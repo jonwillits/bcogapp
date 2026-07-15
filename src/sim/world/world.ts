@@ -31,6 +31,19 @@ export interface Vehicle {
   weights: SensorimotorWeights
   sensors: SensorInput
   motors: MotorOutput
+  /**
+   * Rolling sensor trace, one sample appended per `step()` (so it advances in
+   * sim time and freezes when the sim is paused). Oldest → newest.
+   */
+  history: { left: number[]; right: number[] }
+}
+
+/** Number of samples kept in each vehicle's sensor trace. */
+export const HISTORY_LEN = 160
+
+function pushCapped(arr: number[], v: number): void {
+  arr.push(v)
+  if (arr.length > HISTORY_LEN) arr.shift()
 }
 
 export interface WorldParams {
@@ -77,6 +90,7 @@ export class VehicleWorld {
       ),
       sensors: { left: 0, right: 0 },
       motors: { left: 0, right: 0 },
+      history: { left: [], right: [] },
     }
     this.vehicles.push(v)
     return v
@@ -124,6 +138,8 @@ export class VehicleWorld {
         right: sensedIntensity(sp.right.x, sp.right.z, this.sources),
       }
       v.motors = computeMotors(v.weights, v.sensors)
+      pushCapped(v.history.left, v.sensors.left)
+      pushCapped(v.history.right, v.sensors.right)
       let next = stepVehicle(v.state, v.motors, v.config, dt)
       next = reflectInBounds(next, b)
       v.state = next

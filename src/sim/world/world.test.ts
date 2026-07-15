@@ -62,6 +62,24 @@ describe('VehicleWorld', () => {
     expect(v.sensors.left + v.sensors.right).toBeGreaterThan(0)
   })
 
+  it('appends one sensor-history sample per step and freezes otherwise', () => {
+    const world = new VehicleWorld()
+    world.addSource(0, 5, 1)
+    const v = world.addVehicle('aggression', '#fff', {
+      x: 0,
+      z: 0,
+      heading: Math.PI / 2,
+    })
+    expect(v.history.left).toHaveLength(0)
+    world.step(0.1)
+    world.step(0.1)
+    expect(v.history.left).toHaveLength(2)
+    expect(v.history.right).toHaveLength(2)
+    // No step → no new samples (the paused case).
+    const len = v.history.left.length
+    expect(v.history.left).toHaveLength(len)
+  })
+
   it('keeps vehicles inside the arena bounds', () => {
     const world = new VehicleWorld()
     const v = world.addVehicle('fear', '#fff', {

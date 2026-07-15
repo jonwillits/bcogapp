@@ -1,18 +1,17 @@
-import { useEffect, useReducer, useRef } from 'react'
 import { Panel } from '../../components/Panel'
 import { ValueReadout } from '../../components/ValueReadout'
 import { Plot } from '../../components/Plot'
 import { WiringDiagram } from './WiringDiagram'
-import type { Vehicle } from '../../sim/world/world'
+import { type Vehicle, HISTORY_LEN } from '../../sim/world/world'
 import { getPreset } from '../../sim/creature/vehiclePresets'
 import { palette } from '../../theme/theme'
 
-const HISTORY = 80
-
 /**
  * The side inspector for a selected vehicle: its wiring, a live sensor trace,
- * and read-off values for the handout. Self-refreshes at 10 Hz by reading the
- * (mutated-in-place) vehicle object — no per-frame React work in the scene.
+ * and read-off values for the handout. Pure render from the (mutated-in-place)
+ * vehicle object; the scene re-renders it while the sim advances. The sensor
+ * trace lives on the vehicle and is sampled once per sim step, so it advances
+ * in sim time and freezes when paused.
  */
 export function VehicleInspector({
   vehicle,
@@ -21,25 +20,6 @@ export function VehicleInspector({
   vehicle: Vehicle
   onClose: () => void
 }) {
-  const [, tick] = useReducer((x) => x + 1, 0)
-  const histL = useRef<number[]>([])
-  const histR = useRef<number[]>([])
-
-  useEffect(() => {
-    histL.current = []
-    histR.current = []
-    const id = setInterval(() => {
-      const push = (arr: number[], v: number) => {
-        arr.push(v)
-        if (arr.length > HISTORY) arr.shift()
-      }
-      push(histL.current, vehicle.sensors.left)
-      push(histR.current, vehicle.sensors.right)
-      tick()
-    }, 100)
-    return () => clearInterval(id)
-  }, [vehicle])
-
   const preset = getPreset(vehicle.presetId)
   const speed = (vehicle.motors.left + vehicle.motors.right) / 2
 
@@ -89,10 +69,10 @@ export function VehicleInspector({
           Sensor activation over time
         </div>
         <Plot
-          window={HISTORY}
+          window={HISTORY_LEN}
           series={[
-            { color: palette.sensor, data: histL.current },
-            { color: palette.accent, data: histR.current },
+            { color: palette.sensor, data: vehicle.history.left },
+            { color: palette.accent, data: vehicle.history.right },
           ]}
         />
       </div>

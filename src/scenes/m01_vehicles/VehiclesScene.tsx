@@ -39,19 +39,34 @@ function buildWorld(gain: number, base: number): VehicleWorld {
   return world
 }
 
-/** In-canvas driver: advances the sim each frame while playing. */
+const NOOP = () => {}
+
+/**
+ * In-canvas driver: advances the sim each frame while playing, and pumps a
+ * throttled re-render (~12 Hz) so the inspector's live values/plot update. The
+ * pump only fires while playing, so a paused inspector is frozen; single-step
+ * and reset re-render via their own state updates.
+ */
 function Simulation({
   world,
   playing,
   speed,
+  onSample = NOOP,
 }: {
   world: VehicleWorld
   playing: boolean
   speed: number
+  onSample?: () => void
 }) {
+  const acc = useRef(0)
   useFrame((_, delta) => {
     if (!playing) return
     world.step(Math.min(delta, 0.05) * speed)
+    acc.current += delta
+    if (acc.current >= 0.08) {
+      acc.current = 0
+      onSample()
+    }
   })
   return null
 }
@@ -218,7 +233,13 @@ export default function VehiclesScene() {
           <color attach="background" args={[palette.bg]} />
           <ambientLight intensity={0.55} />
           <directionalLight position={[6, 12, 6]} intensity={0.7} />
-          <Simulation world={world} playing={playing} speed={speed} />
+          <Simulation
+            world={world}
+            playing={playing}
+            speed={speed}
+            // Only pump re-renders while an inspector is open and reading values.
+            onSample={selectedId !== null ? bump : NOOP}
+          />
           <Floor onAdd={addSource} onRemoveNearest={removeNearest} />
           <Grid
             args={[80, 80]}
