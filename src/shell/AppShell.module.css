@@ -1,0 +1,63 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+.brand img {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+}
+.brand:hover {
+  text-decoration: none;
+}
+
+.sceneTitle {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.sep {
+  color: var(--border);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.back {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+}
+.back:hover {
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+.main {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: auto;
+}

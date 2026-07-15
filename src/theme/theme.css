@@ -1,0 +1,40 @@
+/*
+ * BCOG 100 course-app palette + typography tokens.
+ *
+ * Starting point aligned to a dark, projector-friendly "scientific" look that
+ * suits 3D scenes. TODO(theme): tune these to the actual lecture-deck palette
+ * and type once those assets are in hand (see APP_DESIGN "consistent visual
+ * identity"). Keep this file the single source of truth; src/theme/theme.ts
+ * mirrors the same values for use inside Three.js materials.
+ */
+:root {
+  /* Surfaces */
+  --bg: #0e1420;
+  --surface: #161d2b;
+  --surface-2: #1e2738;
+  --border: #2a3446;
+
+  /* Text */
+  --text: #e7ecf3;
+  --text-muted: #9aa6b8;
+
+  /* Brand / accents */
+  --accent: #4f9cff;
+  --accent-strong: #2f7de0;
+  --sensor: #f0a94b; /* sensors / stimuli */
+  --motor: #34d399;  /* motors / actions */
+  --approach: #34d399;
+  --avoid: #f87171;
+
+  /* Typography */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas,
+    monospace;
+
+  /* Rhythm */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --space: 16px;
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}

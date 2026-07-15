@@ -15,11 +15,11 @@ The build tracker for the **BCOG 100 Course App** — the step-by-step "what's d
 
 ## Phase 1 — Scaffold
 
-- [ ] Vite + React + TypeScript project.
-- [ ] Add deps: `three`, `@react-three/fiber`, `@react-three/drei`, `vite-plugin-pwa`.
-- [ ] Create the folder layout from `APP_DEVELOPMENT_PROCESS.md`: `src/shell`, `src/components`, `src/sim/{creature,neural,world}`, `src/scenes`, `src/theme`, `public/`.
-- [ ] Hash-router + scene picker in `App.tsx`.
-- [ ] Confirm `npm run dev` (hot reload) and `npm run build` both work; PWA manifest present.
+- [x] Vite + React + TypeScript project (Vite 8, React 19, TS 6; `create-vite react-ts`).
+- [x] Add deps: `three`, `@react-three/fiber`, `@react-three/drei`, `vite-plugin-pwa` (+ `@types/three`).
+- [x] Create the folder layout from `APP_DEVELOPMENT_PROCESS.md`: `src/shell`, `src/components`, `src/sim/{creature,neural,world}`, `src/scenes`, `src/theme`, `public/`.
+- [x] Hash-router + scene picker in `App.tsx` (`useHashRoute`, `scenes` registry, `Home` picker with built + planned cards).
+- [x] Confirm `npm run dev` (hot reload) and `npm run build` both work; PWA manifest + service worker generated.
 
 ## Phase 2 — Shared shell & reusable pieces
 
@@ -54,3 +54,4 @@ The build tracker for the **BCOG 100 Course App** — the step-by-step "what's d
 
 - **2026-07-13** — Tracker created. Docs + stack decided in Cowork; build to proceed in Claude Code (local disk + GitHub). Next: Phase 0.
 - **2026-07-15** — Phase 0 done. Installed Node 26.5.0 / npm 11.17.0 / gh 2.96.0 via Homebrew. Cloned the pre-existing `github.com/jonwillits/bcogapp` (public) to `~/Documents/Projects/bcogapp`. Seeded it with the planning docs (`README.md` + `docs/`) from Box; kept the repo's GPLv3 `LICENSE`; replaced its Python `.gitignore` with a Node/Vite one. Committed locally (author: Jon Willits). Retired the "checked out at `course_creation/app/`" wording in the course top-level README (app now described as a standalone repo + local clone). **This repo copy of the docs is now the live tracker; the Box `app/docs/` copy is the frozen seed.** Remaining: `git push` is blocked on interactive `gh auth login` (to be run by Jon). Next: Phase 1 scaffold.
+- **2026-07-15** — Phase 1 done. Scaffolded Vite 8 + React 19 + TS 6 (oxlint) and merged into the repo (kept our README/.gitignore/LICENSE/docs). Added `three` 0.185 / r3f 9.6 / drei 10.7 / vite-plugin-pwa 1.3. Built the shell: `AppShell` top bar, `Home` scene picker (built + planned cards), `useHashRoute` hash router, `scenes/registry.ts`, `theme/` tokens (CSS vars + TS mirror; **placeholder palette — tune to lecture decks later**), PWA manifest + SVG app icon. `npm run build` clean (TS + SW generate); `npm run dev` verified in-browser, no console errors. Next: Phase 2 (shared reusable components) → Phase 3 (M1 vehicles scene).

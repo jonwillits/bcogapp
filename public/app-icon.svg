@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="BCOG 100">
+  <!-- Full-bleed background for maskable safe zone -->
+  <rect width="512" height="512" rx="96" fill="#0e1420"/>
+  <!-- Sensor -> interneuron -> motor motif (the evolving-creature spine) -->
+  <g stroke="#3f6ea5" stroke-width="10" stroke-linecap="round" fill="none" opacity="0.9">
+    <line x1="150" y1="170" x2="256" y2="256"/>
+    <line x1="150" y1="342" x2="256" y2="256"/>
+    <line x1="256" y1="256" x2="372" y2="196"/>
+    <line x1="256" y1="256" x2="372" y2="316"/>
+  </g>
+  <g>
+    <!-- sensor nodes (amber) -->
+    <circle cx="150" cy="170" r="30" fill="#f0a94b"/>
+    <circle cx="150" cy="342" r="30" fill="#f0a94b"/>
+    <!-- interneuron (blue accent) -->
+    <circle cx="256" cy="256" r="38" fill="#4f9cff"/>
+    <!-- motor nodes (green) -->
+    <circle cx="372" cy="196" r="26" fill="#34d399"/>
+    <circle cx="372" cy="316" r="26" fill="#34d399"/>
+  </g>
+</svg>
