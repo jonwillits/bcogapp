@@ -48,7 +48,13 @@ export function VehicleMesh({
   }
 
   return (
-    <group ref={group} onClick={handleClick}>
+    <group
+      ref={group}
+      onClick={handleClick}
+      // Stop the press from reaching the ground plane so selecting a vehicle
+      // never also places/removes a light behind it.
+      onPointerDown={(e) => e.stopPropagation()}
+    >
       {/* chassis */}
       <mesh position={[0, 0.12, 0]} castShadow>
         <boxGeometry args={[0.5, 0.16, 0.34]} />

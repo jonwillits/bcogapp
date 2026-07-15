@@ -3,34 +3,35 @@ import { Canvas, useFrame, type ThreeEvent } from '@react-three/fiber'
 import { Grid } from '@react-three/drei'
 import { SceneCanvasLayout } from '../../components/SceneCanvasLayout'
 import { Panel } from '../../components/Panel'
-import { Slider, SelectControl, Button } from '../../components/controls'
+import { Slider, Button } from '../../components/controls'
 import { StepControls } from '../../components/StepControls'
 import { CameraRig } from '../../components/CameraRig'
 import { VehicleMesh } from './VehicleMesh'
 import { SourceMesh } from './SourceMesh'
 import { VehicleInspector } from './VehicleInspector'
 import { VehicleWorld, DEFAULT_WORLD_PARAMS } from '../../sim/world/world'
-import {
-  VEHICLE_PRESETS,
-  DEFAULT_PRESET_ID,
-} from '../../sim/creature/vehiclePresets'
+import { VEHICLE_PRESETS } from '../../sim/creature/vehiclePresets'
 import { palette } from '../../theme/theme'
 
-const VEHICLE_COLORS = ['#4f9cff', '#c084fc', '#2dd4bf']
+// One vehicle per phenotype, so all four behaviors are on screen at once and
+// distinguishable by color. Poses roughly spread across the arena.
 const START_POSES = [
-  { x: -4, z: -2 },
-  { x: 0, z: 3 },
-  { x: 4, z: -1 },
+  { x: -5, z: -2 },
+  { x: 5, z: 2 },
+  { x: -3, z: 5 },
+  { x: 3, z: -5 },
 ]
 const FIXED_STEP = 1 / 30
+const REMOVE_RADIUS = 2.2
 
-function buildWorld(presetId: string, gain: number, base: number): VehicleWorld {
+function buildWorld(gain: number, base: number): VehicleWorld {
   const world = new VehicleWorld({ ...DEFAULT_WORLD_PARAMS, gain, base })
-  START_POSES.forEach((p, i) => {
-    world.addVehicle(presetId, VEHICLE_COLORS[i % VEHICLE_COLORS.length], {
+  VEHICLE_PRESETS.forEach((preset, i) => {
+    const p = START_POSES[i % START_POSES.length]
+    world.addVehicle(preset.id, preset.color, {
       x: p.x,
       z: p.z,
-      heading: (i / START_POSES.length) * Math.PI * 2,
+      heading: (i / VEHICLE_PRESETS.length) * Math.PI * 2,
     })
   })
   world.addSource(5, -4, 1)
@@ -55,14 +56,29 @@ function Simulation({
   return null
 }
 
-/** Ground plane that adds a light where you click (ignoring camera drags). */
-function Floor({ onAdd }: { onAdd: (x: number, z: number) => void }) {
-  const down = useRef<{ x: number; y: number } | null>(null)
+/**
+ * Ground plane that owns light editing: left-click adds a light at the clicked
+ * point, right-click removes the nearest light within REMOVE_RADIUS. Camera
+ * drags (pointer moved) are ignored. Lights and vehicles let clicks fall
+ * through / stop them, so this receives exactly the intended ground clicks.
+ */
+function Floor({
+  onAdd,
+  onRemoveNearest,
+}: {
+  onAdd: (x: number, z: number) => void
+  onRemoveNearest: (x: number, z: number) => void
+}) {
+  const down = useRef<{ x: number; y: number; button: number } | null>(null)
   return (
     <mesh
       rotation={[-Math.PI / 2, 0, 0]}
       onPointerDown={(e: ThreeEvent<PointerEvent>) => {
-        down.current = { x: e.nativeEvent.clientX, y: e.nativeEvent.clientY }
+        down.current = {
+          x: e.nativeEvent.clientX,
+          y: e.nativeEvent.clientY,
+          button: e.nativeEvent.button,
+        }
       }}
       onPointerUp={(e: ThreeEvent<PointerEvent>) => {
         const d = down.current
@@ -72,7 +88,9 @@ function Floor({ onAdd }: { onAdd: (x: number, z: number) => void }) {
           e.nativeEvent.clientX - d.x,
           e.nativeEvent.clientY - d.y,
         )
-        if (moved < 5) onAdd(e.point.x, e.point.z)
+        if (moved >= 5) return // a camera drag, not a click
+        if (d.button === 2) onRemoveNearest(e.point.x, e.point.z)
+        else if (d.button === 0) onAdd(e.point.x, e.point.z)
       }}
     >
       <planeGeometry args={[80, 80]} />
@@ -83,10 +101,9 @@ function Floor({ onAdd }: { onAdd: (x: number, z: number) => void }) {
 
 export default function VehiclesScene() {
   const worldRef = useRef<VehicleWorld | null>(null)
-  const [presetId, setPresetId] = useState(DEFAULT_PRESET_ID)
   const [gain, setGain] = useState(DEFAULT_WORLD_PARAMS.gain)
   const [base, setBase] = useState(DEFAULT_WORLD_PARAMS.base)
-  if (!worldRef.current) worldRef.current = buildWorld(presetId, gain, base)
+  if (!worldRef.current) worldRef.current = buildWorld(gain, base)
   const world = worldRef.current
 
   const [playing, setPlaying] = useState(true)
@@ -100,10 +117,6 @@ export default function VehiclesScene() {
   const vehicles = world.vehicles
   const selectedVehicle = vehicles.find((v) => v.id === selectedId) ?? null
 
-  const changePreset = (id: string) => {
-    setPresetId(id)
-    world.vehicles.forEach((v) => world.setVehiclePreset(v.id, id))
-  }
   const changeGain = (g: number) => {
     setGain(g)
     world.params.gain = g
@@ -118,16 +131,27 @@ export default function VehiclesScene() {
     world.addSource(x, z, 1)
     bump()
   }
-  const removeSource = (id: number) => {
-    world.removeSource(id)
-    bump()
+  const removeNearest = (x: number, z: number) => {
+    let best: number | null = null
+    let bestD = Infinity
+    for (const s of world.sources) {
+      const d = Math.hypot(s.x - x, s.z - z)
+      if (d < bestD) {
+        bestD = d
+        best = s.id
+      }
+    }
+    if (best !== null && bestD <= REMOVE_RADIUS) {
+      world.removeSource(best)
+      bump()
+    }
   }
   const clearLights = () => {
     world.sources = []
     bump()
   }
   const reset = () => {
-    worldRef.current = buildWorld(presetId, gain, base)
+    worldRef.current = buildWorld(gain, base)
     setSelectedId(null)
     setPlaying(true)
     bump()
@@ -139,18 +163,27 @@ export default function VehiclesScene() {
 
   const controls = (
     <Panel title="Braitenberg vehicles">
-      <SelectControl
-        label="Wiring (all vehicles)"
-        value={presetId}
-        onChange={changePreset}
-        options={VEHICLE_PRESETS.map((p) => ({
-          value: p.id,
-          label: `${p.name} (${p.label})`,
-        }))}
-      />
-      <p style={{ margin: 0, fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.45 }}>
-        {VEHICLE_PRESETS.find((p) => p.id === presetId)?.description}
-      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+        {VEHICLE_PRESETS.map((p) => (
+          <div
+            key={p.id}
+            style={{ display: 'flex', alignItems: 'center', gap: 9 }}
+          >
+            <span
+              style={{
+                width: 14,
+                height: 14,
+                borderRadius: 4,
+                background: p.color,
+                flex: 'none',
+              }}
+            />
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 13 }}>
+              {p.label}
+            </span>
+          </div>
+        ))}
+      </div>
       <Slider
         label="Sensor gain"
         value={gain}
@@ -168,9 +201,9 @@ export default function VehiclesScene() {
         onChange={changeBase}
       />
       <Button onClick={clearLights}>Clear lights</Button>
-      <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.4 }}>
-        Click the ground to add a light · click a vehicle to inspect its wiring ·
-        click a light to remove it.
+      <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.45 }}>
+        Left-click the ground to add a light · right-click to remove the nearest
+        one · click a vehicle to inspect its wiring.
       </p>
     </Panel>
   )
@@ -178,12 +211,15 @@ export default function VehiclesScene() {
   return (
     <SceneCanvasLayout
       canvas={
-        <Canvas camera={{ position: [0, 14, 16], fov: 45 }}>
+        <Canvas
+          camera={{ position: [0, 14, 16], fov: 45 }}
+          onContextMenu={(e) => e.preventDefault()}
+        >
           <color attach="background" args={[palette.bg]} />
           <ambientLight intensity={0.55} />
           <directionalLight position={[6, 12, 6]} intensity={0.7} />
           <Simulation world={world} playing={playing} speed={speed} />
-          <Floor onAdd={addSource} />
+          <Floor onAdd={addSource} onRemoveNearest={removeNearest} />
           <Grid
             args={[80, 80]}
             cellSize={1}
@@ -197,7 +233,7 @@ export default function VehiclesScene() {
             position={[0, 0.001, 0]}
           />
           {sources.map((s) => (
-            <SourceMesh key={s.id} source={s} onRemove={removeSource} />
+            <SourceMesh key={s.id} source={s} />
           ))}
           {vehicles.map((v) => (
             <VehicleMesh

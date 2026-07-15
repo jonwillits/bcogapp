@@ -50,22 +50,30 @@ export function VehicleInspector({
       headerAccessory={
         <span
           style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
             fontFamily: 'var(--font-mono)',
-            fontSize: 12,
+            fontSize: 13,
+            fontWeight: 600,
             color: vehicle.color,
           }}
         >
+          <span
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: '50%',
+              background: vehicle.color,
+            }}
+          />
           {preset.label}
         </span>
       }
     >
-      <div>
-        <div style={{ fontWeight: 600, marginBottom: 4 }}>{preset.name}</div>
-        <div
-          style={{ fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.45 }}
-        >
-          {preset.description}
-        </div>
+      <div style={{ fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.45 }}>
+        Its two sensors connect to its two motors as shown. From the wiring and
+        the live values, work out why it behaves the way it does.
       </div>
 
       <WiringDiagram
