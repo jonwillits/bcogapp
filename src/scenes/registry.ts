@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react'
+import { lazy, type ComponentType } from 'react'
 
 /** How a scene is meant to be used (see APP_DESIGN "the two modes"). */
 export type SceneMode = 'demo' | 'lab' | 'both'
@@ -24,11 +24,25 @@ export interface SceneManifest {
   Component: ComponentType
 }
 
+// Scenes are lazy-loaded so Three.js/r3f stay out of the home-screen bundle
+// and only load when a scene is opened.
+const VehiclesScene = lazy(() => import('./m01_vehicles/VehiclesScene'))
+
 /**
- * Registered, runnable scenes. Populated as modules are built — Phase 3 adds
- * the Module 1 vehicles scene. Order here is the order shown in the picker.
+ * Registered, runnable scenes. Order here is the order shown in the picker.
  */
-export const scenes: SceneManifest[] = []
+export const scenes: SceneManifest[] = [
+  {
+    route: 'm01-vehicles',
+    module: 1,
+    title: 'Braitenberg Vehicles',
+    blurb:
+      'Wire two sensors to two motors and watch approach/avoid behavior emerge. The first stage of the evolving-creature engine.',
+    mode: 'both',
+    status: 'building',
+    Component: VehiclesScene,
+  },
+]
 
 /**
  * The planned per-module roadmap, shown as muted cards on the home screen so

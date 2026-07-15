@@ -1,0 +1,21 @@
+.readout {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.label {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.unit {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-left: 3px;
+}

@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { AppShell } from './shell/AppShell'
 import { Home } from './shell/Home'
 import { useHashRoute } from './shell/useHashRoute'
@@ -12,11 +13,29 @@ export default function App() {
       {route === '' ? (
         <Home />
       ) : scene ? (
-        <scene.Component />
+        <Suspense fallback={<SceneLoading />}>
+          <scene.Component />
+        </Suspense>
       ) : (
         <NotFound route={route} />
       )}
     </AppShell>
+  )
+}
+
+function SceneLoading() {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        display: 'grid',
+        placeItems: 'center',
+        color: 'var(--text-muted)',
+      }}
+    >
+      Loading scene…
+    </div>
   )
 }
 

@@ -1,0 +1,67 @@
+.wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* Overlay panels float over the canvas. The overlay layer ignores pointer
+   events so camera drags pass through; individual panels re-enable them. */
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: 1fr auto;
+  gap: 12px;
+  padding: 12px;
+}
+.overlay > * {
+  pointer-events: auto;
+}
+
+.left {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  align-self: start;
+  max-height: 100%;
+  overflow: auto;
+}
+.right {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-self: start;
+  max-height: 100%;
+  overflow: auto;
+}
+.bottom {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: center;
+  align-self: end;
+}
+
+/* On narrow screens, stack: controls collapse to the bottom. */
+@media (max-width: 720px) {
+  .overlay {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+  }
+  .left {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .right {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .bottom {
+    grid-column: 1;
+    grid-row: 3;
+  }
+}

@@ -23,19 +23,19 @@ The build tracker for the **BCOG 100 Course App** — the step-by-step "what's d
 
 ## Phase 2 — Shared shell & reusable pieces
 
-- [ ] App shell/layout + inspection-panel frame.
-- [ ] `CameraRig` (orbit/fly/pointer-lock via drei).
-- [ ] `ControlPanel` (sliders/toggles/reset), `Plot` (canvas/SVG), `ValueReadout`, `StepControls` (play/pause/speed/step).
-- [ ] `theme/` palette + typography aligned with the lecture decks.
-- [ ] Sim/render separation: a tick loop in `sim/` driven from a scene via `useFrame`, unit-testable without a browser.
+- [x] App shell/layout + inspection-panel frame (`AppShell`, `SceneCanvasLayout`, `Panel`).
+- [x] `CameraRig` (drei OrbitControls; fly/pointer-lock can slot in behind the same component later).
+- [x] `ControlPanel` (sliders/toggles/reset), `Plot` (canvas/SVG), `ValueReadout`, `StepControls` (play/pause/speed/step) — built as `Panel` + `controls.tsx` primitives (Slider/SelectControl/Toggle/Button), `Plot` (SVG), `ValueReadout`, `StepControls`.
+- [~] `theme/` palette + typography — tokens in place (CSS vars + TS mirror); **still a placeholder palette, to be tuned to the lecture decks.**
+- [x] Sim/render separation: sim is plain TS in `sim/`, driven from the scene via `useFrame`; verified unit-testable without a browser (7 vitest tests, `npm run test`).
 
 ## Phase 3 — Module 1 vehicles scene (first spine stage)
 
-- [ ] Creature engine v0 in `sim/creature` + `sim/neural`: sensor→motor wiring, movement on a plane.
-- [ ] `scenes/m01_vehicles/` — 3D render, camera-navigable environment with stimuli.
-- [ ] Click a vehicle → wiring shown in a side panel.
-- [ ] Controls for wiring options; watch emergent approach/avoid behavior.
-- [ ] Register in the scene picker; matches the theme.
+- [x] Creature engine v0 in `sim/creature` + `sim/neural`: sensor→motor wiring, differential-drive movement on a plane (`vehicle.ts`, `sensorimotor.ts`, `world.ts`).
+- [x] `scenes/m01_vehicles/` — 3D render, orbit-camera-navigable arena with light sources (click ground to add, click light to remove).
+- [x] Click a vehicle → wiring shown in a side panel (`VehicleInspector` + live `WiringDiagram`, sensor plot, value readouts).
+- [x] Controls for wiring options; watch emergent approach/avoid behavior (4 presets: Fear/Aggression/Love/Explorer; gain + base sliders). Verified in-browser: Aggression vehicles charge the lights.
+- [x] Register in the scene picker (lazy-loaded); matches the theme.
 
 ## Phase 4 — Deploy & integrate
 
@@ -55,3 +55,4 @@ The build tracker for the **BCOG 100 Course App** — the step-by-step "what's d
 - **2026-07-13** — Tracker created. Docs + stack decided in Cowork; build to proceed in Claude Code (local disk + GitHub). Next: Phase 0.
 - **2026-07-15** — Phase 0 done. Installed Node 26.5.0 / npm 11.17.0 / gh 2.96.0 via Homebrew. Cloned the pre-existing `github.com/jonwillits/bcogapp` (public) to `~/Documents/Projects/bcogapp`. Seeded it with the planning docs (`README.md` + `docs/`) from Box; kept the repo's GPLv3 `LICENSE`; replaced its Python `.gitignore` with a Node/Vite one. Committed locally (author: Jon Willits). Retired the "checked out at `course_creation/app/`" wording in the course top-level README (app now described as a standalone repo + local clone). **This repo copy of the docs is now the live tracker; the Box `app/docs/` copy is the frozen seed.** Remaining: `git push` is blocked on interactive `gh auth login` (to be run by Jon). Next: Phase 1 scaffold.
 - **2026-07-15** — Phase 1 done. Scaffolded Vite 8 + React 19 + TS 6 (oxlint) and merged into the repo (kept our README/.gitignore/LICENSE/docs). Added `three` 0.185 / r3f 9.6 / drei 10.7 / vite-plugin-pwa 1.3. Built the shell: `AppShell` top bar, `Home` scene picker (built + planned cards), `useHashRoute` hash router, `scenes/registry.ts`, `theme/` tokens (CSS vars + TS mirror; **placeholder palette — tune to lecture decks later**), PWA manifest + SVG app icon. `npm run build` clean (TS + SW generate); `npm run dev` verified in-browser, no console errors. Next: Phase 2 (shared reusable components) → Phase 3 (M1 vehicles scene).
+- **2026-07-15** — Phases 2 + 3 done. **Sim layer** (plain TS, browser-free): `sim/neural/sensorimotor.ts` (2×2 sensor→motor net + wiring presets), `sim/creature/vehicle.ts` (differential-drive kinematics), `sim/creature/vehiclePresets.ts` (Fear/Aggression/Love/Explorer), `sim/world/world.ts` (`VehicleWorld`), `sim/world/source.ts`; 7 vitest tests pass. **Reusable components**: `CameraRig`, `SceneCanvasLayout`, `Panel`, `controls.tsx` (Slider/SelectControl/Toggle/Button), `StepControls`, `ValueReadout`, `Plot`. **M1 scene** `scenes/m01_vehicles/`: 3D orbit arena, glowing sensors, click-to-add/remove lights, click-vehicle→`VehicleInspector` (live wiring diagram + sensor plot + readouts). Scenes lazy-loaded (home 63 KB gz; scene chunk 245 KB gz). `npm run build` + `npm run test` clean; verified in-browser (Aggression vehicles charge lights; inspector live values; camera orbit; M1 shows in picker). **Next: Phase 4 (deploy to GitHub Pages + wire the M1 lab handout), and tune the palette.**
