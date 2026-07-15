@@ -6,12 +6,12 @@ The build tracker for the **BCOG 100 Course App** — the step-by-step "what's d
 
 ## Phase 0 — Repo & environment
 
-- [ ] Create the working clone on plain local disk, outside sync (e.g. `~/dev/bcogapp`).
-- [ ] `git init`; create `github.com/jonwillits/bcogapp` (GPL v3) and set the remote.
-- [ ] Copy the planning docs (`README.md` + `docs/`) from the Box course folder into the repo as the first commit.
-- [ ] Add `LICENSE` (GPL v3) and `.gitignore` (`node_modules/`, `dist/`, `.DS_Store`, etc.).
-- [ ] Update the course top-level README so it points to the repo by URL and describes the local-clone + GitHub layout (retire the "checked out at `course_creation/app/`" wording).
-- [ ] (Optional) connect `~/dev/bcogapp` as a Cowork workspace if we want to touch it from Cowork too.
+- [x] Create the working clone on plain local disk, outside sync — `~/Documents/Projects/bcogapp` (cloned from the existing remote).
+- [x] `git init`; create `github.com/jonwillits/bcogapp` (GPL v3) and set the remote — repo pre-existed; cloned, `origin` set, default branch `main`.
+- [x] Copy the planning docs (`README.md` + `docs/`) from the Box course folder into the repo as the first commit (committed locally; push pending `gh auth`).
+- [x] Add `LICENSE` (GPL v3) and `.gitignore` (`node_modules/`, `dist/`, `.DS_Store`, etc.) — LICENSE already GPLv3; replaced the Python `.gitignore` template with a Node/Vite one.
+- [x] Update the course top-level README so it points to the repo by URL and describes the local-clone + GitHub layout (retired the "checked out at `course_creation/app/`" wording).
+- [ ] (Optional) connect `~/Documents/Projects/bcogapp` as a Cowork workspace if we want to touch it from Cowork too.
 
 ## Phase 1 — Scaffold
 
@@ -53,3 +53,4 @@ The build tracker for the **BCOG 100 Course App** — the step-by-step "what's d
 ## Log
 
 - **2026-07-13** — Tracker created. Docs + stack decided in Cowork; build to proceed in Claude Code (local disk + GitHub). Next: Phase 0.
+- **2026-07-15** — Phase 0 done. Installed Node 26.5.0 / npm 11.17.0 / gh 2.96.0 via Homebrew. Cloned the pre-existing `github.com/jonwillits/bcogapp` (public) to `~/Documents/Projects/bcogapp`. Seeded it with the planning docs (`README.md` + `docs/`) from Box; kept the repo's GPLv3 `LICENSE`; replaced its Python `.gitignore` with a Node/Vite one. Committed locally (author: Jon Willits). Retired the "checked out at `course_creation/app/`" wording in the course top-level README (app now described as a standalone repo + local clone). **This repo copy of the docs is now the live tracker; the Box `app/docs/` copy is the frozen seed.** Remaining: `git push` is blocked on interactive `gh auth login` (to be run by Jon). Next: Phase 1 scaffold.
