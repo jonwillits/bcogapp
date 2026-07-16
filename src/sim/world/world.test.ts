@@ -74,7 +74,7 @@ describe('vehicle kinematics', () => {
 describe('VehicleWorld', () => {
   it('a vehicle with a source in front reacts (sensors become non-zero)', () => {
     const world = new VehicleWorld()
-    world.addSource(0, 5, 1) // ahead along +Z
+    world.addSource(0, 0.7, 5, 1) // ahead along +Z, sitting on the floor
     const v = world.addVehicle('aggression', '#fff', {
       x: 0,
       z: 0,
@@ -86,7 +86,7 @@ describe('VehicleWorld', () => {
 
   it('appends one sensor-history sample per step and freezes otherwise', () => {
     const world = new VehicleWorld()
-    world.addSource(0, 5, 1)
+    world.addSource(0, 0.7, 5, 1)
     const v = world.addVehicle('aggression', '#fff', {
       x: 0,
       z: 0,
@@ -100,6 +100,24 @@ describe('VehicleWorld', () => {
     // No step → no new samples (the paused case).
     const len = v.history.left.length
     expect(v.history.left).toHaveLength(len)
+  })
+
+  it('height costs signal: a source up on the rim is weaker than one on the floor', () => {
+    const sense = (sourceY: number) => {
+      const world = new VehicleWorld()
+      world.addSource(0, sourceY, 4, 1) // same x/z either way
+      const v = world.addVehicle('aggression', '#fff', {
+        x: 0,
+        z: 0,
+        heading: Math.PI / 2, // facing the source
+      })
+      world.step(0.01)
+      return v.sensors.left + v.sensors.right
+    }
+    const onFloor = sense(0.7)
+    const onRim = sense(3.7) // same spot, but 3 units up the cliff
+    expect(onRim).toBeGreaterThan(0) // still sensed...
+    expect(onRim).toBeLessThan(onFloor) // ...but genuinely weaker
   })
 
   it('tuning one vehicle leaves every other vehicle untouched', () => {
@@ -121,7 +139,7 @@ describe('VehicleWorld', () => {
 
   it('retuning refreshes actuator values, so the inspector equation stays true while paused', () => {
     const world = new VehicleWorld()
-    world.addSource(0, 3, 1)
+    world.addSource(0, 0.7, 3, 1)
     const v = world.addVehicle('aggression', '#fff', {
       x: 0,
       z: 0,

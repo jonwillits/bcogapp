@@ -120,8 +120,9 @@ export class VehicleWorld {
     return v
   }
 
-  addSource(x: number, z: number, strength = 1): Source {
-    const s: Source = { id: nextSourceId++, x, z, strength }
+  /** `y` is the orb's height; sources are sensed in 3D, so height matters. */
+  addSource(x: number, y: number, z: number, strength = 1): Source {
+    const s: Source = { id: nextSourceId++, x, y, z, strength }
     this.sources.push(s)
     return s
   }
@@ -151,9 +152,10 @@ export class VehicleWorld {
     const b = this.params.bounds
     for (const v of this.vehicles) {
       const sp = sensorPositions(v.state, v.config)
+      const h = v.config.sensorHeight
       v.sensors = {
-        left: sensedIntensity(sp.left.x, sp.left.z, this.sources),
-        right: sensedIntensity(sp.right.x, sp.right.z, this.sources),
+        left: sensedIntensity(sp.left.x, h, sp.left.z, this.sources),
+        right: sensedIntensity(sp.right.x, h, sp.right.z, this.sources),
       }
       v.actuators = computeActuators(v.weights, v.sensors)
       pushCapped(v.history.left, v.sensors.left)

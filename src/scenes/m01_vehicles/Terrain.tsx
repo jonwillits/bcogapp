@@ -2,29 +2,23 @@ import { useMemo, useRef } from 'react'
 import type { ThreeEvent } from '@react-three/fiber'
 import * as THREE from 'three'
 
-const SIZE = 48 // extent of the ground mesh
-const SEG = 144 // resolution (enough to keep the ramp smooth)
-const RIM_HEIGHT = 3.5 // how far the surrounding ground rises above the floor
-const RAMP = 5 // distance over which it rises
+const SIZE = 48 // extent of the surrounding plateau
+/** Height of the cliff around the arena; also where rim sources sit. */
+export const RIM_HEIGHT = 3
 
 /**
- * Ground height: flat (0) inside the arena, rising smoothly to RIM_HEIGHT
- * outside it, so the playable area reads as a shallow valley.
+ * The arena as a rectangular pit: a flat floor, **vertical** cliff walls, and a
+ * flat plateau on top.
  *
- * Uses Chebyshev distance (max of |x|,|z|) rather than radial distance because
- * the sim's bounds are a *square* — `reflectInBounds` clamps x and z
- * independently. A round bowl would put the visible wall in the wrong place and
- * the bounce would still look arbitrary, which is the whole thing we're fixing.
- */
-function rimHeight(x: number, z: number, bounds: number): number {
-  const d = Math.max(Math.abs(x), Math.abs(z))
-  const t = Math.min(1, Math.max(0, (d - bounds) / RAMP))
-  return RIM_HEIGHT * t * t * (3 - 2 * t) // smoothstep
-}
-
-/**
- * The valley floor + surrounding rim. Also the pointer target for placing and
- * removing lights (the vehicles and lights let clicks fall through to it).
+ * Built from three separate surfaces rather than one displaced plane, so the
+ * top and bottom edges are true right angles. That matters: a smooth incline
+ * implies a slope a creature might drive up, but the sim simply reflects at the
+ * boundary — nothing can ever climb. The wall should look as impassable as it
+ * actually is.
+ *
+ * The floor and plateau are pointer targets (so lights can be placed on either,
+ * including up on the rim). The walls deliberately are **not** — a light stuck
+ * halfway up a cliff face has nowhere sensible to sit.
  */
 export function Terrain({
   bounds,
@@ -32,61 +26,91 @@ export function Terrain({
   onRemoveNearest,
 }: {
   bounds: number
-  onAdd: (x: number, z: number) => void
+  /** `y` is the ground height at the clicked point (0 = floor, RIM_HEIGHT = rim). */
+  onAdd: (x: number, y: number, z: number) => void
   onRemoveNearest: (x: number, z: number) => void
 }) {
-  const geometry = useMemo(() => {
-    const g = new THREE.PlaneGeometry(SIZE, SIZE, SEG, SEG)
-    g.rotateX(-Math.PI / 2) // into the XZ plane, +Y up
-    const pos = g.attributes.position
-    // The rim must be markedly lighter than the floor, not just a shade off:
-    // in a scene this dark, slope shading alone doesn't carry the shape.
-    const floorColor = new THREE.Color('#0b111c')
-    const rimColor = new THREE.Color('#55689c')
-    const colors = new Float32Array(pos.count * 3)
-    const c = new THREE.Color()
-
-    for (let i = 0; i < pos.count; i++) {
-      const h = rimHeight(pos.getX(i), pos.getZ(i), bounds)
-      pos.setY(i, h)
-      // Tint upward with height, so the boundary is legible even head-on where
-      // the slope's shading alone would be ambiguous.
-      c.copy(floorColor).lerp(rimColor, Math.min(1, h / RIM_HEIGHT))
-      colors[i * 3] = c.r
-      colors[i * 3 + 1] = c.g
-      colors[i * 3 + 2] = c.b
-    }
-    g.setAttribute('color', new THREE.BufferAttribute(colors, 3))
-    g.computeVertexNormals()
+  // A flat frame at rim height with a square hole where the pit is.
+  const plateau = useMemo(() => {
+    const S = SIZE / 2
+    const shape = new THREE.Shape()
+    shape.moveTo(-S, -S)
+    shape.lineTo(S, -S)
+    shape.lineTo(S, S)
+    shape.lineTo(-S, S)
+    shape.closePath()
+    const hole = new THREE.Path() // wound opposite to the outline
+    hole.moveTo(-bounds, -bounds)
+    hole.lineTo(-bounds, bounds)
+    hole.lineTo(bounds, bounds)
+    hole.lineTo(bounds, -bounds)
+    hole.closePath()
+    shape.holes.push(hole)
+    const g = new THREE.ShapeGeometry(shape)
+    g.rotateX(-Math.PI / 2) // XY shape → XZ ground plane, facing +Y
     return g
   }, [bounds])
 
   const down = useRef<{ x: number; y: number; button: number } | null>(null)
+  const onPointerDown = (e: ThreeEvent<PointerEvent>) => {
+    down.current = {
+      x: e.nativeEvent.clientX,
+      y: e.nativeEvent.clientY,
+      button: e.nativeEvent.button,
+    }
+  }
+  const onPointerUp = (e: ThreeEvent<PointerEvent>) => {
+    const d = down.current
+    down.current = null
+    if (!d) return
+    const moved = Math.hypot(
+      e.nativeEvent.clientX - d.x,
+      e.nativeEvent.clientY - d.y,
+    )
+    if (moved >= 5) return // a camera drag, not a click
+    if (d.button === 2) onRemoveNearest(e.point.x, e.point.z)
+    // e.point.y is the surface we hit: 0 on the floor, RIM_HEIGHT on the rim.
+    else if (d.button === 0) onAdd(e.point.x, e.point.y, e.point.z)
+  }
+  const handlers = { onPointerDown, onPointerUp }
+
+  // Each wall faces inward, toward the arena.
+  const walls: { pos: [number, number, number]; rot: [number, number, number] }[] =
+    [
+      { pos: [0, RIM_HEIGHT / 2, bounds], rot: [0, Math.PI, 0] },
+      { pos: [0, RIM_HEIGHT / 2, -bounds], rot: [0, 0, 0] },
+      { pos: [bounds, RIM_HEIGHT / 2, 0], rot: [0, -Math.PI / 2, 0] },
+      { pos: [-bounds, RIM_HEIGHT / 2, 0], rot: [0, Math.PI / 2, 0] },
+    ]
 
   return (
-    <mesh
-      geometry={geometry}
-      onPointerDown={(e: ThreeEvent<PointerEvent>) => {
-        down.current = {
-          x: e.nativeEvent.clientX,
-          y: e.nativeEvent.clientY,
-          button: e.nativeEvent.button,
-        }
-      }}
-      onPointerUp={(e: ThreeEvent<PointerEvent>) => {
-        const d = down.current
-        down.current = null
-        if (!d) return
-        const moved = Math.hypot(
-          e.nativeEvent.clientX - d.x,
-          e.nativeEvent.clientY - d.y,
-        )
-        if (moved >= 5) return // a camera drag, not a click
-        if (d.button === 2) onRemoveNearest(e.point.x, e.point.z)
-        else if (d.button === 0) onAdd(e.point.x, e.point.z)
-      }}
-    >
-      <meshStandardMaterial vertexColors roughness={1} />
-    </mesh>
+    <group>
+      {/* pit floor — the only ground the creatures can actually occupy */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} {...handlers}>
+        <planeGeometry args={[bounds * 2, bounds * 2]} />
+        <meshStandardMaterial color="#0b111c" roughness={1} />
+      </mesh>
+
+      {/* vertical cliff walls (not clickable) */}
+      {walls.map((w, i) => (
+        <mesh key={i} position={w.pos} rotation={w.rot} raycast={() => null}>
+          <planeGeometry args={[bounds * 2, RIM_HEIGHT]} />
+          <meshStandardMaterial
+            color="#2a3a5f"
+            roughness={1}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      ))}
+
+      {/* plateau on top of the cliff */}
+      <mesh geometry={plateau} position={[0, RIM_HEIGHT, 0]} {...handlers}>
+        <meshStandardMaterial
+          color="#55689c"
+          roughness={1}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+    </group>
   )
 }

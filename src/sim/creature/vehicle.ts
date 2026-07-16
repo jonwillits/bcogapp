@@ -21,6 +21,9 @@ export interface VehicleConfig {
   sensorForward: number
   /** lateral offset of each sensor from the centerline */
   sensorHalfWidth: number
+  /** height of the sensors above the floor; sources are sensed in 3D, so this
+   *  is what a source's height is measured against. Matches the mesh. */
+  sensorHeight: number
   /** wheel speed magnitude cap (units/sec) */
   maxSpeed: number
 }
@@ -29,6 +32,7 @@ export const DEFAULT_VEHICLE_CONFIG: VehicleConfig = {
   wheelBase: 0.6,
   sensorForward: 0.5,
   sensorHalfWidth: 0.36,
+  sensorHeight: 0.2,
   maxSpeed: 3.2,
 }
 

@@ -7,7 +7,7 @@ import { Button } from '../../components/controls'
 import { StepControls } from '../../components/StepControls'
 import { CameraRig } from '../../components/CameraRig'
 import { VehicleMesh } from './VehicleMesh'
-import { SourceMesh } from './SourceMesh'
+import { SourceMesh, ORB_HOVER } from './SourceMesh'
 import { VehicleInspector } from './VehicleInspector'
 import { Terrain } from './Terrain'
 import { VehicleWorld, DEFAULT_WORLD_PARAMS } from '../../sim/world/world'
@@ -38,8 +38,8 @@ function buildWorld(): VehicleWorld {
       heading: (i / VEHICLE_PRESETS.length) * Math.PI * 2,
     })
   })
-  world.addSource(5, -4, 1)
-  world.addSource(-5, 4, 1)
+  world.addSource(5, ORB_HOVER, -4, 1)
+  world.addSource(-5, ORB_HOVER, 4, 1)
   return world
 }
 
@@ -96,11 +96,11 @@ export default function VehiclesScene() {
     world.setVehicleTuning(selectedId, patch)
     bump()
   }
-  const addSource = (x: number, z: number) => {
-    // Ignore clicks on the valley walls: a light out there would be buried in
-    // the hillside, and no vehicle can reach it anyway.
-    if (Math.max(Math.abs(x), Math.abs(z)) > world.params.bounds) return
-    world.addSource(x, z, 1)
+  // `groundY` is the surface that was clicked: 0 on the pit floor, RIM_HEIGHT
+  // on the plateau. Rim lights are allowed on purpose — a creature will drive
+  // at one and bounce off the wall, never reaching it.
+  const addSource = (x: number, groundY: number, z: number) => {
+    world.addSource(x, groundY + ORB_HOVER, z, 1)
     bump()
   }
   const removeNearest = (x: number, z: number) => {
