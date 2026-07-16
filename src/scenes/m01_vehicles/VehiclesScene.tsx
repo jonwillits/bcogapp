@@ -161,6 +161,10 @@ export default function VehiclesScene() {
         Left-click the ground to add a light · right-click to remove the nearest
         one · click a vehicle to inspect its wiring and tune it.
       </p>
+      <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.45 }}>
+        Camera: <b>W A S D</b> to move · <b>arrow keys</b> to rotate · drag and
+        scroll also work.
+      </p>
     </Panel>
   )
 
