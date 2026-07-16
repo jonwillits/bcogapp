@@ -186,16 +186,24 @@ export default function VehiclesScene() {
             onAdd={addSource}
             onRemoveNearest={removeNearest}
           />
-          {/* Grid is sized to the arena exactly, so where it stops is where
-              the vehicles bounce — a second, unambiguous read on the boundary. */}
+          {/* Sized to the arena exactly, so where it stops is where the
+              vehicles bounce — a second, unambiguous read on the boundary.
+
+              The spacing is not decorative: one cell is one world unit, the
+              same unit as `d` in the sensor falloff 1/(1+d²) and as speed
+              (units/sec). So the grid is a real ruler — two cells from a light
+              means d≈2 means intensity≈1/5 — and a heavier line every 5 units
+              gives something to count by. Colors must be well clear of the
+              floor (#0b111c) or the 1-unit cells vanish and only the 5-unit
+              sections read, which makes the grid look far coarser than it is. */}
           <Grid
             args={[world.params.bounds * 2, world.params.bounds * 2]}
             cellSize={1}
-            cellThickness={0.5}
-            cellColor="#1b2740"
+            cellThickness={0.6}
+            cellColor="#2c3c60"
             sectionSize={5}
-            sectionThickness={1}
-            sectionColor="#2a3d63"
+            sectionThickness={1.2}
+            sectionColor="#4a628f"
             fadeDistance={60}
             fadeStrength={0.6}
             position={[0, 0.002, 0]}
