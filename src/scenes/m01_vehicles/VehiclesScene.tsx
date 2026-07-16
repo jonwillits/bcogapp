@@ -13,13 +13,16 @@ import { VehicleWorld, DEFAULT_WORLD_PARAMS } from '../../sim/world/world'
 import { VEHICLE_PRESETS } from '../../sim/creature/vehiclePresets'
 import { palette } from '../../theme/theme'
 
-// One vehicle per phenotype, so all four behaviors are on screen at once and
-// distinguishable by color. Poses roughly spread across the arena.
+// One vehicle per phenotype, so every behavior is on screen at once and
+// distinguishable by color. Poses roughly spread across the arena; there is one
+// per entry in VEHICLE_PRESETS.
 const START_POSES = [
-  { x: -5, z: -2 },
-  { x: 5, z: 2 },
+  { x: -6, z: -2 },
+  { x: 6, z: 2 },
   { x: -3, z: 5 },
   { x: 3, z: -5 },
+  { x: -6, z: 4 },
+  { x: 6, z: -4 },
 ]
 const FIXED_STEP = 1 / 30
 const REMOVE_RADIUS = 2.2

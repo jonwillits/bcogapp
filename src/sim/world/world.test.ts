@@ -4,22 +4,44 @@ import { computeActuators, weightsFromWiring } from '../neural/sensorimotor'
 import { stepVehicle, DEFAULT_VEHICLE_CONFIG } from '../creature/vehicle'
 
 describe('sensorimotor wiring', () => {
-  it('uncrossed connects each sensor to its own-side actuator', () => {
-    const w = weightsFromWiring({ crossed: false, sign: 1 }, 2, 0)
+  it('ipsilateral connects each sensor to its own-side actuator', () => {
+    const w = weightsFromWiring({ pattern: 'ipsilateral', sign: 1 }, 2, 0)
     const out = computeActuators(w, { left: 1, right: 0 })
     expect(out.left).toBeCloseTo(2)
     expect(out.right).toBeCloseTo(0)
   })
 
-  it('crossed connects each sensor to the opposite actuator', () => {
-    const w = weightsFromWiring({ crossed: true, sign: 1 }, 2, 0)
+  it('contralateral connects each sensor to the opposite actuator', () => {
+    const w = weightsFromWiring({ pattern: 'contralateral', sign: 1 }, 2, 0)
     const out = computeActuators(w, { left: 1, right: 0 })
     expect(out.left).toBeCloseTo(0)
     expect(out.right).toBeCloseTo(2)
   })
 
+  it('full connects every sensor to every actuator', () => {
+    const w = weightsFromWiring({ pattern: 'full', sign: 1 }, 2, 0)
+    const out = computeActuators(w, { left: 1, right: 0.5 })
+    // both actuators see the sum of both sensors
+    expect(out.left).toBeCloseTo(3)
+    expect(out.right).toBeCloseTo(3)
+  })
+
+  it('full wiring drives both actuators equally, so it cannot steer', () => {
+    for (const sign of [1, -1] as const) {
+      const w = weightsFromWiring({ pattern: 'full', sign }, 2.4, 0.6)
+      for (const s of [
+        { left: 0, right: 0 },
+        { left: 1, right: 0 },
+        { left: 0.3, right: 0.9 },
+      ]) {
+        const out = computeActuators(w, s)
+        expect(out.left).toBeCloseTo(out.right)
+      }
+    }
+  })
+
   it('inhibitory sign slows the driven actuator below base', () => {
-    const w = weightsFromWiring({ crossed: false, sign: -1 }, 2, 1)
+    const w = weightsFromWiring({ pattern: 'ipsilateral', sign: -1 }, 2, 1)
     const out = computeActuators(w, { left: 1, right: 0 })
     expect(out.left).toBeCloseTo(-1)
   })

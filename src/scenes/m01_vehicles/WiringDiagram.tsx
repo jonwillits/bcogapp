@@ -27,16 +27,22 @@ export function WiringDiagram({
   const linkColor = wiring.sign > 0 ? palette.approach : palette.avoid
   const width = (v: number) => 1 + Math.min(6, Math.abs(v) * 3)
 
-  // Which sensor drives which actuator.
-  const links = wiring.crossed
-    ? [
-        { from: sL, to: aR, v: sensors.left },
-        { from: sR, to: aL, v: sensors.right },
-      ]
-    : [
-        { from: sL, to: aL, v: sensors.left },
-        { from: sR, to: aR, v: sensors.right },
-      ]
+  // Which sensor drives which actuator. `full` shows all four connections —
+  // ipsilateral/contralateral are the same picture with one pair removed.
+  const ipsi = [
+    { from: sL, to: aL, v: sensors.left },
+    { from: sR, to: aR, v: sensors.right },
+  ]
+  const contra = [
+    { from: sL, to: aR, v: sensors.left },
+    { from: sR, to: aL, v: sensors.right },
+  ]
+  const links =
+    wiring.pattern === 'full'
+      ? [...contra, ...ipsi] // crossed first so the straight pair draws on top
+      : wiring.pattern === 'contralateral'
+        ? contra
+        : ipsi
 
   const sensorGlow = (v: number) => Math.min(1, v * 1.2)
   const actuatorGlow = (v: number) => Math.min(1, Math.max(0, v) / 3)
