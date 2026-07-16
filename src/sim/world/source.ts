@@ -1,5 +1,7 @@
 /**
- * A stimulus source (a "heat source" / light in the classic Braitenberg setup).
+ * A light source — the stimulus creatures sense, as in Braitenberg's originals.
+ * ("light" throughout, in the app and the handout: they render as little glowing
+ * orbs, so anything else reads as a mismatch.)
  *
  * Position is fully 3D: sources can sit on the arena floor or up on the rim
  * outside it, and `y` is the height of the orb itself. Intensity falls off with

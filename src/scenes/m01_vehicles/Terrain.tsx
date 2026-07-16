@@ -3,8 +3,16 @@ import type { ThreeEvent } from '@react-three/fiber'
 import * as THREE from 'three'
 
 const SIZE = 48 // extent of the surrounding plateau
-/** Height of the cliff around the arena; also where rim sources sit. */
-export const RIM_HEIGHT = 3
+/**
+ * Height of the cliff around the arena; also where rim sources sit.
+ *
+ * Kept deliberately low. Because sources are sensed in 3D with a 1/(1+d²)
+ * falloff, every unit of height costs signal fast: at 3 a rim light was barely
+ * perceptible (~0.01), at 2 it's roughly twice as strong. Still weak enough
+ * that a student has to raise the creature's connection strength to see much —
+ * which is the interesting part — but not so weak that nothing happens at all.
+ */
+export const RIM_HEIGHT = 2
 
 /**
  * The arena as a rectangular pit: a flat floor, **vertical** cliff walls, and a
