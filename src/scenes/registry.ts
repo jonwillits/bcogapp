@@ -89,7 +89,7 @@ export const scenes: SceneManifest[] = [
     module: 1,
     title: 'Braitenberg Vehicles',
     blurb:
-      'Wire two sensors to two motors and watch approach/avoid behavior emerge. The first stage of the evolving-creature engine.',
+      'Wire two sensors to two actuators and watch approach/avoid behavior emerge. The first stage of the evolving-creature engine.',
     mode: 'both',
     status: 'building',
     Component: VehiclesScene,

@@ -21,7 +21,7 @@ export function VehicleInspector({
   onClose: () => void
 }) {
   const preset = getPreset(vehicle.presetId)
-  const speed = (vehicle.motors.left + vehicle.motors.right) / 2
+  const speed = (vehicle.actuators.left + vehicle.actuators.right) / 2
 
   return (
     <Panel
@@ -52,14 +52,14 @@ export function VehicleInspector({
       }
     >
       <div style={{ fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.45 }}>
-        Its two sensors connect to its two motors as shown. From the wiring and
+        Its two sensors connect to its two actuators as shown. From the wiring and
         the live values, work out why it behaves the way it does.
       </div>
 
       <WiringDiagram
         wiring={preset.wiring}
         sensors={vehicle.sensors}
-        motors={vehicle.motors}
+        actuators={vehicle.actuators}
       />
 
       <div>
@@ -80,8 +80,8 @@ export function VehicleInspector({
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         <ValueReadout label="Sensor L" value={vehicle.sensors.left} />
         <ValueReadout label="Sensor R" value={vehicle.sensors.right} />
-        <ValueReadout label="Motor L" value={vehicle.motors.left} />
-        <ValueReadout label="Motor R" value={vehicle.motors.right} />
+        <ValueReadout label="Actuator L" value={vehicle.actuators.left} />
+        <ValueReadout label="Actuator R" value={vehicle.actuators.right} />
         <ValueReadout label="Speed" value={speed} unit="u/s" />
       </div>
     </Panel>

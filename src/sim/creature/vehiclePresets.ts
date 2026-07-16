@@ -29,7 +29,7 @@ export const VEHICLE_PRESETS: VehiclePreset[] = [
     name: 'Fear',
     label: '2a',
     description:
-      'Uncrossed + excitatory. Each sensor speeds up the motor on its own side, so the vehicle turns away from a source and flees — fastest when close.',
+      'Uncrossed + excitatory. Each sensor speeds up the actuator on its own side, so the vehicle turns away from a source and flees — fastest when close.',
     color: '#4f9cff',
     wiring: { crossed: false, sign: 1 },
   },
@@ -38,7 +38,7 @@ export const VEHICLE_PRESETS: VehiclePreset[] = [
     name: 'Aggression',
     label: '2b',
     description:
-      'Crossed + excitatory. Each sensor speeds up the opposite motor, so the vehicle turns toward a source and charges into it, accelerating as it nears.',
+      'Crossed + excitatory. Each sensor speeds up the opposite actuator, so the vehicle turns toward a source and charges into it, accelerating as it nears.',
     color: '#c084fc',
     wiring: { crossed: true, sign: 1 },
   },
@@ -47,7 +47,7 @@ export const VEHICLE_PRESETS: VehiclePreset[] = [
     name: 'Love',
     label: '3a',
     description:
-      'Uncrossed + inhibitory. Stimulus slows the same-side motor, so the vehicle turns toward a source, slows, and comes to rest facing it.',
+      'Uncrossed + inhibitory. Stimulus slows the same-side actuator, so the vehicle turns toward a source, slows, and comes to rest facing it.',
     color: '#2dd4bf',
     wiring: { crossed: false, sign: -1 },
   },
@@ -56,7 +56,7 @@ export const VEHICLE_PRESETS: VehiclePreset[] = [
     name: 'Explorer',
     label: '3b',
     description:
-      'Crossed + inhibitory. Stimulus slows the opposite motor, so the vehicle lingers near a source but keeps moving, wandering off to find others.',
+      'Crossed + inhibitory. Stimulus slows the opposite actuator, so the vehicle lingers near a source but keeps moving, wandering off to find others.',
     color: '#f472b6',
     wiring: { crossed: true, sign: -1 },
   },

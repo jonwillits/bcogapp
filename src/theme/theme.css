@@ -22,7 +22,7 @@
   --accent: #4f9cff;
   --accent-strong: #2f7de0;
   --sensor: #f0a94b; /* sensors / stimuli */
-  --motor: #34d399;  /* motors / actions */
+  --actuator: #34d399;  /* actuators / actions */
   --approach: #34d399;
   --avoid: #f87171;
 

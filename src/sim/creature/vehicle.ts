@@ -1,12 +1,12 @@
 import { clamp } from '../math'
-import type { MotorOutput } from '../neural/sensorimotor'
+import type { ActuatorOutput } from '../neural/sensorimotor'
 
 /**
  * A creature body at Module-1 stage: a two-wheeled cart on the XZ plane with two
  * forward-facing sensors. Position is (x, z); `heading` is the facing angle in
  * radians measured from +X toward +Z. Forward = (cos h, sin h).
  *
- * Movement is differential drive: the two motor outputs are wheel speeds.
+ * Movement is differential drive: the two actuator outputs are wheel speeds.
  */
 export interface VehicleState {
   x: number
@@ -67,12 +67,12 @@ export function sensorPositions(
  */
 export function stepVehicle(
   s: VehicleState,
-  motors: MotorOutput,
+  actuators: ActuatorOutput,
   cfg: VehicleConfig,
   dt: number,
 ): VehicleState {
-  const vL = clamp(motors.left, -cfg.maxSpeed, cfg.maxSpeed)
-  const vR = clamp(motors.right, -cfg.maxSpeed, cfg.maxSpeed)
+  const vL = clamp(actuators.left, -cfg.maxSpeed, cfg.maxSpeed)
+  const vR = clamp(actuators.right, -cfg.maxSpeed, cfg.maxSpeed)
   const v = (vL + vR) / 2
   const omega = (vR - vL) / cfg.wheelBase
   const heading = s.heading + omega * dt

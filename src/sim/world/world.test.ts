@@ -1,26 +1,26 @@
 import { describe, it, expect } from 'vitest'
 import { VehicleWorld } from './world'
-import { computeMotors, weightsFromWiring } from '../neural/sensorimotor'
+import { computeActuators, weightsFromWiring } from '../neural/sensorimotor'
 import { stepVehicle, DEFAULT_VEHICLE_CONFIG } from '../creature/vehicle'
 
 describe('sensorimotor wiring', () => {
-  it('uncrossed connects each sensor to its own-side motor', () => {
+  it('uncrossed connects each sensor to its own-side actuator', () => {
     const w = weightsFromWiring({ crossed: false, sign: 1 }, 2, 0)
-    const out = computeMotors(w, { left: 1, right: 0 })
+    const out = computeActuators(w, { left: 1, right: 0 })
     expect(out.left).toBeCloseTo(2)
     expect(out.right).toBeCloseTo(0)
   })
 
-  it('crossed connects each sensor to the opposite motor', () => {
+  it('crossed connects each sensor to the opposite actuator', () => {
     const w = weightsFromWiring({ crossed: true, sign: 1 }, 2, 0)
-    const out = computeMotors(w, { left: 1, right: 0 })
+    const out = computeActuators(w, { left: 1, right: 0 })
     expect(out.left).toBeCloseTo(0)
     expect(out.right).toBeCloseTo(2)
   })
 
-  it('inhibitory sign slows the driven motor below base', () => {
+  it('inhibitory sign slows the driven actuator below base', () => {
     const w = weightsFromWiring({ crossed: false, sign: -1 }, 2, 1)
-    const out = computeMotors(w, { left: 1, right: 0 })
+    const out = computeActuators(w, { left: 1, right: 0 })
     expect(out.left).toBeCloseTo(-1)
   })
 })

@@ -13,7 +13,7 @@ export const palette = {
   accent: '#4f9cff',
   accentStrong: '#2f7de0',
   sensor: '#f0a94b',
-  motor: '#34d399',
+  actuator: '#34d399',
   approach: '#34d399',
   avoid: '#f87171',
 } as const

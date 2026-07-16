@@ -1,8 +1,8 @@
 import { wrapAngle } from '../math'
 import {
-  computeMotors,
+  computeActuators,
   weightsFromWiring,
-  type MotorOutput,
+  type ActuatorOutput,
   type SensorInput,
   type SensorimotorWeights,
 } from '../neural/sensorimotor'
@@ -17,8 +17,8 @@ import { getPreset } from '../creature/vehiclePresets'
 import { sensedIntensity, type Source } from './source'
 
 /**
- * One focal creature: its pose, its sensor→motor weights, and the most recent
- * sensor/motor values (kept for the inspector UI). Multiple vehicles can share
+ * One focal creature: its pose, its sensor→actuator weights, and the most recent
+ * sensor/actuator values (kept for the inspector UI). Multiple vehicles can share
  * a world, but only the focal creature's "network" is visualized (per
  * APP_DESIGN — the others are effectively NPCs running the same tiny circuit).
  */
@@ -30,7 +30,7 @@ export interface Vehicle {
   config: VehicleConfig
   weights: SensorimotorWeights
   sensors: SensorInput
-  motors: MotorOutput
+  actuators: ActuatorOutput
   /**
    * Rolling sensor trace, one sample appended per `step()` (so it advances in
    * sim time and freezes when the sim is paused). Oldest → newest.
@@ -89,7 +89,7 @@ export class VehicleWorld {
         this.params.base,
       ),
       sensors: { left: 0, right: 0 },
-      motors: { left: 0, right: 0 },
+      actuators: { left: 0, right: 0 },
       history: { left: [], right: [] },
     }
     this.vehicles.push(v)
@@ -137,10 +137,10 @@ export class VehicleWorld {
         left: sensedIntensity(sp.left.x, sp.left.z, this.sources),
         right: sensedIntensity(sp.right.x, sp.right.z, this.sources),
       }
-      v.motors = computeMotors(v.weights, v.sensors)
+      v.actuators = computeActuators(v.weights, v.sensors)
       pushCapped(v.history.left, v.sensors.left)
       pushCapped(v.history.right, v.sensors.right)
-      let next = stepVehicle(v.state, v.motors, v.config, dt)
+      let next = stepVehicle(v.state, v.actuators, v.config, dt)
       next = reflectInBounds(next, b)
       v.state = next
     }

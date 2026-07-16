@@ -1,11 +1,11 @@
 /**
- * The seed of the evolving-creature nervous system: a minimal sensor→motor
+ * The seed of the evolving-creature nervous system: a minimal sensor→actuator
  * network. For Module 1 (Braitenberg vehicles) this is a 2-input × 2-output
- * linear map — two sensors driving two motors, plus a base (resting) drive.
+ * linear map — two sensors driving two actuators, plus a base (resting) drive.
  *
  * This is deliberately the simplest possible "neural" layer. Later stages
  * (M4 circuits, M5/M7 learning) extend the neural package with real neurons,
- * multiple layers, and learning rules; the sensor→motor framing carries over.
+ * multiple layers, and learning rules; the sensor→actuator framing carries over.
  */
 
 export interface SensorInput {
@@ -13,32 +13,32 @@ export interface SensorInput {
   right: number
 }
 
-export interface MotorOutput {
+export interface ActuatorOutput {
   left: number
   right: number
 }
 
 /**
- * Connection weights from each sensor to each motor, plus a shared base drive.
- * motorX = base + Σ (weight · sensor).
+ * Connection weights from each sensor to each actuator, plus a shared base drive.
+ * actuatorX = base + Σ (weight · sensor).
  */
 export interface SensorimotorWeights {
-  /** sensorLeft → motorLeft */
+  /** sensorLeft → actuatorLeft */
   leftToLeft: number
-  /** sensorRight → motorLeft */
+  /** sensorRight → actuatorLeft */
   rightToLeft: number
-  /** sensorLeft → motorRight */
+  /** sensorLeft → actuatorRight */
   leftToRight: number
-  /** sensorRight → motorRight */
+  /** sensorRight → actuatorRight */
   rightToRight: number
-  /** resting drive applied to both motors */
+  /** resting drive applied to both actuators */
   base: number
 }
 
-export function computeMotors(
+export function computeActuators(
   w: SensorimotorWeights,
   s: SensorInput,
-): MotorOutput {
+): ActuatorOutput {
   return {
     left: w.base + w.leftToLeft * s.left + w.rightToLeft * s.right,
     right: w.base + w.leftToRight * s.left + w.rightToRight * s.right,
@@ -47,7 +47,7 @@ export function computeMotors(
 
 /**
  * The two wiring choices that define the classic Braitenberg vehicles:
- * - `crossed`: each sensor drives the motor on the *opposite* side
+ * - `crossed`: each sensor drives the actuator on the *opposite* side
  *   (contralateral) vs. the *same* side (ipsilateral).
  * - `sign`: connections are excitatory (+1, more stimulus → faster) or
  *   inhibitory (−1, more stimulus → slower).
@@ -57,7 +57,7 @@ export interface Wiring {
   sign: 1 | -1
 }
 
-/** Build sensor→motor weights from a wiring choice, gain, and base drive. */
+/** Build sensor→actuator weights from a wiring choice, gain, and base drive. */
 export function weightsFromWiring(
   wiring: Wiring,
   gain: number,
@@ -65,7 +65,7 @@ export function weightsFromWiring(
 ): SensorimotorWeights {
   const g = wiring.sign * gain
   if (wiring.crossed) {
-    // sensorLeft → motorRight, sensorRight → motorLeft
+    // sensorLeft → actuatorRight, sensorRight → actuatorLeft
     return {
       leftToLeft: 0,
       rightToLeft: g,
@@ -74,7 +74,7 @@ export function weightsFromWiring(
       base,
     }
   }
-  // uncrossed: sensorLeft → motorLeft, sensorRight → motorRight
+  // uncrossed: sensorLeft → actuatorLeft, sensorRight → actuatorRight
   return {
     leftToLeft: g,
     rightToLeft: 0,
