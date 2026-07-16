@@ -2,11 +2,14 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// Base is relative so the hash-routed SPA works both at the domain root (local
-// `vite preview`) and under a project subpath (e.g. GitHub Pages `/bcogapp/`).
-// Revisit when we pin a deploy target in Phase 4.
-export default defineConfig({
-  base: './',
+// Production builds are served from the GitHub Pages project sub-path
+// (https://jonwillits.github.io/bcogapp/); `vite dev` stays at the root.
+// Gate on `mode`, not `command`: Vite passes command 'serve' for BOTH dev and
+// preview, so a `command === 'build'` check would make `vite preview` serve the
+// /bcogapp/-based build at the root — every asset request then falls through to
+// the SPA fallback and returns index.html, and the app never mounts.
+export default defineConfig(({ mode }) => ({
+  base: mode === 'production' ? '/bcogapp/' : '/',
   plugins: [
     react(),
     VitePWA({
@@ -38,4 +41,4 @@ export default defineConfig({
       },
     }),
   ],
-})
+}))
