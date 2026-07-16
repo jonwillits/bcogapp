@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { VehicleWorld } from './world'
+import { VehicleWorld, DEFAULT_GAIN } from './world'
 import { computeActuators, weightsFromWiring } from '../neural/sensorimotor'
 import { stepVehicle, DEFAULT_VEHICLE_CONFIG } from '../creature/vehicle'
 
@@ -100,6 +100,48 @@ describe('VehicleWorld', () => {
     // No step → no new samples (the paused case).
     const len = v.history.left.length
     expect(v.history.left).toHaveLength(len)
+  })
+
+  it('tuning one vehicle leaves every other vehicle untouched', () => {
+    const world = new VehicleWorld()
+    const a = world.addVehicle('fear', '#fff', { x: 0, z: 0, heading: 0 })
+    const b = world.addVehicle('fear', '#fff', { x: 2, z: 0, heading: 0 })
+    const bWeightBefore = b.weights.leftToLeft
+
+    world.setVehicleTuning(a.id, { gain: 5, base: 1.5 })
+
+    expect(a.gain).toBeCloseTo(5)
+    expect(a.base).toBeCloseTo(1.5)
+    expect(a.weights.leftToLeft).toBeCloseTo(5) // excitatory → +gain
+    expect(a.weights.base).toBeCloseTo(1.5)
+    // the untouched vehicle keeps its own tuning
+    expect(b.gain).toBeCloseTo(DEFAULT_GAIN)
+    expect(b.weights.leftToLeft).toBeCloseTo(bWeightBefore)
+  })
+
+  it('retuning refreshes actuator values, so the inspector equation stays true while paused', () => {
+    const world = new VehicleWorld()
+    world.addSource(0, 3, 1)
+    const v = world.addVehicle('aggression', '#fff', {
+      x: 0,
+      z: 0,
+      heading: Math.PI / 2,
+    })
+    world.step(0.1) // populate sensors + actuators
+    const before = v.actuators.left
+
+    world.setVehicleTuning(v.id, { gain: 5 })
+
+    // The actuator must equal its own equation: base + Σ(weight × sensor).
+    // If retune only touched the weights, this would still hold the old value.
+    const w = v.weights
+    expect(v.actuators.left).toBeCloseTo(
+      v.base + w.leftToLeft * v.sensors.left + w.rightToLeft * v.sensors.right,
+    )
+    expect(v.actuators.right).toBeCloseTo(
+      v.base + w.leftToRight * v.sensors.left + w.rightToRight * v.sensors.right,
+    )
+    expect(v.actuators.left).not.toBeCloseTo(before)
   })
 
   it('keeps vehicles inside the arena bounds', () => {

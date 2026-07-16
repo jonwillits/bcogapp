@@ -28,6 +28,15 @@ export interface Vehicle {
   color: string
   state: VehicleState
   config: VehicleConfig
+  /**
+   * Tuning of this creature's nervous system. These live on the *creature*,
+   * not the world: they describe an individual's wiring, so individuals can
+   * differ — which is what lets a student vary one vehicle while holding the
+   * others fixed, and what learning will eventually change per-individual.
+   */
+  gain: number
+  base: number
+  /** Derived from `presetId` + `gain` + `base`; recompute with `retune()`. */
   weights: SensorimotorWeights
   sensors: SensorInput
   actuators: ActuatorOutput
@@ -36,6 +45,23 @@ export interface Vehicle {
    * sim time and freezes when the sim is paused). Oldest → newest.
    */
   history: { left: number[]; right: number[] }
+}
+
+export const DEFAULT_GAIN = 2.4
+export const DEFAULT_BASE = 0.6
+
+/**
+ * Recompute a vehicle's weights from its own wiring, gain, and base.
+ *
+ * Also refreshes the actuator values from the current sensor readings. Without
+ * this, retuning while the sim is paused would leave `actuators` stale — they
+ * are otherwise only recomputed in `step()` — and the inspector would display
+ * an equation whose terms had updated but whose total had not, i.e. visibly
+ * wrong arithmetic. It does not move the creature; only `step()` does that.
+ */
+export function retune(v: Vehicle): void {
+  v.weights = weightsFromWiring(getPreset(v.presetId).wiring, v.gain, v.base)
+  v.actuators = computeActuators(v.weights, v.sensors)
 }
 
 /** Number of samples kept in each vehicle's sensor trace. */
@@ -47,15 +73,11 @@ function pushCapped(arr: number[], v: number): void {
 }
 
 export interface WorldParams {
-  gain: number
-  base: number
   /** half-width of the square arena; vehicles reflect off the edges */
   bounds: number
 }
 
 export const DEFAULT_WORLD_PARAMS: WorldParams = {
-  gain: 2.4,
-  base: 0.6,
   bounds: 9,
 }
 
@@ -83,10 +105,12 @@ export class VehicleWorld {
       color,
       state,
       config,
+      gain: DEFAULT_GAIN,
+      base: DEFAULT_BASE,
       weights: weightsFromWiring(
         getPreset(presetId).wiring,
-        this.params.gain,
-        this.params.base,
+        DEFAULT_GAIN,
+        DEFAULT_BASE,
       ),
       sensors: { left: 0, right: 0 },
       actuators: { left: 0, right: 0 },
@@ -110,22 +134,16 @@ export class VehicleWorld {
     const v = this.vehicles.find((veh) => veh.id === id)
     if (!v) return
     v.presetId = presetId
-    v.weights = weightsFromWiring(
-      getPreset(presetId).wiring,
-      this.params.gain,
-      this.params.base,
-    )
+    retune(v)
   }
 
-  /** Rebuild every vehicle's weights after a gain/base change. */
-  reweight(): void {
-    for (const v of this.vehicles) {
-      v.weights = weightsFromWiring(
-        getPreset(v.presetId).wiring,
-        this.params.gain,
-        this.params.base,
-      )
-    }
+  /** Re-tune a single creature, leaving every other vehicle untouched. */
+  setVehicleTuning(id: number, patch: { gain?: number; base?: number }): void {
+    const v = this.vehicles.find((veh) => veh.id === id)
+    if (!v) return
+    if (patch.gain !== undefined) v.gain = patch.gain
+    if (patch.base !== undefined) v.base = patch.base
+    retune(v)
   }
 
   /** Advance the whole world by `dt` seconds. */

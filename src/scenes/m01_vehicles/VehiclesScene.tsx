@@ -3,7 +3,7 @@ import { Canvas, useFrame, type ThreeEvent } from '@react-three/fiber'
 import { Grid } from '@react-three/drei'
 import { SceneCanvasLayout } from '../../components/SceneCanvasLayout'
 import { Panel } from '../../components/Panel'
-import { Slider, Button } from '../../components/controls'
+import { Button } from '../../components/controls'
 import { StepControls } from '../../components/StepControls'
 import { CameraRig } from '../../components/CameraRig'
 import { VehicleMesh } from './VehicleMesh'
@@ -27,8 +27,8 @@ const START_POSES = [
 const FIXED_STEP = 1 / 30
 const REMOVE_RADIUS = 2.2
 
-function buildWorld(gain: number, base: number): VehicleWorld {
-  const world = new VehicleWorld({ ...DEFAULT_WORLD_PARAMS, gain, base })
+function buildWorld(): VehicleWorld {
+  const world = new VehicleWorld({ ...DEFAULT_WORLD_PARAMS })
   VEHICLE_PRESETS.forEach((preset, i) => {
     const p = START_POSES[i % START_POSES.length]
     world.addVehicle(preset.id, preset.color, {
@@ -119,9 +119,7 @@ function Floor({
 
 export default function VehiclesScene() {
   const worldRef = useRef<VehicleWorld | null>(null)
-  const [gain, setGain] = useState(DEFAULT_WORLD_PARAMS.gain)
-  const [base, setBase] = useState(DEFAULT_WORLD_PARAMS.base)
-  if (!worldRef.current) worldRef.current = buildWorld(gain, base)
+  if (!worldRef.current) worldRef.current = buildWorld()
   const world = worldRef.current
 
   const [playing, setPlaying] = useState(true)
@@ -135,15 +133,10 @@ export default function VehiclesScene() {
   const vehicles = world.vehicles
   const selectedVehicle = vehicles.find((v) => v.id === selectedId) ?? null
 
-  const changeGain = (g: number) => {
-    setGain(g)
-    world.params.gain = g
-    world.reweight()
-  }
-  const changeBase = (b: number) => {
-    setBase(b)
-    world.params.base = b
-    world.reweight()
+  const tuneSelected = (patch: { gain?: number; base?: number }) => {
+    if (selectedId === null) return
+    world.setVehicleTuning(selectedId, patch)
+    bump()
   }
   const addSource = (x: number, z: number) => {
     world.addSource(x, z, 1)
@@ -169,7 +162,7 @@ export default function VehiclesScene() {
     bump()
   }
   const reset = () => {
-    worldRef.current = buildWorld(gain, base)
+    worldRef.current = buildWorld()
     setSelectedId(null)
     setPlaying(true)
     bump()
@@ -202,26 +195,10 @@ export default function VehiclesScene() {
           </div>
         ))}
       </div>
-      <Slider
-        label="Sensor gain"
-        value={gain}
-        min={0}
-        max={5}
-        step={0.1}
-        onChange={changeGain}
-      />
-      <Slider
-        label="Base drive"
-        value={base}
-        min={-1}
-        max={2}
-        step={0.1}
-        onChange={changeBase}
-      />
       <Button onClick={clearLights}>Clear lights</Button>
       <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.45 }}>
         Left-click the ground to add a light · right-click to remove the nearest
-        one · click a vehicle to inspect its wiring.
+        one · click a vehicle to inspect its wiring and tune it.
       </p>
     </Panel>
   )
@@ -276,6 +253,7 @@ export default function VehiclesScene() {
           <VehicleInspector
             vehicle={selectedVehicle}
             onClose={() => setSelectedId(null)}
+            onTune={tuneSelected}
           />
         ) : undefined
       }
