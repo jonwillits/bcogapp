@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { AppShell } from './shell/AppShell'
 import { Home } from './shell/Home'
 import { useHashRoute } from './shell/useHashRoute'
@@ -7,9 +7,19 @@ import { scenes } from './scenes/registry'
 export default function App() {
   const route = useHashRoute()
   const scene = route ? scenes.find((s) => s.route === route) : undefined
+  const [labOpen, setLabOpen] = useState(false)
+
+  // Don't carry one scene's open lab pane over to the next scene (or home).
+  useEffect(() => setLabOpen(false), [route])
 
   return (
-    <AppShell sceneTitle={scene?.title} inScene={route !== ''}>
+    <AppShell
+      sceneTitle={scene?.title}
+      inScene={route !== ''}
+      lab={scene?.lab}
+      labOpen={labOpen}
+      onToggleLab={() => setLabOpen((o) => !o)}
+    >
       {route === '' ? (
         <Home />
       ) : scene ? (

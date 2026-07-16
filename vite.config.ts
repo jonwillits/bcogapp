@@ -38,6 +38,21 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         // Cache the built app shell + assets for offline classroom use.
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        runtimeCaching: [
+          {
+            // Lab handouts are fetched live from the course repo (single source
+            // of truth). Serve the cached copy immediately and refresh in the
+            // background, so labs still open offline after one visit.
+            urlPattern:
+              /^https:\/\/raw\.githubusercontent\.com\/jonwillits\/intro_to_bcs\/.*/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'course-lab-content',
+              expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
       },
     }),
   ],

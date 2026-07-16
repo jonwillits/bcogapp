@@ -1,11 +1,11 @@
 .home {
-  max-width: 960px;
+  max-width: 1040px;
   margin: 0 auto;
   padding: 32px 20px 64px;
 }
 
 .header {
-  margin-bottom: 28px;
+  margin-bottom: 30px;
 }
 .header h1 {
   font-size: 30px;
@@ -14,20 +14,39 @@
 }
 .lede {
   color: var(--text-muted);
-  max-width: 60ch;
+  max-width: 62ch;
 }
 
-.sectionLabel {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+/* One row per module */
+.module {
+  margin-top: 30px;
+}
+.moduleHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.moduleNumber {
+  font-family: var(--font-mono);
   font-size: 12px;
-  color: var(--text-muted);
-  margin: 28px 0 12px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  flex: none;
+}
+.moduleTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 14px;
 }
 
@@ -55,6 +74,7 @@
 .cardPlanned {
   opacity: 0.6;
   cursor: default;
+  border-style: dashed;
 }
 
 .cardTop {
@@ -63,23 +83,10 @@
   gap: 8px;
   margin-bottom: 8px;
 }
-.module {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--bg);
-  background: var(--accent);
-  padding: 2px 7px;
-  border-radius: 999px;
-  font-weight: 600;
-}
-.cardPlanned .module {
-  background: var(--surface-2);
-  color: var(--text-muted);
-}
 .cardTitle {
   font-weight: 600;
 }
-.mode {
+.tag {
   margin-left: auto;
   font-size: 11px;
   text-transform: uppercase;
@@ -88,16 +95,10 @@
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 1px 7px;
+  flex: none;
 }
 .blurb {
   color: var(--text-muted);
   font-size: 14px;
   line-height: 1.45;
-}
-
-.emptyNote {
-  color: var(--text-muted);
-  font-size: 14px;
-  font-style: italic;
-  margin-bottom: 4px;
 }

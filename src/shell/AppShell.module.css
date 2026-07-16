@@ -43,21 +43,58 @@
   flex: 1;
 }
 
-.back {
+.barBtn {
   padding: 6px 12px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--surface-2);
   color: var(--text);
+  font-size: 13px;
 }
-.back:hover {
+.barBtn:hover {
   border-color: var(--accent);
   text-decoration: none;
 }
+/* Lab toggle reads as "on" while the pane is open. */
+.barBtnOn {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #06101f;
+  font-weight: 600;
+}
+.barBtnOn:hover {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
 
+/* Main splits horizontally: the lab drawer takes a fixed column and the scene
+   fills the rest, so the pane never covers a scene's own controls. */
 .main {
   flex: 1;
   min-height: 0;
+  display: flex;
+  flex-direction: row;
+}
+
+.labDrawer {
+  flex: none;
+  width: 400px;
+  max-width: 46vw;
+  min-height: 0;
+}
+
+/* The positioned, scrollable box each scene renders into. */
+.sceneArea {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
   position: relative;
   overflow: auto;
+}
+
+@media (max-width: 720px) {
+  .labDrawer {
+    width: 300px;
+    max-width: 70vw;
+  }
 }

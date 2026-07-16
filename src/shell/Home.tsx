@@ -1,15 +1,32 @@
 import styles from './Home.module.css'
-import { scenes, plannedModules } from '../scenes/registry'
+import {
+  MODULES,
+  scenes,
+  plannedScenes,
+  type SceneManifest,
+  type PlannedScene,
+} from '../scenes/registry'
+
+interface ModuleGroup {
+  module: number
+  title: string
+  built: SceneManifest[]
+  planned: PlannedScene[]
+}
 
 /**
- * The scene picker. Built scenes render as clickable cards; the remaining
- * planned modules render as muted cards so the course's scope is visible
- * before those scenes exist. A planned module is hidden once a real scene
- * for it has been registered (it moves up into the built grid).
+ * The scene picker, grouped into one row per course module. A module appears
+ * only once it has at least one demo (built or planned), so the page has no
+ * empty rows; new rows show up automatically as ideas land in the registry.
+ * Module identity lives in the row header, so the cards carry no module badge.
  */
 export function Home() {
-  const builtModules = new Set(scenes.map((s) => s.module))
-  const planned = plannedModules.filter((p) => !builtModules.has(p.module))
+  const groups: ModuleGroup[] = MODULES.map((m) => ({
+    module: m.module,
+    title: m.title,
+    built: scenes.filter((s) => s.module === m.module),
+    planned: plannedScenes.filter((p) => p.module === m.module),
+  })).filter((g) => g.built.length + g.planned.length > 0)
 
   return (
     <div className={styles.home}>
@@ -22,49 +39,43 @@ export function Home() {
         </p>
       </div>
 
-      <div className={styles.sectionLabel}>Available</div>
-      {scenes.length === 0 ? (
-        <p className={styles.emptyNote}>
-          No scenes built yet — the first (Module&nbsp;1 vehicles) is on the way.
-        </p>
-      ) : (
-        <div className={styles.grid}>
-          {scenes.map((s) => (
-            <a
-              key={s.route}
-              className={`${styles.card} ${styles.cardActive}`}
-              href={`#/${s.route}`}
-            >
-              <div className={styles.cardTop}>
-                <span className={styles.module}>M{s.module}</span>
-                <span className={styles.cardTitle}>{s.title}</span>
-                <span className={styles.mode}>{s.mode}</span>
-              </div>
-              <div className={styles.blurb}>{s.blurb}</div>
-            </a>
-          ))}
-        </div>
-      )}
+      {groups.map((g) => (
+        <section className={styles.module} key={g.module}>
+          <div className={styles.moduleHeader}>
+            <span className={styles.moduleNumber}>Module {g.module}</span>
+            <h2 className={styles.moduleTitle}>{g.title}</h2>
+          </div>
 
-      {planned.length > 0 && (
-        <>
-          <div className={styles.sectionLabel}>Planned</div>
           <div className={styles.grid}>
-            {planned.map((p) => (
+            {g.built.map((s) => (
+              <a
+                key={s.route}
+                className={`${styles.card} ${styles.cardActive}`}
+                href={`#/${s.route}`}
+              >
+                <div className={styles.cardTop}>
+                  <span className={styles.cardTitle}>{s.title}</span>
+                  <span className={styles.tag}>{s.mode}</span>
+                </div>
+                <div className={styles.blurb}>{s.blurb}</div>
+              </a>
+            ))}
+
+            {g.planned.map((p) => (
               <div
-                key={p.module}
+                key={`${p.module}-${p.title}`}
                 className={`${styles.card} ${styles.cardPlanned}`}
               >
                 <div className={styles.cardTop}>
-                  <span className={styles.module}>M{p.module}</span>
                   <span className={styles.cardTitle}>{p.title}</span>
+                  <span className={styles.tag}>planned</span>
                 </div>
                 <div className={styles.blurb}>{p.idea}</div>
               </div>
             ))}
           </div>
-        </>
-      )}
+        </section>
+      ))}
     </div>
   )
 }
