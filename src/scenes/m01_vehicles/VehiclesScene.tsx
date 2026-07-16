@@ -1,5 +1,5 @@
 import { useReducer, useRef, useState } from 'react'
-import { Canvas, useFrame, type ThreeEvent } from '@react-three/fiber'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { Grid } from '@react-three/drei'
 import { SceneCanvasLayout } from '../../components/SceneCanvasLayout'
 import { Panel } from '../../components/Panel'
@@ -9,6 +9,7 @@ import { CameraRig } from '../../components/CameraRig'
 import { VehicleMesh } from './VehicleMesh'
 import { SourceMesh } from './SourceMesh'
 import { VehicleInspector } from './VehicleInspector'
+import { Terrain } from './Terrain'
 import { VehicleWorld, DEFAULT_WORLD_PARAMS } from '../../sim/world/world'
 import { VEHICLE_PRESETS } from '../../sim/creature/vehiclePresets'
 import { palette } from '../../theme/theme'
@@ -74,49 +75,6 @@ function Simulation({
   return null
 }
 
-/**
- * Ground plane that owns light editing: left-click adds a light at the clicked
- * point, right-click removes the nearest light within REMOVE_RADIUS. Camera
- * drags (pointer moved) are ignored. Lights and vehicles let clicks fall
- * through / stop them, so this receives exactly the intended ground clicks.
- */
-function Floor({
-  onAdd,
-  onRemoveNearest,
-}: {
-  onAdd: (x: number, z: number) => void
-  onRemoveNearest: (x: number, z: number) => void
-}) {
-  const down = useRef<{ x: number; y: number; button: number } | null>(null)
-  return (
-    <mesh
-      rotation={[-Math.PI / 2, 0, 0]}
-      onPointerDown={(e: ThreeEvent<PointerEvent>) => {
-        down.current = {
-          x: e.nativeEvent.clientX,
-          y: e.nativeEvent.clientY,
-          button: e.nativeEvent.button,
-        }
-      }}
-      onPointerUp={(e: ThreeEvent<PointerEvent>) => {
-        const d = down.current
-        down.current = null
-        if (!d) return
-        const moved = Math.hypot(
-          e.nativeEvent.clientX - d.x,
-          e.nativeEvent.clientY - d.y,
-        )
-        if (moved >= 5) return // a camera drag, not a click
-        if (d.button === 2) onRemoveNearest(e.point.x, e.point.z)
-        else if (d.button === 0) onAdd(e.point.x, e.point.z)
-      }}
-    >
-      <planeGeometry args={[80, 80]} />
-      <meshStandardMaterial color="#0b111c" roughness={1} />
-    </mesh>
-  )
-}
-
 export default function VehiclesScene() {
   const worldRef = useRef<VehicleWorld | null>(null)
   if (!worldRef.current) worldRef.current = buildWorld()
@@ -139,6 +97,9 @@ export default function VehiclesScene() {
     bump()
   }
   const addSource = (x: number, z: number) => {
+    // Ignore clicks on the valley walls: a light out there would be buried in
+    // the hillside, and no vehicle can reach it anyway.
+    if (Math.max(Math.abs(x), Math.abs(z)) > world.params.bounds) return
     world.addSource(x, z, 1)
     bump()
   }
@@ -220,18 +181,24 @@ export default function VehiclesScene() {
             // Only pump re-renders while an inspector is open and reading values.
             onSample={selectedId !== null ? bump : NOOP}
           />
-          <Floor onAdd={addSource} onRemoveNearest={removeNearest} />
+          <Terrain
+            bounds={world.params.bounds}
+            onAdd={addSource}
+            onRemoveNearest={removeNearest}
+          />
+          {/* Grid is sized to the arena exactly, so where it stops is where
+              the vehicles bounce — a second, unambiguous read on the boundary. */}
           <Grid
-            args={[80, 80]}
+            args={[world.params.bounds * 2, world.params.bounds * 2]}
             cellSize={1}
             cellThickness={0.5}
             cellColor="#1b2740"
             sectionSize={5}
             sectionThickness={1}
             sectionColor="#2a3d63"
-            fadeDistance={45}
-            fadeStrength={1}
-            position={[0, 0.001, 0]}
+            fadeDistance={60}
+            fadeStrength={0.6}
+            position={[0, 0.002, 0]}
           />
           {sources.map((s) => (
             <SourceMesh key={s.id} source={s} />
