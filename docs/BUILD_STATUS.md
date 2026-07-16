@@ -4,6 +4,10 @@ The build tracker for the **BCOG 100 Course App** — the step-by-step "what's d
 
 > **Stack:** web-first PWA · Vite + React + TypeScript · Three.js / react-three-fiber · plain-TS sim/neural layer. **License:** GPL v3. **Home:** standalone git repo `github.com/jonwillits/bcogapp`, active clone on **local disk outside any cloud-synced folder** (never run `npm install` inside Box/Drive/Dropbox — sync churns `node_modules` and can corrupt `.git`).
 
+> **Where we are (2026-07-16):** Phases 0–4 complete. The app is **live at <https://jonwillits.github.io/bcogapp/>** and auto-deploys on push to `main`. **Module 1 (Braitenberg Vehicles) is shipped**, and its handout + report doc are rewritten and published in `intro_to_bcs` (the app fetches the handout live, so handout edits need no redeploy). The shared shell — camera, panels, plot, transport, lab pane, scene picker — is in place, so **the next scene is additive**: write `sim/` logic, add a `scenes/mNN_*/` folder, register it.
+>
+> **Known open items:** the `theme/` palette is still a placeholder pending the lecture decks; CI actions target the deprecated Node 20 (`@v4` → `@v5` sometime).
+
 ## Phase 0 — Repo & environment
 
 - [x] Create the working clone on plain local disk, outside sync — `~/Documents/Projects/bcogapp` (cloned from the existing remote).
@@ -31,17 +35,17 @@ The build tracker for the **BCOG 100 Course App** — the step-by-step "what's d
 
 ## Phase 3 — Module 1 vehicles scene (first spine stage)
 
-- [x] Creature engine v0 in `sim/creature` + `sim/neural`: sensor→motor wiring, differential-drive movement on a plane (`vehicle.ts`, `sensorimotor.ts`, `world.ts`).
-- [x] `scenes/m01_vehicles/` — 3D render, orbit-camera-navigable arena with light sources (click ground to add, click light to remove).
-- [x] Click a vehicle → wiring shown in a side panel (`VehicleInspector` + live `WiringDiagram`, sensor plot, value readouts).
-- [x] Controls for wiring options; watch emergent approach/avoid behavior (4 presets: Fear/Aggression/Love/Explorer; gain + base sliders). Verified in-browser: Aggression vehicles charge the lights.
-- [x] Register in the scene picker (lazy-loaded); matches the theme.
+- [x] Creature engine v0 in `sim/creature` + `sim/neural`: sensor→actuator wiring, differential-drive movement on a plane (`vehicle.ts`, `sensorimotor.ts`, `world.ts`).
+- [x] `scenes/m01_vehicles/` — 3D render, camera-navigable pit with light sources (left-click ground to add, right-click to remove the nearest; lights may also sit on the rim, out of reach).
+- [x] Click a vehicle → wiring shown in a side panel (`VehicleInspector` + live `WiringDiagram` with values on the nodes, the arithmetic behind each actuator, sensor plot, readouts).
+- [x] Controls for wiring options; watch emergent approach/avoid behavior — **six** colour-coded phenotypes (2a/2b/2c/3a/3b/3c = 3 wiring patterns × 2 signs), each with its own **connection strength** and **actuator bias** tuned in the inspector. Verified in-browser: 2b charges the lights; 2c/3c cannot steer.
+- [x] Register in the scene picker (lazy-loaded, grouped by module); matches the theme.
 
 ## Phase 4 — Deploy & integrate
 
 - [x] Deploy the PWA — **live at <https://jonwillits.github.io/bcogapp/>** via GitHub Actions (`.github/workflows/deploy.yml`, auto-deploys on push to `main`; tests gate the deploy). Verified: deep-link routes (`#/m01-vehicles`), service worker active at scope `/bcogapp/` with 9 precached entries (offline), manifest served, WebGL2 rendering, no console errors. **Students need only a browser — no Node/install.**
-- [ ] Update `intro_to_bcs/mind_and_brain/levels_of_analysis_lab/vehicles_lab.md` to link the hosted scene (replacing the local-Python setup). *(Deferred by decision — the lab's observe→theorize→inspect framing is still settling.)*
-- [ ] Update the course `BUILD_STATUS.md` (Module 1 Lab cell + note it's app-hosted) and this tracker. *(Deferred with the handout.)*
+- [x] Update `intro_to_bcs/mind_and_brain/levels_of_analysis_lab/vehicles_lab.md` to link the hosted scene (replacing the local-Python setup) — rewritten and pushed; the app fetches it live, so it needs no redeploy. Report doc updated to match.
+- [x] Update the course `BUILD_STATUS.md` (Module 1 Lab cell + note it's app-hosted) and this tracker.
 
 ## Later stages (backlog — see `LAB_IDEAS.md`)
 

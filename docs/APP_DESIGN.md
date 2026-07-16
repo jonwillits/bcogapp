@@ -10,7 +10,7 @@ One app that hosts the course's interactive **demonstrations** and **lab activit
 
 The app is **not** a grab-bag of independent mini-apps. Most of its interactive content is a single **evolving-creature simulation** that accumulates capabilities module by module, tracking the course's evolutionary arc:
 
-- **M1** a Braitenberg vehicle (sensor→motor wiring, emergent behavior) →
+- **M1** a Braitenberg vehicle (sensor→actuator wiring, emergent behavior) — **built** →
 - **M4** a nematode-like early bilaterian making logical approach/avoid decisions via real neural circuits →
 - **M5** an early vertebrate (fish) that *learns* (neural adaptation, Hebbian, error-driven, reinforcement) →
 - **M7** the same fish solving harder pattern-recognition problems (linear inseparability, hidden layers vs. feature selection, train/test generalization) →
@@ -19,6 +19,16 @@ The app is **not** a grab-bag of independent mini-apps. Most of its interactive 
 This is implemented as **one simulation engine, parameterized by evolutionary stage** — the same creature / sensor / nervous-system / environment framework, configured per module for which body plan, sensors, circuits, and learning rules are enabled. We build the machinery once and turn features on as the course advances, rather than rebuilding a creature each week.
 
 Around that spine sit **satellite scenes** that reuse the shared shell (camera, control panels, plots) but aren't part of the creature: the **M3** 2D neuron (ion channels, action potentials, voltage plots), the **M6** labeled-brain flythrough (may embed in the creature or stand alone), and the more abstract **M12** planning, **M13** language-structure, and **M14** symbols-vs-statistics demos.
+
+**Vocabulary is chosen for the whole arc, not one module.** Because the same sensor→actuator map *becomes* a neural network in M4/M5/M7, the seam is the expensive place to change words — so M1's terms are picked to survive it:
+
+| In the app | Becomes, later | Why not the obvious alternative |
+|---|---|---|
+| **actuator** (marked `A`) | — | Not "motor": a flagellum or muscle isn't a motor, and "motor" primes a mechanical reading in a lab about mentalistic language collapsing into mechanism. ("Sensorimotor" stays, though — it's the right term for the *mapping*, and real motor neurons arrive later.) |
+| **connection strength** | **weight** | Not "gain": in network terms gain is an activation-function slope, not the strength between two units — and this parameter is unambiguously a weight. "Connection strength" is jargon-free for M1 and maps 1:1 onto "weight" later. |
+| **actuator bias** | **bias** | Pairs the creature word with the network word, so nothing is retracted — it's the bias term in `actuator = bias + Σ(weight × sensor)`. |
+
+The corollary is architectural: **the general case is the one to build.** M1's weights are already a full 2×2 matrix — the ipsilateral/contralateral vehicles are just that matrix with a diagonal zeroed — which is exactly the form plasticity will later adjust.
 
 **Focal vs. NPC networks.** In the spine sim there is normally **one focal agent** whose neural network is fully simulated and visualizable; any other on-screen agents are "NPCs" with hard-coded behaviors the focal agent reacts to. The lone exception is the social-cognition week (M11), where ~two full networks may run at once. This keeps the computational load small (the real ceiling is one network's *complexity*, not the number of agents) and is why a lightweight web stack is ample — see [`ARCHITECTURE_DECISION.md`](ARCHITECTURE_DECISION.md).
 

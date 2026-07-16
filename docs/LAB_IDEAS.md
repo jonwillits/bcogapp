@@ -10,7 +10,7 @@ The starting backlog: existing labs that lean on third-party sites we'd bring in
 
 | Module | Current lab | External dependency | Render | Migration note |
 |---|---|---|---|---|
-| 1 Mind & Brain | Vehicles (levels of analysis) | Local Python `vehicles.py` (Braitenberg vehicles) | 3D | Students install/run Python today; an in-app sim removes the setup barrier. Now the **first stage of the evolving-creature spine** (rendered in 3D, camera-navigable). |
+| 1 Mind & Brain | Vehicles (levels of analysis) | ~~Local Python `vehicles.py`~~ | 3D | ✅ **Migrated.** Now the [in-app scene](https://jonwillits.github.io/bcogapp/#/m01-vehicles) and the **first stage of the evolving-creature spine**. The Python install is retired from the handout; students just open a link. |
 | 4 Neural Circuits | Neural-network logic lab | `trinket.io` pygame — 4-neuron net, truth tables, training | 2D | Self-contained 2D; strong first-migration candidate. |
 | 7 Pattern Recognition | Pattern recognition | **TensorFlow Playground** (external site) | 2D | Recreating a focused subset gives us control + course-aligned framing. |
 | 13 Language | Animal communication | YouTube videos + Hockett-features worksheet | — | Observation/discussion, not a sim — likely **stays** as handout + links, not an app piece. |
@@ -24,7 +24,10 @@ Fill these in as we talk. Canonical module list: `../../../intro_to_bcs/README.m
 > **The spine.** Most of these are stages of one **evolving-creature engine** (M1 vehicle → M4 bilaterian → M5/M7 fish → maybe M11 primate), with M3/M6/M12–14 as satellite scenes. The durable statement of that architecture — and the "one focal, visualizable network; other agents are hard-coded NPCs" rule — lives in [`APP_DESIGN.md`](APP_DESIGN.md); this board just captures per-module ideas.
 
 ### Module 1 — Mind and Brain
-- **Braitenberg Vehicles sim** — *(idea)* — Render **3D** — in-app Braitenberg vehicles; sliders for various options; can click on a vehicle to see its wiring in a separate window frame; watch emergent behavior. Replaces the local-Python setup.
+- **Braitenberg Vehicles sim** — *(done)* — Render **3D** — **[live](https://jonwillits.github.io/bcogapp/#/m01-vehicles)** · `src/scenes/m01_vehicles/`. Replaces the local-Python setup.
+  Six colour-coded phenotypes on screen at once — `2a/2b/2c/3a/3b/3c`, every combination of three wiring patterns (ipsilateral, contralateral, fully connected) with two signs (excitatory, inhibitory). Click a vehicle to see its live wiring, the arithmetic behind each actuator (`bias + Σ(strength × sensor)`), a sensor trace, and per-vehicle **connection strength** / **actuator bias** sliders — so a student can hold five constant and vary one. Lights are placed by clicking the floor, or stranded on the rim out of reach (sensed in 3D, so height costs signal). The arena is a hard-walled pit, drawn so the boundary is visible rather than mysterious.
+  Only the neutral labels are shown — Braitenberg's "Fear/Aggression/…" names live in `vehiclePresets.ts` as an answer key — so the handout's observe → theorize → inspect arc survives.
+  Handout: `intro_to_bcs/mind_and_brain/levels_of_analysis_lab/vehicles_lab.md`, fetched live by the app's Lab pane.
 
 ### Module 2 — Comparative Approaches
 - **Undecided** - No committed idea for this lab yet. The four main topics for the week are:
