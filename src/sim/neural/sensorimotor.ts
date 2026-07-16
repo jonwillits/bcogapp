@@ -1,7 +1,7 @@
 /**
  * The seed of the evolving-creature nervous system: a minimal sensor→actuator
  * network. For Module 1 (Braitenberg vehicles) this is a 2-input × 2-output
- * linear map — two sensors driving two actuators, plus a base (resting) drive.
+ * linear map — two sensors driving two actuators, plus a bias (resting drive).
  *
  * This is deliberately the simplest possible "neural" layer. Later stages
  * (M4 circuits, M5/M7 learning) extend the neural package with real neurons,
@@ -19,8 +19,8 @@ export interface ActuatorOutput {
 }
 
 /**
- * Connection weights from each sensor to each actuator, plus a shared base drive.
- * actuatorX = base + Σ (weight · sensor).
+ * Connection weights from each sensor to each actuator, plus a shared bias.
+ * actuatorX = bias + Σ (weight · sensor).
  */
 export interface SensorimotorWeights {
   /** sensorLeft → actuatorLeft */
@@ -31,8 +31,8 @@ export interface SensorimotorWeights {
   leftToRight: number
   /** sensorRight → actuatorRight */
   rightToRight: number
-  /** resting drive applied to both actuators */
-  base: number
+  /** resting drive applied to both actuators (the bias term) */
+  bias: number
 }
 
 export function computeActuators(
@@ -40,8 +40,8 @@ export function computeActuators(
   s: SensorInput,
 ): ActuatorOutput {
   return {
-    left: w.base + w.leftToLeft * s.left + w.rightToLeft * s.right,
-    right: w.base + w.leftToRight * s.left + w.rightToRight * s.right,
+    left: w.bias + w.leftToLeft * s.left + w.rightToLeft * s.right,
+    right: w.bias + w.leftToRight * s.left + w.rightToRight * s.right,
   }
 }
 
@@ -70,24 +70,24 @@ export interface Wiring {
   sign: 1 | -1
 }
 
-/** Build sensor→actuator weights from a wiring choice, gain, and base drive. */
+/** Build sensor→actuator weights from a wiring choice, connection strength, and bias. */
 export function weightsFromWiring(
   wiring: Wiring,
-  gain: number,
-  base: number,
+  strength: number,
+  bias: number,
 ): SensorimotorWeights {
-  const g = wiring.sign * gain
+  const g = wiring.sign * strength
   switch (wiring.pattern) {
     case 'contralateral':
       // sensorLeft → actuatorRight, sensorRight → actuatorLeft
-      return { leftToLeft: 0, rightToLeft: g, leftToRight: g, rightToRight: 0, base }
+      return { leftToLeft: 0, rightToLeft: g, leftToRight: g, rightToRight: 0, bias }
     case 'full':
       // Every sensor drives every actuator. Both actuators therefore receive
       // an identical signal, so the creature cannot steer — it only changes
       // speed. That symmetry is the point: steering requires an *asymmetry*.
-      return { leftToLeft: g, rightToLeft: g, leftToRight: g, rightToRight: g, base }
+      return { leftToLeft: g, rightToLeft: g, leftToRight: g, rightToRight: g, bias }
     case 'ipsilateral':
       // sensorLeft → actuatorLeft, sensorRight → actuatorRight
-      return { leftToLeft: g, rightToLeft: 0, leftToRight: 0, rightToRight: g, base }
+      return { leftToLeft: g, rightToLeft: 0, leftToRight: 0, rightToRight: g, bias }
   }
 }

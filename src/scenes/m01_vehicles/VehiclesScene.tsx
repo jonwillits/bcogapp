@@ -133,7 +133,7 @@ export default function VehiclesScene() {
   const vehicles = world.vehicles
   const selectedVehicle = vehicles.find((v) => v.id === selectedId) ?? null
 
-  const tuneSelected = (patch: { gain?: number; base?: number }) => {
+  const tuneSelected = (patch: { strength?: number; bias?: number }) => {
     if (selectedId === null) return
     world.setVehicleTuning(selectedId, patch)
     bump()

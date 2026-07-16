@@ -34,9 +34,9 @@ export interface Vehicle {
    * differ — which is what lets a student vary one vehicle while holding the
    * others fixed, and what learning will eventually change per-individual.
    */
-  gain: number
-  base: number
-  /** Derived from `presetId` + `gain` + `base`; recompute with `retune()`. */
+  strength: number
+  bias: number
+  /** Derived from `presetId` + `strength` + `bias`; recompute with `retune()`. */
   weights: SensorimotorWeights
   sensors: SensorInput
   actuators: ActuatorOutput
@@ -47,11 +47,11 @@ export interface Vehicle {
   history: { left: number[]; right: number[] }
 }
 
-export const DEFAULT_GAIN = 2.4
-export const DEFAULT_BASE = 0.6
+export const DEFAULT_STRENGTH = 2.4
+export const DEFAULT_BIAS = 0.6
 
 /**
- * Recompute a vehicle's weights from its own wiring, gain, and base.
+ * Recompute a vehicle's weights from its own wiring, strength, and bias.
  *
  * Also refreshes the actuator values from the current sensor readings. Without
  * this, retuning while the sim is paused would leave `actuators` stale — they
@@ -60,7 +60,7 @@ export const DEFAULT_BASE = 0.6
  * wrong arithmetic. It does not move the creature; only `step()` does that.
  */
 export function retune(v: Vehicle): void {
-  v.weights = weightsFromWiring(getPreset(v.presetId).wiring, v.gain, v.base)
+  v.weights = weightsFromWiring(getPreset(v.presetId).wiring, v.strength, v.bias)
   v.actuators = computeActuators(v.weights, v.sensors)
 }
 
@@ -105,12 +105,12 @@ export class VehicleWorld {
       color,
       state,
       config,
-      gain: DEFAULT_GAIN,
-      base: DEFAULT_BASE,
+      strength: DEFAULT_STRENGTH,
+      bias: DEFAULT_BIAS,
       weights: weightsFromWiring(
         getPreset(presetId).wiring,
-        DEFAULT_GAIN,
-        DEFAULT_BASE,
+        DEFAULT_STRENGTH,
+        DEFAULT_BIAS,
       ),
       sensors: { left: 0, right: 0 },
       actuators: { left: 0, right: 0 },
@@ -138,11 +138,11 @@ export class VehicleWorld {
   }
 
   /** Re-tune a single creature, leaving every other vehicle untouched. */
-  setVehicleTuning(id: number, patch: { gain?: number; base?: number }): void {
+  setVehicleTuning(id: number, patch: { strength?: number; bias?: number }): void {
     const v = this.vehicles.find((veh) => veh.id === id)
     if (!v) return
-    if (patch.gain !== undefined) v.gain = patch.gain
-    if (patch.base !== undefined) v.base = patch.base
+    if (patch.strength !== undefined) v.strength = patch.strength
+    if (patch.bias !== undefined) v.bias = patch.bias
     retune(v)
   }
 

@@ -8,7 +8,7 @@ import type { Wiring } from '../neural/sensorimotor'
  * not number but which is the general form the later modules build on.
  *
  * Whether a given wiring approaches or avoids also depends on the falloff and
- * gain, but with the defaults here each preset shows its characteristic
+ * connection strength, but with the defaults here each preset shows its characteristic
  * behavior.
  *
  * NOTE: `name` and `description` are "personality" labels kept here as an
@@ -79,7 +79,7 @@ export const VEHICLE_PRESETS: VehiclePreset[] = [
     name: 'Caution',
     label: '3c',
     description:
-      'Fully connected + inhibitory. Both sensors slow both actuators equally, so again it cannot steer: it drives straight, slowing near a source and backing away once the inhibition exceeds its base drive.',
+      'Fully connected + inhibitory. Both sensors slow both actuators equally, so again it cannot steer: it drives straight, slowing near a source and backing away once the inhibition exceeds its actuator bias.',
     color: '#a3e635',
     wiring: { pattern: 'full', sign: -1 },
   },

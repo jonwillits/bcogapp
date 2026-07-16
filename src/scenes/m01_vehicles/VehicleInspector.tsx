@@ -28,23 +28,23 @@ function fmt(n: number): string {
  */
 function equation(
   name: string,
-  base: number,
+  bias: number,
   terms: { w: number; s: number }[],
   total: number,
 ): string {
   const parts = terms
     .filter((t) => t.w !== 0)
     .map((t) => `(${fmt(t.w)} × ${fmt(t.s)})`)
-  const rhs = parts.length ? `${fmt(base)} + ${parts.join(' + ')}` : fmt(base)
+  const rhs = parts.length ? `${fmt(bias)} + ${parts.join(' + ')}` : fmt(bias)
   return `${name} = ${rhs}\n${' '.repeat(name.length)} = ${fmt(total)}`
 }
 
 /**
  * The side inspector for a selected vehicle: its wiring with live values, the
  * arithmetic behind each actuator, a sensor trace, and this creature's own
- * tuning. Gain and base belong to the individual, so changing them here
- * affects only the selected vehicle — letting a student hold the other five
- * fixed and vary one.
+ * tuning. Connection strength and bias belong to the individual, so changing
+ * them here affects only the selected vehicle — letting a student hold the
+ * other five fixed and vary one.
  */
 export function VehicleInspector({
   vehicle,
@@ -53,15 +53,12 @@ export function VehicleInspector({
 }: {
   vehicle: Vehicle
   onClose: () => void
-  onTune: (patch: { gain?: number; base?: number }) => void
+  onTune: (patch: { strength?: number; bias?: number }) => void
 }) {
   const preset = getPreset(vehicle.presetId)
   const w = vehicle.weights
   const s = vehicle.sensors
   const speed = (vehicle.actuators.left + vehicle.actuators.right) / 2
-  // Every connection currently shares one strength (sign × gain); they only
-  // diverge once learning adjusts them individually.
-  const strength = preset.wiring.sign * vehicle.gain
 
   return (
     <Panel
@@ -125,7 +122,7 @@ export function VehicleInspector({
         >
           {equation(
             'A_L',
-            vehicle.base,
+            vehicle.bias,
             [
               { w: w.leftToLeft, s: s.left },
               { w: w.rightToLeft, s: s.right },
@@ -135,7 +132,7 @@ export function VehicleInspector({
           {'\n'}
           {equation(
             'A_R',
-            vehicle.base,
+            vehicle.bias,
             [
               { w: w.leftToRight, s: s.left },
               { w: w.rightToRight, s: s.right },
@@ -162,7 +159,6 @@ export function VehicleInspector({
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <ValueReadout label="Connection strength" value={strength} />
         <ValueReadout label="Speed" value={speed} unit="u/s" />
       </div>
 
@@ -170,21 +166,29 @@ export function VehicleInspector({
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
           Tuning — affects only this vehicle
         </div>
+        {/*
+          The slider sets the *magnitude*; the sign belongs to the phenotype
+          (a 3a with a positive weight simply is a 2a). So display the signed
+          value, which is the number that actually appears in the equation
+          above — otherwise the panel would show 2.40 here and −2.40 there.
+        */}
         <Slider
-          label="Sensor gain"
-          value={vehicle.gain}
+          label="Connection strength"
+          value={vehicle.strength}
           min={0}
           max={5}
           step={0.1}
-          onChange={(gain) => onTune({ gain })}
+          format={(v) => fmt(preset.wiring.sign * v)}
+          onChange={(strength) => onTune({ strength })}
         />
         <Slider
-          label="Base drive"
-          value={vehicle.base}
+          label="Actuator bias"
+          value={vehicle.bias}
           min={-1}
           max={2}
           step={0.1}
-          onChange={(base) => onTune({ base })}
+          format={fmt}
+          onChange={(bias) => onTune({ bias })}
         />
       </div>
     </Panel>
