@@ -251,7 +251,7 @@ it('continuous: make starvation possible', () => {
           birthEnergy: 4,
           meanLifespan,
           lifespanSd: meanLifespan / 4,
-          energy: { baseCost, moveCost: 0.06 },
+          energy: { baseCost, moveCost: 0.06, ambientIncome: 0 },
           food: { ...DEFAULT_FOOD_PARAMS, count: 4, respawnDelay },
         }
         const runs = SEEDS.slice(0, 5).map((s) => run(s, params))
@@ -298,7 +298,7 @@ it('continuous: long lives, so starvation can outpace old age', () => {
         birthEnergy: 4,
         meanLifespan,
         lifespanSd: meanLifespan / 4,
-        energy: { baseCost: 0.05, moveCost: 0.06 },
+        energy: { baseCost: 0.05, moveCost: 0.06, ambientIncome: 0 },
         food: { ...DEFAULT_FOOD_PARAMS, count: 4, respawnDelay },
       }
       const runs = SEEDS.slice(0, 5).map((s) => run(s, params))
@@ -346,7 +346,7 @@ it('continuous: carrying capacity as the mechanism', () => {
           maxEnergy: 12,
           meanLifespan,
           lifespanSd: meanLifespan / 4,
-          energy: { baseCost: 0.05, moveCost: 0.06 },
+          energy: { baseCost: 0.05, moveCost: 0.06, ambientIncome: 0 },
           food: { ...DEFAULT_FOOD_PARAMS, count: 4, respawnDelay },
         }
         const runs = SEEDS.map((s) => run(s, params))
@@ -379,13 +379,13 @@ it('continuous: verify the two best configurations', () => {
     'cap24 life45 delay1': {
       populationCap: 24, initialPopulation: 24, meanLifespan: 45, lifespanSd: 11,
       reproduceThreshold: 6, birthEnergy: 4, maxEnergy: 12,
-      energy: { baseCost: 0.05, moveCost: 0.06 },
+      energy: { baseCost: 0.05, moveCost: 0.06, ambientIncome: 0 },
       food: { ...DEFAULT_FOOD_PARAMS, count: 4, respawnDelay: 1 },
     },
     'cap16 life180 delay4': {
       populationCap: 16, initialPopulation: 16, meanLifespan: 180, lifespanSd: 45,
       reproduceThreshold: 6, birthEnergy: 4, maxEnergy: 12,
-      energy: { baseCost: 0.05, moveCost: 0.06 },
+      energy: { baseCost: 0.05, moveCost: 0.06, ambientIncome: 0 },
       food: { ...DEFAULT_FOOD_PARAMS, count: 4, respawnDelay: 4 },
     },
   }
@@ -458,7 +458,7 @@ it('phase A: ephemeral food with a continuous cycle', () => {
             maxEnergy: 12,
             meanLifespan,
             lifespanSd: meanLifespan / 4,
-            energy: { baseCost: 0.05, moveCost: 0.06 },
+            energy: { baseCost: 0.05, moveCost: 0.06, ambientIncome: 0 },
             food: { ...DEFAULT_FOOD_PARAMS, mode: 'ephemeral' as const, count: 4, flowRate, lifetime },
           }
           const runs = SEEDS.map((s) => run(s, params))
@@ -512,7 +512,7 @@ it('phase A: narrow in on ephemeral', () => {
           maxEnergy: 12,
           meanLifespan,
           lifespanSd: meanLifespan / 4,
-          energy: { baseCost: 0.05, moveCost: 0.06 },
+          energy: { baseCost: 0.05, moveCost: 0.06, ambientIncome: 0 },
           food: { ...DEFAULT_FOOD_PARAMS, mode: 'ephemeral' as const, count: 4, flowRate, lifetime },
         }
         const runs = SEEDS.map((s) => run(s, params))
@@ -569,7 +569,7 @@ it('phase A: does the energy ceiling neuter the queue', () => {
           maxEnergy,
           meanLifespan,
           lifespanSd: meanLifespan / 4,
-          energy: { baseCost: 0.05, moveCost: 0.06 },
+          energy: { baseCost: 0.05, moveCost: 0.06, ambientIncome: 0 },
           food: { ...DEFAULT_FOOD_PARAMS, mode: 'ephemeral' as const, count: 4, flowRate: 2.6, lifetime: 12 },
         }
         const runs = SEEDS.map((s) => run(s, params))
@@ -623,7 +623,7 @@ it('phase A: final — push the reproduction threshold', () => {
           maxEnergy: 30,
           meanLifespan,
           lifespanSd: meanLifespan / 4,
-          energy: { baseCost: 0.05, moveCost: 0.06 },
+          energy: { baseCost: 0.05, moveCost: 0.06, ambientIncome: 0 },
           food: { ...DEFAULT_FOOD_PARAMS, mode: 'ephemeral' as const, count: 4, flowRate, lifetime: 12 },
         }
         const runs = SEEDS.map((s) => run(s, params))
@@ -659,7 +659,7 @@ const PHASE_A = {
   maxEnergy: 30,
   meanLifespan: 60,
   lifespanSd: 15,
-  energy: { baseCost: 0.05, moveCost: 0.06 },
+  energy: { baseCost: 0.05, moveCost: 0.06, ambientIncome: 0 },
   food: { ...DEFAULT_FOOD_PARAMS, mode: 'ephemeral' as const, count: 4, flowRate: 3.4, lifetime: 12 },
 }
 
@@ -720,4 +720,31 @@ it('phase A: verify the chosen configuration', () => {
     if ((end(w)?.population ?? 0) < before * 0.6 || w.extinct) collapsed++
   }
   console.log(`  poison collapses the population in ${collapsed}/10 seeds`)
+})
+
+it('phase B: how long until the wiring is strong enough to express itself', () => {
+  /**
+   * The layer-3 lesson, applied before the fixture search rather than after:
+   * weakly wired populations behave the same everywhere, so they pass
+   * separability trivially and fail divergence completely. The fixtures need to
+   * have run long enough for their mechanisms to have consequences.
+   */
+  console.log('\ntime | pool P: |w| bias cross sign | pool Q: |w| bias cross sign')
+  for (const seconds of [600, 1200, 2400, 4800]) {
+    const row: string[] = []
+    for (const pool of ['P', 'Q'] as const) {
+      const w = new ContinuousWorld(3, PHASE_A, pool)
+      w.run(seconds)
+      const g = w.creatures.map((c) => c.genome)
+      const m = (pick: (x: typeof g[0]) => number) => mean(g.map(pick))
+      row.push(
+        `${f(
+          m((x) => (Math.abs(x.wLL) + Math.abs(x.wLR) + Math.abs(x.wRL) + Math.abs(x.wRR)) / 4),
+        )} ${f(m((x) => x.bias), 5)} ${f(m((x) => x.wLR + x.wRL - x.wLL - x.wRR))} ${f(
+          m((x) => (x.wLL + x.wLR + x.wRL + x.wRR) / 4), 5,
+        )}`,
+      )
+    }
+    console.log(`${f(seconds, 4)} | ${row.join(' | ')}`)
+  }
 })

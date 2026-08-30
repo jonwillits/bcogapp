@@ -158,6 +158,28 @@ export interface Creature {
   vehicle: Vehicle
 }
 
+/**
+ * One creature's place in the ancestry, for the tree.
+ *
+ * Time-stamped rather than generation-numbered, because there are no
+ * generations any more. The tree Part 3 draws therefore has real time on one
+ * axis, which is what a phylogeny actually looks like — and it means a lineage
+ * that reproduces fast is visibly bushier than one that does not, rather than
+ * both marching in lockstep down a column grid.
+ */
+export interface Lineage {
+  id: number
+  parentId: number | null
+  founderId: number
+  bornAt: number
+  /** Sim time of death; null while alive. */
+  diedAt: number | null
+  /** The neutral gene, carried here so the tree can be drawn in its colours. */
+  mark: number
+  /** Whether this creature ever reproduced. */
+  reproduced: boolean
+}
+
 export interface ContinuousSample {
   time: number
   population: number
@@ -181,6 +203,10 @@ export class ContinuousWorld {
   world: VehicleWorld
   lights: FoodLight[] = []
   creatures: Creature[] = []
+  /** Every creature that has ever lived in this run. */
+  lineage: Lineage[] = []
+  /** Index into `lineage`; the search runs this engine hundreds of times. */
+  private lineageById = new Map<number, Lineage>()
   samples: ContinuousSample[] = []
   time = 0
   births = 0
@@ -301,7 +327,59 @@ export class ContinuousWorld {
       vehicle,
     }
     this.creatures.push(c)
+    const node: Lineage = {
+      id: c.id,
+      parentId,
+      founderId,
+      bornAt: this.time,
+      diedAt: null,
+      mark: genome.hue,
+      reproduced: false,
+    }
+    this.lineage.push(node)
+    this.lineageById.set(node.id, node)
     return c
+  }
+
+  /**
+   * Split this population into an independent branch carrying on from exactly
+   * here with a different random stream — the continuous equivalent of the
+   * generational engine's fork, and how the sister lineages W and X are made.
+   *
+   * Shares the whole trunk: the same founders, the same individuals, the same
+   * ids. Two separate runs would give two separate trees with no common
+   * ancestor, and the homology Part 3 asks a student to find would not be there.
+   */
+  fork(newSeed: number): ContinuousWorld {
+    const child = new ContinuousWorld(newSeed, this.params, this.founders)
+    child.time = this.time
+    child.births = this.births
+    child.starved = this.starved
+    child.diedOfAge = this.diedOfAge
+    child.samples = this.samples.map((s) => ({ ...s }))
+    child.lineage = this.lineage.map((n) => ({ ...n }))
+    child.lineageById = new Map(child.lineage.map((n) => [n.id, n]))
+
+    child.world.sources = []
+    child.lights = this.lights.map((l) => ({
+      source: child.world.addSource(l.source.x, l.source.y, l.source.z, l.source.strength),
+      store: l.store,
+      capacity: l.capacity,
+      respawnAt: l.respawnAt,
+      expiresAt: l.expiresAt,
+    }))
+
+    child.world.vehicles = []
+    child.creatures = this.creatures.map((c) => ({
+      ...c,
+      genome: { ...c.genome },
+      vehicle: child.world.addWeightedVehicle(
+        genomeToWeights(c.genome),
+        hueToCss(c.genome.hue),
+        { ...c.vehicle.state },
+      ),
+    }))
+    return child
   }
 
   step(dt: number): void {
@@ -342,7 +420,9 @@ export class ContinuousWorld {
       const v = c.vehicle
       const effort = (Math.abs(v.actuators.left) + Math.abs(v.actuators.right)) / 2
       return (
-        sign * intake[i] - (energy.baseCost + energy.moveCost * effort) * dt
+        sign * intake[i] +
+        energy.ambientIncome * dt -
+        (energy.baseCost + energy.moveCost * effort) * dt
       )
     })
 
@@ -416,6 +496,8 @@ export class ContinuousWorld {
         break
       }
       parent.energy = birthEnergy
+      const parentNode = this.lineageById.get(parent.id)
+      if (parentNode) parentNode.reproduced = true
       const genome = this.params.inheritance
         ? mutate(parent.genome, this.rng, this.params.mutationRates, this.params.mutationScale)
         : randomGenome(this.rng, this.params.founderSpread)
@@ -436,6 +518,8 @@ export class ContinuousWorld {
       if (starving) this.starved++
       else if (old) this.diedOfAge++
       if (starving || old) {
+        const node = this.lineageById.get(c.id)
+        if (node) node.diedAt = this.time
         this.world.removeVehicle(c.vehicle.id)
       } else {
         survivors.push(c)

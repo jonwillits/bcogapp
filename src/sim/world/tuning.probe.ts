@@ -67,7 +67,7 @@ it('probe: cost model — does anything have to move to eat?', () => {
   )
   for (const baseCost of [0.05, 0.2, 0.35, 0.5]) {
     for (const moveCost of [0.03, 0.06, 0.09]) {
-      const params: Partial<EvolutionParams> = { energy: { baseCost, moveCost } }
+      const params: Partial<EvolutionParams> = { energy: { baseCost, moveCost, ambientIncome: 0 } }
       const os = SEEDS.map((s) => outcome(s, params))
       const p = parity(params)
       console.log(

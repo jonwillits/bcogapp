@@ -55,6 +55,21 @@ export interface EnergyParams {
   baseCost: number
   /** Extra drain per second per unit of mean actuator output. */
   moveCost: number
+  /**
+   * Energy available everywhere, from nothing in particular.
+   *
+   * Zero in the food world, where the lights *are* the food and finding them is
+   * the whole problem. Non-zero in a poison world, and it has to be: once energy
+   * drives reproduction rather than merely scoring it, a world whose only
+   * feature is harmful is a world where nothing can ever breed, and every
+   * population evolved there dies out. Measured, not predicted -- the first
+   * attempt at population Z went extinct in every seed.
+   *
+   * So Z's world is one with ambient food and dangerous lights, and W's is one
+   * where the lights are dinner. Those are simply two different worlds, which is
+   * what Q7 and Q18 are about.
+   */
+  ambientIncome: number
 }
 
 /**
@@ -77,6 +92,7 @@ export interface EnergyParams {
 export const DEFAULT_ENERGY_PARAMS: EnergyParams = {
   baseCost: 0.05,
   moveCost: 0.06,
+  ambientIncome: 0,
 }
 
 export interface EvolutionParams {
