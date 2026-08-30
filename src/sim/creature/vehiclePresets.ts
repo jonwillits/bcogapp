@@ -87,6 +87,13 @@ export const VEHICLE_PRESETS: VehiclePreset[] = [
 
 export const DEFAULT_PRESET_ID = 'aggression'
 
-export function getPreset(id: string): VehiclePreset {
+/**
+ * Accepts `null` — the Module 2 case, where a creature's wiring is inherited
+ * and belongs to no named variety — and falls back to the first preset, since
+ * every caller wants *some* preset to read a label off. Only Module 1's UI
+ * calls this; a scene showing evolved creatures must not label them, because
+ * naming the variety is the question Q11 asks the student.
+ */
+export function getPreset(id: string | null): VehiclePreset {
   return VEHICLE_PRESETS.find((p) => p.id === id) ?? VEHICLE_PRESETS[0]
 }

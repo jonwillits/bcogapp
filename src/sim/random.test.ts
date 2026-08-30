@@ -75,28 +75,23 @@ describe('seeded randomness', () => {
     expect(childA.next()).toBe(childB.next())
   })
 
-  it('nothing in the sim layer calls Math.random()', async () => {
+  it('nothing in the sim layer calls Math.random()', () => {
     // The rule that Part 2 rests on, enforced rather than remembered. Only
     // `randomSeed()` may reach for it, and that runs once before a run starts.
-    const { readdirSync, readFileSync, statSync } = await import('node:fs')
-    const { join } = await import('node:path')
-    const root = new URL('.', import.meta.url).pathname
+    const sources = import.meta.glob('./**/*.ts', {
+      query: '?raw',
+      import: 'default',
+      eager: true,
+    }) as Record<string, string>
 
-    const offenders: string[] = []
-    const walk = (dir: string) => {
-      for (const entry of readdirSync(dir)) {
-        const p = join(dir, entry)
-        if (statSync(p).isDirectory()) {
-          walk(p)
-        } else if (entry.endsWith('.ts') && !entry.endsWith('.test.ts')) {
-          const src = readFileSync(p, 'utf8')
-          // `random.ts` itself is the one sanctioned caller.
-          if (entry === 'random.ts') continue
-          if (src.includes('Math.random(')) offenders.push(entry)
-        }
-      }
-    }
-    walk(root)
+    const offenders = Object.entries(sources)
+      .filter(([path]) => !path.endsWith('.test.ts') && !path.endsWith('/random.ts'))
+      .filter(([, src]) => src.includes('Math.random('))
+      .map(([path]) => path)
+
+    // Guard the guard: if the glob ever stops matching, this test would pass
+    // vacuously and the rule would go unenforced without anyone noticing.
+    expect(Object.keys(sources).length).toBeGreaterThan(5)
     expect(offenders).toEqual([])
   })
 })
