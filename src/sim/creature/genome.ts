@@ -99,7 +99,12 @@ export function genomeToWeights(g: Genome): SensorimotorWeights {
  * correctly in this app.
  */
 export function hueToCss(hue: number): string {
-  return `hsl(${wrapHue(hue).toFixed(0)} 72% 62%)`
+  // Comma-separated on purpose: three.js's colour parser does not accept the
+  // modern space-separated `hsl(H S% L%)` form and silently falls back to
+  // white, which renders every vehicle in the population the same colour. That
+  // is not a cosmetic failure -- the whole of Q15 and Q16 is a student watching
+  // one colour take over.
+  return `hsl(${wrapHue(hue).toFixed(0)}, 72%, 62%)`
 }
 
 /** Wrap a hue into [0, 360). */

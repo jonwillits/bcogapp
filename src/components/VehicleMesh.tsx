@@ -1,8 +1,8 @@
 import { useRef } from 'react'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import * as THREE from 'three'
-import type { Vehicle } from '../../sim/world/world'
-import { palette } from '../../theme/theme'
+import type { Vehicle } from '../sim/world/world'
+import { palette } from '../theme/theme'
 
 /**
  * Renders one vehicle and drives its transform imperatively from the sim each

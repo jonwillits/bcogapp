@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import type { Source } from '../../sim/world/source'
+import type { Source } from '../sim/world/source'
 
 /** How far the orb floats above whatever ground it was placed on. */
 export const ORB_HOVER = 0.7

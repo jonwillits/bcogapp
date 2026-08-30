@@ -2,9 +2,9 @@ import type {
   SensorInput,
   ActuatorOutput,
   SensorimotorWeights,
-} from '../../sim/neural/sensorimotor'
-import { DEFAULT_STRENGTH } from '../../sim/world/world'
-import { palette } from '../../theme/theme'
+} from '../sim/neural/sensorimotor'
+import { DEFAULT_STRENGTH } from '../sim/world/world'
+import { palette } from '../theme/theme'
 
 /**
  * A connection this weak is drawn as a faint dotted line rather than a real
