@@ -452,7 +452,13 @@ export class EvolutionWorld {
         l.source.z,
         l.source.strength,
       )
-      return { source: src, store: l.store, capacity: l.capacity, respawnAt: l.respawnAt }
+      return {
+        source: src,
+        store: l.store,
+        capacity: l.capacity,
+        respawnAt: l.respawnAt,
+        expiresAt: l.expiresAt,
+      }
     })
 
     child.materialize(

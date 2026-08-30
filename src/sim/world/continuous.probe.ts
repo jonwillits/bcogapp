@@ -435,3 +435,289 @@ it('continuous: verify the two best configurations', () => {
     console.log(`  poison switch collapses the population in ${survivedPoison}/5 seeds`)
   }
 })
+
+it('phase A: ephemeral food with a continuous cycle', () => {
+  /**
+   * Total influx under ephemeral food is count x flowRate, independent of how
+   * many creatures there are — a clean regulator, where depleting food's influx
+   * depends on consumption which depends on population. Paired with a carrying
+   * capacity that is the second, independent regulator.
+   */
+  console.log(
+    '\n cap flow life span | ext | pop | births | approach | vs noSel | hueConc | lineages | parity | bias',
+  )
+  for (const populationCap of [16, 24]) {
+    for (const flowRate of [1.2, 1.8, 2.6]) {
+      for (const lifetime of [6, 12]) {
+        for (const meanLifespan of [90, 180]) {
+          const params = {
+            populationCap,
+            initialPopulation: populationCap,
+            reproduceThreshold: 6,
+            birthEnergy: 4,
+            maxEnergy: 12,
+            meanLifespan,
+            lifespanSd: meanLifespan / 4,
+            energy: { baseCost: 0.05, moveCost: 0.06 },
+            food: { ...DEFAULT_FOOD_PARAMS, mode: 'ephemeral' as const, count: 4, flowRate, lifetime },
+          }
+          const runs = SEEDS.map((s) => run(s, params))
+          const offRuns = SEEDS.map((s) => run(s, { ...params, selection: false }))
+          const end = (w: ContinuousWorld) => w.samples[w.samples.length - 1]
+          const ap = (w: ContinuousWorld) => end(w)?.approachFraction ?? 0
+          const hue = runs.map((w) => end(w)?.hueConcentration ?? 0)
+          const b = (founders: 'all-2b' | 'all-3a') =>
+            mean([1, 2, 3].map((s) => run(s, { ...params, mutationScale: 0 }, founders).births))
+          const bias = mean(
+            runs.map((w) => mean(w.creatures.map((c) => c.genome.bias))),
+          )
+          console.log(
+            `${f(populationCap, 4)} ${f(flowRate, 4)} ${f(lifetime, 4)} ${f(
+              meanLifespan, 4,
+            )} | ${String(runs.filter((w) => w.extinct).length).padStart(3)} | ${f(
+              mean(runs.map((w) => end(w)?.population ?? 0)), 3,
+            )} | ${f(mean(runs.map((w) => w.births)), 6)} | ${f(
+              mean(runs.map(ap)), 8,
+            )} | ${f(mean(runs.map((w, i) => ap(w) - ap(offRuns[i]))), 8)} | ${f(
+              mean(hue), 7,
+            )} (${hue.filter((h) => h >= 0.8).length}/10) | ${f(
+              mean(runs.map((w) => end(w)?.survivingLineages ?? 0)), 8,
+            )} | ${f(b('all-2b') / Math.max(0.01, b('all-3a')))} | ${f(bias, 4)}`,
+          )
+        }
+      }
+    }
+  }
+})
+
+/** Mean of a sample field over the last `window` seconds — less noisy than the final point. */
+function tail(w: ContinuousWorld, pick: (s: { approachFraction: number; hueConcentration: number }) => number, window = 300) {
+  const cut = w.time - window
+  const xs = w.samples.filter((s) => s.time >= cut).map(pick)
+  return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0
+}
+
+it('phase A: narrow in on ephemeral', () => {
+  console.log(
+    '\nflow life span | pop | births | approach | vs noSel | hueConc | lineages | parity | bias | speed',
+  )
+  for (const flowRate of [1.8, 2.6, 3.4]) {
+    for (const lifetime of [8, 12, 16]) {
+      for (const meanLifespan of [45, 60, 90]) {
+        const params = {
+          populationCap: 16,
+          initialPopulation: 16,
+          reproduceThreshold: 6,
+          birthEnergy: 4,
+          maxEnergy: 12,
+          meanLifespan,
+          lifespanSd: meanLifespan / 4,
+          energy: { baseCost: 0.05, moveCost: 0.06 },
+          food: { ...DEFAULT_FOOD_PARAMS, mode: 'ephemeral' as const, count: 4, flowRate, lifetime },
+        }
+        const runs = SEEDS.map((s) => run(s, params))
+        const offRuns = SEEDS.map((s) => run(s, { ...params, selection: false }))
+        const ap = (w: ContinuousWorld) => tail(w, (s) => s.approachFraction)
+        const hue = runs.map((w) => tail(w, (s) => s.hueConcentration))
+        const b = (founders: 'all-2b' | 'all-3a') =>
+          mean([1, 2, 3].map((s) => run(s, { ...params, mutationScale: 0 }, founders).births))
+        const end = (w: ContinuousWorld) => w.samples[w.samples.length - 1]
+        console.log(
+          `${f(flowRate, 4)} ${f(lifetime, 4)} ${f(meanLifespan, 4)} | ${f(
+            mean(runs.map((w) => end(w)?.population ?? 0)), 3,
+          )} | ${f(mean(runs.map((w) => w.births)), 6)} | ${f(mean(runs.map(ap)), 8)} | ${f(
+            mean(runs.map((w, i) => ap(w) - ap(offRuns[i]))), 8,
+          )} | ${f(mean(hue), 7)} (${hue.filter((h) => h >= 0.8).length}/10) | ${f(
+            mean(runs.map((w) => end(w)?.survivingLineages ?? 0)), 8,
+          )} | ${f(b('all-2b') / Math.max(0.01, b('all-3a')))} | ${f(
+            mean(runs.map((w) => mean(w.creatures.map((c) => c.genome.bias)))), 4,
+          )} | ${f(
+            mean(
+              runs.map((w) =>
+                mean(
+                  w.creatures.map(
+                    (c) =>
+                      (Math.abs(c.vehicle.actuators.left) +
+                        Math.abs(c.vehicle.actuators.right)) / 2,
+                  ),
+                ),
+              ),
+            ), 5,
+          )}`,
+        )
+      }
+    }
+  }
+})
+
+it('phase A: does the energy ceiling neuter the queue', () => {
+  /**
+   * When the world is full, slots go to whoever has the most energy. But energy
+   * is clamped at maxEnergy, so if good foragers all sit at the ceiling they are
+   * tied and the sort decides nothing — the queue stops being a competition.
+   * Raising the ceiling should restore it.
+   */
+  console.log('\nmaxE thresh flow span | approach | vs noSel | hueConc | spread of energy | parity')
+  for (const maxEnergy of [12, 30, 100]) {
+    for (const reproduceThreshold of [6, 10]) {
+      for (const meanLifespan of [45, 90]) {
+        const params = {
+          populationCap: 16,
+          initialPopulation: 16,
+          reproduceThreshold,
+          birthEnergy: 4,
+          maxEnergy,
+          meanLifespan,
+          lifespanSd: meanLifespan / 4,
+          energy: { baseCost: 0.05, moveCost: 0.06 },
+          food: { ...DEFAULT_FOOD_PARAMS, mode: 'ephemeral' as const, count: 4, flowRate: 2.6, lifetime: 12 },
+        }
+        const runs = SEEDS.map((s) => run(s, params))
+        const offRuns = SEEDS.map((s) => run(s, { ...params, selection: false }))
+        const ap = (w: ContinuousWorld) => tail(w, (s) => s.approachFraction)
+        const hue = runs.map((w) => tail(w, (s) => s.hueConcentration))
+        const b = (founders: 'all-2b' | 'all-3a') =>
+          mean([1, 2, 3].map((s) => run(s, { ...params, mutationScale: 0 }, founders).births))
+        // How spread out are the living creatures' energies? If everyone is at
+        // the ceiling this is ~0 and the queue is decided by nothing.
+        const spread = mean(
+          runs.map((w) => {
+            const es = w.creatures.map((c) => c.energy)
+            const m = mean(es)
+            return Math.sqrt(mean(es.map((e) => (e - m) ** 2)))
+          }),
+        )
+        console.log(
+          `${f(maxEnergy, 4)} ${f(reproduceThreshold, 6)} ${f(2.6, 4)} ${f(
+            meanLifespan, 4,
+          )} | ${f(mean(runs.map(ap)), 8)} | ${f(
+            mean(runs.map((w, i) => ap(w) - ap(offRuns[i]))), 8,
+          )} | ${f(mean(hue), 7)} (${hue.filter((h) => h >= 0.8).length}/10) | ${f(
+            spread, 16,
+          )} | ${f(b('all-2b') / Math.max(0.01, b('all-3a')))}`,
+        )
+      }
+    }
+  }
+})
+
+it('phase A: final — push the reproduction threshold', () => {
+  /**
+   * The ceiling hypothesis was wrong; the threshold is the lever. A high bar
+   * means only creatures that forage well ever reach it, so the slots that open
+   * go to them and the rest die without issue -- which is differential
+   * reproduction with real teeth. Pushed too far it should starve the
+   * population of births and go extinct, so the sweep watches for that.
+   */
+  console.log(
+    '\nthresh span flow | ext | births | approach | vs noSel | hueConc | lineages | parity | bias',
+  )
+  for (const reproduceThreshold of [8, 10, 12, 14]) {
+    for (const meanLifespan of [30, 45, 60]) {
+      for (const flowRate of [2.6, 3.4]) {
+        const params = {
+          populationCap: 16,
+          initialPopulation: 16,
+          reproduceThreshold,
+          birthEnergy: 4,
+          maxEnergy: 30,
+          meanLifespan,
+          lifespanSd: meanLifespan / 4,
+          energy: { baseCost: 0.05, moveCost: 0.06 },
+          food: { ...DEFAULT_FOOD_PARAMS, mode: 'ephemeral' as const, count: 4, flowRate, lifetime: 12 },
+        }
+        const runs = SEEDS.map((s) => run(s, params))
+        const offRuns = SEEDS.map((s) => run(s, { ...params, selection: false }))
+        const ap = (w: ContinuousWorld) => tail(w, (s) => s.approachFraction)
+        const hue = runs.map((w) => tail(w, (s) => s.hueConcentration))
+        const b = (founders: 'all-2b' | 'all-3a') =>
+          mean([1, 2, 3].map((s) => run(s, { ...params, mutationScale: 0 }, founders).births))
+        const end = (w: ContinuousWorld) => w.samples[w.samples.length - 1]
+        console.log(
+          `${f(reproduceThreshold, 6)} ${f(meanLifespan, 4)} ${f(flowRate, 4)} | ${String(
+            runs.filter((w) => w.extinct).length,
+          ).padStart(3)} | ${f(mean(runs.map((w) => w.births)), 6)} | ${f(
+            mean(runs.map(ap)), 8,
+          )} | ${f(mean(runs.map((w, i) => ap(w) - ap(offRuns[i]))), 8)} | ${f(
+            mean(hue), 7,
+          )} (${hue.filter((h) => h >= 0.8).length}/10) | ${f(
+            mean(runs.map((w) => end(w)?.survivingLineages ?? 0)), 8,
+          )} | ${f(b('all-2b') / Math.max(0.01, b('all-3a')))} | ${f(
+            mean(runs.map((w) => mean(w.creatures.map((c) => c.genome.bias)))), 4,
+          )}`,
+        )
+      }
+    }
+  }
+})
+
+const PHASE_A = {
+  populationCap: 16,
+  initialPopulation: 16,
+  reproduceThreshold: 10,
+  birthEnergy: 4,
+  maxEnergy: 30,
+  meanLifespan: 60,
+  lifespanSd: 15,
+  energy: { baseCost: 0.05, moveCost: 0.06 },
+  food: { ...DEFAULT_FOOD_PARAMS, mode: 'ephemeral' as const, count: 4, flowRate: 3.4, lifetime: 12 },
+}
+
+it('phase A: verify the chosen configuration', () => {
+  const end = (w: ContinuousWorld) => w.samples[w.samples.length - 1]
+  const ap = (w: ContinuousWorld) => tail(w, (s) => s.approachFraction)
+
+  console.log('\n=== chosen: cap 16, threshold 10, lifespan 60, flow 3.4, lifetime 12')
+
+  const base = SEEDS.map((s) => run(s, PHASE_A))
+  const off = SEEDS.map((s) => run(s, { ...PHASE_A, selection: false }))
+  const hue = base.map((w) => tail(w, (s) => s.hueConcentration))
+  console.log(
+    `  survives ${10 - base.filter((w) => w.extinct).length}/10 | approach ${f(
+      mean(base.map(ap)),
+    )} vs drift ${f(mean(off.map(ap)))} (advantage ${f(
+      mean(base.map((w, i) => ap(w) - ap(off[i]))),
+    )}) | colour fixes ${hue.filter((h) => h >= 0.8).length}/10 at ${f(mean(hue))}`,
+  )
+  console.log(
+    `  births ${f(mean(base.map((w) => w.births)), 5)} | starved ${f(
+      mean(base.map((w) => w.starved)), 5,
+    )} | aged ${f(mean(base.map((w) => w.diedOfAge)), 5)} | mean bias ${f(
+      mean(base.map((w) => mean(w.creatures.map((c) => c.genome.bias)))), 5,
+    )}`,
+  )
+
+  // Population size is still a real control -- it is the carrying capacity.
+  for (const cap of [6, 10, 16, 30, 60]) {
+    const runs = SEEDS.map((s) => run(s, { ...PHASE_A, populationCap: cap, initialPopulation: cap }))
+    const h = runs.map((w) => tail(w, (s) => s.hueConcentration))
+    console.log(
+      `  N=${String(cap).padStart(2)}: survives ${
+        10 - runs.filter((w) => w.extinct).length
+      }/10  final pop ${f(mean(runs.map((w) => end(w)?.population ?? 0)), 5)}  lineages ${f(
+        mean(runs.map((w) => end(w)?.survivingLineages ?? 0)), 4,
+      )}  colour ${h.filter((x) => x >= 0.8).length}/10`,
+    )
+  }
+
+  const noMut = SEEDS.map((s) => run(s, { ...PHASE_A, mutationScale: 0 }))
+  console.log(
+    `  mutation 0: lineages ${f(
+      mean(noMut.map((w) => end(w)?.survivingLineages ?? 0)), 4,
+    )}  approach ${f(mean(noMut.map(ap)), 5)}  (with mutation ${f(mean(base.map(ap)), 5)})`,
+  )
+
+  const noInh = SEEDS.map((s) => run(s, { ...PHASE_A, inheritance: false }))
+  console.log(`  inheritance off: approach ${f(mean(noInh.map(ap)), 5)}`)
+
+  let collapsed = 0
+  for (const seed of SEEDS) {
+    const w = new ContinuousWorld(seed, PHASE_A)
+    w.run(900)
+    const before = end(w)?.population ?? 0
+    w.params.regime = 'poison'
+    w.run(300)
+    if ((end(w)?.population ?? 0) < before * 0.6 || w.extinct) collapsed++
+  }
+  console.log(`  poison collapses the population in ${collapsed}/10 seeds`)
+})

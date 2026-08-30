@@ -15,7 +15,7 @@ import {
 } from '../creature/genome'
 import { VehicleWorld, type Vehicle } from './world'
 import {
-  intakeContributions,
+  harvest,
   freshLight,
   lightStrength,
   respawnPoint,
@@ -103,12 +103,28 @@ export interface ContinuousParams {
   mutationRates: MutationRates
 }
 
+/**
+ * Settled by the Phase A sweeps. Over ten seeds: survives 10/10, the population
+ * ends 24 points more light-seeking than a same-seed drift control, colour fixes
+ * in 10/10, strategy parity 1.04, and the poison switch collapses the population
+ * in 10/10.
+ *
+ * Two of these numbers were hard-won. **The reproduction threshold is the
+ * selection lever** — at 6 a creature reaches it comfortably in a normal life and
+ * almost everyone breeds, so the advantage over drift is +0.07; at 10 only good
+ * foragers get to the front of the queue and it is +0.23. Push it to 12 and the
+ * population starts dying out. And **the food lifetime is what keeps the
+ * creatures moving**: mean evolved bias here is 0.48 against the generational
+ * engine's 0.07–0.18, because food that moves every twelve seconds makes sitting
+ * still unviable. That is the layer-3 near-inertia problem solved by the food
+ * model rather than by a floor on the gene.
+ */
 export const DEFAULT_CONTINUOUS_PARAMS: ContinuousParams = {
-  initialPopulation: 24,
+  initialPopulation: 16,
   meanLifespan: 60,
   lifespanSd: 15,
   birthEnergy: 4,
-  reproduceThreshold: 12,
+  reproduceThreshold: 10,
   starveThreshold: 0,
   mutationScale: 1,
   inheritance: true,
@@ -117,9 +133,15 @@ export const DEFAULT_CONTINUOUS_PARAMS: ContinuousParams = {
   sensorNoise: 0,
   bounds: 9,
   founderSpread: 1.6,
-  populationCap: 24,
-  maxEnergy: 18,
-  food: { ...DEFAULT_FOOD_PARAMS, count: 4 },
+  populationCap: 16,
+  maxEnergy: 30,
+  food: {
+    ...DEFAULT_FOOD_PARAMS,
+    mode: 'ephemeral',
+    count: 4,
+    flowRate: 3.4,
+    lifetime: 12,
+  },
   energy: { ...DEFAULT_ENERGY_PARAMS },
   mutationRates: { ...DEFAULT_MUTATION_RATES },
 }
@@ -188,10 +210,15 @@ export class ContinuousWorld {
   }
 
   private seedLights(): void {
-    for (let i = 0; i < this.params.food.count; i++) {
+    const { food } = this.params
+    for (let i = 0; i < food.count; i++) {
       const p = respawnPoint(this.lights, this.params.bounds, this.rng)
-      const src = this.world.addSource(p.x, 0.7, p.z, this.params.food.strength)
-      this.lights.push(freshLight(src, this.params.food.capacity))
+      const src = this.world.addSource(p.x, 0.7, p.z, food.strength)
+      // Stagger the first expiries across one lifetime, or every light in the
+      // world moves at the same instant for the whole run.
+      const expiresAt =
+        food.mode === 'ephemeral' ? this.rng.range(0, food.lifetime) : Infinity
+      this.lights.push(freshLight(src, food.capacity, expiresAt))
     }
   }
 
@@ -288,35 +315,34 @@ export class ContinuousWorld {
     const sign = REGIME_SIGN[regime]
 
     // 1. What each creature earned and spent this step.
-    const net: number[] = this.creatures.map((c) => {
-      const v = c.vehicle
-      const contributions = intakeContributions(
-        v.state.x,
-        v.config.sensorHeight,
-        v.state.z,
-        this.lights,
-        food,
-      )
-      let total = 0
-      for (const contribution of contributions) total += contribution
+    const { intake, drawn } = harvest(
+      this.creatures.map((c) => ({
+        x: c.vehicle.state.x,
+        y: c.vehicle.config.sensorHeight,
+        z: c.vehicle.state.z,
+      })),
+      this.lights,
+      food,
+      dt,
+    )
 
-      if (regime === 'food' && food.deplete) {
-        for (let i = 0; i < this.lights.length; i++) {
-          if (contributions[i] <= 0) continue
-          const l = this.lights[i]
-          l.store -= food.intakeRate * contributions[i] * dt
-          if (l.store <= 0) {
-            l.store = 0
-            l.respawnAt = this.time + food.respawnDelay
-            this.world.removeSource(l.source.id)
-          }
+    if (regime === 'food' && food.mode === 'depleting' && food.deplete) {
+      this.lights.forEach((l, i) => {
+        if (l.respawnAt !== null || drawn[i] <= 0) return
+        l.store -= drawn[i]
+        if (l.store <= 0) {
+          l.store = 0
+          l.respawnAt = this.time + food.respawnDelay
+          this.world.removeSource(l.source.id)
         }
-      }
+      })
+    }
 
+    const net = this.creatures.map((c, i) => {
+      const v = c.vehicle
       const effort = (Math.abs(v.actuators.left) + Math.abs(v.actuators.right)) / 2
       return (
-        sign * food.intakeRate * total * dt -
-        (energy.baseCost + energy.moveCost * effort) * dt
+        sign * intake[i] - (energy.baseCost + energy.moveCost * effort) * dt
       )
     })
 
@@ -334,7 +360,7 @@ export class ContinuousWorld {
       c.age += dt
     })
 
-    if (regime === 'food' && food.deplete) {
+    if (regime === 'food' && food.mode === 'depleting' && food.deplete) {
       for (const l of this.lights) {
         if (l.respawnAt === null) l.source.strength = lightStrength(l, food)
       }
@@ -353,12 +379,26 @@ export class ContinuousWorld {
   }
 
   private respawnDue(): void {
+    const { food, bounds } = this.params
+
+    // Ephemeral: a light simply moves when its time is up, eaten or not.
+    if (food.mode === 'ephemeral') {
+      for (const l of this.lights) {
+        if (this.time < l.expiresAt) continue
+        this.world.removeSource(l.source.id)
+        const p = respawnPoint(this.lights, bounds, this.rng)
+        l.source = this.world.addSource(p.x, 0.7, p.z, food.strength)
+        l.expiresAt = this.time + food.lifetime
+      }
+      return
+    }
+
     for (const l of this.lights) {
       if (l.respawnAt === null || this.time < l.respawnAt) continue
-      const p = respawnPoint(this.lights, this.params.bounds, this.rng)
+      const p = respawnPoint(this.lights, bounds, this.rng)
       l.store = l.capacity
       l.respawnAt = null
-      l.source = this.world.addSource(p.x, 0.7, p.z, this.params.food.strength)
+      l.source = this.world.addSource(p.x, 0.7, p.z, food.strength)
     }
   }
 

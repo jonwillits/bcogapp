@@ -22,9 +22,11 @@ import { sensedIntensity, type Source } from './source'
  */
 export interface FoodLight {
   source: Source
-  /** Energy left in this light. */
+  /** Energy left in this light — `depleting` mode only. */
   store: number
   capacity: number
+  /** Sim time at which this light moves on — `ephemeral` mode only. */
+  expiresAt: number
   /**
    * While a light is exhausted it is out: removed from the world, sensed by
    * nobody, and due back at this sim time somewhere else on the floor. `null`
@@ -33,7 +35,31 @@ export interface FoodLight {
   respawnAt: number | null
 }
 
+/**
+ * How a light gives up its energy.
+ *
+ * **depleting** — the original model. Each light holds a finite store; a vehicle
+ * draws it down, the light dims, and when it is empty it goes out and a new one
+ * appears elsewhere. Faithful, but it has three tuned parameters, it is invisible
+ * to a student who is never told food is finite, and its influx depends on
+ * consumption which depends on population — a feedback loop that makes the
+ * population dynamics cliff-edged rather than gradual.
+ *
+ * **ephemeral** — a light delivers energy at a steady rate and moves on a timer
+ * whether or not anything ate it. Total influx is then `count x flowRate`,
+ * independent of how many creatures there are, which is a far better regulator.
+ * A light's flow is shared among whoever is feeding on it, in proportion to how
+ * close each one is, so crowding visibly costs — and the countdown to a light
+ * moving is something a student can watch and time rather than infer.
+ */
+export type FoodMode = 'depleting' | 'ephemeral'
+
 export interface FoodParams {
+  mode: FoodMode
+  /** ephemeral: energy per second one light can deliver, shared among feeders. */
+  flowRate: number
+  /** ephemeral: seconds a light stays before moving elsewhere. */
+  lifetime: number
   /** How many lights the respawn pool keeps alight on the floor. */
   count: number
   /** Energy in a fresh light. */
@@ -75,6 +101,9 @@ export interface FoodParams {
  * with parking).
  */
 export const DEFAULT_FOOD_PARAMS: FoodParams = {
+  mode: 'depleting',
+  flowRate: 1.6,
+  lifetime: 8,
   count: 4,
   capacity: 9,
   strength: 4,
@@ -85,8 +114,64 @@ export const DEFAULT_FOOD_PARAMS: FoodParams = {
 }
 
 /** How much energy a light carries when the world is set up. */
-export function freshLight(source: Source, capacity: number): FoodLight {
-  return { source, store: capacity, capacity, respawnAt: null }
+export function freshLight(
+  source: Source,
+  capacity: number,
+  expiresAt = Infinity,
+): FoodLight {
+  return { source, store: capacity, capacity, respawnAt: null, expiresAt }
+}
+
+/**
+ * What every creature earns from every light over `dt`, and what each light
+ * loses by it.
+ *
+ * One function for both modes, because the callers should not care which is
+ * running. Under `depleting` a creature's intake is limited only by how close it
+ * is, and the light pays for all of it. Under `ephemeral` the light has a
+ * maximum rate it can deliver: if the creatures around it want more than that
+ * between them, they share it in proportion to how close each one is, and the
+ * light's store is not touched at all.
+ */
+export function harvest(
+  positions: readonly { x: number; y: number; z: number }[],
+  lights: readonly FoodLight[],
+  p: FoodParams,
+  dt: number,
+): { intake: number[]; drawn: number[] } {
+  const intake = new Array<number>(positions.length).fill(0)
+  const drawn = new Array<number>(lights.length).fill(0)
+
+  lights.forEach((l, li) => {
+    if (l.respawnAt !== null) return
+    const dim =
+      p.mode === 'depleting' && p.deplete
+        ? p.dimFloor +
+          (1 - p.dimFloor) * Math.max(0, Math.min(1, l.store / l.capacity))
+        : 1
+
+    // What each creature would take from this light if it were alone.
+    const raw = positions.map((pos) => {
+      const dx = pos.x - l.source.x
+      const dy = pos.y - l.source.y
+      const dz = pos.z - l.source.z
+      return (p.intakeRate * dim) / (1 + dx * dx + dy * dy + dz * dz)
+    })
+
+    let scale = 1
+    if (p.mode === 'ephemeral') {
+      const wanted = raw.reduce((a, b) => a + b, 0)
+      if (wanted > p.flowRate) scale = p.flowRate / wanted
+    }
+
+    for (let i = 0; i < raw.length; i++) {
+      const got = raw[i] * scale * dt
+      intake[i] += got
+      if (p.mode === 'depleting') drawn[li] += got
+    }
+  })
+
+  return { intake, drawn }
 }
 
 /**
@@ -95,7 +180,7 @@ export function freshLight(source: Source, capacity: number): FoodLight {
  * watching a vehicle park sees the light it is sitting in fade.
  */
 export function lightStrength(l: FoodLight, p: FoodParams): number {
-  if (!p.deplete) return p.strength
+  if (p.mode === 'ephemeral' || !p.deplete) return p.strength
   const frac = Math.max(0, Math.min(1, l.store / l.capacity))
   return p.strength * (p.dimFloor + (1 - p.dimFloor) * frac)
 }
