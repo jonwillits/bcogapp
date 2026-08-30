@@ -10,6 +10,8 @@ import {
   hueToCss,
   DEFAULT_MUTATION_RATES,
   FOUNDER_POOLS,
+  wrapHue,
+  type FounderPool,
   type Genome,
   type MutationRates,
 } from '../creature/genome'
@@ -92,6 +94,19 @@ export interface EvolutionParams {
   bounds: number
   /** Half-width of the uniform weight draw for `diverse` founders. */
   founderSpread: number
+  /**
+   * Degrees added to the founder pool's centre hue before the draw.
+   *
+   * The one sanctioned way to influence what colour a lineage ends up wearing.
+   * §9 forbids overwriting an evolved population's hue — a scripted colour
+   * would make Q15 and Q16 a lie — but explicitly permits choosing the
+   * founders' hues, and this is that. It is also provably free of side effects:
+   * hue is the last draw `drawFounder` takes, so shifting its centre leaves the
+   * position of the random stream, and therefore every weight in the run,
+   * exactly where it was. A fixture generated with a shift is the same
+   * population, repainted.
+   */
+  founderHueShift: number
   food: FoodParams
   energy: EnergyParams
   mutationRates: MutationRates
@@ -107,6 +122,7 @@ export const DEFAULT_EVOLUTION_PARAMS: EvolutionParams = {
   sensorNoise: 0,
   bounds: 9,
   founderSpread: 1.6,
+  founderHueShift: 0,
   food: { ...DEFAULT_FOOD_PARAMS },
   energy: { ...DEFAULT_ENERGY_PARAMS },
   mutationRates: { ...DEFAULT_MUTATION_RATES },
@@ -215,6 +231,21 @@ const NAMED_CENTRES: Record<string, Genome> = {
 let nextIndividualId = 1
 
 /**
+ * Restart individual numbering.
+ *
+ * Individual ids are global across worlds so that four populations can be shown
+ * on one tree without colliding. The cost is that an id depends on how many
+ * worlds were built before it, which would make the saved fixtures depend on
+ * the order something happened to call things in — and those ids are the tree,
+ * so they have to be reproducible. `buildFixtureSet` resets the counter and
+ * builds all four in a fixed order, which is the only supported way to make
+ * them.
+ */
+export function resetIndividualIds(): void {
+  nextIndividualId = 1
+}
+
+/**
  * A breeding population of Module 1 vehicles.
  *
  * Composes a `VehicleWorld` rather than subclassing or flag-switching it: the
@@ -272,8 +303,18 @@ export class EvolutionWorld {
 
   private drawFounderGenome(): Genome {
     if (this.founders === 'diverse') return randomGenome(this.rng, this.params.founderSpread)
-    if (this.founders === 'P') return drawFounder(FOUNDER_POOLS.P, this.rng)
-    if (this.founders === 'Q') return drawFounder(FOUNDER_POOLS.Q, this.rng)
+    const shift = (pool: FounderPool): FounderPool =>
+      this.params.founderHueShift === 0
+        ? pool
+        : {
+            ...pool,
+            centre: {
+              ...pool.centre,
+              hue: wrapHue(pool.centre.hue + this.params.founderHueShift),
+            },
+          }
+    if (this.founders === 'P') return drawFounder(shift(FOUNDER_POOLS.P), this.rng)
+    if (this.founders === 'Q') return drawFounder(shift(FOUNDER_POOLS.Q), this.rng)
     const centre = NAMED_CENTRES[this.founders]
     return drawFounder(
       {
@@ -326,9 +367,20 @@ export class EvolutionWorld {
     }
   }
 
-  private installGeneration(
-    specs: { genome: Genome; parentId: number | null; founderId: number }[],
-  ): void {
+  /**
+   * Build the vehicles and individuals for a generation. Does not touch the
+   * lineage record, so it can serve both a fresh generation and a fork, which
+   * re-materializes individuals that already have a place in the tree.
+   */
+  private materialize(
+    specs: {
+      id?: number
+      genome: Genome
+      parentId: number | null
+      founderId: number
+      generation?: number
+    }[],
+  ): Individual[] {
     this.world.vehicles = []
     this.population = []
     const n = specs.length
@@ -339,26 +391,80 @@ export class EvolutionWorld {
         hueToCss(spec.genome.hue),
         pose,
       )
-      const ind: Individual = {
-        id: nextIndividualId++,
+      this.population.push({
+        id: spec.id ?? nextIndividualId++,
         parentId: spec.parentId,
         founderId: spec.founderId,
-        generation: this.generation,
+        generation: spec.generation ?? this.generation,
         genome: spec.genome,
         energy: 0,
         vehicle,
-      }
-      this.population.push(ind)
+      })
+    })
+    return this.population
+  }
+
+  private installGeneration(
+    specs: { genome: Genome; parentId: number | null; founderId: number }[],
+  ): void {
+    for (const ind of this.materialize(specs)) {
       this.lineage.push({
         id: ind.id,
         parentId: ind.parentId,
         founderId: ind.founderId,
         generation: ind.generation,
-        hue: spec.genome.hue,
+        hue: ind.genome.hue,
         energy: 0,
         reproduced: false,
       })
+    }
+  }
+
+  /**
+   * Split this population into an independent branch that carries on from
+   * exactly here with a different random stream.
+   *
+   * This is how W and X are made, and the reason it exists rather than "run the
+   * engine twice and call them sisters" is that Part 3's payoff is a student
+   * opening the tree. Two separate runs would show two separate trees with no
+   * common ancestor, and the homology the lab asks them to find would simply
+   * not be there to find. A fork shares the whole trunk: the same founders, the
+   * same individuals generation by generation up to the split, and one point
+   * after which the two branches diverge.
+   *
+   * The world is copied along with the population — same light positions, same
+   * stores — so the only thing that differs after the split is which way the
+   * dice fall. That is what a lineage splitting actually is.
+   */
+  fork(newSeed: number): EvolutionWorld {
+    const child = new EvolutionWorld(newSeed, this.params, this.founders)
+    child.generation = this.generation
+    child.time = this.time
+    child.genTime = this.genTime
+    child.history = this.history.map((h) => ({ ...h }))
+    child.lineage = this.lineage.map((n) => ({ ...n }))
+
+    child.world.sources = []
+    child.lights = this.lights.map((l) => {
+      const src = child.world.addSource(
+        l.source.x,
+        l.source.y,
+        l.source.z,
+        l.source.strength,
+      )
+      return { source: src, store: l.store, capacity: l.capacity, respawnAt: l.respawnAt }
     })
+
+    child.materialize(
+      this.population.map((p) => ({
+        id: p.id,
+        genome: { ...p.genome },
+        parentId: p.parentId,
+        founderId: p.founderId,
+        generation: p.generation,
+      })),
+    )
+    return child
   }
 
   // ----------------------------------------------------------------- run

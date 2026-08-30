@@ -12,7 +12,8 @@
  */
 import { it } from 'vitest'
 import { EvolutionWorld } from './evolutionWorld'
-import { observe, CENTRE_LIGHT, PERTURBATIONS } from './observation'
+import { observe, CENTRE_LIGHT, PERTURBATIONS, type Perturbation } from './observation'
+import { buildFixtureSet } from './lineages'
 import { approachScore, crossing, meanWeight, nearestVariety, type Genome } from '../creature/genome'
 
 const f = (n: number, w = 6) => n.toFixed(2).padStart(w)
@@ -380,6 +381,441 @@ it('probe: pick Y and Z, hue gap included', () => {
       `  Q${String(seed).padStart(2)}: arr ${f(o.meanTimeToArrival)} dist ${f(
         o.meanDistance,
       )} settled ${f(o.meanFinalDistance)} hue ${f(w.history[39].modalHue, 6)}`,
+    )
+  }
+})
+
+it('probe: real forks — pick the W/X branch seeds', () => {
+  const opts = { startRadius: 0.3, lightStrength: 4, duration: 30 }
+  console.log('\nP seed / split / branch seeds | W arr dist hue | X arr dist hue')
+  for (const pSeed of [2, 3, 6]) {
+    for (const splitAt of [25, 30]) {
+      const base = new EvolutionWorld(pSeed, {}, 'P')
+      base.run(splitAt)
+      for (const [bw, bx] of [[101, 202], [303, 404]]) {
+        const W = base.fork(bw)
+        W.run(40 - splitAt)
+        const X = base.fork(bx)
+        X.run(40 - splitAt)
+        const ow = observe(genomes(W), CENTRE_LIGHT, opts)
+        const ox = observe(genomes(X), CENTRE_LIGHT, opts)
+        console.log(
+          `  P${pSeed} @${splitAt} ${bw}/${bx} | ${f(ow.meanTimeToArrival)} ${f(
+            ow.meanDistance,
+          )} ${f(W.history[39].modalHue, 6)} | ${f(ox.meanTimeToArrival)} ${f(
+            ox.meanDistance,
+          )} ${f(X.history[39].modalHue, 6)}`,
+        )
+      }
+    }
+  }
+})
+
+it('probe: search W/X/Y triples against §10', () => {
+  const opts = { startRadius: 0.3, lightStrength: 4, duration: 30 }
+  interface Cand { label: string; arr: number; dist: number; hue: number; pSeed?: number; splitAt?: number; branch?: number; seed?: number }
+
+  // Every branch of every candidate P run.
+  const branches: Cand[] = []
+  for (const pSeed of [1, 2, 3, 5, 6]) {
+    for (const splitAt of [25, 30]) {
+      const base = new EvolutionWorld(pSeed, {}, 'P')
+      base.run(splitAt)
+      for (let b = 101; b <= 130; b++) {
+        const w = base.fork(b)
+        w.run(40 - splitAt)
+        const o = observe(genomes(w), CENTRE_LIGHT, opts)
+        branches.push({
+          label: `P${pSeed}@${splitAt}#${b}`,
+          arr: o.meanTimeToArrival, dist: o.meanDistance,
+          hue: w.history[39].modalHue, pSeed, splitAt, branch: b,
+        })
+      }
+    }
+  }
+
+  // Every Y candidate that took the ipsilateral-inhibitory route.
+  const ys: Cand[] = []
+  for (let seed = 1; seed <= 30; seed++) {
+    const w = new EvolutionWorld(seed, {}, 'Q')
+    w.run(40)
+    if (!populationRoute(w).startsWith('ipsi')) continue
+    const o = observe(genomes(w), CENTRE_LIGHT, opts)
+    ys.push({ label: `Q${seed}`, arr: o.meanTimeToArrival, dist: o.meanDistance, hue: w.history[39].modalHue, seed })
+  }
+
+  // §10: arrivals within 15% of each other, distances within 0.9 (10% of the
+  // pit half-width). Score by the worst of the two margins.
+  const results: { score: number; line: string }[] = []
+  for (let i = 0; i < branches.length; i++) {
+    for (let j = i + 1; j < branches.length; j++) {
+      const W = branches[i], X = branches[j]
+      if (W.pSeed !== X.pSeed || W.splitAt !== X.splitAt) continue
+      for (const Y of ys) {
+        const arrs = [W.arr, X.arr, Y.arr]
+        const dists = [W.dist, X.dist, Y.dist]
+        const arrSpread = Math.max(...arrs) / Math.min(...arrs) - 1
+        const distSpread = Math.max(...dists) - Math.min(...dists)
+        if (arrSpread > 0.15 || distSpread > 0.9) continue
+        results.push({
+          score: arrSpread / 0.15 + distSpread / 0.9,
+          line: `  ${W.label} / ${X.label} / ${Y.label} | arr ${f(W.arr)} ${f(X.arr)} ${f(
+            Y.arr,
+          )} (${f(arrSpread * 100, 5)}%) dist ${f(W.dist)} ${f(X.dist)} ${f(Y.dist)} (${f(
+            distSpread, 5,
+          )}) | hues ${f(W.hue, 6)} ${f(X.hue, 6)} ${f(Y.hue, 6)}`,
+        })
+      }
+    }
+  }
+  results.sort((a, b) => a.score - b.score)
+  console.log(`\n${results.length} triples satisfy §10's separability bounds. Best 15:`)
+  for (const r of results.slice(0, 15)) console.log(r.line)
+})
+
+it('probe: verify the chosen fixture set end to end', () => {
+  const opts = { startRadius: 0.3, lightStrength: 4, duration: 30 }
+  const built = buildFixtureSet()
+  console.log('\n id pool | arrive  dist  settled | modal hue | route | lineage nodes')
+  const summary: { id: string; arr: number; dist: number; hue: number }[] = []
+  for (const fx of built) {
+    const o = observe(fx.genomes, CENTRE_LIGHT, opts)
+    const counts = { 'ipsi-inhibitory': 0, 'contra-excitatory': 0, neither: 0 }
+    for (const g of fx.genomes) counts[route(g)]++
+    const best = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]
+    const hues = fx.genomes.map((g) => g.hue)
+    let bestHue = hues[0], bestCount = 0
+    for (const c of hues) {
+      const n = hues.filter((h) => Math.min(Math.abs(c - h), 360 - Math.abs(c - h)) <= 20).length
+      if (n > bestCount) { bestCount = n; bestHue = c }
+    }
+    summary.push({ id: fx.id, arr: o.meanTimeToArrival, dist: o.meanDistance, hue: bestHue })
+    console.log(
+      `  ${fx.id}  ${fx.pool}   | ${f(o.meanTimeToArrival)} ${f(o.meanDistance)} ${f(
+        o.meanFinalDistance,
+      )} | ${f(bestHue, 9)} | ${best[0]} ${best[1]}/${fx.genomes.length} | ${fx.lineage.length}`,
+    )
+  }
+
+  const approachers = summary.filter((s) => s.id !== 'Z')
+  const arrs = approachers.map((s) => s.arr)
+  const dists = approachers.map((s) => s.dist)
+  console.log(
+    `\n  separability: arrival spread ${f(
+      (Math.max(...arrs) / Math.min(...arrs) - 1) * 100, 5,
+    )}% (bound 15%), distance spread ${f(Math.max(...dists) - Math.min(...dists), 5)} (bound 0.90)`,
+  )
+  const gap = (a: number, b: number) => Math.min(Math.abs(a - b), 360 - Math.abs(a - b))
+  const h = Object.fromEntries(summary.map((s) => [s.id, s.hue]))
+  console.log(
+    `  hue gaps: W-Z ${f(gap(h.W, h.Z), 6)}  W-X ${f(gap(h.W, h.X), 6)}  W-Y ${f(
+      gap(h.W, h.Y), 6,
+    )}  Y-Z ${f(gap(h.Y, h.Z), 6)}`,
+  )
+
+  console.log('\n  divergence: mean distance under each perturbation')
+  console.log('  perturbation                             |     W      X      Y      Z | Y vs W/X')
+  for (const pert of PERTURBATIONS) {
+    const d = built.map((fx) => observe(fx.genomes, pert, opts).meanDistance)
+    const wx = (d[0] + d[1]) / 2
+    const ratio = Math.max(wx, d[2]) / Math.max(0.01, Math.min(wx, d[2]))
+    console.log(
+      `  ${pert.label.padEnd(40)} | ${f(d[0])} ${f(d[1])} ${f(d[2])} ${f(d[3])} | ${f(ratio)}`,
+    )
+  }
+})
+
+/**
+ * The final fixture search, scoring both halves of §10 at once on statistics
+ * that can actually see the difference.
+ *
+ * Measured findings that shaped this, in order:
+ *
+ * At 40 generations the evolved populations are barely wired -- mean |w| around
+ * 0.6, bias 0.1, speeds under 0.3 -- so their mechanisms have almost no
+ * behavioural consequence. 4777 triples pass separability and *none* of them
+ * diverges anywhere, which kills Q14.
+ *
+ * At 120 generations they are strongly wired, 66 triples pass separability, and
+ * still none reaches §10's factor of two on **mean distance** under any
+ * perturbation. That is not a tuning failure. Mean distance is the wrong
+ * statistic: every approacher ends up near the light whatever mechanism took it
+ * there, so the number that separability is defined on is the same number that
+ * cannot see a mechanism.
+ *
+ * What does see it is variation -- whether a vehicle holds still at the light or
+ * keeps swinging past it. That is also what a student sees. So the search scores
+ * within-vehicle spread of distance, and speed, requiring the three approachers
+ * to match on all three statistics in the default world and Y to come apart on
+ * at least two perturbations.
+ */
+it('probe: final fixture search', () => {
+  const opts = { startRadius: 0.3, lightStrength: 4, duration: 30 }
+  const WORLDS = [CENTRE_LIGHT, ...PERTURBATIONS]
+
+  interface Cand {
+    label: string
+    d: number[]
+    spread: number[]
+    speed: number[]
+    arr: number
+    hue: number
+    strength: number
+    gens: number
+  }
+  const profile = (label: string, w: EvolutionWorld, gens: number): Cand => {
+    const g = genomes(w)
+    const obs = WORLDS.map((world) => observe(g, world, opts))
+    return {
+      label,
+      d: obs.map((o) => o.meanDistance),
+      spread: obs.map((o) => o.meanDistanceSpread),
+      speed: obs.map((o) => o.meanSpeed),
+      arr: obs[0].meanTimeToArrival,
+      hue: w.history[w.history.length - 1].modalHue,
+      strength: mean(
+        g.map((x) => (Math.abs(x.wLL) + Math.abs(x.wLR) + Math.abs(x.wRL) + Math.abs(x.wRR)) / 4),
+      ),
+      gens,
+    }
+  }
+
+  const branches: (Cand & { pSeed: number })[] = []
+  const ys: Cand[] = []
+  for (const gens of [90, 120, 160]) {
+    const split = gens - 30
+    for (const pSeed of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
+      const base = new EvolutionWorld(pSeed, {}, 'P')
+      base.run(split)
+      for (let b = 101; b <= 108; b++) {
+        const w = base.fork(b)
+        w.run(gens - split)
+        branches.push({ ...profile(`P${pSeed}@${gens}#${b}`, w, gens), pSeed })
+      }
+    }
+    for (let seed = 1; seed <= 30; seed++) {
+      const w = new EvolutionWorld(seed, {}, 'Q')
+      w.run(gens)
+      if (!populationRoute(w).startsWith('ipsi')) continue
+      ys.push(profile(`Q${seed}@${gens}`, w, gens))
+    }
+  }
+  console.log(`
+${branches.length} P branches, ${ys.length} ipsi-inhibitory Q runs`)
+
+  const ratio = (a: number, b: number) =>
+    Math.max(a, b) / Math.max(0.02, Math.min(a, b))
+
+  const results: { score: number; line: string }[] = []
+  for (let i = 0; i < branches.length; i++) {
+    for (let j = i + 1; j < branches.length; j++) {
+      const W = branches[i], X = branches[j]
+      if (W.pSeed !== X.pSeed || W.gens !== X.gens) continue
+      for (const Y of ys) {
+        if (Y.gens !== W.gens) continue
+
+        // Separability, in the default world, on every statistic a student
+        // could sort them by -- not just the two §10 names.
+        const arrs = [W.arr, X.arr, Y.arr]
+        if (Math.max(...arrs) / Math.min(...arrs) - 1 > 0.15) continue
+        const ds = [W.d[0], X.d[0], Y.d[0]]
+        if (Math.max(...ds) - Math.min(...ds) > 0.9) continue
+        // Pairwise across all three, not each against the average of the other
+        // two: a student compares populations with each other, so the widest
+        // gap between any two is what they would notice.
+        const spreads0 = [W.spread[0], X.spread[0], Y.spread[0]]
+        const speeds0 = [W.speed[0], X.speed[0], Y.speed[0]]
+        if (ratio(Math.max(...spreads0), Math.min(...spreads0)) > 1.35) continue
+        if (ratio(Math.max(...speeds0), Math.min(...speeds0)) > 1.35) continue
+
+        // Divergence, under each perturbation, on the statistics that can see
+        // a mechanism.
+        const per = [1, 2, 3, 4].map((k) => ({
+          dist: ratio((W.d[k] + X.d[k]) / 2, Y.d[k]),
+          spread: ratio((W.spread[k] + X.spread[k]) / 2, Y.spread[k]),
+          speed: ratio((W.speed[k] + X.speed[k]) / 2, Y.speed[k]),
+        }))
+        const best = per.map((p) => Math.max(p.spread, p.speed))
+        const count = best.filter((r) => r >= 2).length
+        if (count === 0) continue
+        results.push({
+          score: count * 100 + Math.min(...best.filter((r) => r >= 2)),
+          line: `  ${W.label}/${X.label}/${Y.label} | sep arr ${f(
+            (Math.max(...arrs) / Math.min(...arrs) - 1) * 100, 5,
+          )}% d ${f(Math.max(...ds) - Math.min(...ds), 4)} | best-per-perturbation ${best
+            .map((r) => f(r, 5))
+            .join(' ')} | |w| ${f(W.strength, 4)}/${f(Y.strength, 4)}`,
+        })
+      }
+    }
+  }
+  results.sort((a, b) => b.score - a.score)
+  console.log(`${results.length} triples separable AND divergent on at least one perturbation.`)
+  const hist: Record<number, number> = {}
+  for (const r of results) {
+    const c = Math.floor(r.score / 100)
+    hist[c] = (hist[c] ?? 0) + 1
+  }
+  console.log(`  perturbations reaching 2x: ${JSON.stringify(hist)}`)
+  for (const r of results.slice(0, 16)) console.log(r.line)
+}, 900_000)
+
+it('probe: which statistic separates settling from orbiting', () => {
+  const opts = { startRadius: 0.3, lightStrength: 4, duration: 30 }
+  const WORLDS = [CENTRE_LIGHT, ...PERTURBATIONS]
+  const pops: [string, Genome[]][] = [
+    ['ideal 2b', Array.from({ length: 12 }, () => IDEAL['2b charge'])],
+    ['ideal 3a', Array.from({ length: 12 }, () => IDEAL['3a settle'])],
+  ]
+  const built = buildFixtureSet()
+  for (const fx of built) pops.push([`fixture ${fx.id}`, fx.genomes])
+
+  for (const world of WORLDS) {
+    console.log(`\n${world.label}`)
+    console.log('  population   | dist  spread speed  near%  settled')
+    for (const [label, g] of pops) {
+      const o = observe(g, world, opts)
+      console.log(
+        `  ${label.padEnd(12)} | ${f(o.meanDistance)} ${f(o.meanDistanceSpread)} ${f(
+          o.meanSpeed,
+        )} ${f(o.timeNearFraction)} ${f(o.meanFinalDistance)}`,
+      )
+    }
+  }
+})
+
+it('probe: what are the fixtures actually wired like', () => {
+  const built = buildFixtureSet()
+  for (const fx of built) {
+    const g = fx.genomes
+    const m = (fn: (x: Genome) => number) => mean(g.map(fn))
+    const varieties: Record<string, number> = {}
+    for (const x of g) {
+      const v = nearestVariety(x).split(' ')[0]
+      varieties[v] = (varieties[v] ?? 0) + 1
+    }
+    console.log(
+      `\n${fx.id}: wLL ${f(m((x) => x.wLL))} wLR ${f(m((x) => x.wLR))} wRL ${f(
+        m((x) => x.wRL),
+      )} wRR ${f(m((x) => x.wRR))} bias ${f(m((x) => x.bias))}`,
+    )
+    console.log(
+      `   crossing ${f(m(crossing))} sign ${f(m(meanWeight))} mean|w| ${f(
+        m((x) => (Math.abs(x.wLL) + Math.abs(x.wLR) + Math.abs(x.wRL) + Math.abs(x.wRR)) / 4),
+      )}  varieties ${JSON.stringify(varieties)}`,
+    )
+  }
+})
+
+it('probe: does longer evolution strengthen the wiring', () => {
+  console.log('\ngens | pool | mean|w|  bias  crossing  sign | obs speed spread dist')
+  for (const [pool, regime] of [['P', 'food'], ['Q', 'food']] as const) {
+    for (const gens of [40, 80, 140]) {
+      const w = new EvolutionWorld(5, { regime }, pool)
+      w.run(gens)
+      const g = genomes(w)
+      const m = (fn: (x: Genome) => number) => mean(g.map(fn))
+      const o = observe(g, CENTRE_LIGHT, { startRadius: 0.3, lightStrength: 4, duration: 30 })
+      console.log(
+        `${f(gens, 4)} | ${pool}    | ${f(
+          m((x) => (Math.abs(x.wLL) + Math.abs(x.wLR) + Math.abs(x.wRL) + Math.abs(x.wRR)) / 4),
+        )} ${f(m((x) => x.bias))} ${f(m(crossing))} ${f(m(meanWeight))} | ${f(
+          o.meanSpeed,
+        )} ${f(o.meanDistanceSpread)} ${f(o.meanDistance)}`,
+      )
+    }
+  }
+})
+
+it('probe: can the perturbations themselves be tuned to separate', () => {
+  const opts = { startRadius: 0.3, lightStrength: 4, duration: 30 }
+  // The strongest-wired separable triple the final search found.
+  const base = new EvolutionWorld(4, {}, 'P')
+  base.run(90)
+  const W = base.fork(105); W.run(30)
+  const X = base.fork(108); X.run(30)
+  const Yw = new EvolutionWorld(23, {}, 'Q'); Yw.run(120)
+  const [gW, gX, gY] = [genomes(W), genomes(X), genomes(Yw)]
+
+  const ratio = (a: number, b: number) => Math.max(a, b) / Math.max(0.02, Math.min(a, b))
+  const score = (pert: Perturbation) => {
+    const [ow, ox, oy] = [gW, gX, gY].map((g) => observe(g, pert, opts))
+    const wx = (k: (o: typeof ow) => number) => (k(ow) + k(ox)) / 2
+    return {
+      dist: ratio(wx((o) => o.meanDistance), oy.meanDistance),
+      spread: ratio(wx((o) => o.meanDistanceSpread), oy.meanDistanceSpread),
+      speed: ratio(wx((o) => o.meanSpeed), oy.meanSpeed),
+      near: ratio(wx((o) => o.timeNearFraction) + 0.01, oy.timeNearFraction + 0.01),
+    }
+  }
+  const show = (label: string, pert: Perturbation) => {
+    const s = score(pert)
+    console.log(
+      `  ${label.padEnd(38)} dist ${f(s.dist)} spread ${f(s.spread)} speed ${f(
+        s.speed,
+      )} near ${f(s.near)}`,
+    )
+  }
+
+  console.log('\ndefault world (must NOT separate)')
+  show('one light at the centre', CENTRE_LIGHT)
+
+  console.log('\nrim light, by height and distance')
+  for (const y of [1.7, 2.7, 3.7]) {
+    for (const z of [6, 7.5, 9]) {
+      show(`rim light y=${y} z=${z}`, { label: '', lights: [[0, y, z]] })
+    }
+  }
+
+  console.log('\ntwo lights, by separation')
+  for (const sep of [2, 3.5, 4.5, 6, 7.5]) {
+    show(`two lights at ±${sep}`, {
+      label: '', lights: [[-sep, 0.7, 0], [sep, 0.7, 0]],
+    })
+  }
+
+  console.log('\nsensor noise, by level')
+  for (const n of [0.05, 0.1, 0.15, 0.2, 0.3, 0.5]) {
+    show(`sensor noise ${n}`, { label: '', lights: [[0, 0.7, 0]], sensorNoise: n })
+  }
+
+  console.log('\nlight removed, by time')
+  for (const t of [5, 10, 15, 20, 25]) {
+    show(`light removed at ${t}s`, {
+      label: '', lights: [[0, 0.7, 0]], removeAt: { index: 0, time: t },
+    })
+  }
+})
+
+it('probe: pick Z at 120 generations and set the hue shift', () => {
+  const opts = { startRadius: 0.3, lightStrength: 4, duration: 30 }
+  const modal = (g: Genome[]) => {
+    const hues = g.map((x) => x.hue)
+    let bh = hues[0], bc = 0
+    for (const c of hues) {
+      const n = hues.filter((h) => Math.min(Math.abs(c - h), 360 - Math.abs(c - h)) <= 20).length
+      if (n > bc) { bc = n; bh = c }
+    }
+    return bh
+  }
+  const base = new EvolutionWorld(4, {}, 'P')
+  base.run(90)
+  const W = base.fork(105); W.run(30)
+  const Yw = new EvolutionWorld(23, {}, 'Q'); Yw.run(120)
+  const hW = modal(genomes(W)), hY = modal(genomes(Yw))
+  console.log(`\nW natural hue ${f(hW, 7)}   Y hue ${f(hY, 7)}`)
+  console.log('\nZ candidates at 120 generations (Q, poison)')
+  for (let seed = 1; seed <= 20; seed++) {
+    const z = new EvolutionWorld(seed, { regime: 'poison' }, 'Q')
+    z.run(120)
+    const o = observe(genomes(z), CENTRE_LIGHT, opts)
+    const hZ = modal(genomes(z))
+    const gapYZ = Math.min(Math.abs(hY - hZ), 360 - Math.abs(hY - hZ))
+    const shift = ((hZ - hW) % 360 + 360) % 360
+    console.log(
+      `  Q${String(seed).padStart(2)}: dist ${f(o.meanDistance)} spread ${f(
+        o.meanDistanceSpread,
+      )} hue ${f(hZ, 7)} | Y-Z gap ${f(gapYZ, 6)} | P hueShift needed ${f(shift, 6)}`,
     )
   }
 })

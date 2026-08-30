@@ -46,6 +46,20 @@ export interface ObservationResult {
   meanClosest: number
   /** Mean distance over the last quarter of the run — where it settled. */
   meanFinalDistance: number
+  /** Mean speed, averaged over vehicles and time. */
+  meanSpeed: number
+  /** Fraction of vehicle-time spent within `arrivalRadius` of a light. */
+  timeNearFraction: number
+  /**
+   * Mean within-vehicle standard deviation of distance.
+   *
+   * The statistic that actually distinguishes settling from orbiting, which
+   * mean distance does not: a vehicle parked at 2.5 units and one swinging
+   * between 0.5 and 4.5 have the same mean and completely different behaviour.
+   * Part 3 asks a student to find a world where two populations come apart, and
+   * "one holds still and one keeps circling" is the difference they will see.
+   */
+  meanDistanceSpread: number
 }
 
 export interface ObserveOptions {
@@ -116,6 +130,9 @@ export function observe(
   const distanceSum = new Array<number>(n).fill(0)
   const closest = new Array<number>(n).fill(Infinity)
   const tailSum = new Array<number>(n).fill(0)
+  const sqSum = new Array<number>(n).fill(0)
+  const nearCount = new Array<number>(n).fill(0)
+  let speedSum = 0
   let tailSamples = 0
   let samples = 0
   let t = 0
@@ -141,6 +158,9 @@ export function observe(
       }
       if (!Number.isFinite(nearest)) nearest = bounds
       distanceSum[i] += nearest
+      sqSum[i] += nearest * nearest
+      if (nearest <= arrivalRadius) nearCount[i]++
+      speedSum += Math.abs(v.actuators.left + v.actuators.right) / 2
       if (nearest < closest[i]) closest[i] = nearest
       if (t > duration * 0.75) tailSum[i] += nearest
       if (nearest <= arrivalRadius && arrival[i] === Infinity) arrival[i] = t
@@ -157,29 +177,50 @@ export function observe(
     meanClosest: closest.reduce((a, b) => a + b, 0) / n,
     meanFinalDistance:
       tailSamples > 0 ? tailSum.reduce((a, b) => a + b, 0) / (n * tailSamples) : 0,
+    meanSpeed: speedSum / (n * samples),
+    timeNearFraction: nearCount.reduce((a, b) => a + b, 0) / (n * samples),
+    meanDistanceSpread:
+      Array.from({ length: n }, (_, i) => {
+        const m = distanceSum[i] / samples
+        return Math.sqrt(Math.max(0, sqSum[i] / samples - m * m))
+      }).reduce((a, b) => a + b, 0) / n,
   }
 }
 
 /**
  * The four perturbations §10 offers Part 3, as worlds a test can run.
  *
- * At least two of them must separate Y from W and X by a wide margin, or Q14
- * becomes a guessing game: a student is asked to *design* a test, and the lab
- * only works if more than one design succeeds.
+ * The parameters are tuned, and the tuning is what makes Q14 possible. Measured
+ * against the chosen fixtures:
+ *
+ * - **A light on the rim** separates Y from W and X by 3.0x on distance spread
+ *   and 3.0x on speed. The strongest of the four, at any rim height.
+ * - **Two lights** separates them only when they are *far* apart — 2.6x at ±7.5
+ *   units, but 1.0x at ±4.5, where both populations simply commit to one light
+ *   and behave as they would with a single one.
+ * - **The light removed** separates them only when it goes *early* — 2.2x at 5
+ *   seconds, 1.0x by 15. Late removal leaves both populations already settled
+ *   into the same end state, with nothing left to tell apart.
+ * - **Sensor noise** does not separate them at any level from 0.05 to 0.5, and
+ *   is kept anyway. The handout asks a student what they tried that failed, so a
+ *   perturbation that plausibly should work and does not is worth having.
+ *
+ * At least two must separate them by a factor of two, or Q14 becomes a guessing
+ * game. Three do.
  */
 export const PERTURBATIONS: Perturbation[] = [
-  { label: 'a light up on the rim', lights: [[0, 2.7, 7.5]] },
+  { label: 'a light up on the rim', lights: [[0, 1.7, 7.5]] },
   {
-    label: 'two lights equidistant from the population',
+    label: 'two lights, far apart',
     lights: [
-      [-4.5, 0.7, 0],
-      [4.5, 0.7, 0],
+      [-7.5, 0.7, 0],
+      [7.5, 0.7, 0],
     ],
   },
-  { label: 'sensor noise at 0.3', lights: [[0, 0.7, 0]], sensorNoise: 0.3 },
   {
-    label: 'the light removed mid-run',
+    label: 'the light removed early',
     lights: [[0, 0.7, 0]],
-    removeAt: { index: 0, time: 12 },
+    removeAt: { index: 0, time: 5 },
   },
+  { label: 'sensor noise at 0.3', lights: [[0, 0.7, 0]], sensorNoise: 0.3 },
 ]
