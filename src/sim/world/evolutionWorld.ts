@@ -276,7 +276,14 @@ export class EvolutionWorld {
     if (this.founders === 'Q') return drawFounder(FOUNDER_POOLS.Q, this.rng)
     const centre = NAMED_CENTRES[this.founders]
     return drawFounder(
-      { id: this.founders, label: this.founders, description: '', centre, spread: 0.3 },
+      {
+        id: this.founders,
+        label: this.founders,
+        description: '',
+        centre,
+        spread: 0.3,
+        hueSpread: 70,
+      },
       this.rng,
     )
   }

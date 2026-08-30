@@ -189,6 +189,18 @@ export interface FounderPool {
   centre: Genome
   /** Standard deviation of the founder draw around `centre`, per weight gene. */
   spread: number
+  /**
+   * Standard deviation of the founder draw on `hue`, in degrees.
+   *
+   * Wide on purpose. Which colour a lineage ends up wearing is decided by which
+   * founder happened to win, so a narrow founder spread makes every run from a
+   * pool come out roughly the same colour — and the four saved lineages then
+   * cannot differ in colour in the way Part 3 needs, because two of them share
+   * a pool. Widening it costs nothing anywhere else: the hue draw is the last
+   * one `drawFounder` takes, so changing its scale leaves the position of the
+   * random stream, and therefore every weight in the run, untouched.
+   */
+  hueSpread: number
 }
 
 /**
@@ -207,6 +219,7 @@ export const FOUNDER_POOLS: Record<'P' | 'Q', FounderPool> = {
       'Contralateral excitatory, weakly. Each sensor drives the opposite actuator, so it turns toward light and charges at it — badly, and it overshoots.',
     centre: { wLL: 0, wLR: 0.8, wRL: 0.8, wRR: 0, bias: 0.6, hue: 210 },
     spread: 0.3,
+    hueSpread: 70,
   },
   Q: {
     id: 'Q',
@@ -215,6 +228,7 @@ export const FOUNDER_POOLS: Record<'P' | 'Q', FounderPool> = {
       'Ipsilateral excitatory. Each sensor drives the actuator on its own side, so it turns away from light and flees, fastest when close.',
     centre: { wLL: 0.8, wLR: 0, wRL: 0, wRR: 0.8, bias: 0.6, hue: 40 },
     spread: 0.3,
+    hueSpread: 70,
   },
 }
 
@@ -245,7 +259,7 @@ export function drawFounder(pool: FounderPool, rng: Rng): Genome {
       GENE_RANGE.bias.min,
       GENE_RANGE.bias.max,
     ),
-    hue: wrapHue(c.hue + rng.normal() * 25),
+    hue: wrapHue(c.hue + rng.normal() * pool.hueSpread),
   }
 }
 
