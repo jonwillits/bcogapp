@@ -174,3 +174,27 @@ describe('VehicleWorld', () => {
     expect(Math.abs(v.state.z)).toBeLessThanOrEqual(world.params.bounds + 1e-6)
   })
 })
+
+describe('weights as the general form of a wiring', () => {
+  /**
+   * The wiring diagram now draws from the weight matrix alone, and decides
+   * whether to draw a connection by whether its weight is exactly zero. That
+   * only shows a Module 1 vehicle correctly if the sparse patterns really do
+   * zero their absent connections rather than merely making them small — so
+   * pin it here, where breaking it is visible.
+   */
+  it('sparse patterns zero their absent connections exactly', () => {
+    const ipsi = weightsFromWiring({ pattern: 'ipsilateral', sign: 1 }, 2.4, 0.6)
+    expect(ipsi.leftToRight).toBe(0)
+    expect(ipsi.rightToLeft).toBe(0)
+
+    const contra = weightsFromWiring({ pattern: 'contralateral', sign: -1 }, 2.4, 0.6)
+    expect(contra.leftToLeft).toBe(0)
+    expect(contra.rightToRight).toBe(0)
+
+    const full = weightsFromWiring({ pattern: 'full', sign: 1 }, 2.4, 0.6)
+    for (const w of [full.leftToLeft, full.leftToRight, full.rightToLeft, full.rightToRight]) {
+      expect(w).not.toBe(0)
+    }
+  })
+})

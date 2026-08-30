@@ -94,11 +94,7 @@ export function VehicleInspector({
         the live values, work out why it behaves the way it does.
       </div>
 
-      <WiringDiagram
-        wiring={preset.wiring}
-        sensors={s}
-        actuators={vehicle.actuators}
-      />
+      <WiringDiagram weights={w} sensors={s} actuators={vehicle.actuators} />
 
       <div>
         <div

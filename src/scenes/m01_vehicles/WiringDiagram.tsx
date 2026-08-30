@@ -1,19 +1,44 @@
-import type { Wiring } from '../../sim/neural/sensorimotor'
-import type { SensorInput, ActuatorOutput } from '../../sim/neural/sensorimotor'
+import type {
+  SensorInput,
+  ActuatorOutput,
+  SensorimotorWeights,
+} from '../../sim/neural/sensorimotor'
+import { DEFAULT_STRENGTH } from '../../sim/world/world'
 import { palette } from '../../theme/theme'
+
+/**
+ * A connection this weak is drawn as a faint dotted line rather than a real
+ * one: present in the genome, doing nothing you could see. A weight of exactly
+ * zero — M1's zeroed diagonal — is not drawn at all, because for a Module 1
+ * vehicle that connection genuinely does not exist.
+ *
+ * The distinction matters from Module 2 on, where weights are continuous and
+ * evolve. "Ipsilateral" then means "the crossed weights drifted near zero", and
+ * a student asked to classify the wiring needs to see that as *nearly* absent
+ * rather than as absent or as present.
+ */
+const EFFECTIVELY_ABSENT = 0.15
 
 /**
  * The "click a vehicle → see its wiring" inspector graphic. Two sensor nodes
  * (top) connect to two actuator nodes (bottom); the connection pattern shows the
  * crossed/uncrossed wiring, its color shows excitatory (green) vs inhibitory
  * (red), and its thickness + the node glow track the live activation.
+ *
+ * Takes the full 2×2 weight matrix rather than a wiring *pattern*, because from
+ * Module 2 on there is no pattern to name: the four weights are genes and each
+ * one is a real number that evolves. Every Module 1 vehicle is that same matrix
+ * with a diagonal zeroed, so this draws M1 exactly as it always did — but a
+ * connection's sign and thickness are now read per connection, which is what
+ * lets an evolved genome with, say, one strong crossed excitatory weight and one
+ * weak straight inhibitory one show up honestly.
  */
 export function WiringDiagram({
-  wiring,
+  weights,
   sensors,
   actuators,
 }: {
-  wiring: Wiring
+  weights: SensorimotorWeights
   sensors: SensorInput
   actuators: ActuatorOutput
 }) {
@@ -26,25 +51,29 @@ export function WiringDiagram({
   const aL = { x: 58, y: 132 }
   const aR = { x: 178, y: 132 }
 
-  const linkColor = wiring.sign > 0 ? palette.approach : palette.avoid
-  const width = (v: number) => 1 + Math.min(6, Math.abs(v) * 3)
+  /**
+   * Thickness tracks the live *drive* through the connection — weight × sensor
+   * — scaled so that a Module 1 vehicle at its default connection strength
+   * draws exactly the picture it drew before this generalization. Using the
+   * drive rather than the bare sensor value is what makes a weak inherited
+   * connection look weak; under the old sensor-only rule every connection a
+   * vehicle had was drawn the same width regardless of its strength.
+   */
+  const width = (w: number, s: number) =>
+    1 + Math.min(6, (Math.abs(w * s) / DEFAULT_STRENGTH) * 3)
 
-  // Which sensor drives which actuator. `full` shows all four connections —
-  // ipsilateral/contralateral are the same picture with one pair removed.
-  const ipsi = [
-    { from: sL, to: aL, v: sensors.left },
-    { from: sR, to: aR, v: sensors.right },
+  // All four connections, always considered; which ones are *drawn* falls out
+  // of their weights. Crossed pair first so the straight pair draws on top,
+  // which is the stacking M1's fully-connected vehicles have always had.
+  const links = [
+    { from: sL, to: aR, w: weights.leftToRight, s: sensors.left },
+    { from: sR, to: aL, w: weights.rightToLeft, s: sensors.right },
+    { from: sL, to: aL, w: weights.leftToLeft, s: sensors.left },
+    { from: sR, to: aR, w: weights.rightToRight, s: sensors.right },
   ]
-  const contra = [
-    { from: sL, to: aR, v: sensors.left },
-    { from: sR, to: aL, v: sensors.right },
-  ]
-  const links =
-    wiring.pattern === 'full'
-      ? [...contra, ...ipsi] // crossed first so the straight pair draws on top
-      : wiring.pattern === 'contralateral'
-        ? contra
-        : ipsi
+    .filter((l) => Math.abs(l.w) > 1e-9)
+    // Faint near-absent connections underneath the real ones.
+    .sort((a, b) => Math.abs(a.w) - Math.abs(b.w))
 
   const sensorGlow = (v: number) => Math.min(1, v * 1.2)
   const actuatorGlow = (v: number) => Math.min(1, Math.max(0, v) / 3)
@@ -99,19 +128,29 @@ export function WiringDiagram({
       role="img"
       aria-label="Sensor to actuator wiring"
     >
-      {links.map((l, i) => (
-        <line
-          key={i}
-          x1={l.from.x}
-          y1={l.from.y}
-          x2={l.to.x}
-          y2={l.to.y}
-          stroke={linkColor}
-          strokeWidth={width(l.v)}
-          strokeLinecap="round"
-          opacity={0.85}
-        />
-      ))}
+      {links.map((l, i) => {
+        const absent = Math.abs(l.w) < EFFECTIVELY_ABSENT
+        return (
+          <line
+            key={i}
+            x1={l.from.x}
+            y1={l.from.y}
+            x2={l.to.x}
+            y2={l.to.y}
+            stroke={
+              absent
+                ? palette.textMuted
+                : l.w > 0
+                  ? palette.approach
+                  : palette.avoid
+            }
+            strokeWidth={absent ? 1 : width(l.w, l.s)}
+            strokeDasharray={absent ? '2 4' : undefined}
+            strokeLinecap="round"
+            opacity={absent ? 0.5 : 0.85}
+          />
+        )
+      })}
       {node(sL.x, sL.y, palette.sensor, sensorGlow(sensors.left), 'S', sensors.left, false)}
       {node(sR.x, sR.y, palette.sensor, sensorGlow(sensors.right), 'S', sensors.right, false)}
       {node(aL.x, aL.y, palette.accent, actuatorGlow(actuators.left), 'A', actuators.left, true)}
