@@ -68,8 +68,14 @@ export const DEFAULT_MUTATION_RATES: MutationRates = {
    * circle as fast as the lineage took it over, the population would end up
    * multicoloured, and the lab's best moment — a student writing a confident
    * adaptive explanation for a trait that does nothing — would never arrive.
+   *
+   * The spec proposed 4. Measured over ten seeds, 4 leaves the final population
+   * only 77% concentrated and passes the fixation test in 4 seeds of 10; 2
+   * gives 95% and passes in 10 of 10. The difference is that a lineage keeps
+   * diversifying *after* it has swept, and fifty generations is long enough for
+   * a sigma of 4 to spread it back out.
    */
-  hue: 4,
+  hue: 2,
 }
 
 /** The genome as the four weights and bias the sensorimotor layer consumes. */
@@ -81,6 +87,19 @@ export function genomeToWeights(g: Genome): SensorimotorWeights {
     rightToRight: g.wRR,
     bias: g.bias,
   }
+}
+
+/**
+ * A genome's hue as a CSS colour.
+ *
+ * Saturation and lightness are fixed, so hue is the only thing that varies and
+ * a student comparing two vehicles is comparing the one gene. They are also
+ * both high: this is a dark scene, and a desaturated or dim body would be hard
+ * to tell from the floor -- the palette has already swallowed two things drawn
+ * correctly in this app.
+ */
+export function hueToCss(hue: number): string {
+  return `hsl(${wrapHue(hue).toFixed(0)} 72% 62%)`
 }
 
 /** Wrap a hue into [0, 360). */
@@ -131,13 +150,22 @@ export function mutate(
 }
 
 /**
- * A genome drawn with no ancestry at all — used for the founder pool's spread
+ * A genome drawn with no ancestry at all — used for the diverse founder draw
  * and, more importantly, for **inheritance off**, where every offspring gets one
  * of these instead of its parent's. Part 2's second experiment is what that
  * setting exists for: selection with nothing to select *on*.
+ *
+ * `spread` is the half-width of the uniform draw on each weight, and it is a
+ * real tuning knob rather than a detail. Drawn across the whole legal range,
+ * a good fraction of founders happen to be competent light-seekers by chance
+ * and generation 1 is already close to the ceiling — which leaves adaptation
+ * with nowhere to go and makes Part 1 a flat line. A narrower draw makes the
+ * founders genuinely poor at the problem, which is both what the acceptance
+ * test wants and the more honest picture: variation is the raw material, not a
+ * pre-loaded answer.
  */
-export function randomGenome(rng: Rng): Genome {
-  const w = () => rng.range(GENE_RANGE.weight.min, GENE_RANGE.weight.max)
+export function randomGenome(rng: Rng, spread: number = GENE_RANGE.weight.max): Genome {
+  const w = () => rng.range(-spread, spread)
   return {
     wLL: w(),
     wLR: w(),
@@ -238,6 +266,22 @@ export function crossing(g: Genome): number {
 
 export function meanWeight(g: Genome): number {
   return (g.wLL + g.wLR + g.wRL + g.wRR) / 4
+}
+
+/**
+ * Positive if this genome steers *toward* light, negative if away.
+ *
+ * The product of the two axes, which works because the four Braitenberg
+ * varieties sit in the four quadrants of that plane and approach lives on one
+ * diagonal: crossed-and-excitatory (2b) turns toward a light and charges,
+ * straight-and-inhibitory (3a) turns toward it and settles, and the other two
+ * diagonal-mates turn away. Magnitude is how committed the steering is, so a
+ * barely-wired genome scores near zero whichever way it leans.
+ *
+ * Used for the answer key and for the acceptance tests, never in the UI.
+ */
+export function approachScore(g: Genome): number {
+  return crossing(g) * meanWeight(g)
 }
 
 /**
