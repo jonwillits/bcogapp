@@ -323,3 +323,115 @@ it('continuous: long lives, so starvation can outpace old age', () => {
     }
   }
 })
+
+it('continuous: carrying capacity as the mechanism', () => {
+  /**
+   * The bottleneck the first attempt lost was doing two jobs: strong selection,
+   * and a small effective population that lets drift fix a neutral gene. A hard
+   * carrying capacity restores both. Reproduction becomes a queue ordered by
+   * energy -- truncation selection in continuous time -- and N is pinned, so
+   * lineages coalesce in roughly 2N generations instead of never.
+   */
+  console.log(
+    '\n cap life delay | ext | pop | starve/aged | births | approach | vs noSel | hueConc | lineages | parity',
+  )
+  for (const populationCap of [16, 24, 36]) {
+    for (const meanLifespan of [45, 90, 180]) {
+      for (const respawnDelay of [1, 4]) {
+        const params = {
+          populationCap,
+          initialPopulation: populationCap,
+          reproduceThreshold: 6,
+          birthEnergy: 4,
+          maxEnergy: 12,
+          meanLifespan,
+          lifespanSd: meanLifespan / 4,
+          energy: { baseCost: 0.05, moveCost: 0.06 },
+          food: { ...DEFAULT_FOOD_PARAMS, count: 4, respawnDelay },
+        }
+        const runs = SEEDS.map((s) => run(s, params))
+        const offRuns = SEEDS.map((s) => run(s, { ...params, selection: false }))
+        const end = (w: ContinuousWorld) => w.samples[w.samples.length - 1]
+        const endApproach = (w: ContinuousWorld) => end(w)?.approachFraction ?? 0
+        const b = (founders: 'all-2b' | 'all-3a') =>
+          mean([1, 2, 3].map((s) => run(s, { ...params, mutationScale: 0 }, founders).births))
+        const hue = runs.map((w) => end(w)?.hueConcentration ?? 0)
+        console.log(
+          `${f(populationCap, 4)} ${f(meanLifespan, 4)} ${f(respawnDelay, 5)} | ${String(
+            runs.filter((w) => w.extinct).length,
+          ).padStart(3)} | ${f(mean(runs.map((w) => end(w)?.population ?? 0)), 3)} | ${f(
+            mean(runs.map((w) => w.starved)), 6,
+          )}/${f(mean(runs.map((w) => w.diedOfAge)), 6)} | ${f(
+            mean(runs.map((w) => w.births)), 6,
+          )} | ${f(mean(runs.map(endApproach)), 8)} | ${f(
+            mean(runs.map((w, i) => endApproach(w) - endApproach(offRuns[i]))), 8,
+          )} | ${f(mean(hue), 7)} (${hue.filter((h) => h >= 0.8).length}/10) | ${f(
+            mean(runs.map((w) => end(w)?.survivingLineages ?? 0)), 8,
+          )} | ${f(b('all-2b') / Math.max(0.01, b('all-3a')))}`,
+        )
+      }
+    }
+  }
+})
+
+it('continuous: verify the two best configurations', () => {
+  const CONFIGS = {
+    'cap24 life45 delay1': {
+      populationCap: 24, initialPopulation: 24, meanLifespan: 45, lifespanSd: 11,
+      reproduceThreshold: 6, birthEnergy: 4, maxEnergy: 12,
+      energy: { baseCost: 0.05, moveCost: 0.06 },
+      food: { ...DEFAULT_FOOD_PARAMS, count: 4, respawnDelay: 1 },
+    },
+    'cap16 life180 delay4': {
+      populationCap: 16, initialPopulation: 16, meanLifespan: 180, lifespanSd: 45,
+      reproduceThreshold: 6, birthEnergy: 4, maxEnergy: 12,
+      energy: { baseCost: 0.05, moveCost: 0.06 },
+      food: { ...DEFAULT_FOOD_PARAMS, count: 4, respawnDelay: 4 },
+    },
+  }
+  const end = (w: ContinuousWorld) => w.samples[w.samples.length - 1]
+
+  for (const [label, base] of Object.entries(CONFIGS)) {
+    console.log(`\n=== ${label}`)
+
+    // Small population — Part 2 asks for this, and it is where drift should win.
+    const small = SEEDS.map((s) =>
+      run(s, { ...base, populationCap: 6, initialPopulation: 6 }),
+    )
+    console.log(
+      `  N=6: extinct ${small.filter((w) => w.extinct).length}/10  final pop ${f(
+        mean(small.map((w) => end(w)?.population ?? 0)), 4,
+      )}  lineages ${f(mean(small.map((w) => end(w)?.survivingLineages ?? 0)), 4)}`,
+    )
+
+    // Mutation off: improvement then plateau, and variation runs out.
+    const noMut = SEEDS.map((s) => run(s, { ...base, mutationScale: 0 }))
+    console.log(
+      `  mutation 0: lineages ${f(
+        mean(noMut.map((w) => end(w)?.survivingLineages ?? 0)), 4,
+      )}  approach ${f(mean(noMut.map((w) => end(w)?.approachFraction ?? 0)), 5)}`,
+    )
+
+    // Inheritance off: no trend.
+    const noInh = SEEDS.map((s) => run(s, { ...base, inheritance: false }))
+    console.log(
+      `  inheritance off: approach ${f(
+        mean(noInh.map((w) => end(w)?.approachFraction ?? 0)), 5,
+      )} (vs ${f(mean(SEEDS.map((s) => end(run(s, base))?.approachFraction ?? 0)), 5)} with it)`,
+    )
+
+    // Poison: a well-adapted population should collapse.
+    let survivedPoison = 0
+    for (const seed of SEEDS.slice(0, 5)) {
+      const w = new ContinuousWorld(seed, base)
+      w.run(900)
+      const popBefore = end(w)?.population ?? 0
+      w.params.regime = 'poison'
+      w.run(300)
+      const popAfter = end(w)?.population ?? 0
+      if (popAfter < popBefore * 0.6 || w.extinct) survivedPoison++
+      void popBefore
+    }
+    console.log(`  poison switch collapses the population in ${survivedPoison}/5 seeds`)
+  }
+})

@@ -77,8 +77,27 @@ export interface ContinuousParams {
   sensorNoise: number
   bounds: number
   founderSpread: number
-  /** A backstop against runaway growth. Hitting it is reported, not silent. */
+  /**
+   * How many creatures the pit supports. **Not a backstop — a mechanism.**
+   *
+   * When the world is full nobody is born; a creature that has enough energy to
+   * reproduce simply waits, and the moment a slot opens the creature with the
+   * most energy takes it. That does two jobs the discrete engine got from its
+   * generational bottleneck and the first continuous attempt lost entirely.
+   *
+   * It makes selection strong again: reproduction becomes a queue ordered by
+   * how fast you gather energy, so a good forager breeds repeatedly while a
+   * poor one never reaches the front. That is truncation selection in
+   * continuous time, without a generation boundary.
+   *
+   * And it pins the effective population size, which is what drift — and
+   * therefore colour fixation — depends on. Lineages coalesce in roughly 2N
+   * generations, so a population of 20 fixes within a run and a population of
+   * 120 does not come close.
+   */
   populationCap: number
+  /** Energy is not a bottomless store; banking it while waiting has a limit. */
+  maxEnergy: number
   food: FoodParams
   energy: EnergyParams
   mutationRates: MutationRates
@@ -98,7 +117,8 @@ export const DEFAULT_CONTINUOUS_PARAMS: ContinuousParams = {
   sensorNoise: 0,
   bounds: 9,
   founderSpread: 1.6,
-  populationCap: 160,
+  populationCap: 24,
+  maxEnergy: 18,
   food: { ...DEFAULT_FOOD_PARAMS, count: 4 },
   energy: { ...DEFAULT_ENERGY_PARAMS },
   mutationRates: { ...DEFAULT_MUTATION_RATES },
@@ -310,7 +330,7 @@ export class ContinuousWorld {
     }
 
     this.creatures.forEach((c, i) => {
-      c.energy += net[i]
+      c.energy = Math.min(this.params.maxEnergy, c.energy + net[i])
       c.age += dt
     })
 
@@ -345,7 +365,11 @@ export class ContinuousWorld {
   private reproduce(): void {
     const { reproduceThreshold, birthEnergy, populationCap } = this.params
     // Snapshot: a creature born this instant must not itself reproduce yet.
-    const ready = this.creatures.filter((c) => c.energy >= reproduceThreshold)
+    // Ordered by energy, so when a slot opens it goes to whoever is furthest
+    // ahead rather than to whoever happens to sit earliest in the array.
+    const ready = this.creatures
+      .filter((c) => c.energy >= reproduceThreshold)
+      .sort((a, b) => b.energy - a.energy)
     for (const parent of ready) {
       if (this.creatures.length >= populationCap) {
         this.hitCap = true
