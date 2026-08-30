@@ -16,5 +16,8 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   test: {
     include: process.env.PROBE ? ['src/**/*.probe.ts'] : ['src/**/*.test.ts'],
+    // The Module 2 acceptance tests run whole 50-generation populations over
+    // ten seeds each; several take tens of seconds and none of them is hanging.
+    testTimeout: 120_000,
   },
 })

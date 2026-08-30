@@ -123,3 +123,41 @@ it('probe: light count and density', () => {
     )
   }
 })
+
+it('probe: the mutation-0 plateau', () => {
+  console.log('\nmutation 0 -- five-generation window means')
+  const early: number[] = []
+  const mid: number[] = []
+  const late: number[] = []
+  for (const seed of SEEDS) {
+    const w = new EvolutionWorld(seed, { mutationScale: 0 })
+    w.run(30)
+    const win = (from: number, to: number) =>
+      mean(
+        w.history
+          .filter((h) => h.generation >= from && h.generation <= to)
+          .map((h) => h.meanEnergy),
+      )
+    const e = win(1, 5)
+    const m = win(11, 15)
+    const l = win(26, 30)
+    early.push(e)
+    mid.push(m)
+    late.push(l)
+    console.log(
+      `  seed ${String(seed).padStart(2)}: ${f(e)} ${f(m)} ${f(l)}  rise ${f(
+        m - e,
+      )} then ${f(l - m)}  lineages ${w.history[29].survivingLineages}`,
+    )
+  }
+  console.log(
+    `  aggregate: rise ${f(mean(mid) - mean(early))}, then ${f(
+      mean(late) - mean(mid),
+    )}`,
+  )
+  console.log(
+    `  per-seed |rise| ${f(mean(mid.map((m, i) => Math.abs(m - early[i]))))}, |then| ${f(
+      mean(late.map((l, i) => Math.abs(l - mid[i]))),
+    )}`,
+  )
+})

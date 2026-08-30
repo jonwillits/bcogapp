@@ -56,18 +56,25 @@ export interface EnergyParams {
 }
 
 /**
- * `moveCost` is the single most consequential number in the scene, and it is a
- * straight trade between two of the acceptance tests. Low (0.05) and roaming is
- * cheap, so chargers and parkers earn the same and strategy parity is perfect —
- * but the founders already do well and the population barely improves. High
- * (0.14) and only efficient foragers survive, so improvement across fifty
- * generations is dramatic — but parking beats roaming two to one and Part 3's
- * two strategies stop coexisting. 0.09 is the measured crossing point, where
- * parity comes out at 1.00 and improvement is still plainly visible.
+ * `moveCost` is the consequential one, and it is a straight trade between the
+ * acceptance tests. Cheap movement (0.03) and the founders already forage well,
+ * so the population barely improves; expensive movement (0.09+) and selection
+ * is fierce but parking beats roaming and Part 3's two strategies stop
+ * coexisting. 0.06 is the measured best compromise: 83% of the final population
+ * steers toward light, strategy parity comes out at 1.08, and a selected
+ * population ends 78% above an unselected one from the same seed.
+ *
+ * `baseCost` is *evolutionarily inert*, and that is worth knowing before anyone
+ * tries to tune with it. It subtracts the same amount from every vehicle, so it
+ * cannot change their ranking, and selection here is purely rank-based —
+ * measured across a 4x sweep, every outcome except the absolute energy numbers
+ * was identical. It is kept small for one reason only: to leave mean energy
+ * comfortably positive, since Q2 asks a student to read that number off the
+ * screen and a negative one invites a question the lab does not want to answer.
  */
 export const DEFAULT_ENERGY_PARAMS: EnergyParams = {
   baseCost: 0.05,
-  moveCost: 0.09,
+  moveCost: 0.06,
 }
 
 export interface EvolutionParams {
