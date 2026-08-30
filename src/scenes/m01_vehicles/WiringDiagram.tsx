@@ -52,15 +52,21 @@ export function WiringDiagram({
   const aR = { x: 178, y: 132 }
 
   /**
-   * Thickness tracks the live *drive* through the connection — weight × sensor
-   * — scaled so that a Module 1 vehicle at its default connection strength
-   * draws exactly the picture it drew before this generalization. Using the
-   * drive rather than the bare sensor value is what makes a weak inherited
-   * connection look weak; under the old sensor-only rule every connection a
-   * vehicle had was drawn the same width regardless of its strength.
+   * Thickness tracks the live *drive* through the connection — weight × sensor.
+   * Using the drive rather than the bare sensor value is what makes a weak
+   * inherited connection look weak; under the old sensor-only rule every
+   * connection a vehicle had was drawn the same width regardless of its
+   * strength, so dragging the connection-strength slider changed nothing.
+   *
+   * The response is a square root rather than linear, and that is the whole of
+   * why the slider now reads clearly. Sensor values in ordinary play sit around
+   * 0.1–0.5, so a linear map spends almost all of its range on drives that
+   * never occur and squeezes every real reading into the bottom two pixels —
+   * which is exactly how it looked. A square root spends the range where the
+   * values actually are.
    */
   const width = (w: number, s: number) =>
-    1 + Math.min(6, (Math.abs(w * s) / DEFAULT_STRENGTH) * 3)
+    1 + Math.min(9, Math.sqrt(Math.abs(w * s) / DEFAULT_STRENGTH) * 7)
 
   // All four connections, always considered; which ones are *drawn* falls out
   // of their weights. Crossed pair first so the straight pair draws on top,
