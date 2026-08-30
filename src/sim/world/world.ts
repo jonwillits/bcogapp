@@ -195,6 +195,11 @@ export class VehicleWorld {
     return s
   }
 
+  /** Remove a creature from the world — the continuous life cycle needs it. */
+  removeVehicle(id: number): void {
+    this.vehicles = this.vehicles.filter((v) => v.id !== id)
+  }
+
   removeSource(id: number): void {
     this.sources = this.sources.filter((s) => s.id !== id)
   }
