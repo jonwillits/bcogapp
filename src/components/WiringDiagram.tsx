@@ -158,6 +158,42 @@ export function WiringDiagram({
           />
         )
       })}
+      {/*
+        Each connection's own strength, printed small at the midpoint of its
+        line. The numbers on the nodes change every frame; these do not, and
+        telling apart "what this creature is sensing right now" from "how
+        strongly it is wired" is exactly what Q11 asks a student to do.
+
+        Placed a third of the way down from the sensor rather than at the
+        midpoint, because the two crossed connections *share* their midpoint —
+        both run through the centre of the diagram — and labelling both there
+        prints one number on top of the other. A third of the way down, all four
+        land in distinct places, and the straight pair is nudged outward so its
+        labels clear the lines they belong to.
+      */}
+      {links.map((l, i) => {
+        const t = 0.32
+        const straight = l.from.x === l.to.x
+        return (
+          <text
+            key={`w${i}`}
+            x={l.from.x + (l.to.x - l.from.x) * t + (straight ? (l.from.x < W / 2 ? -14 : 14) : 0)}
+            y={l.from.y + (l.to.y - l.from.y) * t + 3}
+            textAnchor="middle"
+            fontSize={9}
+            fill={palette.textMuted}
+            fontFamily="var(--font-mono)"
+          >
+            {l.w.toFixed(1)}
+          </text>
+        )
+      })}
+      <text x={W / 2} y={11} textAnchor="middle" fontSize={9} fill={palette.textMuted}>
+        Current sensor activation
+      </text>
+      <text x={W / 2} y={H - 3} textAnchor="middle" fontSize={9} fill={palette.textMuted}>
+        Current actuator activation
+      </text>
       {node(sL.x, sL.y, palette.sensor, sensorGlow(sensors.left), 'S', sensors.left, false)}
       {node(sR.x, sR.y, palette.sensor, sensorGlow(sensors.right), 'S', sensors.right, false)}
       {node(aL.x, aL.y, palette.accent, actuatorGlow(actuators.left), 'A', actuators.left, true)}
