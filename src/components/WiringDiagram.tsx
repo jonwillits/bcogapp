@@ -169,17 +169,19 @@ export function WiringDiagram({
 
         The **crossed** pair share their midpoint — both run through the centre
         of the diagram — so labelling each at its middle prints one number on top
-        of the other. Each sits three quarters of the way down instead, halfway
-        between the crossing and its own actuator, and is dropped below the line
-        rather than centred on it: a strongly driven connection is drawn ten
-        pixels wide and swallows anything sitting on top of it.
+        of the other. Each sits a little past the crossing instead, and is
+        dropped below the line rather than centred on it: a strongly driven
+        connection is drawn ten pixels wide and swallows anything on top of it.
+        Kept nearer the crossing than the actuator, so a reader does not take the
+        number for a property of the node it would otherwise sit beside.
 
-        The **straight** pair are vertical, so nudging them outward clears their
-        own line without needing a vertical offset.
+        The **straight** pair sit at their own midpoint, level between sensor and
+        actuator, nudged outward — being vertical, that clears their line without
+        needing to drop below it.
       */}
       {links.map((l, i) => {
         const straight = l.from.x === l.to.x
-        const t = straight ? 0.32 : 0.75
+        const t = straight ? 0.5 : 0.65
         return (
           <text
             key={`w${i}`}
