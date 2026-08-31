@@ -22,7 +22,11 @@ Two things did not change and are worth saying first, because everything else is
 
 **The reproduction threshold is the selection lever**, and this was not obvious. At 6 a creature reaches it comfortably in a normal life and almost everyone breeds; measured advantage over a same-seed drift control was +0.07. At 10, only good foragers reach the front of the queue: +0.28. At 12 the population starts dying out. (A hypothesis of mine was wrong and is worth recording so nobody re-tests it: I predicted creatures were saturating at the energy ceiling and tying in the queue. Ceilings of 12, 30 and 100 give identical results and the energy spread is 1.5–4.3, so nobody saturates.)
 
-**Starvation almost never happens.** In every surviving configuration, essentially all deaths are old age. Selection works through *who gets to reproduce*, not who dies — which is literally the reading's "differential reproduction", but it is not the energy-bar-hits-bottom death the design imagined. Every setting that produced reliable starvation also killed the population.
+**Starvation is a real rule that almost never fires at the defaults.** A creature dies if its energy reaches zero; measured over ten runs of the shipped world, that happened **zero times** against 309 deaths of old age, and the lowest energy anything reached was 2.54. The reason is a timescale: a newborn holds 4 energy and burns at least 0.05/s, so eating *nothing whatever* it would take 80 seconds to starve — against a mean lifespan of 60. Old age nearly always wins the race. So at the defaults, selection works through *who gets to reproduce* rather than who dies, which is literally the reading's "differential reproduction".
+
+**It does fire once a student makes the world hard**, which is what the new settings are for. One patch instead of four: 3.4 starvation deaths a run. The biggest arena with one patch: 5.3. And switching the light to poison kills an adapted population almost entirely by starvation — see below.
+
+**Starvation is switched off while Selection is off.** With selection off, energy gains are shuffled among the living so that nothing a creature does affects what it earns; starving them on a shuffled number would be death by lottery dressed as death by failure, and it would also make population regulation differ between the two conditions, which is the comparison Part 2 rests on.
 
 **A population of 6 survives about half the time.** Jon's call was that this is a good lesson rather than a bug, so Part 2's small-population experiment will sometimes end with an empty arena and the handout should say why.
 
@@ -78,6 +82,18 @@ Each is documented in the test that carries it.
 
 **Fitness is no longer measured in energy.** Under a continuous life cycle energy is *homeostatic*: it climbs to the reproduction threshold, drops back, and climbs again, so a well-adapted creature does not sit at higher energy than a poor one — it cycles faster. Averaged over a population it is nearly flat whatever is happening. The readout is now **births per minute**, plus population and total born.
 
+**Neutral and poison worlds have grazing; the food world does not.** In the food world the patches *are* dinner, so there is nothing else to eat. Left that way, switching the light to neutral does not mean "the light has no effect" — it means famine: measured, every population died within 45 seconds, and under poison within 17. That is not the control condition Part 2 asks for, and it gives Q7 a population to look at for a quarter of a minute. With ambient food available in the non-food regimes, the words mean what they say. Neutral now leaves the population intact (15.4 → 15.8 over five minutes) while selection on light-seeking simply relaxes. Poison still wipes out a light-seeking population — but now **by starvation, because their inherited behaviour drives them into the hazard**, which is a far better answer to Q7 than "there was nothing to eat". It also means a student switching to poison is looking at the same kind of world population Z evolved in, rather than a different one that happens to share the name.
+
+**What the world sliders actually do**, measured over ten runs each, because a student will find the edges. Enlarging the arena without adding patches is fatal — at the largest setting with the default four patches, nine runs in ten went extinct within about two and a half minutes. **Adding patches compensates exactly as expected**, which makes it a real experiment rather than a trap:
+
+| arena | 4 patches | 6 | 8 | 10 |
+|---|---|---|---|---|
+| 9 (default) | survives 10/10 | 10/10 | 10/10 | 10/10 |
+| 11 | 6/10 | 10/10 | 10/10 | 10/10 |
+| 14 (largest) | 1/10 | 7/10 | 10/10 | 10/10 |
+
+Patch *size* is much gentler — the smallest setting alone costs almost nothing (1 extinction in 10), because it changes how far away food can be sensed rather than how much there is. Stationary patches (drift 0) are also survivable, and worth a student trying: it is the condition under which selection largely stops.
+
 **Controls that changed.** "Population size" is now the arena's carrying capacity, which is the same quantity doing a more honest job. "Step generation" is gone, there being no generations. Added, at Jon's suggestion and asked for by nothing in the handout: **size of the arena, size of a food patch, how many patches**, and two **camera view buttons** — a student who does not know the camera tilts has no way to discover it from a drag gesture.
 
 **Speed.** The scene used to scale the *size* of a physics step, so turning speed up coarsened the simulation. Steps are now fixed and speed takes more of them, which allowed the cap to go from 3× to 20×. This matters: at the old cap, what the handout budgets one or two minutes for took nearly seven.
@@ -129,7 +145,11 @@ Ordered by how badly it is currently wrong.
 - "Population size" is now the arena's capacity.
 
 **Part 3.**
-- **Q13 asks for a resemblance that Q9 and Q10 never let the student identify.** It wants three answers — homology, analogy, and *neither* — but Q9 scopes the groupings to behaviour, so the student arrives holding W~X, W~Y and X~Y, which are homology, analogy and analogy. The "neither" is the shared *mark*, and nothing in Part 3 points at it. Suggested fix: one sub-question at Step 2, before they commit — *"Is there anything other than how they behave that makes any two of these look like they belong together? Say whether you think it means anything."* That arms the trap without giving it away and makes Q13's "what misled you" land.
+- **Q13 asks for a resemblance that Q9 and Q10 never let the student identify, and Jon has approved the fix.** Q13 wants three answers — homology, analogy, and *neither* — but Q9 scopes the groupings to behaviour, so a student arrives holding W~X, W~Y and X~Y, which are homology, analogy and analogy. There is no "neither" among them. The intended one is the shared *mark*, and nothing between Q9 and Q13 points at it, so the trap is never armed and *"what misled you on the ones you got wrong"* has no referent either. Add one sub-question at **Step 2, before they commit**:
+
+  > **Q10b.** Is there anything *other* than how they behave that makes any two of these four look like they belong together? Write down what you notice, and say whether you think it means anything.
+
+  That arms the trap without giving it away, keeps the commitment structure intact, and costs nothing if a student answers "no" — that is a legitimate answer they can be shown to have been right about for the wrong reason.
 - Q14's list of things they can change is right, and worth adding that lights in this tab stay put and never run out — which is what makes a designed test repeatable.
 
 **Part 4.**
@@ -141,6 +161,6 @@ Ordered by how badly it is currently wrong.
 
 # What needs your decision
 
-1. **Q13's unarmed trap** — the sub-question above, or drop the third slot and give the coincidence its own question after Reveal tree.
-2. **Whether starvation matters to you.** It essentially never fires. If you want visible death-by-starvation the lever is the starvation threshold rather than the maintenance cost, which kills every population when raised — but I have not found a setting that gives both starvation and survival.
+1. ~~**Q13's unarmed trap.**~~ Settled — the Q10b wording above is approved and needs adding to the handout.
+2. ~~**Whether starvation matters.**~~ Settled — it stays as it is. It fires when a student makes the world hard, which is where it belongs.
 3. **Part 3's separability wants your eye, not only my numbers.** The tests say W, X and Y match to 9.9% on arrival and 0.25 on distance. The question that matters is whether *you* can sort them by watching. If you can, that is much better found now than by a student.

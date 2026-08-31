@@ -39,6 +39,26 @@ type FounderChoice = 'diverse' | 'P' | 'Q'
  * to the world the lab is describing, and hunting each slider for the number it
  * started on is not it.
  */
+/**
+ * Food that is not the light, for the worlds where the light is not food.
+ *
+ * In the food world the patches *are* dinner and finding them is the whole
+ * problem, so there is nothing else to eat and ambient income is zero. Switch
+ * the light to neutral or poison and that stops being true: with no other
+ * source, "neutral" does not mean the light has no effect, it means famine —
+ * measured, every population died within 45 seconds, and under poison within
+ * 17. That is not the control condition Part 2 asks for, and it gives Q7 a
+ * population to look at for a quarter of a minute.
+ *
+ * With grazing available, the words mean what they say. Neutral becomes a world
+ * where light genuinely does nothing and the population persists while selection
+ * on light-seeking relaxes. Poison becomes a world with food in it and a hazard
+ * on top — which is also the world population Z evolved in, so a student
+ * switching the regime is now looking at Z's circumstances rather than at a
+ * different kind of world that happens to share the name.
+ */
+const AMBIENT_WHEN_LIGHT_IS_NOT_FOOD = 0.3
+
 const SETTING_DEFAULTS = {
   founders: 'diverse' as FounderChoice,
   mutationScale: 1,
@@ -273,6 +293,10 @@ function useEvolveTab(
         regime,
         sensorNoise,
         bounds: arena,
+        energy: {
+          ...DEFAULT_CONTINUOUS_PARAMS.energy,
+          ambientIncome: regime === 'food' ? 0 : AMBIENT_WHEN_LIGHT_IS_NOT_FOOD,
+        },
         food: {
           ...DEFAULT_CONTINUOUS_PARAMS.food,
           strength: patchSize,
@@ -485,6 +509,12 @@ function useEvolveTab(
             onChange={(v) => {
               setRegime(v)
               applyLive({ regime: v })
+              // Switching mid-run has to bring the grazing with it, or the
+              // population starves rather than adapting.
+              world.params.energy = {
+                ...world.params.energy,
+                ambientIncome: v === 'food' ? 0 : AMBIENT_WHEN_LIGHT_IS_NOT_FOOD,
+              }
             }}
           />
           <Slider
