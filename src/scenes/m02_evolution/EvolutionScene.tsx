@@ -521,9 +521,14 @@ function useLineagesTab(
       >
         <TabBar tab={tab} onChange={setTab} />
         <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.45 }}>
-          Four populations someone else evolved. Run them, put lights wherever you
-          like, and work out which ones behave alike — <b>before</b> you reveal
-          anything.
+          Four populations someone else evolved. Run them and work out which ones
+          behave alike — <b>before</b> you reveal anything.
+        </p>
+        <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.45 }}>
+          <b>Left-click the floor</b> to put a light down, <b>right-click</b> to take
+          one away — including part-way through a run. Lights here stay exactly
+          where you put them and never run out, so a test you design can be run
+          again and get the same answer.
         </p>
 
         <div style={{ display: 'flex', gap: 6 }}>
