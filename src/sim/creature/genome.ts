@@ -96,7 +96,7 @@ export function genomeToWeights(g: Genome): SensorimotorWeights {
  * crossed ones, blue the resting drive. So two creatures the same colour *are*
  * wired the same, and a population converging on one colour is a population
  * whose wiring is converging — which is what makes evolution watchable in the
- * pit rather than only in a panel.
+ * arena rather than only in a panel.
  *
  * This also settles a debt from Lab 1, where colour identified the variety and
  * students spent an hour learning to trust it. Making colour neutral in Lab 2

@@ -109,6 +109,8 @@ Separability 9.9% on arrival and 0.25 on distance, against bounds of 15% and 0.9
 
 Ordered by how badly it is currently wrong.
 
+**"Pit" is now "arena" throughout the app.** One line in the Lab 2 handout says pit — Part 1 step 1, *"place three or four lights around the floor of the pit"* — and that sentence is being rewritten anyway (see below). Worth knowing that **Lab 1's handout says "pit" three times** (lines 8, 29 and 65 of `vehicles_lab.md`): the app and that handout now disagree, so either Lab 1's wording follows, or Lab 2 introduces the new word explicitly. Lab 1's uses are load-bearing — they explain the steep walls and the rim — so they cannot simply be dropped.
+
 **Part 0 — the four "what's new" bullets all need rewriting.**
 - Food is not "a light you sit in". It is a patch that **drifts**, delivers a steady flow **shared among whoever is feeding on it**, and never runs out. Crowding costs.
 - There are **no generations**. Creatures are born when there is room and die of old age; the pit holds a fixed number.

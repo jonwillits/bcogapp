@@ -7,10 +7,13 @@ import type { Source } from '../sim/world/source'
 export const ORB_HOVER = 0.7
 
 /**
- * A stimulus "light": an emissive sphere with a soft point light and a ground
- * glow. Purely visual — it carries no pointer handlers so add/remove clicks
- * pass through to the terrain (see Terrain.tsx). Gently bobs so it reads as
- * active.
+ * A stimulus "light": an emissive sphere with a soft point light. Purely visual
+ * — it carries no pointer handlers so add/remove clicks pass through to the
+ * terrain (see Terrain.tsx). Gently bobs so it reads as active.
+ *
+ * It used to cast a ring on the ground beneath it. That was dropped: it read as
+ * a reflection, which implied a hard surface the arena does not have, and it
+ * cluttered the floor once several patches were drifting across it.
  *
  * `source.y` is the orb's own height, so a light placed on the rim renders up
  * there rather than buried in the cliff. The ground ring is offset back down by
@@ -43,14 +46,6 @@ export function SourceMesh({ source }: { source: Source }) {
         distance={14}
         decay={2}
       />
-      <mesh
-        rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -ORB_HOVER + 0.02, 0]}
-        raycast={() => null}
-      >
-        <ringGeometry args={[r * 1.4, r * 2, 32]} />
-        <meshBasicMaterial color="#ffb84d" transparent opacity={0.3} />
-      </mesh>
     </group>
   )
 }

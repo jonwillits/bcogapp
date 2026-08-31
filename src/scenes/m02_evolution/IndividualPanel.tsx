@@ -10,6 +10,16 @@ const GENE_ROW: React.CSSProperties = {
   justifyContent: 'space-between',
   fontFamily: 'var(--font-mono)',
   fontSize: 11.5,
+  // Indented under whichever heading owns it. Without this the genes and the
+  // creature's current state sat at the same level and read as one list, which
+  // said that age and stored energy were inherited.
+  paddingLeft: 10,
+}
+
+const SECTION_LABEL: React.CSSProperties = {
+  fontSize: 12,
+  color: 'var(--text-muted)',
+  marginBottom: 3,
 }
 
 /**
@@ -99,9 +109,7 @@ export function IndividualPanel({
       />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 2 }}>
-          Its genes
-        </div>
+        <div style={SECTION_LABEL}>Its genes — inherited, and fixed for life</div>
         {gene('sensor L → actuator L', genome.wLL)}
         {gene('sensor L → actuator R', genome.wLR)}
         {gene('sensor R → actuator L', genome.wRL)}
@@ -128,27 +136,31 @@ export function IndividualPanel({
             {Math.round(genome.hue)}°
           </span>
         </div>
-        {energy !== undefined && (
-          <div style={{ ...GENE_ROW, marginTop: 4 }}>
-            <span style={{ color: 'var(--text-muted)' }}>energy stored</span>
-            <span>{fmt(energy)}</span>
-          </div>
-        )}
-        {age !== undefined && lifespan !== undefined && (
-          <div style={GENE_ROW}>
-            <span style={{ color: 'var(--text-muted)' }}>age</span>
-            <span>
-              {age.toFixed(0)}s of {lifespan.toFixed(0)}s
-            </span>
-          </div>
-        )}
       </div>
+
+      {(energy !== undefined || (age !== undefined && lifespan !== undefined)) && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <div style={SECTION_LABEL}>Where it is now — changing every moment</div>
+          {energy !== undefined && (
+            <div style={GENE_ROW}>
+              <span style={{ color: 'var(--text-muted)' }}>energy stored</span>
+              <span>{fmt(energy)}</span>
+            </div>
+          )}
+          {age !== undefined && lifespan !== undefined && (
+            <div style={GENE_ROW}>
+              <span style={{ color: 'var(--text-muted)' }}>age</span>
+              <span>
+                {age.toFixed(0)}s of {lifespan.toFixed(0)}s
+              </span>
+            </div>
+          )}
+        </div>
+      )}
 
       {lineage && (
         <div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>
-            Its ancestry
-          </div>
+          <div style={SECTION_LABEL}>Its ancestry</div>
           {treeRevealed ? (
             <LineageTree
               lineage={lineage}

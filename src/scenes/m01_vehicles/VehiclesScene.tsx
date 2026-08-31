@@ -96,7 +96,7 @@ export default function VehiclesScene() {
     world.setVehicleTuning(selectedId, patch)
     bump()
   }
-  // `groundY` is the surface that was clicked: 0 on the pit floor, RIM_HEIGHT
+  // `groundY` is the surface that was clicked: 0 on the arena floor, RIM_HEIGHT
   // on the plateau. Rim lights are allowed on purpose — a creature will drive
   // at one and bounce off the wall, never reaching it.
   const addSource = (x: number, groundY: number, z: number) => {

@@ -6,6 +6,7 @@ import { SceneCanvasLayout } from '../../components/SceneCanvasLayout'
 import { Panel } from '../../components/Panel'
 import { Button, Slider, SelectControl, Toggle } from '../../components/controls'
 import { StepControls } from '../../components/StepControls'
+import { Section } from '../../components/Section'
 import { CameraRig } from '../../components/CameraRig'
 import { VehicleMesh } from '../../components/VehicleMesh'
 import { SourceMesh, ORB_HOVER } from '../../components/SourceMesh'
@@ -356,127 +357,89 @@ function useEvolveTab(
       />
     ) : (
       <Panel title="Controls" style={{ width: 276, maxHeight: '82vh', overflowY: 'auto' }}>
-        <Slider
-          label="Mutation rate"
-          value={mutationScale}
-          min={0}
-          max={3}
-          step={0.1}
-          onChange={(v) => {
-            setMutationScale(v)
-            applyLive({ mutationScale: v })
-          }}
-        />
-        <Toggle
-          label="Inheritance"
-          checked={inheritance}
-          onChange={(v) => {
-            setInheritance(v)
-            applyLive({ inheritance: v })
-          }}
-        />
-        <Toggle
-          label="Selection"
-          checked={selection}
-          onChange={(v) => {
-            setSelection(v)
-            applyLive({ selection: v })
-          }}
-        />
-        <Slider
-          label="How many the pit holds"
-          value={capacity}
-          min={6}
-          max={40}
-          step={2}
-          format={(v) => v.toFixed(0)}
-          onChange={setCapacity}
-        />
-        <SelectControl
-          label="Light regime"
-          value={regime}
-          options={[
-            { value: 'food', label: 'Food' },
-            { value: 'neutral', label: 'Neutral' },
-            { value: 'poison', label: 'Poison' },
-          ]}
-          onChange={(v) => {
-            setRegime(v)
-            applyLive({ regime: v })
-          }}
-        />
-        <SelectControl
-          label="Founders"
-          value={founders}
-          options={[
-            { value: 'diverse', label: 'Diverse mix' },
-            { value: 'P', label: 'Pool P — weak light-chasers' },
-            { value: 'Q', label: 'Pool Q — light-fleers' },
-          ]}
-          onChange={setFounders}
-        />
-        <Slider
-          label="Sensor noise"
-          value={sensorNoise}
-          min={0}
-          max={0.6}
-          step={0.05}
-          onChange={(v) => {
-            setSensorNoise(v)
-            applyLive({ sensorNoise: v })
-          }}
-        />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Run seed</span>
-          <input
-            value={seed}
-            onChange={(e) => setSeed(Number(e.target.value) >>> 0)}
-            style={{
-              width: '100%',
-              padding: '4px 6px',
-              fontFamily: 'var(--font-mono)',
-              fontSize: 12,
-              background: 'var(--bg)',
-              color: 'var(--text)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-sm)',
+        <Section
+          title="What the creatures inherit"
+          defaultOpen
+          hint="The three things the reading says evolution needs. Switch one off and see what stops."
+        >
+          <Slider
+            label="Mutation rate"
+            value={mutationScale}
+            min={0}
+            max={3}
+            step={0.1}
+            onChange={(v) => {
+              setMutationScale(v)
+              applyLive({ mutationScale: v })
             }}
           />
-        </div>
-        <div style={{ display: 'flex', gap: 6 }}>
-          <Button onClick={() => reset(seed)} variant="primary">
-            Reset (same seed)
-          </Button>
-          <Button onClick={() => reset(randomSeed())}>Reset</Button>
-        </div>
-        <p style={{ margin: 0, fontSize: 11.5, color: 'var(--text-muted)', lineHeight: 1.45 }}>
-          <b>Reset (same seed)</b> redraws the identical founding population, so you
-          can change exactly one switch and be sure nothing else moved. The pit's
-          capacity and the founders take effect on the next reset; everything else
-          applies at once.
-        </p>
-
-        <div
-          style={{
-            borderTop: '1px solid var(--border)',
-            paddingTop: 10,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 10,
-          }}
-        >
-          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-            The view
-          </div>
-          <ViewButtons
-            onPick={(v) => setView((s) => ({ view: v, nonce: s.nonce + 1 }))}
+          <Toggle
+            label="Inheritance"
+            checked={inheritance}
+            onChange={(v) => {
+              setInheritance(v)
+              applyLive({ inheritance: v })
+            }}
           />
-
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-            The world itself — nothing asks you to change these
-          </div>
+          <Toggle
+            label="Selection"
+            checked={selection}
+            onChange={(v) => {
+              setSelection(v)
+              applyLive({ selection: v })
+            }}
+          />
+          <SelectControl
+            label="Founders"
+            value={founders}
+            options={[
+              { value: 'diverse', label: 'Diverse mix' },
+              { value: 'P', label: 'Pool P — weak light-chasers' },
+              { value: 'Q', label: 'Pool Q — light-fleers' },
+            ]}
+            onChange={setFounders}
+          />
           <Slider
-            label="Size of the pit"
+            label="Sensor noise"
+            value={sensorNoise}
+            min={0}
+            max={0.6}
+            step={0.05}
+            onChange={(v) => {
+              setSensorNoise(v)
+              applyLive({ sensorNoise: v })
+            }}
+          />
+        </Section>
+
+        <Section
+          title="The world they live in"
+          hint="Nothing asks you to change these. A bigger arena and smaller patches make food harder to find and slow the creatures down; adding a patch or two puts it back."
+        >
+          <SelectControl
+            label="Light regime"
+            value={regime}
+            options={[
+              { value: 'food', label: 'Food' },
+              { value: 'neutral', label: 'Neutral' },
+              { value: 'poison', label: 'Poison' },
+            ]}
+            onChange={(v) => {
+              setRegime(v)
+              applyLive({ regime: v })
+            }}
+          />
+          <Slider
+            label="How many the arena holds"
+            value={capacity}
+            min={6}
+            max={40}
+            step={2}
+            format={(v) => v.toFixed(0)}
+            onChange={setCapacity}
+          />
+          <Slider
+            label="Size of the arena"
             value={arena}
             min={6}
             max={14}
@@ -506,13 +469,47 @@ function useEvolveTab(
             format={(v) => v.toFixed(0)}
             onChange={setPatchCount}
           />
+        </Section>
+
+        <Section
+          title="This run"
+          defaultOpen
+          hint="Reset (same seed) redraws the identical founding population, so you can change exactly one switch and be sure nothing else moved."
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Run seed</span>
+            <input
+              value={seed}
+              onChange={(e) => setSeed(Number(e.target.value) >>> 0)}
+              style={{
+                width: '100%',
+                padding: '4px 6px',
+                fontFamily: 'var(--font-mono)',
+                fontSize: 12,
+                background: 'var(--bg)',
+                color: 'var(--text)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
+              }}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <Button onClick={() => reset(seed)} variant="primary">
+              Reset (same seed)
+            </Button>
+            <Button onClick={() => reset(randomSeed())}>Reset</Button>
+          </div>
           <p style={{ margin: 0, fontSize: 11.5, color: 'var(--text-muted)', lineHeight: 1.45 }}>
-            A bigger pit and smaller patches mean food is harder to find, and the
-            creatures breed more slowly. Adding a patch or two puts it back. Pit
-            size and patch count take effect on the next reset; patch size changes
-            straight away.
+            The arena's size and capacity, the number of patches, and the founders
+            all take effect on the next reset; everything else applies at once.
           </p>
-        </div>
+        </Section>
+
+        <Section title="The view" hint="Drag to orbit and scroll to zoom also work.">
+          <ViewButtons
+            onPick={(v) => setView((st) => ({ view: v, nonce: st.nonce + 1 }))}
+          />
+        </Section>
       </Panel>
     ),
     bottom: (

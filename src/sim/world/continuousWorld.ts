@@ -86,7 +86,7 @@ export interface ContinuousParams {
    */
   founderHueShift: number
   /**
-   * How many creatures the pit supports. **Not a backstop — a mechanism.**
+   * How many creatures the arena supports. **Not a backstop — a mechanism.**
    *
    * When the world is full nobody is born; a creature that has enough energy to
    * reproduce simply waits, and the moment a slot opens the creature with the
@@ -365,7 +365,7 @@ export class ContinuousWorld {
     const vehicle = this.world.addWeightedVehicle(
       genomeToWeights(genome),
       // Body colour is read off the wiring genes, so what a creature looks like
-      // in the pit matches where its dot sits on the population plane. It was
+      // in the arena matches where its dot sits on the population plane. It was
       // spawned with the *mark* colour until Jon noticed the two disagreeing.
       bodyColour(genome),
       pose,

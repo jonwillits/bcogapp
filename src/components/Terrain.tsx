@@ -15,7 +15,7 @@ const SIZE = 48 // extent of the surrounding plateau
 export const RIM_HEIGHT = 2
 
 /**
- * The arena as a rectangular pit: a flat floor, **vertical** cliff walls, and a
+ * The arena: a flat floor sunk below a surrounding plateau, **vertical** cliff walls, and a
  * flat plateau on top.
  *
  * Built from three separate surfaces rather than one displaced plane, so the
@@ -38,7 +38,7 @@ export function Terrain({
   onAdd: (x: number, y: number, z: number) => void
   onRemoveNearest: (x: number, z: number) => void
 }) {
-  // A flat frame at rim height with a square hole where the pit is.
+  // A flat frame at rim height with a square hole where the arena is.
   const plateau = useMemo(() => {
     const S = SIZE / 2
     const shape = new THREE.Shape()
@@ -93,7 +93,7 @@ export function Terrain({
 
   return (
     <group>
-      {/* pit floor — the only ground the creatures can actually occupy */}
+      {/* arena floor — the only ground the creatures can actually occupy */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} {...handlers}>
         <planeGeometry args={[bounds * 2, bounds * 2]} />
         <meshStandardMaterial color="#0b111c" roughness={1} />

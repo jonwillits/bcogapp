@@ -43,13 +43,14 @@ export function WiringDiagram({
   actuators: ActuatorOutput
 }) {
   // Extra vertical room so each node's live value sits outside its circle
-  // (sensor values above, actuator values below) without touching the edge.
+  // (sensor values above, actuator values below) without touching the edge, and
+  // so the two headings have somewhere to go.
   const W = 236
-  const H = 176
-  const sL = { x: 58, y: 46 }
-  const sR = { x: 178, y: 46 }
-  const aL = { x: 58, y: 132 }
-  const aR = { x: 178, y: 132 }
+  const H = 204
+  const sL = { x: 58, y: 62 }
+  const sR = { x: 178, y: 62 }
+  const aL = { x: 58, y: 148 }
+  const aR = { x: 178, y: 148 }
 
   /**
    * Thickness tracks the live *drive* through the connection — weight × sensor.

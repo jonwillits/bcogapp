@@ -79,7 +79,7 @@ export interface ObserveOptions {
    * stay in the range where settling is what happens.
    */
   lightStrength?: number
-  /** Where the ring of vehicles starts, as a fraction of the pit half-width. */
+  /** Where the ring of vehicles starts, as a fraction of the arena half-width. */
   startRadius?: number
   seed?: number
 }

@@ -20,8 +20,12 @@ export function VehicleMesh({
   selected: boolean
   onSelect: (id: number) => void
   /**
-   * Colour of the neutral trait, worn as a bead above the body. Omitted by
-   * Module 1, which has no such gene.
+   * Colour of the neutral trait, worn as a bead on the creature's tail — fixed
+   * to the body, so it turns with it. Deliberately *not* part of the floating
+   * energy readout above: the two say completely different things, and putting
+   * them in one widget invited reading the bead as part of the bar.
+   *
+   * Omitted by Module 1, which has no such gene.
    */
   mark?: string
   /**
@@ -121,27 +125,25 @@ export function VehicleMesh({
           emissiveIntensity={0}
         />
       </mesh>
-      {/* Energy bar and the neutral mark, both world-aligned. */}
-      {(energy !== undefined || mark) && (
+      {/* The neutral mark: a bead on the tail, turning with the body. */}
+      {mark && (
+        <mesh position={[-0.3, 0.12, 0]} raycast={() => null}>
+          <sphereGeometry args={[0.1, 14, 14]} />
+          <meshStandardMaterial color={mark} emissive={mark} emissiveIntensity={0.45} />
+        </mesh>
+      )}
+      {/* Energy, floating above and kept world-aligned so it reads the same
+          however the creature is pointing. */}
+      {energy !== undefined && (
         <group ref={overlay} position={[0, 0.52, 0]}>
-          {energy !== undefined && (
-            <>
-              <mesh position={[0, 0, 0]} raycast={() => null}>
-                <boxGeometry args={[0.62, 0.03, 0.1]} />
-                <meshBasicMaterial color="#0b111c" />
-              </mesh>
-              <mesh ref={bar} position={[0, 0.001, 0]} raycast={() => null}>
-                <boxGeometry args={[0.6, 0.05, 0.12]} />
-                <meshBasicMaterial color={palette.approach} />
-              </mesh>
-            </>
-          )}
-          {mark && (
-            <mesh position={[0, 0.13, 0]} raycast={() => null}>
-              <sphereGeometry args={[0.09, 12, 12]} />
-              <meshStandardMaterial color={mark} emissive={mark} emissiveIntensity={0.5} />
-            </mesh>
-          )}
+          <mesh raycast={() => null}>
+            <boxGeometry args={[0.62, 0.03, 0.1]} />
+            <meshBasicMaterial color="#0b111c" />
+          </mesh>
+          <mesh ref={bar} position={[0, 0.001, 0]} raycast={() => null}>
+            <boxGeometry args={[0.6, 0.05, 0.12]} />
+            <meshBasicMaterial color={palette.approach} />
+          </mesh>
         </group>
       )}
       {/* selection ring */}

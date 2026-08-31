@@ -247,11 +247,11 @@ export function lightStrength(l: FoodLight, p: FoodParams): number {
 }
 
 /**
- * A point on the pit floor at least `minGap` from every live light and from the
+ * A point on the arena floor at least `minGap` from every live light and from the
  * centre-out margin, drawn from the run's seeded stream.
  *
  * Gives up after a fixed number of tries rather than looping until it succeeds:
- * with a small pit and many lights there may be no such point, and a simulation
+ * with a small arena and many lights there may be no such point, and a simulation
  * that can hang because the student raised a slider is worse than one that
  * occasionally places two lights close together.
  */

@@ -46,7 +46,7 @@ export const REGIME_SIGN: Record<LightRegime, number> = {
 /**
  * Energy is spent as well as gained, and spent faster the harder a vehicle
  * drives. Without a movement cost a high-bias vehicle that simply races around
- * the pit at random would out-earn a well-steered one by sheer coverage, and
+ * the arena at random would out-earn a well-steered one by sheer coverage, and
  * selection would optimize for speed rather than for steering — which is not
  * the thing the lab is about.
  */

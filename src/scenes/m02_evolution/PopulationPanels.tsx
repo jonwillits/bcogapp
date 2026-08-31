@@ -195,15 +195,16 @@ export function BirthRatePanel({
   samples: readonly ContinuousSample[]
   populationCap: number
 }) {
-  if (samples.length < 5) {
-    return (
-      <div style={CARD}>
-        <p style={{ ...CAPTION, margin: 0 }}>
-          Press play. Once creatures start being born, their rate appears here.
-        </p>
-      </div>
-    )
-  }
+  /**
+   * The empty state occupies exactly the same box as the filled one.
+   *
+   * Rendering a short paragraph until the first births arrive and then swapping
+   * in a plot and four readouts shoved every panel below it down the page the
+   * moment the run got going — which is precisely when a student is watching
+   * something else and does not want the layout moving under them.
+   */
+  const empty = samples.length < 5
+
   // Births in each trailing minute, sampled once a second.
   const WINDOW = 60
   const rate: number[] = []
@@ -213,25 +214,45 @@ export function BirthRatePanel({
     rate.push(((samples[i].births - back.births) / span) * 60)
   }
   const last = samples[samples.length - 1]
-  const recent = rate[rate.length - 1]
-  const early = rate[Math.min(rate.length - 1, WINDOW)]
+  const recent = rate[rate.length - 1] ?? 0
+  const early = rate[Math.min(rate.length - 1, WINDOW)] ?? 0
 
   return (
     <div style={{ ...CARD, display: 'flex', flexDirection: 'column', gap: 7 }}>
-      <Plot
-        width={250}
-        height={80}
-        yMin={0}
-        series={[{ color: palette.accent, data: rate }]}
-      />
+      <div style={{ position: 'relative' }}>
+        <Plot
+          width={250}
+          height={80}
+          yMin={0}
+          series={[{ color: palette.accent, data: empty ? [] : rate }]}
+        />
+        {empty && (
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              textAlign: 'center',
+              padding: '0 12px',
+              fontSize: 11.5,
+              color: 'var(--text-muted)',
+              lineHeight: 1.4,
+            }}
+          >
+            Press play. Once creatures start being born, their rate appears here.
+          </div>
+        )}
+      </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <ValueReadout label="Births per minute, early on" value={early} />
-        <ValueReadout label="Births per minute, now" value={recent} />
-        <ValueReadout label="Creatures alive" value={last.population} />
-        <ValueReadout label="Born since the start" value={last.births} />
+        <ValueReadout label="Births per minute, early on" value={empty ? 0 : early} />
+        <ValueReadout label="Births per minute, now" value={empty ? 0 : recent} />
+        <ValueReadout label="Creatures alive" value={empty ? 0 : (last?.population ?? 0)} />
+        <ValueReadout label="Born since the start" value={empty ? 0 : (last?.births ?? 0)} />
       </div>
       <p style={{ ...CAPTION, margin: 0 }}>
-        The pit supports {populationCap} at a time, so a new creature is born only
+        The arena supports {populationCap} at a time, so a new creature is born only
         when one dies. How fast that happens is how well the population is doing.
       </p>
     </div>
