@@ -27,6 +27,9 @@ export interface FoodLight {
   capacity: number
   /** Sim time at which this light moves on — `ephemeral` mode only. */
   expiresAt: number
+  /** Velocity across the floor — `drifting` mode only. */
+  vx: number
+  vz: number
   /**
    * While a light is exhausted it is out: removed from the world, sensed by
    * nobody, and due back at this sim time somewhere else on the floor. `null`
@@ -48,11 +51,28 @@ export interface FoodLight {
  * **ephemeral** — a light delivers energy at a steady rate and moves on a timer
  * whether or not anything ate it. Total influx is then `count x flowRate`,
  * independent of how many creatures there are, which is a far better regulator.
- * A light's flow is shared among whoever is feeding on it, in proportion to how
- * close each one is, so crowding visibly costs — and the countdown to a light
- * moving is something a student can watch and time rather than infer.
+ * But food that teleports is a large step away from the realism the continuous
+ * life cycle buys, and it looks it.
+ *
+ * **regrowing** — patches, grazed down and recovering in place. Nothing ever
+ * moves. A patch a creature has been feeding on is dim and slowly refills while
+ * it is left alone; one nobody has touched is full and bright. This keeps the
+ * property that made `ephemeral` worth having — sustained influx is
+ * `count x regrowthRate`, independent of how many creatures there are — while
+ * being *visible*, since a patch's brightness simply is how much food is in it.
+ * It still forces movement, because grazing a patch flat means going to another
+ * one, and it makes a patch a student plants stay planted. Measured, though, it
+ * barely selects for anything: food that regrows steadily under you means
+ * camping one patch pays as well as foraging does.
+ *
+ * **drifting** — patches that wander. Each delivers a steady flow like
+ * `ephemeral`, so influx is still `count x flowRate` and independent of
+ * population, but instead of vanishing and reappearing they move slowly and
+ * continuously across the floor. Nothing teleports, and following food that is
+ * going somewhere is a genuine steering problem rather than a search that
+ * restarts from nothing.
  */
-export type FoodMode = 'depleting' | 'ephemeral'
+export type FoodMode = 'depleting' | 'ephemeral' | 'regrowing' | 'drifting'
 
 export interface FoodParams {
   mode: FoodMode
@@ -60,6 +80,15 @@ export interface FoodParams {
   flowRate: number
   /** ephemeral: seconds a light stays before moving elsewhere. */
   lifetime: number
+  /**
+   * regrowing: energy a patch recovers per second, up to its capacity.
+   *
+   * The one number that sets how much food the world contains, since sustained
+   * influx cannot exceed `count x regrowthRate` however many mouths there are.
+   */
+  regrowthRate: number
+  /** drifting: units per second a patch wanders across the floor. */
+  driftSpeed: number
   /** How many lights the respawn pool keeps alight on the floor. */
   count: number
   /** Energy in a fresh light. */
@@ -104,6 +133,8 @@ export const DEFAULT_FOOD_PARAMS: FoodParams = {
   mode: 'depleting',
   flowRate: 1.6,
   lifetime: 8,
+  regrowthRate: 0.8,
+  driftSpeed: 0.5,
   count: 4,
   capacity: 9,
   strength: 4,
@@ -118,8 +149,37 @@ export function freshLight(
   source: Source,
   capacity: number,
   expiresAt = Infinity,
+  vx = 0,
+  vz = 0,
 ): FoodLight {
-  return { source, store: capacity, capacity, respawnAt: null, expiresAt }
+  return { source, store: capacity, capacity, respawnAt: null, expiresAt, vx, vz }
+}
+
+/**
+ * Move the drifting patches one step, turning them back at the walls.
+ *
+ * Reflection rather than wrapping: a patch that vanished at one edge and
+ * reappeared at the other would be the teleport this mode exists to avoid.
+ */
+export function driftLights(
+  lights: readonly FoodLight[],
+  bounds: number,
+  dt: number,
+): void {
+  const margin = 1.2
+  for (const l of lights) {
+    const s = l.source
+    s.x += l.vx * dt
+    s.z += l.vz * dt
+    if (s.x < -bounds + margin || s.x > bounds - margin) {
+      l.vx = -l.vx
+      s.x = Math.max(-bounds + margin, Math.min(bounds - margin, s.x))
+    }
+    if (s.z < -bounds + margin || s.z > bounds - margin) {
+      l.vz = -l.vz
+      s.z = Math.max(-bounds + margin, Math.min(bounds - margin, s.z))
+    }
+  }
 }
 
 /**
@@ -144,8 +204,9 @@ export function harvest(
 
   lights.forEach((l, li) => {
     if (l.respawnAt !== null) return
+    const grazed = p.mode === 'depleting' || p.mode === 'regrowing'
     const dim =
-      p.mode === 'depleting' && p.deplete
+      grazed && p.deplete
         ? p.dimFloor +
           (1 - p.dimFloor) * Math.max(0, Math.min(1, l.store / l.capacity))
         : 1
@@ -159,7 +220,7 @@ export function harvest(
     })
 
     let scale = 1
-    if (p.mode === 'ephemeral') {
+    if (p.mode === 'ephemeral' || p.mode === 'drifting') {
       const wanted = raw.reduce((a, b) => a + b, 0)
       if (wanted > p.flowRate) scale = p.flowRate / wanted
     }
@@ -167,7 +228,7 @@ export function harvest(
     for (let i = 0; i < raw.length; i++) {
       const got = raw[i] * scale * dt
       intake[i] += got
-      if (p.mode === 'depleting') drawn[li] += got
+      if (grazed) drawn[li] += got
     }
   })
 

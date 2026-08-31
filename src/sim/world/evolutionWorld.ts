@@ -474,6 +474,8 @@ export class EvolutionWorld {
         capacity: l.capacity,
         respawnAt: l.respawnAt,
         expiresAt: l.expiresAt,
+        vx: l.vx,
+        vz: l.vz,
       }
     })
 

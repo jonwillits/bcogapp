@@ -15,7 +15,7 @@
  *   PROBE=1 npx vitest run --disable-console-intercept -t "continuous"
  */
 import { it } from 'vitest'
-import { ContinuousWorld, type ContinuousParams } from './continuousWorld'
+import { ContinuousWorld, DEFAULT_CONTINUOUS_PARAMS, type ContinuousParams } from './continuousWorld'
 import { DEFAULT_FOOD_PARAMS } from './food'
 
 const f = (n: number, w = 6) => n.toFixed(2).padStart(w)
@@ -748,3 +748,221 @@ it('phase B: how long until the wiring is strong enough to express itself', () =
     console.log(`${f(seconds, 4)} | ${row.join(' | ')}`)
   }
 })
+
+it('phase C: regrowing patches instead of teleporting lights', () => {
+  /**
+   * Nothing moves. A patch is grazed down and recovers in place, so the world
+   * keeps the property that made ephemeral food worth having -- sustained
+   * influx is count x regrowthRate, independent of population -- while being
+   * visible and organic instead of abrupt.
+   */
+  console.log(
+    '\nregrow cap count | ext | pop | births | approach | vs noSel | markConc | parity | bias | speed',
+  )
+  for (const regrowthRate of [0.6, 1.0, 1.6]) {
+    for (const capacity of [6, 12, 24]) {
+      for (const count of [4, 6]) {
+        const params = {
+          ...DEFAULT_CONTINUOUS_PARAMS,
+          food: {
+            ...DEFAULT_CONTINUOUS_PARAMS.food,
+            mode: 'regrowing' as const,
+            count,
+            capacity,
+            regrowthRate,
+          },
+        }
+        const runs = SEEDS.map((s) => run(s, params))
+        const offRuns = SEEDS.map((s) => run(s, { ...params, selection: false }))
+        const end = (w: ContinuousWorld) => w.samples[w.samples.length - 1]
+        const ap = (w: ContinuousWorld) => tail(w, (s) => s.approachFraction)
+        const marks = runs.map((w) => tail(w, (s) => s.hueConcentration))
+        const b = (founders: 'all-2b' | 'all-3a') =>
+          mean([1, 2, 3].map((s) => run(s, { ...params, mutationScale: 0 }, founders).births))
+        console.log(
+          `${f(regrowthRate, 6)} ${f(capacity, 3)} ${f(count, 5)} | ${String(
+            runs.filter((w) => w.extinct).length,
+          ).padStart(3)} | ${f(mean(runs.map((w) => end(w)?.population ?? 0)), 3)} | ${f(
+            mean(runs.map((w) => w.births)), 6,
+          )} | ${f(mean(runs.map(ap)), 8)} | ${f(
+            mean(runs.map((w, i) => ap(w) - ap(offRuns[i]))), 8,
+          )} | ${f(mean(marks), 8)} (${marks.filter((m) => m >= 0.8).length}/10) | ${f(
+            b('all-2b') / Math.max(0.01, b('all-3a')),
+          )} | ${f(mean(runs.map((w) => mean(w.creatures.map((c) => c.genome.bias)))), 4)} | ${f(
+            mean(
+              runs.map((w) =>
+                mean(
+                  w.creatures.map(
+                    (c) =>
+                      (Math.abs(c.vehicle.actuators.left) +
+                        Math.abs(c.vehicle.actuators.right)) / 2,
+                  ),
+                ),
+              ),
+            ), 5,
+          )}`,
+        )
+      }
+    }
+  }
+}, 1_800_000)
+
+it('phase C: spread the patches out', () => {
+  /**
+   * Six patches regrowing steadily is a world where camping one pays as well as
+   * foraging, so nothing selects for steering. Holding total influx roughly
+   * constant (count x regrowthRate) while raising the count spreads the same
+   * food over more places, so getting to a fresh patch takes travel and skill --
+   * and a high capacity means an untouched patch has accumulated a lot, which
+   * rewards arriving somewhere new.
+   */
+  console.log(
+    '\ncount regrow cap influx | ext | births | approach | vs noSel | markConc | parity | bias speed',
+  )
+  for (const [count, regrowthRate] of [[6, 0.6], [8, 0.45], [12, 0.3], [16, 0.22]] as const) {
+    for (const capacity of [12, 30, 60]) {
+      const params = {
+        ...DEFAULT_CONTINUOUS_PARAMS,
+        food: {
+          ...DEFAULT_CONTINUOUS_PARAMS.food,
+          mode: 'regrowing' as const,
+          count,
+          capacity,
+          regrowthRate,
+        },
+      }
+      const runs = SEEDS.map((s) => run(s, params))
+      const offRuns = SEEDS.map((s) => run(s, { ...params, selection: false }))
+      const ap = (w: ContinuousWorld) => tail(w, (s) => s.approachFraction)
+      const marks = runs.map((w) => tail(w, (s) => s.hueConcentration))
+      const b = (founders: 'all-2b' | 'all-3a') =>
+        mean([1, 2, 3].map((s) => run(s, { ...params, mutationScale: 0 }, founders).births))
+      console.log(
+        `${f(count, 5)} ${f(regrowthRate, 6)} ${f(capacity, 3)} ${f(
+          count * regrowthRate, 6,
+        )} | ${String(runs.filter((w) => w.extinct).length).padStart(3)} | ${f(
+          mean(runs.map((w) => w.births)), 6,
+        )} | ${f(mean(runs.map(ap)), 8)} | ${f(
+          mean(runs.map((w, i) => ap(w) - ap(offRuns[i]))), 8,
+        )} | ${f(mean(marks), 8)} (${marks.filter((m) => m >= 0.8).length}/10) | ${f(
+          b('all-2b') / Math.max(0.01, b('all-3a')),
+        )} | ${f(mean(runs.map((w) => mean(w.creatures.map((c) => c.genome.bias)))), 4)} ${f(
+          mean(
+            runs.map((w) =>
+              mean(
+                w.creatures.map(
+                  (c) =>
+                    (Math.abs(c.vehicle.actuators.left) + Math.abs(c.vehicle.actuators.right)) / 2,
+                ),
+              ),
+            ),
+          ), 5,
+        )}`,
+      )
+    }
+  }
+}, 1_800_000)
+
+it('phase C: drifting patches', () => {
+  /**
+   * Food that wanders instead of teleporting. Same economics as ephemeral --
+   * a steady flow per patch, so influx is count x flowRate and independent of
+   * population -- but following food that is going somewhere is a steering
+   * problem, where a patch vanishing is a search that restarts from nothing.
+   */
+  console.log(
+    '\ndrift flow count | ext | births | approach | vs noSel | markConc | parity | bias speed',
+  )
+  for (const driftSpeed of [0.25, 0.5, 0.9, 1.5]) {
+    for (const flowRate of [2.6, 3.4]) {
+      for (const count of [3, 4]) {
+        const params = {
+          ...DEFAULT_CONTINUOUS_PARAMS,
+          food: {
+            ...DEFAULT_CONTINUOUS_PARAMS.food,
+            mode: 'drifting' as const,
+            count,
+            flowRate,
+            driftSpeed,
+          },
+        }
+        const runs = SEEDS.map((s) => run(s, params))
+        const offRuns = SEEDS.map((s) => run(s, { ...params, selection: false }))
+        const ap = (w: ContinuousWorld) => tail(w, (s) => s.approachFraction)
+        const marks = runs.map((w) => tail(w, (s) => s.hueConcentration))
+        const b = (founders: 'all-2b' | 'all-3a') =>
+          mean([1, 2, 3].map((s) => run(s, { ...params, mutationScale: 0 }, founders).births))
+        console.log(
+          `${f(driftSpeed, 5)} ${f(flowRate, 4)} ${f(count, 5)} | ${String(
+            runs.filter((w) => w.extinct).length,
+          ).padStart(3)} | ${f(mean(runs.map((w) => w.births)), 6)} | ${f(
+            mean(runs.map(ap)), 8,
+          )} | ${f(mean(runs.map((w, i) => ap(w) - ap(offRuns[i]))), 8)} | ${f(
+            mean(marks), 8,
+          )} (${marks.filter((m) => m >= 0.8).length}/10) | ${f(
+            b('all-2b') / Math.max(0.01, b('all-3a')),
+          )} | ${f(mean(runs.map((w) => mean(w.creatures.map((c) => c.genome.bias)))), 4)} ${f(
+            mean(
+              runs.map((w) =>
+                mean(
+                  w.creatures.map(
+                    (c) =>
+                      (Math.abs(c.vehicle.actuators.left) + Math.abs(c.vehicle.actuators.right)) / 2,
+                  ),
+                ),
+              ),
+            ), 5,
+          )}`,
+        )
+      }
+    }
+  }
+}, 1_800_000)
+
+it('phase C: settle the drifting world', () => {
+  console.log('\ndrift flow count | ext | births | approach | vs noSel | markConc | parity | bias speed')
+  for (const driftSpeed of [0.4, 0.5, 0.65]) {
+    for (const flowRate of [3.0, 3.4, 4.0]) {
+      for (const count of [4, 5]) {
+        const params = {
+          ...DEFAULT_CONTINUOUS_PARAMS,
+          food: {
+            ...DEFAULT_CONTINUOUS_PARAMS.food,
+            mode: 'drifting' as const,
+            count,
+            flowRate,
+            driftSpeed,
+          },
+        }
+        const runs = SEEDS.map((s) => run(s, params))
+        const offRuns = SEEDS.map((s) => run(s, { ...params, selection: false }))
+        const ap = (w: ContinuousWorld) => tail(w, (s) => s.approachFraction)
+        const marks = runs.map((w) => tail(w, (s) => s.hueConcentration))
+        const b = (founders: 'all-2b' | 'all-3a') =>
+          mean([1, 2, 3].map((s) => run(s, { ...params, mutationScale: 0 }, founders).births))
+        console.log(
+          `${f(driftSpeed, 5)} ${f(flowRate, 4)} ${f(count, 5)} | ${String(
+            runs.filter((w) => w.extinct).length,
+          ).padStart(3)} | ${f(mean(runs.map((w) => w.births)), 6)} | ${f(
+            mean(runs.map(ap)), 8,
+          )} | ${f(mean(runs.map((w, i) => ap(w) - ap(offRuns[i]))), 8)} | ${f(
+            mean(marks), 8,
+          )} (${marks.filter((m) => m >= 0.8).length}/10) | ${f(
+            b('all-2b') / Math.max(0.01, b('all-3a')),
+          )} | ${f(mean(runs.map((w) => mean(w.creatures.map((c) => c.genome.bias)))), 4)} ${f(
+            mean(
+              runs.map((w) =>
+                mean(
+                  w.creatures.map(
+                    (c) =>
+                      (Math.abs(c.vehicle.actuators.left) + Math.abs(c.vehicle.actuators.right)) / 2,
+                  ),
+                ),
+              ),
+            ), 5,
+          )}`,
+        )
+      }
+    }
+  }
+}, 1_800_000)

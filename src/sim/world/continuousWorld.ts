@@ -17,6 +17,7 @@ import {
 import { VehicleWorld, type Vehicle } from './world'
 import {
   harvest,
+  driftLights,
   freshLight,
   lightStrength,
   respawnPoint,
@@ -118,13 +119,21 @@ export interface ContinuousParams {
  *
  * Two of these numbers were hard-won. **The reproduction threshold is the
  * selection lever** — at 6 a creature reaches it comfortably in a normal life and
- * almost everyone breeds, so the advantage over drift is +0.07; at 10 only good
- * foragers get to the front of the queue and it is +0.23. Push it to 12 and the
- * population starts dying out. And **the food lifetime is what keeps the
- * creatures moving**: mean evolved bias here is 0.48 against the generational
- * engine's 0.07–0.18, because food that moves every twelve seconds makes sitting
- * still unviable. That is the layer-3 near-inertia problem solved by the food
- * model rather than by a floor on the gene.
+ * almost everyone breeds, so the advantage over a drift control is +0.07; at 10
+ * only good foragers get to the front of the queue and it is far higher. Push it
+ * to 12 and the population starts dying out.
+ *
+ * And **moving food is what keeps the creatures moving**: mean evolved bias here
+ * is around 0.46 against the generational engine's 0.07–0.18, because food that
+ * will not stay put makes sitting still unviable. That is the layer-3
+ * near-inertia problem solved by the world rather than by a floor on the gene.
+ *
+ * The food *drifts* rather than teleporting, and the difference is not only
+ * cosmetic. Measured over ten seeds against a same-seed no-selection control:
+ * drifting +0.28, teleporting +0.23, regrowing-in-place roughly zero. Food that
+ * regrows steadily under you means camping one patch pays as well as foraging;
+ * food that is going somewhere is a steering problem, which is the thing these
+ * creatures are selected on.
  */
 export const DEFAULT_CONTINUOUS_PARAMS: ContinuousParams = {
   initialPopulation: 16,
@@ -145,10 +154,10 @@ export const DEFAULT_CONTINUOUS_PARAMS: ContinuousParams = {
   maxEnergy: 30,
   food: {
     ...DEFAULT_FOOD_PARAMS,
-    mode: 'ephemeral',
+    mode: 'drifting',
     count: 4,
-    flowRate: 3.4,
-    lifetime: 12,
+    flowRate: 3.0,
+    driftSpeed: 0.5,
   },
   energy: { ...DEFAULT_ENERGY_PARAMS },
   mutationRates: { ...DEFAULT_MUTATION_RATES },
@@ -262,7 +271,18 @@ export class ContinuousWorld {
       // world moves at the same instant for the whole run.
       const expiresAt =
         food.mode === 'ephemeral' ? this.rng.range(0, food.lifetime) : Infinity
-      this.lights.push(freshLight(src, food.capacity, expiresAt))
+      // Only drawn when it is actually used: an unconditional draw here would
+      // shift the whole run's random stream and invalidate every saved fixture.
+      const heading = food.mode === 'drifting' ? this.rng.range(0, Math.PI * 2) : 0
+      this.lights.push(
+        freshLight(
+          src,
+          food.capacity,
+          expiresAt,
+          food.mode === 'drifting' ? Math.cos(heading) * food.driftSpeed : 0,
+          food.mode === 'drifting' ? Math.sin(heading) * food.driftSpeed : 0,
+        ),
+      )
     }
   }
 
@@ -399,6 +419,8 @@ export class ContinuousWorld {
       capacity: l.capacity,
       respawnAt: l.respawnAt,
       expiresAt: l.expiresAt,
+      vx: l.vx,
+      vz: l.vz,
     }))
 
     child.world.vehicles = []
@@ -436,14 +458,20 @@ export class ContinuousWorld {
       dt,
     )
 
-    if (regime === 'food' && food.mode === 'depleting' && food.deplete) {
+    const grazed = food.mode === 'depleting' || food.mode === 'regrowing'
+    if (regime === 'food' && grazed && food.deplete) {
       this.lights.forEach((l, i) => {
-        if (l.respawnAt !== null || drawn[i] <= 0) return
-        l.store -= drawn[i]
+        if (l.respawnAt !== null) return
+        // Grazed down by whoever fed here, and recovering everywhere else.
+        l.store = Math.min(l.capacity, l.store - drawn[i] + food.regrowthRate * dt)
         if (l.store <= 0) {
           l.store = 0
-          l.respawnAt = this.time + food.respawnDelay
-          this.world.removeSource(l.source.id)
+          if (food.mode === 'depleting') {
+            // The old model: exhausted patches go out and reappear elsewhere.
+            l.respawnAt = this.time + food.respawnDelay
+            this.world.removeSource(l.source.id)
+          }
+          // A regrowing patch simply sits empty and recovers where it is.
         }
       })
     }
@@ -472,11 +500,15 @@ export class ContinuousWorld {
       c.age += dt
     })
 
-    if (regime === 'food' && food.mode === 'depleting' && food.deplete) {
+    if (regime === 'food' && grazed && food.deplete) {
+      // A patch's brightness *is* how much food is in it — the one mechanic
+      // that used to be hidden and now is not.
       for (const l of this.lights) {
         if (l.respawnAt === null) l.source.strength = lightStrength(l, food)
       }
     }
+
+    if (food.mode === 'drifting') driftLights(this.lights, this.params.bounds, dt)
 
     this.time += dt
     this.respawnDue()
