@@ -12,7 +12,7 @@ Two things did not change and are worth saying first, because everything else is
 
 **Spec §3** specifies discrete generations — all N creatures run for a fixed length, are ranked by energy, and the top half each leave two offspring.
 
-**What it is now.** Every creature carries an energy store and a lifespan. Energy rises while it feeds and falls while it lives and moves. When the store fills, it reproduces as soon as the pit has room; when its life runs out, it dies. Nothing resets and nothing is ranked. The pit supports a fixed number — 16 by default — and a creature is born only when a slot opens, which goes to whoever has the fullest store.
+**What it is now.** Every creature carries an energy store and a lifespan. Energy rises while it feeds and falls while it lives and moves. When the store fills, it reproduces as soon as the arena has room; when its life runs out, it dies. Nothing resets and nothing is ranked. The arena supports a fixed number — 16 by default — and a creature is born only when a slot opens, which goes to whoever has the fullest store.
 
 **Why.** Jon's judgement that students find discrete generations confusing, and it survived measurement: the continuous engine matches the generational one on every acceptance test and beats it on two.
 
@@ -24,7 +24,7 @@ Two things did not change and are worth saying first, because everything else is
 
 **Starvation almost never happens.** In every surviving configuration, essentially all deaths are old age. Selection works through *who gets to reproduce*, not who dies — which is literally the reading's "differential reproduction", but it is not the energy-bar-hits-bottom death the design imagined. Every setting that produced reliable starvation also killed the population.
 
-**A population of 6 survives about half the time.** Jon's call was that this is a good lesson rather than a bug, so Part 2's small-population experiment will sometimes end with an empty pit and the handout should say why.
+**A population of 6 survives about half the time.** Jon's call was that this is a good lesson rather than a bug, so Part 2's small-population experiment will sometimes end with an empty arena and the handout should say why.
 
 ## 2. Food: a depleting store became drifting patches
 
@@ -54,9 +54,9 @@ Second, the intermediate version had patches *vanish and reappear elsewhere on a
 
 **What it is now.** **Body colour is read off the wiring genes** — red for the straight connections, green for the crossed, blue for resting drive. Two creatures the same colour are wired the same way, and a population converging in colour is a population whose wiring is converging.
 
-**The neutral trait is still there, and it is still the same gene.** It is worn as a **mark** — a bead above the body — rather than as the body. No new gene was added; only what gets drawn where changed.
+**The neutral trait is still there, and it is still the same gene.** It is worn as a **mark** — a bead on the creature's tail — rather than as the body. No new gene was added; only what gets drawn where changed.
 
-**Why.** Lab 1 spent an hour teaching students that colour identifies the variety, and it was a perfectly reliable cue there. Making colour neutral in Lab 2 would have quietly punished exactly the habit Lab 1 taught — a student applying it would be confirmed within a run (colour and wiring sweep together) and only caught out across populations. Making colour diagnostic keeps the Lab 1 lesson honest and makes evolution watchable in the pit rather than only in a panel.
+**Why.** Lab 1 spent an hour teaching students that colour identifies the variety, and it was a perfectly reliable cue there. Making colour neutral in Lab 2 would have quietly punished exactly the habit Lab 1 taught — a student applying it would be confirmed within a run (colour and wiring sweep together) and only caught out across populations. Making colour diagnostic keeps the Lab 1 lesson honest and makes evolution watchable in the arena rather than only in a panel.
 
 **Consequence for Part 3.** In the Lineages tab, body colour is hidden along with the wiring, because it would now give the wiring away. It appears on **Reveal wiring**.
 
@@ -78,13 +78,13 @@ Each is documented in the test that carries it.
 
 **Fitness is no longer measured in energy.** Under a continuous life cycle energy is *homeostatic*: it climbs to the reproduction threshold, drops back, and climbs again, so a well-adapted creature does not sit at higher energy than a poor one — it cycles faster. Averaged over a population it is nearly flat whatever is happening. The readout is now **births per minute**, plus population and total born.
 
-**Controls that changed.** "Population size" is now the pit's carrying capacity, which is the same quantity doing a more honest job. "Step generation" is gone, there being no generations. Added, at Jon's suggestion and asked for by nothing in the handout: **size of the pit, size of a food patch, how many patches**, and two **camera view buttons** — a student who does not know the camera tilts has no way to discover it from a drag gesture.
+**Controls that changed.** "Population size" is now the arena's carrying capacity, which is the same quantity doing a more honest job. "Step generation" is gone, there being no generations. Added, at Jon's suggestion and asked for by nothing in the handout: **size of the arena, size of a food patch, how many patches**, and two **camera view buttons** — a student who does not know the camera tilts has no way to discover it from a drag gesture.
 
 **Speed.** The scene used to scale the *size* of a physics step, so turning speed up coarsened the simulation. Steps are now fixed and speed takes more of them, which allowed the cap to go from 3× to 20×. This matters: at the old cap, what the handout budgets one or two minutes for took nearly seven.
 
 **The lineage tree** has real time on its axis instead of generation columns, and a dendrogram layout. Lines are drawn in each creature's mark, not its body colour, because the tree's job is to show ancestry independently of wiring.
 
-**Other figures that moved from §8:** hue mutation σ from 4 to 2 (at 4 the fixation test passes in four seeds of ten, because a lineage keeps diversifying after it has swept); founder weights drawn at ±1.6 rather than the full ±3 (at full range too many founders are competent by luck and there is nowhere to improve to); §10's "pit radius" read as the pit's half-width, 9 units, since the pit is square.
+**Other figures that moved from §8:** hue mutation σ from 4 to 2 (at 4 the fixation test passes in four seeds of ten, because a lineage keeps diversifying after it has swept); founder weights drawn at ±1.6 rather than the full ±3 (at full range too many founders are competent by luck and there is nowhere to improve to); §10's "pit radius" read as the arena's half-width, 9 units, since the arena is square.
 
 ## 6. The four saved lineages
 
@@ -113,7 +113,7 @@ Ordered by how badly it is currently wrong.
 
 **Part 0 — the four "what's new" bullets all need rewriting.**
 - Food is not "a light you sit in". It is a patch that **drifts**, delivers a steady flow **shared among whoever is feeding on it**, and never runs out. Crowding costs.
-- There are **no generations**. Creatures are born when there is room and die of old age; the pit holds a fixed number.
+- There are **no generations**. Creatures are born when there is room and die of old age; the arena holds a fixed number.
 - **Colour now tells you the wiring** — say so explicitly, because Lab 1 taught them colour was a label and this is a different promise. The **mark** is the inherited trait that isn't about behaviour.
 - Right-click removes food; this is load-bearing for Q14 and was undiscoverable.
 
@@ -125,8 +125,8 @@ Ordered by how badly it is currently wrong.
 
 **Part 2 — all five experiments.**
 - "Run each for about 30 generations" → a duration.
-- The small-population experiment can now genuinely end in extinction. Jon wants that kept; it needs a sentence so a dead pit reads as a result rather than a crash.
-- "Population size" is now the pit's capacity.
+- The small-population experiment can now genuinely end in extinction. Jon wants that kept; it needs a sentence so an empty arena reads as a result rather than a crash.
+- "Population size" is now the arena's capacity.
 
 **Part 3.**
 - **Q13 asks for a resemblance that Q9 and Q10 never let the student identify.** It wants three answers — homology, analogy, and *neither* — but Q9 scopes the groupings to behaviour, so the student arrives holding W~X, W~Y and X~Y, which are homology, analogy and analogy. The "neither" is the shared *mark*, and nothing in Part 3 points at it. Suggested fix: one sub-question at Step 2, before they commit — *"Is there anything other than how they behave that makes any two of these look like they belong together? Say whether you think it means anything."* That arms the trap without giving it away and makes Q13's "what misled you" land.
