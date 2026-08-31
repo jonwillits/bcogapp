@@ -30,6 +30,30 @@ const FIXED_STEP = 1 / 30
 
 type FounderChoice = 'diverse' | 'P' | 'Q'
 
+/**
+ * Every control's starting value, in one place, so "Reset settings" has
+ * something true to restore to.
+ *
+ * These are the measured defaults — the ones the acceptance tests are written
+ * against. A student who has changed six things and lost track needs a way back
+ * to the world the lab is describing, and hunting each slider for the number it
+ * started on is not it.
+ */
+const SETTING_DEFAULTS = {
+  founders: 'diverse' as FounderChoice,
+  mutationScale: 1,
+  inheritance: true,
+  selection: true,
+  capacity: DEFAULT_CONTINUOUS_PARAMS.populationCap,
+  regime: 'food' as LightRegime,
+  sensorNoise: 0,
+  arena: DEFAULT_CONTINUOUS_PARAMS.bounds,
+  patchSize: DEFAULT_CONTINUOUS_PARAMS.food.strength,
+  patchCount: DEFAULT_CONTINUOUS_PARAMS.food.count,
+  patchSpeed: DEFAULT_CONTINUOUS_PARAMS.food.driftSpeed,
+  speed: 4,
+}
+
 function useBump() {
   const [, bump] = useReducer((x: number) => x + 1, 0)
   return bump
@@ -213,15 +237,16 @@ function useEvolveTab(
 ): TabSlots {
   const bump = useBump()
   const [seed, setSeed] = useState(() => randomSeed())
-  const [founders, setFounders] = useState<FounderChoice>('diverse')
-  const [mutationScale, setMutationScale] = useState(1)
-  const [inheritance, setInheritance] = useState(true)
-  const [selection, setSelection] = useState(true)
-  const [capacity, setCapacity] = useState(16)
-  const [regime, setRegime] = useState<LightRegime>('food')
-  const [sensorNoise, setSensorNoise] = useState(0)
+  const [founders, setFounders] = useState<FounderChoice>(SETTING_DEFAULTS.founders)
+  const [mutationScale, setMutationScale] = useState(SETTING_DEFAULTS.mutationScale)
+  const [inheritance, setInheritance] = useState(SETTING_DEFAULTS.inheritance)
+  const [selection, setSelection] = useState(SETTING_DEFAULTS.selection)
+  const [capacity, setCapacity] = useState(SETTING_DEFAULTS.capacity)
+  const [regime, setRegime] = useState<LightRegime>(SETTING_DEFAULTS.regime)
+  const [sensorNoise, setSensorNoise] = useState(SETTING_DEFAULTS.sensorNoise)
+  const [confirmSettingsReset, setConfirmSettingsReset] = useState(false)
   const [playing, setPlaying] = useState(false)
-  const [speed, setSpeed] = useState(4)
+  const [speed, setSpeed] = useState(SETTING_DEFAULTS.speed)
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [view, setView] = useState<{ view: ViewName; nonce: number }>({
     view: 'angled',
@@ -230,9 +255,10 @@ function useEvolveTab(
   // Things a student can play with but is never asked to. Defaults are the
   // measured ones; the point is that the world's settings are visible and
   // adjustable rather than fixed constants nobody can interrogate.
-  const [arena, setArena] = useState(9)
-  const [patchSize, setPatchSize] = useState(DEFAULT_CONTINUOUS_PARAMS.food.strength)
-  const [patchCount, setPatchCount] = useState(DEFAULT_CONTINUOUS_PARAMS.food.count)
+  const [arena, setArena] = useState(SETTING_DEFAULTS.arena)
+  const [patchSize, setPatchSize] = useState(SETTING_DEFAULTS.patchSize)
+  const [patchCount, setPatchCount] = useState(SETTING_DEFAULTS.patchCount)
+  const [patchSpeed, setPatchSpeed] = useState(SETTING_DEFAULTS.patchSpeed)
 
   const build = (withSeed: number) =>
     new ContinuousWorld(
@@ -251,6 +277,7 @@ function useEvolveTab(
           ...DEFAULT_CONTINUOUS_PARAMS.food,
           strength: patchSize,
           count: patchCount,
+          driftSpeed: patchSpeed,
         },
       },
       founders,
@@ -266,6 +293,37 @@ function useEvolveTab(
     if (patch.sensorNoise !== undefined) world.world.params.sensorNoise = patch.sensorNoise
     bump()
   }
+  /** Put every control back to the value the lab was written against. */
+  const resetSettings = () => {
+    setFounders(SETTING_DEFAULTS.founders)
+    setMutationScale(SETTING_DEFAULTS.mutationScale)
+    setInheritance(SETTING_DEFAULTS.inheritance)
+    setSelection(SETTING_DEFAULTS.selection)
+    setCapacity(SETTING_DEFAULTS.capacity)
+    setRegime(SETTING_DEFAULTS.regime)
+    setSensorNoise(SETTING_DEFAULTS.sensorNoise)
+    setArena(SETTING_DEFAULTS.arena)
+    setPatchSize(SETTING_DEFAULTS.patchSize)
+    setPatchCount(SETTING_DEFAULTS.patchCount)
+    setPatchSpeed(SETTING_DEFAULTS.patchSpeed)
+    setSpeed(SETTING_DEFAULTS.speed)
+    setConfirmSettingsReset(false)
+    // Settings alone would leave the current run half-governed by the old ones,
+    // since several only apply on a rebuild. Restart from the same founders so
+    // what is on screen matches what the panel says.
+    worldRef.current = new ContinuousWorld(
+      seed,
+      {
+        ...DEFAULT_CONTINUOUS_PARAMS,
+        populationCap: SETTING_DEFAULTS.capacity,
+        initialPopulation: SETTING_DEFAULTS.capacity,
+      },
+      SETTING_DEFAULTS.founders,
+    )
+    setSelectedId(null)
+    bump()
+  }
+
   const reset = (newSeed: number) => {
     setSeed(newSeed)
     worldRef.current = build(newSeed)
@@ -469,12 +527,31 @@ function useEvolveTab(
             format={(v) => v.toFixed(0)}
             onChange={setPatchCount}
           />
+          <Slider
+            label="How fast the patches drift"
+            value={patchSpeed}
+            min={0}
+            max={2}
+            step={0.1}
+            onChange={(v) => {
+              setPatchSpeed(v)
+              world.params.food.driftSpeed = v
+              // Rescale each patch's existing heading to the new speed, so they
+              // carry on the way they were going instead of scattering.
+              for (const l of world.lights) {
+                const heading = Math.atan2(l.vz, l.vx)
+                l.vx = Math.cos(heading) * v
+                l.vz = Math.sin(heading) * v
+              }
+              bump()
+            }}
+          />
         </Section>
 
         <Section
           title="This run"
           defaultOpen
-          hint="Reset (same seed) redraws the identical founding population, so you can change exactly one switch and be sure nothing else moved."
+          hint="Reset simulation redraws the identical founding population, so you can change exactly one switch and be sure nothing else moved. New seed draws a different one."
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
             <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Run seed</span>
@@ -495,10 +572,33 @@ function useEvolveTab(
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
             <Button onClick={() => reset(seed)} variant="primary">
-              Reset (same seed)
+              Reset simulation
             </Button>
-            <Button onClick={() => reset(randomSeed())}>Reset</Button>
+            <Button onClick={() => reset(randomSeed())}>New seed</Button>
           </div>
+          {confirmSettingsReset ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 11.5,
+                  color: 'var(--text)',
+                  lineHeight: 1.45,
+                }}
+              >
+                Put <b>every</b> control back to where it started and restart the
+                run? Anything you have changed will be lost.
+              </p>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <Button onClick={resetSettings} variant="primary">
+                  Yes, reset settings
+                </Button>
+                <Button onClick={() => setConfirmSettingsReset(false)}>Cancel</Button>
+              </div>
+            </div>
+          ) : (
+            <Button onClick={() => setConfirmSettingsReset(true)}>Reset settings</Button>
+          )}
           <p style={{ margin: 0, fontSize: 11.5, color: 'var(--text-muted)', lineHeight: 1.45 }}>
             The arena's size and capacity, the number of patches, and the founders
             all take effect on the next reset; everything else applies at once.
