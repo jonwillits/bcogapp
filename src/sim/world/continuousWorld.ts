@@ -2,7 +2,7 @@ import { makeRng, type Rng } from '../random'
 import {
   drawFounder,
   genomeToWeights,
-  hueToCss,
+  bodyColour,
   mutate,
   randomGenome,
   approachScore,
@@ -364,7 +364,10 @@ export class ContinuousWorld {
   ): Creature {
     const vehicle = this.world.addWeightedVehicle(
       genomeToWeights(genome),
-      hueToCss(genome.hue),
+      // Body colour is read off the wiring genes, so what a creature looks like
+      // in the pit matches where its dot sits on the population plane. It was
+      // spawned with the *mark* colour until Jon noticed the two disagreeing.
+      bodyColour(genome),
       pose,
     )
     const c: Creature = {
@@ -429,7 +432,7 @@ export class ContinuousWorld {
       genome: { ...c.genome },
       vehicle: child.world.addWeightedVehicle(
         genomeToWeights(c.genome),
-        hueToCss(c.genome.hue),
+        bodyColour(c.genome),
         { ...c.vehicle.state },
       ),
     }))

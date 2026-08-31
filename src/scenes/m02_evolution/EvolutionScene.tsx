@@ -1,5 +1,6 @@
 import { useReducer, useRef, useState } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import * as THREE from 'three'
 import { Grid } from '@react-three/drei'
 import { SceneCanvasLayout } from '../../components/SceneCanvasLayout'
 import { Panel } from '../../components/Panel'
@@ -68,6 +69,51 @@ function Stepper({
     }
   })
   return null
+}
+
+/**
+ * Two camera presets, driven from a button rather than a drag.
+ *
+ * The scene opens looking fairly steeply down because creatures near the far
+ * wall were hard to pick out from the old oblique angle — and a student who does
+ * not know the camera can be tilted has no way to fix that. The buttons make the
+ * capability discoverable, which the drag-to-orbit gesture never did.
+ */
+const VIEWS = {
+  angled: { radius: 25.5, polar: 0.55 },
+  top: { radius: 23, polar: 0.16 },
+} as const
+export type ViewName = keyof typeof VIEWS
+
+function ViewSetter({ request }: { request: { view: ViewName; nonce: number } }) {
+  const camera = useThree((s) => s.camera)
+  const controls = useThree((s) => s.controls) as { target: THREE.Vector3; update: () => void } | null
+  const applied = useRef(-1)
+  useFrame(() => {
+    if (request.nonce === applied.current) return
+    applied.current = request.nonce
+    const { radius, polar } = VIEWS[request.view]
+    const target = controls?.target ?? new THREE.Vector3(0, 0, 0)
+    const offset = new THREE.Vector3().setFromSpherical(
+      new THREE.Spherical(radius, polar, 0),
+    )
+    camera.position.copy(target).add(offset)
+    camera.lookAt(target)
+    controls?.update()
+  })
+  return null
+}
+
+function ViewButtons({ onPick }: { onPick: (v: ViewName) => void }) {
+  return (
+    <div style={{ display: 'flex', gap: 6 }}>
+      {(['angled', 'top'] as const).map((v) => (
+        <Button key={v} onClick={() => onPick(v)}>
+          {v === 'angled' ? 'Angled view' : 'From above'}
+        </Button>
+      ))}
+    </div>
+  )
 }
 
 function Arena({
@@ -176,6 +222,16 @@ function useEvolveTab(
   const [playing, setPlaying] = useState(false)
   const [speed, setSpeed] = useState(4)
   const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [view, setView] = useState<{ view: ViewName; nonce: number }>({
+    view: 'angled',
+    nonce: 0,
+  })
+  // Things a student can play with but is never asked to. Defaults are the
+  // measured ones; the point is that the world's settings are visible and
+  // adjustable rather than fixed constants nobody can interrogate.
+  const [arena, setArena] = useState(9)
+  const [patchSize, setPatchSize] = useState(DEFAULT_CONTINUOUS_PARAMS.food.strength)
+  const [patchCount, setPatchCount] = useState(DEFAULT_CONTINUOUS_PARAMS.food.count)
 
   const build = (withSeed: number) =>
     new ContinuousWorld(
@@ -189,6 +245,12 @@ function useEvolveTab(
         selection,
         regime,
         sensorNoise,
+        bounds: arena,
+        food: {
+          ...DEFAULT_CONTINUOUS_PARAMS.food,
+          strength: patchSize,
+          count: patchCount,
+        },
       },
       founders,
     )
@@ -247,6 +309,7 @@ function useEvolveTab(
             }
           }}
         />
+        <ViewSetter request={view} />
       </Arena>
     ),
     left: (
@@ -392,6 +455,64 @@ function useEvolveTab(
           capacity and the founders take effect on the next reset; everything else
           applies at once.
         </p>
+
+        <div
+          style={{
+            borderTop: '1px solid var(--border)',
+            paddingTop: 10,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 10,
+          }}
+        >
+          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+            The view
+          </div>
+          <ViewButtons
+            onPick={(v) => setView((s) => ({ view: v, nonce: s.nonce + 1 }))}
+          />
+
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+            The world itself — nothing asks you to change these
+          </div>
+          <Slider
+            label="Size of the pit"
+            value={arena}
+            min={6}
+            max={14}
+            step={1}
+            format={(v) => v.toFixed(0)}
+            onChange={setArena}
+          />
+          <Slider
+            label="Size of a food patch"
+            value={patchSize}
+            min={1.5}
+            max={7}
+            step={0.5}
+            onChange={(v) => {
+              setPatchSize(v)
+              world.params.food.strength = v
+              for (const l of world.lights) l.source.strength = v
+              bump()
+            }}
+          />
+          <Slider
+            label="How many food patches"
+            value={patchCount}
+            min={1}
+            max={10}
+            step={1}
+            format={(v) => v.toFixed(0)}
+            onChange={setPatchCount}
+          />
+          <p style={{ margin: 0, fontSize: 11.5, color: 'var(--text-muted)', lineHeight: 1.45 }}>
+            A bigger pit and smaller patches mean food is harder to find, and the
+            creatures breed more slowly. Adding a patch or two puts it back. Pit
+            size and patch count take effect on the next reset; patch size changes
+            straight away.
+          </p>
+        </div>
       </Panel>
     ),
     bottom: (
@@ -427,6 +548,10 @@ function useLineagesTab(
   const [playing, setPlaying] = useState(false)
   const [speed, setSpeed] = useState(2)
   const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [view, setView] = useState<{ view: ViewName; nonce: number }>({
+    view: 'angled',
+    nonce: 0,
+  })
 
   const fixture = CONTINUOUS_LINEAGE_DATA.find((f) => f.id === which)!
 
@@ -512,6 +637,7 @@ function useLineagesTab(
             bump()
           }}
         />
+        <ViewSetter request={view} />
       </Arena>
     ),
     left: (
@@ -559,6 +685,7 @@ function useLineagesTab(
         </div>
 
         <Button onClick={restart}>Restart this population</Button>
+        <ViewButtons onPick={(v) => setView((s) => ({ view: v, nonce: s.nonce + 1 }))} />
         <Slider
           label="Sensor noise"
           value={sensorNoise}
@@ -653,7 +780,7 @@ export default function EvolutionScene() {
     <SceneCanvasLayout
       canvas={
         <Canvas
-          camera={{ position: [0, 16, 18], fov: 45 }}
+          camera={{ position: [0, 22, 13], fov: 45 }}
           onContextMenu={(e) => e.preventDefault()}
         >
           {slots.world}
