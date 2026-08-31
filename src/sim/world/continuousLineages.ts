@@ -59,32 +59,32 @@ export const CONTINUOUS_FIXTURE_RECIPES: ContinuousFixtureRecipe[] = [
     id: 'W',
     pool: 'P',
     regime: 'food',
-    seed: 8,
-    splitAt: 3000,
-    branchSeed: 103,
-    duration: 3600,
-    hueShift: 24,
-    note: "Sister of X: the same run to 3000s, then a different stream. 81% contralateral excitatory. The hue shift lands its colour on Z's, which is the coincidence Part 3 turns on.",
+    seed: 7,
+    splitAt: 1800,
+    branchSeed: 101,
+    duration: 2400,
+    hueShift: 337.6,
+    note: "Sister of X: the same run to 1800s, then a different stream. 81% contralateral excitatory. The hue shift lands its mark on Z's, which is the coincidence Part 3 turns on -- and it is free of side effects, because the mark is the last draw drawFounder takes.",
   },
   {
     id: 'X',
     pool: 'P',
     regime: 'food',
-    seed: 8,
-    splitAt: 3000,
-    branchSeed: 106,
-    duration: 3600,
-    hueShift: 24,
-    note: 'The other branch of the same split. 94% contralateral excitatory; matches W to 10% on arrival time and 0.27 units on mean distance.',
+    seed: 7,
+    splitAt: 1800,
+    branchSeed: 103,
+    duration: 2400,
+    hueShift: 337.6,
+    note: 'The other branch of the same split, and cleanly contralateral excitatory -- all sixteen. Matches W to 5% on time-to-arrival and 0.22 units on mean distance.',
   },
   {
     id: 'Y',
     pool: 'Q',
     regime: 'food',
-    seed: 14,
+    seed: 2,
     duration: 4800,
     hueShift: 0,
-    note: "Pool Q took the ipsilateral-inhibitory route on this seed, and cleanly -- every one of the sixteen is 3a-like. Evolved for 4800s against W and X's 3600 because the two pools develop at different rates: P amplifies a trait it already has, while Q's route to 3a has to flip its straight weights through zero, which is a fitness valley. At equal durations the two are five times apart on time-to-arrival, and no triple survives.",
+    note: "Pool Q took the ipsilateral-inhibitory route on this seed, and every one of the sixteen is 3a-like. Evolved for 4800s against W and X's 2400 because the pools develop at different rates: P amplifies a trait it already has, while Q's route to 3a has to flip its straight weights through zero, which is a fitness valley. At equal durations no triple survives the arrival-time criterion.",
   },
   {
     id: 'Z',
@@ -94,10 +94,9 @@ export const CONTINUOUS_FIXTURE_RECIPES: ContinuousFixtureRecipe[] = [
     duration: 4800,
     hueShift: 0,
     world: {
-      energy: { baseCost: 0.05, moveCost: 0.06, ambientIncome: 0.4 },
-      food: { ...DEFAULT_CONTINUOUS_PARAMS.food, count: 2 },
+      energy: { baseCost: 0.05, moveCost: 0.06, ambientIncome: 0.6 },
     },
-    note: "Still ipsilateral excitatory, still flees -- all sixteen of them. Never reaches the light, and sits 2.5x further out than the three approachers. Its world has **ambient food and dangerous lights**, which is not decoration: once energy drives reproduction, a world whose only feature is harmful is one where nothing can ever breed, and the first attempt at Z went extinct in every seed. Its colour lands on W's and 131 degrees from Y's, so the population that actually shares Y's ancestry is the one that looks least like it.",
+    note: "Still ipsilateral excitatory and still fleeing -- 94% of them. Never reaches the light, and sits three times further out than the three approachers. Its world has **ambient food and dangerous lights**, which is not decoration: once energy drives reproduction, a world whose only feature is harmful is one where nothing can ever breed, and the first attempt at Z went extinct in every seed. Its mark lands on W's and 95 degrees from Y's, so the population that actually shares Y's ancestry is the one that looks least like it.",
   },
 ]
 
@@ -183,16 +182,20 @@ export function buildContinuousFixtureSet(
 /**
  * The answer key.
  *
- * W ~ X is **homology** — sister branches of one run, sharing every ancestor to
- * 3000 seconds. W ~ Y and X ~ Y is **analogy** — the same behaviour reached from
- * a different pool by different machinery, with no common ancestor that had it.
- * Z is the contrast that keeps the behavioural grouping from being "all of
- * them". And the colour W, X and Z share is **coincidence**: it spans both
+ * W ~ X is **homology** — sister branches of one run, sharing every ancestor up
+ * to 1800 seconds. W ~ Y and X ~ Y is **analogy** — the same behaviour reached
+ * from a different pool by different machinery, with no common ancestor that had
+ * it. Z is the contrast that keeps the behavioural grouping from being "all of
+ * them". And the **mark** W, X and Z share is **coincidence**: it spans both
  * founder pools and means nothing at all.
+ *
+ * Note that body colour is *not* the coincidence any more — since the Module 2
+ * rebuild it is read off the wiring, so W and X share it because they really are
+ * wired alike, and Z does not. The trait that means nothing is the mark.
  */
 export const CONTINUOUS_FIXTURE_ANSWERS: Record<string, string> = {
-  W: 'Contralateral excitatory, pool P. Sister of X; they share every ancestor to 3000s.',
+  W: 'Contralateral excitatory, pool P. Sister of X; they share every ancestor up to 1800s.',
   X: 'Contralateral excitatory, pool P. Sister of W — the homology.',
   Y: 'Ipsilateral inhibitory, pool Q, which fled light. Evolved approach independently by the other of the two routes out of Q — the analogy.',
-  Z: 'Ipsilateral excitatory, pool Q, evolved where light was dangerous and food was everywhere. Still flees. Shares a body colour with W and X, which means nothing.',
+  Z: 'Ipsilateral excitatory, pool Q, evolved where light was dangerous and food was everywhere. Still flees. Wears the same mark as W and X, which means nothing.',
 }

@@ -365,3 +365,47 @@ it('phase B: two candidate provenances for Z', () => {
     show(`food seed ${seed}@${dur}`, w)
   }
 }, 1_800_000)
+
+it('phase B redo: Z under drifting food', () => {
+  /**
+   * Y is now Q2@4800 at hue 74.4, and W/X are P7@2400 branches at hue ~192.
+   * Z needs to flee clearly, be cleanly 2a, and wear a colour far from Y's --
+   * then pool P's founder hue is shifted so W and X land on Z's.
+   *
+   * Its world still needs ambient food: poison alone means negative intake only,
+   * so nothing can ever reach the reproduction threshold.
+   */
+  const Y_HUE = 74.37
+  const W_NATURAL = 192.04
+  const approachers = 1.46 // mean distance of the chosen W/X/Y triple
+  console.log('\nambient count seed dur | arr    d     xApproach | variety purity | hue | Y-Z gap | P shift')
+  for (const ambientIncome of [0.4, 0.6]) {
+    for (const count of [2, 4]) {
+      for (const seed of [1, 2, 3, 4, 5, 6]) {
+        const w = new ContinuousWorld(
+          seed,
+          {
+            ...DEFAULT_CONTINUOUS_PARAMS,
+            regime: 'poison' as const,
+            energy: { baseCost: 0.05, moveCost: 0.06, ambientIncome },
+            food: { ...DEFAULT_CONTINUOUS_PARAMS.food, count },
+          },
+          'Q',
+        )
+        w.run(4800)
+        if (w.extinct) continue
+        const p = profile(`Z${seed}`, w)
+        if (p.variety !== '2a' || p.purity < 0.7) continue
+        const gap = Math.min(Math.abs(p.hue - Y_HUE), 360 - Math.abs(p.hue - Y_HUE))
+        const shift = ((p.hue - W_NATURAL) % 360 + 360) % 360
+        console.log(
+          `${f(ambientIncome, 7)} ${f(count, 5)} ${f(seed, 4)} 4800 | ${f(p.arr)} ${f(
+            p.d[0], 5,
+          )} ${f(p.d[0] / approachers, 9)} | ${p.variety} ${f(p.purity, 5)} | ${f(
+            p.hue, 6,
+          )} | ${f(gap, 7)} | ${f(shift, 7)}`,
+        )
+      }
+    }
+  }
+}, 1_800_000)
