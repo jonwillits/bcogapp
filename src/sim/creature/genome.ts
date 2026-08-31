@@ -90,6 +90,49 @@ export function genomeToWeights(g: Genome): SensorimotorWeights {
 }
 
 /**
+ * **Body colour, read directly off the wiring genes.**
+ *
+ * Red is how strongly the straight connections run, green how strongly the
+ * crossed ones, blue the resting drive. So two creatures the same colour *are*
+ * wired the same, and a population converging on one colour is a population
+ * whose wiring is converging — which is what makes evolution watchable in the
+ * pit rather than only in a panel.
+ *
+ * This also settles a debt from Lab 1, where colour identified the variety and
+ * students spent an hour learning to trust it. Making colour neutral in Lab 2
+ * would have quietly punished exactly the habit Lab 1 taught. The neutral trait
+ * they need for Q15 and Q16 is still there — it is the `hue` gene, now worn as
+ * an ornament rather than as the body (see `markCss`).
+ *
+ * Channels are floored at 60 rather than 0: this is a dark scene, and a
+ * weakly-wired creature would otherwise be black on near-black, which this
+ * palette has swallowed twice before.
+ */
+export function bodyColour(g: Genome): string {
+  const channel = (v: number, lo: number, hi: number) =>
+    Math.round(60 + 195 * clamp((v - lo) / (hi - lo), 0, 1))
+  return `rgb(${channel((g.wLL + g.wRR) / 2, -2.5, 2.5)}, ${channel(
+    (g.wLR + g.wRL) / 2,
+    -2.5,
+    2.5,
+  )}, ${channel(g.bias, 0, 1.5)})`
+}
+
+/**
+ * The neutral trait, as a colour for the creature's ornament.
+ *
+ * This is the gene that does nothing: not sensed, not in the actuator
+ * arithmetic, no effect on energy. It is inherited and it mutates slowly, so it
+ * hitchhikes when a lineage sweeps — and a student who has watched fifty
+ * generations ends up looking at a population wearing one mark for no reason at
+ * all. That is the whole of Q15 and Q16, and nothing may ever set it from
+ * fitness.
+ */
+export function markCss(hue: number): string {
+  return `hsl(${wrapHue(hue).toFixed(0)}, 85%, 62%)`
+}
+
+/**
  * A genome's hue as a CSS colour.
  *
  * Saturation and lightness are fixed, so hue is the only thing that varies and

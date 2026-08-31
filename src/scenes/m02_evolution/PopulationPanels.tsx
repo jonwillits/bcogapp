@@ -3,10 +3,12 @@ import { ValueReadout } from '../../components/ValueReadout'
 import {
   crossing,
   meanWeight,
-  hueToCss,
+  bodyColour,
+  markCss,
   type Genome,
 } from '../../sim/creature/genome'
-import { modalHue, type GenerationRecord } from '../../sim/world/evolutionWorld'
+import { modalHue } from '../../sim/world/evolutionWorld'
+import type { ContinuousSample } from '../../sim/world/continuousWorld'
 import { palette } from '../../theme/theme'
 
 const CARD: React.CSSProperties = {
@@ -96,15 +98,18 @@ export function PopulationPlane({
             cx={x(g)}
             cy={y(g)}
             r={4}
-            fill={hueToCss(g.hue)}
-            opacity={0.85}
+            fill={bodyColour(g)}
+            opacity={0.9}
             stroke="rgba(0,0,0,0.35)"
           />
         ))}
       </svg>
       <p style={CAPTION}>
-        Each dot is one vehicle, in its own body colour. Left–right is whether
-        its connections cross; up–down is whether they excite or inhibit.
+        Each dot is one creature, in its own body colour. Left–right is whether
+        its connections cross; up–down is whether they excite or inhibit. Body
+        colour is <b>red</b> for straight connections, <b>green</b> for crossed,
+        <b> blue</b> for resting drive — so two creatures the same colour are
+        wired the same way.
       </p>
     </div>
   )
@@ -171,59 +176,80 @@ export function GeneHistograms({ genomes }: { genomes: readonly Genome[] }) {
 }
 
 /**
- * Mean and best energy per generation.
+ * How the population is doing, when mean energy no longer tells you.
  *
- * Q2 asks a student to write down the average energy at generation 1 and at
- * generation 50, so the numbers are printed as well as plotted — the left-hand
- * end of a fifty-point line is not something anyone can read a value off.
+ * Under a continuous life cycle energy is *homeostatic*: it climbs to the
+ * reproduction threshold, drops back, and climbs again, so a well-adapted
+ * creature does not sit at higher energy than a poor one — it cycles faster.
+ * Averaged over a population it is nearly flat whatever is happening, which is
+ * why the old mean-energy plot had to go.
+ *
+ * What does track adaptation is **how fast the population is reproducing**. A
+ * population that forages better fills its energy stores sooner, takes the open
+ * slots faster, and turns over more quickly. That is the number to write down.
  */
-export function FitnessPanel({ history }: { history: readonly GenerationRecord[] }) {
-  if (!history.length) {
+export function BirthRatePanel({
+  samples,
+  populationCap,
+}: {
+  samples: readonly ContinuousSample[]
+  populationCap: number
+}) {
+  if (samples.length < 5) {
     return (
       <div style={CARD}>
         <p style={{ ...CAPTION, margin: 0 }}>
-          Energy is recorded at the end of each generation. Press play, or{' '}
-          <b>Step generation</b>, and the first point appears here.
+          Press play. Once creatures start being born, their rate appears here.
         </p>
       </div>
     )
   }
-  const first = history[0]
-  const last = history[history.length - 1]
+  // Births in each trailing minute, sampled once a second.
+  const WINDOW = 60
+  const rate: number[] = []
+  for (let i = 0; i < samples.length; i++) {
+    const back = samples[Math.max(0, i - WINDOW)]
+    const span = Math.max(1, samples[i].time - back.time)
+    rate.push(((samples[i].births - back.births) / span) * 60)
+  }
+  const last = samples[samples.length - 1]
+  const recent = rate[rate.length - 1]
+  const early = rate[Math.min(rate.length - 1, WINDOW)]
+
   return (
     <div style={{ ...CARD, display: 'flex', flexDirection: 'column', gap: 7 }}>
       <Plot
         width={250}
-        height={92}
-        series={[
-          { color: palette.accent, data: history.map((h) => h.meanEnergy) },
-          { color: palette.sensor, data: history.map((h) => h.bestEnergy) },
-        ]}
+        height={80}
+        yMin={0}
+        series={[{ color: palette.accent, data: rate }]}
       />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <ValueReadout label="Mean energy, generation 1" value={first?.meanEnergy ?? 0} />
-        <ValueReadout
-          label={`Mean energy, generation ${last?.generation ?? 0}`}
-          value={last?.meanEnergy ?? 0}
-        />
-        <ValueReadout label="Best this generation" value={last?.bestEnergy ?? 0} />
+        <ValueReadout label="Births per minute, early on" value={early} />
+        <ValueReadout label="Births per minute, now" value={recent} />
+        <ValueReadout label="Creatures alive" value={last.population} />
+        <ValueReadout label="Born since the start" value={last.births} />
       </div>
       <p style={{ ...CAPTION, margin: 0 }}>
-        Brighter line is the best individual; the other is the population average.
+        The pit supports {populationCap} at a time, so a new creature is born only
+        when one dies. How fast that happens is how well the population is doing.
       </p>
     </div>
   )
 }
 
 /**
- * The distribution of body colour.
+ * The distribution of the **mark** — the bead each creature wears.
  *
  * Given the same visual weight as the panels that matter, deliberately: Part 4
  * turns on a student having watched this converge and then being asked to
- * explain why *that* colour was favoured. The panel never says the gene does
+ * explain why *that* mark was favoured. The panel never says the gene does
  * nothing — that is Q16's job, after they have committed to an answer.
+ *
+ * Distinct from body colour, which since the Module 2 rebuild is read off the
+ * wiring and means a great deal. The mark is the one that means nothing.
  */
-export function ColourPanel({ genomes }: { genomes: readonly Genome[] }) {
+export function MarkPanel({ genomes }: { genomes: readonly Genome[] }) {
   const hues = genomes.map((g) => g.hue)
   const { hue, concentration } = modalHue(hues)
   const bins = 36
@@ -243,7 +269,7 @@ export function ColourPanel({ genomes }: { genomes: readonly Genome[] }) {
             y={H - (c / peak) * H}
             width={W / bins - 1}
             height={(c / peak) * H}
-            fill={hueToCss((i / bins) * 360 + 5)}
+            fill={markCss((i / bins) * 360 + 5)}
           />
         ))}
         {/* A full hue strip beneath, so an empty chart still reads as a colour axis. */}
@@ -254,7 +280,7 @@ export function ColourPanel({ genomes }: { genomes: readonly Genome[] }) {
             y={H + 3}
             width={W / bins}
             height={6}
-            fill={hueToCss((i / bins) * 360 + 5)}
+            fill={markCss((i / bins) * 360 + 5)}
             opacity={0.35}
           />
         ))}
@@ -265,13 +291,13 @@ export function ColourPanel({ genomes }: { genomes: readonly Genome[] }) {
             width: 16,
             height: 16,
             borderRadius: 4,
-            background: hueToCss(hue),
+            background: markCss(hue),
             flex: 'none',
             border: '1px solid var(--border)',
           }}
         />
         <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-          {Math.round(concentration * 100)}% of the population is this colour
+          {Math.round(concentration * 100)}% of the population wears this mark
         </span>
       </div>
     </div>

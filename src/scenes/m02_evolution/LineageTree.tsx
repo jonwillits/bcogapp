@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import { hueToCss } from '../../sim/creature/genome'
-import type { LineageNode } from '../../sim/world/evolutionWorld'
+import { markCss } from '../../sim/creature/genome'
+import type { Lineage } from '../../sim/world/continuousWorld'
 import { palette } from '../../theme/theme'
 
 /**
@@ -13,72 +13,95 @@ import { palette } from '../../theme/theme'
  * different roots is an analogy, and nothing in the behaviour alone can tell
  * them apart.
  *
- * Drawn as generation-by-generation columns rather than a conventional
- * dendrogram. A hundred-generation ancestry is long and thin, and what a
- * student needs to see is *where the lines converge* — the generation at which
- * everything alive today shares an ancestor. Columns put that on a readable
- * axis; a dendrogram would put it in a hairline near the root.
+ * Real time runs left to right, which is what a phylogeny actually looks like
+ * and is only possible now that there are no generations to number. It also
+ * shows something generation columns could not: a lineage that reproduces fast
+ * is visibly bushier than one that does not, because its branches are packed
+ * closer together in time rather than marching in lockstep down a grid.
+ *
+ * Lines are drawn in each creature's **mark** — the neutral trait — not its body
+ * colour. Body colour is the wiring, and the tree's whole job is to show
+ * ancestry independently of it.
  */
 export function LineageTree({
   lineage,
   memberIds,
   highlight,
+  span,
   width = 250,
   height = 190,
   label,
 }: {
-  lineage: readonly LineageNode[]
+  lineage: readonly Lineage[]
   memberIds: readonly number[]
   /** Draw these ids and their ancestors brighter — used by the individual panel. */
   highlight?: readonly number[]
+  /** Simulated seconds the run covers, for the time axis. */
+  span: number
   width?: number
   height?: number
   label?: string
 }) {
   const layout = useMemo(() => {
     const byId = new Map(lineage.map((n) => [n.id, n]))
-    const generations = new Map<number, LineageNode[]>()
-    for (const n of lineage) {
-      const list = generations.get(n.generation) ?? []
-      list.push(n)
-      generations.set(n.generation, list)
-    }
-    const gens = [...generations.keys()].sort((a, b) => a - b)
-    const maxGen = gens[gens.length - 1] ?? 0
 
-    // Position within a generation: by descent, so sibling lines stay together
-    // and the tree does not cross itself more than the ancestry actually does.
-    const pos = new Map<number, number>()
-    for (const g of gens) {
-      const rows = generations
-        .get(g)!
-        .slice()
-        .sort((a, b) => {
-          const pa = a.parentId !== null ? (pos.get(a.parentId) ?? 0) : a.id
-          const pb = b.parentId !== null ? (pos.get(b.parentId) ?? 0) : b.id
-          return pa - pb || a.id - b.id
-        })
-      rows.forEach((n, i) => pos.set(n.id, rows.length === 1 ? 0.5 : i / (rows.length - 1)))
+    // Vertical position by descent: walk the roots depth-first so siblings stay
+    // adjacent and the tree crosses itself no more than the ancestry does.
+    const children = new Map<number | null, Lineage[]>()
+    for (const n of lineage) {
+      const list = children.get(n.parentId) ?? []
+      list.push(n)
+      children.set(n.parentId, list)
     }
+    for (const list of children.values()) list.sort((a, b) => a.bornAt - b.bornAt)
+
+    /**
+     * Vertical position, laid out as a dendrogram rather than by walk order.
+     *
+     * Only the tips — creatures with no surviving descendants in this pruned
+     * tree — get their own row; every ancestor sits at the mean of its
+     * children. A plain depth-first ordering gives each node a distinct row and
+     * draws a long diagonal staircase, in which a lineage is impossible to
+     * follow. Putting a parent between its offspring is what makes the shape a
+     * student is being asked to read — where lines converge — actually visible.
+     */
+    const pos = new Map<number, number>()
+    const tips: Lineage[] = []
+    const collectTips = (node: Lineage) => {
+      const kids = children.get(node.id) ?? []
+      if (kids.length === 0) tips.push(node)
+      else for (const k of kids) collectTips(k)
+    }
+    const roots = children.get(null) ?? []
+    for (const root of roots) collectTips(root)
+    tips.forEach((t, i) => pos.set(t.id, tips.length === 1 ? 0.5 : i / (tips.length - 1)))
+
+    const place = (node: Lineage): number => {
+      const kids = children.get(node.id) ?? []
+      if (kids.length === 0) return pos.get(node.id) ?? 0.5
+      const ys = kids.map(place)
+      const y = ys.reduce((a, b) => a + b, 0) / ys.length
+      pos.set(node.id, y)
+      return y
+    }
+    for (const root of roots) place(root)
 
     const lit = new Set<number>()
     if (highlight) {
       for (const id of highlight) {
-        let cursor: number | null = id
-        while (cursor !== null && !lit.has(cursor)) {
-          lit.add(cursor)
-          cursor = byId.get(cursor)?.parentId ?? null
+        let c: number | null = id
+        while (c !== null && !lit.has(c)) {
+          lit.add(c)
+          c = byId.get(c)?.parentId ?? null
         }
       }
     }
-
-    return { byId, gens, maxGen, pos, lit }
+    return { byId, pos, lit }
   }, [lineage, highlight])
 
   const padX = 8
   const padY = 10
-  const x = (g: number) =>
-    padX + (layout.maxGen === 0 ? 0 : (g / layout.maxGen) * (width - padX * 2))
+  const x = (t: number) => padX + (t / Math.max(1, span)) * (width - padX * 2)
   const y = (id: number) => padY + (layout.pos.get(id) ?? 0.5) * (height - padY * 2)
 
   const members = new Set(memberIds)
@@ -97,33 +120,46 @@ export function LineageTree({
         aria-label="Ancestry of the current population"
       >
         {lineage.map((n) => {
-          if (n.parentId === null) return null
-          const parent = layout.byId.get(n.parentId)
-          if (!parent) return null
           const bright = !layout.lit.size || layout.lit.has(n.id)
+          const end = n.diedAt ?? span
+          const parent = n.parentId === null ? null : layout.byId.get(n.parentId)
           return (
-            <line
-              key={`e${n.id}`}
-              x1={x(parent.generation)}
-              y1={y(parent.id)}
-              x2={x(n.generation)}
-              y2={y(n.id)}
-              stroke={hueToCss(n.hue)}
-              strokeWidth={bright ? 1.4 : 0.6}
-              opacity={bright ? 0.75 : 0.16}
-            />
+            <g key={`e${n.id}`}>
+              {/* The life itself: born here, died there. */}
+              <line
+                x1={x(n.bornAt)}
+                y1={y(n.id)}
+                x2={x(end)}
+                y2={y(n.id)}
+                stroke={markCss(n.mark)}
+                strokeWidth={bright ? 1.5 : 0.6}
+                opacity={bright ? 0.8 : 0.14}
+              />
+              {/* The link to its parent, at the moment of birth. */}
+              {parent && (
+                <line
+                  x1={x(n.bornAt)}
+                  y1={y(parent.id)}
+                  x2={x(n.bornAt)}
+                  y2={y(n.id)}
+                  stroke={markCss(n.mark)}
+                  strokeWidth={bright ? 0.9 : 0.4}
+                  opacity={bright ? 0.5 : 0.1}
+                />
+              )}
+            </g>
           )
         })}
         {lineage
-          .filter((n) => n.generation === 0 || members.has(n.id))
+          .filter((n) => n.parentId === null || members.has(n.id))
           .map((n) => (
             <circle
               key={`n${n.id}`}
-              cx={x(n.generation)}
+              cx={x(n.parentId === null ? n.bornAt : (n.diedAt ?? span))}
               cy={y(n.id)}
-              r={n.generation === 0 ? 3 : 2.4}
-              fill={hueToCss(n.hue)}
-              stroke={n.generation === 0 ? palette.text : 'none'}
+              r={n.parentId === null ? 3 : 2.4}
+              fill={markCss(n.mark)}
+              stroke={n.parentId === null ? palette.text : 'none'}
               strokeWidth={0.8}
               opacity={!layout.lit.size || layout.lit.has(n.id) ? 1 : 0.25}
             />
@@ -138,7 +174,7 @@ export function LineageTree({
           fill={palette.textMuted}
           textAnchor="end"
         >
-          generation {layout.maxGen}
+          {Math.round(span / 60)} minutes later
         </text>
       </svg>
     </div>
@@ -159,7 +195,13 @@ export function TrueHistory({
   fixtures,
   width = 250,
 }: {
-  fixtures: readonly { id: string; pool: string; lineage: LineageNode[]; memberIds: number[] }[]
+  fixtures: readonly {
+    id: string
+    pool: string
+    lineage: Lineage[]
+    memberIds: number[]
+    duration: number
+  }[]
   width?: number
 }) {
   const pools = ['P', 'Q']
@@ -170,13 +212,14 @@ export function TrueHistory({
         if (!inPool.length) return null
         // One tree per pool: populations from the same pool genuinely share a
         // root, and drawing them together is the claim being made.
-        const merged = new Map<number, LineageNode>()
+        const merged = new Map<number, Lineage>()
         for (const f of inPool) for (const n of f.lineage) merged.set(n.id, n)
         return (
           <div key={pool}>
             <LineageTree
               lineage={[...merged.values()]}
               memberIds={inPool.flatMap((f) => f.memberIds)}
+              span={Math.max(...inPool.map((f) => f.duration))}
               width={width}
               height={150}
               label={`Founder pool ${pool} — ${inPool.map((f) => f.id).join(' and ')}`}
@@ -192,8 +235,9 @@ export function TrueHistory({
           margin: 0,
         }}
       >
-        Two founder pools, and no line crosses between them. Line colour is the
-        body colour of the individual it belongs to.
+        Two founder pools, and no line crosses between them. Each line is one
+        creature's life, from birth to death, drawn in its <b>mark</b> — the trait
+        that does nothing — rather than its body colour, which is its wiring.
       </p>
     </div>
   )

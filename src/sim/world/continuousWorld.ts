@@ -582,6 +582,37 @@ export class ContinuousWorld {
     void hue
   }
 
+  /** A light the student placed. It joins the pool and behaves like any other. */
+  addLight(x: number, y: number, z: number): void {
+    const src = this.world.addSource(x, y, z, this.params.food.strength)
+    this.lights.push(
+      freshLight(
+        src,
+        this.params.food.capacity,
+        this.params.food.mode === 'ephemeral'
+          ? this.time + this.params.food.lifetime
+          : Infinity,
+      ),
+    )
+  }
+
+  removeLightNearest(x: number, z: number, radius: number): boolean {
+    let best = -1
+    let bestD = Infinity
+    this.lights.forEach((l, i) => {
+      if (l.respawnAt !== null) return
+      const d = Math.hypot(l.source.x - x, l.source.z - z)
+      if (d < bestD) {
+        bestD = d
+        best = i
+      }
+    })
+    if (best < 0 || bestD > radius) return false
+    this.world.removeSource(this.lights[best].source.id)
+    this.lights.splice(best, 1)
+    return true
+  }
+
   run(seconds: number, dt = 1 / 30): void {
     const steps = Math.round(seconds / dt)
     for (let i = 0; i < steps && !this.extinct; i++) this.step(dt)

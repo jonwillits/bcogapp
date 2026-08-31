@@ -2,8 +2,8 @@ import { Panel } from '../../components/Panel'
 import { WiringPanel, fmt } from '../../components/WiringPanel'
 import { LineageTree } from './LineageTree'
 import type { Vehicle } from '../../sim/world/world'
-import type { Genome } from '../../sim/creature/genome'
-import type { LineageNode } from '../../sim/world/evolutionWorld'
+import { markCss, type Genome } from '../../sim/creature/genome'
+import type { Lineage } from '../../sim/world/continuousWorld'
 
 const GENE_ROW: React.CSSProperties = {
   display: 'flex',
@@ -33,14 +33,22 @@ export function IndividualPanel({
   lineage,
   treeRevealed,
   energy,
+  age,
+  lifespan,
+  treeSpan,
   onClose,
 }: {
   vehicle: Vehicle
   genome: Genome
   individualId: number
-  lineage?: readonly LineageNode[]
+  lineage?: readonly Lineage[]
   treeRevealed: boolean
   energy?: number
+  /** Seconds lived, and the span this one was given. */
+  age?: number
+  lifespan?: number
+  /** Simulated seconds the tree covers. */
+  treeSpan?: number
   onClose: () => void
 }) {
   const gene = (label: string, value: number) => (
@@ -99,15 +107,21 @@ export function IndividualPanel({
         {gene('sensor R → actuator L', genome.wRL)}
         {gene('sensor R → actuator R', genome.wRR)}
         {gene('actuator bias', genome.bias)}
+        {/*
+          The mark, not the body colour. Body colour is computed from the four
+          weights above and so is not a gene at all; this bead is the gene that
+          does nothing, and it is listed here among the others precisely because
+          nothing in the panel should hint that it is different.
+        */}
         <div style={GENE_ROW}>
-          <span style={{ color: 'var(--text-muted)' }}>body colour</span>
+          <span style={{ color: 'var(--text-muted)' }}>mark</span>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
             <span
               style={{
                 width: 10,
                 height: 10,
-                borderRadius: 2,
-                background: vehicle.color,
+                borderRadius: '50%',
+                background: markCss(genome.hue),
                 border: '1px solid var(--border)',
               }}
             />
@@ -116,8 +130,16 @@ export function IndividualPanel({
         </div>
         {energy !== undefined && (
           <div style={{ ...GENE_ROW, marginTop: 4 }}>
-            <span style={{ color: 'var(--text-muted)' }}>energy this generation</span>
+            <span style={{ color: 'var(--text-muted)' }}>energy stored</span>
             <span>{fmt(energy)}</span>
+          </div>
+        )}
+        {age !== undefined && lifespan !== undefined && (
+          <div style={GENE_ROW}>
+            <span style={{ color: 'var(--text-muted)' }}>age</span>
+            <span>
+              {age.toFixed(0)}s of {lifespan.toFixed(0)}s
+            </span>
           </div>
         )}
       </div>
@@ -132,6 +154,7 @@ export function IndividualPanel({
               lineage={lineage}
               memberIds={[individualId]}
               highlight={[individualId]}
+              span={treeSpan ?? 1}
               height={140}
             />
           ) : (
