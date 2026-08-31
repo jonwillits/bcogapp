@@ -164,21 +164,27 @@ export function WiringDiagram({
         telling apart "what this creature is sensing right now" from "how
         strongly it is wired" is exactly what Q11 asks a student to do.
 
-        Placed a third of the way down from the sensor rather than at the
-        midpoint, because the two crossed connections *share* their midpoint —
-        both run through the centre of the diagram — and labelling both there
-        prints one number on top of the other. A third of the way down, all four
-        land in distinct places, and the straight pair is nudged outward so its
-        labels clear the lines they belong to.
+        Placement differs for the two kinds of connection, and both cases are
+        about staying legible once a line goes thick.
+
+        The **crossed** pair share their midpoint — both run through the centre
+        of the diagram — so labelling each at its middle prints one number on top
+        of the other. Each sits three quarters of the way down instead, halfway
+        between the crossing and its own actuator, and is dropped below the line
+        rather than centred on it: a strongly driven connection is drawn ten
+        pixels wide and swallows anything sitting on top of it.
+
+        The **straight** pair are vertical, so nudging them outward clears their
+        own line without needing a vertical offset.
       */}
       {links.map((l, i) => {
-        const t = 0.32
         const straight = l.from.x === l.to.x
+        const t = straight ? 0.32 : 0.75
         return (
           <text
             key={`w${i}`}
             x={l.from.x + (l.to.x - l.from.x) * t + (straight ? (l.from.x < W / 2 ? -14 : 14) : 0)}
-            y={l.from.y + (l.to.y - l.from.y) * t + 3}
+            y={l.from.y + (l.to.y - l.from.y) * t + (straight ? 3 : 14)}
             textAnchor="middle"
             fontSize={9}
             fill={palette.textMuted}
