@@ -119,6 +119,8 @@ Two departures from **§9**, both forced.
 
 Separability 9.9% on arrival and 0.25 on distance, against bounds of 15% and 0.90. `continuousLineages.test.ts` regenerates all four from their recipes and compares, so the claim that the history is real is checked rather than asserted.
 
+> ⚠️ **This set does not currently satisfy §6.** Y drives backwards where W and X drive forwards, which is plainly visible and which the separability test was blind to. See [`M02_SEPARABILITY_PROBLEM.md`](M02_SEPARABILITY_PROBLEM.md). The lineages will need regenerating once it is settled.
+
 ---
 
 # What the handout needs
@@ -163,4 +165,4 @@ Ordered by how badly it is currently wrong.
 
 1. ~~**Q13's unarmed trap.**~~ Settled — the Q10b wording above is approved and needs adding to the handout.
 2. ~~**Whether starvation matters.**~~ Settled — it stays as it is. It fires when a student makes the world hard, which is where it belongs.
-3. **Part 3's separability wants your eye, not only my numbers.** The tests say W, X and Y match to 9.9% on arrival and 0.25 on distance. The question that matters is whether *you* can sort them by watching. If you can, that is much better found now than by a student.
+3. ~~**Part 3's separability wants your eye.**~~ **Asked and answered: they are distinguishable.** Jon sorted Y from W and X on sight. Y drives backwards 81% of the time, and the acceptance test could not see it because the speed metric took an absolute value. **This is unresolved and is the one thing blocking Module 2.** Full account, everything tried, and the options: [`M02_SEPARABILITY_PROBLEM.md`](M02_SEPARABILITY_PROBLEM.md).

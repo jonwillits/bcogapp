@@ -4,6 +4,8 @@ The build tracker for the **BCOG 100 Course App** — the step-by-step "what's d
 
 > **Stack:** web-first PWA · Vite + React + TypeScript · Three.js / react-three-fiber · plain-TS sim/neural layer. **License:** GPL v3. **Home:** standalone git repo `github.com/jonwillits/bcogapp`, active clone on **local disk outside any cloud-synced folder** (never run `npm install` inside Box/Drive/Dropbox — sync churns `node_modules` and can corrupt `.git`).
 
+> ⚠️ **One open problem blocks Module 2:** Part 3's populations are distinguishable when the spec requires they not be. See [`M02_SEPARABILITY_PROBLEM.md`](M02_SEPARABILITY_PROBLEM.md). Four tests are failing deliberately.
+>
 > **Where we are (2026-08-31):** Phases 0–5 complete. **Module 2 is built on a branch (`m02-evolution`) and not yet merged** — merging deploys it to students, so it waits on Jon. 72 tests green. The handout still describes the discrete-generation world the scene no longer runs; `M02_SPEC_DEVIATIONS.md` is the list.
 >
 > **Where we were (2026-07-16):** Phases 0–4 complete. The app is **live at <https://jonwillits.github.io/bcogapp/>** and auto-deploys on push to `main`. **Module 1 (Braitenberg Vehicles) is shipped**, and its handout + report doc are rewritten and published in `intro_to_bcs` (the app fetches the handout live, so handout edits need no redeploy). The shared shell — camera, panels, plot, transport, lab pane, scene picker — is in place, so **the next scene is additive**: write `sim/` logic, add a `scenes/mNN_*/` folder, register it.
@@ -59,6 +61,7 @@ The build tracker for the **BCOG 100 Course App** — the step-by-step "what's d
 - [x] §10's acceptance tests as real headless tests. **Three of its criteria are restated** and each restatement is documented at the test that carries it; two were unreachable as written and one was in conflict with another part of §10.
 - [x] The scene: both tabs, energy bars, the population plane, the mark distribution, the birth-rate readout, a lineage tree on real time, grouped collapsible controls, camera presets, and world settings a student can play with but is never asked to.
 - [x] Register at `#/m02-evolution`, fetching its handout live from `intro_to_bcs` the way M1 does.
+- [ ] ⚠️ **Blocked: population Y is visibly distinct from W and X**, which §6 forbids — it drives backwards where they drive forwards, and the acceptance test took an absolute value and could not see it. Four tests fail on purpose until this is settled. [`M02_SEPARABILITY_PROBLEM.md`](M02_SEPARABILITY_PROBLEM.md).
 - [ ] **Merge to `main` — this deploys to students.** Needs Jon's go-ahead; see the finish-up list below.
 - [ ] The handout edits, which are substantial: `docs/M02_SPEC_DEVIATIONS.md` lists them. Jon carries them into Box.
 

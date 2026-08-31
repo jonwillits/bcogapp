@@ -37,6 +37,7 @@ interface Profile {
   d: number[]
   spread: number[]
   speed: number[]
+  reverse: number[]
   arr: number
   hue: number
   /** The commonest Lab 1 variety, and what fraction of the population it is. */
@@ -72,6 +73,7 @@ function profile(label: string, w: ContinuousWorld): Profile {
     d: obs.map((o) => o.meanDistance),
     spread: obs.map((o) => o.meanDistanceSpread),
     speed: obs.map((o) => o.meanSpeed),
+    reverse: obs.map((o) => o.reverseFraction),
     arr: obs[0].meanTimeToArrival,
     hue: bestHue,
     variety: top[0],
@@ -134,12 +136,21 @@ ${branches.length} clean 2b branches, ${ys.length} clean 3a Q runs`)
         if (Math.max(...arrs) / Math.min(...arrs) - 1 > 0.15) { drop.arrival++; continue }
         const ds = [W.d[0], X.d[0], Y.d[0]]
         if (Math.max(...ds) - Math.min(...ds) > 0.9) { drop.distance++; continue }
+        // Whether a creature drives forwards or backwards is the first thing a
+        // viewer notices, and the old absolute-value speed metric was blind to
+        // it -- Jon could sort Y from W and X on sight while the test said they
+        // matched. All three must travel the same way.
+        const rev = [W.reverse[0], X.reverse[0], Y.reverse[0]]
+        if (Math.max(...rev) > 0.25) continue
+        if (Math.max(...rev) - Math.min(...rev) > 0.2) continue
         const sp = [W.spread[0], X.spread[0], Y.spread[0]]
         const sv = [W.speed[0], X.speed[0], Y.speed[0]]
         // 1.6, the same bound accepted for the generational fixtures, where the
         // measured speed spread was 1.51 and documented as the loosest match.
         if (ratio(Math.max(...sp), Math.min(...sp)) > 1.6) { drop.spread++; continue }
-        if (ratio(Math.max(...sv), Math.min(...sv)) > 1.6) { drop.speed++; continue }
+        // Signed now, so compare the gap rather than a ratio: a ratio across
+        // zero is meaningless.
+        if (Math.max(...sv) - Math.min(...sv) > 0.6) { drop.speed++; continue }
 
         const best = [1, 2, 3, 4].map((k) =>
           Math.max(

@@ -46,8 +46,19 @@ export interface ObservationResult {
   meanClosest: number
   /** Mean distance over the last quarter of the run — where it settled. */
   meanFinalDistance: number
-  /** Mean speed, averaged over vehicles and time. */
+  /**
+   * Mean speed, averaged over vehicles and time — **signed**, so reversing
+   * counts as negative rather than as fast.
+   *
+   * It used to be an absolute value, and that hid the single most visible
+   * difference between these populations: an inhibitory approacher spends most
+   * of its life *driving backwards*, and at |1.05| that was indistinguishable
+   * from a contralateral one cruising forwards at 1.05. The separability test
+   * passed on a statistic that could not see the thing a student sees first.
+   */
   meanSpeed: number
+  /** Fraction of vehicle-time spent moving backwards. */
+  reverseFraction: number
   /** Fraction of vehicle-time spent within `arrivalRadius` of a light. */
   timeNearFraction: number
   /**
@@ -133,6 +144,7 @@ export function observe(
   const sqSum = new Array<number>(n).fill(0)
   const nearCount = new Array<number>(n).fill(0)
   let speedSum = 0
+  let reverseCount = 0
   let tailSamples = 0
   let samples = 0
   let t = 0
@@ -160,7 +172,9 @@ export function observe(
       distanceSum[i] += nearest
       sqSum[i] += nearest * nearest
       if (nearest <= arrivalRadius) nearCount[i]++
-      speedSum += Math.abs(v.actuators.left + v.actuators.right) / 2
+      const signed = (v.actuators.left + v.actuators.right) / 2
+      speedSum += signed
+      if (signed < -0.05) reverseCount++
       if (nearest < closest[i]) closest[i] = nearest
       if (t > duration * 0.75) tailSum[i] += nearest
       if (nearest <= arrivalRadius && arrival[i] === Infinity) arrival[i] = t
@@ -178,6 +192,7 @@ export function observe(
     meanFinalDistance:
       tailSamples > 0 ? tailSum.reduce((a, b) => a + b, 0) / (n * tailSamples) : 0,
     meanSpeed: speedSum / (n * samples),
+    reverseFraction: reverseCount / (n * samples),
     timeNearFraction: nearCount.reduce((a, b) => a + b, 0) / (n * samples),
     meanDistanceSpread:
       Array.from({ length: n }, (_, i) => {
