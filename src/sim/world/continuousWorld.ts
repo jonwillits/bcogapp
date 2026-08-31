@@ -10,6 +10,7 @@ import {
   meanWeight,
   DEFAULT_MUTATION_RATES,
   FOUNDER_POOLS,
+  wrapHue,
   type Genome,
   type MutationRates,
 } from '../creature/genome'
@@ -78,6 +79,12 @@ export interface ContinuousParams {
   bounds: number
   founderSpread: number
   /**
+   * Degrees added to the founder pool's centre hue. The one sanctioned way to
+   * influence what colour a lineage wears — hue is the last draw drawFounder
+   * takes, so shifting its centre leaves every weight in the run untouched.
+   */
+  founderHueShift: number
+  /**
    * How many creatures the pit supports. **Not a backstop — a mechanism.**
    *
    * When the world is full nobody is born; a creature that has enough energy to
@@ -133,6 +140,7 @@ export const DEFAULT_CONTINUOUS_PARAMS: ContinuousParams = {
   sensorNoise: 0,
   bounds: 9,
   founderSpread: 1.6,
+  founderHueShift: 0,
   populationCap: 16,
   maxEnergy: 30,
   food: {
@@ -198,6 +206,16 @@ export interface ContinuousSample {
 
 let nextCreatureId = 1
 
+/**
+ * Restart creature numbering. Ids are global so four populations can share one
+ * tree without colliding, which means an id depends on how many worlds were
+ * built before it — and those ids *are* the tree, so the fixture builder resets
+ * the counter and builds all four in a fixed order.
+ */
+export function resetCreatureIds(): void {
+  nextCreatureId = 1
+}
+
 export class ContinuousWorld {
   params: ContinuousParams
   world: VehicleWorld
@@ -249,11 +267,21 @@ export class ContinuousWorld {
   }
 
   private drawGenome(): Genome {
+    const shifted = (pool: typeof FOUNDER_POOLS.P) =>
+      this.params.founderHueShift === 0
+        ? pool
+        : {
+            ...pool,
+            centre: {
+              ...pool.centre,
+              hue: wrapHue(pool.centre.hue + this.params.founderHueShift),
+            },
+          }
     switch (this.founders) {
       case 'P':
-        return drawFounder(FOUNDER_POOLS.P, this.rng)
+        return drawFounder(shifted(FOUNDER_POOLS.P), this.rng)
       case 'Q':
-        return drawFounder(FOUNDER_POOLS.Q, this.rng)
+        return drawFounder(shifted(FOUNDER_POOLS.Q), this.rng)
       case 'all-2b':
         return drawFounder(
           {
@@ -293,7 +321,11 @@ export class ContinuousWorld {
         z: Math.sin(angle) * r,
         heading: angle + Math.PI / 2,
       })
+      // A founder roots its own lineage, which cannot be known until its id is
+      // assigned — so fix the creature *and* the tree node it already wrote.
       c.founderId = c.id
+      const node = this.lineageById.get(c.id)
+      if (node) node.founderId = c.id
       /**
        * Founder ages are staggered across the lifespan rather than all starting
        * at zero. Otherwise the entire founding population reaches old age within
