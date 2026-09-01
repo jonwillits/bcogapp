@@ -440,7 +440,7 @@ function useEvolveTab(
     ) : (
       <Panel title="Controls" style={{ width: 276, maxHeight: '82vh', overflowY: 'auto' }}>
         <Section
-          title="What the creatures inherit"
+          title="Creature Options"
           defaultOpen
           hint="The three things the reading says evolution needs. Switch one off and see what stops."
         >
@@ -495,7 +495,7 @@ function useEvolveTab(
         </Section>
 
         <Section
-          title="The world they live in"
+          title="World Options"
           hint="Nothing asks you to change these. A bigger arena and smaller patches make food harder to find and slow the creatures down; adding a patch or two puts it back."
         >
           <SelectControl
@@ -579,7 +579,7 @@ function useEvolveTab(
         </Section>
 
         <Section
-          title="This run"
+          title="Run Options"
           defaultOpen
           hint="Reset simulation redraws the identical founding population, so you can change exactly one switch and be sure nothing else moved. New seed draws a different one."
         >
@@ -635,7 +635,7 @@ function useEvolveTab(
           </p>
         </Section>
 
-        <Section title="The view" hint="Drag to orbit and scroll to zoom also work.">
+        <Section title="View Options" hint="Drag to orbit and scroll to zoom also work.">
           <ViewButtons
             onPick={(v) => setView((st) => ({ view: v, nonce: st.nonce + 1 }))}
           />
