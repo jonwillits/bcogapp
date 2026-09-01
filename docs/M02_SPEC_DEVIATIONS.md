@@ -173,3 +173,38 @@ Ordered by how badly it is currently wrong.
 1. ~~**Q13's unarmed trap.**~~ Settled — the Q10b wording above is approved and needs adding to the handout.
 2. ~~**Whether starvation matters.**~~ Settled — it stays as it is. It fires when a student makes the world hard, which is where it belongs.
 3. ~~**Part 3's separability wants your eye.**~~ **Settled.** Jon sorted Y from W and X on sight; the speed metric took an absolute value and could not see it. §6 turned out to be unsatisfiable in this engine rather than merely unmet, so it was retired and Part 3 re-aimed at "which of these do the same job". Nothing was regenerated. Verified by eye at `localhost:5173` on 2026-09-01. [`M02_SEPARABILITY_PROBLEM.md`](M02_SEPARABILITY_PROBLEM.md).
+
+---
+
+# Appendix — verbatim replacement for §6 of the scene spec
+
+Approved 2026-09-01. Replaces the subsection **"The one hard build requirement"** in `m02_evolution_SCENE_SPEC.md`. Everything above it in §6 — the four-population description and the intended-answers table — stays as it is, with one correction noted at the end.
+
+> ### The one hard build requirement — withdrawn
+>
+> **As written this cannot be met, and the reason is in the mechanics rather than the tuning.** It asked that W, X and Y be genuinely hard to tell apart in the default world, with the divergence held in the perturbations. Y drives backwards — 81% of the time, obvious within seconds — and no choice of population, light or parameter removes it.
+>
+> An inhibitory approacher reverses whenever the light it senses exceeds `bias / |w|`, and it steers by `|w| ×` the *difference* between its two sensors. Those are the same quantity on the same scale, so any light bright enough to steer by is bright enough to reverse in; there is no setting in between. Raising the resting drive to open a gap makes it worse, because bias cancels out of the difference between the two actuators but not out of their sum — it adds speed without adding steering, the turning circle grows, and the creature stops being able to curve into the light at all. **Reversing is not an artefact of Y's wiring. It is how an inhibitory approacher approaches**: it drives in, crosses into its own reversal zone, and holds station by backing out again.
+>
+> That would still leave room to choose a different Y, except that the space of mechanisms is closed. Of the six varieties only **2b** and **3a** turn toward a source and stay — 2a flees, 3b lingers then wanders off, and the two fully-connected patterns drive both actuators identically and cannot steer at all. W and X must share their wiring, because that is the homology; Y must differ, because that is the analogy. So it is always two of one kind against one of the other, and reversing tracks the kind. Asking the three to look alike is asking two mechanisms to be indistinguishable, which is the one thing they cannot be.
+>
+> Measured before withdrawing it: every pool-Q run that reached a clean 3a, plus 108 configurations of bias floor, light strength, light height, and forbidding reverse outright. In none did the reversal come near invisible, and every setting that reduced it did so by stopping the population approaching at all.
+>
+> ### What replaces it
+>
+> **Part 3 stops asking students to sort the three approachers, and asks which populations are doing the same job.** W, X and Y all reach the light and stay there; Z does not. Y approaching backwards is still Y approaching — same function, different machinery, which is precisely the analogy this tab exists to teach. A student who notices the reversal in the first ten seconds has noticed something true, and arrives at Q12 better placed rather than worse.
+>
+> The commit-then-test arc survives, re-aimed. A student can see *that* Y differs; they cannot see *why*, and nothing about driving backwards says "inhibitory" rather than "a differently tuned W". The designed perturbation is what reveals the mechanism: given a light at the far edge of the floor, a light up on the rim, or two lights far apart, **Y holds station while W and X keep swinging past**. That is the ipsilateral-inhibitory signature — coming to rest at the source — and it is invisible in the default world. The student still commits, still designs a test, and still learns something the watching could not give them.
+>
+> ### The acceptance test
+>
+> Four criteria, all headless against the sim layer, all currently met:
+>
+> 1. **Same job.** W, X and Y each reach the light and stay near it; Z does neither. Currently 13 of 16 for each approacher, none for Z.
+> 2. **The sisters are indistinguishable.** W and X differ on nothing a viewer could name. This is the homology — if they became tellable apart, a student would split it by watching and no test would notice.
+> 3. **Y's difference is specified rather than forbidden.** Y differs by driving backwards and by nothing a student has not been told about: it must not also park, spin, hug the rim, arrive noticeably later, or settle further out.
+> 4. **Divergence.** At least two perturbations separate Y from W and X by a factor of two, measured on how much each creature's distance to the light varies. Three of the five do.
+>
+> Any light a perturbation uses must be one a student can place. The arena floor and the plateau outside it are the only clickable surfaces, so a light sits either **0.7 above the floor inside the bounds** or **2.7 above the plateau outside them**, and nothing in between.
+
+**One correction to carry in the same pass.** The intended-answers table above the replaced subsection still ends *"**W and Z share a body hue**, which means nothing at all — the coincidence arm of §2.1.3"*. Since the rebuild, body colour is read off the wiring genes, so W and X share it because they genuinely are wired alike. The trait that means nothing is the **mark**, worn on the tail: W, X and Z wear the same one while Y, which actually shares Z's ancestry, wears one 95° away. See §3 above.
