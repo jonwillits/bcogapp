@@ -208,3 +208,43 @@ Approved 2026-09-01. Replaces the subsection **"The one hard build requirement"*
 > Any light a perturbation uses must be one a student can place. The arena floor and the plateau outside it are the only clickable surfaces, so a light sits either **0.7 above the floor inside the bounds** or **2.7 above the plateau outside them**, and nothing in between.
 
 **One correction to carry in the same pass.** The intended-answers table above the replaced subsection still ends *"**W and Z share a body hue**, which means nothing at all — the coincidence arm of §2.1.3"*. Since the rebuild, body colour is read off the wiring genes, so W and X share it because they genuinely are wired alike. The trait that means nothing is the **mark**, worn on the tail: W, X and Z wear the same one while Y, which actually shares Z's ancestry, wears one 95° away. See §3 above.
+
+---
+
+# Appendix — verbatim replacements for Part 3 of the handout
+
+Approved 2026-09-01. Changes to `evolution_lab.md` §"Part 3: Four Populations". Steps 2 and 4 are unchanged apart from the Q10b insertion already described above; everything else in the lab is covered by the sections earlier in this document.
+
+Two decisions taken on the way, recorded so they are not silently reopened. **Q9b tells the student there is something to see** rather than leaving Q9 open — the risk of an open question is that half the class never writes the reversal down, which would leave Q12's new clause pointing at nothing. The reversal is not the lesson; what it means is. And **Step 5 is now easier than it was**: the old version asked students to find a difference where none was visible, the new one asks them to deepen one they can already see. Accepted deliberately.
+
+## Add to the Goal, after "Do not unhide anything until the step that tells you to."
+
+> These four are not a puzzle with a trick in it. You are meant to be able to see differences between them, and one of them moves in a way you will spot straight away. The question this part asks is not *can you tell them apart* — it is *what do the differences mean*, and that is the thing watching alone cannot tell you.
+
+Without this, a student who spots Y's reversal in the first ten seconds concludes they have either broken the exercise or already finished it.
+
+## Step 1 — retitle "Sort them by behavior" to "What is each one doing?"
+
+> **Step 1 — What is each one doing?** Put a single light in the middle of the floor and watch all four.
+>
+> **Q9.** Describe what each of W, X, Y and Z does. Then group them by **job**: which of them are getting to the light and staying there, and which is not?
+>
+> **Q9b.** One of the populations that gets to the light does it in a way the others plainly do not. Which one is it, and describe how it moves. Does it still count as doing the same job as the others? Say why or why not.
+
+## Step 3 — Q12 gains a clause and loses a phrase
+
+> **Q12.** At least two populations that **do the same job** are wired differently. Which ones, and what does that tell you? Answer using the reading's terms **behavioral equivalence** and **mechanistic equivalence**. **Then look back at your answer to Q9b: does the wiring explain the way that population moves?**
+
+The replaced phrase is "behave the same way", which is no longer true of W, X and Y. The added clause is what makes Q9b pay off: the oddity the student noticed by watching turns out to be a direct consequence of the wiring they have just revealed, so the visible difference becomes evidence rather than a giveaway.
+
+## Step 5 — replaced, because its premise is now false
+
+The current text opens *"Two of these populations behave almost identically in the world you have been using. Your job is to design a world in which they do not."* That is no longer true. Replacement:
+
+> **Step 5 — Break them.** The reading gives a rule for finding out whether two systems really do the same thing: find out whether they **break the same way**. You now know that Y is wired differently from W and X. In the world you have been using, that difference shows up as exactly one thing — which way it travels. Your job is to find a world where it shows up as something more.
+>
+> Things you can change: where the lights are and how many, whether a light sits on the floor or up on the plateau outside the arena, whether a light disappears part-way through, and how much **sensor noise** there is. **Left-click the ground to add a light, right-click to remove one.** Unlike the food in the other tab, lights here stay where you put them and never run out, which is what makes a test you design repeatable.
+>
+> **Q14.** Describe the test you designed, say what you predicted before running it, and report what happened. Did W and X do something Y did not, beyond travelling in the opposite direction? If your first test failed to separate them, describe that one too, and what you tried next.
+
+**The answer key for Q14.** Three worlds work — a light at the far edge of the floor, a light out on the plateau, or two lights near opposite walls. In each, **W and X keep swinging past the light while Y parks at a fixed distance**: the ipsilateral-inhibitory signature, coming to rest at the source. Sensor noise and removing the light both fail to separate them, which is what Q14's last sentence is for.
