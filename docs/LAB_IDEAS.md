@@ -30,11 +30,11 @@ Fill these in as we talk. Canonical module list: `../../../intro_to_bcs/README.m
   Handout: `intro_to_bcs/mind_and_brain/levels_of_analysis_lab/vehicles_lab.md`, fetched live by the app's Lab pane.
 
 ### Module 2 — Comparative Approaches
-- **Undecided** - No committed idea for this lab yet. The four main topics for the week are:
-  - understanding evolution and natural selection
-  - benefits and pitfalls of evolutionary/adaptationist comparisons and analyses
-  - cross species comparisons
-  - biological vs. artificial comparisons
+- **Evolving Vehicles** — *(done)* — Render **3D** — `#/m02-evolution` · `src/scenes/m02_evolution/`. The second stage of the spine: the Module 1 creature, now with a genome it inherits and mutates.
+  **The Evolve tab** is a living population in a walled arena. Every creature carries an energy store and a lifespan; food is patches that drift across the floor, giving out energy shared among whoever is feeding on them. Fill your store and you reproduce as soon as the arena has room; run out of life and you die. Nothing is ranked and there are no generations — the arena supports a fixed number, and a slot goes to whoever is furthest ahead.
+  The genome is the numbers the creature already had in Lab 1 — the four connection strengths and the actuator bias — plus a **mark**, a bead on its tail that affects nothing at all and is inherited anyway. **Body colour is read off the wiring**, so two creatures the same colour are wired alike and a population converging in colour is a population whose wiring is converging. The mark is the one that means nothing, and it sweeps too, which is the whole of the lab's Part 4.
+  **The Lineages tab** holds four populations — W, X, Y, Z — evolved before the student arrives, with wiring, colour and ancestry all hidden. W and X are sister branches of one run; Y reached the same behaviour from the other founder pool by different machinery; Z still flees. In the default world the three approachers cannot be told apart, and come apart only under a perturbation the student has to design. Revealed in stages.
+  Handout: `intro_to_bcs/comparative_approaches/evolution_lab/evolution_lab.md`, fetched live by the app's Lab pane. **Where the build departed from the scene spec, and what the handout still owes: [`M02_SPEC_DEVIATIONS.md`](M02_SPEC_DEVIATIONS.md).**
 
 ### Module 3 — Neurons and Neural Communication
 - **Neuron Simulation** - I want to create a 2D simulation of a simple neuron, showing its parts, showing some of the biochemical interactions involved. I want ion gates, neurotransmitter release, reuptake, and binding, action potentials, and something like a working simulation of action potentials. We separately want some dynamically changing plots of electrical potential.

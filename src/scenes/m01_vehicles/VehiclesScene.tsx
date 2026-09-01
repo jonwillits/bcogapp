@@ -6,10 +6,10 @@ import { Panel } from '../../components/Panel'
 import { Button } from '../../components/controls'
 import { StepControls } from '../../components/StepControls'
 import { CameraRig } from '../../components/CameraRig'
-import { VehicleMesh } from './VehicleMesh'
-import { SourceMesh, ORB_HOVER } from './SourceMesh'
+import { VehicleMesh } from '../../components/VehicleMesh'
+import { SourceMesh, ORB_HOVER } from '../../components/SourceMesh'
 import { VehicleInspector } from './VehicleInspector'
-import { Terrain } from './Terrain'
+import { Terrain } from '../../components/Terrain'
 import { VehicleWorld, DEFAULT_WORLD_PARAMS } from '../../sim/world/world'
 import { VEHICLE_PRESETS } from '../../sim/creature/vehiclePresets'
 import { palette } from '../../theme/theme'
@@ -96,7 +96,7 @@ export default function VehiclesScene() {
     world.setVehicleTuning(selectedId, patch)
     bump()
   }
-  // `groundY` is the surface that was clicked: 0 on the pit floor, RIM_HEIGHT
+  // `groundY` is the surface that was clicked: 0 on the arena floor, RIM_HEIGHT
   // on the plateau. Rim lights are allowed on purpose — a creature will drive
   // at one and bounce off the wall, never reaching it.
   const addSource = (x: number, groundY: number, z: number) => {

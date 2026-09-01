@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { VehicleWorld, DEFAULT_STRENGTH } from './world'
+import { VehicleWorld, DEFAULT_STRENGTH, DEFAULT_WORLD_PARAMS } from './world'
+import { makeRng } from '../random'
 import { computeActuators, weightsFromWiring } from '../neural/sensorimotor'
 import { stepVehicle, DEFAULT_VEHICLE_CONFIG } from '../creature/vehicle'
 
@@ -172,5 +173,106 @@ describe('VehicleWorld', () => {
     for (let i = 0; i < 200; i++) world.step(0.1)
     expect(Math.abs(v.state.x)).toBeLessThanOrEqual(world.params.bounds + 1e-6)
     expect(Math.abs(v.state.z)).toBeLessThanOrEqual(world.params.bounds + 1e-6)
+  })
+})
+
+describe('weights as the general form of a wiring', () => {
+  /**
+   * The wiring diagram now draws from the weight matrix alone, and decides
+   * whether to draw a connection by whether its weight is exactly zero. That
+   * only shows a Module 1 vehicle correctly if the sparse patterns really do
+   * zero their absent connections rather than merely making them small — so
+   * pin it here, where breaking it is visible.
+   */
+  it('sparse patterns zero their absent connections exactly', () => {
+    const ipsi = weightsFromWiring({ pattern: 'ipsilateral', sign: 1 }, 2.4, 0.6)
+    expect(ipsi.leftToRight).toBe(0)
+    expect(ipsi.rightToLeft).toBe(0)
+
+    const contra = weightsFromWiring({ pattern: 'contralateral', sign: -1 }, 2.4, 0.6)
+    expect(contra.leftToLeft).toBe(0)
+    expect(contra.rightToRight).toBe(0)
+
+    const full = weightsFromWiring({ pattern: 'full', sign: 1 }, 2.4, 0.6)
+    for (const w of [full.leftToLeft, full.leftToRight, full.rightToLeft, full.rightToRight]) {
+      expect(w).not.toBe(0)
+    }
+  })
+})
+
+describe('the world as a population substrate', () => {
+  const facingSource = (world: VehicleWorld) => {
+    world.addSource(0, 0.7, 4, 1)
+    return world
+  }
+
+  it('a weights-only vehicle runs the same arithmetic as a preset one', () => {
+    // The one-engine claim, at its narrowest: a creature built from four
+    // numbers and one built from a named variety must produce the same
+    // actuator values, because they are the same body running the same map.
+    const preset = facingSource(new VehicleWorld())
+    const p = preset.addVehicle('aggression', '#fff', { x: 0, z: 0, heading: Math.PI / 2 })
+
+    const genomic = facingSource(new VehicleWorld())
+    const g = genomic.addWeightedVehicle(
+      { ...p.weights },
+      '#fff',
+      { x: 0, z: 0, heading: Math.PI / 2 },
+    )
+
+    for (let i = 0; i < 50; i++) {
+      preset.step(0.05)
+      genomic.step(0.05)
+    }
+    expect(g.state.x).toBeCloseTo(p.state.x, 9)
+    expect(g.state.z).toBeCloseTo(p.state.z, 9)
+    expect(g.actuators.left).toBeCloseTo(p.actuators.left, 9)
+  })
+
+  it('zero sensor noise leaves Module 1 bit-for-bit unchanged', () => {
+    // Even with an rng attached: at noise 0 the world must not draw from the
+    // stream at all, or M1 would move and every downstream draw would shift.
+    const run = (rng: ReturnType<typeof makeRng> | null) => {
+      const world = facingSource(new VehicleWorld({ ...DEFAULT_WORLD_PARAMS }, rng))
+      const v = world.addVehicle('aggression', '#fff', { x: 0, z: 0, heading: 1 })
+      for (let i = 0; i < 100; i++) world.step(0.05)
+      return v.state
+    }
+    const without = run(null)
+    const withRng = run(makeRng(1))
+    expect(withRng.x).toBe(without.x)
+    expect(withRng.z).toBe(without.z)
+    expect(withRng.heading).toBe(without.heading)
+  })
+
+  it('sensor noise perturbs the run but replays exactly from the same seed', () => {
+    const run = (seed: number, noise: number) => {
+      const world = facingSource(
+        new VehicleWorld({ ...DEFAULT_WORLD_PARAMS, sensorNoise: noise }, makeRng(seed)),
+      )
+      const v = world.addVehicle('aggression', '#fff', { x: 0, z: 0, heading: 1 })
+      for (let i = 0; i < 100; i++) world.step(0.05)
+      return v.state
+    }
+    const clean = run(5, 0)
+    const noisy = run(5, 0.3)
+    const noisyAgain = run(5, 0.3)
+
+    expect(noisy.x).not.toBeCloseTo(clean.x, 3) // noise actually did something
+    expect(noisyAgain.x).toBe(noisy.x) // ...and it is replayable
+    expect(noisyAgain.heading).toBe(noisy.heading)
+  })
+
+  it('never reports a negative sensor reading, however noisy', () => {
+    const world = new VehicleWorld(
+      { ...DEFAULT_WORLD_PARAMS, sensorNoise: 2 },
+      makeRng(3),
+    )
+    const v = world.addVehicle('love', '#fff', { x: 0, z: 0, heading: 0 })
+    for (let i = 0; i < 500; i++) {
+      world.step(0.02)
+      expect(v.sensors.left).toBeGreaterThanOrEqual(0)
+      expect(v.sensors.right).toBeGreaterThanOrEqual(0)
+    }
   })
 })

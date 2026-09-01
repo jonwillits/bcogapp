@@ -79,6 +79,7 @@ const INTRO_BLOB = 'https://github.com/jonwillits/intro_to_bcs/blob/master'
 // Scenes are lazy-loaded so Three.js/r3f stay out of the home-screen bundle
 // and only load when a scene is opened.
 const VehiclesScene = lazy(() => import('./m01_vehicles/VehiclesScene'))
+const EvolutionScene = lazy(() => import('./m02_evolution/EvolutionScene'))
 
 /**
  * Registered, runnable scenes. Order here is the order shown within a module.
@@ -98,6 +99,22 @@ export const scenes: SceneManifest[] = [
       sourceUrl: `${INTRO_BLOB}/mind_and_brain/levels_of_analysis_lab/vehicles_lab.md`,
       reportUrl: `${INTRO_BLOB}/mind_and_brain/levels_of_analysis_lab/vehicles_lab_report.docx`,
       reportLabel: 'Lab 1 report (.docx)',
+    },
+  },
+  {
+    route: 'm02-evolution',
+    module: 2,
+    title: 'Evolving Vehicles',
+    blurb:
+      'The Lab 1 vehicles, now with a genome they inherit and mutate. Watch a population adapt, take the process apart, then work out why two evolved populations are alike.',
+    mode: 'both',
+    status: 'building',
+    Component: EvolutionScene,
+    lab: {
+      rawUrl: `${INTRO_RAW}/comparative_approaches/evolution_lab/evolution_lab.md`,
+      sourceUrl: `${INTRO_BLOB}/comparative_approaches/evolution_lab/evolution_lab.md`,
+      reportUrl: `${INTRO_BLOB}/comparative_approaches/evolution_lab/evolution_lab_report.docx`,
+      reportLabel: 'Lab 2 report (.docx)',
     },
   },
 ]
