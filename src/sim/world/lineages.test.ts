@@ -62,43 +62,46 @@ describe('the fixtures are genuine engine output', () => {
    * this fails — and it should, because the data would then be describing a
    * history the engine no longer produces.
    */
-  it('every fixture reproduces its ancestry exactly from its recipe', () => {
-    const rebuiltAll = buildFixtureSet()
-    for (const [i, recipe] of FIXTURE_RECIPES.entries()) {
-      const rebuilt = rebuiltAll[i]
-      const stored = byId[recipe.id]
-      // The same creatures, in the same order, from the same parents — the half
-      // of the guarantee that holds on every platform.
-      expect(rebuilt.memberIds, `${recipe.id} member ids`).toEqual(stored.memberIds)
-      expect(rebuilt.lineage.length, `${recipe.id} lineage size`).toBe(stored.lineage.length)
-    }
-  }, 120_000)
-
   /**
-   * Gene values are checked only where the data was generated, and the reason is
-   * in `FIXTURES_GENERATED_ON`: Box-Muller rests on `Math.log`, `Math.sin` and
-   * `Math.cos`, which ECMAScript leaves implementation-approximated, so a
-   * different V8 build drifts the genes apart over hundreds of mutations while
-   * leaving every birth, death and parentage identical.
+   * Gated on the platform the data was generated on, and that gate is doing
+   * more work than it looks.
    *
-   * Split rather than loosened, deliberately. The assertion above is not a
-   * weaker version of this one — it is the part of the guarantee that holds
-   * everywhere. Where this cannot run it says so by name rather than passing
-   * quietly.
+   * Regenerating a fixture is not reproducible across platforms at all.
+   * `rng.normal()` is Box-Muller, so it rests on `Math.log`, `Math.sin` and
+   * `Math.cos`, which ECMAScript specifies as *implementation-approximated*
+   * rather than correctly rounded; a last-bit difference between two V8 builds
+   * compounds through hundreds of mutations until it flips which creature wins
+   * the reproduction queue. A first attempt at this assumed the ancestry
+   * survived even where gene values drifted, on the evidence that member ids
+   * matched. The CI runner disproved it immediately: X's pruned lineage came
+   * out 102 nodes against 116. Same survivors, different parents.
+   *
+   * So CI runs the test job on the same architecture, and this gate is the
+   * safety net — if the runner image ever changes arch, the guarantee degrades
+   * to a visible skip rather than a blocked deploy.
+   *
+   * None of it reaches students. The fixtures are committed data and every
+   * student gets the same populations whatever a build machine computes; what a
+   * foreign platform cannot do is re-derive them.
    */
   it.runIf(onFixtureNativePlatform)(
-    'and its gene values exactly, on the platform they were generated on',
+    'every fixture reproduces exactly from its recipe',
     () => {
       const r3 = (n: number) => Math.round(n * 1000) / 1000
-      const rebuiltAll = buildFixtureSet()
+      const rebuilt = buildFixtureSet()
       for (const [i, recipe] of FIXTURE_RECIPES.entries()) {
+        const stored = byId[recipe.id]
+        expect(rebuilt[i].memberIds, `${recipe.id} member ids`).toEqual(stored.memberIds)
         expect(
-          rebuiltAll[i].genomes.map((g) => ({
+          rebuilt[i].genomes.map((g) => ({
             wLL: r3(g.wLL), wLR: r3(g.wLR), wRL: r3(g.wRL), wRR: r3(g.wRR),
             bias: r3(g.bias), hue: r3(g.hue),
           })),
-          `${recipe.id} genomes — regenerate with the command at the top of lineageData.ts`,
-        ).toEqual(byId[recipe.id].genomes)
+          `${recipe.id} genomes — regenerate per the header of lineageData.ts`,
+        ).toEqual(stored.genomes)
+        expect(rebuilt[i].lineage.length, `${recipe.id} lineage size`).toBe(
+          stored.lineage.length,
+        )
       }
     },
     120_000,
