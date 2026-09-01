@@ -17,7 +17,7 @@
 import { it } from 'vitest'
 import { CONTINUOUS_LINEAGE_DATA } from './continuousLineageData'
 import { observe, type Perturbation, type ObserveOptions } from './observation'
-import { OBSERVE_OPTS, tells, MEASURES } from './separability'
+import { OBSERVE_OPTS, tells } from './separability'
 import { crossing, meanWeight, genomeToWeights, type Genome } from '../creature/genome'
 import { VehicleWorld, DEFAULT_WORLD_PARAMS } from './world'
 import { makeRng } from '../random'
@@ -250,7 +250,7 @@ it('why: is the difference explainable from the wiring a student can reveal', ()
     // Does reaching track any gene a student could read off the wiring panel?
     const corr = (pick: (g: Genome) => number) => {
       const xs = per.map((p) => pick(p.g))
-      const ys = per.map((p) => (p.closest <= 1.5 ? 1 : 0))
+      const ys: number[] = per.map((p) => (p.closest <= 1.5 ? 1 : 0))
       const mx = xs.reduce((a, b) => a + b, 0) / n
       const my = ys.reduce((a, b) => a + b, 0) / n
       const num = xs.reduce((a, x, k) => a + (x - mx) * (ys[k] - my), 0)

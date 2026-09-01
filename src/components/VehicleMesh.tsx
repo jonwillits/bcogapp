@@ -75,6 +75,9 @@ export function VehicleMesh({
   })
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
+    // Selection is a left-click. A right-click over a vehicle is meant for the
+    // ground behind it, so it must not also select.
+    if (e.nativeEvent.button !== 0) return
     e.stopPropagation()
     onSelect(vehicle.id)
   }
@@ -83,9 +86,23 @@ export function VehicleMesh({
     <group
       ref={group}
       onClick={handleClick}
-      // Stop the press from reaching the ground plane so selecting a vehicle
-      // never also places/removes a light behind it.
-      onPointerDown={(e) => e.stopPropagation()}
+      /**
+       * Swallow the press only for the *left* button, so selecting a vehicle
+       * never also places a light behind it — but a right-click still reaches
+       * the ground.
+       *
+       * This used to stop every button, which made removing a light impossible
+       * wherever a creature stood. `Terrain` records the button on pointer-down
+       * and acts on pointer-up, so a swallowed press left it with nothing
+       * recorded and the release did nothing at all. The failure was invisible
+       * rather than noisy, and it bit hardest in the one place it mattered: once
+       * a population swarms the light it is trying to reach, the creatures cover
+       * it, and the light a student most wants to remove is the one they cannot.
+       * Right-click removing a light is what Q14 rests on.
+       */
+      onPointerDown={(e) => {
+        if (e.nativeEvent.button === 0) e.stopPropagation()
+      }}
     >
       {/* chassis */}
       <mesh position={[0, 0.12, 0]} castShadow>

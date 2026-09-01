@@ -49,9 +49,6 @@ function look(id: string, worldIndex: number): ObservationResult {
   return o
 }
 
-/** How far apart two numbers are, as a ratio ≥ 1. */
-const ratio = (a: number, b: number) =>
-  Math.max(a, b) / Math.max(0.02, Math.min(a, b))
 
 describe('the fixtures are genuine engine output', () => {
   /**
