@@ -26,6 +26,22 @@ export interface VehicleConfig {
   sensorHeight: number
   /** wheel speed magnitude cap (units/sec) */
   maxSpeed: number
+  /**
+   * Forbid driving a wheel backwards, so an actuator driven negative stalls at
+   * zero instead of reversing.
+   *
+   * Off everywhere by default, and Module 1 must never turn it on: students have
+   * already watched 3c reverse once inhibition exceeds its bias, and the answer
+   * key in `vehiclePresets.ts` says so. It exists for Module 2's §6 problem,
+   * where an inhibitory approacher's reversal zone covers the whole arena and
+   * makes population Y sortable on sight.
+   *
+   * Arguably the more faithful kinematics either way — Braitenberg's 3a comes to
+   * *rest* facing the source, and reversing is an artifact of letting wheel
+   * speed go negative. But it changes what the creature does near a light, so
+   * it is a measured choice, not a tidy-up.
+   */
+  clampReverse?: boolean
 }
 
 export const DEFAULT_VEHICLE_CONFIG: VehicleConfig = {
@@ -66,6 +82,25 @@ export function sensorPositions(
 }
 
 /**
+ * Actuator output as the wheel speeds the body actually turns at.
+ *
+ * The single place the cap (and `clampReverse`) is applied. It is exported and
+ * used by the observation layer as well as by `stepVehicle`, deliberately: the
+ * separability measures are only worth anything if the speed they score is the
+ * speed on screen, and two copies of this rule would be free to drift apart.
+ */
+export function wheelSpeeds(
+  actuators: ActuatorOutput,
+  cfg: VehicleConfig,
+): { left: number; right: number } {
+  const lo = cfg.clampReverse ? 0 : -cfg.maxSpeed
+  return {
+    left: clamp(actuators.left, lo, cfg.maxSpeed),
+    right: clamp(actuators.right, lo, cfg.maxSpeed),
+  }
+}
+
+/**
  * Advance the pose by `dt` seconds under differential-drive kinematics.
  * Returns a new state (pure — does not mutate the input).
  */
@@ -75,8 +110,7 @@ export function stepVehicle(
   cfg: VehicleConfig,
   dt: number,
 ): VehicleState {
-  const vL = clamp(actuators.left, -cfg.maxSpeed, cfg.maxSpeed)
-  const vR = clamp(actuators.right, -cfg.maxSpeed, cfg.maxSpeed)
+  const { left: vL, right: vR } = wheelSpeeds(actuators, cfg)
   const v = (vL + vR) / 2
   const omega = (vR - vL) / cfg.wheelBase
   const heading = s.heading + omega * dt
