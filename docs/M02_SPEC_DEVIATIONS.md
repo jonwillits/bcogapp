@@ -248,3 +248,62 @@ The current text opens *"Two of these populations behave almost identically in t
 > **Q14.** Describe the test you designed, say what you predicted before running it, and report what happened. Did W and X do something Y did not, beyond travelling in the opposite direction? If your first test failed to separate them, describe that one too, and what you tried next.
 
 **The answer key for Q14.** Three worlds work — a light at the far edge of the floor, a light out on the plateau, or two lights near opposite walls. In each, **W and X keep swinging past the light while Y parks at a fixed distance**: the ipsilateral-inhibitory signature, coming to rest at the source. Sensor noise and removing the light both fail to separate them, which is what Q14's last sentence is for.
+
+---
+
+# Appendix — Q20's two run logs
+
+Generated 2026-09-01 from real runs, reproducible with `PROBE=1 npx vitest run --disable-console-intercept -t "q20: the two logs"`. These go in `evolution_lab_report.docx`, which is where Q20 sends the student.
+
+**The confound is the one the app makes easy to commit.** The Evolve tab offers **Reset simulation**, which redraws the identical founding population, and **New seed**, which draws a different one — and Part 2 spends five experiments teaching students to use the first. Q20's imaginary experimenter pressed the second. Both logs print their seed in the header, so the difference is there to be found rather than merely alleged.
+
+**Both controls come out clean, which is what makes this worth setting.** Seed 5 survives whether mutation is on or off; seed 7 dies out whether mutation is on or off. The mutation rate accounts for *none* of the difference between the two runs and the founding population accounts for all of it, so the answer key can say so from real runs rather than asserting in the abstract that seeds matter.
+
+**Why extinction and not birth rate.** The first attempt at this pair used births per minute and had to be thrown away: the arena has a hard carrying capacity, so every run lands within a few births of every other whatever is happening genetically. The pair that looked best was selected on the birth rate in the final sixty seconds, which is one minute of noise, and the two logs came out visibly identical — the question's premise, "they reached different outcomes", would have been false. At Part 2's small-population setting a run is close to a coin flip, and *that is the point*: it makes the outcome almost entirely a matter of which founders were drawn.
+
+## Run 1
+
+> **Mutation rate: 1.0      Seed: 5**
+> Inheritance: on   Selection: on   Light: food   How many the arena holds: 6   Food patches: 4
+>
+> | time | creatures alive | born so far | how uniform the mark is |
+> |---|---|---|---|
+> | 0m | 16 | 0 | 44% |
+> | 2m | 6 | 11 | 100% |
+> | 4m | 6 | 22 | 100% |
+> | 6m | 6 | 34 | 100% |
+> | 8m | 6 | 46 | 100% |
+> | 10m | 6 | 57 | 100% |
+> | 12m | 6 | 71 | 100% |
+> | 14m | 6 | 80 | 100% |
+> | 16m | 6 | 92 | 100% |
+> | 18m | 6 | 105 | 100% |
+> | 20m | 6 | 118 | 100% |
+>
+> Still running at 20 minutes: 6 alive, 118 born in total.
+
+## Run 2
+
+> **Mutation rate: 0.0      Seed: 7**
+> Inheritance: on   Selection: on   Light: food   How many the arena holds: 6   Food patches: 4
+>
+> | time | creatures alive | born so far | how uniform the mark is |
+> |---|---|---|---|
+> | 0m | 15 | 0 | 27% |
+> | 2m | 6 | 9 | 83% |
+> | 4m | 6 | 21 | 100% |
+>
+> The last creature died at 5.3 minutes. 22 were born in total. The run ended there.
+
+## The answer key
+
+| seed | mutation | outcome | born |
+|---|---|---|---|
+| 5 | 1.0 | survived, 6 alive | 118 |
+| 5 | 0.0 | **survived**, 6 alive | 116 |
+| 7 | 1.0 | **died out at 5.2 min** | 20 |
+| 7 | 0.0 | died out at 5.3 min | 22 |
+
+- **What else differed:** the **seed** — the founding population. Run 1 started from draw 5, Run 2 from draw 7. A student can also notice that the two runs began with different numbers of creatures, 16 against 15, which is the same fact showing through.
+- **The word:** a **confound** — a second thing that changed alongside the one you meant to change, so the outcome cannot be attributed to either.
+- **What you would have to do:** press **Reset simulation** rather than **New seed**, so both runs start from the identical founders and the mutation rate is genuinely the only difference. Better still, run many seeds at each setting and compare the averages, since one run of each cannot separate a real effect from a lucky draw either way.
