@@ -13,6 +13,8 @@ import { VehicleWorld, DEFAULT_WORLD_PARAMS } from './world'
 import { ContinuousWorld, DEFAULT_CONTINUOUS_PARAMS } from './continuousWorld'
 import { nearestVariety } from '../creature/genome'
 import { genomeToWeights, type Genome } from '../creature/genome'
+import { observe, CENTRE_LIGHT } from './observation'
+import { OBSERVE_OPTS } from './separability'
 
 const f = (n: number, w = 7) => n.toFixed(2).padStart(w)
 
@@ -87,7 +89,17 @@ it('is a non-reversing 3a population even possible', () => {
    * creature spends its time outside it, going forwards.
    */
   console.log('\npool Q under food — every run that reached 3a, and whether it reverses')
-  console.log('  seed  dur | variety purity | mean bias  mean |w| | signed speed | % reverse')
+  /**
+   * `arrived` and `meanDist` are here because their absence is what put Q16@2400
+   * forward as the one live candidate. The table used to report signed speed and
+   * reverse fraction only, and neither of those can say whether a creature *goes
+   * anywhere* — Q16 scored +0.15 and 16% because it is too weakly wired to move
+   * much in any direction. Measured on approach it sits at 0.08 arrived and 4.54
+   * mean distance, which is Z's behaviour, not an approacher's. Same failure as
+   * the absolute-speed metric, one level up: a summary that cannot see the thing
+   * the criterion is about.
+   */
+  console.log('  seed  dur | variety purity | mean bias  mean |w| | signed speed | % reverse | arrived | meanDist')
   for (const dur of [2400, 4800]) {
     for (let seed = 1; seed <= 30; seed++) {
       const w = new ContinuousWorld(seed, DEFAULT_CONTINUOUS_PARAMS, 'Q')
@@ -106,10 +118,13 @@ it('is a non-reversing 3a population even possible', () => {
       const mag =
         g.reduce((a, x) => a + (Math.abs(x.wLL) + Math.abs(x.wLR) + Math.abs(x.wRL) + Math.abs(x.wRR)) / 4, 0) /
         g.length
+      const o = observe(g, CENTRE_LIGHT, OBSERVE_OPTS)
       console.log(
         `  Q${String(seed).padStart(2)} ${dur} | 3a ${f(top[1] / g.length, 6)} | ${f(
           bias, 9,
-        )} ${f(mag, 9)} | ${f(r.signedSpeed, 12)} | ${f(r.reverse * 100, 9)}`,
+        )} ${f(mag, 9)} | ${f(r.signedSpeed, 12)} | ${f(r.reverse * 100, 9)} | ${f(
+          o.arrivedFraction, 7,
+        )} | ${f(o.meanDistance, 8)}`,
       )
     }
   }
