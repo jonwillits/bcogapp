@@ -3,6 +3,15 @@ import { buildFixtureSet, FIXTURE_RECIPES, pruneLineage } from './lineages'
 import { LINEAGE_DATA } from './lineageData'
 import { observe, CENTRE_LIGHT, PERTURBATIONS, type ObservationResult } from './observation'
 import { crossing, meanWeight, type Genome } from '../creature/genome'
+import {
+  OBSERVE_OPTS,
+  tells,
+  describeGaps,
+  SAME_JOB,
+  Y_SPECIFICATION,
+  DIVERGENCE,
+  positiveRatio,
+} from './separability'
 import { hueDistance, modalHue } from './evolutionWorld'
 
 /**
@@ -14,8 +23,20 @@ import { hueDistance, modalHue } from './evolutionWorld'
  * than by measurement noise. Both are documented at the test that carries them.
  */
 
-const OPTS = { startRadius: 0.3, lightStrength: 4, duration: 30 }
+/**
+ * The observation conditions, imported rather than restated.
+ *
+ * This used to be a local copy of the same three numbers. They matched, but
+ * nothing made them match — and the battery's thresholds in `separability.ts`
+ * are calibrated under `OBSERVE_OPTS`, so a divergence between the two would
+ * have meant asserting thresholds derived from a world other than the one being
+ * measured. Found by a mutation test that should have gone red and did not,
+ * because the mutation was applied to the copy the tests did not use.
+ */
+const OPTS = OBSERVE_OPTS
 const byId = Object.fromEntries(LINEAGE_DATA.map((f) => [f.id, f]))
+
+const APPROACHERS = ['W', 'X', 'Y']
 
 const cache = new Map<string, ObservationResult>()
 function look(id: string, worldIndex: number): ObservationResult {
@@ -94,119 +115,160 @@ describe('the fixtures are genuine engine output', () => {
   })
 })
 
-describe('the separability test — §6’s one hard build requirement', () => {
+/**
+ * Part 3's criteria under the **generational** engine.
+ *
+ * Mirrored verbatim from `continuousLineages.test.ts`, deliberately. Nothing
+ * student-facing reads these fixtures — the scene imports
+ * `CONTINUOUS_LINEAGE_DATA` only — so this file guards the engine that was
+ * replaced, not the one that ships. It is kept because the continuous engine was
+ * adopted on the evidence that it matched the generational one on every
+ * acceptance test, and that comparison is worth nothing if the two suites stop
+ * asking the same questions. The criteria themselves live in `separability.ts`
+ * so there is one definition rather than two.
+ */
+describe('Part 3 — they do the same job', () => {
   /**
-   * In the default world W, X and Y must not be tellable apart by watching. The
-   * whole of Part 3 rests on a student being unable to sort them by eye, having
-   * to commit to a guess, and then having to design a perturbation that
-   * separates them. If they separate on their own, the lab loses its spine.
+   * **This replaces §6's separability test, which was retired rather than
+   * relaxed.** The distinction matters and is the whole of why these tests look
+   * different from the ones they succeed.
    *
-   * §10 names two measures. This checks four, because a student watching does
-   * not restrict themselves to the two the spec happened to name — and the two
-   * extra ones, how much each vehicle's distance varies and how fast it moves,
-   * are exactly what the divergence test below uses to pull them apart. They
-   * have to be *equal here* for that to mean anything.
+   * Relaxing would be keeping the claim "W, X and Y are indistinguishable" and
+   * widening the bar until it passed. That is exactly the failure this area has
+   * a history of: the suite reported the criterion satisfied twice, on a
+   * statistic that could not see what a viewer saw first. Retiring is different
+   * — the lab no longer makes that claim. §6 is unsatisfiable in this engine
+   * (the argument and its 108 measured configurations are recorded at
+   * `SAME_JOB`), so Part 3 now asks which populations do the same *job*, and Y
+   * approaching backwards is still Y approaching.
+   *
+   * A retirement is only honest if the replacement claim is written down and
+   * checked. That is these four tests.
    */
-  const APPROACHERS = ['W', 'X', 'Y']
-
-  it('time to first arrival falls within 15%', () => {
-    const arrivals = APPROACHERS.map((id) => look(id, 0).meanTimeToArrival)
-    expect(Math.max(...arrivals) / Math.min(...arrivals) - 1).toBeLessThan(0.15)
-  })
-
-  it('mean distance falls within 10% of the pit radius', () => {
-    const dists = APPROACHERS.map((id) => look(id, 0).meanDistance)
-    expect(Math.max(...dists) - Math.min(...dists)).toBeLessThan(0.9)
-  })
-
-  it('neither how much they move nor how much they wander gives them away', () => {
-    const spreads = APPROACHERS.map((id) => look(id, 0).meanDistanceSpread)
-    const speeds = APPROACHERS.map((id) => look(id, 0).meanSpeed)
-    // How much each vehicle's distance varies matches closely: 1.08.
-    expect(ratio(Math.max(...spreads), Math.min(...spreads))).toBeLessThan(1.3)
-    /**
-     * Speed is the loosest of the four default-world matches, at 1.51 between
-     * X (0.64) and Y (0.97), and the bound here says so rather than pretending
-     * otherwise. Tightening it further was tried and is the wrong trade: the
-     * only triples that match on speed to within 1.35 have populations that are
-     * barely wired at all, and their *mechanisms* stop being readable — the best
-     * such candidate had a W that was 46% pure across six varieties and came out
-     * ipsilateral, the same machinery as Y, which would leave Q12 with nothing
-     * to find. Clean wiring for Q11 is worth more than a tighter speed match.
-     *
-     * Worth an eye on the built scene: both populations are slow in absolute
-     * terms and there are 24 vehicles each, so this should not be rankable by
-     * watching. If it turns out to be, the fix is a different Y from the same
-     * search rather than a change to the engine.
-     */
-    expect(ratio(Math.max(...speeds), Math.min(...speeds))).toBeLessThan(1.6)
-  })
-
-  it('Z is obviously different on both of §10’s measures', () => {
-    const z = look('Z', 0)
-    const approachers = APPROACHERS.map((id) => look(id, 0))
-    // Never arrives, where all three approachers do.
-    expect(z.arrivedFraction).toBeLessThan(0.1)
-    for (const a of approachers) {
-      expect(a.arrivedFraction).toBeGreaterThan(0.5)
-      expect(z.meanDistance / a.meanDistance).toBeGreaterThan(2)
+  it('W, X and Y all reach the light and stay near it', () => {
+    for (const id of APPROACHERS) {
+      const o = look(id, 0)
+      expect(o.arrivedFraction, `${id} should reach the light`).toBeGreaterThan(
+        SAME_JOB.minArrived,
+      )
+      expect(o.meanDistance, `${id} should stay near it`).toBeLessThan(
+        SAME_JOB.maxMeanDistance,
+      )
     }
+  })
+
+  it('Z does not — it is the contrast that keeps the grouping non-trivial', () => {
+    const z = look('Z', 0)
+    expect(z.arrivedFraction).toBeLessThan(SAME_JOB.maxFleerArrived)
+    for (const id of APPROACHERS)
+      expect(
+        z.meanDistance / look(id, 0).meanDistance,
+        `Z should sit far outside ${id}`,
+      ).toBeGreaterThan(SAME_JOB.minFleerDistanceRatio)
+  })
+
+  /**
+   * The sisters are the calibration point for the whole battery, and the reason
+   * its thresholds are derived rather than chosen: Jon cannot sort W from X by
+   * eye, so whatever they differ by is, by observation, invisible.
+   *
+   * It is also a real requirement in its own right. W and X are the homology; if
+   * a regenerated pair became tellable apart, a student would split them by
+   * watching and Q13's homology arm would collapse with no test failing. Sixty
+   * student-reachable worlds were swept looking for one that separates them
+   * reliably and none does — the best candidate reverses direction depending on
+   * where the light is clicked, and closes entirely if you watch for ninety
+   * seconds instead of thirty.
+   */
+  it('the sisters are indistinguishable, which is what calibrates the battery', () => {
+    const t = tells(['W', 'X'].map((id) => ({ id, observation: look(id, 0) })))
+    expect(t.length, `W and X should not be tellable apart: ${describeGaps(t)}`).toBe(0)
+  })
+
+  /**
+   * The battery, inverted from a constraint into a specification.
+   *
+   * While §6 stood this asked that *no* measure separate the three. Now that the
+   * handout says outright that Y approaches backwards, it asks that the
+   * separation be exactly what the handout describes and nothing more. A
+   * regenerated Y that also parked, span on the spot, hugged the rim or took
+   * visibly longer to arrive would make the student-facing description wrong in
+   * a new way, and this is what catches it.
+   */
+  it('Y differs by driving backwards, and by nothing a student is not told about', () => {
+    const firing = tells(APPROACHERS.map((id) => ({ id, observation: look(id, 0) })))
+    const keys = firing.map((g) => g.measure.key)
+    const allowed: readonly string[] = [
+      ...Y_SPECIFICATION.mustDiffer,
+      ...Y_SPECIFICATION.mayDiffer,
+    ]
+    const unexpected = firing.filter((g) => !allowed.includes(g.measure.key))
+    expect(
+      unexpected.length,
+      `Y differs on something the handout does not describe: ${describeGaps(unexpected)}`,
+    ).toBe(0)
+    for (const key of Y_SPECIFICATION.mustDiffer)
+      expect(keys, `the handout says Y approaches backwards; ${key} should show it`).toContain(
+        key,
+      )
   })
 })
 
 describe('the divergence test', () => {
   /**
-   * **Restated from §10, and this one was forced by a conflict inside the spec
-   * rather than by noise.**
+   * **Restated from §10, and restated a second time now.**
    *
-   * §10 asks that at least two perturbations separate Y from W and X by "mean
-   * distance differing by a factor of two or more". Measured across 128 candidate
-   * branches and 34 candidate Y runs, **no triple that passes the separability
-   * test achieves that on mean distance under any perturbation at all** — not
-   * one, at any run length tried.
+   * §10 asks that at least two perturbations separate Y from W and X by a factor
+   * of two on *mean distance*. No triple ever achieved that, for a structural
+   * reason: mean distance is the statistic separability was defined on, chosen
+   * precisely because every approacher ends up near the light whatever took it
+   * there. A statistic chosen to be blind to mechanism does not stop being blind
+   * when the world is perturbed.
    *
-   * The reason is structural rather than a matter of tuning. Mean distance is
-   * the statistic separability is defined on, and it is defined on it precisely
-   * because every approacher ends up near the light whatever mechanism took it
-   * there. A statistic chosen to be blind to mechanism in the default world does
-   * not stop being blind to mechanism when the world is perturbed.
+   * The first restatement measured **within-vehicle spread of distance and
+   * speed** — holding station versus swinging past. Speed has now been dropped
+   * from it, for two reasons. It is signed, so a ratio across a sign flip is
+   * meaningless: W at +0.67 against Y at −1.05 scores 33 and would pass any bar
+   * without a perturbation doing anything. And the speed difference is visible
+   * in the *default* world, so counting it here would let this test pass on
+   * something the student can already see — when the point of Q14 is to design a
+   * world that shows them something they cannot.
    *
-   * What separates them is *how they move rather than where they end up* — an
-   * ipsilateral inhibitory population holds station at the light, a
-   * contralateral excitatory one keeps swinging past it. That is also precisely
-   * what a student sees. So divergence is measured on within-vehicle variation
-   * in distance and on speed, and on those three of the four perturbations
-   * separate Y from W and X by a factor of two or more.
-   *
-   * The perturbations' own parameters had to be tuned to get there, and are
-   * documented in `observation.ts`: two lights work only when far apart, and a
-   * light must be removed early rather than mid-run.
+   * So divergence is station-keeping alone. Three of the five perturbations
+   * clear a factor of two; two do not, and are kept because the handout asks a
+   * student what they tried that failed.
    */
-  const separates = (worldIndex: number): number => {
-    const wx = (pick: (o: ObservationResult) => number) =>
-      (pick(look('W', worldIndex)) + pick(look('X', worldIndex))) / 2
-    const y = look('Y', worldIndex)
-    return Math.max(
-      ratio(wx((o) => o.meanDistanceSpread), y.meanDistanceSpread),
-      ratio(wx((o) => o.meanSpeed), y.meanSpeed),
-    )
+  const stationKeeping = (worldIndex: number): number => {
+    const wx =
+      (look('W', worldIndex).meanDistanceSpread +
+        look('X', worldIndex).meanDistanceSpread) /
+      2
+    return positiveRatio(wx, look('Y', worldIndex).meanDistanceSpread)
   }
 
   it('at least two perturbations separate Y from W and X by a factor of two', () => {
-    const scores = PERTURBATIONS.map((_, i) => separates(i + 1))
-    const working = scores.filter((s) => s >= 2).length
+    const scores = PERTURBATIONS.map((_, i) => stationKeeping(i + 1))
     expect(
-      working,
-      `per-perturbation scores: ${PERTURBATIONS.map(
+      scores.filter((s) => s >= DIVERGENCE.minRatio).length,
+      `per-perturbation: ${PERTURBATIONS.map(
         (p, i) => `${p.label} ${scores[i].toFixed(2)}`,
       ).join(', ')}`,
-    ).toBeGreaterThanOrEqual(2)
+    ).toBeGreaterThanOrEqual(DIVERGENCE.minPerturbations)
   })
 
-  it('and the default world still does not', () => {
-    // The other half of the same claim: whatever pulls them apart must not be
-    // visible before the student perturbs anything.
-    expect(separates(0)).toBeLessThan(1.5)
+  /**
+   * The control that used to sit here asserted that the default world does *not*
+   * separate them. It has been retired with §6 — the default world does separate
+   * them, openly, and a test saying otherwise would be asserting something known
+   * to be false.
+   *
+   * What replaces it is the claim that actually needs guarding: the perturbation
+   * has to *add* something. If the default world already separated them on
+   * station-keeping, Q14 would be asking students to discover what they had
+   * been looking at all along.
+   */
+  it('and station-keeping is not already given away in the default world', () => {
+    expect(stationKeeping(0)).toBeLessThan(1.6)
   })
 })
 
