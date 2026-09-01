@@ -206,7 +206,3 @@ it('q20: the two logs, as a student would read them', () => {
   )
   console.log('  two runs; the founding population accounted for all of it.')
 }, 900_000)
-
-function modalOf(x: { hueConcentration: number }): number {
-  return 0 * x.hueConcentration
-}
