@@ -263,3 +263,35 @@ export const DIVERGENCE = {
 /** Ratio of two positive quantities, guarded against a near-zero denominator. */
 export const positiveRatio = (a: number, b: number) =>
   Math.max(a, b) / Math.max(0.02, Math.min(a, b))
+
+/**
+ * The platform the committed fixture data was generated on.
+ *
+ * `mutate` draws from `rng.normal()`, which is Box-Muller and therefore built
+ * on `Math.log`, `Math.sin` and `Math.cos`. ECMAScript specifies those as
+ * *implementation-approximated* rather than correctly rounded, so two V8 builds
+ * may differ in the last bit — and over hundreds of generations of mutation
+ * that random-walks the gene values apart. Measured: identical across Node 22
+ * and Node 26 on macOS arm64, different on the Linux x86-64 CI runner, so it is
+ * the platform and not the Node version.
+ *
+ * What survives the difference is everything structural. When CI regenerated
+ * the fixtures it produced **the same creatures, born in the same order, to the
+ * same parents** — `memberIds` and lineage size matched exactly — and only the
+ * gene values drifted. So the ancestry claim, which is what a student can open
+ * the tree and check, is verifiable anywhere. Exact gene equality is only
+ * checkable where the data was made.
+ *
+ * This is not a caveat about what students see: the fixtures are committed data
+ * and every student gets the same populations regardless of what any build
+ * machine computes. It is a limit on where the *derivation* can be re-run.
+ */
+export const FIXTURES_GENERATED_ON = { platform: 'darwin', arch: 'arm64' } as const
+
+// Reached through globalThis rather than the bare `process` global: this module
+// sits in `sim/`, which is type-checked as browser code and has no Node types.
+const host = (globalThis as { process?: { platform?: string; arch?: string } }).process
+
+export const onFixtureNativePlatform =
+  host?.platform === FIXTURES_GENERATED_ON.platform &&
+  host?.arch === FIXTURES_GENERATED_ON.arch

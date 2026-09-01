@@ -9,6 +9,7 @@ import { observe, CENTRE_LIGHT, PERTURBATIONS, type ObservationResult } from './
 import { crossing, meanWeight, type Genome } from '../creature/genome'
 import {
   OBSERVE_OPTS,
+  onFixtureNativePlatform,
   tells,
   describeGaps,
   SAME_JOB,
@@ -57,24 +58,50 @@ function look(id: string, worldIndex: number): ObservationResult {
 
 
 describe('the fixtures are genuine engine output', () => {
-  it('every fixture reproduces exactly from its recipe', () => {
-    const r3 = (n: number) => Math.round(n * 1000) / 1000
+  it('every fixture reproduces its ancestry exactly from its recipe', () => {
     const rebuilt = buildContinuousFixtureSet()
     for (const [i, recipe] of CONTINUOUS_FIXTURE_RECIPES.entries()) {
       const stored = byId[recipe.id]
+      // The same creatures, born in the same order, to the same parents. This
+      // is the half a student can check by opening the tree, and it holds on
+      // every platform.
       expect(rebuilt[i].memberIds, `${recipe.id} member ids`).toEqual(stored.memberIds)
-      expect(
-        rebuilt[i].genomes.map((g) => ({
-          wLL: r3(g.wLL), wLR: r3(g.wLR), wRL: r3(g.wRL), wRR: r3(g.wRR),
-          bias: r3(g.bias), hue: r3(g.hue),
-        })),
-        `${recipe.id} genomes — regenerate per the header of continuousLineageData.ts`,
-      ).toEqual(stored.genomes)
       expect(rebuilt[i].lineage.length, `${recipe.id} lineage size`).toBe(
         stored.lineage.length,
       )
     }
   }, 300_000)
+
+  /**
+   * Gene values are checked only where the data was generated, and the reason is
+   * in `FIXTURES_GENERATED_ON`: Box-Muller rests on `Math.log`, `Math.sin` and
+   * `Math.cos`, which ECMAScript leaves implementation-approximated, so a
+   * different V8 build drifts the genes apart over hundreds of mutations while
+   * leaving every birth, death and parentage identical.
+   *
+   * Splitting it this way rather than loosening it keeps the claim honest: the
+   * assertion above is not a weaker version of this one, it is the part of the
+   * guarantee that holds everywhere. Where this cannot run, it says so by name
+   * rather than passing quietly.
+   */
+  it.runIf(onFixtureNativePlatform)(
+    'and its gene values exactly, on the platform they were generated on',
+    () => {
+      const r3 = (n: number) => Math.round(n * 1000) / 1000
+      const rebuilt = buildContinuousFixtureSet()
+      for (const [i, recipe] of CONTINUOUS_FIXTURE_RECIPES.entries()) {
+        expect(
+          rebuilt[i].genomes.map((g) => ({
+            wLL: r3(g.wLL), wLR: r3(g.wLR), wRL: r3(g.wRL), wRR: r3(g.wRR),
+            bias: r3(g.bias), hue: r3(g.hue),
+          })),
+          `${recipe.id} genomes — regenerate per the header of continuousLineageData.ts`,
+        ).toEqual(byId[recipe.id].genomes)
+      }
+    },
+    300_000,
+  )
+
 
   it('every ancestry is well formed and reaches a founder', () => {
     for (const fx of CONTINUOUS_LINEAGE_DATA) {
