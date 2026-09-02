@@ -86,6 +86,25 @@ export interface ContinuousParams {
    */
   founderHueShift: number
   /**
+   * Founding genomes supplied outright, instead of drawn from a pool.
+   *
+   * The saved Part 3 populations are the reason this exists: Q18 asks what
+   * happens when a population meets the *other* population's world, and that
+   * question only has an answer where creatures eat, starve and breed — which
+   * is the Evolve tab, not the Lineages tab. So a student picks Population W as
+   * the founding stock, sets the lights to poison, and watches.
+   *
+   * The genomes are passed in rather than looked up here on purpose. Fixture
+   * data lives in `continuousLineageData`, which depends on this module; reading
+   * it from inside the engine would close an import cycle, and it would also put
+   * knowledge of one module's teaching material into the shared simulation. The
+   * engine offers the mechanism and the scene supplies the data.
+   *
+   * Fewer genomes than `initialPopulation` are cycled, so shrinking the arena
+   * still works.
+   */
+  founderGenomes: readonly Genome[] | null
+  /**
    * How many creatures the arena supports. **Not a backstop — a mechanism.**
    *
    * When the world is full nobody is born; a creature that has enough energy to
@@ -150,6 +169,7 @@ export const DEFAULT_CONTINUOUS_PARAMS: ContinuousParams = {
   bounds: 9,
   founderSpread: 1.6,
   founderHueShift: 0,
+  founderGenomes: null,
   populationCap: 16,
   maxEnergy: 30,
   food: {
@@ -286,7 +306,13 @@ export class ContinuousWorld {
     }
   }
 
-  private drawGenome(): Genome {
+  private drawGenome(index: number): Genome {
+    // Supplied stock wins over any pool, and takes no draw from the random
+    // stream — so a run seeded this way is still reproducible from its seed.
+    const supplied = this.params.founderGenomes
+    if (supplied && supplied.length > 0) {
+      return { ...supplied[index % supplied.length] }
+    }
     const shifted = (pool: typeof FOUNDER_POOLS.P) =>
       this.params.founderHueShift === 0
         ? pool
@@ -335,7 +361,7 @@ export class ContinuousWorld {
     for (let i = 0; i < n; i++) {
       const angle = (i / n) * Math.PI * 2
       const r = this.params.bounds * 0.55
-      const genome = this.drawGenome()
+      const genome = this.drawGenome(i)
       const c = this.spawn(genome, null, -1, {
         x: Math.cos(angle) * r,
         z: Math.sin(angle) * r,

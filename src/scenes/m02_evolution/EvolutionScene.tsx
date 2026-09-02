@@ -28,7 +28,38 @@ import { palette } from '../../theme/theme'
 
 const FIXED_STEP = 1 / 30
 
-type FounderChoice = 'diverse' | 'P' | 'Q'
+/**
+ * What the arena is stocked with at the start.
+ *
+ * The last two are the *saved* populations of Part 3, offered here because Q18
+ * asks what happens when a population meets the other one's world — and that
+ * question only has an answer where creatures eat, starve and breed, which is
+ * this tab and not the Lineages tab. A light regime control over there would
+ * change nothing on screen: `REGIME_SIGN` signs the energy a creature earns and
+ * never touches how it steers, and nothing in that tab eats.
+ *
+ * Only W and Z are offered, and with bare labels. X and Y would let a student
+ * meet two of Part 3's populations in Part 1, ahead of the staging that makes
+ * Part 3 work, and a describing label ("approaches light") would give away the
+ * very thing Q9 asks them to work out.
+ */
+type FounderChoice = 'diverse' | 'P' | 'Q' | 'W' | 'Z'
+
+/**
+ * Which founder *pool* the engine should draw from for a given choice. A saved
+ * population draws from no pool at all — its genomes are handed over outright
+ * via `founderGenomes` — so it maps to the default and the pool goes unused.
+ */
+const poolFor = (choice: FounderChoice): 'diverse' | 'P' | 'Q' =>
+  choice === 'P' || choice === 'Q' ? choice : 'diverse'
+
+/** The saved populations a student can found a run with. */
+const FOUNDER_FIXTURES: Record<string, readonly Genome[]> = Object.fromEntries(
+  CONTINUOUS_LINEAGE_DATA.filter((f) => f.id === 'W' || f.id === 'Z').map((f) => [
+    f.id,
+    f.genomes,
+  ]),
+)
 
 /**
  * Every control's starting value, in one place, so "Reset settings" has
@@ -303,8 +334,11 @@ function useEvolveTab(
           count: patchCount,
           driftSpeed: patchSpeed,
         },
+        // A saved population is dealt out as the founding stock rather than
+        // drawn from a pool; anything else falls through to the pools.
+        founderGenomes: FOUNDER_FIXTURES[founders] ?? null,
       },
-      founders,
+      poolFor(founders),
     )
 
   const worldRef = useRef<ContinuousWorld | null>(null)
@@ -342,7 +376,7 @@ function useEvolveTab(
         populationCap: SETTING_DEFAULTS.capacity,
         initialPopulation: SETTING_DEFAULTS.capacity,
       },
-      SETTING_DEFAULTS.founders,
+      poolFor(SETTING_DEFAULTS.founders),
     )
     setSelectedId(null)
     bump()
@@ -478,6 +512,8 @@ function useEvolveTab(
               { value: 'diverse', label: 'Diverse mix' },
               { value: 'P', label: 'Pool P — weak light-chasers' },
               { value: 'Q', label: 'Pool Q — light-fleers' },
+              { value: 'W', label: 'Population W' },
+              { value: 'Z', label: 'Population Z' },
             ]}
             onChange={setFounders}
           />

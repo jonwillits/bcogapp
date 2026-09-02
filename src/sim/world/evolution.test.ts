@@ -1,5 +1,17 @@
 import { describe, it, expect } from 'vitest'
-import { EvolutionWorld, modalHue, hueDistance, type EvolutionParams } from './evolutionWorld'
+import { CONTINUOUS_LINEAGE_DATA } from './continuousLineageData'
+import {
+  ContinuousWorld,
+  DEFAULT_CONTINUOUS_PARAMS,
+  type ContinuousParams,
+} from './continuousWorld'
+import {
+  EvolutionWorld,
+  modalHue,
+  hueDistance,
+  type EvolutionParams,
+  type LightRegime,
+} from './evolutionWorld'
 import { approachScore, mutate, DEFAULT_MUTATION_RATES } from '../creature/genome'
 import { makeRng } from '../random'
 
@@ -329,4 +341,79 @@ describe('modal hue', () => {
     const { concentration } = modalHue([355, 358, 2, 5, 8])
     expect(concentration).toBe(1)
   })
+})
+
+describe('founding a run from a saved population — what Q18 rests on', () => {
+  const byId = Object.fromEntries(CONTINUOUS_LINEAGE_DATA.map((f) => [f.id, f]))
+
+  const stock = (id: string, over: Partial<ContinuousParams> = {}) =>
+    new ContinuousWorld(
+      1,
+      {
+        ...DEFAULT_CONTINUOUS_PARAMS,
+        founderGenomes: byId[id].genomes,
+        ...over,
+      },
+      'diverse',
+    )
+
+  it('the founders are that population, gene for gene', () => {
+    const w = stock('W')
+    const founders = w.creatures.map((c) => c.genome)
+    expect(founders).toHaveLength(DEFAULT_CONTINUOUS_PARAMS.initialPopulation)
+    founders.forEach((g, i) => {
+      expect(g).toEqual(byId.W.genomes[i % byId.W.genomes.length])
+    })
+  })
+
+  it('a smaller arena cycles the stock rather than running out', () => {
+    const w = stock('Z', { initialPopulation: 6, populationCap: 6 })
+    expect(w.creatures.map((c) => c.genome)).toEqual(byId.Z.genomes.slice(0, 6))
+  })
+
+  /**
+   * The pedagogical guarantee, and the reason it is a test rather than a probe.
+   *
+   * Q18 tells a student to watch each population meet the other's world and
+   * asks which is *better adapted* — a question that only works if each one
+   * visibly fails away from home. It very nearly did not: at the default four
+   * food patches, Z survives a food world untouched, because patches drift into
+   * a creature that will not go looking for them. Food finds you. Halving the
+   * patches is what makes going to look for it matter, and W is unaffected by
+   * the change, so the comparison stays fair.
+   *
+   * If a later change to the food model, the energy costs or the capacity undoes
+   * that, the handout starts promising something the scene no longer does.
+   */
+  it('each population fails in the other’s world and not in its own', () => {
+    const survivors = (id: string, regime: LightRegime, patches: number) => {
+      const runs = [1, 2, 3, 4, 5].map((seed) => {
+        const w = new ContinuousWorld(
+          seed,
+          {
+            ...DEFAULT_CONTINUOUS_PARAMS,
+            regime,
+            founderGenomes: byId[id].genomes,
+            food: { ...DEFAULT_CONTINUOUS_PARAMS.food, count: patches },
+            energy: {
+              ...DEFAULT_CONTINUOUS_PARAMS.energy,
+              ambientIncome: regime === 'food' ? 0 : 0.6,
+            },
+          },
+          'diverse',
+        )
+        w.run(300)
+        return w.samples[w.samples.length - 1].population
+      })
+      return runs.reduce((a, b) => a + b, 0) / runs.length
+    }
+
+    // At home: both populations hold the arena full.
+    expect(survivors('W', 'food', 2), 'W at home').toBeGreaterThan(14)
+    expect(survivors('Z', 'poison', 4), 'Z at home').toBeGreaterThan(14)
+
+    // Away: both visibly thin out.
+    expect(survivors('W', 'poison', 4), 'W in Z’s world').toBeLessThan(10)
+    expect(survivors('Z', 'food', 2), 'Z in W’s world').toBeLessThan(12)
+  }, 120_000)
 })
