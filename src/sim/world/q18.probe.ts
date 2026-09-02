@@ -111,3 +111,108 @@ it('q18: can Z be made to fail in a food world', () => {
     console.log('  ' + label.padEnd(32) + '|' + cells[0] + ' |' + cells[1])
   }
 }, 900_000)
+
+it('q18: make Z fail visibly fast, without making W fail at all', () => {
+  /**
+   * Jon watched Z in a food world at two patches and reported the dwindle is
+   * real but slow — hard for a student to see inside a lab period. So: which
+   * student-reachable setting makes it quick, while leaving W untouched? Both
+   * halves matter. A setting that starves everyone is not a demonstration that
+   * W is at home and Z is not.
+   *
+   * Births per minute is tracked alongside the head count, because the panel
+   * prints it and a rate can fall long before the arena looks empty.
+   */
+  const MARKS = [60, 120, 180, 300]
+  const variants: [string, Record<string, unknown>, number][] = [
+    ['2 patches                    ', { count: 2 }, 9],
+    ['1 patch                      ', { count: 1 }, 9],
+    ['1 patch, held still          ', { count: 1, driftSpeed: 0 }, 9],
+    ['2 patches, bigger arena (11) ', { count: 2 }, 11],
+    ['1 patch, bigger arena (11)   ', { count: 1 }, 11],
+    ['2 patches, small             ', { count: 2, strength: DEFAULT_CONTINUOUS_PARAMS.food.strength * 0.6 }, 9],
+    ['1 patch, small               ', { count: 1, strength: DEFAULT_CONTINUOUS_PARAMS.food.strength * 0.6 }, 9],
+  ]
+
+  console.log('\n  FOOD world. "alive" is the head count; "b/m" is births per minute.')
+  console.log('  ' + ' '.repeat(31) + '|' + MARKS.map((t) => `  W @${t}s`.padStart(13)).join('') + ' |' + MARKS.map((t) => `  Z @${t}s`.padStart(13)).join(''))
+  console.log('  ' + '-'.repeat(31 + 2 + 13 * MARKS.length * 2))
+
+  for (const [label, food, bounds] of variants) {
+    const cells = ['W', 'Z'].map((id) => {
+      const per = MARKS.map(() => ({ alive: 0, rate: 0, dead: 0 }))
+      const SEEDS = [1, 2, 3, 4, 5, 6]
+      for (const seed of SEEDS) {
+        const w = new ContinuousWorld(
+          seed,
+          {
+            ...DEFAULT_CONTINUOUS_PARAMS,
+            regime: 'food',
+            bounds,
+            founderGenomes: byId[id].genomes,
+            food: { ...DEFAULT_CONTINUOUS_PARAMS.food, ...food },
+          },
+          'diverse',
+        )
+        w.run(MARKS[MARKS.length - 1])
+        const s = w.samples
+        const at = (t: number) => s.reduce((b, x) => (Math.abs(x.time - t) < Math.abs(b.time - t) ? x : b), s[0])
+        MARKS.forEach((t, i) => {
+          const x = at(t), prev = at(Math.max(0, t - 60))
+          const dt = x.time - prev.time
+          per[i].alive += x.population
+          per[i].rate += dt > 0 ? ((x.births - prev.births) / dt) * 60 : 0
+          if (x.population === 0) per[i].dead += 1
+        })
+      }
+      return per
+        .map((p) => `${(p.alive / SEEDS.length).toFixed(1).padStart(5)}/${(p.rate / SEEDS.length).toFixed(0).padStart(3)}${p.dead ? '†' : ' '}`)
+        .join(' ')
+    })
+    console.log('  ' + label + '|' + cells[0] + ' |' + cells[1])
+  }
+  console.log('\n  († = at least one seed of six had emptied by then)')
+}, 900_000)
+
+it('q18: at patch sizes the slider can actually select', () => {
+  /**
+   * The slider runs 1.5 to 7 in steps of 0.5 and the default is 4, so the 2.4
+   * that came out of the sweep is not a setting a student can choose. Only
+   * reachable values below.
+   */
+  const MARKS = [60, 120, 180, 300]
+  console.log('\n  FOOD world, 2 patches. "alive" head count / births per minute.')
+  console.log('  ' + 'patch size'.padEnd(12) + '|' + MARKS.map((t) => `  W @${t}s`.padStart(13)).join('') + ' |' + MARKS.map((t) => `  Z @${t}s`.padStart(13)).join(''))
+  console.log('  ' + '-'.repeat(12 + 2 + 13 * MARKS.length * 2))
+  for (const strength of [3, 2.5, 2, 1.5]) {
+    const cells = ['W', 'Z'].map((id) => {
+      const SEEDS = [1, 2, 3, 4, 5, 6]
+      const per = MARKS.map(() => ({ alive: 0, rate: 0, dead: 0 }))
+      for (const seed of SEEDS) {
+        const w = new ContinuousWorld(
+          seed,
+          {
+            ...DEFAULT_CONTINUOUS_PARAMS,
+            regime: 'food',
+            founderGenomes: byId[id].genomes,
+            food: { ...DEFAULT_CONTINUOUS_PARAMS.food, count: 2, strength },
+          },
+          'diverse',
+        )
+        w.run(MARKS[MARKS.length - 1])
+        const s = w.samples
+        const at = (t: number) => s.reduce((b, x) => (Math.abs(x.time - t) < Math.abs(b.time - t) ? x : b), s[0])
+        MARKS.forEach((t, i) => {
+          const x = at(t), prev = at(Math.max(0, t - 60))
+          const dt = x.time - prev.time
+          per[i].alive += x.population
+          per[i].rate += dt > 0 ? ((x.births - prev.births) / dt) * 60 : 0
+          if (x.population === 0) per[i].dead += 1
+        })
+      }
+      return per.map((p) => `${(p.alive / SEEDS.length).toFixed(1).padStart(5)}/${(p.rate / SEEDS.length).toFixed(0).padStart(3)}${p.dead ? '†' : ' '}`).join(' ')
+    })
+    console.log('  ' + String(strength).padEnd(12) + '|' + cells[0] + ' |' + cells[1])
+  }
+  console.log('\n  († = at least one seed of six had emptied by then)')
+}, 900_000)

@@ -386,15 +386,20 @@ describe('founding a run from a saved population — what Q18 rests on', () => {
    * that, the handout starts promising something the scene no longer does.
    */
   it('each population fails in the other’s world and not in its own', () => {
-    const survivors = (id: string, regime: LightRegime, patches: number) => {
-      const runs = [1, 2, 3, 4, 5].map((seed) => {
+    const alive = (
+      id: string,
+      regime: LightRegime,
+      food: Partial<typeof DEFAULT_CONTINUOUS_PARAMS.food>,
+      at = 300,
+    ) => {
+      const runs = [1, 2, 3, 4, 5, 6].map((seed) => {
         const w = new ContinuousWorld(
           seed,
           {
             ...DEFAULT_CONTINUOUS_PARAMS,
             regime,
             founderGenomes: byId[id].genomes,
-            food: { ...DEFAULT_CONTINUOUS_PARAMS.food, count: patches },
+            food: { ...DEFAULT_CONTINUOUS_PARAMS.food, ...food },
             energy: {
               ...DEFAULT_CONTINUOUS_PARAMS.energy,
               ambientIncome: regime === 'food' ? 0 : 0.6,
@@ -402,18 +407,27 @@ describe('founding a run from a saved population — what Q18 rests on', () => {
           },
           'diverse',
         )
-        w.run(300)
+        w.run(at)
         return w.samples[w.samples.length - 1].population
       })
       return runs.reduce((a, b) => a + b, 0) / runs.length
     }
 
-    // At home: both populations hold the arena full.
-    expect(survivors('W', 'food', 2), 'W at home').toBeGreaterThan(14)
-    expect(survivors('Z', 'poison', 4), 'Z at home').toBeGreaterThan(14)
+    // The settings the handout names: two patches at size 2.5 for the food
+    // test, defaults for the poison one.
+    const HARD_FOOD = { count: 2, strength: 2.5 }
 
-    // Away: both visibly thin out.
-    expect(survivors('W', 'poison', 4), 'W in Z’s world').toBeLessThan(10)
-    expect(survivors('Z', 'food', 2), 'Z in W’s world').toBeLessThan(12)
+    // At home, both hold the arena full — including W under the very settings
+    // that break Z, or the comparison would not be fair.
+    expect(alive('W', 'food', HARD_FOOD), 'W at home').toBeGreaterThan(14)
+    expect(alive('Z', 'poison', {}), 'Z at home').toBeGreaterThan(14)
+
+    // Away, both thin out — and Z's decline has to be *visible*, not merely
+    // present, so it is checked partway through as well as at the end. Jon
+    // watched an earlier setting (two full-size patches) and reported the
+    // dwindle as too slow to see; it sat flat near ten the whole run.
+    expect(alive('W', 'poison', {}), 'W in Z’s world').toBeLessThan(10)
+    expect(alive('Z', 'food', HARD_FOOD, 120), 'Z halved by two minutes').toBeLessThan(9)
+    expect(alive('Z', 'food', HARD_FOOD), 'Z in W’s world').toBeLessThan(6)
   }, 120_000)
 })
