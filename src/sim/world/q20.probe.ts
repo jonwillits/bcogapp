@@ -137,13 +137,25 @@ it('q20: the two logs, as a student would read them', () => {
    * That is the strongest form of the exercise, because the answer key can say
    * so from real runs rather than asserting in the abstract that seeds matter.
    */
-  const CAP = 6
+  const CAP = 8
 
   const go = (seed: number, mutationScale: number) => {
     const w = new ContinuousWorld(
       seed,
-      { ...DEFAULT_CONTINUOUS_PARAMS, mutationScale, populationCap: CAP },
-      'P',
+      {
+        ...DEFAULT_CONTINUOUS_PARAMS,
+        mutationScale,
+        // Both, because the scene sets both from one slider. Setting only the
+        // cap starts the arena with sixteen and lets it fall to six, which is
+        // not what a student would see.
+        populationCap: CAP,
+        initialPopulation: CAP,
+      },
+      // 'diverse' is what SETTING_DEFAULTS.founders is, so it is what a student
+      // running the defaults gets. An earlier version of this used pool P while
+      // the search that chose the seeds used 'diverse', and the two disagreed
+      // about whether the same seed lived or died.
+      'diverse',
     )
     w.run(DURATION)
     return w
@@ -185,11 +197,11 @@ it('q20: the two logs, as a student would read them', () => {
     return w
   }
 
-  log('Run 1', 5, 1)
-  log('Run 2', 7, 0)
+  log('Run A', 5, 1)
+  log('Run B', 2, 0)
 
   console.log('\n\n### Answer key — not for the student handout')
-  for (const [seed, mut] of [[5, 1], [5, 0], [7, 1], [7, 0]] as [number, number][]) {
+  for (const [seed, mut] of [[5, 1], [5, 0], [2, 1], [2, 0]] as [number, number][]) {
     const w = go(seed, mut)
     const end = w.samples[w.samples.length - 1]
     console.log(
@@ -199,10 +211,58 @@ it('q20: the two logs, as a student would read them', () => {
     )
   }
   console.log(
-    '\n  Seed 5 survives whether mutation is on or off. Seed 7 dies out whether mutation',
+    '\n  Seed 5 survives whether mutation is on or off. Seed 2 dies out whether mutation',
   )
   console.log(
     '  is on or off. The mutation rate accounted for none of the difference between the',
   )
   console.log('  two runs; the founding population accounted for all of it.')
+}, 900_000)
+
+it('q20: search for a valid pair, with the scene’s own settings', () => {
+  /**
+   * The first pair was wrong. It set the arena capacity to six but left the
+   * *initial* population at sixteen, so the run began with a surplus of ten that
+   * carried it — and the scene sets both from one slider, so no student could
+   * ever have produced that log. Corrected, every run at capacity six dies out,
+   * and the pair said the opposite.
+   *
+   * Searching properly this time: capacity and initial population tied together
+   * the way the scene ties them, across capacities and seeds, for a pair that
+   * reaches genuinely different outcomes while the *controls* stay clean — same
+   * seed, both mutation rates, same outcome. That last part is what lets the
+   * answer key say the mutation rate accounted for none of it.
+   */
+  const DUR = 1200
+  const go = (cap: number, seed: number, mutationScale: number) => {
+    const w = new ContinuousWorld(
+      seed,
+      {
+        ...DEFAULT_CONTINUOUS_PARAMS,
+        mutationScale,
+        populationCap: cap,
+        initialPopulation: cap,
+      },
+      'diverse',
+    )
+    w.run(DUR)
+    const last = w.samples[w.samples.length - 1]
+    return { extinct: w.extinct, at: last.time, births: last.births, alive: last.population }
+  }
+
+  for (const cap of [8, 10, 12, 16]) {
+    const survives: number[] = []
+    const dies: number[] = []
+    for (let seed = 1; seed <= 14; seed++) {
+      const on = go(cap, seed, 1)
+      const off = go(cap, seed, 0)
+      // A clean control: the seed decides the outcome, not the mutation rate.
+      if (!on.extinct && !off.extinct) survives.push(seed)
+      if (on.extinct && off.extinct) dies.push(seed)
+    }
+    console.log(
+      `  capacity ${String(cap).padStart(2)} | survives either way: [${survives.join(', ')}]  ` +
+        `dies either way: [${dies.join(', ')}]`,
+    )
+  }
 }, 900_000)
