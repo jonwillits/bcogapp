@@ -95,4 +95,59 @@ export const LABS = [
 
     crib: 'crib: what each population should look like',
   },
+  {
+    id: 'm03-neuron',
+    name: 'Lab 3 — The Neuron',
+    route: '#/m03-neuron',
+    scene: 'src/scenes/m03_neuron',
+    handout: 'neurons_and_neural_communication/neuron_lab/neuron_lab.md',
+    report: 'neurons_and_neural_communication/neuron_lab/neuron_lab_report.docx',
+
+    retired: [
+      { term: /\bthe pit\b/gi, why: 'it is called the arena, as in Lab 2' },
+      {
+        term: /watch all four vehicles/gi,
+        why: 'each cell loads with its own world, one at a time - "load each of the four in turn"',
+      },
+      {
+        term: /whether behaviou?r alone lets you sort them/gi,
+        why: 'the four are distinguishable by style but not diagnosable by it - ask whether behaviour tells you what is wrong',
+      },
+    ],
+
+    controls: [
+      'Signal type', 'Body size (signal path length)', 'World speed (how fast the lights move)',
+      'How many lights', 'Reset', 'New seed', 'Reaction time', 'Signal path length',
+      'Lights collected', 'Energy per light collected',
+      'Where the first two inputs come from', 'Show measured', 'Time window for the output',
+      'Sodium-potassium pump power (Na⁺/K⁺)', 'Voltage-gated sodium channel block',
+      'Sodium inactivation recovery', 'Injected current', 'Restore healthy membrane',
+      'Show the equations', 'Energy calculator', 'Things to try', 'Myelin on the axon',
+      'step one spike', 'real time', 'slow motion', 'Simulated time per second',
+      'Reveal faults', 'Lesion controls',
+    ],
+
+    claims: [
+      { says: 'N1-N4 are all bad at finding light, in the same way', test: 'fail alike, and well below healthy' },
+      { says: 'N1 has nothing wrong with its cell and yields only to a slower world', test: 'yields to a slow world' },
+      { says: "N2's fault shows on the Unit tab's printed strengths", test: 'printed strengths give it away' },
+      { says: 'N3 is nearly normal at rest and fails under sustained demand', test: 'only fails under sustained maximum input' },
+      { says: 'N4 wins on energy per light collected', test: 'wins outright on energy per light' },
+      { says: 'Q6: the arithmetic prints 25, 10, 0 and the measured rate differs', test: 'give 25, 10' },
+      { says: 'Q7: the curve is flat at both ends, and neither end is a parameter', test: 'no named parameter sets the floor' },
+      { says: 'Q10: pump off - rest rises, spikes shrink below half, ATP reads zero', test: 'pump off, rest rises' },
+      { says: 'Q10: a silent cell with its pump on still spends ATP', test: 'cell silent, the ATP counter is non-zero' },
+      { says: 'Q12: instant recovery removes the ceiling and lets spikes travel backwards', test: 'raises the ceiling and permits backward propagation' },
+      { says: 'Q12: with instant recovery the upper flat region is gone', test: 'upper flat region is absent' },
+      { says: 'Q2/Q3: a diffusing chemical takes about ten seconds across 100 µm and quadruples per doubling', test: 'quadruples per doubling' },
+      { says: 'Q4: a graded signal is gone by a centimetre', test: 'gone by a centimetre' },
+      { says: 'Q20: 10 spikes/s is far over budget; 20 W affords under 1.5 spikes/s', test: 'lands between 0.3 and 1.5' },
+      { says: 'Q25: predicted and measured agree in the middle and part company at the top', test: 'agree through the middle and part company' },
+      { says: 'no anatomy on the Unit tab; the output function is never named', test: 'contains no anatomy' },
+      { says: 'Q1: the chemical vehicle does fine in the slow world and fails in the fast one', test: null },
+      { says: 'the four sick cells are not sortable by watching', test: null },
+    ],
+
+    crib: 'crib: what the five cells should look like',
+  },
 ]
