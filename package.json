@@ -9,7 +9,9 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "test": "vitest run",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check:docs": "node scripts/check-docs.mjs",
+    "closeout": "node scripts/closeout.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
