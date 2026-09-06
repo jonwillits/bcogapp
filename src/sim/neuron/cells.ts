@@ -35,6 +35,8 @@ export interface WorldSettings {
   lightSpeed: number
   /** How many lights are in the arena at once. */
   lightCount: number
+  /** Half-width of the square arena, in arena units. */
+  arena: number
 }
 
 export interface Scenario {
@@ -59,6 +61,18 @@ export interface DiagnosticCell {
  * one that charges into lights — with the reading's baseline of 5 spikes per
  * second. The world is the "fast" world of Part 1: lights that drift at two
  * units a second, below the vehicle's own top speed of 3.2.
+ *
+ * Measured over four seeds of three minutes (see `world.probe.ts`): the
+ * healthy vehicle collects about 3 lights a minute; N0, N1 and N2 about none;
+ * N3 about 1.7; N4 about 2.2. The last two are the spec's §10 falling short,
+ * and the reason is the world rather than the cells: a vehicle that sits
+ * still and lunges at whatever drifts within reach does nearly as well as one
+ * that roams, because in a walled arena with three moving lights something
+ * drifts within reach every twenty seconds or so — and a bigger arena, more
+ * lights or a busier healthy baseline did not change that (a sit-and-wait N4
+ * *beat* a cruising healthy vehicle in a 12-unit arena). N3's fault needs a
+ * sustained load, and an intermittently chasing vehicle recovers between
+ * chases. Both are recorded in `docs/M03_SPEC_DEVIATIONS.md`.
  */
 export const HEALTHY_UNIT: UnitSettings = {
   b0: 5,
@@ -76,6 +90,7 @@ export const HEALTHY_WORLD: WorldSettings = {
   bodySizeM: DEFAULT_BODY_SIZE_M,
   lightSpeed: WORLD_SPEEDS.fast,
   lightCount: 3,
+  arena: 9,
 }
 
 export const HEALTHY_SCENARIO: Scenario = {
@@ -125,12 +140,12 @@ export const DIAGNOSTIC_CELLS: DiagnosticCell[] = [
   {
     id: 'N3',
     scenario: {
-      cell: { ...HEALTHY_CELL, pumpPower: 0.3 },
+      cell: { ...HEALTHY_CELL, pumpPower: 0.2 },
       unit: { ...HEALTHY_UNIT },
       world: { ...HEALTHY_WORLD },
     },
     fault:
-      'The sodium–potassium pump runs at about a third of normal. Fine at rest and at low rates; under sustained demand sodium builds up inside, E_Na collapses, and the spikes shrink and then fail.',
+      'The sodium–potassium pump runs at a fifth of normal. Fine at rest and at low rates; under sustained demand sodium builds up inside, E_Na collapses, and the spikes shrink and then fail.',
     level: 'implementational',
     normal:
       'The connection strengths are right. At rest the membrane looks very nearly normal — the fault only appears under load.',
@@ -139,11 +154,11 @@ export const DIAGNOSTIC_CELLS: DiagnosticCell[] = [
     id: 'N4',
     scenario: {
       cell: { ...HEALTHY_CELL },
-      unit: { ...HEALTHY_UNIT, b0: -6 },
+      unit: { ...HEALTHY_UNIT, b0: -10 },
       world: { ...HEALTHY_WORLD },
     },
     fault:
-      'Not broken. Its baseline is low, so it fires rarely, sets off slowly, and collects fewer lights — and uses a small fraction of the ATP, so it wins outright on energy per light collected.',
+      'Not broken. Its baseline is low, so it fires rarely and sits still until a light comes close, then lunges. It collects somewhat fewer lights, spends a little less ATP, and gets each light cheaper than the other three.',
     level: 'none',
     normal: 'Everything.',
   },

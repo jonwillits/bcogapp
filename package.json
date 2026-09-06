@@ -9,6 +9,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "test": "vitest run",
+    "test:slow": "SLOW=1 vitest run src/sim/neuron/neuronWorld.slow.test.ts",
     "preview": "vite preview",
     "check:docs": "node scripts/check-docs.mjs",
     "closeout": "node scripts/closeout.mjs"

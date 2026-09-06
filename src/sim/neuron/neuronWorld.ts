@@ -152,7 +152,7 @@ export class NeuronWorld {
     })
     this.left = makeSide()
     this.right = makeSide()
-    this.world = new VehicleWorld({ ...DEFAULT_WORLD_PARAMS }, this.rng)
+    this.world = new VehicleWorld({ ...DEFAULT_WORLD_PARAMS, bounds: this.settings.arena }, this.rng)
     this.vehicle = this.world.addVehicle('aggression', '#c084fc', {
       x: 0,
       z: 0,

@@ -24,8 +24,12 @@ export default defineConfig({
     include: process.env.PROBE
       ? [`${process.env.PROBE_DIR ?? 'src'}/**/*.probe.ts`]
       : ['src/**/*.test.ts'],
+    // The count-based Module 3 world tests take a quarter of an hour; they
+    // run on demand (`npm run test:slow`), not on every `npm run test`.
+    exclude: process.env.SLOW ? ['**/node_modules/**'] : ['**/node_modules/**', '**/*.slow.test.ts'],
     // The Module 2 acceptance tests run whole 50-generation populations over
     // ten seeds each; several take tens of seconds and none of them is hanging.
-    testTimeout: 120_000,
+    // The Module 3 slow suite runs four three-minute worlds per test.
+    testTimeout: process.env.SLOW ? 1_200_000 : 120_000,
   },
 })
