@@ -1,5 +1,5 @@
 import { Panel } from '../../components/Panel'
-import { Slider, SelectControl, Toggle } from '../../components/controls'
+import { Button, Slider, SelectControl, Toggle } from '../../components/controls'
 import { fmt } from '../../components/format'
 import { RATE_PER_INTENSITY } from '../../sim/neuron/neuronWorld'
 import {
@@ -29,7 +29,8 @@ export function UnitTab(s: SceneState) {
   const setWindowMs = (windowMs: number) => s.patchUi({ windowMs })
   const v = artificial ? ARTIFICIAL : BIOLOGICAL
   const cell = cellOn(world, side)
-  const u = world.unit
+  const u = world.unit[side]
+  const otherSide: typeof side = side === 'left' ? 'right' : 'left'
   const fromSensors = world.inputSource === 'sensors'
   const x1 = cell.input.x[0]
   const x2 = cell.input.x[1]
@@ -37,8 +38,8 @@ export function UnitTab(s: SceneState) {
   const measuredRate = cell.outputRate(1000)
   const inWindow = cell.spikesInWindow(windowMs)
 
-  const setUnit = (patch: Parameters<typeof world.setUnit>[0]) => {
-    world.setUnit(patch)
+  const setUnit = (patch: Parameters<typeof world.setWiring>[1]) => {
+    world.setWiring(side, patch)
     bump()
   }
   const setSlider = (i: 0 | 1, value: number) => {
@@ -52,9 +53,10 @@ export function UnitTab(s: SceneState) {
       <TabBar tab={s.tab} onChange={s.setTab} />
       <Note>
         <b>Time scale: real time.</b> Rates in, a {v.strength} on each connection, a total,
-        and a {v.rate} out. The vehicle carries two copies of this {v.cell} on one set of
-        settings, one for each actuator; the instruments show the <b>{side}</b> one. Its four
-        elements are named by the job each one does.
+        and a {v.rate} out. The vehicle has two {v.cell}s, one for each actuator, each with its
+        own {v.baseline} and {v.strength}s — six numbers, as in Lab 1. These sliders set the{' '}
+        <b>{side}</b> {v.cell}; click the other in the picture to set that one. Its four elements
+        are named by the job each one does.
       </Note>
       <Toggle
         label={artificial ? 'artificial (switch to biological)' : 'biological (switch to artificial)'}
@@ -118,6 +120,9 @@ export function UnitTab(s: SceneState) {
         format={(x) => `${x.toFixed(fromSensors ? 1 : 0)} ${v.rateUnit}`}
         onChange={(val) => setSlider(1, val)}
       />
+      <Button onClick={() => { world.copyWiring(side); bump() }}>
+        Give the {otherSide} {v.cell} this wiring
+      </Button>
       {fromSensors && (
         <Note>
           A sensor reading of 1.00 is an input {v.rate} of {RATE_PER_INTENSITY} {v.rateUnit}.
@@ -149,8 +154,8 @@ export function UnitTab(s: SceneState) {
       />
       <Note>
         Lab 1's wiring, with a {v.cell} where each line was. Each {v.cell}'s x₁ is its own
-        side's sensor and its x₂ the other side's; the crossed lines are the b₂ connections.
-        Below: the <b>{side}</b> {v.cell}.
+        side's sensor and its x₂ the other side's; the crossed lines are the b₂ connections,
+        and each {v.cell}'s lines carry its own numbers. Below: the <b>{side}</b> {v.cell}.
       </Note>
       <div>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>

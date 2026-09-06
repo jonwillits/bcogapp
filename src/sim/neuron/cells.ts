@@ -14,20 +14,33 @@ import { DEFAULT_BODY_SIZE_M, type SignalType } from './signals'
  */
 
 /**
- * The reading's arithmetic, as the vehicle's two mirror-image cells use it:
- * y = b₀ + b₁x₁ + b₂x₂, with x₁ the same-side sensor and x₂ the opposite one.
- * The chapter writes a third term; the vehicle has two sensors and nothing
- * else to wire, so a third input was built and then taken out — an unused
- * connection kept only because the equation had room for it explained
- * nothing and asked nothing.
+ * One cell's wiring: y = b₀ + b₁x₁ + b₂x₂, with x₁ the same-side sensor and
+ * x₂ the opposite one. The chapter writes a third term; the vehicle has two
+ * sensors and nothing else to wire, so a third input was built and then
+ * taken out — an unused connection kept only because the equation had room
+ * for it explained nothing and asked nothing.
  */
-export interface UnitSettings {
+export interface CellWiring {
   /** Baseline b₀, spikes per second. */
   b0: number
   /** Strength from the same-side sensor, b₁. */
   bIpsi: number
   /** Strength from the opposite-side sensor, b₂. */
   bContra: number
+}
+
+/**
+ * The vehicle's two cells, each with its own wiring: six numbers, as Lab 1's
+ * four strengths and Lab 2's genome were each connection's own. The first
+ * build locked the two cells to one set of numbers, for the sake of "one
+ * cell, three tabs"; Jon's judgement (2026-09-06) was that identical weights
+ * locked together is an artificial-network habit and unintuitive for a
+ * biological organism, so each cell now carries its own, and the Unit tab
+ * offers a copy button for the experiments that want them alike.
+ */
+export interface UnitSettings {
+  left: CellWiring
+  right: CellWiring
 }
 
 export interface WorldSettings {
@@ -77,10 +90,20 @@ export interface DiagnosticCell {
  * sustained load, and an intermittently chasing vehicle recovers between
  * chases. Both are recorded in `docs/M03_SPEC_DEVIATIONS.md`.
  */
-export const HEALTHY_UNIT: UnitSettings = {
+export const HEALTHY_WIRING: CellWiring = {
   b0: 5,
   bIpsi: 0,
   bContra: 2,
+}
+
+export const HEALTHY_UNIT: UnitSettings = {
+  left: { ...HEALTHY_WIRING },
+  right: { ...HEALTHY_WIRING },
+}
+
+/** The same wiring on both cells — how the healthy vehicle and the five cells are built. */
+export function bothCells(w: CellWiring): UnitSettings {
+  return { left: { ...w }, right: { ...w } }
 }
 
 /** The two detents of the world-speed control, arena units per second. */
@@ -105,11 +128,11 @@ export const DIAGNOSTIC_CELLS: DiagnosticCell[] = [
     id: 'N0',
     scenario: {
       cell: { ...HEALTHY_CELL },
-      unit: { ...HEALTHY_UNIT, bContra: -2 },
+      unit: bothCells({ ...HEALTHY_WIRING, bContra: -2 }),
       world: { ...HEALTHY_WORLD },
     },
     fault:
-      'The connection from the opposite-side sensor is a strong negative where the task needs a positive. The cell computes a perfectly good function that happens to be the wrong one: light slows the far wheel instead of speeding it, so the vehicle turns away.',
+      'In both cells, the connection from the opposite-side sensor is a strong negative where the task needs a positive. Each cell computes a perfectly good function that happens to be the wrong one: light slows the far wheel instead of speeding it, so the vehicle turns away.',
     level: 'algorithmic',
     normal:
       'The membrane is entirely healthy: resting voltage, gate order, spike height and cost per spike are all ordinary.',
@@ -118,7 +141,7 @@ export const DIAGNOSTIC_CELLS: DiagnosticCell[] = [
     id: 'N1',
     scenario: {
       cell: { ...HEALTHY_CELL },
-      unit: { ...HEALTHY_UNIT },
+      unit: bothCells(HEALTHY_WIRING),
       world: { ...HEALTHY_WORLD, lightSpeed: 5 },
     },
     fault:
@@ -130,11 +153,11 @@ export const DIAGNOSTIC_CELLS: DiagnosticCell[] = [
     id: 'N2',
     scenario: {
       cell: { ...HEALTHY_CELL },
-      unit: { ...HEALTHY_UNIT, bContra: 0.25 },
+      unit: bothCells({ ...HEALTHY_WIRING, bContra: 0.25 }),
       world: { ...HEALTHY_WORLD },
     },
     fault:
-      'The connection strengths are near zero. The cell steers the right way, but so weakly that the lights are gone before it gets there.',
+      'In both cells, the connection strengths are near zero. The cells steer the right way, but so weakly that the lights are gone before the vehicle gets there.',
     level: 'algorithmic',
     normal: 'The membrane is healthy. Unlike N0, the sign is right; the size is not.',
   },
@@ -142,7 +165,7 @@ export const DIAGNOSTIC_CELLS: DiagnosticCell[] = [
     id: 'N3',
     scenario: {
       cell: { ...HEALTHY_CELL, pumpPower: 0.2 },
-      unit: { ...HEALTHY_UNIT },
+      unit: bothCells(HEALTHY_WIRING),
       world: { ...HEALTHY_WORLD },
     },
     fault:
@@ -155,11 +178,11 @@ export const DIAGNOSTIC_CELLS: DiagnosticCell[] = [
     id: 'N4',
     scenario: {
       cell: { ...HEALTHY_CELL },
-      unit: { ...HEALTHY_UNIT, b0: -10 },
+      unit: bothCells({ ...HEALTHY_WIRING, b0: -10 }),
       world: { ...HEALTHY_WORLD },
     },
     fault:
-      'Not broken. Its baseline is low, so it fires rarely and sits still until a light comes close, then lunges. It collects somewhat fewer lights, spends a little less ATP, and gets each light cheaper than the other three.',
+      'Not broken. Both cells have a low baseline, so they fire rarely and the vehicle sits still until a light comes close, then lunges. It collects somewhat fewer lights, spends a little less ATP, and gets each light cheaper than the other three.',
     level: 'none',
     normal: 'Everything.',
   },

@@ -8,6 +8,7 @@ import {
   HEALTHY_SCENARIO,
   type Scenario,
   type UnitSettings,
+  type CellWiring,
   type WorldSettings,
 } from './cells'
 import { travelTimeS, arrivingFraction, type SignalType } from './signals'
@@ -23,13 +24,12 @@ import { measureVelocity } from './measure'
  * the cell's spikes run down its axon, and what arrives at the far end is
  * what the wheel does.
  *
- * **Two cells, one parameter set.** The vehicle is bilaterally symmetric: the
- * left cell drives the left wheel from the left (same-side) and right
- * (opposite-side) sensors, and the right cell is its mirror image. They share
- * every parameter, and every control in the scene sets both. The Unit and
- * Membrane tabs show the left one. This is not two neurons kept in sync — it
- * is one cell type, instantiated twice, the way Lab 1's wiring was one matrix
- * with two rows.
+ * **Two cells.** The left cell drives the left wheel from the left (same-side)
+ * and right (opposite-side) sensors, and the right cell is its mirror image.
+ * Each has its own wiring — baseline and two strengths, six numbers in all,
+ * as Lab 1's matrix had a number per connection — and the membrane
+ * parameters are set on both at once, the way a drug reaches both. The Unit
+ * and Membrane tabs show whichever cell is selected.
  *
  * Only `spikes` runs the cells into the wheels. The other two signal types
  * are the comparison cases of the reading's §3.1 (see `signals.ts`): the
@@ -79,6 +79,8 @@ export const LIGHT_HOVER = 0.7
 const MAX_DELAY_S = 90
 
 export type InputSource = 'sensors' | 'sliders'
+/** Which of the vehicle's two cells. */
+export type CellSide = 'left' | 'right'
 
 export interface ReactionTime {
   sensing: number
@@ -216,8 +218,15 @@ export class NeuronWorld {
     this.calibrate()
   }
 
-  setUnit(patch: Partial<UnitSettings>): void {
-    this.unit = { ...this.unit, ...patch }
+  /** One cell's wiring. */
+  setWiring(side: CellSide, patch: Partial<CellWiring>): void {
+    this.unit = { ...this.unit, [side]: { ...this.unit[side], ...patch } }
+  }
+
+  /** Give the other cell this one's wiring. */
+  copyWiring(from: CellSide): void {
+    const to: CellSide = from === 'left' ? 'right' : 'left'
+    this.unit = { ...this.unit, [to]: { ...this.unit[from] } }
   }
 
   /** Signal path length, metres. */
@@ -349,9 +358,10 @@ export class NeuronWorld {
         : [this.sliderRates[0], this.sliderRates[1]]
     const [lIpsi, lContra] = rates(this.left.filtered, this.right.filtered)
     const [rIpsi, rContra] = rates(this.right.filtered, this.left.filtered)
-    const u = this.unit
-    this.left.cell.setInput({ b0: u.b0, b: [u.bIpsi, u.bContra, 0], x: [lIpsi, lContra, 0] })
-    this.right.cell.setInput({ b0: u.b0, b: [u.bIpsi, u.bContra, 0], x: [rIpsi, rContra, 0] })
+    const ul = this.unit.left
+    const ur = this.unit.right
+    this.left.cell.setInput({ b0: ul.b0, b: [ul.bIpsi, ul.bContra, 0], x: [lIpsi, lContra, 0] })
+    this.right.cell.setInput({ b0: ur.b0, b: [ur.bIpsi, ur.bContra, 0], x: [rIpsi, rContra, 0] })
     this.left.cell.advance(dt * 1000)
     this.right.cell.advance(dt * 1000)
 
@@ -369,14 +379,14 @@ export class NeuronWorld {
     const lDel = this.delayedReading(this.left, dt)
     const rDel = this.delayedReading(this.right, dt)
     this.arriving = { left: lDel, right: rDel }
-    const linear = (own: number, other: number) =>
+    const linear = (u: CellWiring, own: number, other: number) =>
       Math.max(
         0,
         u.b0 + u.bIpsi * own * RATE_PER_INTENSITY + u.bContra * other * RATE_PER_INTENSITY,
       )
     return {
-      left: linear(lDel, rDel) * ACTUATOR_PER_HZ,
-      right: linear(rDel, lDel) * ACTUATOR_PER_HZ,
+      left: linear(ul, lDel, rDel) * ACTUATOR_PER_HZ,
+      right: linear(ur, rDel, lDel) * ACTUATOR_PER_HZ,
     }
   }
 

@@ -1,6 +1,6 @@
 import { it } from 'vitest'
 import { NeuronWorld } from './neuronWorld'
-import { HEALTHY_SCENARIO, DIAGNOSTIC_CELLS, type Scenario } from './cells'
+import { HEALTHY_SCENARIO, DIAGNOSTIC_CELLS, bothCells, type Scenario } from './cells'
 import { wheelSpeeds } from '../creature/vehicle'
 
 function trial(scenario: Scenario, seed: number, seconds = 180, warm = 0) {
@@ -60,5 +60,5 @@ it('world variants', () => {
   const n3 = DIAGNOSTIC_CELLS[3].scenario
   for (const pp of [0.2]) report(`N3 pump ${pp}`, { ...n3, cell: { ...n3.cell, pumpPower: pp } }, seeds, 45)
   const n4 = DIAGNOSTIC_CELLS[4].scenario
-  for (const b0 of [-6, -10]) report(`N4 b0 ${b0}`, { ...n4, unit: { ...n4.unit, b0 } }, seeds, 45)
+  for (const b0 of [-6, -10]) report(`N4 b0 ${b0}`, { ...n4, unit: bothCells({ ...n4.unit.left, b0 }) }, seeds, 45)
 }, 1_800_000)

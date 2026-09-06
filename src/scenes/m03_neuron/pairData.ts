@@ -8,9 +8,7 @@ export function pairData(world: NeuronWorld) {
   const l = world.left.cell
   const r = world.right.cell
   return {
-    b0: world.unit.b0,
-    bIpsi: world.unit.bIpsi,
-    bContra: world.unit.bContra,
+    wiring: world.unit,
     sensors: { left: world.vehicle.sensors.left, right: world.vehicle.sensors.right },
     rates: {
       left: [l.input.x[0], l.input.x[1]] as [number, number],

@@ -12,7 +12,8 @@ import { DEFAULT_STRENGTH } from '../../sim/world/world'
  * meet at an integrator, and its output line runs down to the actuator.
  * Because both sensors' lines are drawn into both cells, there is no
  * doubt that each cell's x₁ is the same-side sensor and its x₂ the opposite
- * one, and the crossing *is* the contralateral wiring.
+ * one, and the crossing *is* the contralateral wiring. Each cell's lines
+ * carry its own strengths, so two cells wired differently look different.
  *
  * Three modes draw the cell in the same place: the Unit tab's roles, the
  * reading's circles-and-arrows unit, and the Membrane tab's parts, cross-
@@ -36,9 +37,8 @@ export interface DiagramLabels {
 export interface PairDiagramProps {
   mode: DiagramMode
   labels: DiagramLabels
-  b0: number
-  bIpsi: number
-  bContra: number
+  /** Each cell's own baseline and two strengths. */
+  wiring: Record<Side, { b0: number; bIpsi: number; bContra: number }>
   /** The two sensors' live readings. */
   sensors: { left: number; right: number }
   /** Each cell's live input rates, [same side, opposite side]. */
@@ -83,9 +83,7 @@ const MONO = 'var(--font-mono)'
 export function PairDiagram({
   mode,
   labels,
-  b0,
-  bIpsi,
-  bContra,
+  wiring,
   sensors,
   rates,
   outputs,
@@ -108,8 +106,8 @@ export function PairDiagram({
 
   // Connections: each cell's same-side (straight) and opposite-side (crossed) line.
   const links = sides.flatMap((s) => [
-    { from: { x: CX[s], y: S_Y + 15 }, to: { x: CX[s] - 14, y: IN_Y }, b: bIpsi, x: rates[s][0], straight: true, key: `${s}-ipsi` },
-    { from: { x: CX[other(s)], y: S_Y + 15 }, to: { x: CX[s] + 14, y: IN_Y }, b: bContra, x: rates[s][1], straight: false, key: `${s}-contra` },
+    { from: { x: CX[s], y: S_Y + 15 }, to: { x: CX[s] - 14, y: IN_Y }, b: wiring[s].bIpsi, x: rates[s][0], straight: true, key: `${s}-ipsi` },
+    { from: { x: CX[other(s)], y: S_Y + 15 }, to: { x: CX[s] + 14, y: IN_Y }, b: wiring[s].bContra, x: rates[s][1], straight: false, key: `${s}-contra` },
   ]).filter((l) => Math.abs(l.b) > 1e-9)
 
   const roleLabel = (y: number, text: string) => (
@@ -176,7 +174,7 @@ export function PairDiagram({
             <line x1={cx + 14} y1={IN_Y} x2={cx + 6} y2={BODY_Y - 14} stroke={palette.textMuted} strokeWidth={1} />
             {/* baseline enters from the side */}
             <line x1={cx + 40} y1={BODY_Y} x2={cx + 26} y2={BODY_Y} stroke={palette.textMuted} strokeWidth={1} strokeDasharray="3 3" />
-            <text x={cx + 30} y={BODY_Y - 5} textAnchor="middle" fontSize={8} fill={palette.textMuted} fontFamily={MONO}>b₀ {fmt(b0)}</text>
+            <text x={cx + 30} y={BODY_Y - 5} textAnchor="middle" fontSize={8} fill={palette.textMuted} fontFamily={MONO}>b₀ {fmt(wiring[s].b0)}</text>
 
             {/* unit mode: a box */}
             <g style={fade(mode === 'unit')}>

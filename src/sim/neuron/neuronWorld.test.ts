@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { makeRng } from '../random'
 import { NeuronCell, HEALTHY_CELL, DEFAULT_AXON, REDUCED_COMPARTMENTS } from './cell'
 import { NeuronWorld } from './neuronWorld'
-import { HEALTHY_SCENARIO, HEALTHY_UNIT, DIAGNOSTIC_CELLS, insideHealthyBand } from './cells'
+import { HEALTHY_SCENARIO, HEALTHY_UNIT, HEALTHY_WIRING, DIAGNOSTIC_CELLS, insideHealthyBand } from './cells'
 import { UNIT_INPUT_RANGE } from './unitRanges'
 
 /**
@@ -33,9 +33,11 @@ describe('the diagnosability test', () => {
   it("N2: the Unit tab's printed strengths give it away, and nothing else does", () => {
     const n2 = cell('N2').scenario
     expect(insideHealthyBand(n2.cell)).toBe(true)
-    expect(Math.abs(HEALTHY_UNIT.bContra) / Math.abs(n2.unit.bContra)).toBeGreaterThanOrEqual(2)
-    for (const id of ['N1', 'N3', 'N4']) {
-      expect(Math.abs(cell(id).scenario.unit.bContra)).toBeCloseTo(Math.abs(HEALTHY_UNIT.bContra))
+    for (const side of ['left', 'right'] as const) {
+      expect(Math.abs(HEALTHY_WIRING.bContra) / Math.abs(n2.unit[side].bContra)).toBeGreaterThanOrEqual(2)
+      for (const id of ['N1', 'N3', 'N4']) {
+        expect(Math.abs(cell(id).scenario.unit[side].bContra)).toBeCloseTo(Math.abs(HEALTHY_WIRING.bContra))
+      }
     }
   })
 
