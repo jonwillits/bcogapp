@@ -80,6 +80,7 @@ const INTRO_BLOB = 'https://github.com/jonwillits/intro_to_bcs/blob/master'
 // and only load when a scene is opened.
 const VehiclesScene = lazy(() => import('./m01_vehicles/VehiclesScene'))
 const EvolutionScene = lazy(() => import('./m02_evolution/EvolutionScene'))
+const NeuronScene = lazy(() => import('./m03_neuron/NeuronScene'))
 
 /**
  * Registered, runnable scenes. Order here is the order shown within a module.
@@ -117,6 +118,22 @@ export const scenes: SceneManifest[] = [
       reportLabel: 'Lab 2 report (.docx)',
     },
   },
+  {
+    route: 'm03-neuron',
+    module: 3,
+    title: 'The Neuron',
+    blurb:
+      'The Lab 1 vehicle with a real neuron inside its connection — shown three ways, at three time scales, as one cell. Then four sick vehicles to diagnose.',
+    mode: 'both',
+    status: 'building',
+    Component: NeuronScene,
+    lab: {
+      rawUrl: `${INTRO_RAW}/neurons_and_neural_communication/neuron_lab/neuron_lab.md`,
+      sourceUrl: `${INTRO_BLOB}/neurons_and_neural_communication/neuron_lab/neuron_lab.md`,
+      reportUrl: `${INTRO_BLOB}/neurons_and_neural_communication/neuron_lab/neuron_lab_report.docx`,
+      reportLabel: 'Lab 3 report (.docx)',
+    },
+  },
 ]
 
 /**
@@ -131,11 +148,6 @@ export interface PlannedScene {
 }
 
 export const plannedScenes: PlannedScene[] = [
-  {
-    module: 3,
-    title: 'Neuron Simulation',
-    idea: 'Ion gates, neurotransmitter release and binding, action potentials, with live voltage plots.',
-  },
   {
     module: 4,
     title: 'Logic-Gate Circuits',
