@@ -68,7 +68,7 @@ export function MembraneTab(s: SceneState) {
       <TabBar tab={s.tab} onChange={s.setTab} />
       <Note>
         <b>Time scale: slow motion.</b> {s.msPerSecond} ms of cell time per second — {slowdown >= 1.05 ? `${slowdown.toFixed(0)}× slower than life` : 'real time'}.
-        A spike lasts about a millisecond; the vehicle in the pit is running at this speed too.
+        A spike lasts about a millisecond; the vehicle in the arena is running at this speed too.
       </Note>
       <Slider
         label="Simulated time per second"
@@ -86,7 +86,7 @@ export function MembraneTab(s: SceneState) {
       </div>
       <Section title="Lesion controls" defaultOpen hint="Throw one switch and look at all three tabs.">
         <Slider
-          label="Na⁺/K⁺ pump power"
+          label="Sodium-potassium pump power (Na⁺/K⁺)"
           value={p.pumpPower}
           min={0}
           max={1}

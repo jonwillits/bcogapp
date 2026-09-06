@@ -179,18 +179,18 @@ export const CONCENTRATION_RATE_TRUE = (1e-6 / 96485) * 1e4 * 1e3 /* mol→mM, s
 /**
  * How much faster than a 4 µm fibre the gradients are allowed to run down.
  *
- * Settled at 1 — the true rate for the axon — after measuring the alternative.
- * At 2 or more the pump-off collapse Q10 asks for is dramatic within a minute,
- * but the same constant governs how fast the cell settles under a sustained
- * load, and at 2 the pump's own current had hyperpolarised a driven cell and
- * halved its rate within fifteen seconds of a slider move — so what a student
- * read off the panel depended on how quickly they read it. At 1 the pump-off
- * cell still loses half its spike height inside a simulated minute, and a
- * driven cell drifts over half a minute rather than a few seconds. The panel
- * still says which cell this rate belongs to: a cell body would be several
- * times slower.
+ * Settled at 1.5 after measuring both ends. At 2 or more the pump-off
+ * collapse Q10 asks for is dramatic within a minute, but the same constant
+ * governs how fast the cell settles under a sustained load, and at 2 the
+ * pump's own current had hyperpolarised a driven cell and halved its rate
+ * within fifteen seconds of a slider move — so what a student read off the
+ * panel depended on how quickly they read it. At 1 — the true rate for the
+ * axon — a driven cell drifts over half a minute instead, but the pump-off
+ * cell's spikes are still at 54% of their height at the minute mark, just
+ * short of the halving Q10's window asks for. At 1.5 they are well under
+ * half by then and gone soon after. The panel says so.
  */
-export const RUNDOWN_SPEEDUP = 1
+export const RUNDOWN_SPEEDUP = 1.5
 
 const BALANCE = restingBalance()
 
@@ -226,11 +226,25 @@ export const DEFAULT_AXON: AxonGeometry = {
   myelinGScale: 0.01,
 }
 
-/** Fewer patches for the same axon, used while the Membrane tab is hidden. */
-export const REDUCED_COMPARTMENTS = 10
+/**
+ * A coarser cut of the same axon. **Not used by the scene.** It was built so
+ * the axon could run cheaply while the Membrane tab was hidden, and measured
+ * before being switched off: at ten patches a fifth of the spikes fail to
+ * reach the far end under a 40 events/s drive, at twenty a third fail at
+ * 200 events/s, and only the full forty patches carry every spike at every
+ * rate the cell can produce. The vehicle's behaviour depends on what reaches
+ * the far end, so the coarse axon would have changed it. Kept for the test
+ * that records this and for the instruments, which never need the far end.
+ */
+export const REDUCED_COMPARTMENTS = 20
 
-/** The fixed integration step, ms. */
-export const DT_MS = 0.025
+/**
+ * The fixed integration step, ms. Gating is exponential Euler and voltage is
+ * backward Euler, so the step is limited by accuracy rather than stability;
+ * measured against 0.025 ms, this step moves threshold by 2 mV and the
+ * ceiling by 2%, and halves the cost.
+ */
+export const DT_MS = 0.05
 
 /** Upward crossing of this voltage counts as a spike. */
 export const SPIKE_CROSSING_MV = -20
@@ -334,7 +348,8 @@ export class NeuronCell {
   private traceAcc = 0
   private velA = 0
   private velB = 0
-  private velTA = -1
+  /** Crossing times at the quarter-way patch, waiting to be paired with the three-quarter patch. */
+  private velQueue: number[] = []
   private rng: Rng
 
   constructor(rng: Rng, params: Partial<CellParams> = {}, axon: Partial<AxonGeometry> = {}) {
@@ -413,7 +428,7 @@ export class NeuronCell {
     }
     this.velA = 1 + Math.round(n * 0.25)
     this.velB = 1 + Math.round(n * 0.75)
-    this.velTA = -1
+    this.velQueue = []
   }
 
   /** Put every patch at the classic rest, with the concentrations behind it. */
@@ -443,7 +458,7 @@ export class NeuronCell {
     this.traceHead = 0
     this.traceCount = 0
     this.traceAcc = 0
-    this.velTA = -1
+    this.velQueue = []
     this.naInflux.fill(0)
     this.spikeStart.fill(-1)
     this.naPerSpike.fill(0)
@@ -809,11 +824,20 @@ export class NeuronCell {
     } else if (i === this.count - 1) {
       this.farSpikes.push(now)
     }
-    if (i === this.velA) this.velTA = now
-    if (i === this.velB && this.velTA >= 0 && now - this.velTA < 100 && now > this.velTA) {
-      const distMm = ((this.velB - this.velA) * this.axon.lengthMm) / (this.count - 1)
-      this.conductionVelocity = distMm / (now - this.velTA) // mm/ms = m/s
-      this.velTA = -1
+    // Velocity: pair each crossing at the three-quarter patch with the oldest
+    // unpaired crossing at the quarter patch. First in, first out, because at
+    // high rates several spikes are on the axon at once and the newest
+    // crossing at the quarter patch is not the one that has just arrived.
+    if (i === this.velA) {
+      this.velQueue.push(now)
+      if (this.velQueue.length > 8) this.velQueue.shift()
+    }
+    if (i === this.velB && this.velQueue.length) {
+      const tA = this.velQueue.shift()!
+      if (now > tA && now - tA < 100) {
+        const distMm = ((this.velB - this.velA) * this.axon.lengthMm) / (this.count - 1)
+        this.conductionVelocity = distMm / (now - tA) // mm/ms = m/s
+      }
     }
   }
 
