@@ -51,6 +51,16 @@ export interface Vehicle {
    * sim time and freezes when the sim is paused). Oldest → newest.
    */
   history: { left: number[]; right: number[] }
+  /**
+   * Something other than the weight matrix turning this creature's sensor
+   * readings into actuator drive — Module 3's neurons, which sit inside the
+   * connection Lab 1 drew as a line. Called once per step with the fresh
+   * sensor readings and the step length; what it returns is what the wheels
+   * do. Everything else — the sensor model, the movement, the walls — is the
+   * same code every module runs. Absent for Modules 1 and 2, which are
+   * unchanged by its existence.
+   */
+  drive?: (sensors: SensorInput, dt: number) => ActuatorOutput
 }
 
 export const DEFAULT_STRENGTH = 2.4
@@ -238,7 +248,7 @@ export class VehicleWorld {
         sensedRight = Math.max(0, sensedRight + this.rng.normal() * noise)
       }
       v.sensors = { left: sensedLeft, right: sensedRight }
-      v.actuators = computeActuators(v.weights, v.sensors)
+      v.actuators = v.drive ? v.drive(v.sensors, dt) : computeActuators(v.weights, v.sensors)
       pushCapped(v.history.left, v.sensors.left)
       pushCapped(v.history.right, v.sensors.right)
       let next = stepVehicle(v.state, v.actuators, v.config, dt)

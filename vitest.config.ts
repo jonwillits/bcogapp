@@ -12,10 +12,18 @@ import { defineConfig } from 'vitest/config'
  * only defensible alongside the measurements that chose them.
  *
  *   PROBE=1 npx vitest run --disable-console-intercept -t "cost model"
+ *
+ * `PROBE_DIR` narrows which probes are collected at all — the Module 2 sweeps
+ * take minutes just to load and run, and a Module 3 probe should not have to
+ * wait for them:
+ *
+ *   PROBE=1 PROBE_DIR=src/sim/neuron npx vitest run --disable-console-intercept
  */
 export default defineConfig({
   test: {
-    include: process.env.PROBE ? ['src/**/*.probe.ts'] : ['src/**/*.test.ts'],
+    include: process.env.PROBE
+      ? [`${process.env.PROBE_DIR ?? 'src'}/**/*.probe.ts`]
+      : ['src/**/*.test.ts'],
     // The Module 2 acceptance tests run whole 50-generation populations over
     // ten seeds each; several take tens of seconds and none of them is hanging.
     testTimeout: 120_000,
