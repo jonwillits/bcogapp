@@ -49,7 +49,7 @@ it('world sweep', () => {
   const seeds = [1, 2, 3, 4]
   report('healthy fast', HEALTHY_SCENARIO, seeds)
   for (const c of DIAGNOSTIC_CELLS) report(c.id, c.scenario, seeds, 45)
-})
+}, 1_800_000)
 
 /** Candidate values for the two cells whose one parameter is a matter of degree. */
 it('world variants', () => {
@@ -61,4 +61,4 @@ it('world variants', () => {
   for (const pp of [0.2]) report(`N3 pump ${pp}`, { ...n3, cell: { ...n3.cell, pumpPower: pp } }, seeds, 45)
   const n4 = DIAGNOSTIC_CELLS[4].scenario
   for (const b0 of [-6, -10]) report(`N4 b0 ${b0}`, { ...n4, unit: { ...n4.unit, b0 } }, seeds, 45)
-})
+}, 1_800_000)

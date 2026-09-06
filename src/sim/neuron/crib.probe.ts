@@ -101,4 +101,4 @@ it('crib: what the five cells should look like', () => {
   console.log('What should NOT happen: no vehicle leaves the arena; no light passes through a vehicle;')
   console.log('the vehicle never changes size when the body-size slider moves; a chemical vehicle never turns sharply;')
   console.log('the Unit tab never says dendrite/soma/axon/synapse; nothing anywhere is called an activation function.')
-})
+}, 1_800_000)
