@@ -6,7 +6,11 @@ Run this before anything reaches students.
 npm run closeout
 ```
 
+One lab when several exist: `npm run closeout m02-evolution`. The document half alone, after a text-only edit: `npm run check:docs`.
+
 It checks, it does not push. The two pushes are yours, in the order it prints.
+
+**There is a skill for this**, so it can be invoked by name rather than remembered: `course_admin/skills/lab-close-out/` in the course folder. It covers shipping a change, registering a new lab, and answering a student who reports a discrepancy.
 
 ---
 
@@ -44,8 +48,15 @@ Currently unbacked: *"Part 1: a population visibly adapts."* At the shipped defa
 
 The handout is fetched live from `intro_to_bcs`, so document changes reach students within minutes and need no redeploy.
 
-## Adding to it
+## Adding a lab
 
-- A design change that strands a word: add a row to `BANNED` in `scripts/check-docs.mjs`.
-- A document starts naming a new control: add it to `CONTROLS`.
-- A new claim about what a student will see: **write the test first**, then add the pair to `CLAIMS` in `scripts/closeout.mjs`. A claim in `CLAIMS` with `null` prints as an unbacked promise, which is the honest state until someone measures it.
+Everything module-specific lives in **`scripts/labs.config.mjs`**. Neither script knows about any particular module, so registering a new lab is one entry with four fields — which are the four ways a lab has gone wrong:
+
+- **`retired`** — words the design abandoned and left stranded in the documents. Each may carry `unless` phrases for the places the term is used correctly.
+- **`controls`** — every control name the documents may use, checked against strings extracted from that scene.
+- **`claims`** — promises about what a student will see, each paired with a fragment of the test name that would go red if it stopped being true. `test: null` prints as an unbacked promise, which is the honest state until someone measures it.
+- **`crib`** — the probe that prints what a person should look for.
+
+`BANNED_EVERYWHERE` in the same file holds house style, checked in every lab. Keep it short: a rule there applies to documents nobody is currently thinking about.
+
+**Write the test before the handout makes the promise.** That is the habit the whole of section 3 exists to enforce.

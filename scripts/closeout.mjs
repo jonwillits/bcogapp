@@ -13,19 +13,22 @@
  *   npm run closeout
  */
 import { execFileSync, spawnSync } from 'node:child_process'
-import { existsSync, statSync, readFileSync } from 'node:fs'
+import { existsSync, statSync, readFileSync, readdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
-const COURSE =
-  process.env.INTRO_TO_BCS ??
-  '/Users/jon/Library/CloudStorage/Box-Box/teaching/bcog_web/courses/introduction_to_brain_and_cognitive_science_1/current_version/intro_to_bcs'
+import { LABS, COURSE } from './labs.config.mjs'
 
-const LAB_FILES = [
-  'comparative_approaches/evolution_lab/evolution_lab.md',
-  'comparative_approaches/evolution_lab/evolution_lab_report.docx',
-]
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
+
+/** One lab, or all of them: `npm run closeout m02-evolution`. */
+const only = process.argv[2]
+const labs = only ? LABS.filter((l) => l.id === only) : LABS
+if (!labs.length) {
+  console.error(`\n  No lab "${only}". Known: ${LABS.map((l) => l.id).join(', ')}\n`)
+  process.exit(2)
+}
+const LAB_FILES = labs.flatMap((l) => [l.handout, l.report])
 
 let failed = 0
 const head = (s) => console.log(`\n  ${s}\n  ${'-'.repeat(64)}`)
@@ -96,27 +99,25 @@ head('3. Claims the handout makes about what a student will see')
  * So each claim is listed with the test that would go red if it stopped being
  * true, and the ones with no test are named rather than assumed.
  */
-const CLAIMS = [
-  ['W, X and Y all reach the light and stay; Z does not', 'reach the light and stay near it'],
-  ['W and X cannot be told apart by watching', 'sisters are indistinguishable'],
-  ['Y differs by driving backwards and by nothing else', 'nothing a student is not told about'],
-  ['a designed perturbation separates Y from W and X', 'perturbations separate Y'],
-  ['the default world does not already give the mechanism away', 'not already given away'],
-  ['each population fails in the other world (Q18)', 'fails in the other'],
-  ['the saved lineages are genuine engine output', 'reproduces exactly from its recipe'],
-  ['Part 1: a population visibly adapts', null],
-]
+/** Every test name in the repo, so a claim can be matched to the test behind it. */
+const readTests = (dir) => {
+  let out = ''
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    const p = join(dir, e.name)
+    if (e.isDirectory()) out += readTests(p)
+    else if (e.name.endsWith('.test.ts')) out += readFileSync(p, 'utf-8') + '\n'
+  }
+  return out
+}
+const suite = readTests(join(ROOT, 'src'))
 
-const suite = ['continuousLineages', 'lineages', 'evolution', 'world', 'random']
-  .map((f) => {
-    const p = join(ROOT, 'src/sim/world', `${f}.test.ts`)
-    return existsSync(p) ? readFileSync(p, 'utf-8') : ''
-  })
-  .join('\n')
-for (const [claim, needle] of CLAIMS) {
-  if (needle === null) warn(`NO TEST - "${claim}"`)
-  else if (suite.includes(needle)) ok(`"${claim}"`)
-  else bad(`the test for "${claim}" is gone (looked for "${needle}")`)
+for (const lab of labs) {
+  if (labs.length > 1) console.log(`\n  ${lab.name}`)
+  for (const { says, test } of lab.claims ?? []) {
+    if (test === null) warn(`NO TEST - "${says}"`)
+    else if (suite.includes(test)) ok(`"${says}"`)
+    else bad(`the test for "${says}" is gone (looked for "${test}")`)
+  }
 }
 
 // ------------------------------------------------------- 4. repository state
@@ -175,18 +176,16 @@ for (const r of repos) {
 head('5. What only a person can confirm')
 
 // Probes are excluded from the unit suite by vitest.config.ts, so ask for them.
-const crib = run(
-  'npx',
-  ['vitest', 'run', '--disable-console-intercept', '-t', 'crib: what each population should look like'],
-  ROOT,
-  { PROBE: '1' },
-)
+const cribName = labs.map((l) => l.crib).filter(Boolean)[0]
+const crib = cribName
+  ? run('npx', ['vitest', 'run', '--disable-console-intercept', '-t', cribName], ROOT, { PROBE: '1' })
+  : { out: '' }
 const cribLines = crib.out
   .split('\n')
   .filter((l) => /reach the light|driving backwards|swings toward|SEPARATES|does NOT separate|^  [WXYZ] /.test(l))
 if (cribLines.length) {
   console.log('  Run the scene and check these by eye - tests cannot see motion:')
-  console.log('      npm run dev     then open  http://localhost:5173/#/m02-evolution\n')
+  console.log('      npm run dev     then open  http://localhost:5173/' + (labs[0].route ?? '') + '\n')
   cribLines.slice(0, 14).forEach((l) => console.log(`  ${l.trim()}`))
   console.log('\n  Full list:  npx vitest run --disable-console-intercept -t "crib:"')
 } else {
