@@ -8,7 +8,8 @@ import {
   STRENGTH_RANGE,
   RATE_RANGE,
 } from '../../sim/neuron/unitRanges'
-import { CellDiagram } from './CellDiagram'
+import { PairDiagram } from './PairDiagram'
+import { pairData, cellOn } from './pairData'
 import { TransferPlot, Raster } from './plots'
 import { BIOLOGICAL, ARTIFICIAL, EQUIVALENCE_LINES } from './unitLabels'
 import { TabBar, Note, Row, PANEL_STYLE, RIGHT_STYLE, type SceneState } from './NeuronScene'
@@ -22,12 +23,12 @@ import { TabBar, Note, Row, PANEL_STYLE, RIGHT_STYLE, type SceneState } from './
 
 export function UnitTab(s: SceneState) {
   const { world, bump, curve } = s
-  const { artificial, overlay, windowMs } = s.ui
+  const { artificial, overlay, windowMs, side } = s.ui
   const setArtificial = (artificial: boolean) => s.patchUi({ artificial })
   const setOverlay = (overlay: boolean) => s.patchUi({ overlay })
   const setWindowMs = (windowMs: number) => s.patchUi({ windowMs })
   const v = artificial ? ARTIFICIAL : BIOLOGICAL
-  const cell = world.cell
+  const cell = cellOn(world, side)
   const u = world.unit
   const fromSensors = world.inputSource === 'sensors'
   const x1 = cell.input.x[0]
@@ -51,7 +52,9 @@ export function UnitTab(s: SceneState) {
       <TabBar tab={s.tab} onChange={s.setTab} />
       <Note>
         <b>Time scale: real time.</b> Rates in, a {v.strength} on each connection, a total,
-        and a {v.rate} out. Its four elements are named by the job each one does.
+        and a {v.rate} out. The vehicle carries two copies of this {v.cell} on one set of
+        settings, one for each actuator; the instruments show the <b>{side}</b> one. Its four
+        elements are named by the job each one does.
       </Note>
       <Toggle
         label={artificial ? 'artificial (switch to biological)' : 'biological (switch to artificial)'}
@@ -59,7 +62,7 @@ export function UnitTab(s: SceneState) {
         onChange={setArtificial}
       />
       <SelectControl
-        label="Where the first two inputs come from"
+        label="Where the inputs come from"
         value={world.inputSource}
         options={[
           { value: 'sensors', label: "the vehicle's sensors (live)" },
@@ -84,7 +87,6 @@ export function UnitTab(s: SceneState) {
         [
           { key: 'bIpsi', label: `${v.strength} b₁ (same-side sensor)`, value: u.bIpsi },
           { key: 'bContra', label: `${v.strength} b₂ (opposite-side sensor)`, value: u.bContra },
-          { key: 'b3', label: `${v.strength} b₃ (third input)`, value: u.b3 },
         ] as const
       ).map((row) => (
         <Slider
@@ -116,20 +118,11 @@ export function UnitTab(s: SceneState) {
         format={(x) => `${x.toFixed(fromSensors ? 1 : 0)} ${v.rateUnit}`}
         onChange={(val) => setSlider(1, val)}
       />
-      <Slider
-        label={`input ${v.rate} x₃ (free)`}
-        value={u.x3}
-        min={RATE_RANGE.min}
-        max={RATE_RANGE.max}
-        step={RATE_RANGE.step}
-        format={(x) => `${x.toFixed(0)} ${v.rateUnit}`}
-        onChange={(x3) => setUnit({ x3 })}
-      />
       {fromSensors && (
         <Note>
           A sensor reading of 1.00 is an input {v.rate} of {RATE_PER_INTENSITY} {v.rateUnit}.
-          Moving x₁ or x₂ switches the inputs to the sliders; the vehicle then drives on the
-          cell's output regardless of what its sensors see.
+          Moving x₁ or x₂ switches both cells' inputs to the sliders; the vehicle then drives on
+          the cells' output regardless of what its sensors see.
         </Note>
       )}
       <Toggle label="Show measured" checked={overlay} onChange={setOverlay} />
@@ -146,15 +139,19 @@ export function UnitTab(s: SceneState) {
   )
 
   const right = (
-    <Panel title={artificial ? 'One unit' : 'One cell'} style={RIGHT_STYLE}>
-      <CellDiagram
+    <Panel title={artificial ? 'Two units, one wiring' : 'Two cells, one wiring'} style={RIGHT_STYLE}>
+      <PairDiagram
         mode={artificial ? 'artificial' : 'unit'}
         labels={v}
-        strengths={[u.bIpsi, u.bContra, u.b3]}
-        baseline={u.b0}
-        rates={[x1, x2, u.x3]}
-        output={measuredRate}
+        {...pairData(world)}
+        selected={side}
+        onSelect={(sd) => s.patchUi({ side: sd })}
       />
+      <Note>
+        Lab 1's wiring, with a {v.cell} where each line was. Each {v.cell}'s x₁ is its own
+        side's sensor and its x₂ the other side's; the crossed lines are the b₂ connections.
+        Below: the <b>{side}</b> {v.cell}.
+      </Note>
       <div>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>
           What the arithmetic says
@@ -172,8 +169,8 @@ export function UnitTab(s: SceneState) {
             overflowX: 'auto',
           }}
         >
-          {`y = b₀ + b₁x₁ + b₂x₂ + b₃x₃\n` +
-            `  = ${fmt(u.b0)} + (${fmt(u.bIpsi)} × ${fmt(x1)}) + (${fmt(u.bContra)} × ${fmt(x2)}) + (${fmt(u.b3)} × ${fmt(u.x3)})\n` +
+          {`y = b₀ + b₁x₁ + b₂x₂\n` +
+            `  = ${fmt(u.b0)} + (${fmt(u.bIpsi)} × ${fmt(x1)}) + (${fmt(u.bContra)} × ${fmt(x2)})\n` +
             `  = ${fmt(total)}` +
             (total < 0 ? `   → held at 0` : '')}
         </pre>

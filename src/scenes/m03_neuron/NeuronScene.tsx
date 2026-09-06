@@ -42,7 +42,11 @@ export const DEFAULT_MS_PER_SECOND = 20
  * of them would change the hook order when the tab changes, which React
  * (rightly) refuses.
  */
+export type Side = 'left' | 'right'
+
 export interface UiState {
+  /** Which of the vehicle's two cells the Unit and Membrane instruments show. */
+  side: Side
   artificial: boolean
   overlay: boolean
   windowMs: number
@@ -54,6 +58,7 @@ export interface UiState {
 }
 
 export const DEFAULT_UI: UiState = {
+  side: 'left',
   artificial: false,
   overlay: false,
   windowMs: 1000,

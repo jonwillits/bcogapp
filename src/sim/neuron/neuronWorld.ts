@@ -350,8 +350,8 @@ export class NeuronWorld {
     const [lIpsi, lContra] = rates(this.left.filtered, this.right.filtered)
     const [rIpsi, rContra] = rates(this.right.filtered, this.left.filtered)
     const u = this.unit
-    this.left.cell.setInput({ b0: u.b0, b: [u.bIpsi, u.bContra, u.b3], x: [lIpsi, lContra, u.x3] })
-    this.right.cell.setInput({ b0: u.b0, b: [u.bIpsi, u.bContra, u.b3], x: [rIpsi, rContra, u.x3] })
+    this.left.cell.setInput({ b0: u.b0, b: [u.bIpsi, u.bContra, 0], x: [lIpsi, lContra, 0] })
+    this.right.cell.setInput({ b0: u.b0, b: [u.bIpsi, u.bContra, 0], x: [rIpsi, rContra, 0] })
     this.left.cell.advance(dt * 1000)
     this.right.cell.advance(dt * 1000)
 
@@ -372,7 +372,7 @@ export class NeuronWorld {
     const linear = (own: number, other: number) =>
       Math.max(
         0,
-        u.b0 + u.bIpsi * own * RATE_PER_INTENSITY + u.bContra * other * RATE_PER_INTENSITY + u.b3 * u.x3,
+        u.b0 + u.bIpsi * own * RATE_PER_INTENSITY + u.bContra * other * RATE_PER_INTENSITY,
       )
     return {
       left: linear(lDel, rDel) * ACTUATOR_PER_HZ,

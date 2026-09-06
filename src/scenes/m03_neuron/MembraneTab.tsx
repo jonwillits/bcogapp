@@ -11,7 +11,8 @@ import {
   ATP_PER_SPIKE_LENNIE,
   BRAIN_WATTS,
 } from '../../sim/neuron/energy'
-import { CellDiagram } from './CellDiagram'
+import { PairDiagram } from './PairDiagram'
+import { pairData, cellOn } from './pairData'
 import { VoltageTrace, GateMeters, CurrentArrows } from './plots'
 import { PARTS, ROLE_TO_PART } from './membraneLabels'
 import { TabBar, Note, Row, sci, PANEL_STYLE, RIGHT_STYLE, DEFAULT_MS_PER_SECOND, type SceneState } from './NeuronScene'
@@ -31,10 +32,10 @@ d[Na]in/dt ∝ −INa − 3 Jpump           d[K]in/dt ∝ −IK + 2 Jpump`
 
 export function MembraneTab(s: SceneState) {
   const { world, bump } = s
-  const cell = world.cell
+  const { showEquations, traceMs, calcRate, signalling, spikeShare, side } = s.ui
+  const cell = cellOn(world, side)
   const p = world.cellParams
   const r = cell.readout()
-  const { showEquations, traceMs, calcRate, signalling, spikeShare } = s.ui
   const setShowEquations = (showEquations: boolean) => s.patchUi({ showEquations })
   const setTraceMs = (traceMs: number) => s.patchUi({ traceMs })
   const setCalcRate = (calcRate: number) => s.patchUi({ calcRate })
@@ -69,6 +70,7 @@ export function MembraneTab(s: SceneState) {
       <Note>
         <b>Time scale: slow motion.</b> {s.msPerSecond} ms of cell time per second — {slowdown >= 1.05 ? `${slowdown.toFixed(0)}× slower than life` : 'real time'}.
         A spike lasts about a millisecond; the vehicle in the arena is running at this speed too.
+        Every control here sets both of the vehicle's cells; the instruments show the <b>{side}</b> one.
       </Note>
       <Slider
         label="Simulated time per second"
@@ -213,16 +215,13 @@ export function MembraneTab(s: SceneState) {
   )
 
   const right = (
-    <Panel title="One cell, as biology" style={RIGHT_STYLE}>
-      <CellDiagram
+    <Panel title="Two cells, as biology" style={RIGHT_STYLE}>
+      <PairDiagram
         mode="membrane"
         labels={PARTS}
-        strengths={[world.unit.bIpsi, world.unit.bContra, world.unit.b3]}
-        baseline={world.unit.b0}
-        rates={[cell.input.x[0], cell.input.x[1], cell.input.x[2]]}
-        output={cell.outputRate()}
-        profile={cell.profile()}
-        wrapped={(i) => cell.isWrapped(i)}
+        {...pairData(world)}
+        selected={side}
+        onSelect={(sd) => s.patchUi({ side: sd })}
       />
       <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.45 }}>
         {ROLE_TO_PART.map((m) => (

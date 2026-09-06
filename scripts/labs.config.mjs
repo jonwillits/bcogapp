@@ -119,7 +119,7 @@ export const LABS = [
       'Signal type', 'Body size (signal path length)', 'World speed (how fast the lights move)',
       'How many lights', 'Reset', 'New seed', 'Reaction time', 'Signal path length',
       'Lights collected', 'Energy per light collected',
-      'Where the first two inputs come from', 'Show measured', 'Time window for the output',
+      'Where the inputs come from', 'Show measured', 'Time window for the output',
       'Sodium-potassium pump power (Na⁺/K⁺)', 'Voltage-gated sodium channel block',
       'Sodium inactivation recovery', 'Injected current', 'Restore healthy membrane',
       'Show the equations', 'Energy calculator', 'Things to try', 'Myelin on the axon',

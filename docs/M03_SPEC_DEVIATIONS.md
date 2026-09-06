@@ -128,7 +128,10 @@ As spec §7: Lennie's 2.4 × 10⁹ ATP per spike, 86 × 10⁹ neurons, 50 kJ/mol
 
 ## 8. Things in the UI the spec did not ask for
 
-- **"Where the first two inputs come from"** on the Unit tab: the vehicle's sensors (live) or the sliders. Q6 needs the sliders; the vehicle needs the sensors; both cannot drive x₁ and x₂ at once. Moving x₁ or x₂ switches to the sliders, and the vehicle then drives on the cell's output regardless of what it sees.
+- **"Where the inputs come from"** on the Unit tab: the vehicle's sensors (live) or the sliders. Q6 needs the sliders; the vehicle needs the sensors; both cannot drive x₁ and x₂ at once. Moving x₁ or x₂ switches to the sliders, and the vehicle then drives on the cells' output regardless of what it sees.
+- **The third input is gone.** The spec's §2.2 asks for three inputs with a rate slider each, to match the reading's `y = b₀ + b₁x₁ + b₂x₂ + b₃x₃`. The vehicle has two sensors and nothing else to wire, so x₃ was a slider connected to nothing, explaining nothing and asked about nowhere; Jon's call (2026-09-06) was to take it out. The panel prints `y = b₀ + b₁x₁ + b₂x₂`. Q26's "fourth input" is a thought question and needs no slider.
+- **Both cells in one picture.** The Unit and Membrane tabs draw Lab 1's wiring — two sensors, straight and crossed lines, two actuators — with a cell where each line was, so each cell's x₁ is visibly the same-side sensor and its x₂ the other side's. Clicking a cell selects which one the instruments below show; a line says the vehicle carries two copies on one set of settings. (Jon's request, 2026-09-06; the spec's "one cell" wording assumed a single cell could drive a vehicle, and it cannot steer.)
+- **The World readouts are grouped** — reaction time as a stacked bar, the signal, the lights as value tiles, and light speed against the vehicle's top speed as two bars — and the body-size slider carries a one-line hint that it changes the travel time and not the vehicle (Jon's feedback, 2026-09-06).
 - **"Step one spike"** runs the world until the body fires and the spike has passed.
 - **The Membrane tab's slow motion runs the vehicle too** — one clock. The panel says which time scale is on screen on every tab.
 - **The trace window** has four settings (20–400 ms).
@@ -144,7 +147,7 @@ Ordered by how much it matters.
 3. **Part 1, Q1's table.** A sentence that the healthy spiking vehicle collects fewer lights in the slow world than the fast one, and why (slow lights do not come to an idling vehicle).
 4. **Q10.** "A simulated minute" is right; the Membrane tab's slow motion would make that a fifty-minute wait, so say "press *real time* on the Membrane tab first".
 5. **Q12.** One clause: the low end of the curve rises a little too (§2).
-6. **Part 0.** One line that the vehicle carries two mirror-image copies of the cell, and the tabs show the left one.
+6. **Part 0.** One line that the vehicle carries two mirror-image copies of the cell, drawn together on the Unit and Membrane tabs in Lab 1's wiring picture, and that clicking one selects which the instruments show.
 7. **Q13.** The Membrane tab's inhibitory synapse passes potassium out, not chloride in, and says the chapter's version alongside. The Q13 answer ("what changed is the receptor, and the ion its channel passes") is unaffected; an answer key should accept either ion.
 8. **Q19 / Part 4.** N4 does not use "a small fraction of the ATP" (§6 above): the resting cost dominates, which is the reading's own point. Reword to "spends a little less, and gets its lights cheaper than the other three" — and note for the answer key that N3 comes close on that figure *because* its pump is broken, which is a good trap for Q19's "why is a rarely firing cell not a broken one".
 9. **Part 0.** The handout links to `neuron_lab_report.docx`, which does not exist yet; `npm run closeout m03-neuron` fails on it and will keep failing until it does. The close-out's question-set check needs it to compare the report against the handout's Q1–Q28.

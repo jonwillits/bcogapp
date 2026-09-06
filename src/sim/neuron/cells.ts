@@ -13,7 +13,14 @@ import { DEFAULT_BODY_SIZE_M, type SignalType } from './signals'
  * single change is the one line that follows.
  */
 
-/** The reading's arithmetic, as the vehicle's two mirror-image cells use it. */
+/**
+ * The reading's arithmetic, as the vehicle's two mirror-image cells use it:
+ * y = b₀ + b₁x₁ + b₂x₂, with x₁ the same-side sensor and x₂ the opposite one.
+ * The chapter writes a third term; the vehicle has two sensors and nothing
+ * else to wire, so a third input was built and then taken out — an unused
+ * connection kept only because the equation had room for it explained
+ * nothing and asked nothing.
+ */
 export interface UnitSettings {
   /** Baseline b₀, spikes per second. */
   b0: number
@@ -21,10 +28,6 @@ export interface UnitSettings {
   bIpsi: number
   /** Strength from the opposite-side sensor, b₂. */
   bContra: number
-  /** Strength of the third, free input, b₃. */
-  b3: number
-  /** Rate of the third input, x₃, spikes per second — a slider, not a sensor. */
-  x3: number
 }
 
 export interface WorldSettings {
@@ -78,8 +81,6 @@ export const HEALTHY_UNIT: UnitSettings = {
   b0: 5,
   bIpsi: 0,
   bContra: 2,
-  b3: 0,
-  x3: 0,
 }
 
 /** The two detents of the world-speed control, arena units per second. */
