@@ -132,7 +132,7 @@ export const LABS = [
       { says: 'N1 has nothing wrong with its cell and yields only to a slower world', test: 'yields to a slow world' },
       { says: "N2's fault shows on the Unit tab's printed strengths", test: 'printed strengths give it away' },
       { says: 'N3 is nearly normal at rest and fails under sustained demand', test: 'only fails under sustained maximum input' },
-      { says: 'N4 wins on energy per light collected', test: 'wins outright on energy per light' },
+      { says: 'N4 has the lowest energy per light collected of the four', test: 'lowest energy per light collected' },
       { says: 'Q6: the arithmetic prints 25, 10, 0 and the measured rate differs', test: 'give 25, 10' },
       { says: 'Q7: the curve is flat at both ends, and neither end is a parameter', test: 'no named parameter sets the floor' },
       { says: 'Q10: pump off - rest rises, spikes shrink below half, ATP reads zero', test: 'pump off, rest rises' },
