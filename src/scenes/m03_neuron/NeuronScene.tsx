@@ -33,8 +33,16 @@ const MAX_STEP_S = 1 / 30
  */
 export const DIAGNOSTIC_WARM_UP_S = 45
 
-/** Default slow-motion on the Membrane tab: milliseconds of cell time per real second. */
-export const DEFAULT_MS_PER_SECOND = 20
+/**
+ * Default slow motion on the Membrane tab: milliseconds of cell time per real
+ * second. Ten times slower than life — a spike is a few frames wide and the
+ * vehicle visibly crawls. It was 50× (20 ms/s) and the vehicle looked frozen,
+ * which read as a bug rather than a time scale (Jon, 2026-09-06). The 50×
+ * setting is one click away for watching a single spike.
+ */
+export const DEFAULT_MS_PER_SECOND = 100
+/** The slower setting, for watching one spike: fifty times slower than life. */
+export const SPIKE_WATCH_MS_PER_SECOND = 20
 
 /**
  * Per-tab UI state, kept here rather than in the tabs because the tabs are
@@ -236,6 +244,7 @@ export default function NeuronScene() {
   return (
     <SceneCanvasLayout
       canvas={
+        <>
         <Canvas camera={{ position: [0, 20, 14], fov: 45 }} onContextMenu={(e) => e.preventDefault()}>
           <color attach="background" args={[palette.bg]} />
           <ambientLight intensity={0.55} />
@@ -262,6 +271,10 @@ export default function NeuronScene() {
           <Stepper world={world} scale={playing ? scale : 0} onAdvance={bump} />
           <CameraRig target={[0, 0, 0]} />
         </Canvas>
+        {tab === 'membrane' && (
+          <TimeScaleBadge msPerSecond={msPerSecond} onChange={setMsPerSecond} />
+        )}
+        </>
       }
       left={slots.left}
       right={slots.right}
@@ -279,6 +292,69 @@ export default function NeuronScene() {
         />
       }
     />
+  )
+}
+
+/**
+ * Over the arena whenever the scene is not running in real time. The panel
+ * says so too, but a vehicle that has all but stopped is the first thing a
+ * student sees, and the reason has to be on the same part of the screen.
+ */
+function TimeScaleBadge({ msPerSecond, onChange }: { msPerSecond: number; onChange: (v: number) => void }) {
+  const slowdown = 1000 / msPerSecond
+  const real = slowdown < 1.05
+  const btn = (label: string, value: number) => (
+    <button
+      type="button"
+      onClick={() => onChange(value)}
+      style={{
+        padding: '3px 8px',
+        fontSize: 11,
+        borderRadius: 999,
+        border: '1px solid var(--border)',
+        cursor: 'pointer',
+        background: Math.abs(msPerSecond - value) < 0.5 ? 'var(--accent)' : 'var(--surface-2)',
+        color: Math.abs(msPerSecond - value) < 0.5 ? '#0b111c' : 'var(--text)',
+        fontWeight: Math.abs(msPerSecond - value) < 0.5 ? 600 : 400,
+      }}
+    >
+      {label}
+    </button>
+  )
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: 12,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        padding: '6px 12px',
+        borderRadius: 999,
+        background: real ? 'color-mix(in srgb, var(--surface) 92%, transparent)' : 'color-mix(in srgb, #f0a94b 22%, var(--surface))',
+        border: `1px solid ${real ? 'var(--border)' : '#f0a94b'}`,
+        boxShadow: 'var(--shadow)',
+        fontSize: 12,
+        color: 'var(--text)',
+        whiteSpace: 'nowrap',
+        pointerEvents: 'auto',
+      }}
+    >
+      <span>
+        {real ? (
+          <b>Real time</b>
+        ) : (
+          <>
+            <b>Slow motion</b> — {slowdown.toFixed(0)}× slower than life. The vehicle is on the same clock, so it has all but stopped.
+          </>
+        )}
+      </span>
+      {btn('real time', 1000)}
+      {btn('10× slow', DEFAULT_MS_PER_SECOND)}
+      {btn('50× slow', SPIKE_WATCH_MS_PER_SECOND)}
+    </div>
   )
 }
 

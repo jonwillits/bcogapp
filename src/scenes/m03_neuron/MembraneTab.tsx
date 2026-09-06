@@ -15,7 +15,7 @@ import { PairDiagram } from './PairDiagram'
 import { pairData, cellOn } from './pairData'
 import { VoltageTrace, GateMeters, CurrentArrows } from './plots'
 import { PARTS, ROLE_TO_PART } from './membraneLabels'
-import { TabBar, Note, Row, sci, PANEL_STYLE, RIGHT_STYLE, DEFAULT_MS_PER_SECOND, type SceneState } from './NeuronScene'
+import { TabBar, Note, Row, sci, PANEL_STYLE, RIGHT_STYLE, DEFAULT_MS_PER_SECOND, SPIKE_WATCH_MS_PER_SECOND, type SceneState } from './NeuronScene'
 
 /**
  * The Membrane tab — implementational: how, and at what cost. The four parts
@@ -68,9 +68,11 @@ export function MembraneTab(s: SceneState) {
     <Panel title="The membrane" style={PANEL_STYLE}>
       <TabBar tab={s.tab} onChange={s.setTab} />
       <Note>
-        <b>Time scale: slow motion.</b> {s.msPerSecond} ms of cell time per second — {slowdown >= 1.05 ? `${slowdown.toFixed(0)}× slower than life` : 'real time'}.
-        A spike lasts about a millisecond; the vehicle in the arena is running at this speed too.
-        Every control here sets both of the vehicle's cells; the instruments show the <b>{side}</b> one.
+        <b>Time scale: {slowdown >= 1.05 ? 'slow motion' : 'real time'}.</b> {s.msPerSecond} ms of cell time per second{slowdown >= 1.05 ? ` — ${slowdown.toFixed(0)}× slower than life` : ''}.
+        A spike lasts about a millisecond, so this tab slows the whole scene down to show one;
+        the vehicle in the arena is on the same clock, which is why it has all but stopped.
+        Press <b>real time</b> to let it drive (Q10 needs a real minute). Every control here sets
+        both of the vehicle's cells; the instruments show the <b>{side}</b> one.
       </Note>
       <Slider
         label="Simulated time per second"
@@ -81,9 +83,10 @@ export function MembraneTab(s: SceneState) {
         format={(lg) => `${Math.round(10 ** lg)} ms/s`}
         onChange={(lg) => s.setMsPerSecond(Math.round(10 ** lg))}
       />
-      <div style={{ display: 'flex', gap: 6 }}>
-        <Button onClick={() => s.setMsPerSecond(DEFAULT_MS_PER_SECOND)}>slow motion</Button>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         <Button onClick={() => s.setMsPerSecond(1000)}>real time</Button>
+        <Button onClick={() => s.setMsPerSecond(DEFAULT_MS_PER_SECOND)}>10× slow</Button>
+        <Button onClick={() => s.setMsPerSecond(SPIKE_WATCH_MS_PER_SECOND)}>50× slow</Button>
         <Button onClick={stepOneSpike}>step one spike</Button>
       </div>
       <Section title="Lesion controls" defaultOpen hint="Throw one switch and look at all three tabs.">

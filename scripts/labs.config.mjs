@@ -123,7 +123,7 @@ export const LABS = [
       'Sodium-potassium pump power (Na⁺/K⁺)', 'Voltage-gated sodium channel block',
       'Sodium inactivation recovery', 'Injected current', 'Restore healthy membrane',
       'Show the equations', 'Energy calculator', 'Things to try', 'Myelin on the axon',
-      'step one spike', 'real time', 'slow motion', 'Simulated time per second',
+      'step one spike', 'real time', '10× slow', '50× slow', 'Simulated time per second',
       'Reveal faults', 'Lesion controls',
     ],
 

@@ -145,7 +145,11 @@ Ordered by how much it matters.
 1. **Q6.** Tell students the measured rate will be *lower* than the arithmetic at these totals (about half), and that the third case reads a few spikes rather than zero — then ask why. Otherwise the first thing a careful student concludes is that the panel is broken.
 2. **Part 3, Step 1.** "Watch all four vehicles" → "load each of the four in turn". And "whether behaviour alone lets you sort them" → "whether behaviour alone tells you what is wrong with each": they *are* distinguishable by style; they are not diagnosable by it.
 3. **Part 1, Q1's table.** A sentence that the healthy spiking vehicle collects fewer lights in the slow world than the fast one, and why (slow lights do not come to an idling vehicle).
-4. **Q10.** "A simulated minute" is right; the Membrane tab's slow motion would make that a fifty-minute wait, so say "press *real time* on the Membrane tab first".
+4. **The Membrane tab's slow motion needs saying before a student meets it, or it reads as a freeze.** The tab opens ten times slower than life (a badge over the arena says so, with *real time*, *10× slow* and *50× slow* buttons), and the vehicle is on the same clock, so it all but stops. Wording to add, in Part 0 where the Membrane tab is introduced and again at Part 2 Step 3:
+
+   > *The Membrane tab runs the whole scene in slow motion — ten times slower than life by default, fifty times if you ask — because an action potential lasts about a millisecond and you are meant to watch one happen. The vehicle in the arena is on the same clock, so it will have all but stopped. It has not frozen. A badge over the arena says what speed you are at; press* real time *there, or on the panel, whenever you want the vehicle to drive again.*
+
+   And at Q10: "a simulated minute" is right; add "press *real time* first, or a simulated minute takes ten real ones".
 5. **Q12.** One clause: the low end of the curve rises a little too (§2).
 6. **Part 0.** One line that the vehicle carries two mirror-image copies of the cell, drawn together on the Unit and Membrane tabs in Lab 1's wiring picture, and that clicking one selects which the instruments show.
 7. **Q13.** The Membrane tab's inhibitory synapse passes potassium out, not chloride in, and says the chapter's version alongside. The Q13 answer ("what changed is the receptor, and the ion its channel passes") is unaffected; an answer key should accept either ion.
