@@ -338,8 +338,13 @@ function TimeScaleBadge({ msPerSecond, onChange }: { msPerSecond: number; onChan
         boxShadow: 'var(--shadow)',
         fontSize: 12,
         color: 'var(--text)',
-        whiteSpace: 'nowrap',
+        maxWidth: 'min(560px, calc(100% - 24px))',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        textAlign: 'center',
+        lineHeight: 1.35,
         pointerEvents: 'auto',
+        zIndex: 1,
       }}
     >
       <span>
@@ -347,7 +352,7 @@ function TimeScaleBadge({ msPerSecond, onChange }: { msPerSecond: number; onChan
           <b>Real time</b>
         ) : (
           <>
-            <b>Slow motion</b> — {slowdown.toFixed(0)}× slower than life. The vehicle is on the same clock, so it has all but stopped.
+            <b>Slow motion</b> — {slowdown.toFixed(0)}× slower than life; the vehicle is on the same clock.
           </>
         )}
       </span>
