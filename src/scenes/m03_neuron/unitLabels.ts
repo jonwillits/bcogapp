@@ -58,6 +58,6 @@ export const BIOLOGICAL: UnitVocabulary = {
  * quantities a *weight* and a *baseline*. Both names, once, as an equivalence.
  */
 export const EQUIVALENCE_LINES = [
-  'connection strength (Lab 1)  =  weight (the reading)  =  b₁, b₂, b₃',
+  'connection strength (Lab 1)  =  weight (the reading)  =  b₁, b₂',
   'actuator bias (Lab 1)  =  baseline (the reading)  =  b₀',
 ] as const
