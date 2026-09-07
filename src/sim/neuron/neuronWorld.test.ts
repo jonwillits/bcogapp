@@ -33,10 +33,12 @@ describe('the diagnosability test', () => {
   it("N2: the Unit tab's printed strengths give it away, and nothing else does", () => {
     const n2 = cell('N2').scenario
     expect(insideHealthyBand(n2.cell)).toBe(true)
+    // The crossed connection is b₂ in the left cell and b₁ in the right.
+    const crossed = (u: typeof n2.unit, side: 'left' | 'right') => (side === 'left' ? u[side].b2 : u[side].b1)
     for (const side of ['left', 'right'] as const) {
-      expect(Math.abs(HEALTHY_WIRING.bContra) / Math.abs(n2.unit[side].bContra)).toBeGreaterThanOrEqual(2)
+      expect(Math.abs(HEALTHY_WIRING.b2) / Math.abs(crossed(n2.unit, side))).toBeGreaterThanOrEqual(2)
       for (const id of ['N1', 'N3', 'N4']) {
-        expect(Math.abs(cell(id).scenario.unit[side].bContra)).toBeCloseTo(Math.abs(HEALTHY_WIRING.bContra))
+        expect(Math.abs(crossed(cell(id).scenario.unit, side))).toBeCloseTo(Math.abs(HEALTHY_WIRING.b2))
       }
     }
   })

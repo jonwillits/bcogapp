@@ -10,6 +10,7 @@ import {
   type UnitSettings,
   type CellWiring,
   type WorldSettings,
+  mirror,
 } from './cells'
 import { travelTimeS, arrivingFraction, type SignalType } from './signals'
 import { measureVelocity } from './measure'
@@ -24,8 +25,8 @@ import { measureVelocity } from './measure'
  * the cell's spikes run down its axon, and what arrives at the far end is
  * what the wheel does.
  *
- * **Two cells.** The left cell drives the left wheel from the left (same-side)
- * and right (opposite-side) sensors, and the right cell is its mirror image.
+ * **Two cells.** The left cell drives the left wheel and the right cell the
+ * right wheel; both receive both sensors, x₁ the left one and x₂ the right.
  * Each has its own wiring — baseline and two strengths, six numbers in all,
  * as Lab 1's matrix had a number per connection — and the membrane
  * parameters are set on both at once, the way a drug reaches both. The Unit
@@ -223,10 +224,10 @@ export class NeuronWorld {
     this.unit = { ...this.unit, [side]: { ...this.unit[side], ...patch } }
   }
 
-  /** Give the other cell this one's wiring. */
-  copyWiring(from: CellSide): void {
+  /** Give the other cell this one's wiring, mirrored: the same function on the other side. */
+  mirrorWiring(from: CellSide): void {
     const to: CellSide = from === 'left' ? 'right' : 'left'
-    this.unit = { ...this.unit, [to]: { ...this.unit[from] } }
+    this.unit = { ...this.unit, [to]: mirror(this.unit[from]) }
   }
 
   /** Signal path length, metres. */
@@ -351,17 +352,15 @@ export class NeuronWorld {
     this.left.filtered += (sensors.left - this.left.filtered) * a
     this.right.filtered += (sensors.right - this.right.filtered) * a
 
-    // Each cell's two sensor-driven inputs: same side first, opposite second.
-    const rates = (own: number, other: number): [number, number] =>
+    // Both cells receive both sensors: x₁ is the left sensor, x₂ the right.
+    const [x1, x2]: [number, number] =
       this.inputSource === 'sensors'
-        ? [own * RATE_PER_INTENSITY, other * RATE_PER_INTENSITY]
+        ? [this.left.filtered * RATE_PER_INTENSITY, this.right.filtered * RATE_PER_INTENSITY]
         : [this.sliderRates[0], this.sliderRates[1]]
-    const [lIpsi, lContra] = rates(this.left.filtered, this.right.filtered)
-    const [rIpsi, rContra] = rates(this.right.filtered, this.left.filtered)
     const ul = this.unit.left
     const ur = this.unit.right
-    this.left.cell.setInput({ b0: ul.b0, b: [ul.bIpsi, ul.bContra, 0], x: [lIpsi, lContra, 0] })
-    this.right.cell.setInput({ b0: ur.b0, b: [ur.bIpsi, ur.bContra, 0], x: [rIpsi, rContra, 0] })
+    this.left.cell.setInput({ b0: ul.b0, b: [ul.b1, ul.b2, 0], x: [x1, x2, 0] })
+    this.right.cell.setInput({ b0: ur.b0, b: [ur.b1, ur.b2, 0], x: [x1, x2, 0] })
     this.left.cell.advance(dt * 1000)
     this.right.cell.advance(dt * 1000)
 
@@ -379,14 +378,11 @@ export class NeuronWorld {
     const lDel = this.delayedReading(this.left, dt)
     const rDel = this.delayedReading(this.right, dt)
     this.arriving = { left: lDel, right: rDel }
-    const linear = (u: CellWiring, own: number, other: number) =>
-      Math.max(
-        0,
-        u.b0 + u.bIpsi * own * RATE_PER_INTENSITY + u.bContra * other * RATE_PER_INTENSITY,
-      )
+    const linear = (u: CellWiring) =>
+      Math.max(0, u.b0 + u.b1 * lDel * RATE_PER_INTENSITY + u.b2 * rDel * RATE_PER_INTENSITY)
     return {
-      left: linear(ul, lDel, rDel) * ACTUATOR_PER_HZ,
-      right: linear(ur, rDel, lDel) * ACTUATOR_PER_HZ,
+      left: linear(ul) * ACTUATOR_PER_HZ,
+      right: linear(ur) * ACTUATOR_PER_HZ,
     }
   }
 

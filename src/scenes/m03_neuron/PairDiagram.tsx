@@ -10,10 +10,11 @@ import { DEFAULT_STRENGTH } from '../../sim/world/world'
  * inhibitory, thickness by drive, the strength printed on the line. What
  * Lab 1 drew as a bare line into an actuator is now a cell: its two inputs
  * meet at an integrator, and its output line runs down to the actuator.
- * Because both sensors' lines are drawn into both cells, there is no
- * doubt that each cell's x₁ is the same-side sensor and its x₂ the opposite
- * one, and the crossing *is* the contralateral wiring. Each cell's lines
- * carry its own strengths, so two cells wired differently look different.
+ * Both sensors' lines are drawn into both cells: x₁ is always the left
+ * sensor and x₂ always the right, so the crossed line into a cell is the
+ * connection from the sensor on the *other* side, and the crossing *is* the
+ * contralateral wiring. Each cell's lines carry its own strengths, so two
+ * cells wired differently look different.
  *
  * Two modes draw the cell in the same place: the Unit tab's roles and the
  * Membrane tab's parts, cross-fading when the mode changes so the roles
@@ -38,10 +39,10 @@ export interface PairDiagramProps {
   mode: DiagramMode
   labels: DiagramLabels
   /** Each cell's own baseline and two strengths. */
-  wiring: Record<Side, { b0: number; bIpsi: number; bContra: number }>
+  wiring: Record<Side, { b0: number; b1: number; b2: number }>
   /** The two sensors' live readings. */
   sensors: { left: number; right: number }
-  /** Each cell's live input rates, [same side, opposite side]. */
+  /** Each cell's live input rates, [left sensor, right sensor]. */
   rates: Record<Side, [number, number]>
   /** Each cell's output rate, spikes per second. */
   outputs: Record<Side, number>
@@ -101,13 +102,13 @@ export function PairDiagram({
   const width = (b: number, x: number) =>
     1 + Math.min(9, Math.sqrt(Math.abs(b * x) / (DEFAULT_STRENGTH * 10)) * 7)
   const sides: Side[] = ['left', 'right']
-  const other = (s: Side): Side => (s === 'left' ? 'right' : 'left')
   const sensorOf = (s: Side) => (s === 'left' ? sensors.left : sensors.right)
 
-  // Connections: each cell's same-side (straight) and opposite-side (crossed) line.
+  // Connections: into each cell, b₁ from the left sensor and b₂ from the
+  // right. The line is straight when the sensor is on the cell's own side.
   const links = sides.flatMap((s) => [
-    { from: { x: CX[s], y: S_Y + 15 }, to: { x: CX[s] - 14, y: IN_Y }, b: wiring[s].bIpsi, x: rates[s][0], straight: true, key: `${s}-ipsi` },
-    { from: { x: CX[other(s)], y: S_Y + 15 }, to: { x: CX[s] + 14, y: IN_Y }, b: wiring[s].bContra, x: rates[s][1], straight: false, key: `${s}-contra` },
+    { from: { x: CX.left, y: S_Y + 15 }, to: { x: CX[s] - 14, y: IN_Y }, b: wiring[s].b1, x: rates[s][0], straight: s === 'left', label: 'b₁', key: `${s}-b1` },
+    { from: { x: CX.right, y: S_Y + 15 }, to: { x: CX[s] + 14, y: IN_Y }, b: wiring[s].b2, x: rates[s][1], straight: s === 'right', label: 'b₂', key: `${s}-b2` },
   ]).filter((l) => Math.abs(l.b) > 1e-9)
 
   const roleLabel = (y: number, text: string) => (
@@ -142,7 +143,7 @@ export function PairDiagram({
         const y = l.from.y + (l.to.y - l.from.y) * t + (l.straight ? 3 : 12)
         return (
           <text key={`${l.key}-w`} x={x} y={y} textAnchor="middle" fontSize={9} fill={palette.textMuted} fontFamily={MONO}>
-            {l.straight ? 'b₁' : 'b₂'} {fmt(l.b)}
+            {l.label} {fmt(l.b)}
           </text>
         )
       })}

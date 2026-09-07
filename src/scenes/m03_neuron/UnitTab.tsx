@@ -68,8 +68,8 @@ export function UnitTab(s: SceneState) {
       />
       {(
         [
-          { key: 'bIpsi', label: `${v.strength} b₁ (same-side sensor)`, value: u.bIpsi },
-          { key: 'bContra', label: `${v.strength} b₂ (opposite-side sensor)`, value: u.bContra },
+          { key: 'b1', label: `${v.strength} b₁ (from the left sensor)`, value: u.b1 },
+          { key: 'b2', label: `${v.strength} b₂ (from the right sensor)`, value: u.b2 },
         ] as const
       ).map((row) => (
         <Slider
@@ -83,8 +83,8 @@ export function UnitTab(s: SceneState) {
           onChange={(val) => setUnit({ [row.key]: val })}
         />
       ))}
-      <Button title="Give the other cell this wiring" onClick={() => { world.copyWiring(side); bump() }}>
-        Give the {otherSide} {v.cell} this wiring
+      <Button title="Mirror this wiring to the other cell" onClick={() => { world.mirrorWiring(side); bump() }}>
+        Mirror this wiring to the {otherSide} {v.cell}
       </Button>
       <GroupLabel>Activity — live, and changing with the input</GroupLabel>
       <SelectControl
@@ -101,7 +101,7 @@ export function UnitTab(s: SceneState) {
         }}
       />
       <Slider
-        label={`input ${v.rate} x₁${fromSensors ? ' — from the same-side sensor' : ''}`}
+        label={`input ${v.rate} x₁${fromSensors ? ' — from the left sensor' : ' (the left sensor)'}`}
         value={fromSensors ? Math.min(RATE_RANGE.max, x1) : world.sliderRates[0]}
         min={RATE_RANGE.min}
         max={RATE_RANGE.max}
@@ -110,7 +110,7 @@ export function UnitTab(s: SceneState) {
         onChange={(val) => setSlider(0, val)}
       />
       <Slider
-        label={`input ${v.rate} x₂${fromSensors ? ' — from the opposite-side sensor' : ''}`}
+        label={`input ${v.rate} x₂${fromSensors ? ' — from the right sensor' : ' (the right sensor)'}`}
         value={fromSensors ? Math.min(RATE_RANGE.max, x2) : world.sliderRates[1]}
         min={RATE_RANGE.min}
         max={RATE_RANGE.max}
@@ -147,9 +147,9 @@ export function UnitTab(s: SceneState) {
         onSelect={(sd) => s.patchUi({ side: sd })}
       />
       <Note>
-        Lab 1's wiring, with a {v.cell} where each line was. Each {v.cell}'s x₁ is its own
-        side's sensor and its x₂ the other side's; the crossed lines are the b₂ connections.
-        The muted numbers on the lines are {v.strength}s — fixed until you change them. The
+        Lab 1's wiring, with a {v.cell} where each line was. In both {v.cell}s x₁ is the left
+        sensor and x₂ the right; the line that crosses into a {v.cell} comes from the sensor on the
+        other side. The muted numbers on the lines are {v.strength}s — fixed until you change them. The
         bright numbers at the sensors, inputs, outputs and actuators are activity — live.
         Below: the <b>{side}</b> {v.cell}.
       </Note>
@@ -171,7 +171,7 @@ export function UnitTab(s: SceneState) {
           }}
         >
           {`y = b₀ + b₁x₁ + b₂x₂\n` +
-            `  = ${fmt(u.b0)} + (${fmt(u.bIpsi)} × ${fmt(x1)}) + (${fmt(u.bContra)} × ${fmt(x2)})\n` +
+            `  = ${fmt(u.b0)} + (${fmt(u.b1)} × ${fmt(x1)}) + (${fmt(u.b2)} × ${fmt(x2)})\n` +
             `  = ${fmt(total)}` +
             (total < 0 ? `   → held at 0` : '')}
         </pre>

@@ -14,19 +14,23 @@ import { DEFAULT_BODY_SIZE_M, type SignalType } from './signals'
  */
 
 /**
- * One cell's wiring: y = b₀ + b₁x₁ + b₂x₂, with x₁ the same-side sensor and
- * x₂ the opposite one. The chapter writes a third term; the vehicle has two
- * sensors and nothing else to wire, so a third input was built and then
- * taken out — an unused connection kept only because the equation had room
- * for it explained nothing and asked nothing.
+ * One cell's wiring: y = b₀ + b₁x₁ + b₂x₂, with x₁ always the **left** sensor
+ * and x₂ always the **right** sensor, in both cells. The first build numbered
+ * the inputs relative to the cell (x₁ its own side, x₂ the other), which made
+ * b₁ the same-side connection in both cells; Jon's call (2026-09-07) was that
+ * absolute sides read straight off the picture, which draws sensor L and
+ * sensor R, and relative ones do not. So the crossed connection is b₂ in the
+ * left cell and b₁ in the right. The chapter writes a third term; the vehicle
+ * has two sensors and nothing else to wire, so a third input was built and
+ * then taken out.
  */
 export interface CellWiring {
   /** Baseline b₀, spikes per second. */
   b0: number
-  /** Strength from the same-side sensor, b₁. */
-  bIpsi: number
-  /** Strength from the opposite-side sensor, b₂. */
-  bContra: number
+  /** Strength from the left sensor, b₁. */
+  b1: number
+  /** Strength from the right sensor, b₂. */
+  b2: number
 }
 
 /**
@@ -90,21 +94,24 @@ export interface DiagnosticCell {
  * sustained load, and an intermittently chasing vehicle recovers between
  * chases. Both are recorded in `docs/M03_SPEC_DEVIATIONS.md`.
  */
+/** The left cell's wiring; the right cell is its mirror image. */
 export const HEALTHY_WIRING: CellWiring = {
   b0: 5,
-  bIpsi: 0,
-  bContra: 2,
+  b1: 0,
+  b2: 2,
 }
 
-export const HEALTHY_UNIT: UnitSettings = {
-  left: { ...HEALTHY_WIRING },
-  right: { ...HEALTHY_WIRING },
+/** The other cell's version of a wiring: the same function on the other side. */
+export function mirror(w: CellWiring): CellWiring {
+  return { b0: w.b0, b1: w.b2, b2: w.b1 }
 }
 
-/** The same wiring on both cells — how the healthy vehicle and the five cells are built. */
+/** A left-cell wiring and its mirror — how the healthy vehicle and the five cells are built. */
 export function bothCells(w: CellWiring): UnitSettings {
-  return { left: { ...w }, right: { ...w } }
+  return { left: { ...w }, right: mirror(w) }
 }
+
+export const HEALTHY_UNIT: UnitSettings = bothCells(HEALTHY_WIRING)
 
 /** The two detents of the world-speed control, arena units per second. */
 export const WORLD_SPEEDS = { slow: 0.5, fast: 2 } as const
@@ -128,11 +135,11 @@ export const DIAGNOSTIC_CELLS: DiagnosticCell[] = [
     id: 'N0',
     scenario: {
       cell: { ...HEALTHY_CELL },
-      unit: bothCells({ ...HEALTHY_WIRING, bContra: -2 }),
+      unit: bothCells({ ...HEALTHY_WIRING, b2: -2 }),
       world: { ...HEALTHY_WORLD },
     },
     fault:
-      'In both cells, the connection from the opposite-side sensor is a strong negative where the task needs a positive. Each cell computes a perfectly good function that happens to be the wrong one: light slows the far wheel instead of speeding it, so the vehicle turns away.',
+      'In both cells, the crossed connection — from the sensor on the other side — is a strong negative where the task needs a positive. Each cell computes a perfectly good function that happens to be the wrong one: light slows the far wheel instead of speeding it, so the vehicle turns away.',
     level: 'algorithmic',
     normal:
       'The membrane is entirely healthy: resting voltage, gate order, spike height and cost per spike are all ordinary.',
@@ -153,7 +160,7 @@ export const DIAGNOSTIC_CELLS: DiagnosticCell[] = [
     id: 'N2',
     scenario: {
       cell: { ...HEALTHY_CELL },
-      unit: bothCells({ ...HEALTHY_WIRING, bContra: 0.25 }),
+      unit: bothCells({ ...HEALTHY_WIRING, b2: 0.25 }),
       world: { ...HEALTHY_WORLD },
     },
     fault:
