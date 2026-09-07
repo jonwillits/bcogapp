@@ -118,12 +118,12 @@ export const LABS = [
     controls: [
       'Signal type', 'Body size (signal path length)', 'World speed (how fast the lights move)',
       'How many lights', 'Reset', 'New seed', 'Reaction time', 'Signal path length',
-      'Lights collected', 'Energy per light collected',
-      'Where the inputs come from', 'Give the', 'Show measured', 'Time window for the output',
+      'Lights collected', 'Energy per light',
+      'Where the inputs come from', 'Give the other cell this wiring', 'Show measured', 'Time window for the output',
       'Sodium-potassium pump power (Na⁺/K⁺)', 'Voltage-gated sodium channel block',
       'Sodium inactivation recovery', 'Injected current', 'Restore healthy membrane',
       'Show the equations', 'Energy calculator', 'Things to try', 'Myelin on the axon',
-      'step one spike', 'real time', '10× slow', '50× slow', 'Simulated time per second',
+      'Step one spike', 'Real time', 'Ten times slower than life', 'Fifty times slower than life', 'Simulated time per second',
       'Reveal faults', 'Lesion controls',
     ],
 

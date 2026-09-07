@@ -84,10 +84,10 @@ export function MembraneTab(s: SceneState) {
         onChange={(lg) => s.setMsPerSecond(Math.round(10 ** lg))}
       />
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        <Button onClick={() => s.setMsPerSecond(1000)}>real time</Button>
-        <Button onClick={() => s.setMsPerSecond(DEFAULT_MS_PER_SECOND)}>10× slow</Button>
-        <Button onClick={() => s.setMsPerSecond(SPIKE_WATCH_MS_PER_SECOND)}>50× slow</Button>
-        <Button onClick={stepOneSpike}>step one spike</Button>
+        <Button title="Real time" onClick={() => s.setMsPerSecond(1000)}>real time</Button>
+        <Button title="Ten times slower than life" onClick={() => s.setMsPerSecond(DEFAULT_MS_PER_SECOND)}>10× slow</Button>
+        <Button title="Fifty times slower than life" onClick={() => s.setMsPerSecond(SPIKE_WATCH_MS_PER_SECOND)}>50× slow</Button>
+        <Button title="Step one spike" onClick={stepOneSpike}>step one spike</Button>
       </div>
       <Section title="Lesion controls" defaultOpen hint="Throw one switch and look at all three tabs.">
         <Slider

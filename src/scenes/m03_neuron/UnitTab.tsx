@@ -120,7 +120,7 @@ export function UnitTab(s: SceneState) {
         format={(x) => `${x.toFixed(fromSensors ? 1 : 0)} ${v.rateUnit}`}
         onChange={(val) => setSlider(1, val)}
       />
-      <Button onClick={() => { world.copyWiring(side); bump() }}>
+      <Button title="Give the other cell this wiring" onClick={() => { world.copyWiring(side); bump() }}>
         Give the {otherSide} {v.cell} this wiring
       </Button>
       {fromSensors && (

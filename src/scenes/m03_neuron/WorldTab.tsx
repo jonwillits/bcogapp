@@ -191,10 +191,10 @@ export function WorldTab(s: SceneState) {
 
       <Section title="Lights" defaultOpen hint="What the vehicle is getting done, and what it is costing.">
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-          <ValueReadout label="Collected" value={`${world.lightsCollected}`} />
+          <ValueReadout label="Lights collected" value={`${world.lightsCollected}`} />
           <ValueReadout label="Per minute" value={world.recentLightsPerMinute} digits={1} />
           <ValueReadout label="ATP, both cells" value={sci(world.atpTotal, 1)} />
-          <ValueReadout label="ATP per light" value={sci(world.energyPerLight, 1)} />
+          <ValueReadout label="Energy per light" value={`${sci(world.energyPerLight, 1)} ATP`} />
         </div>
         <Note>
           Per minute is the last minute; over the whole run so far it is{' '}
