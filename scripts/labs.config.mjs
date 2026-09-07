@@ -116,7 +116,7 @@ export const LABS = [
     ],
 
     controls: [
-      'Signal type', 'Body size (signal path length)', 'World speed (how fast the lights move)',
+      'Signal type', 'Neuron axon size (signal path length)', 'World speed (how fast the lights move)',
       'How many lights', 'Reset', 'New seed', 'Reaction time', 'Signal path length',
       'Lights collected', 'Energy per light',
       'Where the inputs come from', 'Mirror this wiring to the other cell', 'Time window for the output',

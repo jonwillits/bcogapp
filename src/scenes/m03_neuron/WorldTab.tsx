@@ -97,7 +97,7 @@ export function WorldTab(s: SceneState) {
         }}
       />
       <Slider
-        label="Body size (signal path length)"
+        label="Neuron axon size (signal path length)"
         value={sizeIndex}
         min={0}
         max={BODY_SIZES_M.length - 1}
@@ -153,7 +153,7 @@ export function WorldTab(s: SceneState) {
   )
 
   const right = (
-    <Panel title="Readouts" style={RIGHT_STYLE}>
+    <Panel title="World Information" style={RIGHT_STYLE}>
       <Section title="Reaction time" defaultOpen hint="How long the vehicle takes to act on what it senses, and which part of the trip takes it.">
         <ValueReadout label="Reaction time" value={formatTime(rt.total)} />
         <StackedBar
@@ -165,7 +165,7 @@ export function WorldTab(s: SceneState) {
         />
       </Section>
 
-      <Section title="The signal" defaultOpen hint="What the body-size and signal-type controls do to the trip.">
+      <Section title="The neural signal" defaultOpen hint="What the body-size and signal-type controls do to the trip.">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
           <Row label="Signal path length" value={formatDistance(world.pathLength)} />
           <Row label="Travel time" value={formatTime(rt.travel)} />
@@ -204,7 +204,7 @@ export function WorldTab(s: SceneState) {
         </Note>
       </Section>
 
-      <Section title="The world" hint="How fast the lights move against how fast the vehicle can.">
+      <Section title="Motion Comparison" hint="How fast the lights move against how fast the vehicle can.">
         <SpeedBars
           max={6}
           rows={[

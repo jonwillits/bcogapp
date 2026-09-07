@@ -438,7 +438,7 @@ export function GroupLabel({ children }: { children: React.ReactNode }) {
 export function TabBar({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }) {
   const tabs: { id: Tab; title: string; level: string }[] = [
     { id: 'world', title: 'World', level: 'computational' },
-    { id: 'unit', title: 'Unit', level: 'algorithmic' },
+    { id: 'unit', title: 'Neurons', level: 'algorithmic' },
     { id: 'membrane', title: 'Membrane', level: 'implementational' },
     { id: 'diagnosis', title: 'Diagnosis', level: 'five cells' },
   ]

@@ -56,37 +56,7 @@ export function UnitTab(s: SceneState) {
         named by the job each one does.
       </Note>
       <SideBanner side={side} noun={v.cell} onChange={(sd) => s.patchUi({ side: sd })} />
-      <GroupLabel>Wiring — fixed until you change it</GroupLabel>
-      <Slider
-        label={`${v.baseline} b₀`}
-        value={u.b0}
-        min={BASELINE_RANGE.min}
-        max={BASELINE_RANGE.max}
-        step={BASELINE_RANGE.step}
-        format={(x) => `${fmt(x)} ${v.rateUnit}`}
-        onChange={(b0) => setUnit({ b0 })}
-      />
-      {(
-        [
-          { key: 'b1', label: `${v.strength} b₁ (from the left sensor)`, value: u.b1 },
-          { key: 'b2', label: `${v.strength} b₂ (from the right sensor)`, value: u.b2 },
-        ] as const
-      ).map((row) => (
-        <Slider
-          key={row.key}
-          label={row.label}
-          value={row.value}
-          min={STRENGTH_RANGE.min}
-          max={STRENGTH_RANGE.max}
-          step={STRENGTH_RANGE.step}
-          format={fmt}
-          onChange={(val) => setUnit({ [row.key]: val })}
-        />
-      ))}
-      <Button title="Mirror this wiring to the other cell" onClick={() => { world.mirrorWiring(side); bump() }}>
-        Mirror this wiring to the {otherSide} {v.cell}
-      </Button>
-      <GroupLabel>Activity — live, and changing with the input</GroupLabel>
+      <GroupLabel>Sensor Neuron Activity</GroupLabel>
       <SelectControl
         label="Where the inputs come from"
         value={world.inputSource}
@@ -125,6 +95,37 @@ export function UnitTab(s: SceneState) {
           the cells' output regardless of what its sensors see.
         </Note>
       )}
+      <GroupLabel>Wiring — fixed until you change it</GroupLabel>
+      <Slider
+        label={`${v.baseline} b₀`}
+        value={u.b0}
+        min={BASELINE_RANGE.min}
+        max={BASELINE_RANGE.max}
+        step={BASELINE_RANGE.step}
+        format={(x) => `${fmt(x)} ${v.rateUnit}`}
+        onChange={(b0) => setUnit({ b0 })}
+      />
+      {(
+        [
+          { key: 'b1', label: `${v.strength} b₁ (from the left sensor)`, value: u.b1 },
+          { key: 'b2', label: `${v.strength} b₂ (from the right sensor)`, value: u.b2 },
+        ] as const
+      ).map((row) => (
+        <Slider
+          key={row.key}
+          label={row.label}
+          value={row.value}
+          min={STRENGTH_RANGE.min}
+          max={STRENGTH_RANGE.max}
+          step={STRENGTH_RANGE.step}
+          format={fmt}
+          onChange={(val) => setUnit({ [row.key]: val })}
+        />
+      ))}
+      <Button title="Mirror this wiring to the other cell" onClick={() => { world.mirrorWiring(side); bump() }}>
+        Mirror this wiring to the {otherSide} {v.cell}
+      </Button>
+      <GroupLabel>Output Options</GroupLabel>
       <Slider
         label="Time window for the output"
         value={Math.log10(windowMs)}
