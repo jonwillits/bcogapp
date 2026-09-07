@@ -97,7 +97,7 @@ export function WorldTab(s: SceneState) {
         }}
       />
       <Slider
-        label="Neuron axon size (signal path length)"
+        label="Sensor-to-actuator distance"
         value={sizeIndex}
         min={0}
         max={BODY_SIZES_M.length - 1}
@@ -109,8 +109,9 @@ export function WorldTab(s: SceneState) {
         }}
       />
       <Note>
-        Sets how far the signal has to travel, and so the <b>travel</b> time in the readouts.
-        The vehicle is drawn the same size whatever this says.
+        How far the signal has to travel from a sensor to its actuator — for spikes, the length
+        of the axon. It sets the <b>travel</b> time in the readouts; the vehicle is drawn the same
+        size whatever this says.
       </Note>
       <Slider
         label="World speed (how fast the lights move)"
