@@ -15,16 +15,16 @@ import { DEFAULT_STRENGTH } from '../../sim/world/world'
  * one, and the crossing *is* the contralateral wiring. Each cell's lines
  * carry its own strengths, so two cells wired differently look different.
  *
- * Three modes draw the cell in the same place: the Unit tab's roles, the
- * reading's circles-and-arrows unit, and the Membrane tab's parts, cross-
- * fading when the mode changes so the roles visibly turn into the parts.
+ * Two modes draw the cell in the same place: the Unit tab's roles and the
+ * Membrane tab's parts, cross-fading when the mode changes so the roles
+ * visibly turn into the parts.
  * The words come in as props; this file knows neither vocabulary.
  *
  * Clicking a cell selects it, and the instruments below the picture show
  * that cell.
  */
 
-export type DiagramMode = 'unit' | 'artificial' | 'membrane'
+export type DiagramMode = 'unit' | 'membrane'
 export type Side = 'left' | 'right'
 
 export interface DiagramLabels {
@@ -184,15 +184,6 @@ export function PairDiagram({
               <rect x={cx - 12} y={GAP_Y + 2} width={24} height={6} rx={2} fill="none" stroke={palette.border} />
             </g>
 
-            {/* artificial mode: the reading's circle and function box */}
-            <g style={fade(mode === 'artificial')}>
-              <circle cx={cx} cy={BODY_Y} r={17} fill={palette.surface2} stroke={palette.border} />
-              <text x={cx} y={BODY_Y + 4} textAnchor="middle" fontSize={12} fill={palette.text}>Σ</text>
-              <line x1={cx} y1={LINE_Y0} x2={cx} y2={LINE_Y0 + 10} stroke={palette.accent} strokeWidth={1.5} />
-              <rect x={cx - 16} y={LINE_Y0 + 10} width={32} height={26} rx={4} fill={palette.surface2} stroke={palette.border} />
-              <polyline points={`${cx - 12},${LINE_Y0 + 30} ${cx - 2},${LINE_Y0 + 30} ${cx + 12},${LINE_Y0 + 15}`} fill="none" stroke={palette.accent} strokeWidth={1.4} />
-              <line x1={cx} y1={LINE_Y0 + 36} x2={cx} y2={GAP_Y - 3} stroke={palette.accent} strokeWidth={1.5} />
-            </g>
 
             {/* membrane mode: the parts */}
             <g style={fade(mode === 'membrane')}>

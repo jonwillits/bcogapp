@@ -1,5 +1,5 @@
 import { Panel } from '../../components/Panel'
-import { Button, Slider, SelectControl, Toggle } from '../../components/controls'
+import { Button, Slider, SelectControl } from '../../components/controls'
 import { fmt } from '../../components/format'
 import { RATE_PER_INTENSITY } from '../../sim/neuron/neuronWorld'
 import {
@@ -11,7 +11,7 @@ import {
 import { PairDiagram } from './PairDiagram'
 import { pairData, cellOn } from './pairData'
 import { TransferPlot, Raster } from './plots'
-import { BIOLOGICAL, ARTIFICIAL, EQUIVALENCE_LINES } from './unitLabels'
+import { BIOLOGICAL, EQUIVALENCE_LINES } from './unitLabels'
 import { TabBar, Note, Row, SideBanner, GroupLabel, PANEL_STYLE, RIGHT_STYLE, type SceneState } from './NeuronScene'
 
 /**
@@ -23,10 +23,9 @@ import { TabBar, Note, Row, SideBanner, GroupLabel, PANEL_STYLE, RIGHT_STYLE, ty
 
 export function UnitTab(s: SceneState) {
   const { world, bump, curve } = s
-  const { artificial, windowMs, side } = s.ui
-  const setArtificial = (artificial: boolean) => s.patchUi({ artificial })
+  const { windowMs, side } = s.ui
   const setWindowMs = (windowMs: number) => s.patchUi({ windowMs })
-  const v = artificial ? ARTIFICIAL : BIOLOGICAL
+  const v = BIOLOGICAL
   const cell = cellOn(world, side)
   const u = world.unit[side]
   const otherSide: typeof side = side === 'left' ? 'right' : 'left'
@@ -56,11 +55,6 @@ export function UnitTab(s: SceneState) {
         own {v.baseline} and {v.strength}s — six numbers, as in Lab 1. Its four elements are
         named by the job each one does.
       </Note>
-      <Toggle
-        label={artificial ? 'artificial (switch to biological)' : 'biological (switch to artificial)'}
-        checked={artificial}
-        onChange={setArtificial}
-      />
       <SideBanner side={side} noun={v.cell} onChange={(sd) => s.patchUi({ side: sd })} />
       <GroupLabel>Wiring — fixed until you change it</GroupLabel>
       <SelectControl
@@ -144,9 +138,9 @@ export function UnitTab(s: SceneState) {
   )
 
   const right = (
-    <Panel title={artificial ? 'Two units, one wiring' : 'Two cells, one wiring'} style={RIGHT_STYLE}>
+    <Panel title="Two cells, one wiring" style={RIGHT_STYLE}>
       <PairDiagram
-        mode={artificial ? 'artificial' : 'unit'}
+        mode="unit"
         labels={v}
         {...pairData(world)}
         selected={side}
@@ -238,11 +232,6 @@ export function UnitTab(s: SceneState) {
           Nothing about the {v.cell} changes as this slider moves.
         </Note>
       </div>
-      <Note>
-        {artificial
-          ? 'Every word on this panel changed and not one number did.'
-          : 'Flip the toggle: every word on this panel changes and not one number does.'}
-      </Note>
     </Panel>
   )
 

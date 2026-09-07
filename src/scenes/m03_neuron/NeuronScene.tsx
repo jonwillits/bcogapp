@@ -55,7 +55,6 @@ export type Side = 'left' | 'right'
 export interface UiState {
   /** Which of the vehicle's two cells the Unit and Membrane instruments show. */
   side: Side
-  artificial: boolean
   windowMs: number
   showEquations: boolean
   traceMs: number
@@ -66,7 +65,6 @@ export interface UiState {
 
 export const DEFAULT_UI: UiState = {
   side: 'left',
-  artificial: false,
   windowMs: 1000,
   showEquations: false,
   traceMs: 60,

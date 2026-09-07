@@ -1,6 +1,8 @@
 /**
- * The words the Unit tab uses, in both states of its biological / artificial
- * toggle. This file is the algorithmic level's vocabulary and nothing else:
+ * The words the Unit tab uses. (A biological / artificial toggle that changed
+ * every word and no number was built for the spec's Q27 and removed with that
+ * question on 2026-09-07 — a lab already full, and a minor loss.) This file is
+ * the algorithmic level's vocabulary and nothing else:
  * the chapter's §3.2 names no part of a cell, and neither does anything here.
  * `NeuronScene.naming.test.ts` reads this file and `UnitTab.tsx` and fails on
  * any anatomical term, because the anatomical word is the obvious one to
@@ -12,8 +14,6 @@
  */
 
 export interface UnitVocabulary {
-  /** What the toggle is set to. */
-  mode: 'biological' | 'artificial'
   /** The thing being described. */
   cell: string
   /** The four roles, in flow order. */
@@ -37,7 +37,6 @@ export interface UnitVocabulary {
 }
 
 export const BIOLOGICAL: UnitVocabulary = {
-  mode: 'biological',
   cell: 'neuron',
   inputSurface: 'input surface',
   integrator: 'integrator',
@@ -52,21 +51,6 @@ export const BIOLOGICAL: UnitVocabulary = {
   spikeTrain: 'spike train',
 }
 
-export const ARTIFICIAL: UnitVocabulary = {
-  mode: 'artificial',
-  cell: 'unit',
-  inputSurface: 'inputs',
-  integrator: 'sum',
-  outputLine: 'output',
-  junction: 'connection',
-  rate: 'activation',
-  rateUnit: 'units',
-  strength: 'weight',
-  baseline: 'bias',
-  integrate: 'weighted sum',
-  spike: 'event',
-  spikeTrain: 'output',
-}
 
 /**
  * The one-number-two-names line the panel prints, per spec §2.2. Lab 1 fixed
