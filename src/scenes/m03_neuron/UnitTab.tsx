@@ -57,19 +57,6 @@ export function UnitTab(s: SceneState) {
       </Note>
       <SideBanner side={side} noun={v.cell} onChange={(sd) => s.patchUi({ side: sd })} />
       <GroupLabel>Wiring — fixed until you change it</GroupLabel>
-      <SelectControl
-        label="Where the inputs come from"
-        value={world.inputSource}
-        options={[
-          { value: 'sensors', label: "the vehicle's sensors (live)" },
-          { value: 'sliders', label: 'the sliders below' },
-        ]}
-        onChange={(src) => {
-          world.inputSource = src
-          if (src === 'sliders') world.sliderRates = [Math.round(x1), Math.round(x2)]
-          bump()
-        }}
-      />
       <Slider
         label={`${v.baseline} b₀`}
         value={u.b0}
@@ -100,6 +87,19 @@ export function UnitTab(s: SceneState) {
         Give the {otherSide} {v.cell} this wiring
       </Button>
       <GroupLabel>Activity — live, and changing with the input</GroupLabel>
+      <SelectControl
+        label="Where the inputs come from"
+        value={world.inputSource}
+        options={[
+          { value: 'sensors', label: "the vehicle's sensors (live)" },
+          { value: 'sliders', label: 'the sliders below' },
+        ]}
+        onChange={(src) => {
+          world.inputSource = src
+          if (src === 'sliders') world.sliderRates = [Math.round(x1), Math.round(x2)]
+          bump()
+        }}
+      />
       <Slider
         label={`input ${v.rate} x₁${fromSensors ? ' — from the same-side sensor' : ''}`}
         value={fromSensors ? Math.min(RATE_RANGE.max, x1) : world.sliderRates[0]}
