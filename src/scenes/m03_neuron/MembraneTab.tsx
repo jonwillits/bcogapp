@@ -15,7 +15,7 @@ import { PairDiagram } from './PairDiagram'
 import { pairData, cellOn } from './pairData'
 import { VoltageTrace, GateMeters, CurrentArrows } from './plots'
 import { PARTS, ROLE_TO_PART } from './membraneLabels'
-import { TabBar, Note, Row, sci, PANEL_STYLE, RIGHT_STYLE, DEFAULT_MS_PER_SECOND, SPIKE_WATCH_MS_PER_SECOND, type SceneState } from './NeuronScene'
+import { TabBar, Note, Row, SideBanner, sci, PANEL_STYLE, RIGHT_STYLE, DEFAULT_MS_PER_SECOND, SPIKE_WATCH_MS_PER_SECOND, type SceneState } from './NeuronScene'
 
 /**
  * The Membrane tab — implementational: how, and at what cost. The four parts
@@ -72,8 +72,9 @@ export function MembraneTab(s: SceneState) {
         A spike lasts about a millisecond, so this tab slows the whole scene down to show one;
         the vehicle in the arena is on the same clock, which is why it has all but stopped.
         Press <b>real time</b> to let it drive (Q10 needs a real minute). Every control here sets
-        both of the vehicle's cells; the instruments show the <b>{side}</b> one.
+        both of the vehicle's cells.
       </Note>
+      <SideBanner side={side} noun="cell's instruments" onChange={(sd) => s.patchUi({ side: sd })} />
       <Slider
         label="Simulated time per second"
         value={Math.log10(s.msPerSecond)}

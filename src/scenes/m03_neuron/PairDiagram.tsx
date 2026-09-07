@@ -238,7 +238,7 @@ export function PairDiagram({
       {roleLabel(LINE_Y0 + 28, labels.outputLine)}
       {roleLabel(GAP_Y + 6, labels.junction)}
       <text x={W / 2} y={H - 2} textAnchor="middle" fontSize={8.5} fill={palette.textMuted}>
-        wheel speed, u/s · click a cell to show it below
+        muted numbers on the lines: strengths, fixed · bright numbers: activity, live · click a cell to show it below
       </text>
     </svg>
   )

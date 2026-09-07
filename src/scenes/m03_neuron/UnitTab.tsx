@@ -12,7 +12,7 @@ import { PairDiagram } from './PairDiagram'
 import { pairData, cellOn } from './pairData'
 import { TransferPlot, Raster } from './plots'
 import { BIOLOGICAL, ARTIFICIAL, EQUIVALENCE_LINES } from './unitLabels'
-import { TabBar, Note, Row, PANEL_STYLE, RIGHT_STYLE, type SceneState } from './NeuronScene'
+import { TabBar, Note, Row, SideBanner, GroupLabel, PANEL_STYLE, RIGHT_STYLE, type SceneState } from './NeuronScene'
 
 /**
  * The Unit tab — algorithmic: what is computed. The neuron as the reading's
@@ -23,9 +23,8 @@ import { TabBar, Note, Row, PANEL_STYLE, RIGHT_STYLE, type SceneState } from './
 
 export function UnitTab(s: SceneState) {
   const { world, bump, curve } = s
-  const { artificial, overlay, windowMs, side } = s.ui
+  const { artificial, windowMs, side } = s.ui
   const setArtificial = (artificial: boolean) => s.patchUi({ artificial })
-  const setOverlay = (overlay: boolean) => s.patchUi({ overlay })
   const setWindowMs = (windowMs: number) => s.patchUi({ windowMs })
   const v = artificial ? ARTIFICIAL : BIOLOGICAL
   const cell = cellOn(world, side)
@@ -54,15 +53,16 @@ export function UnitTab(s: SceneState) {
       <Note>
         <b>Time scale: real time.</b> Rates in, a {v.strength} on each connection, a total,
         and a {v.rate} out. The vehicle has two {v.cell}s, one for each actuator, each with its
-        own {v.baseline} and {v.strength}s — six numbers, as in Lab 1. These sliders set the{' '}
-        <b>{side}</b> {v.cell}; click the other in the picture to set that one. Its four elements
-        are named by the job each one does.
+        own {v.baseline} and {v.strength}s — six numbers, as in Lab 1. Its four elements are
+        named by the job each one does.
       </Note>
       <Toggle
         label={artificial ? 'artificial (switch to biological)' : 'biological (switch to artificial)'}
         checked={artificial}
         onChange={setArtificial}
       />
+      <SideBanner side={side} noun={v.cell} onChange={(sd) => s.patchUi({ side: sd })} />
+      <GroupLabel>Wiring — fixed until you change it</GroupLabel>
       <SelectControl
         label="Where the inputs come from"
         value={world.inputSource}
@@ -102,6 +102,10 @@ export function UnitTab(s: SceneState) {
           onChange={(val) => setUnit({ [row.key]: val })}
         />
       ))}
+      <Button title="Give the other cell this wiring" onClick={() => { world.copyWiring(side); bump() }}>
+        Give the {otherSide} {v.cell} this wiring
+      </Button>
+      <GroupLabel>Activity — live, and changing with the input</GroupLabel>
       <Slider
         label={`input ${v.rate} x₁${fromSensors ? ' — from the same-side sensor' : ''}`}
         value={fromSensors ? Math.min(RATE_RANGE.max, x1) : world.sliderRates[0]}
@@ -120,9 +124,6 @@ export function UnitTab(s: SceneState) {
         format={(x) => `${x.toFixed(fromSensors ? 1 : 0)} ${v.rateUnit}`}
         onChange={(val) => setSlider(1, val)}
       />
-      <Button title="Give the other cell this wiring" onClick={() => { world.copyWiring(side); bump() }}>
-        Give the {otherSide} {v.cell} this wiring
-      </Button>
       {fromSensors && (
         <Note>
           A sensor reading of 1.00 is an input {v.rate} of {RATE_PER_INTENSITY} {v.rateUnit}.
@@ -130,7 +131,6 @@ export function UnitTab(s: SceneState) {
           the cells' output regardless of what its sensors see.
         </Note>
       )}
-      <Toggle label="Show measured" checked={overlay} onChange={setOverlay} />
       <Slider
         label="Time window for the output"
         value={Math.log10(windowMs)}
@@ -154,8 +154,10 @@ export function UnitTab(s: SceneState) {
       />
       <Note>
         Lab 1's wiring, with a {v.cell} where each line was. Each {v.cell}'s x₁ is its own
-        side's sensor and its x₂ the other side's; the crossed lines are the b₂ connections,
-        and each {v.cell}'s lines carry its own numbers. Below: the <b>{side}</b> {v.cell}.
+        side's sensor and its x₂ the other side's; the crossed lines are the b₂ connections.
+        The muted numbers on the lines are {v.strength}s — fixed until you change them. The
+        bright numbers at the sensors, inputs, outputs and actuators are activity — live.
+        Below: the <b>{side}</b> {v.cell}.
       </Note>
       <div>
         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>
@@ -211,17 +213,18 @@ export function UnitTab(s: SceneState) {
           ceiling={curve.ceiling || UNIT_INPUT_RANGE.max}
           opX={total}
           opY={measuredRate}
-          measured={overlay ? curve.sweep : null}
+          measured={curve.sweep}
           yMax={UNIT_INPUT_RANGE.max}
           xLabel={`total arriving input, b₀ + Σ bᵢxᵢ`}
           yLabel={`output ${v.rate}`}
         />
         <Note>
-          The flat parts are measured, not set: the floor is where the cell stops firing, the
-          ceiling ({curve.ceiling ? curve.ceiling.toFixed(0) : '…'} {v.rateUnit}) is the most
-          it can sustain.{' '}
-          {overlay &&
-            'Dashed: the arithmetic, floored at zero and nothing else. Orange: measured from the membrane across a sweep of inputs. The cell this measures has no branching input surface, so it cannot speak to whether a real one computes more than a sum.'}
+          Dashed: what the arithmetic predicts, held at zero below zero and nothing else. Orange:
+          measured from the membrane across a sweep of inputs — its flat parts are measured, not
+          set; the most it can sustain under any steady drive is{' '}
+          {curve.ceiling ? curve.ceiling.toFixed(0) : '…'} {v.rateUnit}. The cell this measures
+          has no branching input surface, so it cannot speak to whether a real one computes more
+          than a sum.
         </Note>
       </div>
       <div>

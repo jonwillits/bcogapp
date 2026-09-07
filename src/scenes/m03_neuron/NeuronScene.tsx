@@ -56,7 +56,6 @@ export interface UiState {
   /** Which of the vehicle's two cells the Unit and Membrane instruments show. */
   side: Side
   artificial: boolean
-  overlay: boolean
   windowMs: number
   showEquations: boolean
   traceMs: number
@@ -68,7 +67,6 @@ export interface UiState {
 export const DEFAULT_UI: UiState = {
   side: 'left',
   artificial: false,
-  overlay: false,
   windowMs: 1000,
   showEquations: false,
   traceMs: 60,
@@ -87,13 +85,15 @@ export interface MeasuredCurve {
 const SWEEP_TOTALS = [-40, -20, 0, 10, 20, 30, 40, 60, 80, 100, 120, 150, 180, 210, 240, 260]
 
 /**
- * Floor, ceiling and (when asked for) the whole curve, measured from a cell
- * with these parameters. Debounced, because a slider drag fires many changes
- * and each measurement runs a few seconds of simulated cell; skipped while
- * the Unit tab is not showing.
+ * Floor, ceiling and the whole curve, measured from a cell with these
+ * parameters. Debounced, because a slider drag fires many changes and each
+ * measurement runs a few seconds of simulated cell; skipped while the Unit
+ * tab is not showing. The sweep used to be behind a "Show measured" switch;
+ * Jon's call (2026-09-07) was that a switch whose effect is off-screen until
+ * you scroll is not worth having, so the measured curve is always drawn.
  */
-function useMeasuredCurve(params: CellParams, overlay: boolean, enabled: boolean): MeasuredCurve {
-  const key = enabled ? JSON.stringify(params) + (overlay ? '+' : '-') : ''
+function useMeasuredCurve(params: CellParams, enabled: boolean): MeasuredCurve {
+  const key = enabled ? JSON.stringify(params) : ''
   const [state, setState] = useState<MeasuredCurve & { key: string }>({
     key: '',
     floor: 0,
@@ -105,11 +105,11 @@ function useMeasuredCurve(params: CellParams, overlay: boolean, enabled: boolean
     const handle = setTimeout(() => {
       const [floor] = measureSweep([UNIT_INPUT_RANGE.min], params, 1)
       const ceiling = measureCeiling(params)
-      const sweep = overlay ? { x: [...SWEEP_TOTALS], y: measureSweep(SWEEP_TOTALS, params, 1.2) } : null
+      const sweep = { x: [...SWEEP_TOTALS], y: measureSweep(SWEEP_TOTALS, params, 1.2) }
       setState({ key, floor, ceiling, sweep })
     }, 350)
     return () => clearTimeout(handle)
-  }, [key, params, overlay, enabled, state.key])
+  }, [key, params, enabled, state.key])
   return state
 }
 
@@ -210,7 +210,7 @@ export default function NeuronScene() {
   }
 
   const scale = tab === 'membrane' ? msPerSecond / 1000 : speed
-  const curve = useMeasuredCurve(world.cellParams, ui.overlay, tab === 'unit')
+  const curve = useMeasuredCurve(world.cellParams, tab === 'unit')
 
   const state: SceneState = {
     world,
@@ -359,6 +359,79 @@ function TimeScaleBadge({ msPerSecond, onChange }: { msPerSecond: number; onChan
       {btn('real time', 1000)}
       {btn('10× slow', DEFAULT_MS_PER_SECOND)}
       {btn('50× slow', SPIKE_WATCH_MS_PER_SECOND)}
+    </div>
+  )
+}
+
+/**
+ * Which of the vehicle's two cells the panel is about, said loudly. The
+ * selection ring in the picture and a word in the note were too easy to miss
+ * (Jon, 2026-09-07), and a student adjusting the wrong cell's wiring would
+ * not know it.
+ */
+export function SideBanner({
+  side,
+  noun,
+  onChange,
+}: {
+  side: Side
+  noun: string
+  onChange: (s: Side) => void
+}) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        padding: '8px 10px',
+        borderRadius: 'var(--radius-sm)',
+        background: 'color-mix(in srgb, var(--accent) 18%, var(--surface))',
+        border: '1px solid var(--accent)',
+      }}
+    >
+      <span style={{ fontSize: 14, fontWeight: 700, flex: 1 }}>
+        The <span style={{ textTransform: 'uppercase' }}>{side}</span> {noun}
+      </span>
+      {(['left', 'right'] as const).map((s) => (
+        <button
+          key={s}
+          type="button"
+          onClick={() => onChange(s)}
+          style={{
+            padding: '4px 10px',
+            fontSize: 12,
+            borderRadius: 999,
+            border: '1px solid var(--border)',
+            cursor: 'pointer',
+            background: side === s ? 'var(--accent)' : 'var(--surface-2)',
+            color: side === s ? '#0b111c' : 'var(--text)',
+            fontWeight: side === s ? 600 : 400,
+          }}
+        >
+          {s}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+/** A small heading that separates one kind of control from another. */
+export function GroupLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        fontSize: 11,
+        fontWeight: 700,
+        letterSpacing: 0.4,
+        textTransform: 'uppercase',
+        color: 'var(--text-muted)',
+        borderBottom: '1px solid var(--border)',
+        paddingBottom: 3,
+        marginTop: 2,
+      }}
+    >
+      {children}
     </div>
   )
 }
