@@ -15,7 +15,7 @@ import { PairDiagram } from './PairDiagram'
 import { pairData, cellOn } from './pairData'
 import { VoltageTrace, GateMeters, CurrentArrows } from './plots'
 import { PARTS, ROLE_TO_PART } from './membraneLabels'
-import { TabBar, Note, Row, SideBanner, sci, PANEL_STYLE, RIGHT_STYLE, DEFAULT_MS_PER_SECOND, SPIKE_WATCH_MS_PER_SECOND, type SceneState } from './NeuronScene'
+import { TabBar, Note, Row, SideBanner, GroupLabel, sci, PANEL_STYLE, RIGHT_STYLE, DEFAULT_MS_PER_SECOND, SPIKE_WATCH_MS_PER_SECOND, type SceneState } from './NeuronScene'
 
 /**
  * The Membrane tab — implementational: how, and at what cost. The four parts
@@ -67,21 +67,25 @@ export function MembraneTab(s: SceneState) {
   const left = (
     <Panel title="The membrane" style={PANEL_STYLE}>
       <TabBar tab={s.tab} onChange={s.setTab} />
+      <SideBanner side={side} noun="neuron" onChange={(sd) => s.patchUi({ side: sd })} />
       <Note>
-        <b>Time scale: {slowdown >= 1.05 ? 'slow motion' : 'real time'}.</b> {s.msPerSecond} ms of cell time per second{slowdown >= 1.05 ? ` — ${slowdown.toFixed(0)}× slower than life` : ''}.
+        <b>Time scale: {slowdown >= 1.05 ? 'slow motion' : 'real time'}.</b>{' '}
+        {slowdown >= 1.05 ? `${slowdown.toFixed(0)}× slower than life. ` : ''}
         A spike lasts about a millisecond, so this tab slows the whole scene down to show one;
         the vehicle in the arena is on the same clock, which is why it has all but stopped.
-        Press <b>real time</b> to let it drive (Q10 needs a real minute). Every control here sets
-        both of the vehicle's cells.
+        Press <b>real time</b> to let it drive (Q10 needs a real minute).
       </Note>
-      <SideBanner side={side} noun="cell's instruments" onChange={(sd) => s.patchUi({ side: sd })} />
+      <GroupLabel>Simulation Speed</GroupLabel>
       <Slider
-        label="Simulated time per second"
+        label="Simulation speed"
         value={Math.log10(s.msPerSecond)}
         min={Math.log10(5)}
         max={3}
         step={0.05}
-        format={(lg) => `${Math.round(10 ** lg)} ms/s`}
+        format={(lg) => {
+          const k = 1000 / 10 ** lg
+          return k < 1.05 ? 'real time' : `${k.toFixed(0)}× slower than life`
+        }}
         onChange={(lg) => s.setMsPerSecond(Math.round(10 ** lg))}
       />
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -90,50 +94,52 @@ export function MembraneTab(s: SceneState) {
         <Button title="Fifty times slower than life" onClick={() => s.setMsPerSecond(SPIKE_WATCH_MS_PER_SECOND)}>50× slow</Button>
         <Button title="Step one spike" onClick={stepOneSpike}>step one spike</Button>
       </div>
-      <Section title="Lesion controls" defaultOpen hint="Throw one switch and look at all three tabs.">
-        <Slider
-          label="Sodium-potassium pump power (Na⁺/K⁺)"
-          value={p.pumpPower}
-          min={0}
-          max={1}
-          step={0.05}
-          format={(v) => `${(v * 100).toFixed(0)}%`}
-          onChange={(pumpPower) => set({ pumpPower })}
-        />
-        <Slider
-          label="Voltage-gated sodium channel block"
-          value={p.naBlock}
-          min={0}
-          max={1}
-          step={0.05}
-          format={(v) => `${(v * 100).toFixed(0)}%`}
-          onChange={(naBlock) => set({ naBlock })}
-        />
-        <Slider
-          label="Sodium inactivation recovery"
-          value={Math.log(p.hRecovery)}
-          min={0}
-          max={Math.log(INSTANT_RECOVERY)}
-          step={0.05}
-          format={(lg) => {
-            const k = Math.exp(lg)
-            return k < 1.05 ? 'normal' : k >= INSTANT_RECOVERY * 0.97 ? 'instant' : `${k.toFixed(1)}× faster`
-          }}
-          onChange={(lg) => set({ hRecovery: Math.min(INSTANT_RECOVERY, Math.exp(lg)) })}
-        />
-        <Slider
-          label="Injected current"
-          value={p.iInject}
-          min={-10}
-          max={40}
-          step={0.5}
-          format={(v) => `${v.toFixed(1)} µA/cm²`}
-          onChange={(iInject) => set({ iInject })}
-        />
-        <Button onClick={() => set({ pumpPower: 1, naBlock: 0, hRecovery: 1, iInject: 0, myelin: HEALTHY_CELL.myelin })}>
-          Restore healthy membrane
-        </Button>
-      </Section>
+      <Note>{s.msPerSecond} ms of neuron time per real second.</Note>
+      <GroupLabel>Lesions — damage the neurons</GroupLabel>
+      <Note>Each of these acts on both of the vehicle's neurons at once, the way a drug reaches the whole animal. Throw one switch and look at all three tabs.</Note>
+      <Slider
+        label="Sodium-potassium pump power (Na⁺/K⁺)"
+        value={p.pumpPower}
+        min={0}
+        max={1}
+        step={0.05}
+        format={(v) => `${(v * 100).toFixed(0)}%`}
+        onChange={(pumpPower) => set({ pumpPower })}
+      />
+      <Slider
+        label="Sodium channels blocked"
+        value={p.naBlock}
+        min={0}
+        max={1}
+        step={0.05}
+        format={(v) => `${(v * 100).toFixed(0)}%`}
+        onChange={(naBlock) => set({ naBlock })}
+      />
+      <Slider
+        label="How fast sodium channels reset (normal … instant)"
+        value={Math.log(p.hRecovery)}
+        min={0}
+        max={Math.log(INSTANT_RECOVERY)}
+        step={0.05}
+        format={(lg) => {
+          const k = Math.exp(lg)
+          return k < 1.05 ? 'normal' : k >= INSTANT_RECOVERY * 0.97 ? 'instant' : `${k.toFixed(1)}× faster`
+        }}
+        onChange={(lg) => set({ hRecovery: Math.min(INSTANT_RECOVERY, Math.exp(lg)) })}
+      />
+      <Slider
+        label="Current injected into the neuron"
+        value={p.iInject}
+        min={-10}
+        max={40}
+        step={0.5}
+        format={(v) => `${v.toFixed(1)} µA/cm²`}
+        onChange={(iInject) => set({ iInject })}
+      />
+      <Button onClick={() => set({ pumpPower: 1, naBlock: 0, hRecovery: 1, iInject: 0, myelin: HEALTHY_CELL.myelin })}>
+        Restore healthy membrane
+      </Button>
+      <GroupLabel>Equations</GroupLabel>
       <Toggle label="Show the equations" checked={showEquations} onChange={setShowEquations} />
       {showEquations && (
         <div>
@@ -162,7 +168,7 @@ export function MembraneTab(s: SceneState) {
         </div>
       )}
       <Section
-        title="Energy calculator"
+        title="Brain Energy Calculator (Part 4)"
         hint="For Q20 and Q21. Whole-brain power from a firing rate — and the rate a real brain can afford."
       >
         <Row label="Neurons in a human brain" value={sci(NEURONS_IN_A_BRAIN, 0)} />
@@ -219,32 +225,34 @@ export function MembraneTab(s: SceneState) {
   )
 
   const right = (
-    <Panel title="Two cells, as biology" style={RIGHT_STYLE}>
-      <PairDiagram
-        mode="membrane"
-        labels={PARTS}
-        {...pairData(world)}
-        selected={side}
-        onSelect={(sd) => s.patchUi({ side: sd })}
-      />
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.45 }}>
-        {ROLE_TO_PART.map((m) => (
-          <div key={m.role}>
-            <span style={{ fontFamily: 'var(--font-mono)' }}>{m.role}</span> → <b>{m.part}</b>: {m.note}
-          </div>
-        ))}
-      </div>
-      <Note>
-        The {PARTS.junction} here: an excitatory input opens channels that let sodium in; an
-        inhibitory one opens channels that let potassium out. Same transmitter, different
-        receptor, opposite effect on the voltage. (The chapter's GABA receptor lets chloride in
-        instead; the effect is the same, and this model tracks only sodium and potassium.)
-      </Note>
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Voltage across the membrane</span>
-          <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-            window{' '}
+    <Panel title="Neuron Information" style={RIGHT_STYLE}>
+      <Section title="The parts" defaultOpen hint="The two neurons as biology: each job on the Neurons tab, and the part that does it.">
+        <PairDiagram
+          mode="membrane"
+          labels={PARTS}
+          {...pairData(world)}
+          selected={side}
+          onSelect={(sd) => s.patchUi({ side: sd })}
+        />
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.45 }}>
+          {ROLE_TO_PART.map((m) => (
+            <div key={m.role}>
+              <span style={{ fontFamily: 'var(--font-mono)' }}>{m.role}</span> → <b>{m.part}</b>: {m.note}
+            </div>
+          ))}
+        </div>
+        <Note>
+          The {PARTS.junction} here: an excitatory input opens channels that let sodium in; an
+          inhibitory one opens channels that let potassium out. Same transmitter, different
+          receptor, opposite effect on the voltage. (The chapter's GABA receptor lets chloride in
+          instead; the effect is the same, and this model tracks only sodium and potassium.)
+        </Note>
+      </Section>
+
+      <Section title="Voltage trace" defaultOpen hint="The voltage across the selected neuron's membrane, in millivolts against milliseconds.">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>milliseconds shown</span>
+          <span>
             {[20, 60, 200, 400].map((w) => (
               <button
                 key={w}
@@ -271,49 +279,54 @@ export function MembraneTab(s: SceneState) {
           Nothing here plays back a recorded spike. The trace is calculated moment by moment
           from the equations; the shape, height and duration come out of them.
         </Note>
-      </div>
-      <div>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>
-          The gates, right now
-        </div>
+      </Section>
+
+      <Section title="The gates" defaultOpen hint="Hodgkin and Huxley's m, h and n, right now.">
         <GateMeters m={r.m} h={r.h} n={r.n} />
-      </div>
-      <div>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 2 }}>
-          Ions crossing the membrane, and the pump
-        </div>
+      </Section>
+
+      <Section title="Ions and the pump" hint="What is crossing the membrane, and the pump carrying it back.">
         <CurrentArrows iNa={r.iNa} iK={r.iK} iPump={r.iPump} iSyn={r.iSyn} />
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-        <Row label="Voltage at the body" value={`${r.vSoma.toFixed(1)} mV`} />
-        <Row label="Voltage at the far end of the axon" value={`${r.vFar.toFixed(1)} mV`} />
-        <Row label="Spikes at the body, last second" value={`${recentSoma}`} />
-        <Row label="Spikes reaching the far end, last second" value={`${recentFar}`} />
-        <Row label="Conduction speed (measured)" value={r.conductionVelocity === null ? 'not yet measured' : `${r.conductionVelocity.toFixed(2)} m/s`} />
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-        <Row label="Sodium inside / outside" value={`${r.naIn.toFixed(0)} / ${NA_OUT_MM} mM`} />
-        <Row label="Potassium inside / outside" value={`${r.kIn.toFixed(0)} / ${K_OUT_MM} mM`} />
-        <Row label="E_Na (from the concentrations)" value={`${r.eNa.toFixed(1)} mV`} />
-        <Row label="E_K (from the concentrations)" value={`${r.eK.toFixed(1)} mV`} />
-      </div>
-      <Note>
-        The concentrations are live, and the reversal potentials are recomputed from them every
-        step. They change here at the rate they would in a 4 µm axon
-        {RUNDOWN_SPEEDUP > 1 ? `, shown ${RUNDOWN_SPEEDUP}× faster than life` : ''} — several
-        times faster than in a cell body, so that a pump you switch off runs down within a
-        simulated minute rather than many.
-      </Note>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-        <Row label="ATP per second (pump turnover, whole cell)" value={sci(r.atpPerSecond)} />
-        <Row label="ATP per spike" value={sci(r.atpPerSpike)} />
-        <Row label="ATP spent so far, this cell" value={sci(cell.atpTotal)} />
-      </div>
-      <Note>
-        The counter is the pump's cycles, one ATP each, added up across every patch of membrane
-        in the cell. Per spike: the sodium a spike lets in, at three sodium carried out per ATP —
-        counted for each patch the spike reached.
-      </Note>
+      </Section>
+
+      <Section title="Spikes and conduction" hint="What the cell body is doing, and what reaches the far end of the axon.">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+          <Row label="Voltage at the cell body" value={`${r.vSoma.toFixed(1)} mV`} />
+          <Row label="Voltage at the far end of the axon" value={`${r.vFar.toFixed(1)} mV`} />
+          <Row label="Spikes at the cell body, last second" value={`${recentSoma}`} />
+          <Row label="Spikes reaching the far end, last second" value={`${recentFar}`} />
+          <Row label="Conduction speed (measured)" value={r.conductionVelocity === null ? 'not yet measured' : `${r.conductionVelocity.toFixed(2)} m/s`} />
+        </div>
+      </Section>
+
+      <Section title="Concentrations" hint="Sodium and potassium inside and outside, and the reversal potentials they set.">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+          <Row label="Sodium inside / outside" value={`${r.naIn.toFixed(0)} / ${NA_OUT_MM} mM`} />
+          <Row label="Potassium inside / outside" value={`${r.kIn.toFixed(0)} / ${K_OUT_MM} mM`} />
+          <Row label="E_Na (from the concentrations)" value={`${r.eNa.toFixed(1)} mV`} />
+          <Row label="E_K (from the concentrations)" value={`${r.eK.toFixed(1)} mV`} />
+        </div>
+        <Note>
+          The concentrations are live, and the reversal potentials are recomputed from them every
+          step. They change here at the rate they would in a 4 µm axon
+          {RUNDOWN_SPEEDUP > 1 ? `, shown ${RUNDOWN_SPEEDUP}× faster than life` : ''} — several
+          times faster than in a cell body, so that a pump you switch off runs down within a
+          simulated minute rather than many.
+        </Note>
+      </Section>
+
+      <Section title="Energy (ATP)" defaultOpen hint="The pump's work, counted cycle by cycle.">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+          <Row label="ATP per second (pump turnover, whole neuron)" value={sci(r.atpPerSecond)} />
+          <Row label="ATP per spike" value={sci(r.atpPerSpike)} />
+          <Row label="ATP spent so far, this neuron" value={sci(cell.atpTotal)} />
+        </div>
+        <Note>
+          The counter is the pump's cycles, one ATP each, added up across every patch of membrane
+          in the neuron. Per spike: the sodium a spike lets in, at three sodium carried out per
+          ATP — counted for each patch the spike reached.
+        </Note>
+      </Section>
     </Panel>
   )
 

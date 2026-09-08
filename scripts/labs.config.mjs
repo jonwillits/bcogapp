@@ -120,11 +120,11 @@ export const LABS = [
       'How many lights', 'Reset', 'New seed', 'Reaction time', 'Signal path length',
       'Lights collected', 'Energy per light',
       'Where the inputs come from', 'Mirror this wiring to the other cell', 'Time window for the output',
-      'Sodium-potassium pump power (Na⁺/K⁺)', 'Voltage-gated sodium channel block',
-      'Sodium inactivation recovery', 'Injected current', 'Restore healthy membrane',
-      'Show the equations', 'Energy calculator', 'Things to try', 'Myelin on the axon',
-      'Step one spike', 'Real time', 'Ten times slower than life', 'Fifty times slower than life', 'Simulated time per second',
-      'Reveal faults', 'Lesion controls',
+      'Sodium-potassium pump power (Na⁺/K⁺)', 'Sodium channels blocked',
+      'How fast sodium channels reset', 'Current injected into the neuron', 'Restore healthy membrane',
+      'Show the equations', 'Brain Energy Calculator', 'Things to try', 'Myelin on the axon',
+      'Step one spike', 'Real time', 'Ten times slower than life', 'Fifty times slower than life', 'Simulation speed',
+      'Reveal faults', 'Lesions', 'Load a vehicle', 'Neuron Information', 'World Information',
     ],
 
     claims: [

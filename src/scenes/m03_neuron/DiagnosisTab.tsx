@@ -1,7 +1,8 @@
 import { Panel } from '../../components/Panel'
 import { Toggle } from '../../components/controls'
 import { DIAGNOSTIC_CELLS } from '../../sim/neuron/cells'
-import { TabBar, Note, PANEL_STYLE, RIGHT_STYLE, DIAGNOSTIC_WARM_UP_S, type SceneState, type LoadedCell } from './NeuronScene'
+import { ValueReadout } from '../../components/ValueReadout'
+import { TabBar, Note, GroupLabel, sci, PANEL_STYLE, RIGHT_STYLE, DIAGNOSTIC_WARM_UP_S, type SceneState, type LoadedCell } from './NeuronScene'
 
 /**
  * The Diagnosis tab: five cells, N0 explained, N1–N4 hidden until the student
@@ -19,8 +20,9 @@ export function DiagnosisTab(s: SceneState) {
         Four vehicles, N1 to N4, are all bad at finding light, and bad at it in ways that look
         the same from outside. Each has a different thing wrong with it, and one has nothing
         wrong with it at all. N0 is a worked example. Load one; the other three tabs then show
-        that vehicle's cell.
+        that vehicle's neurons.
       </Note>
+      <GroupLabel>Load a vehicle</GroupLabel>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
         {cells.map((c) => (
           <button
@@ -39,7 +41,7 @@ export function DiagnosisTab(s: SceneState) {
               color: s.loaded === c ? '#0b111c' : 'var(--text)',
             }}
           >
-            {c}
+            {c === 'healthy' ? 'Healthy' : c}
           </button>
         ))}
       </div>
@@ -48,6 +50,7 @@ export function DiagnosisTab(s: SceneState) {
         what you see is how it drives once it has been driving for a while. Reset replays the same
         run from that point.
       </Note>
+      <GroupLabel>When you have committed</GroupLabel>
       <Toggle label="Reveal faults" checked={s.revealed} onChange={s.setRevealed} />
     </Panel>
   )
@@ -55,11 +58,19 @@ export function DiagnosisTab(s: SceneState) {
   const shown = current && (current.id === 'N0' || s.revealed)
 
   const right = (
-    <Panel title={s.loaded === 'healthy' ? 'Healthy cell' : `Cell ${s.loaded}`} style={RIGHT_STYLE}>
+    <Panel title={s.loaded === 'healthy' ? 'The healthy vehicle' : `Vehicle ${s.loaded}`} style={RIGHT_STYLE}>
+      <GroupLabel>Scorecard — from the World tab</GroupLabel>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+        <ValueReadout label="Lights per minute" value={s.world.recentLightsPerMinute} digits={1} />
+        <ValueReadout label="Energy per light" value={`${sci(s.world.energyPerLight, 1)} ATP`} />
+        <ValueReadout label="Lights collected" value={`${s.world.lightsCollected}`} />
+        <ValueReadout label="Run time" value={`${s.world.time.toFixed(0)} s`} />
+      </div>
+      <Note>Lights per minute is the last minute of driving. Energy per light is the ATP both neurons have spent, divided by the lights caught.</Note>
       {s.loaded === 'healthy' && (
         <Note>
           The default: every parameter at its healthy value, in the fast world. Everything the
-          four cells are compared against.
+          four vehicles are compared against.
         </Note>
       )}
       {current && !shown && (
@@ -92,8 +103,8 @@ export function DiagnosisTab(s: SceneState) {
       )}
       {s.revealed && (
         <Note>
-          Every one of the five is the healthy cell with exactly one named parameter changed; the
-          full parameter sets are in <code>src/sim/neuron/cells.ts</code>, healthy default
+          Every one of the five is the healthy vehicle with exactly one named parameter changed;
+          the full parameter sets are in <code>src/sim/neuron/cells.ts</code>, healthy default
           alongside.
         </Note>
       )}

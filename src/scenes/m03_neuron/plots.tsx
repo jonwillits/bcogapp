@@ -264,11 +264,11 @@ export function CurrentArrows({
       {/* sodium: positive = outward in the model's sign convention */}
       {arrow(60, iNa, iNa < 0, palette.approach, 'Na⁺')}
       {arrow(120, iK, iK < 0, palette.accent, 'K⁺')}
-      {arrow(180, iSyn, iSyn > 0, palette.sensor, 'input')}
+      {arrow(180, iSyn, iSyn > 0, palette.sensor, 'synaptic input')}
       {/* the pump */}
       <g>
         <rect x={228} y={mem.y0 - 6} width={30} height={mem.y1 - mem.y0 + 12} rx={5} fill={palette.surface} stroke={palette.text} strokeWidth={1.2} />
-        <text x={243} y={mem.y0 - 12} textAnchor="middle" fontSize={8} fill={AXIS}>pump {iPump.toFixed(1)}</text>
+        <text x={243} y={mem.y0 - 12} textAnchor="middle" fontSize={8} fill={AXIS}>pump {iPump.toFixed(1)} µA/cm²</text>
         <text x={243} y={mem.y0 + 3} textAnchor="middle" fontSize={7} fill={palette.approach}>3 Na⁺ ↑</text>
         <text x={243} y={mem.y1 - 1} textAnchor="middle" fontSize={7} fill={palette.accent}>2 K⁺ ↓</text>
         <text x={243} y={mem.y1 + 18} textAnchor="middle" fontSize={8} fill={AXIS}>1 ATP / cycle</text>
