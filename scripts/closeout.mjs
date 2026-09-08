@@ -182,7 +182,7 @@ const crib = cribName
   : { out: '' }
 const cribLines = crib.out
   .split('\n')
-  .filter((l) => /reach the light|driving backwards|swings toward|SEPARATES|does NOT separate|^  [WXYZ] /.test(l))
+  .filter((l) => /reach the light|driving backwards|swings toward|lights\/min|SEPARATES|does NOT separate|^  [WXYZ] /.test(l))
 if (cribLines.length) {
   console.log('  Run the scene and check these by eye - tests cannot see motion:')
   console.log('      npm run dev     then open  http://localhost:5173/' + (labs[0].route ?? '') + '\n')
@@ -213,7 +213,7 @@ console.log(`  1. The app first when the documents describe something new in it;
 
      cd "${COURSE}" && git add -- ${LAB_FILES.join(' ')}
      cd "${COURSE}" && git status --short
-     cd "${COURSE}" && git commit -m "Lab 2: ..." && git push origin master
+     cd "${COURSE}" && git commit -m "${labs.map((l) => l.name.split(" — ")[0]).join(", ")}: ..." && git push origin master
 
   The handout is fetched live, so it reaches students in minutes with no redeploy.
 `)
