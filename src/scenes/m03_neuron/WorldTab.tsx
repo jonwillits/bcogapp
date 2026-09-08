@@ -184,7 +184,7 @@ export function WorldTab(s: SceneState) {
         {!usesCell && (
           <Note>
             This signal type does not use the spiking cell: the actuators get the delayed signal
-            through Lab 1's arithmetic. The Unit and Membrane tabs still show the cell, running on
+            through Lab 1's arithmetic. The Neurons and Membrane tabs still show the cell, running on
             the same sensor rates.
           </Note>
         )}

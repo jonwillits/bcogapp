@@ -188,8 +188,16 @@ export default function NeuronScene() {
   const patchUi = (patch: Partial<UiState>) => setUi((u) => ({ ...u, ...patch }))
 
   const worldRef = useRef<NeuronWorld | null>(null)
-  const build = (cell: LoadedCell, withSeed: number) => {
-    const w = new NeuronWorld(withSeed, scenarioFor(cell))
+  /**
+   * A fresh world. Loading a vehicle starts from its scenario; Reset and New
+   * seed keep every control where the student left it — as Lab 2's Reset
+   * does — so one switch can be changed and nothing else moves.
+   */
+  const build = (cell: LoadedCell, withSeed: number, keep?: NeuronWorld) => {
+    const scenario: Scenario = keep
+      ? { cell: { ...keep.cellParams }, unit: { ...keep.unit }, world: { ...keep.settings } }
+      : scenarioFor(cell)
+    const w = new NeuronWorld(withSeed, scenario)
     if (cell !== 'healthy') w.run(DIAGNOSTIC_WARM_UP_S)
     return w
   }
@@ -198,7 +206,7 @@ export default function NeuronScene() {
 
   const reset = (withSeed: number) => {
     setSeed(withSeed)
-    worldRef.current = build(loaded, withSeed)
+    worldRef.current = build(loaded, withSeed, worldRef.current ?? undefined)
     bump()
   }
   const load = (cell: LoadedCell) => {
