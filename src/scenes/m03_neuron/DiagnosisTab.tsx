@@ -46,7 +46,7 @@ export function DiagnosisTab(s: SceneState) {
         ))}
       </div>
       <Note>
-        Each cell loads with its own world, already {DIAGNOSTIC_WARM_UP_S} seconds into its run, so
+        Each vehicle loads with its own world, already {DIAGNOSTIC_WARM_UP_S} seconds into its run, so
         what you see is how it drives once it has been driving for a while. Reset replays the same
         run from that point.
       </Note>
