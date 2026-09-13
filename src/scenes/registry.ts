@@ -81,6 +81,7 @@ const INTRO_BLOB = 'https://github.com/jonwillits/intro_to_bcs/blob/master'
 const VehiclesScene = lazy(() => import('./m01_vehicles/VehiclesScene'))
 const EvolutionScene = lazy(() => import('./m02_evolution/EvolutionScene'))
 const NeuronScene = lazy(() => import('./m03_neuron/NeuronScene'))
+const BilaterianScene = lazy(() => import('./m04_bilaterian/BilaterianScene'))
 
 /**
  * Registered, runnable scenes. Order here is the order shown within a module.
@@ -134,6 +135,22 @@ export const scenes: SceneManifest[] = [
       reportLabel: 'Lab 3 report (.docx)',
     },
   },
+  {
+    route: 'm04-bilaterian',
+    module: 4,
+    title: 'The Bilaterian',
+    blurb:
+      'The vehicle becomes a nematode-like early bilaterian with a layered nervous system. Set its weights by hand until it satisfies a truth table, then work out whether another animal’s odd behavior came from its wiring or its chemistry. The second stage of the evolving-creature engine.',
+    mode: 'both',
+    status: 'building',
+    Component: BilaterianScene,
+    lab: {
+      rawUrl: `${INTRO_RAW}/neural_circuits_affect_and_valence/bilaterian_lab/bilaterian_lab.md`,
+      sourceUrl: `${INTRO_BLOB}/neural_circuits_affect_and_valence/bilaterian_lab/bilaterian_lab.md`,
+      reportUrl: `${INTRO_BLOB}/neural_circuits_affect_and_valence/bilaterian_lab/bilaterian_lab_report.docx`,
+      reportLabel: 'Lab 4 report (.docx)',
+    },
+  },
 ]
 
 /**
@@ -148,11 +165,6 @@ export interface PlannedScene {
 }
 
 export const plannedScenes: PlannedScene[] = [
-  {
-    module: 4,
-    title: 'Logic-Gate Circuits',
-    idea: 'The creature as an early bilaterian, approaching or avoiding stimuli via logical functions and real neural circuits.',
-  },
   {
     module: 5,
     title: 'Fish That Learn',
