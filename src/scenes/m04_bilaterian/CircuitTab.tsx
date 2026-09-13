@@ -100,7 +100,7 @@ export function CircuitTab(s: SceneState) {
         </div>
         <Note>Reset keeps every control where you left it. Camera: <b>W A S D</b> to move · <b>arrow keys</b> to rotate · drag and scroll also work.</Note>
       </Section>
-      <Section title="Wiring — fixed until you change it" defaultOpen={scenario.open.circuit} hint="Weights, the baseline, the threshold, the routing switch and the activation function. Locked ones are printed, not slid.">
+      <Section key={`${scenario.key}-wiring`} title="Wiring — fixed until you change it" defaultOpen={scenario.open.circuit} hint="Weights, the baseline, the threshold, the routing switch and the activation function. Locked ones are printed, not slid.">
         {hideNumbers ? (
           <Note>This animal’s numbers are hidden until you reveal its faults on the Worms tab. The diagram still shows how it is wired.</Note>
         ) : (
@@ -202,7 +202,7 @@ export function CircuitTab(s: SceneState) {
         onFlipRoute={() => set({ route: route === 'forward' ? 'reverse' : 'forward' })}
       />
       <Note>{HONESTY_LINE}</Note>
-      <Section title="The arithmetic" defaultOpen={scenario.open.arithmetic} hint="What the interneuron computes, with the live numbers in it.">
+      <Section key={`${scenario.key}-arithmetic`} title="The arithmetic" defaultOpen={scenario.open.arithmetic} hint="What the interneuron computes, with the live numbers in it.">
         {hideNumbers ? (
           <Note>Hidden until you reveal.</Note>
         ) : (
@@ -254,7 +254,7 @@ export function CircuitTab(s: SceneState) {
           </>
         )}
       </Section>
-      <Section title="The target function" defaultOpen={scenario.open.target} hint="What the animal must do on each combination of cues, and what it does now.">
+      <Section key={`${scenario.key}-target`} title="The target function" defaultOpen={scenario.open.target} hint="What the animal must do on each combination of cues, and what it does now.">
         {!target ? (
           <Note>This scenario has no target function: two graded quantities set against each other, and the behaviour is whichever wins.</Note>
         ) : hideNumbers ? (
@@ -295,7 +295,7 @@ export function CircuitTab(s: SceneState) {
           </>
         )}
       </Section>
-      <Section title="The decision boundary" defaultOpen={scenario.open.boundary} hint="Every combination of the two inputs is a point; the unit draws one line through them.">
+      <Section key={`${scenario.key}-boundary`} title="The decision boundary" defaultOpen={scenario.open.boundary} hint="Every combination of the two inputs is a point; the unit draws one line through them.">
         {n !== 2 ? (
           <Note>Two inputs make a plane. This scenario has {n}.</Note>
         ) : hideNumbers ? (
