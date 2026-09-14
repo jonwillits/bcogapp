@@ -57,14 +57,18 @@ describe('Part 1', () => {
     expect(avoid.cuesPerMinute).toBe(0)
   })
 
-  it('the trade-off: as shipped the animal will not cross; strengthen food and weaken copper and it does', () => {
+  it('the trade-off: crossings depend on how food is weighed against copper, not on either alone', () => {
     const t = scenarioByKey('trade-off')
     const shipped = runSeeds(t, SEEDS, SECONDS)
-    const bold = runSeeds(t, SEEDS, SECONDS, { circuit: singleInterneuron([3, -0.2], 0, 0.45, 'forward') })
-    expect(shipped.cuesPerMinute).toBeLessThan(0.2)
-    expect(bold.cuesPerMinute).toBeGreaterThan(0.8)
-    // Crossing burns: the bold animal pays for its food.
-    expect(bold.harm).toBeGreaterThan(shipped.harm)
+    const wary = runSeeds(t, SEEDS, SECONDS, { circuit: singleInterneuron([3, -3], 0, 0.35, 'forward') })
+    const bold = runSeeds(t, SEEDS, SECONDS, { circuit: singleInterneuron([3, -1], 0, 0.35, 'forward') })
+    // Equal weights, at 1 or at 3, cross rarely; food weighed three times
+    // copper crosses freely. Both strengths are high in the bold animal —
+    // it still cares about copper — and that is the point.
+    expect(shipped.cuesPerMinute).toBeLessThan(0.5)
+    expect(wary.cuesPerMinute).toBeLessThan(0.3)
+    expect(bold.cuesPerMinute).toBeGreaterThan(1.4)
+    expect(bold.harm).toBeGreaterThan(0)
   })
 })
 

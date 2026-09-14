@@ -12,15 +12,11 @@ import {
   type MotorGroup,
 } from '../../sim/bilaterian/circuit'
 import { ACTIVATIONS, TRUTH_ROWS, truthTableOf, unitOutput, type Activation } from '../../sim/bilaterian/unit'
-import { CONCENTRATION_RANGE } from '../../sim/bilaterian/dishWorld'
-import { randomSeed } from '../../sim/random'
 import { palette } from '../../theme/theme'
 import { CircuitDiagram } from './CircuitDiagram'
 import { DecisionBoundaryPlot, ActivationPlot, Trace } from './plots'
 import { EQUIVALENCE_LINES, HONESTY_LINE } from './labels'
-import { TabBar, Note, Row, GroupLabel, PANEL_STYLE, RIGHT_STYLE, SCENARIOS, type SceneState } from './BilaterianScene'
-
-const PART_LABEL: Record<string, string> = { 1: 'Part 1', 2: 'Part 2', 3: 'Part 3', closer: 'Closer' }
+import { TabBar, Note, Row, PANEL_STYLE, RIGHT_STYLE, type SceneState } from './BilaterianScene'
 
 /**
  * The Circuit tab — Parts 1 and 2. The diagram, the routing switch, sliders
@@ -52,54 +48,10 @@ export function CircuitTab(s: SceneState) {
     <Panel title="The circuit" style={PANEL_STYLE}>
       <TabBar tab={s.tab} onChange={s.setTab} />
       <Note>
-        <b>Real time</b>, times the speed control. One animal in a dish of cue fields. It has one
-        sensory cell per cue, at the head, and it steers by comparing what each cell senses now
-        against a moment ago. Every number in its nervous system is on the right.
+        The animal has one sensory cell per cue, at the head, and it steers by comparing what each
+        cell senses now against a moment ago. Every number in its nervous system is on the right;
+        everything you can change about it is here. The dish itself is on the World tab.
       </Note>
-      <Section title="Scenario" defaultOpen hint="Each scenario sets the cues in the dish, what they are called, and which controls are locked.">
-        <SelectControl
-          label="Load a scenario"
-          value={scenario.key}
-          options={SCENARIOS.map((sc) => ({ value: sc.key, label: `${PART_LABEL[String(sc.part)]} — ${sc.title}` }))}
-          onChange={(k) => s.loadScenario(k)}
-        />
-        <Note>{scenario.blurb}</Note>
-        {scenario.keepWiringFrom && (
-          <Note>
-            Loaded from <b>{scenario.keepWiringFrom}</b>, the interneuron keeps the numbers you set there.
-          </Note>
-        )}
-      </Section>
-      <Section title="World" hint="The dish, and what you can put in it.">
-        <Slider
-          label="Cue concentration (the plumes)"
-          value={world.concentration}
-          min={CONCENTRATION_RANGE.min}
-          max={CONCENTRATION_RANGE.max}
-          step={CONCENTRATION_RANGE.step}
-          format={(v) => `${v.toFixed(2)}×`}
-          onChange={(v) => {
-            world.concentration = v
-            bump()
-          }}
-        />
-        <SelectControl
-          label="Source to place on a click"
-          value={String(s.placeChannel)}
-          options={scenario.channels.map((c) => ({ value: String(c.channel), label: c.name }))}
-          onChange={(v) => s.setPlaceChannel(Number(v))}
-        />
-        <Note>Click the floor to place a source of that cue; right-click removes the nearest. Placed sources stay put.</Note>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Run seed — same seed, same run</span>
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, flex: 1 }}>{s.seed}</span>
-            <Button onClick={() => s.reset(s.seed)}>Reset</Button>
-            <Button onClick={() => s.reset(randomSeed())}>New seed</Button>
-          </div>
-        </div>
-        <Note>Reset keeps every control where you left it. Camera: <b>W A S D</b> to move · <b>arrow keys</b> to rotate · drag and scroll also work.</Note>
-      </Section>
       <Section key={`${scenario.key}-wiring`} title="Wiring — fixed until you change it" defaultOpen={scenario.open.circuit} hint="Weights, the baseline, the threshold, the routing switch and the activation function. Locked ones are printed, not slid.">
         {hideNumbers ? (
           <Note>This animal’s numbers are hidden until you reveal its faults on the Worms tab. The diagram still shows how it is wired.</Note>
@@ -169,8 +121,23 @@ export function CircuitTab(s: SceneState) {
               />
             )}
             <Note>
-              The baseline and the threshold are two knobs on the same line. Neither is derived from the other here; find out for yourself what each does to the boundary.
+              The baseline and the threshold are two knobs on the same line — on purpose. Neither is derived from the other here; find out for yourself what each does to the boundary, and why moving either one alone can turn AND into OR.
             </Note>
+            <Button
+              onClick={() => {
+                const from = world.startCircuit
+                circuit.activation = from.activation
+                circuit.routes = [...from.routes]
+                circuit.interneurons.forEach((_, j) => {
+                  const src = from.interneurons[j]
+                  setWiring(circuit, { interneuron: j, baseline: src.baseline, threshold: src.threshold })
+                  src.weights.forEach((w, i) => setWiring(circuit, { interneuron: j, weight: { input: i, value: w } }))
+                })
+                bump()
+              }}
+            >
+              Restore the wiring this scenario started with
+            </Button>
           </>
         )}
       </Section>
@@ -295,7 +262,12 @@ export function CircuitTab(s: SceneState) {
           </>
         )}
       </Section>
-      <Section key={`${scenario.key}-boundary`} title="The decision boundary" defaultOpen={scenario.open.boundary} hint="Every combination of the two inputs is a point; the unit draws one line through them.">
+      <Section
+        key={`${scenario.key}-boundary`}
+        title="The decision boundary"
+        defaultOpen={scenario.open.boundary}
+        hint="Every combination of the two inputs is a point. The interneuron’s decision on any input can be drawn as a line through this space. Each point’s colour is its target: blue for act (1), orange for do not act (0)."
+      >
         {n !== 2 ? (
           <Note>Two inputs make a plane. This scenario has {n}.</Note>
         ) : hideNumbers ? (
@@ -310,7 +282,7 @@ export function CircuitTab(s: SceneState) {
               labels={[scenario.channels[0].name, scenario.channels[1].name]}
             />
             <Note>
-              Blue where the target says act, orange where it says do not. Move one number and watch whether the line slides or turns.
+              The background is blue where the current weights output act (1) and orange where they output do not act (0). The white line is the current decision boundary, set by the weights, the baseline and the threshold. Move one number and watch whether the line slides or turns.
             </Note>
           </>
         )}
@@ -345,13 +317,6 @@ export function CircuitTab(s: SceneState) {
           Routed forward, the animal compares the net input now against a moment ago: rising, and nothing triggers a reversal; falling, and reversal probability climbs. Routed to reverse, it compares the verdict the same way, and runs while the verdict fires. Going straight is not something the animal does; it is what happens when the rule for turning is not met. Nothing compares one side of the head against the other.
         </Note>
       </Section>
-      <GroupLabel>This world</GroupLabel>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-        <ValueReadout label="Cues reached per minute" value={world.recentCuesPerMinute} digits={1} />
-        <ValueReadout label="Harm" value={world.harm} digits={1} />
-        {scenario.countCrossings && <ValueReadout label="Crossings of the strip" value={`${world.crossings}`} />}
-        <ValueReadout label="Run time" value={`${world.time.toFixed(0)} s`} />
-      </div>
     </Panel>
   )
 

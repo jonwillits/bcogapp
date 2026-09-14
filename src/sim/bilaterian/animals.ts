@@ -52,7 +52,7 @@ export const ANIMALS: Animal[] = [
     circuit: withWiring({ route: 'reverse' }),
     modulators: {},
     fault:
-      'A routing switch is flipped: the verdict that food odor is near reaches the reverse group instead of the forward group. The cell is fine, the weight is fine, and the animal flees its food.',
+      'A routing switch is flipped: the verdict reaches the reverse group instead of the forward group. The cells are fine, the weights are fine, and the whole verdict is inverted: the animal flees its food, and is drawn into the carbon dioxide a healthy animal avoids, where it crawls.',
     where: 'wiring',
     normal: 'Every weight, the baseline, the threshold, and all four modulator levels.',
     separates: 'Visible on the diagram, and the chemistry is entirely normal.',
@@ -71,9 +71,9 @@ export const ANIMALS: Animal[] = [
   {
     id: 'W2',
     circuit: cloneCircuit(HEALTHY_CIRCUIT),
-    modulators: { arousal: 6 },
+    modulators: { arousal: 8 },
     fault:
-      'Arousal and vigilance at maximum. The rule that triggers a reversal fires six times as readily, so the animal reacts to everything and finishes nothing.',
+      'Arousal and vigilance at maximum. The rule that triggers a reversal fires eight times as readily, so the animal reacts to everything and finishes nothing.',
     where: 'chemistry',
     normal: 'Every number on the wiring panel.',
     separates: 'Reversal rate high in every world you put it in.',

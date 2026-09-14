@@ -2,6 +2,7 @@ import { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import type { Worm } from '../../sim/bilaterian/worm'
+import type { DishWorld } from '../../sim/bilaterian/dishWorld'
 import { SEGMENTS } from '../../sim/bilaterian/worm'
 import type { CueSource } from '../../sim/bilaterian/fields'
 import type { ChannelSpec } from '../../sim/bilaterian/scenarios'
@@ -95,15 +96,20 @@ export function WormMesh({ worm, colors }: { worm: Worm; colors: string[] }) {
  * geometry twice before, and a field a student cannot see is a field that
  * is not there.
  */
+/** A plume fades out over its last seconds, so dissipating never looks like being eaten. */
+const PLUME_FADE_S = 5
+
 export function CueFieldMesh({
   source,
   channel,
   scale,
+  now,
 }: {
   source: CueSource
   channel: ChannelSpec
   /** The concentration control, applied to this source. */
   scale: number
+  now: number
 }) {
   const texture = useMemo(() => {
     const size = 128
@@ -132,16 +138,57 @@ export function CueFieldMesh({
   // The disc reaches out to three scale lengths, where the field is a tenth
   // of its centre value; stronger sources look bigger because they are.
   const radius = source.scale * 3 * Math.sqrt(Math.max(0.3, (source.strength * scale) / 4))
+  const left = source.lifetime === null ? Infinity : source.lifetime - (now - source.born)
+  const fade = Math.max(0.05, Math.min(1, left / PLUME_FADE_S))
   return (
     <group position={[source.x, 0.01, source.z]}>
       <mesh rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
         <planeGeometry args={[radius * 2, radius * 2]} />
-        <meshBasicMaterial map={texture} transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+        <meshBasicMaterial map={texture} transparent opacity={fade} depthWrite={false} blending={THREE.AdditiveBlending} />
       </mesh>
       <mesh position={[0, 0.1, 0]} raycast={() => null}>
         <sphereGeometry args={[0.12, 12, 12]} />
-        <meshStandardMaterial color={channel.color} emissive={channel.color} emissiveIntensity={1.2} />
+        <meshStandardMaterial color={channel.color} emissive={channel.color} emissiveIntensity={1.2 * fade} />
       </mesh>
+    </group>
+  )
+}
+
+/**
+ * A meal, marked: a ring that opens out from where the animal ate and fades
+ * over a second and a half. A plume that dissipates fades slowly instead,
+ * so the two never look alike.
+ */
+const MEAL_RING_S = 1.5
+
+export function MealMarks({ world }: { world: DishWorld }) {
+  const rings = useRef<(THREE.Mesh | null)[]>([])
+  useFrame(() => {
+    const recent = world.meals.slice(-4)
+    rings.current.forEach((mesh, i) => {
+      if (!mesh) return
+      const meal = recent[i]
+      const age = meal ? world.time - meal.t : Infinity
+      if (age > MEAL_RING_S) {
+        mesh.visible = false
+        return
+      }
+      mesh.visible = true
+      const k = age / MEAL_RING_S
+      mesh.position.set(meal!.x, 0.03, meal!.z)
+      const r = 0.3 + 1.6 * k
+      mesh.scale.set(r, r, 1)
+      ;(mesh.material as THREE.MeshBasicMaterial).opacity = 1 - k
+    })
+  })
+  return (
+    <group>
+      {[0, 1, 2, 3].map((i) => (
+        <mesh key={i} ref={(el) => (rings.current[i] = el)} rotation={[-Math.PI / 2, 0, 0]} visible={false} raycast={() => null}>
+          <ringGeometry args={[0.8, 1, 40]} />
+          <meshBasicMaterial color="#ffffff" transparent opacity={0} side={THREE.DoubleSide} depthWrite={false} />
+        </mesh>
+      ))}
     </group>
   )
 }

@@ -136,7 +136,7 @@ const food = (x: number, z: number, strength = CEILING_AT): SourceSpec => ({
 const PART2_PLUME = 8
 
 /** The healthy single-cue wiring: one cell, weight 1, a low threshold, routed forward. */
-export const SINGLE_CUE_THRESHOLD = 0.45
+export const SINGLE_CUE_THRESHOLD = 0.35
 
 const nourishFood = (channel: number): Outcome => (channel === 0 ? 'nourish' : 'ignore')
 
@@ -170,13 +170,16 @@ export const SCENARIOS: Scenario[] = [
       'Food odor on the far side of a strip of copper. Both weights are unlocked. Strengthen the food connection and more crossings happen; strengthen the copper connection and fewer do. Nothing here is a rule with a yes and a no in it.',
     channels: channels(CHANNELS.food, CHANNELS.copper),
     sources: [
-      { ...food(0, 5.5), respawn: 'far-side' },
-      ...Array.from({ length: 15 }, (_, i) => ({
+      // The food is close enough to the strip, and its plume broad enough,
+      // that its rise across the strip is real: the crossing is then a
+      // contest between two graded quantities rather than a wall.
+      { ...food(0, 4), scale: 3, respawn: 'far-side' },
+      ...Array.from({ length: 27 }, (_, i) => ({
         channel: 1,
-        x: -8.4 + i * 1.2,
+        x: -7.8 + i * 0.6,
         z: 0,
-        strength: 1.5,
-        scale: 0.8,
+        strength: 0.7,
+        scale: 0.5,
         lifetime: null,
         respawn: 'none' as const,
         keepPlumesOut: true,
@@ -186,9 +189,9 @@ export const SCENARIOS: Scenario[] = [
     locks: { ...lock(2, true), weights: [false, false] },
     open: { circuit: true, arithmetic: true, target: false, boundary: false },
     onReach: nourishFood,
-    hazard: (c) => (c[1] >= 1 ? 1 : 0),
+    hazard: (c) => (c[1] >= 0.55 ? 0.5 : 0),
     countCrossings: true,
-    start: { x: 0, z: -5.5 },
+    start: { x: 0, z: -4 },
   },
   {
     key: 'target-and',
@@ -271,7 +274,7 @@ export const SCENARIOS: Scenario[] = [
   {
     key: 'diagnosis',
     part: 3,
-    title: 'Five animals',
+    title: 'The diagnosis dish',
     blurb:
       'Food odor and carbon dioxide. A healthy animal reaches the food and keeps out of the carbon dioxide, which marks decaying matter and is thick going. Five animals, loaded one at a time into this dish.',
     channels: channels(CHANNELS.food, CHANNELS.co2),
@@ -283,11 +286,14 @@ export const SCENARIOS: Scenario[] = [
       food(-5, -1),
       food(1, -6),
     ],
-    circuit: singleInterneuron([1, -2], 0, SINGLE_CUE_THRESHOLD, 'forward', 'sigmoid'),
+    circuit: singleInterneuron([1, -2.5], 0, SINGLE_CUE_THRESHOLD, 'forward', 'sigmoid'),
     locks: lock(2, true),
     open: { circuit: true, arithmetic: true, target: false, boundary: false },
     onReach: nourishFood,
-    linger: (c) => (c[1] > 1.5 ? 0.02 : 1),
+    // Decaying matter is thick going, and thicker toward its middle: an
+    // animal that backs into the edge of it tail-first can still get out,
+    // and one that walks into the middle head-first cannot.
+    linger: (c) => (c[1] > 1.8 ? 0.03 : c[1] > 1.0 ? 0.15 : 1),
     start: { x: -2, z: 0 },
   },
   {
@@ -295,7 +301,7 @@ export const SCENARIOS: Scenario[] = [
     part: 'closer',
     title: 'The world changes',
     blurb:
-      'The same dish, the same animal, the same weights. The food odor now emanates from a toxin. Watch the harm counter. Then fix it with the controls you have been using all hour, and ask what you just did that the animal cannot.',
+      'The same dish, the same animal, the same weights. The food odor now emanates from a toxin. Watch the harm counter. Then fix it with the controls you have been using all hour — the routing switch on the diagram, or the sign of a weight — and ask what you just did that the animal cannot.',
     channels: channels(CHANNELS.food),
     sources: [food(5, 5), food(-5, 3), food(0, -6)],
     circuit: singleInterneuron([1], 0, SINGLE_CUE_THRESHOLD, 'forward'),

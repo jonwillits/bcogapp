@@ -12,12 +12,13 @@ import { cloneCircuit, type Circuit } from '../../sim/bilaterian/circuit'
 import type { Levels } from '../../sim/bilaterian/modulators'
 import { randomSeed } from '../../sim/random'
 import { palette } from '../../theme/theme'
-import { WormMesh, CueFieldMesh } from './meshes'
+import { WormMesh, CueFieldMesh, MealMarks } from './meshes'
+import { WorldTab } from './WorldTab'
 import { CircuitTab } from './CircuitTab'
 import { ChemistryTab } from './ChemistryTab'
 import { WormsTab } from './WormsTab'
 
-export type Tab = 'circuit' | 'chemistry' | 'worms'
+export type Tab = 'world' | 'circuit' | 'chemistry' | 'worms'
 
 /** One world step at most. */
 const MAX_STEP_S = 1 / 30
@@ -76,7 +77,7 @@ function Stepper({ world, scale, onAdvance }: { world: DishWorld; scale: number;
  * vehicle became this animal, and Modules 5 and 7 configure what is here.
  */
 export default function BilaterianScene() {
-  const [tab, setTab] = useState<Tab>('circuit')
+  const [tab, setTabState] = useState<Tab>('world')
   const [playing, setPlaying] = useState(true)
   const [speed, setSpeed] = useState(1)
   const [seed, setSeed] = useState(() => randomSeed())
@@ -126,7 +127,7 @@ export default function BilaterianScene() {
 
   const loadScenario = (key: string) => {
     const next = scenarioByKey(key)
-    const opts: { circuit?: Circuit } = {}
+    const opts: { circuit?: Circuit; concentration?: number } = { concentration: world.concentration }
     if (next.keepWiringFrom === scenarioKey) {
       const from = world.worm.circuit
       const c = cloneCircuit(next.circuit)
@@ -151,9 +152,16 @@ export default function BilaterianScene() {
     worldRef.current = build(DIAGNOSIS, seed, {
       circuit: a.circuit,
       modulators: a.modulators,
+      concentration: world.concentration,
       warm: ANIMAL_WARM_UP_S,
     })
     bump()
+  }
+
+  /** Opening the Worms tab puts the healthy animal in the diagnosis dish, unless an animal is already there. */
+  const setTab = (t: Tab) => {
+    if (t === 'worms' && world.scenario.key !== DIAGNOSIS.key) loadAnimal('healthy')
+    setTabState(t)
   }
 
   const hideNumbers = animal !== 'healthy' && animal !== 'W0' && !revealed
@@ -178,7 +186,8 @@ export default function BilaterianScene() {
     playing,
   }
 
-  const slots = tab === 'circuit' ? CircuitTab(state) : tab === 'chemistry' ? ChemistryTab(state) : WormsTab(state)
+  const slots =
+    tab === 'world' ? WorldTab(state) : tab === 'circuit' ? CircuitTab(state) : tab === 'chemistry' ? ChemistryTab(state) : WormsTab(state)
   const channelColors = scenario.channels.map((c) => c.color)
 
   return (
@@ -217,8 +226,10 @@ export default function BilaterianScene() {
               source={s}
               channel={scenario.channels[s.channel] ?? scenario.channels[0]}
               scale={s.lifetime === null ? 1 : world.concentration}
+              now={world.time}
             />
           ))}
+          <MealMarks world={world} />
           <WormMesh worm={world.worm} colors={channelColors} />
           <Stepper world={world} scale={playing ? speed : 0} onAdvance={bump} />
           <CameraRig target={[0, 0, 0]} />
@@ -246,9 +257,10 @@ export default function BilaterianScene() {
 /** The tab bar every left panel starts with. */
 export function TabBar({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }) {
   const tabs: { id: Tab; title: string; sub: string }[] = [
+    { id: 'world', title: 'World', sub: 'the dish' },
     { id: 'circuit', title: 'Circuit', sub: 'the wiring' },
     { id: 'chemistry', title: 'Chemistry', sub: 'the modulators' },
-    { id: 'worms', title: 'Worms', sub: 'five animals' },
+    { id: 'worms', title: 'Worms', sub: 'the diagnosis' },
   ]
   return (
     <div style={{ display: 'flex', gap: 4 }}>

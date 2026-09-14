@@ -1,6 +1,7 @@
 import { makeRng, type Rng } from '../random'
 import { placeAwayFrom, fieldAt, type CueSource } from './fields'
 import { cloneCircuit, type Circuit } from './circuit'
+import { MODULATOR_IDS, valenceArousal, type ModulatorId } from './modulators'
 import { kickModulator, type Levels } from './modulators'
 import { Worm, FEEDING_PAUSE_S } from './worm'
 import type { Scenario, SourceSpec } from './scenarios'
@@ -46,6 +47,10 @@ export class DishWorld {
   readonly scenario: Scenario
   readonly worm: Worm
   readonly seed: number
+  /** The wiring this dish started with — what "restore" goes back to. */
+  readonly startCircuit: Circuit
+  /** Meals eaten, most recent last, for the dish to mark. */
+  meals: { x: number; z: number; t: number }[] = []
   sources: CueSource[] = []
   time = 0
   concentration: number
@@ -69,7 +74,15 @@ export class DishWorld {
   private nextId = 1
   private rng: Rng
   /** The interneuron's net input, its output and the reversal rate, per step. */
-  trace = { net: [] as number[], output: [] as number[], rate: [] as number[], cells: [] as number[][] }
+  trace = {
+    net: [] as number[],
+    output: [] as number[],
+    rate: [] as number[],
+    cells: [] as number[][],
+    levels: Object.fromEntries(MODULATOR_IDS.map((id) => [id, [] as number[]])) as Record<ModulatorId, number[]>,
+    valence: [] as number[],
+    arousal: [] as number[],
+  }
 
   constructor(seed: number, scenario: Scenario, opts: DishOptions = {}) {
     this.seed = seed
@@ -86,6 +99,7 @@ export class DishWorld {
       { x: start.x, z: start.z, heading },
     )
     this.lastSide = Math.sign(start.z)
+    this.startCircuit = cloneCircuit(this.worm.circuit)
   }
 
   private spawn(spec: SourceSpec, x: number, z: number): CueSource {
@@ -119,7 +133,7 @@ export class DishWorld {
     if (spec.respawn === 'far-side') {
       // Across the strip from wherever the animal is, so it must cross again.
       const side = head.z >= 0 ? -1 : 1
-      p = { x: this.rng.range(-6, 6), z: side * this.rng.range(3.5, 7) }
+      p = { x: this.rng.range(-4, 4), z: side * this.rng.range(3, 5.5) }
     }
     this.spawn({ ...spec, lifetime: spec.lifetime }, p.x, p.z)
   }
@@ -227,6 +241,8 @@ export class DishWorld {
         if (outcome === 'nourish') {
           this.cuesReached++
           this.reached.push(this.time)
+          this.meals.push({ x: eating.x, z: eating.z, t: this.time })
+          if (this.meals.length > 6) this.meals.shift()
           kickModulator(w.mod, 'satiety', 0.05, this.time)
           kickModulator(w.mod, 'relief', 0.25, this.time)
         } else if (outcome === 'harm') {
@@ -263,6 +279,10 @@ export class DishWorld {
       if (!this.trace.cells[i]) this.trace.cells[i] = []
       push(this.trace.cells[i], cell.output)
     })
+    for (const id of MODULATOR_IDS) push(this.trace.levels[id], w.mod.level[id])
+    const va = valenceArousal(w.mod.level, w.signedVerdict)
+    push(this.trace.valence, va.valence)
+    push(this.trace.arousal, va.arousal)
   }
 
   run(seconds: number, dt = 1 / 30): void {

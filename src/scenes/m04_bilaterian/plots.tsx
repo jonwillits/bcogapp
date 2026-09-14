@@ -2,7 +2,7 @@ import { palette } from '../../theme/theme'
 import { Plot } from '../../components/Plot'
 import { TRACE_LEN } from '../../sim/bilaterian/dishWorld'
 import { unitOutput, decisionBoundary, TRUTH_ROWS, type RateUnit, type Activation } from '../../sim/bilaterian/unit'
-import { AFFECT_STATES } from '../../sim/bilaterian/modulators'
+import { AFFECT_STATES, MODULATORS, type ModulatorId } from '../../sim/bilaterian/modulators'
 
 const AXIS = palette.textMuted
 const MONO = 'var(--font-mono)'
@@ -23,7 +23,7 @@ export function DecisionBoundaryPlot({
   live,
   labels,
   width = 300,
-  height = 240,
+  height = 250,
 }: {
   unit: RateUnit
   activation: Activation
@@ -33,8 +33,8 @@ export function DecisionBoundaryPlot({
   width?: number
   height?: number
 }) {
-  const padL = 34
-  const padB = 26
+  const padL = 52
+  const padB = 34
   const padT = 8
   const padR = 10
   const lo = -0.25
@@ -101,10 +101,16 @@ export function DecisionBoundaryPlot({
         )
       })}
       <circle cx={x(Math.max(lo, Math.min(hi, live[0])))} cy={y(Math.max(lo, Math.min(hi, live[1])))} r={4.5} fill="#ffffff" stroke={palette.bg} strokeWidth={1.5} />
-      <text x={width - padR} y={height - 4} textAnchor="end" fontSize={9} fill={AXIS}>x₁ = {labels[0]} →</text>
-      <text x={padL + 2} y={padT + 9} fontSize={9} fill={AXIS}>↑ x₂ = {labels[1]}</text>
-      <text x={width - padR} y={padT + 9} textAnchor="end" fontSize={8} fill={AXIS}>
-        {target ? 'points: the target · shading: what the unit does' : 'shading: what the unit does'}
+      <text x={(x(lo) + x(hi)) / 2} y={height - 6} textAnchor="middle" fontSize={9} fill={AXIS}>
+        x₁ = {labels[0]} · 1 = present, 0 = absent
+      </text>
+      <text x={14} y={(y(lo) + y(hi)) / 2} textAnchor="middle" fontSize={9} fill={AXIS}>
+        <tspan x={14} dy={-((labels[1].split(' ').length) * 5.5)}>x₂ =</tspan>
+        {labels[1].split(' ').map((word, i) => (
+          <tspan key={i} x={14} dy={11}>
+            {word}
+          </tspan>
+        ))}
       </text>
     </svg>
   )
@@ -174,12 +180,15 @@ export function AffectPlane({
   valence,
   arousal,
   hidden,
+  trail,
   width = 300,
   height = 240,
 }: {
   valence: number
   arousal: number
   hidden?: boolean
+  /** Where the dot has been, oldest first. */
+  trail?: { valence: number[]; arousal: number[] }
   width?: number
   height?: number
 }) {
@@ -199,6 +208,15 @@ export function AffectPlane({
           <text x={x(s.valence)} y={y(s.arousal) - 7} textAnchor="middle" fontSize={9} fill={AXIS}>{s.name}</text>
         </g>
       ))}
+      {!hidden && trail && trail.valence.length > 1 && (
+        <polyline
+          points={trail.valence.map((v, i) => `${x(v).toFixed(1)},${y(trail.arousal[i]).toFixed(1)}`).join(' ')}
+          fill="none"
+          stroke={palette.accent}
+          strokeWidth={1.5}
+          opacity={0.55}
+        />
+      )}
       {!hidden && (
         <circle cx={x(valence)} cy={y(arousal)} r={7} fill="#ffffff" stroke={palette.accent} strokeWidth={2.5} />
       )}
@@ -227,4 +245,45 @@ export function Trace({
   height?: number
 }) {
   return <Plot width={width} height={height} window={TRACE_LEN} yMin={yMin} yMax={yMax} series={series} />
+}
+
+export const MODULATOR_COLORS: Record<ModulatorId, string> = {
+  pursuit: '#ffd166',
+  satiety: '#34d399',
+  arousal: '#f87171',
+  relief: '#b388ff',
+}
+
+/**
+ * The four modulator levels over the last few seconds, each drawn as a
+ * fraction of its own range so that they share one plot, with a legend.
+ * This is what "a state decaying over minutes" looks like: a line that
+ * jumped at an event and is drifting back.
+ */
+export function ModulatorTrace({
+  levels,
+  width = 300,
+  height = 90,
+}: {
+  levels: Record<ModulatorId, number[]>
+  width?: number
+  height?: number
+}) {
+  const series = MODULATORS.map((m) => ({
+    color: MODULATOR_COLORS[m.id],
+    data: (levels[m.id] ?? []).map((v) => (v - m.min) / (m.max - m.min)),
+  }))
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <Plot width={width} height={height} window={TRACE_LEN} yMin={0} yMax={1} series={series} />
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, fontSize: 10, color: 'var(--text-muted)' }}>
+        {MODULATORS.map((m) => (
+          <span key={m.id} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ width: 10, height: 3, background: MODULATOR_COLORS[m.id], display: 'inline-block' }} />
+            {m.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
 }

@@ -147,6 +147,7 @@ export function CircuitDiagram({
         </text>
       </g>
       <text x={J.x + 50} y={J.y + 4} fontSize={8} fill={palette.textMuted}>{routeLocked ? 'locked' : 'click to flip'}</text>
+      <text x={J.x - 50} y={J.y + 4} textAnchor="end" fontSize={8} fill={palette.textMuted}>routing switch</text>
 
       {/* motor groups */}
       {node(F.x, F.y, 16, palette.actuator, motor.forward, 'F')}

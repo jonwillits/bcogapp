@@ -332,10 +332,7 @@ export class Worm {
     this.rate = reversalRate(worse, lv.arousal, lv.relief)
     const canTrigger = this.mode === 'forward' && this.pauseLeft <= 0
     if (canTrigger && rng.next() < 1 - Math.exp(-this.rate * dt)) {
-      // An aroused animal reacts harder as well as more readily: the pulse
-      // into the reverse group scales with arousal, so each reversal runs
-      // longer and backs up further.
-      this.motor.pulse = REVERSAL_PULSE * (0.75 + 0.25 * lv.arousal)
+      this.motor.pulse = REVERSAL_PULSE
       this.reversals++
       this.energy += ENERGY_PER_REVERSAL
       this.lastReversalAt = this.time
@@ -408,9 +405,16 @@ export class Worm {
     // things were better — with the exact angle and its side drawn from the
     // stream. No direction information enters here: it is a fixed motor
     // pattern with noise on it.
-    const angle = (rng.next() < 0.5 ? -1 : 1) * Math.PI * (TUNING.turnMin + (TUNING.turnMax - TUNING.turnMin) * rng.next())
-    this.turnRate = angle / TUNING.turnSeconds
-    this.turnLeft = TUNING.turnSeconds
+    // An aroused animal overreacts: the bend that follows a reversal is
+    // wilder, so its new heading is less often back the way things were
+    // better. (A longer reversal was tried instead and backed the animal
+    // tail-first into things it could not sense.)
+    const excess = Math.max(0, this.mod.level.arousal - 1)
+    const least = TUNING.turnMin / (1 + 0.5 * excess)
+    const angle = (rng.next() < 0.5 ? -1 : 1) * Math.PI * (least + (TUNING.turnMax - least) * rng.next())
+    const seconds = TUNING.turnSeconds * (1 + 0.06 * excess)
+    this.turnRate = angle / seconds
+    this.turnLeft = seconds
     this.mode = 'turning'
     this.turns++
     this.energy += ENERGY_PER_TURN

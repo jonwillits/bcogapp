@@ -2,7 +2,7 @@ import { Panel } from '../../components/Panel'
 import { Section } from '../../components/Section'
 import { Slider } from '../../components/controls'
 import { MODULATORS, valenceArousal, nearestState, MODULATOR_DECAY_S } from '../../sim/bilaterian/modulators'
-import { AffectPlane } from './plots'
+import { AffectPlane, ModulatorTrace } from './plots'
 import { TabBar, Note, Row, PANEL_STYLE, RIGHT_STYLE, type SceneState } from './BilaterianScene'
 
 /**
@@ -59,7 +59,7 @@ export function ChemistryTab(s: SceneState) {
 
   const right = (
     <Panel title="The animal’s state" style={RIGHT_STYLE}>
-      <AffectPlane valence={valence} arousal={arousal} hidden={hideNumbers} />
+      <AffectPlane valence={valence} arousal={arousal} hidden={hideNumbers} trail={{ valence: world.trace.valence, arousal: world.trace.arousal }} />
       {hideNumbers ? (
         <Note>The dot is hidden until you reveal.</Note>
       ) : (
@@ -70,9 +70,11 @@ export function ChemistryTab(s: SceneState) {
             <Row label="Nearest named state" value={state} mono={false} />
           </div>
           <Note>
-            An affective state is a position in this space, not a word. Each control moves the dot in one direction, and where the animal ends up depends on where it started. What it senses right now nudges the dot too.
+            An affective state is a position in this space, not a word. Each control moves the dot in one direction, and where the animal ends up depends on where it started. What it senses right now nudges the dot too; the faint line is where the dot has been over the last eight seconds.
           </Note>
           <Section title="Persistence" defaultOpen hint="How long the current state has outlasted whatever set it, and what is holding it.">
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>The four levels over the last eight seconds, each as a fraction of its own range</div>
+            <ModulatorTrace levels={world.trace.levels} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
               <Row
                 label="Last event that moved the chemistry"
