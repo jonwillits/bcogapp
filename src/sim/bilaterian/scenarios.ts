@@ -287,7 +287,10 @@ export const SCENARIOS: Scenario[] = [
       food(1, -6),
     ],
     circuit: singleInterneuron([1, -2.5], 0, SINGLE_CUE_THRESHOLD, 'forward', 'sigmoid'),
-    locks: lock(2, true),
+    // Unlocked: Part 3's warm-up halves a weight on the healthy animal to
+    // learn what a wiring fault looks like. The hidden animals show no
+    // controls until revealed, so nothing here lets a student edit one blind.
+    locks: lock(2, false),
     open: { circuit: true, arithmetic: true, target: false, boundary: false },
     onReach: nourishFood,
     // Decaying matter is thick going, and thicker toward its middle: an

@@ -24,7 +24,7 @@ export function ChemistryTab(s: SceneState) {
       <Note>
         Four modulators, each released into the tissue rather than into a synapse. None carries a
         message; each changes what the cells do with the messages they already get. Set one and
-        the animal’s behaviour changes while every number on the Circuit tab stays exactly as it was.
+        the animal’s behavior changes while every number on the Circuit tab stays exactly as it was.
       </Note>
       {hideNumbers ? (
         <Note>This animal’s chemistry is hidden until you reveal its faults on the Worms tab.</Note>

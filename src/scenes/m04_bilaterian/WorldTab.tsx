@@ -89,7 +89,7 @@ export function WorldTab(s: SceneState) {
         ))}
       </div>
       <Note>
-        A plume glows brighter toward its centre, the way the field it draws is stronger there; the bead at the middle is the source. Plumes drift away and reappear elsewhere after a while; a plume that is being eaten flashes a ring and vanishes.
+        A plume glows brighter toward its center, the way the field it draws is stronger there; the bead at the middle is the source. Plumes drift away and reappear elsewhere after a while; a plume that is being eaten flashes a ring and vanishes.
       </Note>
       <GroupLabel>What the animal is getting done</GroupLabel>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>

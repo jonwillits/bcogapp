@@ -223,7 +223,7 @@ export function CircuitTab(s: SceneState) {
       </Section>
       <Section key={`${scenario.key}-target`} title="The target function" defaultOpen={scenario.open.target} hint="What the animal must do on each combination of cues, and what it does now.">
         {!target ? (
-          <Note>This scenario has no target function: two graded quantities set against each other, and the behaviour is whichever wins.</Note>
+          <Note>This scenario has no target function: two graded quantities set against each other, and the behavior is whichever wins.</Note>
         ) : hideNumbers ? (
           <Note>Hidden until you reveal.</Note>
         ) : (
@@ -266,7 +266,7 @@ export function CircuitTab(s: SceneState) {
         key={`${scenario.key}-boundary`}
         title="The decision boundary"
         defaultOpen={scenario.open.boundary}
-        hint="Every combination of the two inputs is a point. The interneuron’s decision on any input can be drawn as a line through this space. Each point’s colour is its target: blue for act (1), orange for do not act (0)."
+        hint="Every combination of the two inputs is a point. The interneuron’s decision on any input can be drawn as a line through this space. Each point’s color is its target: blue for act (1), orange for do not act (0)."
       >
         {n !== 2 ? (
           <Note>Two inputs make a plane. This scenario has {n}.</Note>
