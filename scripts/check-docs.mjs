@@ -41,30 +41,37 @@ export function docxText(path) {
     .replace(/[ \t]+/g, ' ')
 }
 
-/** Every string a scene can put in front of a student. */
-function appStrings(sceneDir) {
+/**
+ * Every string a scene can put in front of a student: control labels, titles
+ * and JSX text in the scene's components, plus every string literal in the
+ * sim files the lab names in `strings` — Module 4's scenario titles,
+ * modulator names and activation-function labels live there, not in a
+ * component.
+ */
+function appStrings(sceneDir, extraDirs = []) {
   const out = new Set()
-  const walk = (dir) => {
+  const walk = (dir, literals) => {
     if (!existsSync(dir)) return
     for (const e of readdirSync(dir, { withFileTypes: true })) {
       const p = join(dir, e.name)
-      if (e.isDirectory()) walk(p)
-      else if (e.name.endsWith('.tsx')) {
+      if (e.isDirectory()) walk(p, literals)
+      else if (e.name.endsWith('.tsx') || (literals && e.name.endsWith('.ts') && !/\.(test|probe)\.ts$/.test(e.name))) {
         const t = readFileSync(p, 'utf-8')
-        for (const re of [
+        const res = [
           /label="([^"]+)"/g,
           /label:\s*'([^']+)'/g,
           /title="([^"]+)"/g,
-          />\s*([A-Z][^<>{}\n]{2,44})\s*</g,
-        ]) {
-          for (const m of t.matchAll(re)) out.add(m[1].trim())
-        }
+          />\s*([A-Za-z][^<>{}\n]{2,44})\s*</g,
+        ]
+        if (literals || e.name.endsWith('.ts')) res.push(/'((?:[^'\\\n]|\\.){3,})'/g, /`((?:[^`\\$]|\\.){3,})`/g)
+        for (const re of res) for (const m of t.matchAll(re)) out.add(m[1].trim())
       }
     }
   }
   // Shared components count: a scene renders them too.
-  walk(join(ROOT, 'src/components'))
-  walk(join(ROOT, sceneDir))
+  walk(join(ROOT, 'src/components'), false)
+  walk(join(ROOT, sceneDir), true)
+  for (const d of extraDirs) walk(join(ROOT, d), true)
   return out
 }
 
@@ -107,7 +114,7 @@ function checkLab(lab) {
   }
 
   // 2. controls the documents name must exist in the scene
-  const strings = appStrings(lab.scene)
+  const strings = appStrings(lab.scene, lab.strings ?? [])
   const flat = [...strings].join(' | ')
   for (const c of lab.controls ?? []) {
     if (!flat.includes(c)) {

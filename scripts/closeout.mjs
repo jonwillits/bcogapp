@@ -182,7 +182,7 @@ const crib = cribName
   : { out: '' }
 const cribLines = crib.out
   .split('\n')
-  .filter((l) => /reach the light|driving backwards|swings toward|lights\/min|SEPARATES|does NOT separate|^  [WXYZ] /.test(l))
+  .filter((l) => /reach the light|driving backwards|swings toward|lights\/min|SEPARATES|does NOT separate|^  [WXYZ] |^(healthy|W[0-4]|W1, W3|at 2\.5×) {2,}/.test(l))
 if (cribLines.length) {
   console.log('  Run the scene and check these by eye - tests cannot see motion:')
   console.log('      npm run dev     then open  http://localhost:5173/' + (labs[0].route ?? '') + '\n')

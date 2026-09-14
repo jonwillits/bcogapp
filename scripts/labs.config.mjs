@@ -14,6 +14,8 @@
  *             can verify and which therefore need a test each
  *   crib      the probe that prints what a person should look for, since
  *             nothing headless can see motion
+ *   strings   sim directories whose string literals reach the screen, on top
+ *             of the scene's own components
  */
 
 export const COURSE =
@@ -149,5 +151,62 @@ export const LABS = [
     ],
 
     crib: 'crib: what the five cells should look like',
+  },
+  {
+    id: 'm04-bilaterian',
+    name: 'Lab 4 — The Bilaterian',
+    route: '#/m04-bilaterian',
+    scene: 'src/scenes/m04_bilaterian',
+    /** Sim files whose strings reach the screen: scenario titles, modulator names, function labels. */
+    strings: ['src/sim/bilaterian'],
+    handout: 'neural_circuits_affect_and_valence/bilaterian_lab/bilaterian_lab.md',
+    report: 'neural_circuits_affect_and_valence/bilaterian_lab/bilaterian_lab_report.docx',
+
+    retired: [
+      { term: /\bFive animals\b/g, why: 'the scenario is "The diagnosis dish"' },
+      { term: /flip the pill/gi, why: 'the diagram calls it the routing switch' },
+      { term: /\btrain(ing|ed)?\b|\bepochs?\b|learning rate/gi, why: 'nothing learns in this lab, and none of that vocabulary is in the scene' },
+      { term: /dopamine|serotonin|norepinephrine|endorphin/gi, why: 'no molecule is named on screen; matching them is Q20', unless: ['Q20'] },
+    ],
+
+    controls: [
+      'Scenario', 'Cue concentration', 'Source to place on a click', 'Reset', 'New seed',
+      'Cues reached per minute', 'Harm', 'Crossings of the strip', 'Reversals per minute', 'Time in reverse',
+      'Energy per cue reached', 'routing switch', 'forward group', 'reverse group', 'interneuron',
+      'activation function', 'threshold function', 'sigmoid function', 'Restore the wiring this scenario started with',
+      'Wiring — fixed until you change it', 'The arithmetic', 'The target function', 'The decision boundary', 'Steering',
+      'Rows satisfied', 'pursuit', 'satiety and tone', 'arousal and vigilance', 'relief', 'Persistence',
+      'Scorecard', 'Reveal faults', 'When you have committed', 'The diagnosis dish', 'The labeled line',
+      'Food beyond copper', 'The world changes', 'handful of interneurons', 'connection strength', 'actuator bias',
+    ],
+
+    claims: [
+      { says: 'Q1: the animal reaches food about twice a minute by comparing now against a moment ago', test: 'routed forward the animal reaches food; routed to reverse it reaches none' },
+      { says: 'Q1: reversal probability rises when the comparison comes out badly and not otherwise', test: 'reversal probability rises when the comparison comes out badly' },
+      { says: 'Q1: starting 180° from the source, the animal still arrives', test: 'starting 180° from the source, it still arrives in every seed' },
+      { says: 'Q2: routed to reverse, it never touches the food', test: 'routed forward the animal reaches food; routed to reverse it reaches none' },
+      { says: 'Q4: crossings depend on how food is weighed against copper, not on either alone', test: 'crossings depend on how food is weighed against copper' },
+      { says: 'Q6: as shipped the AND animal feeds in warm water and is harmed; 1, 1, 2 feeds only in cool water', test: 'AND: as shipped the animal feeds in warm water' },
+      { says: 'Q6: two strengths of 1 with a threshold of 2 fire only on (1,1)', test: 'two strengths of 1 with a threshold of 2 fire only on (1,1)' },
+      { says: 'Q8: going from AND to OR by one number shifts the line and does not rotate it', test: 'shifts the line and does not rotate it' },
+      { says: 'Q9: baseline and threshold slide the same line', test: 'shifts the line and does not rotate it' },
+      { says: 'Q10: wired for OR the animal spends less time in danger than wired for AND', test: 'OR: one number turns AND into OR' },
+      { says: 'Q11: AND NOT needs a negative weight, and with it the animal is never eaten', test: 'AND NOT: needs a negative weight' },
+      { says: 'Q12: no setting of one unit satisfies XOR', test: 'no student-reachable setting of one unit satisfies XOR' },
+      { says: 'Q13: moving any modulator leaves every number on the Circuit tab unchanged', test: 'moving any modulator to either extreme leaves every stored weight bit-identical' },
+      { says: 'Q14: W1, W3 and W4 all reach cues well below the healthy animal', test: 'W1 to W4 all reach cues well below the healthy animal' },
+      { says: 'Q14: W2 reverses far more often than any other animal', test: 'W2 reverses far more often than any other animal' },
+      { says: 'Q14: W1 and W3 cannot be told apart at the shipped concentration', test: 'W1 and W3 are the same animal at the shipped concentration' },
+      { says: 'Q16: at high concentration W3 recovers and W1 does not', test: 'at maximum concentration W3 recovers and W1 does not' },
+      { says: 'Q17: W4 has nothing wrong with its wiring; only satiety differs', test: 'every weight, switch and threshold equals the healthy default' },
+      { says: 'Q18: W4 goes into the bogs where the others will not', test: 'W4 goes where the others will not' },
+      { says: 'the worked example W0 flees its food and reaches none', test: 'W0 flees its food and reaches none' },
+      { says: 'Q21: harm rises and the animal does not recover within five minutes', test: 'harm counter rises and the animal does not recover' },
+      { says: 'Q22: flipping the switch fixes it in one move', test: 'flipping the switch fixes it in one move' },
+      { says: 'Q19: a meal kicks two levels up and they decay back over a couple of minutes', test: null },
+      { says: 'Q20: the healthy animal sits nearest contentment on the plane', test: null },
+    ],
+
+    crib: 'crib: what the six animals should look like',
   },
 ]
