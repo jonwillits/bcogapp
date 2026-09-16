@@ -37,6 +37,7 @@ A demo used only for lecture may be just the scene plus a tracker entry — no h
 - Put all simulation/neural logic in `src/sim/` (plain TS), driven from the scene via r3f's `useFrame`. Keep sim logic out of components so it's testable and reusable across stages.
 - For spine (evolving-creature) modules, extend the shared engine in `src/sim/creature|neural|world/` behind a stage flag — don't fork a new creature.
 - Keep parameters exposed and legible; match the course palette/typography from `src/theme/`.
+- **Measure every synchronous path before it ships, and keep the probe.** Write a `timing.probe.ts` beside the sim (Module 4's is the pattern) that times scene construction, any head start or warm-up, one fixed step, one frame at the maximum speed, one second of simulation, and every instrument the panels compute per render or on a slider change. Anything over about 300 ms on a click path or in a render, after multiplying by four for a student laptop, gets the Lab 3 treatment: made incremental across frames with a progress badge, bit-identical to the one-shot version, with a test that says so (`NeuronWorld.warmUp` / `fastForward` and `NeuronScene`'s `WarmUpBadge`). Check the frame loop's clamp and step cap while you are there, and that no per-step list grows without a cap. The reasoning is in `APP_DESIGN.md` under hard requirements.
 
 ### Phase 3 — Author the handout *(labs only)*
 - Write/adapt `intro_to_bcs/<module>/<module>_lab.md` per the course [`WEEK_DEVELOPMENT_PROCESS.md`](../../WEEK_DEVELOPMENT_PROCESS.md) Phase 4 (activity-based, references the reading/lectures, points at the in-app scene rather than an external URL).
@@ -45,6 +46,7 @@ A demo used only for lecture may be just the scene plus a tracker entry — no h
 
 ### Phase 4 — Test on the binding platform
 - Verify it runs and performs acceptably **in a browser on a low-end Chromebook-class device** (the constraint that matters), plus a quick check on Mac/Win/Linux.
+- Click every button that loads or resets something and watch the tab: if the page goes unresponsive for even a second on the Mac, it is several on the binding platform. The timing probe from Phase 2 says which call it is.
 - Sanity-check that a student with zero setup can launch and complete it.
 - Spot-check the 3D camera controls feel right (no lost-in-space, sensible reset).
 
