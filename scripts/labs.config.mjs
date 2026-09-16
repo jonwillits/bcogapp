@@ -107,6 +107,7 @@ export const LABS = [
 
     retired: [
       { term: /\bthe pit\b/gi, why: 'it is called the arena, as in Lab 2' },
+      { term: /\bbody size\b/gi, why: 'the control is Sensor-to-actuator distance' },
       {
         term: /watch all four vehicles/gi,
         why: 'each cell loads with its own world, one at a time - "load each of the four in turn"',

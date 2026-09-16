@@ -80,6 +80,19 @@ describe('the diagnosability test', () => {
 })
 
 describe('determinism', () => {
+  it('a warm-up paid across frames ends where run() ends', () => {
+    const a = new NeuronWorld(5, DIAGNOSTIC_CELLS[0].scenario)
+    a.run(3)
+    const b = new NeuronWorld(5, DIAGNOSTIC_CELLS[0].scenario)
+    b.warmUp(3)
+    let frames = 0
+    while (!b.fastForward(5)) frames++
+    expect(frames).toBeGreaterThan(1)
+    expect(b.time).toBeCloseTo(a.time, 6)
+    expect(b.vehicle.state.x).toBeCloseTo(a.vehicle.state.x, 9)
+    expect(b.vehicle.state.z).toBeCloseTo(a.vehicle.state.z, 9)
+    expect(b.atpTotal).toBeCloseTo(a.atpTotal, 6)
+  })
   it('the same seed and settings reproduce a run exactly', () => {
     const run = () => {
       const w = new NeuronWorld(77, HEALTHY_SCENARIO)

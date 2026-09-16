@@ -32,6 +32,8 @@ const MAX_STEP_S = 1 / 30
  * been driving for a while is what a student is meant to be looking at.
  */
 export const DIAGNOSTIC_WARM_UP_S = 45
+/** Wall time per frame spent paying down a loaded vehicle's head start. */
+const FAST_FORWARD_BUDGET_MS = 30
 
 /**
  * Default slow motion on the Membrane tab: milliseconds of cell time per real
@@ -148,6 +150,13 @@ function Stepper({
 }) {
   const repaint = useRef(0)
   useFrame((_, delta) => {
+    if (world.warmUpRemaining > 0) {
+      // A loaded vehicle's head start, paid a slice per frame so the page
+      // never freezes; paused or not, since it is loading, not running.
+      world.fastForward(FAST_FORWARD_BUDGET_MS)
+      onAdvance()
+      return
+    }
     if (scale <= 0) return
     let remaining = Math.min(delta, 0.05) * scale
     let guard = 0
@@ -198,7 +207,7 @@ export default function NeuronScene() {
       ? { cell: { ...keep.cellParams }, unit: { ...keep.unit }, world: { ...keep.settings } }
       : scenarioFor(cell)
     const w = new NeuronWorld(withSeed, scenario)
-    if (cell !== 'healthy') w.run(DIAGNOSTIC_WARM_UP_S)
+    if (cell !== 'healthy') w.warmUp(DIAGNOSTIC_WARM_UP_S)
     return w
   }
   if (!worldRef.current) worldRef.current = build(loaded, seed)
@@ -277,8 +286,10 @@ export default function NeuronScene() {
           <Stepper world={world} scale={playing ? scale : 0} onAdvance={bump} />
           <CameraRig target={[0, 0, 0]} />
         </Canvas>
-        {tab === 'membrane' && (
-          <TimeScaleBadge msPerSecond={msPerSecond} onChange={setMsPerSecond} />
+        {world.warmUpRemaining > 0 ? (
+          <WarmUpBadge world={world} />
+        ) : (
+          tab === 'membrane' && <TimeScaleBadge msPerSecond={msPerSecond} onChange={setMsPerSecond} />
         )}
         </>
       }
@@ -306,6 +317,31 @@ export default function NeuronScene() {
  * says so too, but a vehicle that has all but stopped is the first thing a
  * student sees, and the reason has to be on the same part of the screen.
  */
+/** Over the arena while a loaded vehicle's head start is being simulated. */
+function WarmUpBadge({ world }: { world: NeuronWorld }) {
+  const done = Math.max(0, world.time)
+  const total = done + world.warmUpRemaining
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: 12,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        padding: '6px 12px',
+        borderRadius: 999,
+        background: 'var(--surface)',
+        border: '1px solid var(--border)',
+        fontSize: 12,
+        color: 'var(--text)',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      <b>Fast-forwarding</b> — {done.toFixed(0)} of {total.toFixed(0)} s driven
+    </div>
+  )
+}
+
 function TimeScaleBadge({ msPerSecond, onChange }: { msPerSecond: number; onChange: (v: number) => void }) {
   const slowdown = 1000 / msPerSecond
   const real = slowdown < 1.05

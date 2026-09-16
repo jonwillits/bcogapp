@@ -342,6 +342,34 @@ export class NeuronWorld {
   }
 
   /**
+   * Simulated seconds still owed when a vehicle is loaded part-way into its
+   * run. `run(45)` in one go blocks the page for seconds on a fast machine and
+   * for long enough on a slow one that the browser offers to kill the tab, so
+   * the scene pays the debt down a frame at a time with `fastForward`.
+   */
+  warmUpRemaining = 0
+
+  /** Owe `seconds` of simulation, to be paid across frames. */
+  warmUp(seconds: number): void {
+    this.warmUpRemaining = seconds
+  }
+
+  /**
+   * Pay down the warm-up for at most `budgetMs` of wall time, in the same
+   * steps `run` takes so the result is the run's. Returns true when paid off.
+   */
+  fastForward(budgetMs: number, dt = 1 / 30): boolean {
+    const until = performance.now() + budgetMs
+    while (this.warmUpRemaining > 1e-9) {
+      const step = Math.min(dt, this.warmUpRemaining)
+      this.step(step)
+      this.warmUpRemaining -= step
+      if (performance.now() >= until) break
+    }
+    return this.warmUpRemaining <= 1e-9
+  }
+
+  /**
    * The connection, opened up. Called by `VehicleWorld.step` with fresh sensor
    * readings; returns what the two wheels do.
    */

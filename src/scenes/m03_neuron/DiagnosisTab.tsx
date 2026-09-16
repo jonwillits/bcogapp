@@ -78,7 +78,7 @@ export function DiagnosisTab(s: SceneState) {
           Its fault is hidden. Watch it in the World tab, decide which tab to open first and why,
           commit to a diagnosis, then design a test for the ones you cannot separate. Things you
           can change: how fast the lights move, how many there are, how long the vehicle has to
-          keep working, and the body size. Then press <b>Reveal faults</b>.
+          keep working, and the sensor-to-actuator distance. Then press <b>Reveal faults</b>.
         </Note>
       )}
       {current && shown && (
