@@ -107,6 +107,27 @@ describe('structure', () => {
   })
 })
 
+describe('a session-long run', () => {
+  it('nothing in the world grows with the run', () => {
+    // Lab 3's rule: ring buffers and pruned lists, because a lab runs for a
+    // whole session. Twenty minutes in the diagnosis dish, then every
+    // per-step or per-event list is checked against its cap.
+    const w = new DishWorld(9, DIAGNOSIS)
+    w.run(1200)
+    expect(w.cuesReached).toBeGreaterThan(5)
+    expect(w.reached.length).toBeLessThanOrEqual(200)
+    expect(w.meals.length).toBeLessThanOrEqual(6)
+    for (const arr of [w.trace.net, w.trace.output, w.trace.rate, w.trace.valence, w.trace.arousal, ...w.trace.cells, ...Object.values(w.trace.levels)]) {
+      expect(arr.length).toBeLessThanOrEqual(240)
+    }
+    expect(w.sources.length).toBeLessThanOrEqual(DIAGNOSIS.sources.length)
+    expect(w.worm.chain.length).toBe(16)
+    // The last-minute rate reads the same off the capped list.
+    const from = w.time - 60
+    expect(w.recentCuesPerMinute).toBe(w.reached.filter((t) => t >= from).length)
+  })
+})
+
 describe('determinism', () => {
   it('same seed and same settings reproduce a run exactly', () => {
     for (const s of SCENARIOS) {

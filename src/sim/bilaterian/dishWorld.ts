@@ -20,6 +20,8 @@ import type { Scenario, SourceSpec } from './scenarios'
 export const DISH_BOUNDS = 8
 /** A source is reached within this distance of the head. */
 export const REACH = 1.0
+/** Meal times kept for the last-minute rate; far more than a minute ever holds. */
+const REACHED_KEPT = 200
 /** One meal, in seconds of a verdict at full strength. */
 const MEAL = 1
 /** How long a half-eaten meal is remembered once the animal wanders off, seconds. */
@@ -55,7 +57,11 @@ export class DishWorld {
   time = 0
   concentration: number
   cuesReached = 0
-  /** Sim times at which cues were reached. */
+  /**
+   * Sim times of the most recent meals, for the last-minute rate. Capped:
+   * a lab runs for a whole session, and nothing in the world may grow with
+   * it. The whole-run rate uses the counter, not this list.
+   */
   reached: number[] = []
   harm = 0
   crossings = 0
@@ -241,6 +247,7 @@ export class DishWorld {
         if (outcome === 'nourish') {
           this.cuesReached++
           this.reached.push(this.time)
+          if (this.reached.length > REACHED_KEPT) this.reached.shift()
           this.meals.push({ x: eating.x, z: eating.z, t: this.time })
           if (this.meals.length > 6) this.meals.shift()
           kickModulator(w.mod, 'satiety', 0.05, this.time)
