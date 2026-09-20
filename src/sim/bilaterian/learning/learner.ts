@@ -216,7 +216,15 @@ export class Learner {
 
     // 5. Δbᵢ = η · xᵢ · Φ, for every connection, whatever Φ is.
     for (let i = 0; i < n; i++) this.changePerSecond[i] = weightChange(s.rate, this.eligibility[i], this.phi)
-    learnWeights(this.actor, this.changePerSecond.map((c) => c * dt), this.config.limits, s.competition)
+    // Weakening takes an excitatory connection toward nothing and never past
+    // it: a synapse can be depressed to silence, not into inhibition. Without
+    // this, a high rate overshoots through zero while the unit's recent
+    // average is still decaying, and coincidence appears to learn avoidance.
+    const limits =
+      s.factor === 'coincidence' && s.weakening
+        ? this.config.limits.map((lim, i) => (this.actor.weights[i] >= 0 ? { ...lim, min: Math.max(lim.min, 0) } : lim))
+        : this.config.limits
+    learnWeights(this.actor, this.changePerSecond.map((c) => c * dt), limits, s.competition)
 
     // 6. The critic's own connections are eligible connections too, and the
     //    same broadcast number reaches them.

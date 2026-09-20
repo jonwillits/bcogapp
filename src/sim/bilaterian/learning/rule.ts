@@ -95,7 +95,7 @@ export const WEIGHT_FLOOR = -3
  * means a unit that fires all the time weakens its own connections until it
  * does not.
  */
-export const WEAKENING_GAIN = 1.25
+export const WEAKENING_GAIN = 2
 /** How far back "lately" reaches, seconds. */
 export const USUAL_OUTPUT_TAU_S = 20
 
