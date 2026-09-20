@@ -74,6 +74,8 @@ export class LearningDish extends DishWorld {
   interval: number
   flags: Record<string, boolean>
   sites: Site[] = []
+  /** Which of the scenario's phases the dish is in. */
+  phase = 0
   /** Sites touched so far. A count, not a list. */
   trials = 0
   /** Seconds left of a "nothing arrived" now being resolved. */
@@ -95,6 +97,13 @@ export class LearningDish extends DishWorld {
     this.flags = { ...spec.flags, ...opts.flags }
     this.startWeights = [...actor.weights]
     this.weightTrace = actor.weights.map((b) => [b])
+    this.layOutSites()
+  }
+
+  /** Move the dish to another of the scenario's phases. The animal and its weights carry over; the sites do not. */
+  setPhase(k: number): void {
+    const n = this.scenario.learning.phases?.length ?? 1
+    this.phase = Math.max(0, Math.min(n - 1, k))
     this.layOutSites()
   }
 

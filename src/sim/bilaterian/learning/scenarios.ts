@@ -40,6 +40,8 @@ export interface LearningSpec {
   /** Switches the student can flip, with their labels and starting positions. */
   flags?: Record<string, boolean>
   flagLabels?: Record<string, string>
+  /** The phases a student steps the dish through, in order, where the scenario has them. */
+  phases?: { label: string; does: string }[]
   /** The sites the dish should hold now, given its switches. */
   sites?: (w: LearningDish) => SiteSpec[]
   /** The target the scenario holds for an input, where it holds one. Nothing in the animal holds it. */
@@ -62,6 +64,9 @@ const NEUTRAL = {
 function channels(...specs: { name: string; color: string; pursuitDrives?: boolean }[]): ChannelSpec[] {
   return specs.map((s, i) => ({ channel: i, name: s.name, color: s.color, pursuitDrives: s.pursuitDrives }))
 }
+
+/** The teacher counts a cue as present at half its ceiling. */
+const PRESENT = 0.5
 
 const plastic = { plastic: true, min: WEIGHT_FLOOR, max: WEIGHT_CEILING }
 const innate = { plastic: false, min: WEIGHT_FLOOR, max: WEIGHT_CEILING }
@@ -122,6 +127,42 @@ export const LEARNING_SCENARIOS: LearningScenario[] = [
         'the cues at a touched site dissolve after 1.5 s',
       ],
       show: { trace: false, discount: false, credit: false, twoEquations: false },
+    },
+  },
+  {
+    key: 'blocking',
+    part: 2,
+    title: 'Blocking',
+    blurb:
+      'Three phases, and you decide when each ends. First salt alone marks the food: run it until the salt weight stops climbing. Then almond odor is added at every site, with the food unchanged. Then almond odor alone, with nothing there. Run all three under one rule, write down both weights, press Reset, and run them again under the other.',
+    channels: channels(CHANNELS.food, NEUTRAL.salt, NEUTRAL.almond),
+    sources: [],
+    circuit: singleInterneuron([1, 0, 0], 0, SINGLE_CUE_THRESHOLD, 'forward'),
+    locks: { ...unlocked(3), weights: [true, false, false] },
+    open: { circuit: true, arithmetic: false, target: false, boundary: false },
+    onReach: () => 'ignore',
+    start: { x: 0, z: 0 },
+    learning: {
+      settings: { factor: 'coincidence' },
+      factors: ['coincidence', 'prediction', 'teacher', 'verdict'],
+      config: { limits: [innate, plastic, plastic], predicts: [false, true, true] },
+      outcomeChannel: 0,
+      phases: [
+        { label: 'Phase 1 — salt alone', does: 'salt marks a place; touching one brings food at once' },
+        { label: 'Phase 2 — salt and almond odor together', does: 'salt and almond odor mark the same places; touching one brings the same food' },
+        { label: 'Phase 3 — almond odor alone', does: 'almond odor marks a place; touching one brings nothing' },
+      ],
+      sites: (w) => {
+        const spec: SiteSpec = [
+          { cues: [1], payload: 'nourish' as const },
+          { cues: [1, 2], payload: 'nourish' as const },
+          { cues: [2], payload: 'nothing' as const },
+        ][w.phase]
+        return [spec, spec]
+      },
+      teacher: (x, w) => (w.phase < 2 && Math.max(x[1], x[2]) >= PRESENT ? 1 : Math.max(x[1], x[2]) > 0 ? 0 : null),
+      worldDoes: (w) => [w.scenario.learning.phases![w.phase].does],
+      show: { trace: true, discount: true, credit: false, twoEquations: true },
     },
   },
 ]

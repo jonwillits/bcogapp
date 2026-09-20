@@ -103,3 +103,25 @@ it('bounds', () => {
     }
   }
 })
+
+it('blocking', () => {
+  const minutesPerPhase = Number(process.env.PHASE_MIN ?? 4)
+  for (const factor of ['coincidence', 'prediction', 'teacher', 'verdict'] as const) {
+    for (const rate of [0.1, 0.3, 1]) {
+      const rows: string[] = []
+      for (let seed = 1000; seed < 1000 + SEEDS; seed++) {
+        const w = new LearningDish(seed, learningScenarioByKey('blocking'), { learning: { factor, rate, traceWindow: factor === 'verdict' ? 3 : 0 } })
+        const marks: string[] = []
+        for (let ph = 0; ph < 3; ph++) {
+          w.setPhase(ph)
+          const before = w.trials
+          w.run(60 * minutesPerPhase)
+          const b = w.worm.circuit.interneurons[0].weights
+          marks.push(`A ${f(b[1])} B ${f(b[2])} (${w.trials - before} trials)`)
+        }
+        rows.push(marks.join('  |  '))
+      }
+      console.log(`${factor} η=${rate}\n  ` + rows.join('\n  '))
+    }
+  }
+})
