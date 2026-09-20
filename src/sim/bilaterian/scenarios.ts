@@ -34,7 +34,8 @@ export interface SourceSpec {
   keepPlumesOut?: boolean
 }
 
-export type Outcome = 'nourish' | 'harm' | 'ignore'
+/** `nothing`: the animal stops to feed and there is nothing there. `ignore`: not something it can feed on. */
+export type Outcome = 'nourish' | 'harm' | 'nothing' | 'ignore'
 
 export interface TargetFunction {
   name: string

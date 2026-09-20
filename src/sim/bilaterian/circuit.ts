@@ -47,11 +47,16 @@ export interface WiringPatch {
 }
 
 /**
- * **The only code path that writes a stored weight, baseline, threshold or
- * route.** It is called from the Circuit tab's controls and from a scenario
- * loader, and from nowhere else — `noLearning.test.ts` walks the sim
- * directory and fails if anything else assigns to them. Nothing learns: the
- * student is the only thing in the room that can change a weight.
+ * **One of exactly two code paths that write a stored weight, and the only
+ * one that writes a baseline, a threshold or a route.** It is called from
+ * the Circuit tab's controls and from a scenario loader. In Lab 4 it was the
+ * only writer of anything — the student was the only thing in the room that
+ * could change a weight — and `noLearning.test.ts` said so. Module 5 retired
+ * that test on purpose: the second writer is the learning rule's
+ * `learnWeights` in `learning/rule.ts`, and `learning/oneWriter.test.ts`
+ * walks the sim directory and fails if a third appears. With no learning
+ * layer attached, Lab 4 runs bit-for-bit as it shipped
+ * (`learning/lab4Regression.test.ts`).
  */
 export function setWiring(c: Circuit, patch: WiringPatch): void {
   const j = patch.interneuron ?? 0

@@ -46,6 +46,7 @@ export interface SensoryCell {
    */
   pursuitDrives: boolean
   hungerSilences: boolean
+  internal: boolean
   /** Concentration at the head. */
   concentration: number
   /** The modulator gain currently applied to this cell's output. */
@@ -66,6 +67,12 @@ export interface ChannelBiology {
   pursuitDrives?: boolean
   /** A hungry animal's chemistry turns this cell down. */
   hungerSilences?: boolean
+  /**
+   * The cell reports something about the animal's situation that is not a
+   * concentration at its head — which dish it is in, say. The world drives it
+   * through `Worm.internalDrive`. Lab 4 has none.
+   */
+  internal?: boolean
 }
 
 // ---- the body, the cells, the rule, the motor groups ---------------------
@@ -179,6 +186,8 @@ export class Worm {
   pauseLeft = 0
   /** A world may slow the animal — inside decaying matter, say. */
   speedFactor = 1
+  /** What the world is currently telling each internal cell, 0..1, by cell index. */
+  internalDrive: number[] = []
 
   // Live readouts, one per interneuron.
   net: number[]
@@ -219,6 +228,7 @@ export class Worm {
       channel: b.channel,
       pursuitDrives: !!b.pursuitDrives,
       hungerSilences: !!b.hungerSilences,
+      internal: !!b.internal,
       concentration: 0,
       gain: 1,
       output: 0,
@@ -293,8 +303,8 @@ export class Worm {
 
     // 1. Sense, at the head, one cell per channel.
     const c = concentrations(this.head.x, this.head.z, sources, scaleOf)
-    for (const cell of this.cells) {
-      cell.concentration = c[cell.channel]
+    for (const [i, cell] of this.cells.entries()) {
+      cell.concentration = cell.internal ? (this.internalDrive[i] ?? 0) * CEILING_AT : c[cell.channel]
       cell.gain = (cell.pursuitDrives ? lv.pursuit : 1) * (cell.hungerSilences ? lv.satiety : 1)
       cell.output = sensoryOutput(cell.concentration, cell.gain)
       cell.now += ((cell.output - cell.now) * dt) / TUNING.nowTau
