@@ -97,7 +97,7 @@ export function ChemistryTab(s: SceneState) {
               )}
               <Row
                 label="Held by the reverse group’s loop"
-                value={held === null ? 'not running' : `running ${held.toFixed(1)} s since its trigger`}
+                value={held === null ? 'not running' : `running, ${held.toFixed(1)} s`}
               />
             </div>
             <Note>

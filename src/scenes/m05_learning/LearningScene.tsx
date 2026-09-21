@@ -1,4 +1,5 @@
 import { useReducer, useRef, useState } from 'react'
+import { Button } from '../../components/controls'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Grid } from '@react-three/drei'
 import { SceneCanvasLayout } from '../../components/SceneCanvasLayout'
@@ -15,7 +16,7 @@ import { WormMesh, CueFieldMesh, MealMarks } from '../m04_bilaterian/meshes'
 import { CircuitTab } from '../m04_bilaterian/CircuitTab'
 import { ChemistryTab } from '../m04_bilaterian/ChemistryTab'
 import type { SceneState } from '../m04_bilaterian/BilaterianScene'
-import { WorldTab } from './WorldTab'
+import { WorldTab, placeable } from './WorldTab'
 import { LearningTab } from './LearningTab'
 import { WeightTraceSection, DopamineControls, DopamineReadouts } from './instruments'
 
@@ -24,6 +25,7 @@ export type Tab = 'world' | 'circuit' | 'learning' | 'chemistry'
 const MAX_STEP_S = 1 / 30
 /** Simulated seconds of a skip paid per frame. */
 const SKIP_SLICE_S = 30
+const SKIP_BADGE_MS = 1200
 
 export interface LearningSceneState {
   world: LearningDish
@@ -77,6 +79,7 @@ export default function LearningScene() {
   const [seed, setSeed] = useState(() => randomSeed())
   const [placeChannel, setPlaceChannel] = useState(0)
   const [, bump] = useReducer((x: number) => x + 1, 0)
+  const [skipped, setSkipped] = useState({ seconds: 0, until: 0 })
   const worldRef = useRef<LearningDish | null>(null)
 
   if (!worldRef.current) worldRef.current = new LearningDish(seed, LEARNING_SCENARIOS[0])
@@ -104,8 +107,9 @@ export default function LearningScene() {
   }
 
   const loadScenario = (key: string) => {
-    worldRef.current = new LearningDish(seed, learningScenarioByKey(key), { concentration: world.concentration })
-    setPlaceChannel(0)
+    const next = learningScenarioByKey(key)
+    worldRef.current = new LearningDish(seed, next, { concentration: world.concentration })
+    setPlaceChannel(placeable(next)[0]?.channel ?? 0)
     bump()
   }
 
@@ -118,6 +122,10 @@ export default function LearningScene() {
   const skip = (seconds: number) => {
     const owedAlready = world.skipRemaining > 0
     world.skipAhead(seconds)
+    // The skip itself takes a few hundredths of a second, too brief to read.
+    // The badge stays up a second so a student sees that something happened, and how much.
+    setSkipped((was) => ({ seconds: (owedAlready || Date.now() < was.until ? was.seconds : 0) + seconds, until: Date.now() + SKIP_BADGE_MS }))
+    setTimeout(bump, SKIP_BADGE_MS + 30)
     bump()
     if (owedAlready) return
     const pay = () => {
@@ -218,7 +226,7 @@ export default function LearningScene() {
           <Stepper world={world} scale={playing ? speed : 0} onAdvance={bump} />
           <CameraRig target={[0, 0, 0]} />
         </Canvas>
-        {world.skipRemaining > 0 && (
+        {(world.skipRemaining > 0 || Date.now() < skipped.until) && (
           <div
             style={{
               position: 'absolute',
@@ -234,7 +242,11 @@ export default function LearningScene() {
               whiteSpace: 'nowrap',
             }}
           >
-            <b>Skipping ahead</b> — {world.skipRemaining.toFixed(0)} s to go
+            {world.skipRemaining > 0 ? (
+              <><b>Skipping ahead</b> — {world.skipRemaining.toFixed(0)} s to go</>
+            ) : (
+              <><b>Skipped ahead {formatSkip(skipped.seconds)}</b> — run time is now {world.time.toFixed(0)} s</>
+            )}
           </div>
         )}
         </>
@@ -242,18 +254,29 @@ export default function LearningScene() {
       left={slots.left}
       right={slots.right}
       bottom={
-        <StepControls
-          playing={playing}
-          onPlayPause={() => setPlaying((p) => !p)}
-          onStep={() => {
-            world.step(MAX_STEP_S)
-            bump()
-          }}
-          onReset={() => reset(seed)}
-          speed={speed}
-          onSpeedChange={setSpeed}
-          maxSpeed={8}
-        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+          <StepControls
+            playing={playing}
+            onPlayPause={() => setPlaying((p) => !p)}
+            onStep={() => {
+              world.step(MAX_STEP_S)
+              bump()
+            }}
+            onReset={() => reset(seed)}
+            speed={speed}
+            onSpeedChange={setSpeed}
+            maxSpeed={8}
+          />
+          {/* Beside the transport, where it cannot scroll out of sight: on the
+              World tab it sat below the fold at a large font size. */}
+          <div style={{ display: 'flex', gap: 6, pointerEvents: 'auto' }}>
+            {SKIPS.map((k) => (
+              <Button key={k.label} onClick={() => skip(k.seconds)} title="Run the dish forward without drawing it. Nothing is left out: the traces record straight through.">
+                {k.label}
+              </Button>
+            ))}
+          </div>
+        </div>
       }
     />
   )
@@ -288,6 +311,16 @@ function LaneMesh({ lane, colors, live }: { lane: LaneSpec; colors: string[]; li
       )}
     </group>
   )
+}
+
+export const SKIPS = [
+  { label: 'Skip ahead 1 min', seconds: 60 },
+  { label: 'Skip ahead 3 min', seconds: 180 },
+] as const
+
+function formatSkip(seconds: number): string {
+  const m = seconds / 60
+  return `${Number.isInteger(m) ? m : m.toFixed(1)} minute${m === 1 ? '' : 's'}`
 }
 
 /** The wiring a run of this world started from. */

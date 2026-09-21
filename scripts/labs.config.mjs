@@ -241,7 +241,7 @@ export const LABS = [
       'What the world does', 'Go to phase 1', 'Go to phase 2', 'Go to phase 3', 'Interval between the touch and the food',
       'A second cue, almond odor, at every site', 'Almond odor marks the food (off: salt does)',
       'Wait', 'Move to the second dish', 'Deliver one outcome', 'Response to salt alone, here and now',
-      'Sites touched', 'Touched and found nothing', 'Harm', 'Reset', 'New seed', 'Skip ahead 1 minute', 'Skip ahead 3 minutes',
+      'Sites touched', 'Touched and found nothing', 'Harm', 'Reset', 'New seed', 'Skip ahead 1 min', 'Skip ahead 3 min',
       'The weight trace', 'at the start', 'run started',
       'Learning on', 'Coincidence', 'Prediction', 'Teacher', 'Verdict', 'learning rate η', 'eligibility trace window',
       'discount γ, per second of delay', 'Weakening (long-term depression)', 'Competition',

@@ -10,22 +10,22 @@ Written 2026-09-20 by the session that built `m05-learning`, from the shipped co
 
 ## 1. Every control, as it shipped
 
-Four tabs: **World**, **Circuit**, **Learning**, **Chemistry**. The transport bar at the bottom is Lab 4's (play/pause, step, reset, **speed 0.25× to 8×**, where Lab 4 stopped at 3×).
+Four tabs: **World**, **Circuit**, **Learning**, **Chemistry**. The transport bar at the bottom is Lab 4's (play/pause, step, reset, **speed 0.25× to 8×**, where Lab 4 stopped at 3×), with two buttons beside it that are on screen on every tab: **Skip ahead 1 min** and **Skip ahead 3 min**. Presses add up, they work while paused, and a badge over the dish reads *Skipped ahead 3 minutes — run time is now 182 s* for about a second afterward.
 
 ### World tab (left panel, "The world")
 
 | Name on screen | Range | Default | Where it appears |
 |---|---|---|---|
-| **Scenario** | six entries, listed as "Part 1 — Hand the weights over" and so on | Hand the weights over | always |
+| **Scenario** | six entries, lettered because two share Part 1 and two share Part 2: *Part 1a — Hand the weights over*, *Part 1b — Salt, then food*, *Part 2a — Blocking*, *Part 2b — Four signals, one problem*, *Part 3 — The corridor*, *Closer — Extinction* | Hand the weights over | always |
 | **Go to phase 1 / 2 / 3** (buttons, under *The phases*), with **Now in** printing the phase's label | — | phase 1 | `blocking` (three), `extinction` (two) |
 | **Wait**, **Move to the second dish** (becomes **Move back to the first dish**), **Deliver one outcome** (under *The three returns*) | — | — | `extinction` only |
 | **Interval between the touch and the food** | 0 to 10 s, step 0.5 | 0.0 s | `pairing` only |
 | **A second cue, almond odor, at every site** (toggle) | — | off | `pairing` only |
 | **Almond odor marks the food (off: salt does)** (toggle) | — | off | `four-signals` only |
 | **Cue concentration (the plumes)** | 0.25× to 2.5× | 1.00× | always; it scales plumes that come and go, which in this lab means `hand-over`'s food plumes and nothing else |
-| **Source to place on a click** | the scenario's cues | food odor | always; a placed source is a cue by itself and carries nothing |
+| **Source to place on a click** | the scenario's cues, **without food odor wherever food is delivered at sites** (everywhere but `hand-over`) | the first cue listed: food odor in `hand-over`, salt elsewhere | always; a placed source is a cue by itself and carries nothing, which is how a student tests whether a cue alone now draws the animal |
 | **Reset**, **New seed**, run seed printed | — | random seed | always |
-| **Skip ahead 1 minute**, **Skip ahead 3 minutes** | — | — | always; a badge over the dish reads *Skipping ahead — N s to go* for the instant it takes. Presses add up. Works while paused |
+
 
 **Reset behaves differently from Lab 4 and the handout must say so.** It starts the run again with every control where the student left it and **the weights back where the run started**. A weight set by hand on the Circuit tab counts as a new start. Changing phase, flipping a toggle or moving the interval does not reset anything.
 
@@ -35,7 +35,7 @@ Right panel, "This world": **What the world does** (one line per rule of the dis
 
 Lab 4's, unchanged, with the wiring section retitled **Wiring — yours to set, and now the rule's to change** and one section added at the top of the right panel:
 
-- **The weight trace** — every stored weight over the last 10 minutes on one axis from −3 to 3, a zero line, a vertical **run started** mark while the start is still on the plot, a dotted line at each weight's starting value, and a row per weight reading *at the start 1.00 · now 1.82*. An innate connection is drawn dashed and labeled *(innate: the rule cannot move it)*.
+- **The weight trace** — every stored weight over **the last five minutes** on one axis from −3 to 3, with the time axis labeled in minutes and seconds of run time. It grows from the left and then scrolls; it is never squeezed to fit a longer run, so the **run started** mark leaves the left edge after five minutes (Jon's call: squeezing makes changes harder to see). A zero line, a dotted line at each weight's starting value, and a row per weight reading *at the start 1.00 · now 1.82*. An innate connection is drawn dashed and labeled *(innate: the rule cannot move it)*.
 
 The weight sliders stay live in every scenario for every connection the rule can move. The food-odor weight is locked (printed, not slid) in the five scenarios where it is the innate outcome pathway; in `hand-over` it is the one plastic weight and is a slider.
 
@@ -157,6 +157,22 @@ So the time a part takes is now reading, setting controls and writing, which is 
 14. **Skip-ahead buttons, and speed to 8×**, for the reason in §4. Neither is in the spec.
 15. **Lab 4's files changed, inertly.** `worm.ts`, `dishWorld.ts`, `fields.ts`, `scenarios.ts` and `circuit.ts` gained hooks (a source may carry its own consequence; reaching one may deliver nothing; a cell may be driven from inside the animal and then does not steer; a lane; per-step news), and Lab 4's three tab components gained four optional slots. `lab4Regression.test.ts` holds all seven scenarios and six animals to the trajectory they ran at `9ebfc77`, to the last bit.
 
-## 6. Not verifiable from the scripted session
+## 6. Jon's walk-through, 2026-09-21, and what it leaves for the handout
+
+Jon walked `LAB_5_WALKTHROUGH.md` (beside the scene spec in the course folder) and every prediction held. Changed in the app as a result: Skip ahead moved beside the transport bar (at a large font size it sat below the fold on the World tab) and its badge now stays a second; the weight trace got a fixed five-minute window and a labeled time axis; the scenario menu is lettered; food odor can no longer be placed by a click where food is delivered at sites (a placed one could not be eaten and read as a bug); and Lab 4's *Held by the reverse group's loop* row no longer changes height as it updates.
+
+**Rulings the handout has to carry:**
+
+- **Warn against a very low or negative starting weight in `hand-over`.** The change is η·x·y and y only fires once b₁x passes 0.35, so at b₁ = 0.1 almost nothing happens, and at a negative b₁ nothing ever does: the animal never approaches, the unit never fires, and the rule has nothing to multiply. That is §5.2.1's limitation exactly, and worth a question of its own, but a student who wanders into it by accident in the opening minutes will think the scene is broken. Tell them to leave b₁ at 1.00 for the first run.
+- **Ask about the dopamine trace dipping at each poisoned meal in `hand-over`** while nothing uses it. Jon: worth asking.
+- **Say in the handout that the two traces in `pairing` with the second cue lie exactly on top of each other**, since only one line is visible.
+- **`four-signals`: three minutes before the flip and three after**, and a heads-up — without giving the result away — that at 1× this is slow and Skip ahead is what to use. The scenario's own blurb now says so too.
+- **`blocking`: "until the weight stops climbing"**, not a fixed time. Interval: use 10 s in `pairing`.
+- **Do not ask students to find the bystander gaining credit at a wide trace window**; it does not.
+- **Explain, rather than change:** that the animal keeps approaching salt after extinction (approach steers on the salt weight; what extinguishes is the verdict), and that context connections can only become inhibitory.
+- The delivered meal in `extinction` can take half a minute to land at 1×; say so, and that it can be sped up.
+- The actor's weights and the critic's values being the same numbers: Jon is unsure and thinks it is acceptable. No question should depend on them coming apart.
+
+## 7. Not verifiable from the scripted session
 
 The in-app browser does animate this scene (the traces moved during the check), but motion was not judged. For Jon at `localhost:5173/#/m05-learning`, with the crib from `npm run closeout m05-learning`: the lane's walls and three colored strips, and that a strip brightens when the animal is on it; the pink wash when the vibration passes; the violet tint of the second dish; that a touched site's cue visibly dissolves before food appears at a 10 s interval; that the animal visibly climbs to salt once salt has weight; the run-started mark and dotted start lines on the weight trace; and that six sensory cells fit on the circuit diagram in `extinction`.

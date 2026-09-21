@@ -219,7 +219,7 @@ export const LEARNING_SCENARIOS: LearningScenario[] = [
     part: 2,
     title: 'Four signals, one problem',
     blurb:
-      'One learning problem, held still while you change the rule. Two sites are marked by salt and two by almond odor; one kind holds food and the other holds nothing. Run each of the four settings from Reset, and record what each learns. Then flip which cue marks the food, mid-run, and record what each does about it.',
+      'One learning problem, held still while you change the rule. Two sites are marked by salt and two by almond odor; one kind holds food and the other holds nothing. Run each of the four settings from Reset, and record what each learns. Then flip which cue marks the food, mid-run, and record what each does about it. Learning here takes minutes of dish time, because the animal touches a site only two or three times a minute: give each setting about three minutes before the flip and three after, with Skip ahead.',
     channels: channels(CHANNELS.food, NEUTRAL.salt, NEUTRAL.almond),
     sources: [],
     circuit: singleInterneuron([1, 0, 0], 0, SINGLE_CUE_THRESHOLD, 'forward'),

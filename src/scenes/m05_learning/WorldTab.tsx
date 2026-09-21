@@ -8,11 +8,24 @@ import { Note, Row, GroupLabel, PANEL_STYLE, RIGHT_STYLE } from '../m04_bilateri
 import { TabBar, type LearningSceneState } from './LearningScene'
 import { TIER_FOUR_LINE } from './labels'
 
-const PART_LABEL: Record<string, string> = { 1: 'Part 1', 2: 'Part 2', 3: 'Part 3', closer: 'Closer' }
-export const SKIPS = [
-  { label: 'Skip ahead 1 minute', seconds: 60 },
-  { label: 'Skip ahead 3 minutes', seconds: 180 },
-] as const
+/** Two scenarios share Part 1 and two share Part 2, so the menu letters them. */
+const MENU_LABEL: Record<string, string> = {
+  'hand-over': 'Part 1a',
+  pairing: 'Part 1b',
+  blocking: 'Part 2a',
+  'four-signals': 'Part 2b',
+  corridor: 'Part 3',
+  extinction: 'Closer',
+}
+/**
+ * What a click may place: any cue with a field, except — where the scenario
+ * delivers food at sites — the food odor, which there is what food smells
+ * like when it arrives and not a cue that can sit in the dish with no food under it.
+ */
+export function placeable(scenario: LearningSceneState['scenario']) {
+  return scenario.channels.filter((c) => !c.internal && c.channel !== scenario.learning.outcomeChannel)
+}
+
 export const INTERVAL_RANGE = { min: 0, max: 10, step: 0.5 } as const
 
 /**
@@ -35,7 +48,7 @@ export function WorldTab(s: LearningSceneState) {
       <SelectControl
         label="Scenario"
         value={scenario.key}
-        options={LEARNING_SCENARIOS.map((sc) => ({ value: sc.key, label: `${PART_LABEL[String(sc.part)]} — ${sc.title}` }))}
+        options={LEARNING_SCENARIOS.map((sc) => ({ value: sc.key, label: `${MENU_LABEL[sc.key]} — ${sc.title}` }))}
         onChange={(k) => s.loadScenario(k)}
       />
       <Note>{scenario.blurb}</Note>
@@ -146,7 +159,7 @@ export function WorldTab(s: LearningSceneState) {
       <SelectControl
         label="Source to place on a click"
         value={String(s.placeChannel)}
-        options={scenario.channels.filter((c) => !c.internal).map((c) => ({ value: String(c.channel), label: c.name }))}
+        options={placeable(scenario).map((c) => ({ value: String(c.channel), label: c.name }))}
         onChange={(v) => s.setPlaceChannel(Number(v))}
       />
       <Note>Click the floor to place a source of that cue; right-click removes the nearest. A placed source stays put and carries nothing: it is a cue by itself.</Note>
@@ -159,20 +172,8 @@ export function WorldTab(s: LearningSceneState) {
           <Button onClick={() => s.reset(randomSeed())}>New seed</Button>
         </div>
       </div>
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        {SKIPS.map((k) => (
-          <Button
-            key={k.label}
-            onClick={() => {
-              s.skip(k.seconds)
-            }}
-          >
-            {k.label}
-          </Button>
-        ))}
-      </div>
       <Note>
-        <b>Skip ahead</b> runs the dish forward without drawing it, which takes about a second whatever machine you are on. Nothing is left out: the weight trace and every counter record straight through it. Use it whenever an instruction says to run for some minutes.
+        <b>Skip ahead</b>, beside the play button at the bottom of the screen, runs the dish forward without drawing it. It takes about a second whatever machine you are on, and nothing is left out: the weight trace and every counter record straight through it. At 1× speed some of this lab’s runs take minutes; use it whenever you are told to run for some minutes.
       </Note>
       <Note>
         Reset starts the run again with every control where you left it and <b>the weights back where the run started</b>, so two runs that differ in one setting can be compared. Camera: <b>W A S D</b> to move · <b>arrow keys</b> to rotate.

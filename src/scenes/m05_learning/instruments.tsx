@@ -1,12 +1,14 @@
 import { Section } from '../../components/Section'
 import { fmt } from '../../components/format'
 import { Note, Row } from '../m04_bilaterian/BilaterianScene'
-import { WEIGHT_TRACE_LEN, SIGNAL_TRACE_LEN, WEIGHT_SAMPLE_S, type LearningDish } from '../../sim/bilaterian/learning/learningDish'
+import { SIGNAL_TRACE_LEN, WEIGHT_SAMPLE_S, type LearningDish } from '../../sim/bilaterian/learning/learningDish'
 import { WEIGHT_CEILING, WEIGHT_FLOOR } from '../../sim/bilaterian/learning/rule'
 import { LinePlot, Legend } from './plots'
 import { DOPAMINE_EVIDENCE_LINE, SIGNAL_COLORS } from './labels'
 
 const SUB = '₁₂₃₄₅₆'
+/** The weight trace shows the last five minutes and scrolls; it is never squeezed to fit a longer run. */
+const WEIGHT_WINDOW = 600
 
 /**
  * The weight trace — the instrument the whole lab is read through. Every
@@ -21,13 +23,15 @@ export function WeightTraceSection({ world }: { world: LearningDish }) {
   return (
     <Section title="The weight trace" defaultOpen hint="Every stored weight over the run. Nobody is touching a slider.">
       <LinePlot
-        series={world.weightTrace.map((data, i) => ({ color: channels[i].color, data, dashed: !limits[i].plastic }))}
+        series={world.weightTrace.map((data, i) => ({ color: channels[i].color, data: data.slice(-WEIGHT_WINDOW), dashed: !limits[i].plastic }))}
         references={world.startWeights.map((value, i) => ({ value, color: channels[i].color }))}
         yMin={WEIGHT_FLOOR}
         yMax={WEIGHT_CEILING}
-        capacity={WEIGHT_TRACE_LEN}
+        capacity={WEIGHT_WINDOW}
+        height={124}
         zeroLine
-        startMark
+        startMark={world.weightTrace[0].length <= WEIGHT_WINDOW}
+        timeAxis={{ now: world.time, secondsPerSample: WEIGHT_SAMPLE_S }}
       />
       <Legend items={channels.map((c, i) => ({ color: c.color, label: `b${SUB[i]} ${c.name}` }))} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
@@ -40,7 +44,7 @@ export function WeightTraceSection({ world }: { world: LearningDish }) {
         ))}
       </div>
       <Note>
-        The plot holds the last {Math.round((WEIGHT_TRACE_LEN * WEIGHT_SAMPLE_S) / 60)} minutes. Dotted lines are where each weight started. The sliders on the left stay live: set a weight by hand and the rule carries on from there, and Reset will start from it.
+        The plot shows the last {Math.round((WEIGHT_WINDOW * WEIGHT_SAMPLE_S) / 60)} minutes of the run, in minutes and seconds of run time, and scrolls once a run is longer than that: the <i>run started</i> mark then moves off the left edge. Dotted lines are where each weight started, and stay. The sliders on the left stay live: set a weight by hand and the rule carries on from there, and Reset will start from it.
       </Note>
     </Section>
   )
