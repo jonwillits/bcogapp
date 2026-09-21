@@ -173,6 +173,8 @@ export const scenes: SceneManifest[] = [
     lab: {
       rawUrl: `${INTRO_RAW}/learning_and_plasticity/learning_lab/learning_lab.md`,
       sourceUrl: `${INTRO_BLOB}/learning_and_plasticity/learning_lab/learning_lab.md`,
+      reportUrl: `${INTRO_BLOB}/learning_and_plasticity/learning_lab/learning_lab_report.docx`,
+      reportLabel: 'Lab 5 report (.docx)',
     },
   },
 ]

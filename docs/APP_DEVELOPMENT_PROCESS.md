@@ -54,6 +54,7 @@ Jon walks it, edits it in place, and hands back notes. The handout (Phase 3) is 
 ### Phase 3 — Author the handout *(labs only)*
 - Write/adapt `intro_to_bcs/<module>/<module>_lab.md` per the course [`WEEK_DEVELOPMENT_PROCESS.md`](../../WEEK_DEVELOPMENT_PROCESS.md) Phase 4 (activity-based, references the reading/lectures, points at the in-app scene rather than an external URL).
 - Make sure every question the handout asks maps to something the scene actually lets the student see/measure.
+- **The handout points at the reading; the reading and the lectures never point at the lab** (Jon's standing rule, recorded 2026-09-22). A lab is the artifact most likely to change, and a chapter or deck that names it has to change with it. So no "see the lab" sentence is ever owed by a chapter, and any such item in a tracker is a mistake to remove, not a debt to pay.
 - If graded, create/point to the rubric in `course_admin/grading_guides/`.
 
 ### Phase 4 — Test on the binding platform
