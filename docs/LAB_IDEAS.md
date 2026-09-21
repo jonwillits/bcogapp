@@ -15,7 +15,7 @@ The starting backlog: existing labs that lean on third-party sites we'd bring in
 | 7 Pattern Recognition | Pattern recognition | **TensorFlow Playground** (external site) | 2D | Recreating a focused subset gives us control + course-aligned framing. |
 | 13 Language | Animal communication | YouTube videos + Hockett-features worksheet | — | Observation/discussion, not a sim — likely **stays** as handout + links, not an app piece. |
 
-Labs with **no external interactive site today** (candidates for new interactive pieces, or fine as-is): Module 3 Neurons, Module 5 Learning (rock–paper–scissors RL), Module 9 Spatial Cognition, Module 10 Memory (recognition experiment), Module 11 Social Cognition (prisoner's dilemma), Module 14 Symbolic Cognition (logic lab).
+Labs with **no external interactive site today** (candidates for new interactive pieces, or fine as-is): Module 9 Spatial Cognition, Module 10 Memory (recognition experiment), Module 11 Social Cognition (prisoner's dilemma), Module 14 Symbolic Cognition (logic lab).
 
 ## Per-module idea board
 
@@ -49,7 +49,7 @@ Fill these in as we talk. Canonical module list: `../../../intro_to_bcs/README.m
 - ~~**Logic-gate neural net** — Render **2D** — port of the python 4-neuron network: pick a truth table, train, watch weights/decision boundary.~~ Superseded by the scene above; the training is explicitly out.
 
 ### Module 5 — Learning and Plasticity
-- **Learning** (`#/m05-learning`) — **built 2026-09-20**, on the branch `m05-learning`. Lab 4's bilaterian in Lab 4's dish with one thing added: the weights can change by themselves. One rule, Δbᵢ = η·xᵢ·Φ, with a selector for what supplies Φ (the unit's own output, a held prediction's error, a target the scenario holds, one broadcast number). Six scenarios: `hand-over` (the rule is on and the animal is poisoned anyway), `pairing`, `blocking` (the separating experiment), `four-signals`, `corridor` (value seeping backward; a rule this animal does not have, and the panel says so), `extinction` (three returns, no weight that decays). The handout is written from the built scene; the record for it is [`M05_AS_BUILT_NOTES.md`](M05_AS_BUILT_NOTES.md).
+- **Learning** (`#/m05-learning`) — **live 2026-09-21** (built 2026-09-20, walked and handout written 2026-09-21). Lab 4's bilaterian in Lab 4's dish with one thing added: the weights can change by themselves. One rule, Δbᵢ = η·xᵢ·Φ, with a selector for what supplies Φ (the unit's own output, a held prediction's error, a target the scenario holds, one broadcast number). Six scenarios: `hand-over` (the rule is on and the animal is poisoned anyway), `pairing`, `blocking` (the separating experiment), `four-signals`, `corridor` (value seeping backward; a rule this animal does not have, and the panel says so), `extinction` (three returns, no weight that decays). Handout: `intro_to_bcs/learning_and_plasticity/learning_lab/learning_lab.md`, 29 questions, written from [`M05_AS_BUILT_NOTES.md`](M05_AS_BUILT_NOTES.md) after Jon's walk-through. Owed: the rubric.
 - ~~The worms are now early vertebrates, probably fish~~ — retired. The fish is Module 7's; see the spine amendment in [`APP_DESIGN.md`](APP_DESIGN.md).
 - ~~Rock–paper–scissors reinforcement learning~~ — the legacy lab, superseded entirely.
 

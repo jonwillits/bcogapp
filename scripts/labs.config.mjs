@@ -220,13 +220,12 @@ export const LABS = [
     handout: 'learning_and_plasticity/learning_lab/learning_lab.md',
     report: 'learning_and_plasticity/learning_lab/learning_lab_report.docx',
     /**
-     * The handout was written FROM the built scene (decided 2026-09-20; drafted
-     * 2026-09-21 after Jon's walk-through). Until it is pushed the app's Lab
-     * pane says so. The claims below are the claims the SCENE makes true:
-     * the statements about what a student will see that a passing test
-     * guarantees. The handout may assert these and nothing it cannot find here.
+     * The handout was written FROM the built scene (decided 2026-09-20; live
+     * 2026-09-21 after Jon's walk-through), so the claims below are still
+     * phrased as what the SCENE makes true — the statements about what a
+     * student will see that a passing test guarantees — and the handout
+     * asserts nothing it could not find here.
      */
-    handoutPending: true,
 
     retired: [
       { term: /\bfish\b/gi, why: 'the animal is Lab 4’s bilaterian; the fish is Module 7’s' },
@@ -287,7 +286,6 @@ export const LABS = [
       { says: 'Throughout: with learning off this is Lab 4, to the last bit', test: 'reproduces bit-for-bit: every scenario and every animal' },
       { says: 'Throughout: Skip ahead is the same run as watching it, and the traces record through it', test: 'a skip paid down a slice per frame is the same run as one paid at once' },
       { says: 'the weight trace shows a run-started mark and at-the-start values', test: null },
-      { says: 'the Lab button says the handout is not published yet instead of failing', test: null },
     ],
 
     crib: 'crib: what the weight trace and the signal trace should do',

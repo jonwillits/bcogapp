@@ -101,7 +101,7 @@ export const scenes: SceneManifest[] = [
     blurb:
       'Wire two sensors to two actuators and watch approach/avoid behavior emerge. The first stage of the evolving-creature engine.',
     mode: 'both',
-    status: 'building',
+    status: 'done',
     Component: VehiclesScene,
     lab: {
       rawUrl: `${INTRO_RAW}/mind_and_brain/levels_of_analysis_lab/vehicles_lab.md`,
@@ -117,7 +117,7 @@ export const scenes: SceneManifest[] = [
     blurb:
       'The Lab 1 vehicles, now with a genome they inherit and mutate. Watch a population adapt, take the process apart, then work out why two evolved populations are alike.',
     mode: 'both',
-    status: 'building',
+    status: 'done',
     Component: EvolutionScene,
     lab: {
       rawUrl: `${INTRO_RAW}/comparative_approaches/evolution_lab/evolution_lab.md`,
@@ -133,7 +133,7 @@ export const scenes: SceneManifest[] = [
     blurb:
       'The Lab 1 vehicle with a real neuron inside its connection — shown three ways, at three time scales, as one cell. Then four sick vehicles to diagnose.',
     mode: 'both',
-    status: 'building',
+    status: 'done',
     Component: NeuronScene,
     lab: {
       rawUrl: `${INTRO_RAW}/neurons_and_neural_communication/neuron_lab/neuron_lab.md`,
@@ -149,7 +149,7 @@ export const scenes: SceneManifest[] = [
     blurb:
       'The vehicle becomes a nematode-like early bilaterian with a layered nervous system. Set its weights by hand until it satisfies a truth table, then work out whether another animal’s odd behavior came from its wiring or its chemistry. The second stage of the evolving-creature engine.',
     mode: 'both',
-    status: 'building',
+    status: 'done',
     Component: BilaterianScene,
     lab: {
       rawUrl: `${INTRO_RAW}/neural_circuits_affect_and_valence/bilaterian_lab/bilaterian_lab.md`,
@@ -165,15 +165,14 @@ export const scenes: SceneManifest[] = [
     blurb:
       'Lab 4’s animal in Lab 4’s dish, with one thing added: the weights can now change by themselves. Hand them over to a rule, find out why that alone does not fix the animal, and then choose what a weight change is allowed to depend on. The same stage of the evolving-creature engine, configured to learn.',
     mode: 'both',
-    status: 'building',
+    status: 'done',
     Component: LearningScene,
-    // The handout is written from the built scene and does not exist yet.
-    // Until it lands at this path the Lab pane says so and offers the link;
-    // when it lands, the button starts working with no change here.
+    // The handout was written from the built scene and landed 2026-09-21.
+    // `notYet` stays as the message for a failed fetch, since the fallback
+    // for a handout that exists is Lab 4's, with a link to sourceUrl.
     lab: {
       rawUrl: `${INTRO_RAW}/learning_and_plasticity/learning_lab/learning_lab.md`,
       sourceUrl: `${INTRO_BLOB}/learning_and_plasticity/learning_lab/learning_lab.md`,
-      notYet: 'The handout for this lab has not been published yet. The simulation is complete and can be explored without it; the instructions will appear here when they are ready.',
     },
   },
 ]
