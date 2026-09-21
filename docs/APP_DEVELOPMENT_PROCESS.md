@@ -39,6 +39,18 @@ A demo used only for lecture may be just the scene plus a tracker entry — no h
 - Keep parameters exposed and legible; match the course palette/typography from `src/theme/`.
 - **Measure every synchronous path before it ships, and keep the probe.** Write a `timing.probe.ts` beside the sim (Module 4's is the pattern) that times scene construction, any head start or warm-up, one fixed step, one frame at the maximum speed, one second of simulation, and every instrument the panels compute per render or on a slider change. Anything over about 300 ms on a click path or in a render, after multiplying by four for a student laptop, gets the Lab 3 treatment: made incremental across frames with a progress badge, bit-identical to the one-shot version, with a test that says so (`NeuronWorld.warmUp` / `fastForward` and `NeuronScene`'s `WarmUpBadge`). Check the frame loop's clamp and step cap while you are there, and that no per-step list grows without a cap. The reasoning is in `APP_DESIGN.md` under hard requirements.
 
+### Phase 2.5 — The walk-through document *(labs; as soon as the first draft runs)*
+
+**When the first draft of a lab scene is up and running — every scenario loads, the acceptance tests pass — the build session writes a walk-through document before anything else happens.** Not the handout, not a merge, not a push. Motion cannot be verified headlessly, the person who knows what the lab is for has not seen it yet, and every lab so far changed after Jon first watched it (Lab 4: sixteen of eighteen predictions held, and the two that did not were real).
+
+- It is a Markdown file **beside the scene spec in the course folder**, `course_creation/labs/NN_<module>/LAB_N_WALKTHROUGH.md`, so Jon can edit it inline. This is the one file a build session writes into the course folder; say so when you do it.
+- **At the top: the exact command that starts it running, and the local URL**, including the branch to check out and the route. Then the close-out command that reprints the predictions.
+- Then a checklist, one section per scenario plus the shell, wording, and the previous lab's regression. **Every item is a prediction to check against — a count, a time, a value, a thing that should NOT happen — never "does it look right".** Take the numbers from the crib probe, with the seeds they were measured over. Flag the items the session could least check itself, and put the open judgment calls in as questions.
+- A *Notes:* line under each section, a list of what is already known to be imperfect, and an empty section at the end for everything else.
+- One paragraph per line, as in every `.md` in that folder.
+
+Jon walks it, edits it in place, and hands back notes. The handout (Phase 3) is written after that pass, from the as-built notes as corrected by it. `labs/05_learning_and_plasticity/LAB_5_WALKTHROUGH.md` is the pattern.
+
 ### Phase 3 — Author the handout *(labs only)*
 - Write/adapt `intro_to_bcs/<module>/<module>_lab.md` per the course [`WEEK_DEVELOPMENT_PROCESS.md`](../../WEEK_DEVELOPMENT_PROCESS.md) Phase 4 (activity-based, references the reading/lectures, points at the in-app scene rather than an external URL).
 - Make sure every question the handout asks maps to something the scene actually lets the student see/measure.
