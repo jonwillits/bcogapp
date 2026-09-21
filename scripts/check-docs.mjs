@@ -90,6 +90,12 @@ function checkLab(lab) {
 
   const handoutPath = join(COURSE, lab.handout)
   const reportPath = join(COURSE, lab.report)
+  // A lab whose handout is written from the built scene has no documents to
+  // check until it lands. Say so, and start checking the day the file exists.
+  if (lab.handoutPending && !existsSync(handoutPath)) {
+    notes.push(`handout not written yet (expected at ${lab.handout}); nothing to check until it lands`)
+    return { problems, notes }
+  }
   for (const [label, p] of [['handout', handoutPath], ['report document', reportPath]]) {
     if (!existsSync(p)) {
       fail(label, `not found at ${p} - set INTRO_TO_BCS if the course repo moved`)

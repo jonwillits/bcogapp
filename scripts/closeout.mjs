@@ -28,7 +28,7 @@ if (!labs.length) {
   console.error(`\n  No lab "${only}". Known: ${LABS.map((l) => l.id).join(', ')}\n`)
   process.exit(2)
 }
-const LAB_FILES = labs.flatMap((l) => [l.handout, l.report])
+const LAB_FILES = labs.flatMap((l) => [l.handout, l.report]).filter(Boolean)
 
 let failed = 0
 const head = (s) => console.log(`\n  ${s}\n  ${'-'.repeat(64)}`)
@@ -113,6 +113,7 @@ const suite = readTests(join(ROOT, 'src'))
 
 for (const lab of labs) {
   if (labs.length > 1) console.log(`\n  ${lab.name}`)
+  if (lab.handoutPending) console.log('  (no handout yet: these are the claims the SCENE makes true - what the handout may assert)')
   for (const { says, test } of lab.claims ?? []) {
     if (test === null) warn(`NO TEST - "${says}"`)
     else if (suite.includes(test)) ok(`"${says}"`)
@@ -182,11 +183,11 @@ const crib = cribName
   : { out: '' }
 const cribLines = crib.out
   .split('\n')
-  .filter((l) => /reach the light|driving backwards|swings toward|lights\/min|SEPARATES|does NOT separate|^  [WXYZ] |^(healthy|W[0-4]|W1, W3|at 2\.5×) {2,}/.test(l))
+  .filter((l) => /reach the light|driving backwards|swings toward|lights\/min|SEPARATES|does NOT separate|^  [WXYZ] |^(healthy|W[0-4]|W1, W3|at 2\.5×) {2,}|^m05 · /.test(l))
 if (cribLines.length) {
   console.log('  Run the scene and check these by eye - tests cannot see motion:')
   console.log('      npm run dev     then open  http://localhost:5173/' + (labs[0].route ?? '') + '\n')
-  cribLines.slice(0, 14).forEach((l) => console.log(`  ${l.trim()}`))
+  cribLines.slice(0, 24).forEach((l) => console.log(`  ${l.trim()}`))
   console.log('\n  Full list:  npx vitest run --disable-console-intercept -t "crib:"')
 } else {
   warn('could not produce the viewing crib')

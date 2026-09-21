@@ -210,4 +210,85 @@ export const LABS = [
 
     crib: 'crib: what the six animals should look like',
   },
+  {
+    id: 'm05-learning',
+    name: 'Lab 5 — Learning',
+    route: '#/m05-learning',
+    scene: 'src/scenes/m05_learning',
+    /** Sim files whose strings reach the screen: scenario titles, blurbs, the four settings' names. */
+    strings: ['src/sim/bilaterian/learning', 'src/sim/bilaterian', 'src/scenes/m04_bilaterian'],
+    handout: 'learning_and_plasticity/learning_lab/learning_lab.md',
+    report: 'learning_and_plasticity/learning_lab/learning_lab_report.docx',
+    /**
+     * The handout is written FROM the built scene and does not exist yet
+     * (decided 2026-09-20). Until it lands the document checks are skipped
+     * with a note, and the claims below are the claims the SCENE makes true:
+     * the statements about what a student will see that a passing test
+     * guarantees. The handout may assert these and nothing it cannot find here.
+     */
+    handoutPending: true,
+
+    retired: [
+      { term: /\bfish\b/gi, why: 'the animal is Lab 4’s bilaterian; the fish is Module 7’s' },
+      { term: /serotonin|norepinephrine|endorphin/gi, why: 'only dopamine is named on screen, on the broadcast signal' },
+      { term: /\bepisod|\breplay|\bretriev/gi, why: 'nothing in the scene keeps a record of an occasion; Module 10 owns records', unless: ['Module 10'] },
+      { term: /basal gangli|cerebell|striat/gi, why: 'Module 5 stops at the synapse and the cell; Module 6 owns the anatomy' },
+      { term: /Hebb’s rule setting|delta rule setting/gi, why: 'the selector’s settings are Coincidence, Prediction, Teacher and Verdict' },
+    ],
+
+    controls: [
+      'Scenario', 'Hand the weights over', 'Salt, then food', 'Blocking', 'Four signals, one problem', 'The corridor', 'Extinction',
+      'What the world does', 'Go to phase 1', 'Go to phase 2', 'Go to phase 3', 'Interval between the touch and the food',
+      'A second cue, almond odor, at every site', 'Almond odor marks the food (off: salt does)',
+      'Wait', 'Move to the second dish', 'Deliver one outcome', 'Response to salt alone, here and now',
+      'Sites touched', 'Touched and found nothing', 'Harm', 'Reset', 'New seed',
+      'The weight trace', 'at the start', 'run started',
+      'Learning on', 'Coincidence', 'Prediction', 'Teacher', 'Verdict', 'learning rate η', 'eligibility trace window',
+      'discount γ, per second of delay', 'Weakening (long-term depression)', 'Competition',
+      'The arithmetic', 'One occasion, by hand', 'One algorithm, written down twice', 'The signal trace', 'Credit',
+      'surprise at the food', 'dopamine — the broadcast signal', 'Dopamine',
+      'pursuit', 'satiety and tone', 'arousal and vigilance', 'relief',
+    ],
+
+    claims: [
+      { says: 'Part 1: with the rule on, the food-odor weight moves by more than 20% and the animal is harmed anyway, in every minute of five, at every learning rate', test: 'the weight moves by more than 20%% and the animal is harmed anyway' },
+      { says: 'Part 1: it is harmed as much as the animal whose weights nobody can change', test: 'is harmed as much as the animal whose weights nobody can change' },
+      { says: 'Part 1: salt starts ignored and ends driving the verdict by itself', test: 'salt starts ignored and ends driving the verdict by itself' },
+      { says: 'Part 1: the panel’s by-hand occasion gives 1600 at η = 1 and 16 at η = 0.01', test: 'reproduces the chapter’s arithmetic: 1600 at η = 1, 16 at η = 0.01' },
+      { says: 'Part 1: one occasion at the high rate moves a weight as far as a hundred at the low rate', test: 'one occasion at the high rate moves a weight as far as a hundred at the low rate' },
+      { says: 'Part 1: a second cue that co-occurs as reliably gains exactly as much', test: 'a second cue that co-occurs as reliably gains exactly as much' },
+      { says: 'Part 1: past the 1.5 s the cues linger, a pairing moves the weight by less than a tenth as far', test: 'past the coincidence window, a pairing moves the weight by less than a tenth as far' },
+      { says: 'Part 1: with weakening off, no weight ever goes down, in any scenario', test: 'no stored weight ever decreases — every scenario, twenty seeds' },
+      { says: 'Part 1: both bounds off, the weights sit at the ceiling inside a minute and the verdict fires over most of the dish', test: 'inside a minute the weights sit at the ceiling' },
+      { says: 'Part 1: with either bound on, they do not', test: 'with weakening on, they do not' },
+      { says: 'Part 2: under Prediction the added cue ends below 20% of the first', test: 'under prediction, the added cue ends below 20% of the first' },
+      { says: 'Part 2: under Coincidence the added cue ends within 30% of the first', test: 'under coincidence, the added cue ends within 30% of the first' },
+      { says: 'Part 2: tested alone, almond odor is sought out under Coincidence and not under Prediction', test: 'almond odor is sought out under coincidence and not under prediction' },
+      { says: 'Part 2: the selector changes Φ and nothing else', test: 'the same Φ gives the same Δb under every setting' },
+      { says: 'Part 2: the Prediction setting holds its prediction through the arrival', test: 'not regenerated while the arrival is being resolved' },
+      { says: 'Part 2: Coincidence cannot tell the cue that marks food from the one that marks nothing, and unlearns neither', test: 'coincidence cannot tell the cue that marks food' },
+      { says: 'Part 2: Prediction learns which cue food follows, and follows the flip', test: 'prediction learns which cue food follows, and follows the flip' },
+      { says: 'Part 2: a Teacher stops as soon as the verdict is right, near 0.7', test: 'a teacher gets there precisely' },
+      { says: 'Part 2: one broadcast number is enough to follow the flip, and is the least exact of the three that can', test: 'it is the least exact of the three that can follow the flip' },
+      { says: 'Part 3: value appears at the approach first, then the turn, then the marker', test: 'value seeps backward' },
+      { says: 'Part 3: by the last trials the marker carries more than the surprise left at the food', test: 'the first point in the chain carries more than the food does' },
+      { says: 'Part 3: with the trace window at zero the marker never gains', test: 'with the trace window at zero, the first action in the chain never gains weight' },
+      { says: 'Part 3: a wider window carries value back sooner', test: 'a wider window carries the news further back sooner' },
+      { says: 'Part 3: the passing vibration gains almost nothing at any window', test: 'what passes through and leads nowhere gains almost nothing' },
+      { says: 'Part 3: the scene says real nematodes do not bridge this delay, on the Credit section and the corridor’s panel', test: 'the tier-four statement is on the Credit section' },
+      { says: 'Closer: after extinction the salt weight sits far above where it started', test: 'the stored weight ends far above where it started' },
+      { says: 'Closer: Wait brings the response back and moves no weight', test: 'spontaneous recovery: wait, with no training of any kind' },
+      { says: 'Closer: Move brings it back, and moving back takes it away again', test: 'renewal: move to the second dish' },
+      { says: 'Closer: one unpaired meal brings it back', test: 'reinstatement: one unpaired delivery' },
+      { says: 'Closer: every return is partial, and two together return more than one', test: 'none of the returns reaches the level before extinction' },
+      { says: 'Chemistry: dopamine is named on the broadcast signal, with the note that the recordings were in vertebrates and largely primates', test: 'dopamine is named, on the broadcast signal' },
+      { says: 'Chemistry: moving any of the four modulators leaves every weight alone', test: 'moving any of the four functional modulators leaves every stored weight bit-identical' },
+      { says: 'Throughout: same seed and same settings reproduce a run exactly', test: 'same seed and same settings reproduce a run exactly, in every scenario' },
+      { says: 'Throughout: with learning off this is Lab 4, to the last bit', test: 'reproduces bit-for-bit: every scenario and every animal' },
+      { says: 'the weight trace shows a run-started mark and at-the-start values', test: null },
+      { says: 'the Lab button says the handout is not published yet instead of failing', test: null },
+    ],
+
+    crib: 'crib: what the weight trace and the signal trace should do',
+  },
 ]
