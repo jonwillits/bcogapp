@@ -63,14 +63,15 @@ export function WormsTab(s: SceneState) {
     <Panel title={s.animal === 'healthy' ? 'The healthy animal' : `Animal ${s.animal}`} style={RIGHT_STYLE}>
       <GroupLabel>Scorecard</GroupLabel>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-        <ValueReadout label="Cues reached per minute" value={w.recentCuesPerMinute} digits={1} />
-        <ValueReadout label="Over the whole run" value={w.cuesPerMinute} digits={2} />
+        <ValueReadout label="Cues reached per minute — over the last minute" value={w.recentCuesPerMinute} digits={1} />
+        <ValueReadout label="Cues reached per minute — over the whole run" value={w.cuesPerMinute} digits={2} />
+        <ValueReadout label="Cues reached — total count" value={`${w.cuesReached}`} />
         <ValueReadout label="Reversals per minute" value={w.reversalsPerMinute} digits={1} />
         <ValueReadout label="Time in reverse" value={`${(100 * w.fractionInReverse).toFixed(0)}%`} />
         <ValueReadout label="Energy per cue reached" value={Number.isFinite(w.energyPerCue) ? w.energyPerCue.toFixed(1) : '—'} />
         <ValueReadout label="Run time" value={`${w.time.toFixed(0)} s`} />
       </div>
-      <Note>Cues reached per minute is the last minute. Energy per cue is everything the animal has spent moving, reversing and turning, divided by the cues it has reached.</Note>
+      <Note>Both of the first two are rates, in cues per minute: one counts only the last minute and jumps about, the other averages the whole run and settles. The total count is the plain number eaten. Energy per cue is everything the animal has spent moving, reversing and turning, divided by the cues it has reached.</Note>
       {s.animal === 'healthy' && (
         <Note>The default: every weight, switch and threshold at its healthy value, every modulator at its healthy level. What the five are compared against.</Note>
       )}

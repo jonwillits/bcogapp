@@ -93,19 +93,19 @@ export function WorldTab(s: SceneState) {
       </Note>
       <GroupLabel>What the animal is getting done</GroupLabel>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-        <ValueReadout label="Cues reached per minute" value={world.recentCuesPerMinute} digits={1} />
-        <ValueReadout label="Over the whole run" value={world.cuesPerMinute} digits={2} />
+        <ValueReadout label="Cues reached per minute — over the last minute" value={world.recentCuesPerMinute} digits={1} />
+        <ValueReadout label="Cues reached per minute — over the whole run" value={world.cuesPerMinute} digits={2} />
         <ValueReadout label="Harm" value={world.harm} digits={1} />
         {scenario.countCrossings && <ValueReadout label="Crossings of the strip" value={`${world.crossings}`} />}
         <ValueReadout label="Reversals per minute" value={world.reversalsPerMinute} digits={1} />
         <ValueReadout label="Run time" value={`${world.time.toFixed(0)} s`} />
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-        <Row label="Cues reached" value={`${world.cuesReached}`} />
+        <Row label="Cues reached — total count" value={`${world.cuesReached}`} />
         <Row label="Sources in the dish" value={`${world.sources.length}`} />
       </div>
       <Note>
-        Cues reached per minute is the last minute. Harm counts what the dish did to the animal: a meal it should not have eaten, or a second spent somewhere it should not be.
+        Both cue figures are rates, in cues per minute: one over the last minute, one averaged over the whole run. Harm counts what the dish did to the animal: a meal it should not have eaten, or a second spent somewhere it should not be.
       </Note>
     </Panel>
   )
