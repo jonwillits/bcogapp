@@ -59,6 +59,41 @@ export function WorldTab(s: LearningSceneState) {
         </>
       )}
 
+      {spec.context && (
+        <>
+          <GroupLabel>The three returns</GroupLabel>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            <Button
+              onClick={() => {
+                world.wait()
+                bump()
+              }}
+            >
+              Wait
+            </Button>
+            <Button
+              onClick={() => {
+                world.moveDish()
+                bump()
+              }}
+            >
+              {world.context.dish === 0 ? 'Move to the second dish' : 'Move back to the first dish'}
+            </Button>
+            <Button
+              onClick={() => {
+                world.deliverOutcome()
+                bump()
+              }}
+            >
+              Deliver one outcome
+            </Button>
+          </div>
+          <Note>
+            <b>Wait</b> sets the animal aside and brings it back in a later session, with no training of any kind in between. <b>Move</b> puts it in another dish. <b>Deliver one outcome</b> drops one meal at its mouth with no cue, as soon as it is clear of any salt{world.deliveryPending ? ' — waiting for that now' : ''}. None of the three touches a weight: check the weight trace. Use Reset, run both phases again, and try the next.
+          </Note>
+        </>
+      )}
+
       {(spec.intervalControl || spec.flags) && <GroupLabel>This scenario’s controls</GroupLabel>}
       {spec.intervalControl && (
         <>
@@ -154,6 +189,7 @@ export function WorldTab(s: LearningSceneState) {
         <ValueReadout label="Run time" value={`${world.time.toFixed(0)} s`} />
         {spec.sites && <ValueReadout label="Sites touched" value={`${world.trials}`} />}
         {spec.sites && <ValueReadout label="Touched and found nothing" value={`${world.emptyVisits}`} />}
+        {spec.context && <ValueReadout label="Response to salt alone, here and now" value={world.responseToCue()} digits={2} />}
       </div>
       <Note>
         Harm counts what the dish did to the animal. These are counts and rates on the experimenter’s side of the glass; nothing in the animal keeps them.

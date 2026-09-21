@@ -179,6 +179,12 @@ export default function LearningScene() {
               now={world.time}
             />
           ))}
+          {scenario.learning.context && world.context.dish === 1 && (
+            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.003, 0]}>
+              <planeGeometry args={[DISH_BOUNDS * 2, DISH_BOUNDS * 2]} />
+              <meshBasicMaterial color="#c9a0ff" transparent opacity={0.16} />
+            </mesh>
+          )}
           {scenario.learning.lane && <LaneMesh lane={scenario.learning.lane} colors={channelColors} live={world.worm.internalDrive} />}
           <MealMarks world={world} />
           <WormMesh worm={world.worm} colors={channelColors} />

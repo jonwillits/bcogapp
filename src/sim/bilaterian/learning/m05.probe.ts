@@ -196,3 +196,23 @@ it('chain', () => {
     }
   }
 })
+
+it('extinction', () => {
+  for (let seed = 1000; seed < 1000 + SEEDS; seed++) {
+    const make = () => {
+      const w = new LearningDish(seed, learningScenarioByKey('extinction'))
+      w.run(240)
+      const acquired = { b: [...w.worm.circuit.interneurons[0].weights], r: w.responseToCue(), trials: w.trials }
+      w.setPhase(1)
+      w.run(180)
+      return { w, acquired }
+    }
+    const { w, acquired } = make()
+    const b = w.worm.circuit.interneurons[0].weights
+    const line = [`acquired: salt ${f(acquired.b[1])} response ${f(acquired.r)} (${acquired.trials} trials)`, `extinguished: salt ${f(b[1])} dish ${f(b[2])} session ${f(b[4])} response ${f(w.responseToCue())} (${w.trials - acquired.trials} trials)`]
+    const a = make().w; a.wait(); line.push(`wait → ${f(a.responseToCue())}`)
+    const m = make().w; m.moveDish(); line.push(`move → ${f(m.responseToCue())}`)
+    const d = make().w; const meals = d.cuesReached; d.deliverOutcome(); d.run(15); line.push(`deliver → ${f(d.responseToCue())} (dish ${f(d.worm.circuit.interneurons[0].weights[2])}, meals +${d.cuesReached - meals}, held ${f(d.learner.held.value)})`)
+    console.log(`seed ${seed}: ` + line.join(' | '))
+  }
+})

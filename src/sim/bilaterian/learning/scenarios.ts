@@ -54,6 +54,11 @@ export interface LearningSpec {
    * every meal. Each zone is reported by a cell of its own.
    */
   lane?: LaneSpec
+  /**
+   * Cells that report where the animal is and which session this is. The
+   * closer's three buttons act on these and on nothing else.
+   */
+  context?: { dishes: [number, number]; sessions: [number, number]; cue: number }
   /** Part 3 runs a rule this animal does not have, and the panel says so. */
   tierFour?: boolean
   /** Which Learning-tab sections this scenario uses. */
@@ -94,6 +99,23 @@ const FLOOR = {
   approach: { name: 'the approach', color: '#ffd166', internal: true },
   hum: { name: 'a passing vibration', color: '#ff6fae', internal: true },
 } as const
+
+const CONTEXT = {
+  dish: { name: 'this dish', color: '#7fb3ff', internal: true },
+  otherDish: { name: 'the second dish', color: '#c9a0ff', internal: true },
+  session: { name: 'this session', color: '#9be7c0', internal: true },
+  laterSession: { name: 'a later session', color: '#f0c987', internal: true },
+} as const
+
+/**
+ * A context connection can only become inhibitory. What an animal learns
+ * about a place, in this model, is that something does not hold there; the
+ * association itself is carried by the cue. That is a modeling choice, made
+ * so that the three returns of §5.2.11 fall out of new learning about context
+ * sitting on top of an association that survived, with no weight decaying
+ * anywhere.
+ */
+const inhibitoryOnly = { plastic: true, min: WEIGHT_FLOOR, max: 0 }
 
 const plastic = { plastic: true, min: WEIGHT_FLOOR, max: WEIGHT_CEILING }
 const innate = { plastic: false, min: WEIGHT_FLOOR, max: WEIGHT_CEILING }
@@ -270,6 +292,44 @@ export const LEARNING_SCENARIOS: LearningScenario[] = [
         'after each meal the animal is put back at the start',
       ],
       show: { trace: true, discount: true, credit: true, twoEquations: false },
+    },
+  },
+  {
+    key: 'extinction',
+    part: 'closer',
+    title: 'Extinction',
+    blurb:
+      'Salt marks the food until its weight stops climbing. Then go to phase 2: salt marks nothing, and the response fades. Look at the salt weight when it has. Then try each of the three buttons, from the same extinguished animal: wait, move it to a second dish, or deliver one meal with no cue at all.',
+    channels: channels(CHANNELS.food, NEUTRAL.salt, CONTEXT.dish, CONTEXT.otherDish, CONTEXT.session, CONTEXT.laterSession),
+    sources: [],
+    circuit: singleInterneuron([1, 0, 0, 0, 0, 0], 0, SINGLE_CUE_THRESHOLD, 'forward', 'sigmoid'),
+    locks: { ...unlocked(6), weights: [true, false, false, false, false, false] },
+    open: { circuit: true, arithmetic: false, target: false, boundary: false },
+    onReach: () => 'ignore',
+    start: { x: 0, z: 0 },
+    learning: {
+      settings: { factor: 'prediction' },
+      factors: ['prediction'],
+      boundsLocked: true,
+      config: {
+        limits: [innate, plastic, inhibitoryOnly, inhibitoryOnly, inhibitoryOnly, inhibitoryOnly],
+        predicts: [false, true, true, true, true, true],
+      },
+      outcomeChannel: 0,
+      context: { dishes: [2, 3], sessions: [4, 5], cue: 1 },
+      phases: [
+        { label: 'Phase 1 — acquisition', does: 'salt marks a place; touching one brings food at once' },
+        { label: 'Phase 2 — extinction', does: 'salt marks a place; touching one brings nothing' },
+      ],
+      sites: (w) => {
+        const spec: SiteSpec = { cues: [1], payload: w.phase === 0 ? 'nourish' : 'nothing' }
+        return [spec, spec]
+      },
+      worldDoes: (w) => [
+        w.scenario.learning.phases![w.phase].does,
+        `the animal is in ${w.context.dish === 0 ? 'the first dish' : 'the second dish'}, ${w.context.later ? 'in a later session' : 'in its first session'}`,
+      ],
+      show: { trace: false, discount: false, credit: false, twoEquations: true },
     },
   },
 ]

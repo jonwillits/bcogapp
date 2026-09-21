@@ -1,5 +1,6 @@
 import { DishWorld, DISH_BOUNDS, REACH, type DishOptions } from '../dishWorld'
 import type { CueSource } from '../fields'
+import { unitOutput } from '../unit'
 import { Learner, type LearningSettings } from './learner'
 import type { LearningScenario, SiteSpec } from './scenarios'
 
@@ -43,6 +44,8 @@ const SITE_SPACING = 7
 const LANE_RETURN_S = 2.5
 const LANE_TIMEOUT_S = 90
 export const CHAIN_TRIALS_KEPT = 12
+/** An unpaired delivery waits until the cue's cell reads below this. */
+const UNPAIRED_BELOW = 0.2
 /** The weight trace keeps one sample every half second, for the last ten minutes. */
 export const WEIGHT_SAMPLE_S = 0.5
 export const WEIGHT_TRACE_LEN = 1200
@@ -78,6 +81,11 @@ export class LearningDish extends DishWorld {
   interval: number
   flags: Record<string, boolean>
   sites: Site[] = []
+  /** Where the animal is and which session this is — what the context cells report. */
+  context = { dish: 0 as 0 | 1, later: false }
+  /** Unannounced meals delivered by hand. A count. */
+  delivered = 0
+  deliveryPending = false
   /** Which of the scenario's phases the dish is in. */
   phase = 0
   /** Sites touched so far. A count, not a list. */
@@ -153,6 +161,69 @@ export class LearningDish extends DishWorld {
     }
   }
 
+  /** What the context cells report now. */
+  private runContext(): void {
+    const c = this.scenario.learning.context!
+    const drive = this.worm.internalDrive
+    drive[c.dishes[0]] = this.context.dish === 0 ? 1 : 0
+    drive[c.dishes[1]] = this.context.dish === 1 ? 1 : 0
+    drive[c.sessions[0]] = this.context.later ? 0 : 1
+    drive[c.sessions[1]] = this.context.later ? 1 : 0
+  }
+
+  /** Time passes with no training of any kind: the animal is set aside and comes back in a later session. Nothing about any weight changes. */
+  wait(): void {
+    this.context.later = true
+    this.runContext()
+    this.learner.cut()
+  }
+
+  /** The animal is moved to the other dish. Nothing about any weight changes. */
+  moveDish(): void {
+    this.context.dish = this.context.dish === 0 ? 1 : 0
+    this.runContext()
+    this.learner.cut()
+    this.layOutSites()
+  }
+
+  /**
+   * One meal at the animal's mouth, unannounced and unpaired: no cue marks
+   * it. It waits until the animal is clear of the cue, because a meal that
+   * lands while the animal is standing in salt is a pairing, not an unpaired
+   * delivery (one seed in four did exactly that).
+   */
+  deliverOutcome(): void {
+    if (this.scenario.learning.outcomeChannel !== undefined) this.deliveryPending = true
+  }
+
+  private runDelivery(): void {
+    const spec = this.scenario.learning
+    const cue = spec.context?.cue ?? 1
+    if ((this.worm.cells[cue]?.output ?? 0) > UNPAIRED_BELOW) return
+    const head = this.worm.head
+    const p = this.spawn(
+      { channel: spec.outcomeChannel!, x: head.x, z: head.z, strength: SITE_STRENGTH, scale: 1, lifetime: 6, respawn: 'none' },
+      head.x,
+      head.z,
+    )
+    p.carries = 'nourish'
+    this.deliveryPending = false
+    this.delivered++
+  }
+
+  /**
+   * The response: what the verdict would be to the cue alone, here and now —
+   * the cue present, the context cells as they currently are, nothing else.
+   * Computed from the weights; nothing is looked up.
+   */
+  responseToCue(): number {
+    const c = this.scenario.learning.context
+    const circuit = this.worm.circuit
+    const x = this.worm.cells.map((cell, i) => (cell.internal ? (this.worm.internalDrive[i] ?? 0) : 0))
+    x[c ? c.cue : 1] = 1
+    return unitOutput(circuit.interneurons[0], x, circuit.activation)
+  }
+
   /** Move the dish to another of the scenario's phases. The animal and its weights carry over; the sites do not. */
   setPhase(k: number): void {
     const n = this.scenario.learning.phases?.length ?? 1
@@ -226,6 +297,8 @@ export class LearningDish extends DishWorld {
   override step(dt: number): void {
     this.runSites()
     if (this.scenario.learning.lane) this.runLane()
+    if (this.scenario.learning.context) this.runContext()
+    if (this.deliveryPending) this.runDelivery()
     super.step(dt)
 
     if (this.omissionLeft > 0) {
