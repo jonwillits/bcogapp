@@ -71,7 +71,7 @@ All six use Lab 4's animal and 16-unit dish. All load with learning on, η = 0.3
 | `blocking` | Blocking | same three | phase 1: two salt sites with food. Phase 2: both cues at each site, same food. Phase 3: almond alone, nothing | as the phase says | all four; loads at Coincidence | + two equations, trace, discount |
 | `four-signals` | Four signals, one problem | same three | two salt sites and two almond sites; one kind holds food, the other nothing; the toggle flips which | as the toggle says | all four; loads at Coincidence; trace window 3 s | + trace, discount, Credit under Verdict |
 | `corridor` | The corridor | food odor (innate), the marker, the turn, the approach, a passing vibration | a walled lane 2.6 wide along the dish; zones at x = −6 to −3.5, −1.5 to 1, 3 to 5.5; food at 6.5; animal starts at −7 facing along it | food nourishes; after each meal the animal is put back at the start 2.5 s later; the vibration comes on for 1.5 s at a random moment 0.5 to 3 s into each trial | Verdict, locked; bounds held off; window 3 s, γ 0.9 | Credit open, with the tier-four line; the line is also on the World tab |
-| `extinction` | Extinction | food odor (innate), salt, this dish, the second dish, this session, a later session | two salt sites. Phase 1 food, phase 2 nothing. **sigmoid function**, so the response is graded | as the phase says, plus where and when the animal is | Prediction, locked; bounds held off | two equations |
+| `extinction` | Extinction | food odor (innate), salt, dish one, dish two, session one, session two | two salt sites. Phase 1 food, phase 2 nothing. **sigmoid function**, so the response is graded | as the phase says, plus where and when the animal is | Prediction, locked; bounds held off | two equations |
 
 **A site** is the one world mechanism this lab added. It is a place marked by narrow cue plumes (present, an input of exactly 1, within reach; about 0.04 at the next site over). When the animal's head comes within 1 unit, the site is *touched*: its cues linger 1.5 s and dissolve, and what it holds arrives after the interval — food appears there with its own odor, or nothing does — **whatever the animal's verdict says**. A site nobody finds moves after 45 s; delivered food waits 20 s. The naive animal finds sites by blundering into them, about two a minute; once a cue has weight it climbs to them.
 
@@ -115,7 +115,7 @@ All six use Lab 4's animal and 16-unit dish. All load with learning on, η = 0.3
 ### The closer
 
 - After four minutes of acquisition: salt **0.93 to 1.00**, response **0.98**.
-- In phase 2 the response falls under 0.20 within 3 to 70 s (two or three touches). Then: **salt 0.65 to 0.72**, this dish −0.33 to −0.36, this session −0.33 to −0.36, response **0.09**.
+- In phase 2 the response falls under 0.20 within 3 to 70 s (two or three touches). Then: **salt 0.65 to 0.72**, dish one −0.33 to −0.36, session one −0.33 to −0.36, response **0.09**.
 - **Wait → 0.46 to 0.52. Move → 0.46 to 0.52. Both → 0.88 to 0.92. One unpaired meal → 0.91 to 0.95.** Move back and the response is 0.09 again. Wait and Move change no weight; the meal drives both context connections back to 0 and leaves salt where it was.
 - The delivered meal waits until the salt cell reads under 0.2, which can take up to half a minute.
 

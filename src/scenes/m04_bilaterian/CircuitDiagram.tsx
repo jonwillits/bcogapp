@@ -42,7 +42,10 @@ export function CircuitDiagram({
   const W = 340
   const H = 296
   const n = cells.length
-  const cellX = (i: number) => (n === 1 ? W / 2 : 90 + (i * (W - 180)) / Math.max(1, n - 1))
+  // More than four cells (Module 5's corridor and extinction): spread them to the edges and stagger the names.
+  const crowded = n > 4
+  const edge = crowded ? 28 : 90
+  const cellX = (i: number) => (n === 1 ? W / 2 : edge + (i * (W - 2 * edge)) / Math.max(1, n - 1))
   const S_Y = 52
   const I = { x: W / 2, y: 152 }
   const J = { x: W / 2, y: 204 }
@@ -114,7 +117,7 @@ export function CircuitDiagram({
       {cells.map((c, i) => (
         <g key={`c${i}`}>
           {node(cellX(i), S_Y, 16, channels[i]?.color ?? palette.sensor, c.output, `x${'₁₂₃₄₅₆'[i]}`)}
-          <text x={cellX(i)} y={S_Y - 24} textAnchor="middle" fontSize={9.5} fill={palette.text}>
+          <text x={cellX(i)} y={S_Y - (crowded && i % 2 ? 35 : 24)} textAnchor="middle" fontSize={crowded ? 8.5 : 9.5} fill={palette.text}>
             {channels[i]?.name ?? `cue ${i + 1}`}
           </text>
           <text x={cellX(i)} y={S_Y + 30} textAnchor="middle" fontSize={10} fill={palette.text} fontFamily="var(--font-mono)">

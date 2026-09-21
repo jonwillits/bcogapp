@@ -101,10 +101,10 @@ const FLOOR = {
 } as const
 
 const CONTEXT = {
-  dish: { name: 'this dish', color: '#7fb3ff', internal: true },
-  otherDish: { name: 'the second dish', color: '#c9a0ff', internal: true },
-  session: { name: 'this session', color: '#9be7c0', internal: true },
-  laterSession: { name: 'a later session', color: '#f0c987', internal: true },
+  dish: { name: 'dish one', color: '#7fb3ff', internal: true },
+  otherDish: { name: 'dish two', color: '#c9a0ff', internal: true },
+  session: { name: 'session one', color: '#9be7c0', internal: true },
+  laterSession: { name: 'session two', color: '#f0c987', internal: true },
 } as const
 
 /**
@@ -192,7 +192,7 @@ export const LEARNING_SCENARIOS: LearningScenario[] = [
     onReach: () => 'ignore',
     start: { x: 0, z: 0 },
     learning: {
-      settings: { factor: 'coincidence' },
+      settings: { factor: 'coincidence', traceWindow: 3 },
       factors: ['coincidence', 'prediction', 'teacher', 'verdict'],
       config: { limits: [innate, plastic, plastic], predicts: [false, true, true] },
       outcomeChannel: 0,
@@ -327,7 +327,7 @@ export const LEARNING_SCENARIOS: LearningScenario[] = [
       },
       worldDoes: (w) => [
         w.scenario.learning.phases![w.phase].does,
-        `the animal is in ${w.context.dish === 0 ? 'the first dish' : 'the second dish'}, ${w.context.later ? 'in a later session' : 'in its first session'}`,
+        `the animal is in ${w.context.dish === 0 ? 'dish one' : 'dish two'}, in ${w.context.later ? 'session two, after a wait' : 'session one'}`,
       ],
       show: { trace: false, discount: false, credit: false, twoEquations: true },
     },

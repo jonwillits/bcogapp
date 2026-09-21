@@ -125,7 +125,7 @@ it('crib: what the weight trace and the signal trace should do', () => {
       return { acq: base.acq, gone: base.gone, salt: b(base.w)[1], dish: b(base.w)[2], session: b(base.w)[4], low: base.w.responseToCue(), wait: wait.responseToCue(), move: move.responseToCue(), both: both.responseToCue(), del: del.responseToCue() }
     })
     say(`extinction: after four minutes of acquisition salt is ${range(rows.map((r) => r.acq.salt))} and the response ${range(rows.map((r) => r.acq.r))}.`)
-    say(`extinction: in phase 2 the response falls under 0.20 within ${range(rows.map((r) => r.gone), 0)} s. Salt then sits at ${range(rows.map((r) => r.salt))} — NOT back at 0 — with this dish at ${range(rows.map((r) => r.dish))} and this session at ${range(rows.map((r) => r.session))}; response ${range(rows.map((r) => r.low))}.`)
+    say(`extinction: in phase 2 the response falls under 0.20 within ${range(rows.map((r) => r.gone), 0)} s. Salt then sits at ${range(rows.map((r) => r.salt))} — NOT back at 0 — with dish one at ${range(rows.map((r) => r.dish))} and session one at ${range(rows.map((r) => r.session))}; response ${range(rows.map((r) => r.low))}.`)
     say(`extinction: response after Wait ${range(rows.map((r) => r.wait))}; after Move ${range(rows.map((r) => r.move))}; after both ${range(rows.map((r) => r.both))}; after one unpaired meal ${range(rows.map((r) => r.del))}. No weight moves on Wait or Move.`)
   }
 }, 600_000)
