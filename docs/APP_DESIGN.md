@@ -11,10 +11,12 @@ One app that hosts the course's interactive **demonstrations** and **lab activit
 The app is **not** a grab-bag of independent mini-apps. Most of its interactive content is a single **evolving-creature simulation** that accumulates capabilities module by module, tracking the course's evolutionary arc:
 
 - **M1** a Braitenberg vehicle (sensor→actuator wiring, emergent behavior) — **built** →
-- **M4** a nematode-like early bilaterian making logical approach/avoid decisions via real neural circuits →
-- **M5** an early vertebrate (fish) that *learns* (neural adaptation, Hebbian, error-driven, reinforcement) →
-- **M7** the same fish solving harder pattern-recognition problems (linear inseparability, hidden layers vs. feature selection, train/test generalization) →
+- **M4** a nematode-like early bilaterian making logical approach/avoid decisions via real neural circuits — **built** →
+- **M5** *the same bilaterian*, now able to change its own weights: one learning rule with four third factors (coincidence, prediction, a teacher, one broadcast verdict), blocking, credit across a delay, extinction — **built** →
+- **M7** an early vertebrate (fish) solving harder pattern-recognition problems (linear inseparability, hidden layers vs. feature selection, train/test generalization) →
 - **M11** (possibly) primates in a game-theoretic social setting.
+
+**The spine was amended on 2026-09-20: M1 vehicle → M4 and M5 bilaterian → M7 fish.** The earlier plan made Module 5 the fish, and it was wrong for that chapter, whose headline (§5.1.11) is that most of learning is considerably older than the vertebrate: tiers one to three are available to a worm, the chapter's own worked case of an association across time is a nematode, and only bridging a delay arrives with the vertebrates. Building the learning lab in a fish would have contradicted the section saying a fish was not needed. So `m05-learning` is a *configuration* of `m04-bilaterian` — it imports that scene's animal, dish and tabs rather than copying them — and the fish arrives in Module 7, where the problems genuinely need it. Module 5's Part 3 runs a delay-bridging rule in an animal that does not have one, and says so on its own face.
 
 This is implemented as **one simulation engine, parameterized by evolutionary stage** — the same creature / sensor / nervous-system / environment framework, configured per module for which body plan, sensors, circuits, and learning rules are enabled. We build the machinery once and turn features on as the course advances, rather than rebuilding a creature each week.
 

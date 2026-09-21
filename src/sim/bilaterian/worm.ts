@@ -46,6 +46,7 @@ export interface SensoryCell {
    */
   pursuitDrives: boolean
   hungerSilences: boolean
+  internal: boolean
   /** Concentration at the head. */
   concentration: number
   /** The modulator gain currently applied to this cell's output. */
@@ -66,6 +67,12 @@ export interface ChannelBiology {
   pursuitDrives?: boolean
   /** A hungry animal's chemistry turns this cell down. */
   hungerSilences?: boolean
+  /**
+   * The cell reports something about the animal's situation that is not a
+   * concentration at its head — which dish it is in, say. The world drives it
+   * through `Worm.internalDrive`. Lab 4 has none.
+   */
+  internal?: boolean
 }
 
 // ---- the body, the cells, the rule, the motor groups ---------------------
@@ -179,6 +186,10 @@ export class Worm {
   pauseLeft = 0
   /** A world may slow the animal — inside decaying matter, say. */
   speedFactor = 1
+  /** Half the width of a lane along x the world has walled the animal into, or null for the open dish. */
+  laneHalfWidth: number | null = null
+  /** What the world is currently telling each internal cell, 0..1, by cell index. */
+  internalDrive: number[] = []
 
   // Live readouts, one per interneuron.
   net: number[]
@@ -219,6 +230,7 @@ export class Worm {
       channel: b.channel,
       pursuitDrives: !!b.pursuitDrives,
       hungerSilences: !!b.hungerSilences,
+      internal: !!b.internal,
       concentration: 0,
       gain: 1,
       output: 0,
@@ -293,13 +305,14 @@ export class Worm {
 
     // 1. Sense, at the head, one cell per channel.
     const c = concentrations(this.head.x, this.head.z, sources, scaleOf)
-    for (const cell of this.cells) {
-      cell.concentration = c[cell.channel]
+    for (const [i, cell] of this.cells.entries()) {
+      cell.concentration = cell.internal ? (this.internalDrive[i] ?? 0) * CEILING_AT : c[cell.channel]
       cell.gain = (cell.pursuitDrives ? lv.pursuit : 1) * (cell.hungerSilences ? lv.satiety : 1)
       cell.output = sensoryOutput(cell.concentration, cell.gain)
       cell.now += ((cell.output - cell.now) * dt) / TUNING.nowTau
       cell.trace += ((cell.output - cell.trace) * dt) / TUNING.traceTau
-      cell.delta = cell.now - cell.trace
+      // An internal cell reports a state, not something to climb: it never triggers a reversal.
+      cell.delta = cell.internal ? 0 : cell.now - cell.trace
     }
     const x = this.cells.map((s) => s.output)
     const dx = this.cells.map((s) => s.delta)
@@ -441,8 +454,9 @@ export class Worm {
       p.x = Math.max(-lim, Math.min(lim, p.x))
       onWall('x')
     }
-    if (p.z > lim || p.z < -lim) {
-      p.z = Math.max(-lim, Math.min(lim, p.z))
+    const limZ = this.laneHalfWidth ?? lim
+    if (p.z > limZ || p.z < -limZ) {
+      p.z = Math.max(-limZ, Math.min(limZ, p.z))
       onWall('z')
     }
     const n = this.chain.length

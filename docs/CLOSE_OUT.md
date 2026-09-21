@@ -10,7 +10,7 @@ One lab when several exist: `npm run closeout m02-evolution`. The document half 
 
 It checks, it does not push. The two pushes are yours, in the order it prints.
 
-**There is a skill for this**, so it can be invoked by name rather than remembered: `course_admin/skills/lab-close-out/` in the course folder. It covers shipping a change, registering a new lab, and answering a student who reports a discrepancy.
+**There is a skill for this**, so it can be invoked by name rather than remembered: `current_version/course_creation/skills/lab_close_out/SKILL.md` in the course folder (`~/Library/CloudStorage/Box-Box/teaching/bcog_web/courses/introduction_to_brain_and_cognitive_science_1/`). It covers shipping a change, registering a new lab, and answering a student who reports a discrepancy.
 
 ---
 

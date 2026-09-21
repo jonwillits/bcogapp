@@ -88,7 +88,14 @@ export function LabPane({
           <p className={styles.status}>Loading lab instructions…</p>
         )}
 
-        {state.kind === 'error' && (
+        {state.kind === 'error' && lab.notYet && (
+          <div className={styles.status}>
+            <div className={styles.statusTitle}>Lab instructions not published yet</div>
+            <p>{lab.notYet}</p>
+          </div>
+        )}
+
+        {state.kind === 'error' && !lab.notYet && (
           <div className={styles.status}>
             <div className={styles.statusTitle}>Lab info not available</div>
             <p>

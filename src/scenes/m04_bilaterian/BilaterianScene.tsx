@@ -8,7 +8,7 @@ import { Terrain } from '../../components/Terrain'
 import { DishWorld, DISH_BOUNDS } from '../../sim/bilaterian/dishWorld'
 import { SCENARIOS, DIAGNOSIS, scenarioByKey, type Scenario } from '../../sim/bilaterian/scenarios'
 import { ANIMALS, animalById, type AnimalId } from '../../sim/bilaterian/animals'
-import { cloneCircuit, type Circuit } from '../../sim/bilaterian/circuit'
+import { cloneCircuit, type Circuit, type WiringPatch } from '../../sim/bilaterian/circuit'
 import type { Levels } from '../../sim/bilaterian/modulators'
 import { randomSeed } from '../../sim/random'
 import { palette } from '../../theme/theme'
@@ -48,6 +48,17 @@ export interface SceneState {
   setPlaceChannel: (c: number) => void
   speed: number
   playing: boolean
+  /**
+   * Slots for a scene that configures this one. Module 5 is this animal in
+   * this dish with one tab replaced and an instrument added, so it supplies
+   * its own tab bar, a section for the Circuit tab, and one for Chemistry.
+   */
+  tabBar?: React.ReactNode
+  wiringTitle?: string
+  circuitExtra?: React.ReactNode
+  chemistryExtra?: { controls?: React.ReactNode; readouts?: React.ReactNode }
+  /** Called after a control on the Circuit tab has written the wiring. */
+  afterWiring?: (patch: WiringPatch) => void
 }
 
 function Stepper({ world, scale, onAdvance }: { world: DishWorld; scale: number; onAdvance: () => void }) {

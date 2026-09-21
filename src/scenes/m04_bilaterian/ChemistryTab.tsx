@@ -20,7 +20,7 @@ export function ChemistryTab(s: SceneState) {
 
   const left = (
     <Panel title="The chemistry" style={PANEL_STYLE}>
-      <TabBar tab={s.tab} onChange={s.setTab} />
+      {s.tabBar ?? <TabBar tab={s.tab} onChange={s.setTab} />}
       <Note>
         Four modulators, each released into the tissue rather than into a synapse. None carries a
         message; each changes what the cells do with the messages they already get. Set one and
@@ -48,6 +48,7 @@ export function ChemistryTab(s: SceneState) {
           </div>
         ))
       )}
+      {s.chemistryExtra?.controls}
     </Panel>
   )
 
@@ -96,7 +97,7 @@ export function ChemistryTab(s: SceneState) {
               )}
               <Row
                 label="Held by the reverse group’s loop"
-                value={held === null ? 'not running' : `running ${held.toFixed(1)} s since its trigger`}
+                value={held === null ? 'not running' : `running, ${held.toFixed(1)} s`}
               />
             </div>
             <Note>
@@ -108,6 +109,7 @@ export function ChemistryTab(s: SceneState) {
               ))}
             </div>
           </Section>
+          {s.chemistryExtra?.readouts}
         </>
       )}
     </Panel>

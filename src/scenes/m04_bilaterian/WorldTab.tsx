@@ -18,7 +18,7 @@ export function WorldTab(s: SceneState) {
 
   const left = (
     <Panel title="The world" style={PANEL_STYLE}>
-      <TabBar tab={s.tab} onChange={s.setTab} />
+      {s.tabBar ?? <TabBar tab={s.tab} onChange={s.setTab} />}
       <Note>
         <b>Real time</b>, times the speed control. One animal in a dish of cue fields. Each
         scenario sets which cues are in the dish, what they are called, and which of the animal’s
@@ -83,7 +83,7 @@ export function WorldTab(s: SceneState) {
           <div key={c.channel} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
             <span style={{ width: 12, height: 12, borderRadius: 6, background: c.color, display: 'inline-block', boxShadow: `0 0 6px ${c.color}` }} />
             <span>
-              {c.name} — sensory cell x{'₁₂₃₄'[c.channel]}
+              {c.name} — sensory cell x{'₁₂₃₄₅₆'[c.channel]}
             </span>
           </div>
         ))}

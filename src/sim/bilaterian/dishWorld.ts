@@ -4,7 +4,7 @@ import { cloneCircuit, type Circuit } from './circuit'
 import { MODULATOR_IDS, valenceArousal, type ModulatorId } from './modulators'
 import { kickModulator, type Levels } from './modulators'
 import { Worm, FEEDING_PAUSE_S } from './worm'
-import type { Scenario, SourceSpec } from './scenarios'
+import type { Outcome, Scenario, SourceSpec } from './scenarios'
 
 /**
  * One animal in one dish: the scenario's sources, the worm, and the
@@ -76,9 +76,19 @@ export class DishWorld {
   mealSource: number | null = null
   /** Within reach of something it can eat, right now. */
   eating = false
+  /**
+   * What this step delivered, for anything that listens: `news` is +1 for a
+   * meal and −1 for harm (a hazard counts by the second), and `arriving` is
+   * what is reaching the mouth while the animal feeds — 1 for food, 0 for
+   * anything else — and null when it is not feeding. Lab 4 reads neither.
+   */
+  news = 0
+  arriving: number | null = null
+  /** Times the animal stopped to feed and found nothing there. */
+  emptyVisits = 0
   private lastSide = 0
-  private nextId = 1
-  private rng: Rng
+  protected nextId = 1
+  protected rng: Rng
   /** The interneuron's net input, its output and the reversal rate, per step. */
   trace = {
     net: [] as number[],
@@ -108,7 +118,7 @@ export class DishWorld {
     this.startCircuit = cloneCircuit(this.worm.circuit)
   }
 
-  private spawn(spec: SourceSpec, x: number, z: number): CueSource {
+  protected spawn(spec: SourceSpec, x: number, z: number): CueSource {
     const s: CueSource = {
       id: this.nextId++,
       channel: spec.channel,
@@ -130,7 +140,7 @@ export class DishWorld {
     )
   }
 
-  private respawn(s: CueSource): void {
+  protected respawn(s: CueSource): void {
     this.sources = this.sources.filter((q) => q.id !== s.id)
     const spec = this.specOf(s)
     if (!spec || spec.respawn === 'none') return
@@ -150,7 +160,7 @@ export class DishWorld {
    * would draw a healthy animal in and then refuse to feed it, which is the
    * hungry animal's story and not the healthy one's.
    */
-  private clearGround(ax: number, az: number): { x: number; z: number } {
+  protected clearGround(ax: number, az: number): { x: number; z: number } {
     // Clear of the dish's fixed features, and far enough from every other
     // plume that the two never add up past the sensory cell's ceiling —
     // past the ceiling a halved gain and a halved weight stop being the same
@@ -167,6 +177,11 @@ export class DishWorld {
       if (fixed.every((f) => fieldAt(f, p.x, p.z) < 0.5)) return p
     }
     return placeAwayFrom(this.rng, DISH_BOUNDS, ax, az, RESPAWN_CLEAR)
+  }
+
+  /** What reaching a source does: the source's own say if it has one, the scenario's rule for its channel if not. */
+  protected outcomeOf(s: CueSource, c: readonly number[]): Outcome {
+    return s.carries ?? this.scenario.onReach(s.channel, c)
   }
 
   /** Click-the-ground placement, as Labs 1 to 3 have it. */
@@ -203,6 +218,7 @@ export class DishWorld {
   step(dt: number): void {
     const w = this.worm
     const sc = this.scenario
+    this.news = 0
 
     // Plumes dissipate.
     for (const s of [...this.sources]) {
@@ -212,7 +228,11 @@ export class DishWorld {
     // What the world does at the head: thick going, harm per second.
     const c = w.cells.map((cell) => cell.concentration)
     w.speedFactor = sc.linger ? sc.linger(c) : 1
-    if (sc.hazard) this.harm += sc.hazard(c) * dt
+    if (sc.hazard) {
+      const hurt = sc.hazard(c) * dt
+      this.harm += hurt
+      this.news -= hurt
+    }
     // Slow to eat only while actually at the food: a meal remembered from
     // a plume the animal has wandered off must not hold it still out in the dish.
     if (this.eating) w.speedFactor *= 1 - w.feedDrive
@@ -226,12 +246,13 @@ export class DishWorld {
     if (w.pauseLeft <= 0 && w.feedDrive > 0.02) {
       for (const s of this.sources) {
         if (Math.hypot(s.x - head.x, s.z - head.z) > REACH) continue
-        if (sc.onReach(s.channel, c) === 'ignore') continue
+        if (this.outcomeOf(s, c) === 'ignore') continue
         eating = s
         break
       }
     }
     this.eating = eating !== null
+    this.arriving = eating ? (this.outcomeOf(eating, c) === 'nourish' ? 1 : 0) : null
     if (this.mealSource !== null && !this.sources.some((q) => q.id === this.mealSource)) {
       this.meal = 0
       this.mealSource = null
@@ -243,8 +264,9 @@ export class DishWorld {
       }
       this.meal += w.feedDrive * dt
       if (this.meal >= MEAL) {
-        const outcome = sc.onReach(eating.channel, c)
+        const outcome = this.outcomeOf(eating, c)
         if (outcome === 'nourish') {
+          this.news += 1
           this.cuesReached++
           this.reached.push(this.time)
           if (this.reached.length > REACHED_KEPT) this.reached.shift()
@@ -258,7 +280,10 @@ export class DishWorld {
           // after a few minutes, which read as recovery, and the closer
           // depends on the animal being unable to fix itself.
           this.harm += 1
+          this.news -= 1
           kickModulator(w.mod, 'arousal', 0.1, this.time)
+        } else if (outcome === 'nothing') {
+          this.emptyVisits++
         }
         w.pause(FEEDING_PAUSE_S + 2 * w.mod.level.relief)
         this.meal = 0

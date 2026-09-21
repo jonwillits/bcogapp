@@ -31,6 +31,13 @@ export interface CueSource {
   lifetime: number | null
   /** Sim time this source appeared. */
   born: number
+  /**
+   * What reaching this particular source does, where the dish decides that
+   * source by source instead of channel by channel. Still a rule of the dish
+   * and not a property of the channel: the same cue can mark food in one
+   * place and nothing in another.
+   */
+  carries?: 'nourish' | 'harm' | 'nothing' | 'ignore'
 }
 
 /** A field falls off with distance as 1 / (1 + (d / scale)²). */

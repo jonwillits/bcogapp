@@ -50,6 +50,12 @@ export interface LabSource {
   /** The report doc students fill in and submit. */
   reportUrl?: string
   reportLabel?: string
+  /**
+   * What to say if the handout cannot be fetched because it has not been
+   * written yet. Without it a failed fetch offers a link to `sourceUrl`,
+   * which for a handout that does not exist is a dead one.
+   */
+  notYet?: string
 }
 
 /**
@@ -82,6 +88,7 @@ const VehiclesScene = lazy(() => import('./m01_vehicles/VehiclesScene'))
 const EvolutionScene = lazy(() => import('./m02_evolution/EvolutionScene'))
 const NeuronScene = lazy(() => import('./m03_neuron/NeuronScene'))
 const BilaterianScene = lazy(() => import('./m04_bilaterian/BilaterianScene'))
+const LearningScene = lazy(() => import('./m05_learning/LearningScene'))
 
 /**
  * Registered, runnable scenes. Order here is the order shown within a module.
@@ -151,6 +158,24 @@ export const scenes: SceneManifest[] = [
       reportLabel: 'Lab 4 report (.docx)',
     },
   },
+  {
+    route: 'm05-learning',
+    module: 5,
+    title: 'Learning',
+    blurb:
+      'Lab 4’s animal in Lab 4’s dish, with one thing added: the weights can now change by themselves. Hand them over to a rule, find out why that alone does not fix the animal, and then choose what a weight change is allowed to depend on. The same stage of the evolving-creature engine, configured to learn.',
+    mode: 'both',
+    status: 'building',
+    Component: LearningScene,
+    // The handout is written from the built scene and does not exist yet.
+    // Until it lands at this path the Lab pane says so and offers the link;
+    // when it lands, the button starts working with no change here.
+    lab: {
+      rawUrl: `${INTRO_RAW}/learning_and_plasticity/learning_lab/learning_lab.md`,
+      sourceUrl: `${INTRO_BLOB}/learning_and_plasticity/learning_lab/learning_lab.md`,
+      notYet: 'The handout for this lab has not been published yet. The simulation is complete and can be explored without it; the instructions will appear here when they are ready.',
+    },
+  },
 ]
 
 /**
@@ -166,11 +191,6 @@ export interface PlannedScene {
 
 export const plannedScenes: PlannedScene[] = [
   {
-    module: 5,
-    title: 'Fish That Learn',
-    idea: 'The creature becomes an early vertebrate: neural adaptation, Hebbian, error-driven, and reinforcement learning.',
-  },
-  {
     module: 6,
     title: 'Brain Flythrough',
     idea: 'Camera flythrough of labeled vertebrate brain structures.',
@@ -178,7 +198,7 @@ export const plannedScenes: PlannedScene[] = [
   {
     module: 7,
     title: 'Classifier Playground',
-    idea: 'Harder pattern recognition: XOR and circle-surround, hidden layers vs. feature selection, train/test generalization.',
+    idea: 'The creature becomes an early vertebrate, a fish. Harder pattern recognition: XOR and circle-surround, hidden layers vs. feature selection, train/test generalization.',
   },
   {
     module: 11,
