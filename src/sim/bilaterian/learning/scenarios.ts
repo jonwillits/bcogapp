@@ -48,6 +48,8 @@ export interface LearningSpec {
   teacher?: (x: readonly number[], w: LearningDish) => number | null
   /** What reaching each thing currently does, a line apiece, for the World tab. */
   worldDoes: (w: LearningDish) => string[]
+  /** Part 3 runs a rule this animal does not have, and the panel says so. */
+  tierFour?: boolean
   /** Which Learning-tab sections this scenario uses. */
   show: { trace: boolean; discount: boolean; credit: boolean; twoEquations: boolean }
 }

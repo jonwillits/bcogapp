@@ -18,7 +18,7 @@ export function WorldTab(s: SceneState) {
 
   const left = (
     <Panel title="The world" style={PANEL_STYLE}>
-      <TabBar tab={s.tab} onChange={s.setTab} />
+      {s.tabBar ?? <TabBar tab={s.tab} onChange={s.setTab} />}
       <Note>
         <b>Real time</b>, times the speed control. One animal in a dish of cue fields. Each
         scenario sets which cues are in the dish, what they are called, and which of the animal’s

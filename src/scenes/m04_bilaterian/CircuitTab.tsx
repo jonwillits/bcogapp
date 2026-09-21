@@ -39,6 +39,7 @@ export function CircuitTab(s: SceneState) {
 
   const set = (patch: Parameters<typeof setWiring>[1]) => {
     setWiring(circuit, patch)
+    s.afterWiring?.(patch)
     bump()
   }
 
@@ -46,13 +47,13 @@ export function CircuitTab(s: SceneState) {
 
   const left = (
     <Panel title="The circuit" style={PANEL_STYLE}>
-      <TabBar tab={s.tab} onChange={s.setTab} />
+      {s.tabBar ?? <TabBar tab={s.tab} onChange={s.setTab} />}
       <Note>
         The animal has one sensory cell per cue, at the head, and it steers by comparing what each
         cell senses now against a moment ago. Every number in its nervous system is on the right;
         everything you can change about it is here. The dish itself is on the World tab.
       </Note>
-      <Section key={`${scenario.key}-wiring`} title="Wiring — fixed until you change it" defaultOpen={scenario.open.circuit} hint="Weights, the baseline, the threshold, the routing switch and the activation function. Locked ones are printed, not slid.">
+      <Section key={`${scenario.key}-wiring`} title={s.wiringTitle ?? 'Wiring — fixed until you change it'} defaultOpen={scenario.open.circuit} hint="Weights, the baseline, the threshold, the routing switch and the activation function. Locked ones are printed, not slid.">
         {hideNumbers ? (
           <Note>This animal’s numbers are hidden until you reveal its faults on the Worms tab. The diagram still shows how it is wired.</Note>
         ) : (
@@ -169,6 +170,7 @@ export function CircuitTab(s: SceneState) {
         onFlipRoute={() => set({ route: route === 'forward' ? 'reverse' : 'forward' })}
       />
       <Note>{HONESTY_LINE}</Note>
+      {s.circuitExtra}
       <Section key={`${scenario.key}-arithmetic`} title="The arithmetic" defaultOpen={scenario.open.arithmetic} hint="What the interneuron computes, with the live numbers in it.">
         {hideNumbers ? (
           <Note>Hidden until you reveal.</Note>
