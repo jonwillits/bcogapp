@@ -16,7 +16,7 @@ Four tabs: **World**, **Circuit**, **Learning**, **Chemistry**. The transport ba
 
 | Name on screen | Range | Default | Where it appears |
 |---|---|---|---|
-| **Scenario** | six entries, lettered because two share Part 1 and two share Part 2: *Part 1a — Hand the weights over*, *Part 1b — Salt, then food*, *Part 2a — Blocking*, *Part 2b — Four signals, one problem*, *Part 3 — The corridor*, *Closer — Extinction* | Hand the weights over | always |
+| **Scenario** | six entries, lettered because two share Part 1 and two share Part 2: *Part 1a — Let the weights change*, *Part 1b — Salt, then food*, *Part 2a — Blocking*, *Part 2b — Four signals, one problem*, *Part 3 — The corridor*, *Closer — Extinction* | Let the weights change | always |
 | **Go to phase 1 / 2 / 3** (buttons, under *The phases*), with **Now in** printing the phase's label | — | phase 1 | `blocking` (three), `extinction` (two) |
 | **Wait**, **Move to the second dish** (becomes **Move back to the first dish**), **Deliver one outcome** (under *The three returns*) | — | — | `extinction` only |
 | **Interval between the touch and the food** | 0 to 10 s, step 0.5 | 0.0 s | `pairing` only |
@@ -67,7 +67,7 @@ All six use Lab 4's animal and 16-unit dish. All load with learning on, η = 0.3
 
 | Key | Menu title | Cells (x₁…) | Loads with | What the world does | Rule | Sections |
 |---|---|---|---|---|---|---|
-| `hand-over` | Hand the weights over | food odor | b₁ = 1, θ = 0.35, forward, threshold function — Lab 4's `reversal` exactly, three food plumes | food odor marks a toxin: eating harms | Coincidence, locked; bounds held off | arithmetic, signal trace |
+| `hand-over` | Let the weights change | food odor | b₁ = 1, θ = 0.35, forward, threshold function — Lab 4's `reversal` exactly, three food plumes | food odor marks a toxin: eating harms | Coincidence, locked; bounds held off | arithmetic, signal trace |
 | `pairing` | Salt, then food | food odor (innate, 1), salt (0), almond odor (0) | two salt-marked sites | touching a site brings food after the interval; its cues dissolve 1.5 s after the touch | Coincidence, locked; **bounds unlocked** | same |
 | `blocking` | Blocking | same three | phase 1: two salt sites with food. Phase 2: both cues at each site, same food. Phase 3: almond alone, nothing | as the phase says | all four; loads at Coincidence | + two equations, trace, discount |
 | `four-signals` | Four signals, one problem | same three | two salt sites and two almond sites; one kind holds food, the other nothing; the toggle flips which | as the toggle says | all four; loads at Coincidence; trace window 3 s | + trace, discount, Credit under Verdict |

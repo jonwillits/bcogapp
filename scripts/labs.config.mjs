@@ -237,7 +237,7 @@ export const LABS = [
     ],
 
     controls: [
-      'Scenario', 'Hand the weights over', 'Salt, then food', 'Blocking', 'Four signals, one problem', 'The corridor', 'Extinction',
+      'Scenario', 'Let the weights change', 'Salt, then food', 'Blocking', 'Four signals, one problem', 'The corridor', 'Extinction',
       'What the world does', 'Go to phase 1', 'Go to phase 2', 'Go to phase 3', 'Interval between the touch and the food',
       'A second cue, almond odor, at every site', 'Almond odor marks the food (off: salt does)',
       'Wait', 'Move to the second dish', 'Deliver one outcome', 'Response to salt alone, here and now',

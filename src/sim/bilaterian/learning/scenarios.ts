@@ -135,7 +135,7 @@ export const LEARNING_SCENARIOS: LearningScenario[] = [
     ...reversal,
     key: 'hand-over',
     part: 1,
-    title: 'Hand the weights over',
+    title: 'Let the weights change',
     blurb:
       'Lab 4’s last dish: the food odor marks a toxin, and the animal’s one weight says approach. In Lab 4 you were the only thing in the room that could change that weight. Now a rule can. Watch the weight trace on the Circuit tab, and watch the harm counter.',
     learning: {
