@@ -68,7 +68,7 @@ export function WorldTab(s: LearningSceneState) {
                   bump()
                 }}
               >
-                {`Go to phase ${k + 1}`}
+                {'Go to phase ' + (k + 1)}
               </Button>
             ))}
           </div>

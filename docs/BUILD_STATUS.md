@@ -95,7 +95,7 @@ The build tracker for the **BCOG 100 Course App** — the step-by-step "what's d
 
 ## Later stages (backlog — see `LAB_IDEAS.md`)
 
-- [x] **M5: learning, in the bilaterian** — built 2026-09-20 on `m05-learning`, unmerged; see Phase 8 in the log and [`M05_AS_BUILT_NOTES.md`](M05_AS_BUILT_NOTES.md). Owed: Jon's walk-through against the crib, the handout (written from the notes), the merge.
+- [x] **M5: learning, in the bilaterian** — built 2026-09-20 on `m05-learning`, unmerged; see Phase 8 in the log and [`M05_AS_BUILT_NOTES.md`](M05_AS_BUILT_NOTES.md). Walked by Jon 2026-09-21 (every prediction held; changes in `7c7d895`), and the handout and report drafted the same day from the as-built notes. Owed: Jon's read of the handout, the merge and the two pushes, the rubric.
 - [ ] M7 fish (the creature becomes a vertebrate here, not in M5): harder pattern recognition (XOR, circle-surround, hidden layers vs. features, train/test).
 - [ ] M6 brain flythrough; M11 (two-network game theory); M12–14 abstract demos.
 

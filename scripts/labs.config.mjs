@@ -220,9 +220,9 @@ export const LABS = [
     handout: 'learning_and_plasticity/learning_lab/learning_lab.md',
     report: 'learning_and_plasticity/learning_lab/learning_lab_report.docx',
     /**
-     * The handout is written FROM the built scene and does not exist yet
-     * (decided 2026-09-20). Until it lands the document checks are skipped
-     * with a note, and the claims below are the claims the SCENE makes true:
+     * The handout was written FROM the built scene (decided 2026-09-20; drafted
+     * 2026-09-21 after Jon's walk-through). Until it is pushed the app's Lab
+     * pane says so. The claims below are the claims the SCENE makes true:
      * the statements about what a student will see that a passing test
      * guarantees. The handout may assert these and nothing it cannot find here.
      */
@@ -231,14 +231,14 @@ export const LABS = [
     retired: [
       { term: /\bfish\b/gi, why: 'the animal is Lab 4’s bilaterian; the fish is Module 7’s' },
       { term: /serotonin|norepinephrine|endorphin/gi, why: 'only dopamine is named on screen, on the broadcast signal' },
-      { term: /\bepisod|\breplay|\bretriev/gi, why: 'nothing in the scene keeps a record of an occasion; Module 10 owns records', unless: ['Module 10'] },
+      { term: /\bepisod|\breplay|\bretriev/gi, why: 'nothing in the scene keeps a record of an occasion; Module 10 owns records', unless: ['q28', 'q29'] },
       { term: /basal gangli|cerebell|striat/gi, why: 'Module 5 stops at the synapse and the cell; Module 6 owns the anatomy' },
       { term: /Hebb’s rule setting|delta rule setting/gi, why: 'the selector’s settings are Coincidence, Prediction, Teacher and Verdict' },
     ],
 
     controls: [
       'Scenario', 'Let the weights change', 'Salt, then food', 'Blocking', 'Four signals, one problem', 'The corridor', 'Extinction',
-      'What the world does', 'Go to phase 1', 'Go to phase 2', 'Go to phase 3', 'Interval between the touch and the food',
+      'What the world does', 'Go to phase', 'Interval between the touch and the food',
       'A second cue, almond odor, at every site', 'Almond odor marks the food (off: salt does)',
       'Wait', 'Move to the second dish', 'Deliver one outcome', 'Response to salt alone, here and now',
       'Sites touched', 'Touched and found nothing', 'Harm', 'Reset', 'New seed', 'Skip ahead 1 min', 'Skip ahead 3 min',

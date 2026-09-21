@@ -181,7 +181,7 @@ export function LearningTab(s: LearningSceneState) {
           {spec.tierFour && <Note><b>{TIER_FOUR_LINE}</b></Note>}
           {spec.lane && (
             <>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>What each point in the chain is worth, trial by trial — the last {world.chainByTrial.length || ''} trials</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>What each point in the chain is worth, trial by trial, oldest at the top — scroll for the latest</div>
               <ChainGrid
                 names={spec.lane.chain.map((c) => c.name)}
                 trials={world.chainByTrial}

@@ -43,7 +43,8 @@ const SITE_SPACING = 7
 /** After a meal in the lane the animal stays long enough for the news to land, then is returned, seconds. */
 const LANE_RETURN_S = 2.5
 const LANE_TIMEOUT_S = 90
-export const CHAIN_TRIALS_KEPT = 12
+/** Enough to keep the first trial on the grid through a thirty-trial run, which is what the handout asks a student to read. */
+export const CHAIN_TRIALS_KEPT = 40
 /** An unpaired delivery waits until the cue's cell reads below this. */
 const UNPAIRED_BELOW = 0.2
 /** The weight trace keeps one sample every half second, for the last ten minutes. */

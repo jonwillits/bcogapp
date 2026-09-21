@@ -142,6 +142,7 @@ export function ChainGrid({
         ))}
       </div>
       {trials.length === 0 && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>No trial finished yet.</div>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 3, maxHeight: 250, overflowY: 'auto' }}>
       {trials.map((t, k) => (
         <div key={firstTrial + k} style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
           <span style={{ width: 44, fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>{firstTrial + k}</span>
@@ -151,6 +152,7 @@ export function ChainGrid({
           <span style={{ ...cell, background: shade(t.atFood * 1.8, '255, 111, 174') }}>{t.atFood.toFixed(2)}</span>
         </div>
       ))}
+      </div>
     </div>
   )
 }
