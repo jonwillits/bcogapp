@@ -21,7 +21,7 @@ Labs with **no external interactive site today** (candidates for new interactive
 
 Fill these in as we talk. Canonical module list: `../../../intro_to_bcs/README.md`.
 
-> **The spine.** Most of these are stages of one **evolving-creature engine** (M1 vehicle → M4 bilaterian → M5/M7 fish → maybe M11 primate), with M3/M6/M12–14 as satellite scenes. The durable statement of that architecture — and the "one focal, visualizable network; other agents are hard-coded NPCs" rule — lives in [`APP_DESIGN.md`](APP_DESIGN.md); this board just captures per-module ideas.
+> **The spine.** Most of these are stages of one **evolving-creature engine** (M1 vehicle → M4 and M5 bilaterian → M7 fish → maybe M11 primate), with M3/M6/M12–14 as satellite scenes. The durable statement of that architecture — and the "one focal, visualizable network; other agents are hard-coded NPCs" rule — lives in [`APP_DESIGN.md`](APP_DESIGN.md); this board just captures per-module ideas.
 
 ### Module 1 — Mind and Brain
 - **Braitenberg Vehicles sim** — *(done)* — Render **3D** — **[live](https://jonwillits.github.io/bcogapp/#/m01-vehicles)** · `src/scenes/m01_vehicles/`. Replaces the local-Python setup.
@@ -49,13 +49,15 @@ Fill these in as we talk. Canonical module list: `../../../intro_to_bcs/README.m
 - ~~**Logic-gate neural net** — Render **2D** — port of the python 4-neuron network: pick a truth table, train, watch weights/decision boundary.~~ Superseded by the scene above; the training is explicitly out.
 
 ### Module 5 — Learning and Plasticity
-- **Expand the 3D simulation to include learning** - The worms are now early vertebrates, probably fish, and they are going to be used to demonstrate neural adaptation, hebbian learning, error-driven learning, and reinforcement learning.
+- **Learning** (`#/m05-learning`) — **built 2026-09-20**, on the branch `m05-learning`. Lab 4's bilaterian in Lab 4's dish with one thing added: the weights can change by themselves. One rule, Δbᵢ = η·xᵢ·Φ, with a selector for what supplies Φ (the unit's own output, a held prediction's error, a target the scenario holds, one broadcast number). Six scenarios: `hand-over` (the rule is on and the animal is poisoned anyway), `pairing`, `blocking` (the separating experiment), `four-signals`, `corridor` (value seeping backward; a rule this animal does not have, and the panel says so), `extinction` (three returns, no weight that decays). The handout is written from the built scene; the record for it is [`M05_AS_BUILT_NOTES.md`](M05_AS_BUILT_NOTES.md).
+- ~~The worms are now early vertebrates, probably fish~~ — retired. The fish is Module 7's; see the spine amendment in [`APP_DESIGN.md`](APP_DESIGN.md).
+- ~~Rock–paper–scissors reinforcement learning~~ — the legacy lab, superseded entirely.
 
 ### Module 6 — Vertebrate Neural Architecture
 - **camera flythrough of labeled brain structures** - Likely a driver of the 3D + camera requirement. Question about whether there would be added value embedding this within the vehicles simulation, or as a separate stand alone activity.
 
 ### Module 7 — Pattern Recognition
-- **Classifier playground** — Continue with the fish, but expand the complexity of the pattern recognition problems the fish need to solve. We will demonstrate the same things you can learn from the Tensorflow playground: 1) linear inseparability of XOR and Circle-Surround classification problems. How there are two ways to solve the problems: hidden layers or input feature selection. And training set vs. test set differences used to demonstrate learning and generalization problems.
+- **Classifier playground** — The creature becomes an early vertebrate, a fish, here (not in Module 5), configuring Module 5's learning layer with `m > 1` and a second layer, which `circuit.test.ts` forbids until then. Expand the complexity of the pattern recognition problems the fish need to solve. We will demonstrate the same things you can learn from the Tensorflow playground: 1) linear inseparability of XOR and Circle-Surround classification problems. How there are two ways to solve the problems: hidden layers or input feature selection. And training set vs. test set differences used to demonstrate learning and generalization problems.
 
 ### Module 8 — Perception and Action
 - _(open)_
