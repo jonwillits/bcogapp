@@ -167,6 +167,42 @@ export const LEARNING_SCENARIOS: LearningScenario[] = [
       show: { trace: true, discount: true, credit: false, twoEquations: true },
     },
   },
+  {
+    key: 'four-signals',
+    part: 2,
+    title: 'Four signals, one problem',
+    blurb:
+      'One learning problem, held still while you change the rule. Two sites are marked by salt and two by almond odor; one kind holds food and the other holds nothing. Run each of the four settings from Reset, and record what each learns. Then flip which cue marks the food, mid-run, and record what each does about it.',
+    channels: channels(CHANNELS.food, NEUTRAL.salt, NEUTRAL.almond),
+    sources: [],
+    circuit: singleInterneuron([1, 0, 0], 0, SINGLE_CUE_THRESHOLD, 'forward'),
+    locks: { ...unlocked(3), weights: [true, false, false] },
+    open: { circuit: true, arithmetic: false, target: false, boundary: false },
+    onReach: () => 'ignore',
+    start: { x: 0, z: 0 },
+    learning: {
+      settings: { factor: 'coincidence', traceWindow: 3 },
+      factors: ['coincidence', 'prediction', 'teacher', 'verdict'],
+      config: { limits: [innate, plastic, plastic], predicts: [false, true, true] },
+      outcomeChannel: 0,
+      flags: { almondMarksFood: false },
+      flagLabels: { almondMarksFood: 'Almond odor marks the food (off: salt does)' },
+      sites: (w) => {
+        const good = w.flags.almondMarksFood ? 2 : 1
+        return [1, 2, 1, 2].map((cue) => ({ cues: [cue], payload: cue === good ? ('nourish' as const) : ('nothing' as const) }))
+      },
+      teacher: (x, w) => {
+        const good = w.flags.almondMarksFood ? 2 : 1
+        if (x[good] >= PRESENT) return 1
+        return x[1] > 0 || x[2] > 0 ? 0 : null
+      },
+      worldDoes: (w) =>
+        w.flags.almondMarksFood
+          ? ['almond odor marks food: touching one brings food at once', 'salt marks nothing: touching one brings nothing']
+          : ['salt marks food: touching one brings food at once', 'almond odor marks nothing: touching one brings nothing'],
+      show: { trace: true, discount: true, credit: false, twoEquations: false },
+    },
+  },
 ]
 
 export function learningScenarioByKey(key: string): LearningScenario {

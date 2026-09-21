@@ -125,3 +125,25 @@ it('blocking', () => {
     }
   }
 })
+
+it('four-signals', () => {
+  const half = Number(process.env.HALF_MIN ?? 5)
+  for (const factor of ['coincidence', 'prediction', 'teacher', 'verdict'] as const) {
+    const rows: string[] = []
+    for (let seed = 1000; seed < 1000 + SEEDS; seed++) {
+      const w = new LearningDish(seed, learningScenarioByKey('four-signals'), { learning: { factor } })
+      const marks: string[] = []
+      for (const flip of [false, true]) {
+        w.flags.almondMarksFood = flip
+        w.layOutSites()
+        const meals = w.cuesReached
+        const empty = w.emptyVisits
+        w.run(60 * half)
+        const b = w.worm.circuit.interneurons[0].weights
+        marks.push(`salt ${f(b[1])} almond ${f(b[2])} meals ${w.cuesReached - meals} empty ${w.emptyVisits - empty}`)
+      }
+      rows.push(marks.join('  | flipped |  '))
+    }
+    console.log(`${factor}\n  ` + rows.join('\n  '))
+  }
+})
