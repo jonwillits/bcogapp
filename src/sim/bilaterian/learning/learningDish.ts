@@ -224,6 +224,30 @@ export class LearningDish extends DishWorld {
     return unitOutput(circuit.interneurons[0], x, circuit.activation)
   }
 
+  /**
+   * Skip ahead: simulated time the dish owes, paid down a slice per frame
+   * without drawing the frames in between. A minute of this dish is a few
+   * milliseconds of arithmetic; what makes a student wait is the screen being
+   * redrawn thirty times a second at a speed the machine may not reach. The
+   * traces record through a skip, so the whole curve is there afterward, and
+   * a skip paid in slices is the same run as one paid at once, by test.
+   */
+  skipRemaining = 0
+
+  skipAhead(seconds: number): void {
+    this.skipRemaining += seconds
+  }
+
+  /** Pay down up to `seconds` of the skip. Returns what is still owed. */
+  paySkip(seconds: number): number {
+    const dt = 1 / 30
+    const steps = Math.round(Math.min(seconds, this.skipRemaining) / dt)
+    for (let i = 0; i < steps; i++) this.step(dt)
+    this.skipRemaining = Math.max(0, this.skipRemaining - steps * dt)
+    if (this.skipRemaining < dt / 2) this.skipRemaining = 0
+    return this.skipRemaining
+  }
+
   /** Move the dish to another of the scenario's phases. The animal and its weights carry over; the sites do not. */
   setPhase(k: number): void {
     const n = this.scenario.learning.phases?.length ?? 1

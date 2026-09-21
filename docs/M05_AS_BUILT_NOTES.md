@@ -25,6 +25,7 @@ Four tabs: **World**, **Circuit**, **Learning**, **Chemistry**. The transport ba
 | **Cue concentration (the plumes)** | 0.25× to 2.5× | 1.00× | always; it scales plumes that come and go, which in this lab means `hand-over`'s food plumes and nothing else |
 | **Source to place on a click** | the scenario's cues | food odor | always; a placed source is a cue by itself and carries nothing |
 | **Reset**, **New seed**, run seed printed | — | random seed | always |
+| **Skip ahead 1 minute**, **Skip ahead 3 minutes** | — | — | always; a badge over the dish reads *Skipping ahead — N s to go* for the instant it takes. Presses add up. Works while paused |
 
 **Reset behaves differently from Lab 4 and the handout must say so.** It starts the run again with every control where the student left it and **the weights back where the run started**. A weight set by hand on the Circuit tab counts as a new start. Changing phase, flipping a toggle or moving the interval does not reset anything.
 
@@ -123,20 +124,20 @@ All six use Lab 4's animal and 16-unit dish. All load with learning on, η = 0.3
 
 ## 4. Timing, in wall-clock minutes
 
-Simulated time is wall-clock time divided by the speed control. **Nearly all of this lab is waiting for a weight trace to do something, and at 1× it does not fit in seventy minutes.** The handout should tell students to run at 4× from Part 1 on, and at 8× for `four-signals`. The measured minimums below assume the student starts each run promptly; they do not include reading or writing.
+**The lab does not ask a student to sit through its runs.** The World tab has **Skip ahead 1 minute** and **Skip ahead 3 minutes**, which run the dish forward without drawing it. Measured in the browser on the development Mac: three simulated minutes in **54 ms** of wall-clock time, React updates included. It is paid down on a timer rather than in the frame loop, thirty simulated seconds a slice, so it does not depend on how fast a machine can draw, and a Chromebook twenty times slower takes about a second. Nothing is left out by a skip: the weight trace, the signal traces and every counter record straight through it, and a test asserts that a sliced skip is the same run as one paid at once.
 
-| Part | Runs a student needs | At 1× | At 4× | Where they are sitting and watching |
-|---|---|---|---|---|
-| 0 | tour | 3 | 3 | — |
-| 1 | `hand-over` 3 min, and again at η = 0.01 for 3; `pairing` to the ceiling 2; η = 1 and η = 0.01, 3; second cue 2; interval 10 s, 5; weakening 5; competition 3 | **26** | **7** | all of it except setting controls. The 10 s interval and the two bounds are fifteen minutes of watching at 1× |
-| 2 | `blocking` under Coincidence 2 + 4 + 2; under Prediction 3.5 + 4 + 2; `four-signals`, four settings × (5 + 5) | **57** | **15** (8 at 8× for `four-signals`) | `four-signals` is forty minutes at 1×. Either run it at 8× or cut each half to three minutes, which is enough for every setting but Verdict |
-| 3 | thirty trials 5.2; window 0, fifteen trials 2.5; window 10, fifteen trials 2.5; one γ, 2.5 | **13** | **3.5** | the grid fills on its own; this is the part students can write during |
-| Closer | acquisition 4, extinction 1.5, then the three buttons from one animal, in the order Move, Move back, Wait, Deliver | **7** | **2** | the buttons are instant. **One run is enough if the order is Move → Move back → Wait → Deliver**; with Reset between them it is 18 minutes at 1× |
-| | **Total running time** | **106** | **31** | |
+Jon's ruling (2026-09-21): five minutes of watching per question is too long even at 8×, and the speed control's top end cannot be assumed on a Chromebook, where drawing and not simulation is the limit. So **the handout should give every run as "Reset, then Skip ahead N minutes"**, and keep live watching for the places where watching is the point: the first minute of `hand-over`, the first approach to salt in `pairing`, and a few corridor trials.
 
-So at 4× the running fits with room to think, and at 1× Part 2 alone overruns the lab. Every previous lab's as-built notes had to admit this after the fact; this one can plan for it. Nothing on any click path costs more than 0.05 ms (`timing.probe.ts`), and one frame at 8× is 0.03 ms of simulation, so high speed is safe on a Chromebook.
+Simulated minutes each part needs, which is what the handout writes after "Skip ahead". Shortening these does not work: the limit is how often the animal touches a site (two to three a minute), and below three minutes a half `four-signals` stops separating the rules reliably (Teacher shows its signature in 3 of 8 seeds at two minutes a half, 8 of 8 at three).
 
----
+| Part | Runs | Simulated minutes | Wall-clock cost of the running itself |
+|---|---|---|---|
+| 1 | `hand-over` 3, and 3 more at η = 0.01; `pairing` to the ceiling 3; η = 1 and 0.01, 3; second cue 2; interval 10 s, 5; weakening 5; competition 3 | 27 | watch the first minute of `hand-over` live (1 min); the rest is about a dozen clicks |
+| 2 | `blocking`: phase 1 until flat (3 under Coincidence, 5 under Prediction), phase 2 for 4, phase 3 for 2, twice; `four-signals`: four settings × (3 + 3) | 20 + 24 | under ten seconds of skipping in all |
+| 3 | thirty trials 5; window 0, 3; window 10, 3; one γ, 3 | 14 | watch three or four trials live (about 40 s), skip the rest |
+| Closer | acquisition 4, extinction 2, then Move → Move back → Wait → Deliver from the one animal | 6 | the buttons are instant; the delivered meal can take up to 30 s to land, or one more skip |
+
+So the time a part takes is now reading, setting controls and writing, which is the handout's to budget and not the simulation's. The speed control still runs 0.25× to 8× for anyone who wants to watch a run at pace. Nothing on any click path costs more than 0.05 ms (`timing.probe.ts`), and a 30-second slice of a skip is about 2 ms.
 
 ## 5. Where the build departed from the spec, and where the spec's numbers were wrong
 
@@ -153,7 +154,7 @@ So at 4× the running fits with room to think, and at 1× Part 2 alone overruns 
 11. **The runaway's "fires on essentially every input combination"** is 75% of the time in the dish with the second cue on (98% of the time at the ceiling), against 30 to 35% with either bound. On a bare integrator it is 94%.
 12. **`hand-over` and `pairing` hold the selector at Coincidence** (Jon agreed). Under Prediction or Verdict `hand-over` would repair the animal; nothing in the scene offers that.
 13. **Reset restores the weights.** Lab 4's Reset keeps everything; here a run that kept what it learned could not be compared with the one before.
-14. **Speed goes to 8×**, for the reason in §4.
+14. **Skip-ahead buttons, and speed to 8×**, for the reason in §4. Neither is in the spec.
 15. **Lab 4's files changed, inertly.** `worm.ts`, `dishWorld.ts`, `fields.ts`, `scenarios.ts` and `circuit.ts` gained hooks (a source may carry its own consequence; reaching one may deliver nothing; a cell may be driven from inside the animal and then does not steer; a lane; per-step news), and Lab 4's three tab components gained four optional slots. `lab4Regression.test.ts` holds all seven scenarios and six animals to the trajectory they ran at `9ebfc77`, to the last bit.
 
 ## 6. Not verifiable from the scripted session

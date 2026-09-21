@@ -170,6 +170,21 @@ describe('determinism', () => {
     expect(a.worm.head).toEqual(b.worm.head)
   })
 
+  it('a skip paid down a slice per frame is the same run as one paid at once, and the traces record through it', () => {
+    for (const s of LEARNING_SCENARIOS) {
+      const sliced = new LearningDish(31, s)
+      sliced.skipAhead(180)
+      let frames = 0
+      while (sliced.paySkip(30) > 0) frames++
+      const atOnce = new LearningDish(31, s)
+      atOnce.run(180)
+      const sig = (w: LearningDish) => JSON.stringify([w.time, w.worm.head, w.worm.circuit, w.trials, w.harm, w.cuesReached, w.weightTrace])
+      expect(sig(sliced), s.key).toBe(sig(atOnce))
+      expect(frames).toBe(5)
+      expect(sliced.weightTrace[0].length).toBeGreaterThan(300)
+    }
+  })
+
   it('nothing in the layer reaches for a second source of randomness', () => {
     for (const [path, src] of production) expect(stripComments(src), path).not.toMatch(/Math\.random|makeRng\(|Date\.now|performance\.now/)
   })

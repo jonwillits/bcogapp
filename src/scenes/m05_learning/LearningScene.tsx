@@ -22,6 +22,8 @@ import { WeightTraceSection, DopamineControls, DopamineReadouts } from './instru
 export type Tab = 'world' | 'circuit' | 'learning' | 'chemistry'
 
 const MAX_STEP_S = 1 / 30
+/** Simulated seconds of a skip paid per frame. */
+const SKIP_SLICE_S = 30
 
 export interface LearningSceneState {
   world: LearningDish
@@ -34,11 +36,15 @@ export interface LearningSceneState {
   reset: (seed: number) => void
   placeChannel: number
   setPlaceChannel: (c: number) => void
+  /** Run the dish forward this many simulated seconds without drawing it. */
+  skip: (seconds: number) => void
 }
 
 function Stepper({ world, scale, onAdvance }: { world: LearningDish; scale: number; onAdvance: () => void }) {
   const repaint = useRef(0)
   useFrame((_, delta) => {
+    // A skip is being paid down by the scene's own timer; do not step underneath it.
+    if (world.skipRemaining > 0) return
     if (scale <= 0) return
     let remaining = Math.min(delta, 0.05) * scale
     let guard = 0
@@ -103,7 +109,27 @@ export default function LearningScene() {
     bump()
   }
 
-  const state: LearningSceneState = { world, scenario, loadScenario, tab, setTab, bump, seed, reset, placeChannel, setPlaceChannel }
+  /**
+   * Skip ahead, paid down on a timer and not in the frame loop: thirty
+   * simulated seconds a slice, a slice per task, so the page stays responsive
+   * and the cost does not depend on how fast this machine can draw. (The frame
+   * loop is also the one thing a throttled or backgrounded tab stops running.)
+   */
+  const skip = (seconds: number) => {
+    const owedAlready = world.skipRemaining > 0
+    world.skipAhead(seconds)
+    bump()
+    if (owedAlready) return
+    const pay = () => {
+      if (worldRef.current !== world) return
+      world.paySkip(SKIP_SLICE_S)
+      bump()
+      if (world.skipRemaining > 0) setTimeout(pay, 0)
+    }
+    setTimeout(pay, 0)
+  }
+
+  const state: LearningSceneState = { world, scenario, loadScenario, tab, setTab, bump, seed, reset, placeChannel, setPlaceChannel, skip }
   const tabBar = <TabBar tab={tab} onChange={setTab} />
 
   /** Lab 4's tabs, handed this world and this scene's slots. */
@@ -143,6 +169,7 @@ export default function LearningScene() {
   return (
     <SceneCanvasLayout
       canvas={
+        <>
         <Canvas camera={{ position: [0, 18, 12], fov: 45 }} onContextMenu={(e) => e.preventDefault()}>
           <color attach="background" args={[palette.bg]} />
           <ambientLight intensity={0.6} />
@@ -191,6 +218,26 @@ export default function LearningScene() {
           <Stepper world={world} scale={playing ? speed : 0} onAdvance={bump} />
           <CameraRig target={[0, 0, 0]} />
         </Canvas>
+        {world.skipRemaining > 0 && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 12,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              padding: '6px 12px',
+              borderRadius: 999,
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              fontSize: 12,
+              color: 'var(--text)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <b>Skipping ahead</b> — {world.skipRemaining.toFixed(0)} s to go
+          </div>
+        )}
+        </>
       }
       left={slots.left}
       right={slots.right}

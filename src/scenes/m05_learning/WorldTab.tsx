@@ -9,6 +9,10 @@ import { TabBar, type LearningSceneState } from './LearningScene'
 import { TIER_FOUR_LINE } from './labels'
 
 const PART_LABEL: Record<string, string> = { 1: 'Part 1', 2: 'Part 2', 3: 'Part 3', closer: 'Closer' }
+export const SKIPS = [
+  { label: 'Skip ahead 1 minute', seconds: 60 },
+  { label: 'Skip ahead 3 minutes', seconds: 180 },
+] as const
 export const INTERVAL_RANGE = { min: 0, max: 10, step: 0.5 } as const
 
 /**
@@ -155,6 +159,21 @@ export function WorldTab(s: LearningSceneState) {
           <Button onClick={() => s.reset(randomSeed())}>New seed</Button>
         </div>
       </div>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        {SKIPS.map((k) => (
+          <Button
+            key={k.label}
+            onClick={() => {
+              s.skip(k.seconds)
+            }}
+          >
+            {k.label}
+          </Button>
+        ))}
+      </div>
+      <Note>
+        <b>Skip ahead</b> runs the dish forward without drawing it, which takes about a second whatever machine you are on. Nothing is left out: the weight trace and every counter record straight through it. Use it whenever an instruction says to run for some minutes.
+      </Note>
       <Note>
         Reset starts the run again with every control where you left it and <b>the weights back where the run started</b>, so two runs that differ in one setting can be compared. Camera: <b>W A S D</b> to move · <b>arrow keys</b> to rotate.
       </Note>
