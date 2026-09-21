@@ -96,3 +96,42 @@ export function Bar({ value, color, label }: { value: number; color: string; lab
     </div>
   )
 }
+
+/**
+ * The chain, trial by trial: one row a trial, one box a point in the chain,
+ * shaded by what the critic held that point to be worth when the trial ended,
+ * with the surprise left at the food in the last column. The reading's
+ * `f-td-chain`, filling in while it runs.
+ */
+export function ChainGrid({
+  names,
+  trials,
+  firstTrial,
+}: {
+  names: string[]
+  trials: { values: number[]; atFood: number }[]
+  firstTrial: number
+}) {
+  const shade = (v: number, rgb: string) => `rgba(${rgb}, ${Math.max(0, Math.min(1, v / 1.8)).toFixed(2)})`
+  const cell = { flex: 1, height: 18, borderRadius: 3, border: '1px solid #33456e', fontSize: 9.5, fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#e8f1ff' } as const
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <div style={{ display: 'flex', gap: 3, fontSize: 9.5, color: 'var(--text-muted)' }}>
+        <span style={{ width: 44 }}>trial</span>
+        {[...names, 'surprise at the food'].map((n) => (
+          <span key={n} style={{ flex: 1, textAlign: 'center' }}>{n}</span>
+        ))}
+      </div>
+      {trials.length === 0 && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>No trial finished yet.</div>}
+      {trials.map((t, k) => (
+        <div key={firstTrial + k} style={{ display: 'flex', gap: 3, alignItems: 'center' }}>
+          <span style={{ width: 44, fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>{firstTrial + k}</span>
+          {t.values.map((v, i) => (
+            <span key={i} style={{ ...cell, background: shade(v, '94, 230, 214') }}>{v.toFixed(2)}</span>
+          ))}
+          <span style={{ ...cell, background: shade(t.atFood * 1.8, '255, 111, 174') }}>{t.atFood.toFixed(2)}</span>
+        </div>
+      ))}
+    </div>
+  )
+}

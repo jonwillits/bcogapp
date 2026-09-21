@@ -48,10 +48,28 @@ export interface LearningSpec {
   teacher?: (x: readonly number[], w: LearningDish) => number | null
   /** What reaching each thing currently does, a line apiece, for the World tab. */
   worldDoes: (w: LearningDish) => string[]
+  /**
+   * A walled lane along x with a chain of zones in it: the animal starts at
+   * one end, food waits at the other, and it is put back at the start after
+   * every meal. Each zone is reported by a cell of its own.
+   */
+  lane?: LaneSpec
   /** Part 3 runs a rule this animal does not have, and the panel says so. */
   tierFour?: boolean
   /** Which Learning-tab sections this scenario uses. */
   show: { trace: boolean; discount: boolean; credit: boolean; twoEquations: boolean }
+}
+
+export interface LaneSpec {
+  halfWidth: number
+  startX: number
+  foodX: number
+  /** Stretches of floor, each reported by the cell at `cell`. */
+  zones: { cell: number; from: number; to: number }[]
+  /** A cell that comes on for a moment at some point in every trial and leads nowhere. */
+  distractor?: { cell: number; seconds: number }
+  /** The points of the chain, in order, for the Credit section: a name and the cell whose value stands for it. */
+  chain: { name: string; cell: number }[]
 }
 
 export interface LearningScenario extends Scenario {
@@ -63,12 +81,19 @@ const NEUTRAL = {
   almond: { name: 'almond odor', color: '#ff9f6b' },
 } as const
 
-function channels(...specs: { name: string; color: string; pursuitDrives?: boolean }[]): ChannelSpec[] {
-  return specs.map((s, i) => ({ channel: i, name: s.name, color: s.color, pursuitDrives: s.pursuitDrives }))
+function channels(...specs: { name: string; color: string; pursuitDrives?: boolean; internal?: boolean }[]): ChannelSpec[] {
+  return specs.map((s, i) => ({ channel: i, name: s.name, color: s.color, pursuitDrives: s.pursuitDrives, internal: s.internal }))
 }
 
 /** The teacher counts a cue as present at half its ceiling. */
 const PRESENT = 0.5
+
+const FLOOR = {
+  marker: { name: 'the marker', color: '#b388ff', internal: true },
+  turn: { name: 'the turn', color: '#5ee6d6', internal: true },
+  approach: { name: 'the approach', color: '#ffd166', internal: true },
+  hum: { name: 'a passing vibration', color: '#ff6fae', internal: true },
+} as const
 
 const plastic = { plastic: true, min: WEIGHT_FLOOR, max: WEIGHT_CEILING }
 const innate = { plastic: false, min: WEIGHT_FLOOR, max: WEIGHT_CEILING }
@@ -201,6 +226,50 @@ export const LEARNING_SCENARIOS: LearningScenario[] = [
           ? ['almond odor marks food: touching one brings food at once', 'salt marks nothing: touching one brings nothing']
           : ['salt marks food: touching one brings food at once', 'almond odor marks nothing: touching one brings nothing'],
       show: { trace: true, discount: true, credit: false, twoEquations: false },
+    },
+  },
+  {
+    key: 'corridor',
+    part: 3,
+    title: 'The corridor',
+    blurb:
+      'A lane with a chain in it: a marker on the floor, then a turn, then the approach, then food. After every meal the animal is put back at the start. A vibration passes through at some point in each trial and leads nowhere. Open the Learning tab’s Credit section and watch what each point in the chain comes to be worth, trial by trial.',
+    channels: channels({ ...CHANNELS.food, color: '#ffe9a8' }, FLOOR.marker, FLOOR.turn, FLOOR.approach, FLOOR.hum),
+    sources: [{ channel: 0, x: 6.5, z: 0, strength: 8, scale: 3, lifetime: null, respawn: 'none' }],
+    circuit: singleInterneuron([1, 0, 0, 0, 0], 0, SINGLE_CUE_THRESHOLD, 'forward'),
+    locks: { ...unlocked(5), weights: [true, false, false, false, false] },
+    open: { circuit: true, arithmetic: false, target: false, boundary: false },
+    onReach: (channel) => (channel === 0 ? 'nourish' : 'ignore'),
+    start: { x: -7, z: 0 },
+    learning: {
+      settings: { factor: 'verdict', traceWindow: 3 },
+      factors: ['verdict'],
+      boundsLocked: true,
+      config: { limits: [innate, plastic, plastic, plastic, plastic], predicts: [false, true, true, true, true] },
+      lane: {
+        halfWidth: 1.3,
+        startX: -7,
+        foodX: 6.5,
+        zones: [
+          { cell: 1, from: -6, to: -3.5 },
+          { cell: 2, from: -1.5, to: 1 },
+          { cell: 3, from: 3, to: 5.5 },
+        ],
+        distractor: { cell: 4, seconds: 1.5 },
+        chain: [
+          { name: 'the marker', cell: 1 },
+          { name: 'the turn', cell: 2 },
+          { name: 'the approach', cell: 3 },
+        ],
+      },
+      tierFour: true,
+      worldDoes: () => [
+        'food waits at the far end of the lane, and nourishes',
+        'the marker, the turn and the approach are stretches of floor; none of them does anything',
+        'a vibration passes once per trial, at no particular point, and leads nowhere',
+        'after each meal the animal is put back at the start',
+      ],
+      show: { trace: true, discount: true, credit: true, twoEquations: false },
     },
   },
 ]

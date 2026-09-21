@@ -94,7 +94,7 @@ export function CircuitDiagram({
               fill={palette.textMuted}
               fontFamily="var(--font-mono)"
             >
-              b{'₁₂₃₄'[i]} = {hideNumbers ? '?' : fmt(w)}
+              b{'₁₂₃₄₅₆'[i]} = {hideNumbers ? '?' : fmt(w)}
             </text>
           </g>
         )
@@ -113,7 +113,7 @@ export function CircuitDiagram({
       {/* sensory cells */}
       {cells.map((c, i) => (
         <g key={`c${i}`}>
-          {node(cellX(i), S_Y, 16, channels[i]?.color ?? palette.sensor, c.output, `x${'₁₂₃₄'[i]}`)}
+          {node(cellX(i), S_Y, 16, channels[i]?.color ?? palette.sensor, c.output, `x${'₁₂₃₄₅₆'[i]}`)}
           <text x={cellX(i)} y={S_Y - 24} textAnchor="middle" fontSize={9.5} fill={palette.text}>
             {channels[i]?.name ?? `cue ${i + 1}`}
           </text>

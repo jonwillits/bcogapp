@@ -39,6 +39,10 @@ const SITE_STRENGTH = 8
  */
 const SITE_SCALE = 1
 const SITE_SPACING = 7
+/** After a meal in the lane the animal stays long enough for the news to land, then is returned, seconds. */
+const LANE_RETURN_S = 2.5
+const LANE_TIMEOUT_S = 90
+export const CHAIN_TRIALS_KEPT = 12
 /** The weight trace keeps one sample every half second, for the last ten minutes. */
 export const WEIGHT_SAMPLE_S = 0.5
 export const WEIGHT_TRACE_LEN = 1200
@@ -85,6 +89,14 @@ export class LearningDish extends DishWorld {
   readonly startWeights: number[]
   weightTrace: number[][]
   signalTrace = { phi: [] as number[], broadcast: [] as number[], value: [] as number[], output: [] as number[] }
+  /** Lane trials finished, and the instruments the Credit section reads. A count and a short ring, on the experimenter's side. */
+  laneTrials = 0
+  /** For each of the last few trials: what the critic held each point of the chain to be worth, and the surprise left at the food. */
+  chainByTrial: { values: number[]; atFood: number }[] = []
+  private trialBegan = 0
+  private returnAt: number | null = null
+  private distractorAt = 0
+  private surpriseAtFood = 0
   private sinceWeightSample = 0
   private sinceSignalSample = 0
 
@@ -98,6 +110,47 @@ export class LearningDish extends DishWorld {
     this.startWeights = [...actor.weights]
     this.weightTrace = actor.weights.map((b) => [b])
     this.layOutSites()
+    if (spec.lane) {
+      this.worm.laneHalfWidth = spec.lane.halfWidth
+      this.beginLaneTrial()
+    }
+  }
+
+  /** Put the animal at the start of the lane, facing along it. Nothing carries across: it was picked up and put down. */
+  private beginLaneTrial(): void {
+    const lane = this.scenario.learning.lane!
+    this.worm.placeAt(lane.startX, 0, 0)
+    this.worm.mode = 'forward'
+    this.learner.cut()
+    this.trialBegan = this.time
+    this.returnAt = null
+    this.surpriseAtFood = 0
+    this.distractorAt = this.rng.range(0.5, 3)
+    if (!this.sources.some((s) => s.channel === 0)) {
+      for (const spec of this.scenario.sources) this.spawn(spec, spec.x, spec.z)
+    }
+  }
+
+  private runLane(): void {
+    const lane = this.scenario.learning.lane!
+    const x = this.worm.head.x
+    const drive = this.worm.internalDrive
+    for (const z of lane.zones) drive[z.cell] = x >= z.from && x <= z.to ? 1 : 0
+    if (lane.distractor) {
+      const t = this.time - this.trialBegan
+      drive[lane.distractor.cell] = t >= this.distractorAt && t < this.distractorAt + lane.distractor.seconds ? 1 : 0
+    }
+    // The surprise at the food: the broadcast signal on the step of delay the meal falls in.
+    if (this.returnAt !== null && this.time < this.returnAt - LANE_RETURN_S + 1.2) this.surpriseAtFood = Math.max(this.surpriseAtFood, this.learner.broadcast)
+    const timedOut = this.returnAt === null && this.time - this.trialBegan > LANE_TIMEOUT_S
+    if (timedOut || (this.returnAt !== null && this.time >= this.returnAt)) {
+      if (!timedOut) {
+        this.laneTrials++
+        this.chainByTrial.push({ values: lane.chain.map((c) => this.learner.critic.weights[c.cell]), atFood: this.surpriseAtFood })
+        if (this.chainByTrial.length > CHAIN_TRIALS_KEPT) this.chainByTrial.shift()
+      }
+      this.beginLaneTrial()
+    }
   }
 
   /** Move the dish to another of the scenario's phases. The animal and its weights carry over; the sites do not. */
@@ -163,11 +216,16 @@ export class LearningDish extends DishWorld {
   protected override respawn(s: CueSource): void {
     const site = this.sites.find((q) => q.payload === s.id)
     if (site) this.moveSite(site)
-    else super.respawn(s)
+    else if (this.scenario.learning.lane) {
+      // The food at the end of the lane: eaten, and back once the animal is returned to the start.
+      this.sources = this.sources.filter((q) => q.id !== s.id)
+      this.returnAt = this.time + LANE_RETURN_S
+    } else super.respawn(s)
   }
 
   override step(dt: number): void {
     this.runSites()
+    if (this.scenario.learning.lane) this.runLane()
     super.step(dt)
 
     if (this.omissionLeft > 0) {

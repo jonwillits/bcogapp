@@ -147,3 +147,52 @@ it('four-signals', () => {
     console.log(`${factor}\n  ` + rows.join('\n  '))
   }
 })
+
+it('corridor', () => {
+  for (const cfg of [
+    { label: 'default (window 3, γ 0.9)', l: {} },
+    { label: 'window 0', l: { traceWindow: 0 } },
+    { label: 'window 10', l: { traceWindow: 10 } },
+    { label: 'γ 0.5', l: { discount: 0.5 } },
+    { label: 'γ 0.99', l: { discount: 0.99 } },
+  ]) {
+    for (let seed = 1000; seed < 1000 + Math.min(SEEDS, 3); seed++) {
+      const w = new LearningDish(seed, learningScenarioByKey('corridor'), { learning: cfg.l })
+      const lines: string[] = []
+      let seen = 0
+      while (w.laneTrials < 20 && w.time < 900) {
+        w.step(1 / 30)
+        if (w.laneTrials !== seen) {
+          seen = w.laneTrials
+          const c = w.chainByTrial[w.chainByTrial.length - 1]
+          if (seen <= 6 || seen % 5 === 0) lines.push(`    trial ${seen} t=${f(w.time, 0)}s  values ${c.values.map((v) => f(v)).join(' ')}  surprise at food ${f(c.atFood)}`)
+        }
+      }
+      const b = w.worm.circuit.interneurons[0].weights
+      console.log(`${cfg.label} seed ${seed}: ${w.laneTrials} trials in ${f(w.time, 0)} s; actor marker ${f(b[1])} turn ${f(b[2])} approach ${f(b[3])} vibration ${f(b[4])}\n${lines.join('\n')}`)
+    }
+  }
+})
+
+it('chain', () => {
+  for (const traceWindow of [0, 3, 10]) {
+    for (let seed = 1000; seed < 1000 + SEEDS; seed++) {
+      const w = new LearningDish(seed, learningScenarioByKey('corridor'), { learning: { traceWindow } })
+      const first = [0, 0, 0]
+      const late: { values: number[]; atFood: number }[] = []
+      let seen = 0
+      while (w.laneTrials < 30 && w.time < 1500) {
+        w.step(1 / 30)
+        if (w.laneTrials !== seen) {
+          seen = w.laneTrials
+          const c = w.chainByTrial[w.chainByTrial.length - 1]
+          c.values.forEach((v, i) => { if (!first[i] && v > 0.3) first[i] = seen })
+          if (seen > 20) late.push(c)
+        }
+      }
+      const avg = (pick: (c: { values: number[]; atFood: number }) => number) => late.reduce((a, c) => a + pick(c), 0) / late.length
+      const b = w.worm.circuit.interneurons[0].weights
+      console.log(`window ${traceWindow} seed ${seed}: ${f(w.time / 60, 1)} min; first trial over 0.3: marker ${first[0]} turn ${first[1]} approach ${first[2]}; trials 21-30 mean: marker ${f(avg((c) => c.values[0]))} turn ${f(avg((c) => c.values[1]))} approach ${f(avg((c) => c.values[2]))} surprise at food ${f(avg((c) => c.atFood))}; actor marker ${f(b[1])} vibration ${f(b[4])}`)
+    }
+  }
+})

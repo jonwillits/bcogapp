@@ -186,6 +186,8 @@ export class Worm {
   pauseLeft = 0
   /** A world may slow the animal — inside decaying matter, say. */
   speedFactor = 1
+  /** Half the width of a lane along x the world has walled the animal into, or null for the open dish. */
+  laneHalfWidth: number | null = null
   /** What the world is currently telling each internal cell, 0..1, by cell index. */
   internalDrive: number[] = []
 
@@ -309,7 +311,8 @@ export class Worm {
       cell.output = sensoryOutput(cell.concentration, cell.gain)
       cell.now += ((cell.output - cell.now) * dt) / TUNING.nowTau
       cell.trace += ((cell.output - cell.trace) * dt) / TUNING.traceTau
-      cell.delta = cell.now - cell.trace
+      // An internal cell reports a state, not something to climb: it never triggers a reversal.
+      cell.delta = cell.internal ? 0 : cell.now - cell.trace
     }
     const x = this.cells.map((s) => s.output)
     const dx = this.cells.map((s) => s.delta)
@@ -451,8 +454,9 @@ export class Worm {
       p.x = Math.max(-lim, Math.min(lim, p.x))
       onWall('x')
     }
-    if (p.z > lim || p.z < -lim) {
-      p.z = Math.max(-lim, Math.min(lim, p.z))
+    const limZ = this.laneHalfWidth ?? lim
+    if (p.z > limZ || p.z < -limZ) {
+      p.z = Math.max(-limZ, Math.min(limZ, p.z))
       onWall('z')
     }
     const n = this.chain.length

@@ -43,7 +43,7 @@ export function CircuitTab(s: SceneState) {
     bump()
   }
 
-  const sub = (i: number) => '₁₂₃₄'[i]
+  const sub = (i: number) => '₁₂₃₄₅₆'[i]
 
   const left = (
     <Panel title="The circuit" style={PANEL_STYLE}>

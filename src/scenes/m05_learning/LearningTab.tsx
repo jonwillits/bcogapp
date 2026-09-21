@@ -7,7 +7,7 @@ import { Note, Row, GroupLabel, PANEL_STYLE, RIGHT_STYLE } from '../m04_bilateri
 import { THIRD_FACTORS, RATE_RANGE, TRACE_RANGE, DISCOUNT_RANGE, weightChange } from '../../sim/bilaterian/learning/rule'
 import { SIGNAL_TRACE_LEN } from '../../sim/bilaterian/learning/learningDish'
 import { TabBar, type LearningSceneState } from './LearningScene'
-import { LinePlot, Legend, Bar } from './plots'
+import { LinePlot, Legend, Bar, ChainGrid } from './plots'
 import { SIGNAL_COLORS, TIER_FOUR_LINE } from './labels'
 
 const SUB = '₁₂₃₄₅₆'
@@ -74,7 +74,7 @@ export function LearningTab(s: LearningSceneState) {
           )
         })}
       </div>
-      {spec.factors.length === 1 && <Note>This scenario holds the rule at {current.label}. Part 2’s scenarios unlock the other three.</Note>}
+      {spec.factors.length === 1 && <Note>This scenario holds the rule at {current.label}.</Note>}
 
       <GroupLabel>Rates and windows</GroupLabel>
       <Slider
@@ -179,6 +179,18 @@ export function LearningTab(s: LearningSceneState) {
       {(spec.show.credit || usesTrace) && (
         <Section title="Credit" defaultOpen hint="Which connections are still candidates, and what each point is worth.">
           {spec.tierFour && <Note><b>{TIER_FOUR_LINE}</b></Note>}
+          {spec.lane && (
+            <>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>What each point in the chain is worth, trial by trial — the last {world.chainByTrial.length || ''} trials</div>
+              <ChainGrid
+                names={spec.lane.chain.map((c) => c.name)}
+                trials={world.chainByTrial}
+                firstTrial={world.laneTrials - world.chainByTrial.length + 1}
+              />
+              <Row label="Trials finished" value={`${world.laneTrials}`} />
+              <Note>Value is in green; the surprise left at the food, which is the broadcast signal when the meal lands, is in pink. Watch which column fills first, and what happens to the pink one.</Note>
+            </>
+          )}
           <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Eligibility on each connection — a mark that fades</div>
           {scenario.channels.map((c, i) => (
             <Bar key={c.channel} value={l.eligibility[i] ?? 0} color={c.color} label={`e${SUB[i]} ${c.name}`} />
@@ -213,13 +225,13 @@ function Arithmetic({ s }: { s: LearningSceneState }) {
         {scenario.channels
           .map((c, i) =>
             l.config.limits[i].plastic
-              ? `Δb${SUB[i]} = η · x${SUB[i]} · Φ = ${fmt(set.rate)} · ${fmt(l.eligibility[i])} · ${fmt(l.phi)} = ${fmt(set.on ? l.changePerSecond[i] : 0)} per second   (${c.name})`
+              ? `Δb${SUB[i]} = η · x${SUB[i]} · Φ = ${fmt(set.rate)} · ${fmt(l.marks[i])} · ${fmt(l.phi)} = ${fmt(set.on ? l.changePerSecond[i] : 0)} per second   (${c.name})`
               : `Δb${SUB[i]} = 0   (${c.name}: innate)`,
           )
           .join('\n')}
       </pre>
       <Note>
-        Every connection uses the same η and the same Φ; only its own input differs. {set.traceWindow > 0 ? 'With a trace window above zero, xᵢ here is the input as the connection still holds it.' : ''}
+        Every connection uses the same η and the same Φ; only its own input differs. {set.factor === 'verdict' ? 'Under Verdict, xᵢ is the mark on the connection as it stood when the step the news is about ended.' : ''}
       </Note>
       <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>One occasion, by hand — under Coincidence, at the learning rate set on the left</div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-mono)', fontSize: 12, flexWrap: 'wrap' }}>

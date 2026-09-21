@@ -8,7 +8,7 @@ import { Terrain } from '../../components/Terrain'
 import { DISH_BOUNDS } from '../../sim/bilaterian/dishWorld'
 import { cloneCircuit, setWiring, type Circuit } from '../../sim/bilaterian/circuit'
 import { LearningDish, type LearningDishOptions } from '../../sim/bilaterian/learning/learningDish'
-import { LEARNING_SCENARIOS, learningScenarioByKey, type LearningScenario } from '../../sim/bilaterian/learning/scenarios'
+import { LEARNING_SCENARIOS, learningScenarioByKey, type LaneSpec, type LearningScenario } from '../../sim/bilaterian/learning/scenarios'
 import { randomSeed } from '../../sim/random'
 import { palette } from '../../theme/theme'
 import { WormMesh, CueFieldMesh, MealMarks } from '../m04_bilaterian/meshes'
@@ -179,6 +179,7 @@ export default function LearningScene() {
               now={world.time}
             />
           ))}
+          {scenario.learning.lane && <LaneMesh lane={scenario.learning.lane} colors={channelColors} live={world.worm.internalDrive} />}
           <MealMarks world={world} />
           <WormMesh worm={world.worm} colors={channelColors} />
           <Stepper world={world} scale={playing ? speed : 0} onAdvance={bump} />
@@ -202,6 +203,37 @@ export default function LearningScene() {
         />
       }
     />
+  )
+}
+
+/**
+ * The corridor: two walls, and a strip of floor for each zone, bright while
+ * the animal is on it. Flat colour, unlit, because the dark theme has hidden
+ * lit geometry here before.
+ */
+function LaneMesh({ lane, colors, live }: { lane: LaneSpec; colors: string[]; live: number[] }) {
+  const length = DISH_BOUNDS * 2
+  return (
+    <group>
+      {[-1, 1].map((side) => (
+        <mesh key={side} position={[0, 0.15, side * (lane.halfWidth + 0.08)]}>
+          <boxGeometry args={[length, 0.3, 0.12]} />
+          <meshBasicMaterial color="#8fa6d6" />
+        </mesh>
+      ))}
+      {lane.zones.map((z) => (
+        <mesh key={z.cell} rotation={[-Math.PI / 2, 0, 0]} position={[(z.from + z.to) / 2, 0.006, 0]}>
+          <planeGeometry args={[z.to - z.from, lane.halfWidth * 2]} />
+          <meshBasicMaterial color={colors[z.cell]} transparent opacity={live[z.cell] ? 0.75 : 0.32} />
+        </mesh>
+      ))}
+      {lane.distractor && (live[lane.distractor.cell] ?? 0) > 0 && (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.004, 0]}>
+          <planeGeometry args={[length, lane.halfWidth * 2]} />
+          <meshBasicMaterial color={colors[lane.distractor.cell]} transparent opacity={0.22} />
+        </mesh>
+      )}
+    </group>
   )
 }
 

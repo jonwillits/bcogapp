@@ -67,12 +67,16 @@ describe('four signals, one problem', () => {
     expect(r.after.salt).toBeLessThan(0.36)
   })
 
-  it('one broadcast number learns which cue leads somewhere good, and is slow to give it up', () => {
+  it('one broadcast number learns which cue leads somewhere good, and follows the flip — from nothing but how things went', () => {
     const r = run('verdict')
     expect(r.before.salt).toBeGreaterThan(r.before.almond + 1)
-    // It was told only that things went worse than expected, never what to
-    // do instead: five minutes after the flip salt still outweighs almond odor.
-    expect(r.after.salt).toBeLessThan(r.before.salt)
-    expect(r.after.salt).toBeGreaterThan(1)
+    expect(r.after.almond).toBeGreaterThan(r.after.salt + 0.5)
+  })
+
+  it('and it is the least exact of the three that can follow the flip: prediction ends nearer the mark on both cues', () => {
+    const verdict = run('verdict')
+    const prediction = run('prediction')
+    // What the old cue is left holding, five minutes after it stopped marking anything.
+    expect(Math.abs(prediction.after.salt)).toBeLessThan(verdict.after.salt)
   })
 })

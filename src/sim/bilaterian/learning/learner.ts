@@ -96,6 +96,15 @@ export class Learner {
   /** eᵢ: the fading mark on each connection. With the window at zero it is the live input. */
   readonly eligibility: number[]
   /**
+   * The marks as they stood when the last step of delay ended. The broadcast
+   * signal is news about that step — how the step that followed compared
+   * with it — so these are the marks it lands on. Landing it on the live
+   * marks instead credits a cue with its own arrival, and the value of
+   * whatever comes just before food then climbs without limit (measured:
+   * 2.6 and rising, where it should settle under 1).
+   */
+  readonly marksAtLastStep: number[]
+  /**
    * The held prediction. `value` was generated at `madeAt`, before the
    * arrival it is compared with, and is not recomputed while that arrival is
    * being resolved. §5.2.6: this register is what earns prediction learning
@@ -109,6 +118,8 @@ export class Learner {
   private valueAtLastStep = 0
   private newsSinceLastStep = 0
   private sinceLastStep = 0
+  /** The marks the broadcast now being released lands on. */
+  private readonly marksForNews: number[]
   /** Each input summed over the current step of delay, so a cue briefer than a step is still seen. */
   private readonly inputOverStep: number[]
   /** How active the receiving unit has been lately — what weakening measures its output against. */
@@ -130,6 +141,13 @@ export class Learner {
     this.eligibility = new Array<number>(n).fill(0)
     this.changePerSecond = new Array<number>(n).fill(0)
     this.inputOverStep = new Array<number>(n).fill(0)
+    this.marksAtLastStep = new Array<number>(n).fill(0)
+    this.marksForNews = new Array<number>(n).fill(0)
+  }
+
+  /** The input each connection currently brings to the rule — what the panel prints as xᵢ. */
+  get marks(): readonly number[] {
+    return this.settings.factor === 'verdict' ? this.marksForNews : this.eligibility
   }
 
   /** p: what the predicting connections currently say is about to arrive. */
@@ -153,6 +171,8 @@ export class Learner {
   /** A break in the animal's experience — it was picked up and put down. Nothing carries across it. */
   cut(): void {
     this.eligibility.fill(0)
+    this.marksAtLastStep.fill(0)
+    this.marksForNews.fill(0)
     this.valueAtLastStep = 0
     this.newsSinceLastStep = 0
     this.sinceLastStep = 0
@@ -197,6 +217,10 @@ export class Learner {
       const overStep = this.valueOf(this.inputOverStep.map((sum) => sum / this.sinceLastStep))
       this.broadcast = this.newsSinceLastStep + s.discount * overStep - this.valueAtLastStep
       this.valueAtLastStep = overStep
+      for (let i = 0; i < n; i++) {
+        this.marksForNews[i] = this.marksAtLastStep[i]
+        this.marksAtLastStep[i] = this.eligibility[i]
+      }
       this.newsSinceLastStep = 0
       this.sinceLastStep = 0
       this.inputOverStep.fill(0)
@@ -215,7 +239,10 @@ export class Learner {
     })
 
     // 5. Δbᵢ = η · xᵢ · Φ, for every connection, whatever Φ is.
-    for (let i = 0; i < n; i++) this.changePerSecond[i] = weightChange(s.rate, this.eligibility[i], this.phi)
+    // The input each connection brings to the rule: its mark. For the
+    // broadcast signal, the mark as it stood when the step the news is about ended.
+    const marks = this.marks
+    for (let i = 0; i < n; i++) this.changePerSecond[i] = weightChange(s.rate, marks[i], this.phi)
     // Weakening takes an excitatory connection toward nothing and never past
     // it: a synapse can be depressed to silence, not into inhibition. Without
     // this, a high rate overshoots through zero while the unit's recent
@@ -229,7 +256,7 @@ export class Learner {
     // 6. The critic's own connections are eligible connections too, and the
     //    same broadcast number reaches them.
     const criticLimits = this.config.predicts.map((p) => ({ plastic: p, min: WEIGHT_FLOOR, max: WEIGHT_CEILING }))
-    const criticChanges = this.eligibility.map((e) => weightChange(s.rate, e, this.broadcast) * dt)
+    const criticChanges = this.marksForNews.map((e) => weightChange(s.rate, e, this.broadcast) * dt)
     learnWeights(this.critic, criticChanges, criticLimits, false)
   }
 }

@@ -83,7 +83,7 @@ export function WorldTab(s: SceneState) {
           <div key={c.channel} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
             <span style={{ width: 12, height: 12, borderRadius: 6, background: c.color, display: 'inline-block', boxShadow: `0 0 6px ${c.color}` }} />
             <span>
-              {c.name} — sensory cell x{'₁₂₃₄'[c.channel]}
+              {c.name} — sensory cell x{'₁₂₃₄₅₆'[c.channel]}
             </span>
           </div>
         ))}
