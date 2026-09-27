@@ -121,7 +121,7 @@ function CardChip({ n, tone = 'normal' }: { n: number; tone?: 'normal' | 'match'
         borderRadius: 999,
         background: bg,
         color: tone === 'key' ? '#e7ecf3' : '#0b111c',
-        border: tone === 'key' ? '2px solid #e7ecf3' : 'none',
+        border: `2px solid ${tone === 'key' ? '#e7ecf3' : 'transparent'}`,
         fontSize: 10.5,
         fontWeight: 700,
         alignItems: 'center',

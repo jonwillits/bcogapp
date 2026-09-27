@@ -1,7 +1,16 @@
 import type { CSSProperties, ReactNode } from 'react'
 import { KIND_LABEL, type Kind } from '../../sim/brain/bench'
 
-/** Small shared pieces for the four tabs. */
+/**
+ * Small shared pieces for the four tabs.
+ *
+ * One rule for every control here: **selection changes a control's color and
+ * never its size.** A selected chip used to go bold, bold is wider, and a row
+ * of chips that just fit then wrapped onto a second line the moment one was
+ * chosen (Jon, 2026-09-27, on the Plan tab's view choices). So font weight,
+ * padding and border width are constants, and `layout.test.ts` checks that
+ * no control in this scene keys any of them on its state.
+ */
 
 export type Tab = 'specimens' | 'plan' | 'tree' | 'bench'
 
@@ -32,7 +41,7 @@ export function TabBar({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void
             cursor: 'pointer',
             background: tab === t.id ? 'var(--accent)' : 'transparent',
             color: tab === t.id ? '#0b111c' : 'var(--text)',
-            fontWeight: tab === t.id ? 600 : 400,
+            fontWeight: 600,
           }}
         >
           {t.title}
@@ -69,7 +78,7 @@ export function Btn({ children, onClick, primary, disabled, title, small }: { ch
         border: `1px solid ${primary ? 'var(--accent)' : 'var(--border)'}`,
         background: primary ? 'var(--accent)' : 'var(--surface-2)',
         color: primary ? '#0b111c' : 'var(--text)',
-        fontWeight: primary ? 600 : 400,
+        fontWeight: 600,
         cursor: disabled ? 'not-allowed' : 'pointer',
         opacity: disabled ? 0.45 : 1,
       }}
@@ -102,7 +111,7 @@ export function Choice<T extends string>({ value, options, onChange, disabledIds
               cursor: off ? 'not-allowed' : 'pointer',
               background: on ? 'var(--accent)' : 'var(--surface-2)',
               color: on ? '#0b111c' : 'var(--text)',
-              fontWeight: on ? 600 : 400,
+              fontWeight: 500,
               opacity: off ? 0.4 : 1,
             }}
           >
