@@ -105,7 +105,7 @@ const readTests = (dir) => {
   for (const e of readdirSync(dir, { withFileTypes: true })) {
     const p = join(dir, e.name)
     if (e.isDirectory()) out += readTests(p)
-    else if (e.name.endsWith('.test.ts')) out += readFileSync(p, 'utf-8') + '\n'
+    else if (/\.test\.tsx?$/.test(e.name)) out += readFileSync(p, 'utf-8') + '\n'
   }
   return out
 }

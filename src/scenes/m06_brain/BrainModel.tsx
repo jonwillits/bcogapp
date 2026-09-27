@@ -283,18 +283,21 @@ function Labels({ g, species, selected, onPick }: { g: ReturnType<typeof brainGe
   const left: StructureId[] = ['basalGanglia', 'thalamus', 'reticularFormation']
   const text = (id: StructureId) => labelIn(STRUCTURES.find((s) => s.id === id)!, species)
   const items: { id: StructureId; x: number; y: number; anchor: 'start' | 'middle' | 'end' }[] = []
-  const spread = (ids: StructureId[], gap: number, minX: number) => {
+  /** Left to right from the anchors with a minimum gap, then pushed back from the right edge so the last labels keep the gap too. */
+  const spread = (ids: StructureId[], gap: number, minX: number, maxX: number) => {
     const sorted = [...ids].sort((a, b) => g.anchors[a].x - g.anchors[b].x)
     let prev = -Infinity
-    return sorted.map((id) => {
+    const xs = sorted.map((id) => {
       const x = Math.max(minX, g.anchors[id].x - 18, prev + gap)
       prev = x
-      return { id, x }
+      return x
     })
+    for (let i = xs.length - 1; i >= 0; i--) xs[i] = Math.min(xs[i], maxX - (xs.length - 1 - i) * gap)
+    return sorted.map((id, i) => ({ id, x: xs[i] }))
   }
-  spread(above, 118, 40).forEach(({ id, x }) => items.push({ id, x: Math.min(x, g.width - 100), y: 22, anchor: 'start' }))
-  spread(below, 62, 6).forEach(({ id, x }, i) => items.push({ id, x: Math.min(x, g.width - 60), y: g.height - 26 + (i % 2) * 11, anchor: 'start' }))
-  left.forEach((id, i) => items.push({ id, x: 6, y: 120 + i * 14, anchor: 'start' }))
+  spread(above, 118, 110, g.width - 70).forEach(({ id, x }) => items.push({ id, x, y: 22, anchor: 'start' }))
+  spread(below, 64, 6, g.width - 58).forEach(({ id, x }, i) => items.push({ id, x, y: g.height - 26 + (i % 2) * 11, anchor: 'start' }))
+  left.forEach((id, i) => items.push({ id, x: 6, y: 128 + i * 15, anchor: 'start' }))
   return (
     <g fontSize={9.5} fill="#e7ecf3">
       {items.map(({ id, x, y, anchor }) => {

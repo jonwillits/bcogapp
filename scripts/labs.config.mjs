@@ -290,4 +290,86 @@ export const LABS = [
 
     crib: 'crib: what the weight trace and the signal trace should do',
   },
+  {
+    id: 'm06-brain',
+    name: 'Lab 6 — One Plan, Many Brains',
+    route: '#/m06-brain',
+    scene: 'src/scenes/m06_brain',
+    /** The data layer whose strings reach the screen: structure lines, task and tool text, the tree's cards and reveal lines. */
+    strings: ['src/sim/brain'],
+    handout: 'vertebrate_neural_architecture/brain_lab/brain_lab.md',
+    report: 'vertebrate_neural_architecture/brain_lab/brain_lab_report.docx',
+    /**
+     * Built 2026-09-27 with no handout: the handout is written from
+     * docs/M06_AS_BUILT_NOTES.md after Jon's walk-through, so the claims
+     * below are what the SCENE makes true — what the handout may assert.
+     */
+    handoutPending: true,
+
+    retired: [
+      { term: /flythrough|fly-through/gi, why: 'the flythrough was never built; the model is taken apart and experimented on' },
+      { term: /\blesion\b/gi, why: 'the tool is called Remove; the line under it names lesions as the method', unless: ['lesions, and neuropsychology'] },
+      { term: /fear cent(er|re)/gi, why: 'the scene never prints it; the handout names it only as the misconception' },
+      { term: /\b(frontal|parietal|temporal|occipital) lobe|visual cortex|homunculus|prefrontal/gi, why: 'no cortical region is named in Module 6; later modules own them' },
+      { term: /\bmouse\b/gi, why: 'the comparison brain on screen is “mammal”, one parameter set; the chapter’s mouse is the handout’s to cite' },
+      { term: /log scale/gi, why: 'the true-scale view uses a magnifier, not a log scale' },
+    ],
+
+    controls: [
+      'Specimens', 'Plan', 'Tree', 'Bench',
+      'Commit my matches', 'True scale', 'Credits', 'Enlarge', 'See the original', 'Show the cutouts again', 'Play again with a new order',
+      'from the side', 'from above', 'zoom', 'size not recorded',
+      'The lamprey tour', 'Lamprey beside mammal', 'Proportions', 'The bird pallium', 'Show all seven', 'Show lamprey and mammal only',
+      'Reveal the answer', 'Start over',
+      'Orient', 'Tone and shock', 'Cue and food', 'Lever', 'Timed blink', 'Open field',
+      'Train', 'Test', 'Run', 'Clear training', 'Record', 'Remove', 'Stimulate', 'Silence a pathway during training',
+      'the neocortex', 'the dopamine clusters', 'the amygdala', 'the hindbrain', 'Restore',
+      'the dopamine clusters (raise dopamine)', 'the periaqueductal gray', 'one point on the tectum', 'Point on the tectum',
+      'nothing silenced', 'climbing fibers', 'dopamine fibers',
+      'reported', 'follows from the chapter', 'no result reported', 'not scorable',
+      'Doya’s table', 'unsupervised', 'prediction', 'supervised', 'reinforcement',
+    ],
+
+    claims: [
+      { says: 'Plan: the six regions and their proportions are the chapter figure’s, number for number and color for color', test: 'the seven rows match the pasted source, number for number' },
+      { says: 'Plan: the lamprey has no cerebellum and every other species set has one', test: 'the lamprey has no cerebellum, and every other vertebrate set has one' },
+      { says: 'Plan: the lamprey’s pallium has three layers, the mammal’s six, and the bird’s is clustered', test: 'the lamprey’s pallium has three layers, the mammal’s six, and the bird’s is clustered' },
+      { says: 'Plan: the hippocampus and the thalamus are named, not spent', test: 'the hippocampus and the thalamus are named, not spent' },
+      { says: 'Plan: the pallium is labeled pallium in the lamprey and pallium (neocortex) in the mammal', test: 'uses the chapter’s naming convention' },
+      { says: 'Specimens: thirteen photographs, each with a credit, a licence, a source URL and a crop box', test: 'lists at least eight specimens, each with a credit, a licence, a source URL and a crop box' },
+      { says: 'Specimens: before Commit my matches, no species name, correctness or credit is rendered against any image', test: 'attaches no species name, scientific name or credit to any image' },
+      { says: 'Specimens: before the reveal every image is a grayscale cutout identified only by a number', test: 'shows every image as a grayscale cutout on the neutral stage' },
+      { says: 'Specimens: the same run seed gives the same order', test: 'the run seed fixes the order' },
+      { says: 'Specimens: after the reveal each match is marked, named, shown as the full-color original, and linked to its source', test: 'marks each match right or wrong, names it, shows the original and links to its source' },
+      { says: 'Specimens: true size comes from each original’s own scale bar and is the same at every zoom', test: 'drawn size in centimeters is the same at every zoom' },
+      { says: 'Specimens: the span runs from about three centimeters to about twenty', test: 'the span runs from a few centimeters to about twenty' },
+      { says: 'Specimens: the Credits view lists every credit, licence and source; the photographs are excluded from the GPL', test: 'the NOTICE exists, names every file, and excludes them from the GPL' },
+      { says: 'Tree: the topology is §7.1’s and the answer key is §7.2’s card for card', test: 'the answer key matches §7.2 card for card' },
+      { says: 'Tree: the large-brain card cannot be placed once; the key has three separate origins', test: 'the large-brain card’s key has three separate origins' },
+      { says: 'Tree: no card is accepted on the outgroup branch', test: 'no vertebrate card is accepted on the outgroup branch' },
+      { says: 'Tree: no answer-key information is rendered before Reveal the answer', test: 'before the reveal, no key branch, no mark and no reveal line is rendered' },
+      { says: 'Tree: a pallium placed with the mammals is marked wrong at the reveal; the amygdala at the root is neither right nor wrong', test: 'placing is free until every card has a placement, then the reveal marks each one' },
+      { says: 'Bench: the recording map is §8.5’s row for row, and a grey cell is never zero', test: 'matches §8.5 row for row' },
+      { says: 'Bench: the amygdala records high in the threat task and the food task alike', test: 'the amygdala is active in the threat task and the food task alike' },
+      { says: 'Bench: the dopamine cells shift from the food to the cue across training, as a primate result', test: 'show Module 5’s shift, as a primate result' },
+      { says: 'Bench: removing the dopamine clusters slows every movement, and the learned tasks cannot be scored cleanly', test: 'removing the dopamine clusters lowers movement in every task' },
+      { says: 'Bench: silencing the dopamine fibers during Lever training, then testing, leaves movement normal and pressing at the untrained level', test: 'silencing the dopamine fibers during Lever training, then testing, leaves movement normal and pressing at the untrained level' },
+      { says: 'Bench: silencing the climbing fibers during Timed-blink training leaves the timed blink absent and the reflex blink unchanged', test: 'silencing climbing fibers during Timed-blink training leaves the timed blink absent and the reflex blink unchanged' },
+      { says: 'Bench: silencing the other route leaves each task learned normally', test: 'silencing climbing fibers during Lever training leaves the lever learned normally' },
+      { says: 'Bench: removing the amygdala leaves both Tone-and-shock and Cue-and-food unlearned', test: 'removing the amygdala leaves both Tone-and-shock and Cue-and-food unlearned at test' },
+      { says: 'Bench: removing the neocortex leaves walking, grooming and exploring, and every other task grey', test: 'removing the neocortex leaves walking, grooming and exploring in the open field, and every other task grey' },
+      { says: 'Bench: stimulating the periaqueductal gray gives the whole defensive pattern, in a rat', test: 'stimulating the periaqueductal gray gives the whole defensive pattern, in a rat' },
+      { says: 'Bench: stimulating neighboring points on the tectum turns the animal toward neighboring places, monotonically', test: 'stimulating neighboring points turns the animal toward neighboring places, monotonically' },
+      { says: 'Bench: the hindbrain cannot be removed, and the refusal names breathing and heart rate', test: 'the hindbrain cannot be removed, and the refusal is shown' },
+      { says: 'Bench: every non-grey result carries a claim id that exists in the outline', test: 'every id exists in the live outline when it is reachable' },
+      { says: 'Bench: no cell for the hippocampus is non-grey', test: 'no bench cell for the hippocampus is non-grey' },
+      { says: 'Bench: the same seed reproduces every bench number', test: 'the same seed reproduces every bench number' },
+      { says: 'Throughout: no cortical region, no fear center, no brain part called a module, no agentic verb', test: 'never says fear center, and never calls a brain part a module' },
+      { says: 'Throughout: the three honesty lines are on screen', test: 'states the three honesty lines' },
+      { says: 'Shell: the Lab button says the handout is not posted yet, not an error', test: 'the Lab pane message for the missing handout is honest and not an error' },
+    ],
+
+    /** No motion anywhere in this scene: there is no crib. What only a person can confirm is in LAB_6_WALKTHROUGH.md. */
+    crib: null,
+  },
 ]

@@ -96,7 +96,7 @@ export function SpecimensTab({ seed, onNewSeed, header, manifest: given, initial
         {specimens.length ? `${specimens.filter((s) => guesses[s.id]).length} of ${specimens.length} named` : failed ? 'The specimen list could not be loaded.' : 'Loading the specimens…'}
       </Note>
       {!committed && (
-        <Btn primary disabled={!specimens.length || !allNamed(specimens, guesses)} onClick={() => setCommitted(true)} title={allNamed(specimens, guesses) ? undefined : 'Name every image first'}>
+        <Btn primary disabled={!specimens.length || !allNamed(specimens, guesses)} onClick={() => setCommitted(true)}>
           Commit my matches
         </Btn>
       )}
@@ -123,6 +123,7 @@ export function SpecimensTab({ seed, onNewSeed, header, manifest: given, initial
           </Btn>
         </>
       )}
+      {!committed && !allNamed(specimens, guesses) && specimens.length > 0 && <Note>The button is available once every image has a name.</Note>}
       <Note>Write down the strategy you used before you commit. The reflection asks for it.</Note>
     </Panel>
   )

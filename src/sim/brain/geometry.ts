@@ -53,8 +53,8 @@ export interface BrainGeometry {
 
 const W = 520
 const H = 300
-const LEFT = 40
-const LENGTH = 330
+const LEFT = 118
+const LENGTH = 300
 const MID_Y = 165
 
 /** Lay out a species on the standard canvas. */

@@ -5,7 +5,7 @@ import { defineConfig } from 'vitest/config'
  * run together.
  *
  * `npm run test` gates the deploy, so it has to stay fast and deterministic —
- * it runs `*.test.ts` only. The `*.probe.ts` files sweep the evolution engine's
+ * it runs `*.test.ts` and `*.test.tsx` only (the latter renders components headlessly, as Module 6's reveal tests do). The `*.probe.ts` files sweep the evolution engine's
  * parameter space over dozens of fifty-generation runs; they take minutes, they
  * assert nothing, and their output is a table to read. They are kept in the
  * repo because the tuned constants in `food.ts` and `evolutionWorld.ts` are
@@ -23,7 +23,7 @@ export default defineConfig({
   test: {
     include: process.env.PROBE
       ? [`${process.env.PROBE_DIR ?? 'src'}/**/*.probe.ts`]
-      : ['src/**/*.test.ts'],
+      : ['src/**/*.test.{ts,tsx}'],
     // The count-based Module 3 world tests take a quarter of an hour; they
     // run on demand (`npm run test:slow`), not on every `npm run test`.
     exclude: process.env.SLOW ? ['**/node_modules/**'] : ['**/node_modules/**', '**/*.slow.test.ts'],
