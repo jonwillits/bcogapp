@@ -284,19 +284,25 @@ function Labels({ g, species, selected, onPick }: { g: ReturnType<typeof brainGe
   const text = (id: StructureId) => labelIn(STRUCTURES.find((s) => s.id === id)!, species)
   const items: { id: StructureId; x: number; y: number; anchor: 'start' | 'middle' | 'end' }[] = []
   /** Left to right from the anchors with a minimum gap, then pushed back from the right edge so the last labels keep the gap too. */
-  const spread = (ids: StructureId[], gap: number, minX: number, maxX: number) => {
+  const widthOf = (id: StructureId) => 5.3 * text(id).length + 8
+  const spread = (ids: StructureId[], minX: number, maxX: number, rows: number) => {
     const sorted = [...ids].sort((a, b) => g.anchors[a].x - g.anchors[b].x)
-    let prev = -Infinity
-    const xs = sorted.map((id) => {
-      const x = Math.max(minX, g.anchors[id].x - 18, prev + gap)
-      prev = x
+    // Labels alternate between `rows` rows, so only labels in the same row must keep clear of each other.
+    const last: number[] = Array(rows).fill(-Infinity)
+    const xs = sorted.map((id, i) => {
+      const r = i % rows
+      const x = Math.max(minX, g.anchors[id].x - 18, last[r])
+      last[r] = x + widthOf(id)
       return x
     })
-    for (let i = xs.length - 1; i >= 0; i--) xs[i] = Math.min(xs[i], maxX - (xs.length - 1 - i) * gap)
-    return sorted.map((id, i) => ({ id, x: xs[i] }))
+    for (let i = xs.length - 1; i >= 0; i--) {
+      const next = xs.slice(i + rows).length ? xs[i + rows] : maxX
+      xs[i] = Math.min(xs[i], next - widthOf(sorted[i]))
+    }
+    return sorted.map((id, i) => ({ id, x: xs[i], row: i % rows }))
   }
-  spread(above, 118, 110, g.width - 70).forEach(({ id, x }) => items.push({ id, x, y: 22, anchor: 'start' }))
-  spread(below, 64, 6, g.width - 58).forEach(({ id, x }, i) => items.push({ id, x, y: g.height - 26 + (i % 2) * 11, anchor: 'start' }))
+  spread(above, 110, g.width - 4, 1).forEach(({ id, x }) => items.push({ id, x, y: 22, anchor: 'start' }))
+  spread(below, 6, g.width - 4, 2).forEach(({ id, x, row }) => items.push({ id, x, y: g.height - 26 + row * 11, anchor: 'start' }))
   left.forEach((id, i) => items.push({ id, x: 6, y: 128 + i * 15, anchor: 'start' }))
   return (
     <g fontSize={9.5} fill="#e7ecf3">
