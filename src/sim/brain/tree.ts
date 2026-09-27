@@ -185,8 +185,8 @@ export const CARDS: readonly Card[] = [
     id: 'basalGangliaTwoPathways',
     label: 'Basal ganglia with two opposed pathways',
     key: ['vertebrates'],
-    claims: ['§6.1.8-C24', '§6.2.10-C1'],
-    revealLine: 'A lamprey’s selection circuitry and a mouse’s are nearly the same. The design was not improved; it was copied.',
+    claims: ['§6.1.8-C24', '§6.2.10-C1', '§6.2.9-C6', '§6.2.9-C8'],
+    revealLine: 'A lamprey’s selection circuitry and a mouse’s are nearly the same: the same direct pathway, which releases one program, and the same indirect pathway, which presses the others down. The design was not improved; it was copied.',
   },
   {
     id: 'pallium',

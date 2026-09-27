@@ -141,6 +141,9 @@ export type Level = 'none' | 'low' | 'moderate' | 'high'
 
 export const LEVEL_LINE = 'Activity is shown on a four-step schematic scale: none, low, moderate, high. The steps are not measurements.'
 
+/** §6.2.1-C5, printed with every recording. */
+export const REVERSE_INFERENCE_LINE = 'Going from “this structure was active during the task” to “this structure does the task” is reverse inference. A recording shows where; it does not show what for.'
+
 type L = Level | null
 
 interface RecordRow {
@@ -627,7 +630,7 @@ export class Bench {
         speciesNote: 'The superior colliculus in mammals (§6.3.2-C9).',
         direction,
         point,
-        text: `The eyes and head turn ${direction === 0 ? 'straight ahead' : `${Math.abs(direction)}° to the ${direction < 0 ? 'left' : 'right'}`}. A neighboring point on the tectum turns them toward a neighboring place.`,
+        text: `The eyes and head turn ${direction === 0 ? 'straight ahead' : `${Math.abs(direction)}° to the ${direction < 0 ? 'left' : 'right'}`}. A neighboring point on the tectum turns them toward a neighboring place: the tectum is a topographic map.`,
       }
     }
     // dopamine clusters

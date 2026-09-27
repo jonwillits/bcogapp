@@ -1,0 +1,82 @@
+NOTICE — the Lab 6 specimen photographs are NOT covered by this repository's GPL licence
+
+The image files in this folder (public/m06/specimens/) and the derived
+cutouts in derived/ are photographs of real brains used in the Lab 6
+identification game. They are used by permission or under their own licences,
+listed below, and they are excluded from the GNU General Public License that
+covers the rest of this repository. Nothing in this repository's LICENSE file
+applies to them, and they are not to be treated as copyrighted by this
+project. Copying them elsewhere means carrying their own credit and terms.
+
+The originals are unaltered. The files in derived/ are made from them by
+scripts/m06-specimens.py using only a crop, a threshold, a flood fill and a
+conversion to grayscale — nothing is redrawn, and no generative editing of
+any kind is used. Each derived file's name is an opaque hash so that no
+species name reaches the page before the game's reveal; manifest.json maps
+each to its original.
+
+----------------------------------------------------------------------------
+Comparative Mammalian Brain Collections (twelve mammals)
+----------------------------------------------------------------------------
+
+Credit line for every file in this group:
+
+  From the University of Wisconsin and Michigan State Comparative Mammalian
+  Brain Collections and the National Museum of Health and Medicine
+  (brainmuseum.org), supported by the National Science Foundation and the
+  National Institutes of Health.
+
+Terms: the collections grant permission to use their images for educational
+and research purposes on the condition that they are not published and
+copyrighted, and ask that they be identified as above with the funding
+sources acknowledged. They are used here on those terms and on no other.
+
+  Platypus73466clr.jpg        platypus, Ornithorhynchus anatinus
+      https://brainmuseum.org/Specimens/monotremata/platypus/index.html
+  Graykangaroo621276clr.jpg   western grey kangaroo, Macropus fuliginosus
+      https://brainmuseum.org/Specimens/diprotodontia/graykangaroo/index.html
+  labrat63-463lgclr.jpg       brown rat, Rattus norvegicus
+      https://brainmuseum.org/Specimens/rodentia/labrat/index.html
+  Marmoset6clr.jpg            common marmoset, Callithrix jacchus
+      https://brainmuseum.org/Specimens/primates/marmoset/index.html
+  chimp6sect6.jpg             common chimpanzee, Pan troglodytes
+      https://brainmuseum.org/Specimens/primates/chimp/index.html
+  human8sect6.jpg             human, Homo sapiens
+      https://brainmuseum.org/Specimens/primates/human/index.html
+  dolphinpanel6.jpg           bottlenose dolphin, Tursiops truncatus
+      https://brainmuseum.org/Specimens/cetacea/dolphin/index.html
+  manatee8sect6.jpg           Florida manatee, Trichechus manatus latirostris
+      https://brainmuseum.org/Specimens/sirenia/manatee/index.html
+  Casealionpanel6.jpg         California sea lion, Zalophus californianus
+      https://brainmuseum.org/Specimens/pinnipedia/calsealion/index.html
+  elephantall6clr.jpg         African bush elephant, Loxodonta africana
+      https://brainmuseum.org/Specimens/proboscidea/elephant/index.html
+  Pig6clr.jpg                 domestic pig, Sus scrofa domesticus
+      https://brainmuseum.org/Specimens/artiodactyla/pig/index.html
+  Sheep6clr.jpg               domestic sheep, Ovis aries
+      https://brainmuseum.org/Specimens/artiodactyla/sheep/index.html
+
+----------------------------------------------------------------------------
+Wikimedia Commons (one bird)
+----------------------------------------------------------------------------
+
+  Visual_processing_areas_of_the_brains_of_four_species_of_birds.png
+
+  Figure 2 of Martin GR, Wilson K-J, Wild JM, Parsons S, Kubke MF, Corfield J
+  (2007), Kiwi Forego Vision in the Guidance of Their Nocturnal Activities,
+  PLoS ONE 2(2): e198, doi:10.1371/journal.pone.0000198. Via Wikimedia
+  Commons:
+  https://commons.wikimedia.org/wiki/File:Visual_processing_areas_of_the_brains_of_four_species_of_birds.png
+
+  Licence: Creative Commons Attribution 2.5 Generic (CC BY 2.5), as stated on
+  the Commons file page. The article is (c) 2007 Martin et al., open access
+  under the Creative Commons Attribution License.
+
+  Changes made for the game: cropped to panel b, bottom row (the kiwi's brain
+  seen from above, the one view with no label on the tissue), background
+  removed by thresholding, shown in grayscale until the reveal. The unaltered
+  figure, with the emu, barn owl and pigeon, is what the reveal shows.
+
+----------------------------------------------------------------------------
+manifest.json carries the same credits, and the app's Credits view prints
+them after the game's reveal.

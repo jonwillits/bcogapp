@@ -89,6 +89,7 @@ const EvolutionScene = lazy(() => import('./m02_evolution/EvolutionScene'))
 const NeuronScene = lazy(() => import('./m03_neuron/NeuronScene'))
 const BilaterianScene = lazy(() => import('./m04_bilaterian/BilaterianScene'))
 const LearningScene = lazy(() => import('./m05_learning/LearningScene'))
+const BrainScene = lazy(() => import('./m06_brain/BrainScene'))
 
 /**
  * Registered, runnable scenes. Order here is the order shown within a module.
@@ -177,6 +178,24 @@ export const scenes: SceneManifest[] = [
       reportLabel: 'Lab 5 report (.docx)',
     },
   },
+  {
+    route: 'm06-brain',
+    module: 6,
+    title: 'One Plan, Many Brains',
+    blurb:
+      'Lab 6. A satellite scene with no creature in it: identify real brains from photographs, take a stylized vertebrate brain apart, place its parts on the tree, then run experiments on a generic mammal and find out that knowing where something happens is not the same as explaining it.',
+    mode: 'both',
+    status: 'done',
+    Component: BrainScene,
+    // The handout is written after the build and Jon's walk-through, so the
+    // fetch fails until it lands; `notYet` is what a student reads meanwhile.
+    lab: {
+      rawUrl: `${INTRO_RAW}/vertebrate_neural_architecture/brain_lab/brain_lab.md`,
+      sourceUrl: `${INTRO_BLOB}/vertebrate_neural_architecture/brain_lab/brain_lab.md`,
+      notYet:
+        'The Lab 6 handout has not been posted yet. When it is, it will appear here without a reload of the app. Until then the scene itself is open to explore.',
+    },
+  },
 ]
 
 /**
@@ -191,11 +210,6 @@ export interface PlannedScene {
 }
 
 export const plannedScenes: PlannedScene[] = [
-  {
-    module: 6,
-    title: 'Brain Flythrough',
-    idea: 'Camera flythrough of labeled vertebrate brain structures.',
-  },
   {
     module: 7,
     title: 'Classifier Playground',

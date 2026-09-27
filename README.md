@@ -58,7 +58,7 @@ Scenes don't store their handouts. A scene declares a `lab` source and the share
 
 ## Repository
 
-Standalone repo, GPL v3. Because it's a live code project, its canonical home is **GitHub + a working clone on plain local disk** (`~/Documents/Projects/bcogapp`) — **never** inside Box/Drive/Dropbox, where sync churns `node_modules/` and can corrupt `.git`. The course directory references this repo by URL rather than holding a checkout.
+Standalone repo, GPL v3 — except the Lab 6 specimen photographs, which are used by permission or under their own licences; see [`NOTICE.md`](NOTICE.md). Because it's a live code project, its canonical home is **GitHub + a working clone on plain local disk** (`~/Documents/Projects/bcogapp`) — **never** inside Box/Drive/Dropbox, where sync churns `node_modules/` and can corrupt `.git`. The course directory references this repo by URL rather than holding a checkout.
 
 ## Relationship to the rest of the course
 

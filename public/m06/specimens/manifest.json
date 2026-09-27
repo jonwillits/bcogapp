@@ -1,0 +1,655 @@
+{
+  "note": "Read by the Specimens tab. The originals in this folder are unaltered; `derived/` holds the crops the game shows, made by scripts/m06-specimens.py. See NOTICE for credits and licences.",
+  "specimens": [
+    {
+      "id": "platypus",
+      "name": "platypus",
+      "scientificName": "Ornithorhynchus anatinus",
+      "treeGroup": "platypus",
+      "file": "Platypus73466clr.jpg",
+      "stage": "blue",
+      "views": [
+        {
+          "view": "side",
+          "box": [
+            11,
+            265,
+            235,
+            394
+          ],
+          "sizePx": [
+            224,
+            129
+          ],
+          "derived": "derived/21e275c063.png"
+        },
+        {
+          "view": "above",
+          "box": [
+            22,
+            426,
+            224,
+            635
+          ],
+          "sizePx": [
+            202,
+            209
+          ],
+          "derived": "derived/4679291259.png"
+        }
+      ],
+      "scaleBar": {
+        "cm": 1,
+        "region": [
+          200,
+          785,
+          320,
+          815
+        ],
+        "px": 70
+      },
+      "credit": "From the University of Wisconsin and Michigan State Comparative Mammalian Brain Collections and the National Museum of Health and Medicine (brainmuseum.org), supported by the National Science Foundation and the National Institutes of Health.",
+      "licence": "Used by permission of the Comparative Mammalian Brain Collections for educational and research purposes, with the attribution requested; not published as copyrighted material. Excluded from this repository's GPL licence.",
+      "source": "https://brainmuseum.org/Specimens/monotremata/platypus/index.html"
+    },
+    {
+      "id": "kangaroo",
+      "name": "gray kangaroo",
+      "scientificName": "Macropus fuliginosus",
+      "treeGroup": "kangaroo",
+      "file": "Graykangaroo621276clr.jpg",
+      "stage": "blue",
+      "views": [
+        {
+          "view": "side",
+          "box": [
+            15,
+            62,
+            287,
+            202
+          ],
+          "sizePx": [
+            272,
+            140
+          ],
+          "derived": "derived/6687b17330.png"
+        },
+        {
+          "view": "above",
+          "box": [
+            21,
+            410,
+            275,
+            577
+          ],
+          "sizePx": [
+            254,
+            167
+          ],
+          "derived": "derived/dea43dab1c.png"
+        }
+      ],
+      "scaleBar": {
+        "cm": 1,
+        "region": [
+          290,
+          740,
+          370,
+          770
+        ],
+        "px": 35
+      },
+      "credit": "From the University of Wisconsin and Michigan State Comparative Mammalian Brain Collections and the National Museum of Health and Medicine (brainmuseum.org), supported by the National Science Foundation and the National Institutes of Health.",
+      "licence": "Used by permission of the Comparative Mammalian Brain Collections for educational and research purposes, with the attribution requested; not published as copyrighted material. Excluded from this repository's GPL licence.",
+      "source": "https://brainmuseum.org/Specimens/diprotodontia/graykangaroo/index.html"
+    },
+    {
+      "id": "rat",
+      "name": "rat",
+      "scientificName": "Rattus norvegicus",
+      "treeGroup": "rat",
+      "file": "labrat63-463lgclr.jpg",
+      "stage": "blue",
+      "views": [
+        {
+          "view": "side",
+          "box": [
+            10,
+            81,
+            313,
+            205
+          ],
+          "sizePx": [
+            303,
+            124
+          ],
+          "derived": "derived/7118f37dec.png"
+        },
+        {
+          "view": "above",
+          "box": [
+            9,
+            394,
+            295,
+            537
+          ],
+          "sizePx": [
+            286,
+            143
+          ],
+          "derived": "derived/46645ff3da.png"
+        }
+      ],
+      "scaleBar": {
+        "cm": 1,
+        "region": [
+          280,
+          510,
+          410,
+          540
+        ],
+        "px": 91
+      },
+      "credit": "From the University of Wisconsin and Michigan State Comparative Mammalian Brain Collections and the National Museum of Health and Medicine (brainmuseum.org), supported by the National Science Foundation and the National Institutes of Health.",
+      "licence": "Used by permission of the Comparative Mammalian Brain Collections for educational and research purposes, with the attribution requested; not published as copyrighted material. Excluded from this repository's GPL licence.",
+      "source": "https://brainmuseum.org/Specimens/rodentia/labrat/index.html"
+    },
+    {
+      "id": "marmoset",
+      "name": "common marmoset",
+      "scientificName": "Callithrix jacchus",
+      "treeGroup": null,
+      "file": "Marmoset6clr.jpg",
+      "stage": "blue",
+      "views": [
+        {
+          "view": "side",
+          "box": [
+            35,
+            231,
+            213,
+            355
+          ],
+          "sizePx": [
+            178,
+            124
+          ],
+          "derived": "derived/3741834997.png"
+        },
+        {
+          "view": "above",
+          "box": [
+            35,
+            387,
+            215,
+            508
+          ],
+          "sizePx": [
+            180,
+            121
+          ],
+          "derived": "derived/3e96659312.png"
+        }
+      ],
+      "scaleBar": {
+        "cm": 1,
+        "region": [
+          220,
+          475,
+          295,
+          505
+        ],
+        "px": 47
+      },
+      "credit": "From the University of Wisconsin and Michigan State Comparative Mammalian Brain Collections and the National Museum of Health and Medicine (brainmuseum.org), supported by the National Science Foundation and the National Institutes of Health.",
+      "licence": "Used by permission of the Comparative Mammalian Brain Collections for educational and research purposes, with the attribution requested; not published as copyrighted material. Excluded from this repository's GPL licence.",
+      "source": "https://brainmuseum.org/Specimens/primates/marmoset/index.html"
+    },
+    {
+      "id": "chimpanzee",
+      "name": "chimpanzee",
+      "scientificName": "Pan troglodytes",
+      "treeGroup": "chimpanzee",
+      "file": "chimp6sect6.jpg",
+      "stage": "blue",
+      "views": [
+        {
+          "view": "side",
+          "box": [
+            15,
+            213,
+            201,
+            345
+          ],
+          "sizePx": [
+            186,
+            132
+          ],
+          "derived": "derived/762abe9a08.png"
+        },
+        {
+          "view": "above",
+          "box": [
+            17,
+            350,
+            202,
+            497
+          ],
+          "sizePx": [
+            185,
+            147
+          ],
+          "derived": "derived/df046b41ab.png"
+        }
+      ],
+      "scaleBar": {
+        "cm": 1,
+        "region": [
+          220,
+          468,
+          290,
+          498
+        ],
+        "px": 17
+      },
+      "credit": "From the University of Wisconsin and Michigan State Comparative Mammalian Brain Collections and the National Museum of Health and Medicine (brainmuseum.org), supported by the National Science Foundation and the National Institutes of Health.",
+      "licence": "Used by permission of the Comparative Mammalian Brain Collections for educational and research purposes, with the attribution requested; not published as copyrighted material. Excluded from this repository's GPL licence.",
+      "source": "https://brainmuseum.org/Specimens/primates/chimp/index.html"
+    },
+    {
+      "id": "human",
+      "name": "human",
+      "scientificName": "Homo sapiens",
+      "treeGroup": "human",
+      "file": "human8sect6.jpg",
+      "stage": "blue",
+      "views": [
+        {
+          "view": "side",
+          "box": [
+            12,
+            270,
+            230,
+            443
+          ],
+          "sizePx": [
+            218,
+            173
+          ],
+          "derived": "derived/ea35a06a62.png"
+        },
+        {
+          "view": "above",
+          "box": [
+            273,
+            455,
+            490,
+            635
+          ],
+          "sizePx": [
+            217,
+            180
+          ],
+          "derived": "derived/e6c99e96b7.png"
+        }
+      ],
+      "scaleBar": {
+        "cm": 5,
+        "region": [
+          200,
+          835,
+          320,
+          870
+        ],
+        "px": 71
+      },
+      "credit": "From the University of Wisconsin and Michigan State Comparative Mammalian Brain Collections and the National Museum of Health and Medicine (brainmuseum.org), supported by the National Science Foundation and the National Institutes of Health.",
+      "licence": "Used by permission of the Comparative Mammalian Brain Collections for educational and research purposes, with the attribution requested; not published as copyrighted material. Excluded from this repository's GPL licence.",
+      "source": "https://brainmuseum.org/Specimens/primates/human/index.html"
+    },
+    {
+      "id": "dolphin",
+      "name": "bottlenose dolphin",
+      "scientificName": "Tursiops truncatus",
+      "treeGroup": "dolphin",
+      "file": "dolphinpanel6.jpg",
+      "stage": "blue",
+      "views": [
+        {
+          "view": "side",
+          "box": [
+            11,
+            285,
+            238,
+            474
+          ],
+          "sizePx": [
+            227,
+            189
+          ],
+          "derived": "derived/89aadee157.png"
+        },
+        {
+          "view": "above",
+          "box": [
+            14,
+            480,
+            246,
+            700
+          ],
+          "sizePx": [
+            232,
+            220
+          ],
+          "derived": "derived/7187544ed8.png"
+        }
+      ],
+      "scaleBar": {
+        "cm": 1,
+        "region": [
+          215,
+          700,
+          275,
+          725
+        ],
+        "px": 15
+      },
+      "credit": "From the University of Wisconsin and Michigan State Comparative Mammalian Brain Collections and the National Museum of Health and Medicine (brainmuseum.org), supported by the National Science Foundation and the National Institutes of Health.",
+      "licence": "Used by permission of the Comparative Mammalian Brain Collections for educational and research purposes, with the attribution requested; not published as copyrighted material. Excluded from this repository's GPL licence.",
+      "source": "https://brainmuseum.org/Specimens/cetacea/dolphin/index.html"
+    },
+    {
+      "id": "manatee",
+      "name": "Florida manatee",
+      "scientificName": "Trichechus manatus latirostris",
+      "treeGroup": null,
+      "file": "manatee8sect6.jpg",
+      "stage": "blue",
+      "views": [
+        {
+          "view": "side",
+          "box": [
+            5,
+            205,
+            211,
+            355
+          ],
+          "sizePx": [
+            206,
+            150
+          ],
+          "derived": "derived/b7aa08db4a.png"
+        },
+        {
+          "view": "above",
+          "box": [
+            5,
+            362,
+            211,
+            515
+          ],
+          "sizePx": [
+            206,
+            153
+          ],
+          "derived": "derived/2b34c93338.png"
+        }
+      ],
+      "scaleBar": {
+        "cm": 1,
+        "region": [
+          215,
+          620,
+          275,
+          650
+        ],
+        "px": 18
+      },
+      "credit": "From the University of Wisconsin and Michigan State Comparative Mammalian Brain Collections and the National Museum of Health and Medicine (brainmuseum.org), supported by the National Science Foundation and the National Institutes of Health.",
+      "licence": "Used by permission of the Comparative Mammalian Brain Collections for educational and research purposes, with the attribution requested; not published as copyrighted material. Excluded from this repository's GPL licence.",
+      "source": "https://brainmuseum.org/Specimens/sirenia/manatee/index.html"
+    },
+    {
+      "id": "sealion",
+      "name": "California sea lion",
+      "scientificName": "Zalophus californianus",
+      "treeGroup": null,
+      "file": "Casealionpanel6.jpg",
+      "stage": "blue",
+      "views": [
+        {
+          "view": "side",
+          "box": [
+            35,
+            204,
+            227,
+            301
+          ],
+          "sizePx": [
+            192,
+            97
+          ],
+          "derived": "derived/7373227c78.png"
+        },
+        {
+          "view": "above",
+          "box": [
+            37,
+            308,
+            232,
+            437
+          ],
+          "sizePx": [
+            195,
+            129
+          ],
+          "derived": "derived/8a4df23d6e.png"
+        }
+      ],
+      "scaleBar": {
+        "cm": 1,
+        "region": [
+          225,
+          405,
+          290,
+          435
+        ],
+        "px": 12
+      },
+      "credit": "From the University of Wisconsin and Michigan State Comparative Mammalian Brain Collections and the National Museum of Health and Medicine (brainmuseum.org), supported by the National Science Foundation and the National Institutes of Health.",
+      "licence": "Used by permission of the Comparative Mammalian Brain Collections for educational and research purposes, with the attribution requested; not published as copyrighted material. Excluded from this repository's GPL licence.",
+      "source": "https://brainmuseum.org/Specimens/pinnipedia/calsealion/index.html"
+    },
+    {
+      "id": "elephant",
+      "name": "African elephant",
+      "scientificName": "Loxodonta africana",
+      "treeGroup": null,
+      "file": "elephantall6clr.jpg",
+      "stage": "blue",
+      "views": [
+        {
+          "view": "side",
+          "box": [
+            18,
+            299,
+            231,
+            423
+          ],
+          "sizePx": [
+            213,
+            124
+          ],
+          "derived": "derived/efdf81f085.png"
+        },
+        {
+          "view": "above",
+          "box": [
+            24,
+            80,
+            227,
+            272
+          ],
+          "sizePx": [
+            203,
+            192
+          ],
+          "derived": "derived/8061beea68.png"
+        }
+      ],
+      "scaleBar": {
+        "cm": 5,
+        "region": [
+          270,
+          930,
+          370,
+          960
+        ],
+        "px": 49
+      },
+      "credit": "From the University of Wisconsin and Michigan State Comparative Mammalian Brain Collections and the National Museum of Health and Medicine (brainmuseum.org), supported by the National Science Foundation and the National Institutes of Health.",
+      "licence": "Used by permission of the Comparative Mammalian Brain Collections for educational and research purposes, with the attribution requested; not published as copyrighted material. Excluded from this repository's GPL licence.",
+      "source": "https://brainmuseum.org/Specimens/proboscidea/elephant/index.html"
+    },
+    {
+      "id": "pig",
+      "name": "pig",
+      "scientificName": "Sus scrofa domesticus",
+      "treeGroup": null,
+      "file": "Pig6clr.jpg",
+      "stage": "blue",
+      "views": [
+        {
+          "view": "side",
+          "box": [
+            11,
+            61,
+            260,
+            201
+          ],
+          "sizePx": [
+            249,
+            140
+          ],
+          "derived": "derived/a110c8204b.png"
+        },
+        {
+          "view": "above",
+          "box": [
+            11,
+            415,
+            255,
+            557
+          ],
+          "sizePx": [
+            244,
+            142
+          ],
+          "derived": "derived/e340ac5cad.png"
+        }
+      ],
+      "scaleBar": {
+        "cm": 1,
+        "region": [
+          240,
+          515,
+          320,
+          550
+        ],
+        "px": 26
+      },
+      "credit": "From the University of Wisconsin and Michigan State Comparative Mammalian Brain Collections and the National Museum of Health and Medicine (brainmuseum.org), supported by the National Science Foundation and the National Institutes of Health.",
+      "licence": "Used by permission of the Comparative Mammalian Brain Collections for educational and research purposes, with the attribution requested; not published as copyrighted material. Excluded from this repository's GPL licence.",
+      "source": "https://brainmuseum.org/Specimens/artiodactyla/pig/index.html"
+    },
+    {
+      "id": "sheep",
+      "name": "sheep",
+      "scientificName": "Ovis aries",
+      "treeGroup": null,
+      "file": "Sheep6clr.jpg",
+      "stage": "blue",
+      "views": [
+        {
+          "view": "side",
+          "box": [
+            5,
+            68,
+            305,
+            238
+          ],
+          "sizePx": [
+            300,
+            170
+          ],
+          "derived": "derived/efc0095f04.png"
+        },
+        {
+          "view": "above",
+          "box": [
+            6,
+            455,
+            295,
+            655
+          ],
+          "sizePx": [
+            289,
+            200
+          ],
+          "derived": "derived/1bb5c66e85.png"
+        }
+      ],
+      "scaleBar": {
+        "cm": 1,
+        "region": [
+          275,
+          625,
+          365,
+          660
+        ],
+        "px": 33
+      },
+      "credit": "From the University of Wisconsin and Michigan State Comparative Mammalian Brain Collections and the National Museum of Health and Medicine (brainmuseum.org), supported by the National Science Foundation and the National Institutes of Health.",
+      "licence": "Used by permission of the Comparative Mammalian Brain Collections for educational and research purposes, with the attribution requested; not published as copyrighted material. Excluded from this repository's GPL licence.",
+      "source": "https://brainmuseum.org/Specimens/artiodactyla/sheep/index.html"
+    },
+    {
+      "id": "kiwi",
+      "name": "kiwi",
+      "scientificName": "Apteryx (kiwi)",
+      "treeGroup": "bird",
+      "file": "Visual_processing_areas_of_the_brains_of_four_species_of_birds.png",
+      "stage": "white",
+      "views": [
+        {
+          "view": "above",
+          "box": [
+            347,
+            492,
+            594,
+            772
+          ],
+          "sizePx": [
+            247,
+            280
+          ],
+          "derived": "derived/ac9e6801ee.png"
+        }
+      ],
+      "scaleBar": {
+        "cm": 0.5,
+        "region": [
+          540,
+          775,
+          610,
+          797
+        ],
+        "dark": true,
+        "px": 38
+      },
+      "credit": "Figure 2, panel b (bottom row: the kiwi's brain seen from above), of Martin GR, Wilson K-J, Wild JM, Parsons S, Kubke MF, Corfield J (2007), Kiwi Forego Vision in the Guidance of Their Nocturnal Activities, PLoS ONE 2(2): e198, doi:10.1371/journal.pone.0000198, via Wikimedia Commons. Changes made: cropped to one panel, background removed, shown in grayscale during the game.",
+      "licence": "Creative Commons Attribution 2.5 Generic (CC BY 2.5), as stated on the Wikimedia Commons file page; the article is © 2007 Martin et al., open access under the Creative Commons Attribution License.",
+      "source": "https://commons.wikimedia.org/wiki/File:Visual_processing_areas_of_the_brains_of_four_species_of_birds.png"
+    }
+  ]
+}
