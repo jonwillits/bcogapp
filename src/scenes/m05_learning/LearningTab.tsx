@@ -12,9 +12,16 @@ import { SIGNAL_COLORS, TIER_FOUR_LINE } from './labels'
 
 const SUB = '₁₂₃₄₅₆'
 
-/** The learning rate slides on a log scale, so 0.01 and 1 are both reachable by hand. */
-const toSlider = (rate: number) => Math.log10(rate)
-const fromSlider = (v: number) => Math.round(10 ** v * 1000) / 1000
+/**
+ * The learning rate slides on a log scale, so 0.01 and 1 are both reachable by
+ * hand. The value is rounded to two significant figures, because a raw log
+ * step lands on 0.295 and 0.302 and never on 0.3 — the number the scene
+ * loads with and the handout names. A student reported it (2026-09-28); the
+ * test beside this tab holds every rate the handout asks for to be reachable.
+ */
+export const toSlider = (rate: number) => Math.log10(rate)
+export const fromSlider = (v: number) => Number((10 ** v).toPrecision(2))
+export const RATE_SLIDER_STEP = 0.01
 
 /**
  * The Learning tab — the one new tab. The rule, with one selector deciding
@@ -82,7 +89,7 @@ export function LearningTab(s: LearningSceneState) {
         value={toSlider(set.rate)}
         min={toSlider(RATE_RANGE.min)}
         max={toSlider(RATE_RANGE.max)}
-        step={0.01}
+        step={RATE_SLIDER_STEP}
         format={(v) => fromSlider(v).toString()}
         onChange={(v) => change({ rate: fromSlider(v) })}
       />

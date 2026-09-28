@@ -45,7 +45,7 @@ The weight sliders stay live in every scenario for every connection the rule can
 |---|---|---|---|
 | **Learning on** (toggle) | — | on | never |
 | **The rule — what supplies Φ**: four radio cards, **Coincidence Φ = y**, **Prediction Φ = a − p**, **Teacher Φ = t − o**, **Verdict Φ = δ**, each with its section numbers and a *Needs:* line | — | per scenario | held at Coincidence in `hand-over` and `pairing`, at Verdict in `corridor`, at Prediction in `extinction`; all four offered in `blocking` and `four-signals`. Locked cards are greyed. |
-| **learning rate η** | 0.01 to 1, log scale | 0.3 | never |
+| **learning rate η** | 0.01 to 1, log scale, rounded to two significant figures (so 0.3 and every rate the handout names is a stop; fixed 2026-09-28 after a student found the slider landing on 0.295 and 0.302) | 0.3 | never |
 | **eligibility trace window** | 0 to 10 s, step 0.5 | 3 s where shown (0 elsewhere) | shown in `blocking`, `four-signals`, `corridor` |
 | **discount γ, per second of delay** | 0.50 to 0.99 | 0.90 | shown in `blocking`, `four-signals`, `corridor`; the note under it prints γ¹⁰ live (0.35 at 0.9, the chapter's "about a third") |
 | **Weakening (long-term depression) — §5.3.2** (toggle) | — | **off** | held off in `hand-over`, `corridor`, `extinction` |
