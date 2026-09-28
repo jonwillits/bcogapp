@@ -300,18 +300,18 @@ export const LABS = [
     handout: 'vertebrate_neural_architecture/brain_lab/brain_lab.md',
     report: 'vertebrate_neural_architecture/brain_lab/brain_lab_report.docx',
     /**
-     * Built 2026-09-27 with no handout: the handout is written from
-     * docs/M06_AS_BUILT_NOTES.md after Jon's walk-through, so the claims
-     * below are what the SCENE makes true — what the handout may assert.
+     * Built 2026-09-27 with no handout; the handout was written the same
+     * evening from docs/M06_AS_BUILT_NOTES.md after Jon's walk-through, so
+     * the claims below are phrased as what the SCENE makes true — what the
+     * handout may assert — and the handout asserts nothing it cannot find here.
      */
-    handoutPending: true,
 
     retired: [
       { term: /flythrough|fly-through/gi, why: 'the flythrough was never built; the model is taken apart and experimented on' },
       { term: /\blesion\b/gi, why: 'the tool is called Remove; the line under it names lesions as the method', unless: ['lesions, and neuropsychology'] },
-      { term: /fear cent(er|re)/gi, why: 'the scene never prints it; the handout names it only as the misconception' },
+      { term: /fear cent(er|re)/gi, why: 'the scene never prints it; the handout names it only as the misconception', unless: ['news story', 'phrase', 'misconception'] },
       { term: /\b(frontal|parietal|temporal|occipital) lobe|visual cortex|homunculus|prefrontal/gi, why: 'no cortical region is named in Module 6; later modules own them' },
-      { term: /\bmouse\b/gi, why: 'the comparison brain on screen is “mammal”, one parameter set; the chapter’s mouse is the handout’s to cite' },
+      { term: /\bmouse\b/gi, why: 'the comparison brain on screen is “mammal”, one parameter set; the chapter’s mouse is the handout’s to cite', unless: ['the reading'] },
       { term: /log scale/gi, why: 'the true-scale view uses a magnifier, not a log scale' },
     ],
 

@@ -192,6 +192,8 @@ export const scenes: SceneManifest[] = [
     lab: {
       rawUrl: `${INTRO_RAW}/vertebrate_neural_architecture/brain_lab/brain_lab.md`,
       sourceUrl: `${INTRO_BLOB}/vertebrate_neural_architecture/brain_lab/brain_lab.md`,
+      reportUrl: `${INTRO_BLOB}/vertebrate_neural_architecture/brain_lab/brain_lab_report.docx`,
+      reportLabel: 'Lab 6 report (.docx)',
       notYet:
         'The Lab 6 handout has not been posted yet. When it is, it will appear here without a reload of the app. Until then the scene itself is open to explore.',
     },
