@@ -216,6 +216,15 @@ export function HiddenSpacePlot({ world, a, b, hide, size = 300 }: { world: Fish
     else if (Math.abs(wa) > 1e-9) line = [k / wa, lo, k / wa, hi]
   }
   const kinds = [...world.mix.happens, ...world.mix.doesNot].filter((id) => KINDS[id].typical)
+  // Kinds the hidden layer puts on one point share a marker, with their names listed: that they coincide is the observation.
+  const markers: { p: [number, number]; happens: boolean; labels: string[] }[] = []
+  for (const id of kinds) {
+    const k = KINDS[id]
+    const p = at(k.typical![0], k.typical![1])
+    const near = markers.find((m) => m.happens === k.happens && Math.hypot(m.p[0] - p[0], m.p[1] - p[1]) < 0.08)
+    if (near) near.labels.push(k.label)
+    else markers.push({ p, happens: k.happens, labels: [k.label] })
+  }
   return (
     <svg width="100%" viewBox={`0 0 ${size} ${size}`} style={{ display: 'block', background: 'var(--bg)', borderRadius: 8 }} role="img" aria-label="hidden-activity space">
       <defs>
@@ -229,18 +238,23 @@ export function HiddenSpacePlot({ world, a, b, hide, size = 300 }: { world: Fish
         return <circle key={i} cx={x(p[0])} cy={y(p[1])} r={2.4} fill={ring.happens[i] ? KIND_COLORS.happens : KIND_COLORS.doesNot} opacity={0.75} />
       })}
       {line && <line x1={x(line[0])} y1={y(line[1])} x2={x(line[2])} y2={y(line[3])} stroke="#ffffff" strokeWidth={2} clipPath="url(#hs-clip)" />}
-      {kinds.map((id) => {
-        const k = KINDS[id]
-        const p = at(k.typical![0], k.typical![1])
-        return (
-          <g key={id}>
-            <circle cx={x(p[0])} cy={y(p[1])} r={6.5} fill={k.happens ? KIND_COLORS.happens : palette.bg} stroke={k.happens ? '#cfe4ff' : KIND_COLORS.doesNot} strokeWidth={2} />
-            <text x={x(p[0]) + (p[0] > 0.6 ? -9 : 9)} y={y(p[1]) + (p[1] > 0.6 ? 12 : -8)} textAnchor={p[0] > 0.6 ? 'end' : 'start'} fontSize={8.5} fill={palette.text}>
-              {k.label}
+      {markers.map((m) => (
+        <g key={m.labels.join('+')}>
+          <circle cx={x(m.p[0])} cy={y(m.p[1])} r={6.5} fill={m.happens ? KIND_COLORS.happens : palette.bg} stroke={m.happens ? '#cfe4ff' : KIND_COLORS.doesNot} strokeWidth={2} />
+          {m.labels.map((label, i) => (
+            <text
+              key={label}
+              x={x(m.p[0]) + (m.p[0] > 0.6 ? -9 : 9)}
+              y={y(m.p[1]) + (m.p[1] > 0.6 ? 12 + 10 * i : -8 - 10 * (m.labels.length - 1 - i))}
+              textAnchor={m.p[0] > 0.6 ? 'end' : 'start'}
+              fontSize={8.5}
+              fill={palette.text}
+            >
+              {label}
             </text>
-          </g>
-        )
-      })}
+          ))}
+        </g>
+      ))}
       {[0, 1].map((v) => (
         <g key={v}>
           <text x={x(v)} y={size - padB + 11} textAnchor="middle" fontSize={8.5} fill={AXIS} fontFamily={MONO}>{v}</text>
