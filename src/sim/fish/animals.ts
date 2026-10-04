@@ -69,7 +69,7 @@ function f3Circuit(): Circuit {
 
 function f4Circuit(): Circuit {
   const c = healthyCircuit()
-  setWiring(c, { layer: 'output', threshold: -0.9 })
+  setWiring(c, { layer: 'output', threshold: -0.6 })
   return c
 }
 
@@ -99,12 +99,12 @@ export const FISH_ANIMALS: readonly FishAnimal[] = [
   {
     id: 'F2',
     label: 'F2',
-    change: 'Satiety and tone is at 0.1, where the healthy fish’s is at 1. It is hungry.',
+    change: 'Satiety and tone is at 0.4, where the healthy fish’s is at 1. It is hungry.',
     where: 'chemistry',
     whereText: 'Chemistry: its criterion to dart is high.',
     gives: 'Few false alarms and many misses. d′ is the healthy fish’s.',
     circuit: healthyCircuit(),
-    chemistry: { arousal: 1, satiety: 0.1 },
+    chemistry: { arousal: 1, satiety: 0.4 },
     hidden: true,
   },
   {
@@ -121,7 +121,7 @@ export const FISH_ANIMALS: readonly FishAnimal[] = [
   {
     id: 'F4',
     label: 'F4',
-    change: 'Its criterion is −0.9, where the healthy fish’s is 0: a liberal criterion.',
+    change: 'Its criterion is −0.6, where the healthy fish’s is 0: a liberal criterion.',
     where: 'not broken',
     whereText: 'Nowhere. It is not broken.',
     gives:

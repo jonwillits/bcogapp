@@ -140,7 +140,7 @@ export const FISH_SCENARIOS: readonly FishScenario[] = [
     preset: HEALTHY_PRESET,
     unlocked: ['criterion', 'chemistry', 'stakes', 'baseRate'],
     testSets: [{ key: 'test', label: 'test set', mix: EEL_SUCKER, far: false }],
-    testSize: 1000,
+    testSize: 2000,
     extras: [],
     open: ['evidence', 'scorecard', 'stakes'],
   },

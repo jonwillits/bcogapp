@@ -64,7 +64,7 @@ export const CHEMISTRY: readonly ChemistrySpec[] = [
 ]
 
 /** How far one unit of each modulator moves the criterion, on the evidence axis. */
-export const AROUSAL_SHIFT = 0.4
+export const AROUSAL_SHIFT = 0.25
 export const SATIETY_SHIFT = 1
 
 export interface Chemistry {
@@ -427,6 +427,35 @@ export class FishWorld {
     })
     this.version++
   }
+
+  /**
+   * Each side's average smell — its prototype (§7.2.4) — for the things now
+   * in the stream: where the cross goes on the feature-space plot. Measured
+   * over a fixed draw of 2,000 from its own stream, so it does not wander
+   * with whichever encounters happen to be on the plot.
+   */
+  prototypes(): { happens: [number, number]; doesNot: [number, number] } {
+    const key = `${this.mix.label}|${this.settings.spread}|${this.settings.distance}`
+    if (this.protoCache?.key === key) return this.protoCache.value
+    const rng = makeRng((this.seeds.test ^ 0x9e3779b9) >>> 0)
+    const sum = { yes: [0, 0, 0], no: [0, 0, 0] }
+    for (let i = 0; i < 2000; i++) {
+      const kind = pickKind(this.mix, 0.5, rng)
+      const far = this.settings.distance === 'far' || (this.settings.distance === 'both' && rng.next() < 0.5)
+      const [x1, x2] = sniff(kind, drawIndividual(kind, this.settings.spread, rng), far, rng)
+      const into = kind.happens ? sum.yes : sum.no
+      into[0] += x1
+      into[1] += x2
+      into[2]++
+    }
+    const value = {
+      happens: [sum.yes[0] / sum.yes[2], sum.yes[1] / sum.yes[2]] as [number, number],
+      doesNot: [sum.no[0] / sum.no[2], sum.no[1] / sum.no[2]] as [number, number],
+    }
+    this.protoCache = { key, value }
+    return value
+  }
+  private protoCache: { key: string; value: { happens: [number, number]; doesNot: [number, number] } } | null = null
 
   /** The evidence the fish's present weights give each member of a test set. */
   testEvidence(set: TestSet, into?: Float32Array): Float32Array {
