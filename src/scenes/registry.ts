@@ -90,6 +90,7 @@ const NeuronScene = lazy(() => import('./m03_neuron/NeuronScene'))
 const BilaterianScene = lazy(() => import('./m04_bilaterian/BilaterianScene'))
 const LearningScene = lazy(() => import('./m05_learning/LearningScene'))
 const BrainScene = lazy(() => import('./m06_brain/BrainScene'))
+const FishScene = lazy(() => import('./m07_fish/FishScene'))
 
 /**
  * Registered, runnable scenes. Order here is the order shown within a module.
@@ -198,6 +199,24 @@ export const scenes: SceneManifest[] = [
         'The Lab 6 handout has not been posted yet. When it is, it will appear here without a reload of the app. Until then the scene itself is open to explore.',
     },
   },
+  {
+    route: 'm07-fish',
+    module: 7,
+    title: 'The Smell of an Eel',
+    blurb:
+      'Lab 7. The animal becomes a fish, holding its place in a murky stream while smells drift down to it. Draw one line between an eel and a harmless sucker, find out whether a fish is jumpy or blind, and then give its network the hidden layer that Labs 4 and 5 did not allow. The third stage of the evolving-creature engine.',
+    mode: 'both',
+    status: 'building',
+    Component: FishScene,
+    // The handout is written after the build and Jon's walk-through, from the
+    // as-built notes, so the fetch fails until it lands.
+    lab: {
+      rawUrl: `${INTRO_RAW}/pattern_recognition/fish_lab/fish_lab.md`,
+      sourceUrl: `${INTRO_BLOB}/pattern_recognition/fish_lab/fish_lab.md`,
+      notYet:
+        'The Lab 7 handout has not been posted yet. When it is, it will appear here without a reload of the app. Until then the scene itself is open to explore.',
+    },
+  },
 ]
 
 /**
@@ -212,11 +231,6 @@ export interface PlannedScene {
 }
 
 export const plannedScenes: PlannedScene[] = [
-  {
-    module: 7,
-    title: 'Classifier Playground',
-    idea: 'The creature becomes an early vertebrate, a fish. Harder pattern recognition: XOR and circle-surround, hidden layers vs. feature selection, train/test generalization.',
-  },
   {
     module: 11,
     title: "Prisoner's Dilemma",

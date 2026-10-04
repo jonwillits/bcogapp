@@ -258,6 +258,11 @@ export class FishWorld {
     this.makeTests()
   }
 
+  /** A copy of the wiring this run started with. */
+  get startWiring(): Circuit {
+    return cloneCircuit(this.start)
+  }
+
   /** The seed of the animation's own stream. Nothing in this file draws from it, so animation cannot perturb a run. */
   get animSeed(): number {
     return this.seeds.anim
