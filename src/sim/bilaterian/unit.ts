@@ -45,20 +45,42 @@ export function netInput(u: RateUnit, x: readonly number[]): number {
   return net
 }
 
-/** The activation function alone: floor at 0, ceiling at 1. */
-export function activate(kind: Activation, net: number, threshold: number): number {
+/**
+ * The activation function alone: floor at 0, ceiling at 1. `width` is the
+ * sigmoid's; Labs 4 and 5 never pass it and get `SIGMOID_WIDTH`. Module 7's
+ * fish passes a gentler one, because a rule that scales a change by the
+ * slope needs a slope that is not zero almost everywhere.
+ */
+export function activate(kind: Activation, net: number, threshold: number, width: number = SIGMOID_WIDTH): number {
   const drive = net - threshold
   if (kind === 'threshold') return drive >= 0 ? 1 : 0
-  return 1 / (1 + Math.exp(-drive / SIGMOID_WIDTH))
+  return 1 / (1 + Math.exp(-drive / width))
 }
 
-export function unitOutput(u: RateUnit, x: readonly number[], kind: Activation): number {
-  return activate(kind, netInput(u, x), u.threshold)
+/**
+ * How much the unit's output would change if its net input changed: the
+ * slope of the activation function where the unit now sits. For the sigmoid
+ * it is y(1 − y)/width. For the threshold function it is zero everywhere
+ * but at the step itself, and a unit is never exactly there.
+ */
+export function activationSlope(kind: Activation, net: number, threshold: number, width: number = SIGMOID_WIDTH): number {
+  if (kind === 'threshold') return 0
+  const y = activate(kind, net, threshold, width)
+  return (y * (1 - y)) / width
+}
+
+export function unitOutput(u: RateUnit, x: readonly number[], kind: Activation, width: number = SIGMOID_WIDTH): number {
+  return activate(kind, netInput(u, x), u.threshold, width)
 }
 
 /** One layer: every unit over the same inputs. */
-export function layerOutput(units: readonly RateUnit[], x: readonly number[], kind: Activation): number[] {
-  return units.map((u) => unitOutput(u, x, kind))
+export function layerOutput(
+  units: readonly RateUnit[],
+  x: readonly number[],
+  kind: Activation,
+  width: number = SIGMOID_WIDTH,
+): number[] {
+  return units.map((u) => unitOutput(u, x, kind, width))
 }
 
 /** A unit counts as firing at or above half its ceiling — for the step, exactly when it is on. */

@@ -14,6 +14,13 @@ import type { Activation, RateUnit } from './unit'
  * inseparability to Module 7; a Lab 4 that could solve XOR would spend that
  * three modules early.
  *
+ * **Module 7 is where that ban lifts, and only for its own scene.** A circuit
+ * may carry an `output` unit, which reads the interneurons' outputs rather
+ * than the sensory cells: the interneurons are then a hidden layer. Nothing
+ * in Lab 4's or Lab 5's world reads `output`, no circuit either of them
+ * ships has one (`circuit.test.ts`, `learning/structure.test.ts`), and their
+ * no-XOR sweeps still run. Only `src/sim/fish/` builds a circuit with one.
+ *
  * **Routing is a first-class control, not a sign buried in a weight.** Each
  * interneuron's verdict goes to the forward group or the reverse group; the
  * switch is a visible object on the diagram. Flip it and approach becomes
@@ -30,6 +37,12 @@ export interface Circuit {
   interneurons: RateUnit[]
   /** Which motor group each interneuron's verdict reaches. */
   routes: MotorGroup[]
+  /**
+   * Module 7 only: one unit that reads the interneurons' outputs, or the
+   * inputs themselves when there are no interneurons. Absent — not merely
+   * undefined — on every circuit Labs 4 and 5 build.
+   */
+  output?: RateUnit
 }
 
 /** Slider ranges — the whole student-reachable parameter space. */
@@ -38,6 +51,8 @@ export const BASELINE_RANGE = { min: -3, max: 3, step: 0.1 } as const
 export const THRESHOLD_RANGE = { min: -3, max: 3, step: 0.1 } as const
 
 export interface WiringPatch {
+  /** Which unit: an interneuron by index (the default), or Module 7's output unit. */
+  layer?: 'output'
   interneuron?: number
   weight?: { input: number; value: number }
   baseline?: number
@@ -60,26 +75,25 @@ export interface WiringPatch {
  */
 export function setWiring(c: Circuit, patch: WiringPatch): void {
   const j = patch.interneuron ?? 0
-  const u = c.interneurons[j]
+  const u = patch.layer === 'output' ? c.output : c.interneurons[j]
   if (!u) return
   if (patch.weight) u.weights[patch.weight.input] = patch.weight.value
   if (patch.baseline !== undefined) u.baseline = patch.baseline
   if (patch.threshold !== undefined) u.threshold = patch.threshold
-  if (patch.route !== undefined) c.routes[j] = patch.route
+  if (patch.route !== undefined && patch.layer !== 'output') c.routes[j] = patch.route
   if (patch.activation !== undefined) c.activation = patch.activation
 }
 
 /** A deep copy, so a loaded scenario's starting wiring is never edited in place. */
 export function cloneCircuit(c: Circuit): Circuit {
-  return {
+  const unit = (u: RateUnit): RateUnit => ({ baseline: u.baseline, threshold: u.threshold, weights: [...u.weights] })
+  const copy: Circuit = {
     activation: c.activation,
-    interneurons: c.interneurons.map((u) => ({
-      baseline: u.baseline,
-      threshold: u.threshold,
-      weights: [...u.weights],
-    })),
+    interneurons: c.interneurons.map(unit),
     routes: [...c.routes],
   }
+  if (c.output) copy.output = unit(c.output)
+  return copy
 }
 
 /** One interneuron over `n` inputs — the Lab 4 instantiation. */
@@ -99,9 +113,11 @@ export function singleInterneuron(
 
 /** Every number on the wiring panel, as one string — what the independence test compares. */
 export function wiringSignature(c: Circuit): string {
+  const unit = (u: RateUnit) => ({ b0: u.baseline, b: u.weights, theta: u.threshold })
   return JSON.stringify({
     activation: c.activation,
     routes: c.routes,
-    units: c.interneurons.map((u) => ({ b0: u.baseline, b: u.weights, theta: u.threshold })),
+    units: c.interneurons.map(unit),
+    ...(c.output ? { output: unit(c.output) } : {}),
   })
 }

@@ -10,8 +10,14 @@ import { describe, it, expect } from 'vitest'
  * `learnWeights`, the learning rule's write. This walks the simulation and
  * both scenes and fails if a third appears, or if either moves.
  *
- * The rule writes weights and nothing else. A baseline, a threshold and a
- * routing switch still have one writer.
+ * In Labs 4 and 5 the rule writes weights and nothing else. A threshold and
+ * a routing switch still have one writer everywhere.
+ *
+ * Module 7 extended this test rather than loosening it. The fish's hidden
+ * layer adds weights but no writer: `src/sim/fish/` and its scene are walked
+ * too and must contain no write at all. And the fish's rule moves a baseline
+ * — the weight on an input that is always 1 — through `learnWeights` itself,
+ * which only Module 7 asks it to do.
  */
 
 const sim = import.meta.glob('../**/*.ts', { query: '?raw', import: 'default', eager: true }) as Record<string, string>
@@ -21,7 +27,17 @@ const scenes = import.meta.glob('../../../scenes/{m04_bilaterian,m05_learning}/*
   eager: true,
 }) as Record<string, string>
 
-const production = Object.entries({ ...sim, ...scenes }).filter(([p]) => !p.includes('.test.') && !p.includes('.probe.'))
+// Module 7's fish has a hidden layer, and so more weights to write. It gets no writer of its own.
+const fish = import.meta.glob('../../fish/**/*.ts', { query: '?raw', import: 'default', eager: true }) as Record<string, string>
+const fishScene = import.meta.glob('../../../scenes/m07_fish/*.{ts,tsx}', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>
+
+const production = Object.entries({ ...sim, ...scenes, ...fish, ...fishScene }).filter(
+  ([p]) => !p.includes('.test.') && !p.includes('.probe.'),
+)
 
 const WEIGHT_WRITE = /\.weights\s*\[[^\]]*\]\s*[-+*/]?=(?!=)/g
 const WEIGHTS_REPLACED = /\.weights\s*=(?!=)/g
@@ -51,6 +67,8 @@ describe('exactly two code paths write a stored weight', () => {
     expect(production.some(([p]) => p === './rule.ts')).toBe(true)
     expect(production.some(([p]) => p === './learner.ts')).toBe(true)
     expect(production.some(([p]) => p.includes('/scenes/m04_bilaterian/'))).toBe(true)
+    expect(production.some(([p]) => p.endsWith('/fish/brain.ts'))).toBe(true)
+    expect(production.some(([p]) => p.endsWith('/fish/world.ts'))).toBe(true)
   })
 
   it('setWiring, and the learning rule — and nothing else', () => {
@@ -69,12 +87,41 @@ describe('exactly two code paths write a stored weight', () => {
     expect([...bodyOf(rule, 'learnWeights').matchAll(WEIGHT_WRITE)].length).toBe(1)
   })
 
-  it('the rule never writes a baseline, a threshold or a routing switch: those still have one writer', () => {
+  it('the rule never writes a threshold or a routing switch: those still have one writer', () => {
     for (const [path, src] of production) {
       if (path.endsWith('/circuit.ts')) continue
-      expect(src, path).not.toMatch(/\.baseline\s*[-+*/]?=(?!=)/)
       expect(src, path).not.toMatch(/\.threshold\s*[-+*/]?=(?!=)/)
       expect(src, path).not.toMatch(/\.routes\s*\[[^\]]*\]\s*=(?!=)/)
+    }
+  })
+
+  it('a baseline has the same two writers as a weight, and the second only when Module 7 asks', () => {
+    // The baseline is the weight on an input that is always 1. `learnWeights`
+    // moves it when it is handed `alwaysOn`, in the same statement block as
+    // the weights. Labs 4 and 5 never hand it one.
+    const BASELINE_WRITE = /\.baseline\s*[-+*/]?=(?!=)/g
+    const writers = production
+      .map(([path, src]) => ({ path, writes: [...src.matchAll(BASELINE_WRITE)].length }))
+      .filter((w) => w.writes > 0)
+    expect(writers.map((w) => w.path).sort()).toEqual(['../circuit.ts', './rule.ts'])
+    for (const w of writers) expect(w.writes, w.path).toBe(1)
+    const rule = production.find(([p]) => p === './rule.ts')![1]
+    expect([...bodyOf(rule, 'learnWeights').matchAll(BASELINE_WRITE)].length).toBe(1)
+    expect(bodyOf(rule, 'learnWeights')).toMatch(/if \(alwaysOn\) unit\.baseline =/)
+    for (const [path, src] of production) {
+      if (path.includes('/fish/') || path === './rule.ts') continue
+      expect(src, path).not.toMatch(/alwaysOn/)
+    }
+  })
+
+  it('the fish reaches a weight only through those two writes', () => {
+    const brain = production.find(([p]) => p.endsWith('/fish/brain.ts'))![1]
+    expect(brain).toMatch(/learnWeights\(out, /)
+    expect(brain).toMatch(/learnWeights\(hidden\[j\], /)
+    for (const [path, src] of production) {
+      if (!path.includes('/fish/') && !path.includes('/m07_fish/')) continue
+      expect([...src.matchAll(WEIGHT_WRITE)].length, path).toBe(0)
+      expect([...src.matchAll(WEIGHTS_REPLACED)].length, path).toBe(0)
     }
   })
 

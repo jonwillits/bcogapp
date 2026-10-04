@@ -112,6 +112,15 @@ export function weightChange(eta: number, x: number, phi: number): number {
   return eta * x * phi
 }
 
+/**
+ * Module 7 adds one more place Φ can come from, and it is not a fifth
+ * setting on Lab 5's selector: a unit that feeds other units takes its share
+ * of *their* Φ, passed back through the connections its activity went
+ * forward on, scaled by its own slope. The shape of the rule does not change.
+ * The fish's output unit still uses `prediction`.
+ */
+export type PhiSource = ThirdFactor | 'passed-back'
+
 /** What each setting needs in order to supply Φ. Anything a setting does not use is ignored. */
 export interface PhiSources {
   /** The receiving unit's own output, y. */
@@ -128,12 +137,16 @@ export interface PhiSources {
   target: number | null
   /** The broadcast signal (δ). */
   broadcast: number
+  /** Passed back only: how much this unit's output would change if its net input changed, f′(net). */
+  slope?: number
+  /** Passed back only: each unit this one feeds — the weight of the connection to it, and that unit's own Φ. */
+  downstream?: readonly { weight: number; phi: number }[]
 }
 
 /**
  * Φ. **The single place the four settings differ.**
  */
-export function thirdFactor(which: ThirdFactor, s: PhiSources): number {
+export function thirdFactor(which: PhiSource, s: PhiSources): number {
   switch (which) {
     case 'coincidence':
       return s.output - (s.weakening ? WEAKENING_GAIN * s.usualOutput : 0)
@@ -143,6 +156,11 @@ export function thirdFactor(which: ThirdFactor, s: PhiSources): number {
       return s.target === null ? 0 : s.target - s.output
     case 'verdict':
       return s.broadcast
+    case 'passed-back': {
+      let share = 0
+      for (const d of s.downstream ?? []) share += d.weight * d.phi
+      return (s.slope ?? 0) * share
+    }
   }
 }
 
@@ -156,14 +174,20 @@ export interface ConnectionLimits {
 /**
  * **The learning rule's write — the only code path besides `setWiring` that
  * assigns a stored weight.** `oneWriter.test.ts` walks the sim directory and
- * fails if a third appears. It writes weights and nothing else: never a
- * baseline, a threshold or a routing switch.
+ * fails if a third appears. It never writes a threshold or a routing switch.
+ *
+ * In Labs 4 and 5 it never writes a baseline either. Module 7's fish passes
+ * `alwaysOn`: the baseline treated as what it is in the rule's own terms, the
+ * weight on an input that is always 1, so Δb₀ = η · 1 · Φ. Without it a
+ * hidden layer cannot place its units' lines, only turn them. Nothing in
+ * `bilaterian/` passes it (`oneWriter.test.ts`).
  */
 export function learnWeights(
   unit: RateUnit,
   changes: readonly number[],
   limits: readonly ConnectionLimits[],
   competition: boolean,
+  alwaysOn?: { change: number; min: number; max: number },
 ): void {
   const next = unit.weights.map((b, i) => {
     const lim = limits[i]
@@ -183,6 +207,7 @@ export function learnWeights(
     }
   }
   for (let i = 0; i < next.length; i++) unit.weights[i] = next[i]
+  if (alwaysOn) unit.baseline = clamp(unit.baseline + alwaysOn.change, alwaysOn.min, alwaysOn.max)
 }
 
 function clamp(v: number, lo: number, hi: number): number {

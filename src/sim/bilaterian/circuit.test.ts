@@ -85,6 +85,25 @@ describe('structure', () => {
     expect(keys).toEqual(['activation', 'interneurons', 'routes'])
   })
 
+  it('the ban on a hidden layer lifted for Module 7’s fish, and not here: no Lab 4 circuit has an output unit', () => {
+    // `Circuit.output` is the second layer. It exists as a type so the fish
+    // can have one; nothing this scene ships or runs carries it.
+    for (const s of SCENARIOS) expect('output' in s.circuit, s.key).toBe(false)
+    for (const a of ANIMALS) expect('output' in a.circuit, a.id).toBe(false)
+    for (const s of SCENARIOS) {
+      const w = new DishWorld(4, s)
+      w.run(5)
+      expect('output' in w.worm.circuit, s.key).toBe(false)
+      expect('output' in cloneCircuit(w.worm.circuit), s.key).toBe(false)
+    }
+    // And nothing in the dish or the animal would read one if it were there.
+    const sim = import.meta.glob('./*.ts', { query: '?raw', import: 'default', eager: true }) as Record<string, string>
+    for (const [path, src] of Object.entries(sim)) {
+      if (path.includes('.test.') || path.includes('.probe.') || path === './circuit.ts') continue
+      expect(src, path).not.toMatch(/circuit\??\.output\b/)
+    }
+  })
+
   it('the animal carries exactly one sensor per channel, and none is left or right', () => {
     for (const s of SCENARIOS) {
       const w = new Worm(cloneCircuit(s.circuit), s.channels)

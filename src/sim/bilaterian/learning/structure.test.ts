@@ -84,6 +84,17 @@ describe('no hidden layer', () => {
       w.run(30)
       expect(w.worm.circuit.interneurons.length, s.key).toBe(1)
       expect(w.worm.circuit.routes.length, s.key).toBe(1)
+      // Module 7 lifted the ban for its own scene. It is not lifted here.
+      expect('output' in s.circuit, s.key).toBe(false)
+      expect('output' in w.worm.circuit, s.key).toBe(false)
+    }
+  })
+
+  it('nothing in the learning layer reads a second layer, passes an error back, or moves a baseline', () => {
+    for (const [path, src] of production) {
+      if (path.endsWith('/rule.ts')) continue
+      const code = stripComments(src)
+      expect(code, path).not.toMatch(/circuit\.output|passed-back|alwaysOn|activationSlope/)
     }
   })
 
