@@ -68,6 +68,7 @@ export function WorldTab(s: FishSceneState) {
             checked={st.stayAround}
             onChange={(v) => {
               world.set({ stayAround: v })
+              s.restartShow()
               bump()
             }}
           />
@@ -98,6 +99,7 @@ export function WorldTab(s: FishSceneState) {
             checked={st.distance === 'both'}
             onChange={(v) => {
               world.set({ distance: v ? 'both' : 'near' })
+              s.restartShow()
               bump()
             }}
           />

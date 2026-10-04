@@ -372,6 +372,9 @@ export class FishWorld {
       (change.spread !== undefined && change.spread !== before.spread) ||
       (change.poolSize !== undefined && change.poolSize !== before.poolSize) ||
       (change.source !== undefined && change.source !== before.source)
+    // A change to what is in the stream takes effect with the next smell: one
+    // already drifting down, whose outcome has not arrived, is let go.
+    if (change.phase !== undefined || change.distance !== undefined || change.stayAround !== undefined || change.source !== undefined) this.dropPending()
     Object.assign(this.settings, change)
     if (change.chemistry) this.settings.chemistry = { ...change.chemistry }
     if (change.stakes) this.settings.stakes = { ...change.stakes }
@@ -382,9 +385,16 @@ export class FishWorld {
 
   /** *An eel comes back*: the closer's third phase. The next thing upstream is an eel. */
   eelReturns(): void {
+    this.dropPending()
     this.settings.phase = 2
     this.forced = 'eel'
     this.version++
+  }
+
+  /** Let go of a smell whose outcome has not arrived. Nothing was learned from it, and nothing is scored. */
+  private dropPending(): void {
+    this.pending = null
+    this.brain.awaiting = false
   }
 
   // ───────────────────────── the pool and the test sets ─────────────────────────

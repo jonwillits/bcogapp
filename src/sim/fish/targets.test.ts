@@ -268,6 +268,21 @@ describe('a new predator', () => {
     expect(struck).toBeGreaterThanOrEqual(5)
   })
 
+  it('an eel comes back at once, even with another smell already drifting down', () => {
+    const w = trained('new-predator', {}, 1000, 1000)
+    w.set({ phase: 1 })
+    w.run(500)
+    const pike = w.begin()
+    expect(['pike', 'chub']).toContain(pike.kind)
+    w.eelReturns()
+    expect(w.pending).toBeNull()
+    expect(w.runEncounter().kind).toBe('eel')
+    // After that the stream holds all four.
+    const seen = new Set<string>()
+    for (let i = 0; i < 200; i++) seen.add(w.runEncounter().kind)
+    expect([...seen].sort()).toEqual(['chub', 'eel', 'pike', 'sucker'])
+  })
+
   it('with eels and suckers staying around, both test sets stay high', () => {
     const r = closer(true)
     expect(mean(r.map((x) => x.old))).toBeGreaterThanOrEqual(90)
