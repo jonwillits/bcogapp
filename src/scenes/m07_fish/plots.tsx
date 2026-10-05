@@ -548,7 +548,7 @@ export function NetworkDiagram({
       <text x={OUT_X} y={OUT_Y - 21} textAnchor="middle" fontSize={8.5} fill={AXIS}>output unit{live ? ': evidence' : ''}</text>
       {/* routing switch and verdict */}
       <line x1={OUT_X} y1={OUT_Y + 16} x2={OUT_X} y2={H - 44} stroke={AXIS} strokeWidth={1.5} />
-      <rect x={OUT_X - 44} y={H - 44} width={88} height={18} rx={9} fill={palette.surface2} stroke={AXIS} />
+      <rect x={OUT_X - 58} y={H - 44} width={116} height={18} rx={9} fill={palette.surface2} stroke={AXIS} />
       <text x={OUT_X} y={H - 31.5} textAnchor="middle" fontSize={8.5} fill={palette.text}>routing switch (locked)</text>
       <text x={OUT_X} y={H - 12} textAnchor="middle" fontSize={10} fill={e && e.verdict ? palette.accent : AXIS} fontWeight={600}>
         → {routeLabel}
