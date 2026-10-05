@@ -390,7 +390,7 @@ export const LABS = [
     handoutPending: true,
 
     retired: [
-      { term: /\bepochs?\b/gi, why: 'a fish meets things; the scene counts encounters, and meetings per individual in a pool' },
+      { term: /\bepochs?\b/gi, why: 'the scene counts encounters, and encounters per individual in a pool' },
       { term: /\bloss\b/gi, why: 'the learning curve plots percent wrong' },
       { term: /playground|tensorflow/gi, why: 'the Playground lab is retired; this is the fish scene' },
       { term: /spiral/gi, why: 'the spiral was replaced by the downstream scenario' },
@@ -402,8 +402,8 @@ export const LABS = [
 
     controls: [
       'World', 'Network', 'Learning', 'Decision', 'Fish',
-      'Scenario', 'One line will do', 'Jumpy or blind?', 'Ripe or rotting', 'Built in, wired at random, or learned', 'The eels it has met', 'Downstream', 'A new predator',
-      'What the world does', 'What is in the stream', 'Scorecard', 'Encounters', 'Harm taken', 'Meals', 'Percent of verdicts right', 'Meetings per individual, on average',
+      'Scenario', 'One line will do', 'Jumpy or blind?', 'Ripe or rotting', 'Built in, wired at random, or learned', 'The eels it has smelled', 'Downstream', 'A new predator',
+      'What the world does', 'What is in the stream', 'Scorecard', 'Encounters', 'Harm taken', 'Meals', 'Percent of verdicts right', 'Encounters per individual, on average',
       'Where the encounters come from', 'How many individuals live here', 'How much smells vary', 'Run seed', 'Reset', 'New seed',
       'Go to phase', 'An eel comes back', 'Eels and suckers stay around', 'Go downstream', 'Go back upstream', 'Learn from every distance',
       'Proportion of A (a built-in receptor)', 'Proportion only (receptors A and B disconnected)',
@@ -440,7 +440,7 @@ export const LABS = [
       { says: 'World: a fish that never eats is right half the time on the island, not four times in five', test: 'the island is the case to watch' },
       { says: 'World: a pool is a fixed set of individuals, each with its own smell', test: 'a pool holds a fixed number of individuals, each with its own smell' },
       { says: 'World: far smells read about three tenths of near ones', test: 'far things are diluted' },
-      { says: 'World: the fish never meets the test set', test: 'the test sets are the experimenter’s' },
+      { says: 'World: the fish never encounters the test set', test: 'the test sets are the experimenter’s' },
       { says: 'World: the fish keeps no list of occasions; its state is a fixed number of numbers', test: 'the fish’s state is the same size after ten encounters and after five thousand' },
       { says: 'Part 1 and throughout: Reset restores the weights and keeps every setting', test: 'restores the weights to where the run started, keeps every setting' },
       { says: 'Part 2: moving the criterion or either modulator changes no weight, no baseline and no evidence value', test: 'moving the criterion, or either modulator, changes no weight, no baseline and no evidence value' },

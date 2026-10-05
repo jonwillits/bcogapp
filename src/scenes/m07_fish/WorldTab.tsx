@@ -81,7 +81,7 @@ export function WorldTab(s: FishSceneState) {
       {downstream && (
         <>
           <GroupLabel>Distance</GroupLabel>
-          <Row label="The fish now meets things that are" value={st.distance === 'both' ? 'near and far' : st.distance} mono={false} />
+          <Row label="The fish now encounters things that are" value={st.distance === 'both' ? 'near and far' : st.distance} mono={false} />
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             <Button
               variant={st.distance === 'far' ? 'primary' : 'default'}
@@ -208,12 +208,12 @@ export function WorldTab(s: FishSceneState) {
         <li>The outcome arrives on every encounter, whatever the fish did.</li>
         {st.source === 'pool' ? (
           <li>
-            {st.poolSize} individuals live here. Each has its own smell, and the fish meets the same ones again and again.
+            {st.poolSize} individuals live here. Each has its own smell, and the fish encounters the same ones again and again.
           </li>
         ) : (
           <li>Every encounter is a new individual.</li>
         )}
-        {downstream && <li>{st.distance === 'far' ? 'Everything the fish meets here is far off, and its smell is diluted.' : st.distance === 'both' ? 'Half of what the fish meets is near and half is far off.' : 'Everything the fish meets here is near.'}</li>}
+        {downstream && <li>{st.distance === 'far' ? 'Everything the fish encounters here is far off, and its smell is diluted.' : st.distance === 'both' ? 'Half of what the fish encounters is near and half is far off.' : 'Everything the fish encounters here is near.'}</li>}
         <li>The verdict goes to: {ROUTE_LABEL[world.route]} (locked).</li>
       </ul>
       <Content>{MURKY_LINE}</Content>
@@ -243,7 +243,7 @@ export function WorldTab(s: FishSceneState) {
       <ValueReadout label="Harm taken" value={world.harm} digits={0} />
       <ValueReadout label="Meals" value={world.meals} digits={0} />
       <ValueReadout label="Percent of verdicts right" value={total ? percentCorrect(world.counts) : 0} digits={1} unit="%" />
-      {st.source === 'pool' && <ValueReadout label="Meetings per individual, on average" value={world.meetingsPerIndividual} digits={1} />}
+      {st.source === 'pool' && <ValueReadout label="Encounters per individual, on average" value={world.meetingsPerIndividual} digits={1} />}
     </Panel>
   )
 

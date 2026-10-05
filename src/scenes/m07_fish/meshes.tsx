@@ -310,7 +310,7 @@ export function FishMesh({ world, show, anim, playing, speed }: { world: FishWor
  * How each animal is drawn: a chain of beads behind its head, as the fish's
  * own body is. The shapes are what tell them apart — an eel long, thin and
  * winding; a pike a straight spear with a broad tail; a sucker and a chub
- * stout — and their colors (`KINDS`) are kept off the feature space's blue
+ * small and stout, so that neither looks like a threat beside the fish — and their colors (`KINDS`) are kept off the feature space's blue
  * and orange, which mean something else.
  */
 interface Body {
@@ -326,14 +326,18 @@ interface Body {
   /** The tail fin's size, or 0 for none. */
   tail: number
   scale: number
+  /** A second color on every other bead: a pike's pale bars. */
+  bars?: string
+  /** The tail fin's own color: a chub's red fins. */
+  fin?: string
 }
 
 const MAX_BEADS = 16
 const BODIES: Partial<Record<KindId, Body>> = {
   eel: { radii: Array.from({ length: 16 }, (_, i) => (i === 0 ? 0.23 : 0.2 * (1 - 0.6 * (i / 15)))), gap: 0.27, wave: 0.34, lag: 0.6, beat: 13, tall: 1, tail: 0, scale: 1.6 },
-  pike: { radii: [0.11, 0.18, 0.24, 0.27, 0.27, 0.24, 0.18, 0.11], gap: 0.31, wave: 0.05, lag: 0.7, beat: 9, tall: 1.1, tail: 0.42, scale: 1.6 },
-  sucker: { radii: [0.22, 0.31, 0.33, 0.28, 0.2, 0.12], gap: 0.27, wave: 0.07, lag: 0.8, beat: 5, tall: 0.9, tail: 0.3, scale: 1.5 },
-  chub: { radii: [0.2, 0.31, 0.31, 0.22, 0.13], gap: 0.25, wave: 0.07, lag: 0.8, beat: 6, tall: 1.4, tail: 0.36, scale: 1.5 },
+  pike: { radii: [0.11, 0.18, 0.24, 0.27, 0.27, 0.24, 0.18, 0.11], gap: 0.31, wave: 0.05, lag: 0.7, beat: 9, tall: 1.1, tail: 0.42, scale: 1.6, bars: '#e3ecc0' },
+  sucker: { radii: [0.22, 0.31, 0.33, 0.28, 0.2, 0.12], gap: 0.27, wave: 0.07, lag: 0.8, beat: 5, tall: 0.9, tail: 0.3, scale: 0.95 },
+  chub: { radii: [0.2, 0.31, 0.31, 0.22, 0.13], gap: 0.25, wave: 0.07, lag: 0.8, beat: 6, tall: 1.4, tail: 0.36, scale: 0.9, fin: '#d9776a' },
 }
 
 /** How long a harmless animal takes to drift from upstream to past the fish: it is carried at about the water's speed, and is gone before the next smell. */
@@ -365,12 +369,15 @@ export function EncounterMesh({ world, show }: { world: FishWorld; show: Show })
   const stick = useRef<THREE.Mesh>(null)
   const ring = useRef<THREE.Mesh>(null)
   const plop = useRef<THREE.Mesh>(null)
+  const morsel = useRef<THREE.Mesh>(null)
   const tools = useMemo(
     () => ({
       dummy: new THREE.Object3D(),
       a: new THREE.Color(RECEPTOR_COLORS.a),
       b: new THREE.Color(RECEPTOR_COLORS.b),
       skin: new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: '#ffffff', emissiveIntensity: 0.3, roughness: 0.6 }),
+      bars: new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: '#ffffff', emissiveIntensity: 0.3, roughness: 0.6 }),
+      fin: new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: '#ffffff', emissiveIntensity: 0.3, roughness: 0.6 }),
       rind: new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: '#ffffff', emissiveIntensity: 0.3, roughness: 0.6 }),
     }),
     [],
@@ -446,6 +453,10 @@ export function EncounterMesh({ world, show }: { world: FishWorld; show: Show })
         g.scale.setScalar(body.scale)
         tools.skin.color.set(KINDS[shownAnimal!.kind].color)
         tools.skin.emissive.copy(tools.skin.color)
+        tools.bars.color.set(body.bars ?? KINDS[shownAnimal!.kind].color)
+        tools.bars.emissive.copy(tools.bars.color)
+        tools.fin.color.set(body.fin ?? KINDS[shownAnimal!.kind].color)
+        tools.fin.emissive.copy(tools.fin.color)
         const n = body.radii.length
         const swing = show.clock * body.beat
         for (let i = 0; i < MAX_BEADS; i++) {
@@ -456,6 +467,7 @@ export function EncounterMesh({ world, show }: { world: FishWorld; show: Show })
           const r = body.radii[i]
           m.position.set(body.wave * (0.25 + 0.75 * (i / (n - 1))) * Math.sin(swing - i * body.lag), 0, i * body.gap)
           m.scale.set(r, r * body.tall, r * 1.3)
+          m.material = i % 2 === 1 ? tools.bars : tools.skin
         }
         if (tail.current) {
           tail.current.visible = body.tail > 0
@@ -471,6 +483,21 @@ export function EncounterMesh({ world, show }: { world: FishWorld; show: Show })
             eye.scale.setScalar(0.24 * r)
           }
         })
+      }
+    }
+
+    // The food the fish stays for: a morsel carried down to its mouth as the
+    // outcome arrives. Taken, if the fish stayed and nothing struck it;
+    // otherwise it is carried on past, and that is the feeding a dart loses.
+    if (morsel.current) {
+      const on = !eating && !!e && show.stage >= 2
+      const past = show.t - T_OUTCOME
+      const taken = on && show.stage === 3 && !e!.verdict && !e!.happens
+      const z = HOME.z - 0.55 + 5 * past
+      morsel.current.visible = on && z < 8 && !(taken && past > 0.12)
+      if (morsel.current.visible) {
+        morsel.current.position.set(HOME.x, 0.42, taken ? HOME.z - 0.55 : z)
+        morsel.current.scale.setScalar(ease((show.t - T_VERDICT) / 0.15) * (taken ? 1 - past / 0.12 : 1))
       }
     }
 
@@ -542,7 +569,7 @@ export function EncounterMesh({ world, show }: { world: FishWorld; show: Show })
             <sphereGeometry args={[1, 12, 10]} />
           </mesh>
         ))}
-        <mesh ref={tail} material={tools.skin} raycast={() => null}>
+        <mesh ref={tail} material={tools.fin} raycast={() => null}>
           <coneGeometry args={[1, 1.5, 4]} />
         </mesh>
         {[0, 1].map((i) => (
@@ -560,6 +587,10 @@ export function EncounterMesh({ world, show }: { world: FishWorld; show: Show })
           <cylinderGeometry args={[0.05, 0.07, 0.95, 6]} />
         </mesh>
       </group>
+      <mesh ref={morsel} visible={false} raycast={() => null}>
+        <sphereGeometry args={[0.12, 10, 8]} />
+        <meshBasicMaterial color="#f3e7b8" />
+      </mesh>
       <mesh ref={plop} rotation={[-Math.PI / 2, 0, 0]} visible={false} raycast={() => null}>
         <ringGeometry args={[0.85, 1, 32]} />
         <meshBasicMaterial color="#cfe6f2" transparent opacity={0} side={THREE.DoubleSide} depthWrite={false} />

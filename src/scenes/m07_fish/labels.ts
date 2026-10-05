@@ -10,7 +10,7 @@ export const ORIENTING_LINE =
 
 /** World tab. Or a student asks why the fish does not just look. */
 export const MURKY_LINE =
-  'The water is murky. The fish cannot see what is upstream: it meets each thing first as a smell, and sees an eel only when the eel arrives.'
+  'The water is murky. The fish cannot see what is upstream: each thing reaches it first as a smell, and sees an eel only when the eel arrives.'
 
 /** Network tab. §7.2.2 makes the same simplification. */
 export const TWO_RECEPTORS_LINE =

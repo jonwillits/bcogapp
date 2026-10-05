@@ -184,7 +184,7 @@ export function NetworkTab(s: FishSceneState) {
         <Toggle label="Show each kind’s average (its prototype)" checked={s.view.showPrototypes} onChange={(v) => s.setView({ showPrototypes: v })} />
         {!hide && (
           <Note>
-            The shading is the output unit’s prediction for every smell: blue where it says the outcome is likely, orange where it says not. The white line is the <b>decision boundary</b>: the smells whose evidence sits exactly at the criterion. One unit draws one straight line. <b>Linear separability</b> is whether one straight line can divide the two kinds. Filled dots are the last {world.ring.count} encounters, the <b>training set</b> as it arrives; hollow dots are the <b>test set</b>, which the fish never meets.
+            The shading is the output unit’s prediction for every smell: blue where the prediction is high, orange where it is low. The white line is the <b>decision boundary</b>: the smells whose evidence sits exactly at the criterion. One unit draws one straight line. <b>Linear separability</b> is whether one straight line can divide the two kinds. Filled dots are the last {world.ring.count} encounters, the <b>training set</b> as it arrives; hollow dots are the <b>test set</b>, which the fish never encounters.
             {s.hoverUnit !== null && ` The shading is now hidden unit ${s.hoverUnit + 1}’s own output.`}
           </Note>
         )}
@@ -225,7 +225,7 @@ export function NetworkTab(s: FishSceneState) {
 
       <Section key={`${world.scenario.key}-curve`} title="The learning curve" defaultOpen={world.scenario.open.includes('curve')}>
         <LearningCurve world={world} />
-        <Note>Percent wrong, against encounters. The training line is scored on the last {world.ring.count || 300} encounters as the fish met them; each test line is the fish’s present weights on a test set it never meets. When the training line runs well below a test line, that gap is <b>overfitting</b>.{world.scenario.key === 'new-predator' && ' With two test sets, one line falling while the other rises is what catastrophic interference looks like here.'}{world.scenario.key === 'downstream' && ' The far test set holds smells unlike any the fish meets while it learns near: it measures out-of-distribution generalization, and invariance to distance.'}</Note>
+        <Note>Percent wrong, against encounters. The training line is scored on the last {world.ring.count || 300} encounters as they arrived; each test line is the fish’s present weights on a test set it never encounters. When the training line runs well below a test line, that gap is <b>overfitting</b>.{world.scenario.key === 'new-predator' && ' With two test sets, one line falling while the other rises is what catastrophic interference looks like here.'}{world.scenario.key === 'downstream' && ' The far test set holds smells unlike any that reach the fish while it learns near: it measures out-of-distribution generalization, and invariance to distance.'}</Note>
       </Section>
     </Panel>
   )

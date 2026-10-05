@@ -38,8 +38,8 @@ describe('the nine lines that are content, each on its panel', () => {
     expect(file('WorldTab.tsx')).toMatch(/<Content>\{ORIENTING_LINE\}<\/Content>/)
   })
 
-  it('2. murky water: the fish meets each thing first as a smell', () => {
-    expect(labels).toMatch(/The water is murky\. The fish cannot see what is upstream: it meets each thing first as a smell/)
+  it('2. murky water: each thing reaches the fish first as a smell', () => {
+    expect(labels).toMatch(/The water is murky\. The fish cannot see what is upstream: each thing reaches it first as a smell/)
     expect(file('WorldTab.tsx')).toMatch(/<Content>\{MURKY_LINE\}<\/Content>/)
   })
 
@@ -120,6 +120,14 @@ describe('words that must not be on screen', () => {
       expect(text, path).not.toMatch(/\b(knows?|knew|notic\w*|figur\w+ out|realiz\w*|understands?|wants?|thinks?|believes?|decides?|decided|deciding|recogni[sz]es?|remembers?|expects?|learns? that|detects?|anticipat\w*)\b/i)
     }
     expect(screen).toMatch(/prediction/)
+  })
+
+  it('the fish does not meet anything: a smell reaches it, and it encounters or smells a thing', () => {
+    // Jon, 2026-10-05: *meet* and *met* make an acquaintance of an eel. The
+    // scene's own word is *encounter*.
+    for (const [path, src] of all) {
+      expect(visibleText(src), path).not.toMatch(/\b(meets?|met|meetings?)\b/i)
+    }
   })
 
   it('nothing on screen speaks of a record kept inside the fish', () => {

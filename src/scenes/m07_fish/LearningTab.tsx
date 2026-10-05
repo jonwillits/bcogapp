@@ -192,7 +192,7 @@ export function LearningTab(s: FishSceneState) {
           <Section key={`${world.scenario.key}-lcurve`} title="The learning curve" defaultOpen>
             <LearningCurve world={world} />
             <Row label="Encounters so far" value={world.encounters.toLocaleString('en-US')} />
-            {world.settings.source === 'pool' && <Row label="Meetings per individual, on average" value={world.meetingsPerIndividual.toFixed(1)} />}
+            {world.settings.source === 'pool' && <Row label="Encounters per individual, on average" value={world.meetingsPerIndividual.toFixed(1)} />}
           </Section>
         </>
       )}

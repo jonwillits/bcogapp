@@ -47,7 +47,7 @@ export const ISLAND_CENTER = 0.5
 export const ISLAND_RADIUS = 0.25
 
 export const KINDS: Record<KindId, Kind> = {
-  eel: { id: 'eel', label: 'eel', typical: [0.75, 0.45], happens: true, does: 'An eel lunges.', harms: true, color: '#a3a064' },
+  eel: { id: 'eel', label: 'eel', typical: [0.75, 0.45], happens: true, does: 'An eel lunges.', harms: true, color: '#b0a04e' },
   sucker: {
     id: 'sucker',
     label: 'sucker',
@@ -57,7 +57,7 @@ export const KINDS: Record<KindId, Kind> = {
     harms: false,
     color: '#c9a58a',
   },
-  pike: { id: 'pike', label: 'pike', typical: [0.15, 0.9], happens: true, does: 'A pike lunges.', harms: true, color: '#6fa56a' },
+  pike: { id: 'pike', label: 'pike', typical: [0.15, 0.9], happens: true, does: 'A pike lunges.', harms: true, color: '#4f9a63' },
   chub: {
     id: 'chub',
     label: 'chub',
