@@ -110,7 +110,7 @@ export const FISH_ANIMALS: readonly FishAnimal[] = [
   {
     id: 'F3',
     label: 'F3',
-    change: 'Its weights favor receptor B, the one that barely separates an eel from a sucker.',
+    change: 'Its weights are largest on receptor B, the one that barely separates an eel from a sucker.',
     where: 'representation',
     whereText: 'Representation: its sensitivity is low.',
     gives: 'Misses and false alarms are both up. d′ is well below the healthy fish’s.',

@@ -74,11 +74,24 @@ function plumeAt(show: Show): { x: number; z: number } {
   return { x: show.lateral * (1 - 0.75 * k), z: NOSE_Z + CURRENT * (show.t - T_VERDICT) }
 }
 
-/** A fruit: it falls in upstream and drifts down behind its own smell, to rest in front of the fish as the outcome arrives. */
-function fruitAt(show: Show): { x: number; z: number } {
-  const k = ease(Math.min(1, show.t / T_OUTCOME))
-  return { x: show.lateral * (1 - 0.75 * k), z: NOSE_Z - CURRENT * T_VERDICT + (FRUIT_Z - (NOSE_Z - CURRENT * T_VERDICT)) * k }
+/**
+ * The food in an eel-and-sucker stream: a morsel carried in from out of
+ * sight upstream, right behind the smell and at the water's speed, along a
+ * straight line that brings it to the fish's mouth as the outcome arrives.
+ */
+function morselAt(show: Show): { x: number; z: number } {
+  return { x: HOME.x + show.lateral * (1 - show.t / T_OUTCOME), z: HOME.z - 0.55 + CURRENT * (show.t - T_OUTCOME) }
 }
+
+/** A fruit: carried in the same way, from out of sight and behind its own smell, slowing to rest in front of the fish as the outcome arrives. */
+function fruitAt(show: Show): { x: number; z: number } {
+  const k = Math.min(1, show.t / T_OUTCOME)
+  const from = HOME.z - 0.55 - CURRENT * T_OUTCOME
+  return { x: show.lateral * (1 - 0.75 * k), z: from + (FRUIT_Z - from) * (1 - (1 - k) * (1 - k)) }
+}
+
+/** Food not yet tasted: pale, and neither of the feature space's colors. */
+const FOOD_COLOR = '#f3e7b8'
 
 const MOTES = 80
 /** Weed in the rock's lee, either side of where the fish tucks in: across from the rock, downstream of it, height. */
@@ -368,7 +381,6 @@ export function EncounterMesh({ world, show }: { world: FishWorld; show: Show })
   const round = useRef<THREE.Mesh>(null)
   const stick = useRef<THREE.Mesh>(null)
   const ring = useRef<THREE.Mesh>(null)
-  const plop = useRef<THREE.Mesh>(null)
   const morsel = useRef<THREE.Mesh>(null)
   const tools = useMemo(
     () => ({
@@ -486,22 +498,22 @@ export function EncounterMesh({ world, show }: { world: FishWorld; show: Show })
       }
     }
 
-    // The food the fish stays for: a morsel carried down to its mouth as the
-    // outcome arrives. Taken, if the fish stayed and nothing struck it;
-    // otherwise it is carried on past, and that is the feeding a dart loses.
+    // The food the fish stays for. Taken, if the fish stayed and nothing
+    // struck it; otherwise it is carried on past, and that is the feeding a
+    // dart loses.
     if (morsel.current) {
-      const on = !eating && !!e && show.stage >= 2
+      const on = !eating && !!e && show.stage >= 1
       const past = show.t - T_OUTCOME
       const taken = on && show.stage === 3 && !e!.verdict && !e!.happens
-      const z = HOME.z - 0.55 + 5 * past
-      morsel.current.visible = on && z < 8 && !(taken && past > 0.12)
+      const at = morselAt(show)
+      morsel.current.visible = on && at.z < 9 && !(taken && past > 0.12)
       if (morsel.current.visible) {
-        morsel.current.position.set(HOME.x, 0.42, taken ? HOME.z - 0.55 : z)
-        morsel.current.scale.setScalar(ease((show.t - T_VERDICT) / 0.15) * (taken ? 1 - past / 0.12 : 1))
+        morsel.current.position.set(taken ? HOME.x : at.x, 0.42, taken ? HOME.z - 0.55 : at.z)
+        morsel.current.scale.setScalar(taken ? 1 - past / 0.12 : ease(show.t / 0.25))
       }
     }
 
-    // A fruit: a dim shape in the murk until it is tasted, and then what it was.
+    // A fruit: pale and unmarked, like any food, until it is tasted, and then what it was.
     if (fruit.current && round.current && stick.current) {
       const on = eating && !!e && show.stage >= 1
       fruit.current.visible = on
@@ -515,27 +527,14 @@ export function EncounterMesh({ world, show }: { world: FishWorld; show: Show })
         // Left, it rests a moment and is then carried off downstream.
         const off = Math.max(0, show.t - T_OUTCOME - OUTCOME_SPAN)
         fruit.current.position.set(at.x, 0.45 + 0.04 * Math.sin(show.clock * 4), at.z + 0.5 * CURRENT * off * off)
-        fruit.current.scale.setScalar((known ? 1 : 0.7) * (1 - gone) * (1 - ease(off / 1.2)))
+        fruit.current.scale.setScalar((known ? 1 : 0.75 * ease(show.t / 0.25)) * (1 - gone) * (1 - ease(off / 1.2)))
         round.current.visible = !twig
         stick.current.visible = twig
         round.current.scale.set(1, known && e!.kind === 'rotting' ? 0.7 : 1, 1)
-        tools.rind.color.set(known ? kind.color : '#5d7684')
+        tools.rind.color.set(known ? kind.color : FOOD_COLOR)
         tools.rind.emissive.copy(tools.rind.color)
       }
     }
-    if (plop.current) {
-      // The ripple where a fruit fell in.
-      const mat = plop.current.material as THREE.MeshBasicMaterial
-      const k = show.t / 0.6
-      plop.current.visible = eating && !!world.pending && show.stage === 1 && k <= 1
-      if (plop.current.visible) {
-        mat.opacity = 0.7 * (1 - k)
-        const r = 0.3 + 1.2 * k
-        plop.current.scale.set(r, r, 1)
-        plop.current.position.set(show.lateral, 0.06, NOSE_Z - CURRENT * T_VERDICT)
-      }
-    }
-
     if (ring.current) {
       // A ring where something befell the fish: struck, fed, or sickened.
       const mat = ring.current.material as THREE.MeshBasicMaterial
@@ -589,11 +588,7 @@ export function EncounterMesh({ world, show }: { world: FishWorld; show: Show })
       </group>
       <mesh ref={morsel} visible={false} raycast={() => null}>
         <sphereGeometry args={[0.12, 10, 8]} />
-        <meshBasicMaterial color="#f3e7b8" />
-      </mesh>
-      <mesh ref={plop} rotation={[-Math.PI / 2, 0, 0]} visible={false} raycast={() => null}>
-        <ringGeometry args={[0.85, 1, 32]} />
-        <meshBasicMaterial color="#cfe6f2" transparent opacity={0} side={THREE.DoubleSide} depthWrite={false} />
+        <meshBasicMaterial color={FOOD_COLOR} />
       </mesh>
       <mesh ref={ring} rotation={[-Math.PI / 2, 0, 0]} visible={false} raycast={() => null}>
         <ringGeometry args={[0.8, 1, 40]} />
