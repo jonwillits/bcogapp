@@ -10,6 +10,23 @@ import { Content, GroupLabel, LogSlider, Note, PANEL_STYLE, RIGHT_STYLE, Row, Ta
 
 const sub = (i: number) => '₁₂₃₄₅₆₇₈₉'[i] ?? String(i + 1)
 const n3 = (v: number) => (Math.abs(v) < 0.0005 ? '0.000' : (v < 0 ? '−' : '') + Math.abs(v).toFixed(3))
+/** `n3` with the sign's place kept, for a line of arithmetic: a space where the minus would be. */
+const s3 = (v: number) => (Math.abs(v) >= 0.0005 && v < 0 ? '' : ' ') + n3(v)
+
+/**
+ * One connection's change, always on two lines that never wrap: the rule in
+ * symbols, and under it the same line in numbers. A negative Φ used to push
+ * the single line past the panel's edge and shove everything below it down.
+ */
+function Arithmetic({ symbols, rate, input, phi, change }: { symbols: string; rate: number; input: string; phi: number; change: number }) {
+  return (
+    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, whiteSpace: 'pre', overflow: 'hidden' }}>
+      {symbols}
+      {'\n'}
+      {`    = ${rate} · ${input} · ${s3(phi)} = ${s3(change)}`}
+    </div>
+  )
+}
 
 /**
  * The Learning tab. One rule, Lab 5's: every connection changes by its input
@@ -146,14 +163,10 @@ export function LearningTab(s: FishSceneState) {
             {st.on &&
               e &&
               Array.from({ length: showOut }, (_, i) => (
-                <div key={i} style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>
-                  Δb{sub(i)} = η · {outIn[i]} · Φ = {st.rate} · {(outVals[i] ?? 0).toFixed(2)} · {n3(last.phiOut)} = {n3(last.output[i] ?? 0)}
-                </div>
+                <Arithmetic key={i} symbols={`Δb${sub(i)} = η · ${outIn[i]} · Φ`} rate={st.rate} input={(outVals[i] ?? 0).toFixed(2)} phi={last.phiOut} change={last.output[i] ?? 0} />
               ))}
             {st.on && e && (
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>
-                Δb₀ = η · 1 · Φ = {st.rate} · 1 · {n3(last.phiOut)} = {n3(last.outputBaseline)}
-              </div>
+              <Arithmetic symbols="Δb₀ = η · 1 · Φ" rate={st.rate} input="1" phi={last.phiOut} change={last.outputBaseline} />
             )}
             {outIn.length > showOut && <Note>…and {outIn.length - showOut} more connections onto the output unit, by the same line.</Note>}
 
@@ -172,9 +185,7 @@ export function LearningTab(s: FishSceneState) {
                     {st.on &&
                       e &&
                       labels.slice(0, 3).map((_, i) => (
-                        <div key={i} style={{ fontFamily: 'var(--font-mono)', fontSize: 11 }}>
-                          Δb{sub(i)} = η · x{sub(i)} · Φ = {st.rate} · {(b.x[i] ?? 0).toFixed(2)} · {n3(last.phiHidden[j] ?? 0)} = {n3(last.hidden[j]?.[i] ?? 0)}
-                        </div>
+                        <Arithmetic key={i} symbols={`Δb${sub(i)} = η · x${sub(i)} · Φ`} rate={st.rate} input={(b.x[i] ?? 0).toFixed(2)} phi={last.phiHidden[j] ?? 0} change={last.hidden[j]?.[i] ?? 0} />
                       ))}
                   </>
                 ) : (

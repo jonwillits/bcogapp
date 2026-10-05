@@ -4,9 +4,9 @@ import { SceneCanvasLayout } from '../../components/SceneCanvasLayout'
 import { StepControls } from '../../components/StepControls'
 import { CameraRig } from '../../components/CameraRig'
 import { Button } from '../../components/controls'
-import { fmt } from '../../components/format'
+import { fmtSigned } from '../../components/format'
 import { FishWorld, type WorldOptions } from '../../sim/fish/world'
-import { FISH_SCENARIOS, ROUTE_LABEL, scenarioByKey, type Control, type FishScenario } from '../../sim/fish/scenarios'
+import { FISH_SCENARIOS, scenarioByKey, type Control, type FishScenario } from '../../sim/fish/scenarios'
 import { fishById, type FishId } from '../../sim/fish/animals'
 import { KINDS } from '../../sim/fish/kinds'
 import { makeRng, randomSeed, type Rng } from '../../sim/random'
@@ -293,7 +293,7 @@ export default function FishScene() {
           </Canvas>
           <EncounterBadge world={world} show={show} hide={hide} />
           {(owed.current > 0 || Date.now() < skipped.until) && (
-            <div style={{ ...BADGE, top: 62 }}>
+            <div style={{ ...BADGE, top: 136 }}>
               {owed.current > 0 ? (
                 <>
                   <b>Skipping ahead</b> — {owed.current} encounters to go
@@ -357,45 +357,63 @@ const BADGE: React.CSSProperties = {
   textOverflow: 'ellipsis',
 }
 
-/** What happened on an encounter, in a sentence, and which of the four outcomes it was. */
-export function describeOutcome(world: FishWorld, e: { kind: keyof typeof KINDS; verdict: boolean; happens: boolean }): { text: string; name: string } {
+/**
+ * An encounter in words, one fact to a line and each line always worded the
+ * same way. The verdict line is what the fish did: the column of the
+ * chapter's table. The outcome line is what was there: its row. The name of
+ * the cell follows from the two.
+ */
+export function describeOutcome(world: FishWorld, e: { kind: keyof typeof KINDS; verdict: boolean; happens: boolean }): { verdict: string; outcome: string; name: string } {
   const kind = KINDS[e.kind]
   const name = e.happens ? (e.verdict ? SDT_NAMES.hit : SDT_NAMES.miss) : e.verdict ? SDT_NAMES.falseAlarm : SDT_NAMES.correctRejection
-  const a = /^[aeiou]/.test(kind.label) ? 'An' : 'A'
   if (world.route === 'dart') {
-    if (e.happens) return { name, text: e.verdict ? `${a} ${kind.label} lunged at empty water. The fish had darted to cover.` : `${a} ${kind.label} lunged, and the fish was struck.` }
-    return { name, text: e.verdict ? `${a} ${kind.label} drifted past. The fish had darted to cover and lost the feeding.` : `${a} ${kind.label} drifted past. The fish stayed and fed.` }
+    const a = /^[aeiou]/.test(kind.label) ? 'An' : 'A'
+    return {
+      name,
+      verdict: e.verdict ? 'The fish darted to cover.' : 'The fish stayed.',
+      outcome: `${a} ${kind.label} ${e.happens ? 'lunged' : 'drifted past'}.`,
+    }
   }
-  const what = kind.typical === null ? `the ${kind.label}` : kind.label.startsWith('twig') ? 'the twig or leaf' : `the ${kind.label}`
-  const taste = e.happens ? 'It nourished.' : kind.harms ? 'It sickened.' : 'It was nothing to eat.'
-  return { name, text: e.verdict ? `The fish ate ${what}. ${taste}` : `The fish left ${what}, and mouthed it briefly anyway. ${taste}` }
+  const what = kind.label.startsWith('twig') ? 'A twig or leaf' : kind.label[0].toUpperCase() + kind.label.slice(1)
+  return {
+    name,
+    verdict: e.verdict ? 'The fish ate it.' : 'The fish left it.',
+    outcome: `${what}. ${e.happens ? 'It nourished.' : kind.harms ? 'It sickened.' : 'Nothing to eat.'}`,
+  }
 }
 
-/** The encounter counter, always on screen, and what the encounter in front of the fish is doing. */
+const BADGE_LINE: React.CSSProperties = { height: 17, lineHeight: '17px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
+
+/**
+ * The encounter counter, always on screen, and the encounter in front of
+ * the fish. Six lines, each with its own place: a line that has nothing to
+ * say yet is left empty, so nothing moves when the next one fills in, and
+ * it can be read at a glance at any speed.
+ */
 function EncounterBadge({ world, show, hide }: { world: FishWorld; show: Show; hide: boolean }) {
   const e = world.pending ?? world.last
-  const count = `Encounter ${(world.encounters + (world.pending ? 1 : 0)).toLocaleString('en-US')}`
-  let rest: React.ReactNode = ' — waiting for a smell'
+  const lines: React.ReactNode[] = ['waiting for a smell', '', '', '', '']
   if (e) {
-    const smell = `smell A ${e.x1.toFixed(2)}, B ${e.x2.toFixed(2)}${e.far ? ' (far)' : ''}`
-    const verdict = e.verdict ? ROUTE_LABEL[world.route] : world.route === 'dart' ? 'stay and feed' : 'leave it'
-    const numbers = hide ? '' : ` · evidence ${fmt(e.evidence)} against criterion ${fmt(e.criterion)}`
-    if (world.pending) {
-      rest = show.stage >= 2 ? ` — ${smell}${numbers} → ${verdict}` : ` — ${smell}`
-    } else {
-      const o = describeOutcome(world, e)
-      rest = (
-        <>
-          {' '}
-          — {smell} → {verdict}. {o.text} <span style={{ color: palette.accent }}>({o.name})</span>
-        </>
-      )
+    const o = describeOutcome(world, e)
+    lines[0] = `smell A ${e.x1.toFixed(2)}, B ${e.x2.toFixed(2)}${e.far ? ' (far)' : ''}`
+    const acted = !world.pending || show.stage >= 2
+    if (acted && !hide) lines[1] = `evidence ${fmtSigned(e.evidence)}, criterion ${fmtSigned(e.criterion)}`
+    if (acted) lines[2] = o.verdict
+    if (!world.pending) {
+      lines[3] = o.outcome
+      lines[4] = <span style={{ color: palette.accent, fontWeight: 600 }}>{o.name}</span>
     }
   }
   return (
-    <div style={{ ...BADGE, whiteSpace: 'normal', textAlign: 'center', borderRadius: 12 }}>
-      <b>{count}</b>
-      {rest}
+    <div style={{ ...BADGE, width: 250, textAlign: 'center', borderRadius: 12, fontVariantNumeric: 'tabular-nums' }}>
+      <div style={BADGE_LINE}>
+        <b>Encounter {(world.encounters + (world.pending ? 1 : 0)).toLocaleString('en-US')}</b>
+      </div>
+      {lines.map((line, i) => (
+        <div key={i} style={BADGE_LINE}>
+          {line || '\u00a0'}
+        </div>
+      ))}
     </div>
   )
 }
