@@ -189,7 +189,7 @@ export class FishWorld {
   sparse: boolean
 
   tests: TestSet[] = []
-  pool: { kind: KindId; smell: [number, number]; met: number }[] = []
+  pool: { kind: KindId; smell: [number, number]; times: number }[] = []
 
   /** The encounter in front of the fish whose outcome has not arrived, or null. */
   pending: Encounter | null = null
@@ -408,15 +408,15 @@ export class FishWorld {
     for (let i = 0; i < n; i++) {
       const side = i % 2 === 0 ? mix.happens : mix.doesNot
       const kind = side[Math.floor(i / 2) % side.length]
-      this.pool.push({ kind, smell: drawIndividual(KINDS[kind], this.settings.spread, rng), met: 0 })
+      this.pool.push({ kind, smell: drawIndividual(KINDS[kind], this.settings.spread, rng), times: 0 })
     }
   }
 
-  /** How many times each individual of the pool has been met, on average. */
+  /** How many times each individual of the pool has been encountered, on average. */
   get meetingsPerIndividual(): number {
     if (!this.pool.length) return 0
     let n = 0
-    for (const p of this.pool) n += p.met
+    for (const p of this.pool) n += p.times
     return n / this.pool.length
   }
 
@@ -499,7 +499,7 @@ export class FishWorld {
     return n ? (100 * (c.hits + c.correctRejections)) / n : 0
   }
 
-  /** Percent of the ring of recent training encounters the fish got right when it met them. */
+  /** Percent of the ring of recent training encounters the fish got right as they arrived. */
   get recentTrainingAccuracy(): number {
     const n = this.ring.count
     if (!n) return 0
@@ -590,7 +590,7 @@ export class FishWorld {
       if (e.verdict && !e.happens && kind.harms) this.harm++
     }
     this.energy += e.happens ? (e.verdict ? st.hit : st.miss) : e.verdict ? st.falseAlarm : st.correctRejection
-    if (e.individual >= 0) this.pool[e.individual].met++
+    if (e.individual >= 0) this.pool[e.individual].times++
 
     const moved = this.brain.settings.on
     this.brain.resolve(e.happens ? 1 : 0)
@@ -656,7 +656,7 @@ export class FishWorld {
     this.ring.next = 0
     this.curve = []
     this.curveStride = CURVE_STRIDE
-    for (const p of this.pool) p.met = 0
+    for (const p of this.pool) p.times = 0
     this.brain.awaiting = false
     this.version++
   }
