@@ -14,6 +14,14 @@ Five tabs: **World**, **Network**, **Learning**, **Decision**, **Fish**. The str
 
 A badge at the top of the stream is always on screen: *Encounter 124 — smell A 0.72, B 0.41 · evidence 0.31 against criterion 0.00 → dart to cover*, and once the outcome arrives, a sentence saying what happened and which of the four outcomes it was, for example *An eel lunged at empty water. The fish had darted to cover. (Hit)*.
 
+**The stream view, as revised 2026-10-04 after Jon first opened the scene.** All of it is drawing (`meshes.tsx`); an encounter is still 2.5 s at 1× with the verdict at 1.0 s and the outcome at 1.6 s, so no number in §3 moved.
+
+- **A smell is a loose cloud of specks, not an object**: pink specks for receptor A's response and green for receptor B's, up to 30 of each, the number of each in proportion to that response (an eel at 0.75, 0.45 is about 22 pink and 14 green; a far smell has a third as many). It is carried at the water's speed (7.5 units a second), reaches the fish's nose as the verdict is taken, and washes on past it, fading. The same two colors mark receptors A and B on the diagram and the two axes of the feature space, and a line on the World tab's right panel says what they mean.
+- **The current** is specks hanging in the water at several depths, moving at the same speed as the smell. The bed and its stones do not move.
+- **Each animal has its own shape**, a chain of beads like the fish's body: the eel long, thin and winding, olive; the pike a straight spear with a broad tail, green; the sucker stout, tan; the chub short and deep, pale brass. None is the feature space's blue or orange. An eel or pike lunges head first to where the fish was and backs away. A sucker or chub is carried down the left side at about the water's speed and is still leaving while the next smell starts down.
+- **A fruit** falls in upstream with a ripple and drifts down behind its smell as a dim shape, coming to rest in front of the fish as the outcome arrives. Once tasted it shows what it was: cherry red and yellow for the two ripe kinds, a squashed brown one for rotting, a brown stick for a twig, and one plum color for every fruit in Part 4. Eaten, it is gone.
+- **Cover** is the large pale rock at the right with weed in its lee. The fish ends behind it, clear of the rock, whole body in view, facing upstream.
+
 ### World tab (left panel, "The world")
 
 | Name on screen | Range | Default | Where it appears |
@@ -296,11 +304,13 @@ Training is the last 300 encounters as the fish met them; test is the 200-encoun
 
 ## 6. Not verifiable from the scripted session
 
-The in-app browser throttles the frame loop, so nothing about motion was judged. For Jon at `localhost:5173/#/m07-fish`, with the crib from `npm run closeout m07-fish`: the fish's tail beat, its wandering heading, fin flutter and occasional twitch; that it turns to face each puff of smell; the dart to the rock at the right and the drift back; the eel's lunge to where the fish was and the red ring when the fish is struck; the green ring for a meal; a sucker drifting past on the left; the fruit being taken, or left and mouthed briefly; whether the murk reads as murk; and whether the hollow test-set dots, the white boundary and the hidden-unit squares are legible on the dark theme.
+The in-app browser throttles the frame loop, so nothing about motion was judged. For Jon at `localhost:5173/#/m07-fish`, with the crib from `npm run closeout m07-fish`: the fish's tail beat, its wandering heading, fin flutter and occasional twitch; that it turns to face each puff of smell; the dart into the weed behind the rock at the right and the drift back; the eel's lunge to where the fish was and the red ring when the fish is struck; the green ring for a meal; a sucker carried past on the left; the fruit being taken, or left and mouthed briefly; whether the specks of a smell read as a smell and their two colors as two amounts; whether the current's speed (7.5 units a second, `CURRENT` in `meshes.tsx`) is too brisk; whether the murk reads as murk; and whether the hollow test-set dots, the white boundary and the hidden-unit squares are legible on the dark theme.
 
 ## 7. State at hand-off, 2026-10-04 evening — for the session that walks and revises it
 
 **Where things stand.** Branch `m07-fish`, six commits off `main`, working tree clean, nothing pushed, nothing merged. 455 tests pass, the build is clean, and `npm run closeout m07-fish` exits 0. Jon has not walked the scene yet: `LAB_7_WALKTHROUGH.md` (course folder, beside the spec) is as the build session wrote it, with no boxes ticked and no answers under its ten questions in §12. He has opened the scene in Chrome once, has first impressions of what looks good and what does not, and will start the next session by describing them. No revision has been made in response to anything he has seen.
+
+**Since then (2026-10-04, later the same evening).** Jon described what he saw on first opening the scene. One revision followed, to the stream view only: the smell, the current, the animals' shapes and colors, the fruit and the cover rock, described at the top of §1. The suite is still 455 and green. The in-app browser confirmed that the new shapes draw; their motion is Jon's to check.
 
 **Order of work from here.** Jon's observations and walk-through notes → changes to the scene, each with its test and each re-measured if it moves a number in §3 → these notes and the close-out's claim list corrected to match → the handout, `intro_to_bcs/pattern_recognition/fish_lab/fish_lab.md`, written from these notes → merge and push, which Jon is asked about first.
 

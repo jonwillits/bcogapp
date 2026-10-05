@@ -5,7 +5,7 @@ import { evidenceFor, hiddenOutputFor, makeScratch, predictionOf, inputLabels } 
 import { KINDS } from '../../sim/fish/kinds'
 import { dPrimeOf, moments } from '../../sim/fish/sdt'
 import type { FishWorld } from '../../sim/fish/world'
-import { CURVE_COLORS, KIND_COLORS, OUTCOME_WORDS } from './labels'
+import { CURVE_COLORS, KIND_COLORS, OUTCOME_WORDS, RECEPTOR_COLORS } from './labels'
 
 const AXIS = palette.textMuted
 const MONO = 'var(--font-mono)'
@@ -155,8 +155,8 @@ export function FeatureSpacePlot({
           <text x={padL - 4} y={y(v) + 3} textAnchor="end" fontSize={8.5} fill={AXIS} fontFamily={MONO}>{v}</text>
         </g>
       ))}
-      <text x={x(0.5)} y={size - 5} textAnchor="middle" fontSize={9} fill={AXIS}>receptor A (x₁) →</text>
-      <text x={10} y={y(0.5)} textAnchor="middle" fontSize={9} fill={AXIS} transform={`rotate(-90 10 ${y(0.5)})`}>receptor B (x₂) →</text>
+      <text x={x(0.5)} y={size - 5} textAnchor="middle" fontSize={9} fill={RECEPTOR_COLORS.a}>receptor A (x₁) →</text>
+      <text x={10} y={y(0.5)} textAnchor="middle" fontSize={9} fill={RECEPTOR_COLORS.b} transform={`rotate(-90 10 ${y(0.5)})`}>receptor B (x₂) →</text>
     </svg>
   )
 }
@@ -501,7 +501,7 @@ export function NetworkDiagram({
             {builtIn ? (
               <rect x={IN_X - 13} y={yy - 13} width={26} height={26} rx={3} fill={palette.surface2} stroke="#ffd166" strokeWidth={2} strokeDasharray="4 2" />
             ) : (
-              <circle cx={IN_X} cy={yy} r={14} fill={palette.surface2} stroke={palette.sensor} strokeWidth={2} />
+              <circle cx={IN_X} cy={yy} r={14} fill={palette.surface2} stroke={i === 0 ? RECEPTOR_COLORS.a : RECEPTOR_COLORS.b} strokeWidth={2} />
             )}
             <text x={IN_X} y={yy + 3.5} textAnchor="middle" fontSize={10} fill={palette.text} fontFamily={MONO}>
               {live ? (b.x[i] ?? 0).toFixed(2) : builtIn ? '' : i === 0 ? 'A' : 'B'}

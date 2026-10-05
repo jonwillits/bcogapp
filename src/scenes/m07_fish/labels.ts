@@ -40,6 +40,16 @@ export const KIND_COLORS = {
   doesNot: '#f0a94b',
 } as const
 
+/**
+ * One color for each receptor: the specks of a smell in the stream, the two
+ * receptors on the diagram, and the feature space's two axes. Neither is the
+ * feature space's blue or orange.
+ */
+export const RECEPTOR_COLORS = {
+  a: '#ff5fd2',
+  b: '#b8f04a',
+} as const
+
 export const CURVE_COLORS = ['#ffd166', '#5ee6d6', '#ff6fae'] as const
 
 /** What the outcome is called, by where the verdict goes. */

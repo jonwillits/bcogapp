@@ -6,7 +6,7 @@ import { KINDS, POOL_RANGE, SPREAD_RANGE, FAR_DILUTION } from '../../sim/fish/ki
 import { percentCorrect } from '../../sim/fish/sdt'
 import { BUILT_INS } from '../../sim/fish/brain'
 import type { FishSceneState } from './FishScene'
-import { MURKY_LINE, ORIENTING_LINE, KIND_COLORS } from './labels'
+import { MURKY_LINE, ORIENTING_LINE, KIND_COLORS, RECEPTOR_COLORS } from './labels'
 import { Content, GroupLabel, Note, PANEL_STYLE, RIGHT_STYLE, Row, TabBar } from './ui'
 
 /**
@@ -217,6 +217,9 @@ export function WorldTab(s: FishSceneState) {
         <li>The verdict goes to: {ROUTE_LABEL[world.route]} (locked).</li>
       </ul>
       <Content>{MURKY_LINE}</Content>
+      <Content>
+        A smell is drawn as specks carried on the current: <span style={{ color: RECEPTOR_COLORS.a }}>pink</span> for receptor A’s response and <span style={{ color: RECEPTOR_COLORS.b }}>green</span> for receptor B’s. The more specks of a color, the stronger that response.
+      </Content>
       <Content>{ORIENTING_LINE}</Content>
 
       <GroupLabel>What is in the stream</GroupLabel>

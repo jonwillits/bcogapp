@@ -33,6 +33,12 @@ export interface Kind {
   does: string
   /** Whether an encounter the fish gets wrong costs it: a strike, or a sickening fruit. */
   harms: boolean
+  /**
+   * Its color in the stream: near the animal's or fruit's own, and kept off
+   * the feature space's blue and orange, which there mean whether the
+   * outcome happened. The two fruits of Part 4 are one fruit at different
+   * strengths, and share a color.
+   */
   color: string
 }
 
@@ -41,7 +47,7 @@ export const ISLAND_CENTER = 0.5
 export const ISLAND_RADIUS = 0.25
 
 export const KINDS: Record<KindId, Kind> = {
-  eel: { id: 'eel', label: 'eel', typical: [0.75, 0.45], happens: true, does: 'An eel lunges.', harms: true, color: '#ff6b6b' },
+  eel: { id: 'eel', label: 'eel', typical: [0.75, 0.45], happens: true, does: 'An eel lunges.', harms: true, color: '#a3a064' },
   sucker: {
     id: 'sucker',
     label: 'sucker',
@@ -49,9 +55,9 @@ export const KINDS: Record<KindId, Kind> = {
     happens: false,
     does: 'A sucker drifts past. It is harmless.',
     harms: false,
-    color: '#5fb3ff',
+    color: '#c9a58a',
   },
-  pike: { id: 'pike', label: 'pike', typical: [0.15, 0.9], happens: true, does: 'A pike lunges.', harms: true, color: '#ffa94d' },
+  pike: { id: 'pike', label: 'pike', typical: [0.15, 0.9], happens: true, does: 'A pike lunges.', harms: true, color: '#6fa56a' },
   chub: {
     id: 'chub',
     label: 'chub',
@@ -59,7 +65,7 @@ export const KINDS: Record<KindId, Kind> = {
     happens: false,
     does: 'A chub drifts past. It is harmless.',
     harms: false,
-    color: '#63e6be',
+    color: '#d9d2a6',
   },
   twig: {
     id: 'twig',
@@ -68,7 +74,7 @@ export const KINDS: Record<KindId, Kind> = {
     happens: false,
     does: 'A twig or leaf is nothing to eat.',
     harms: false,
-    color: '#9aa5b1',
+    color: '#9c8566',
   },
   'ripe-a': {
     id: 'ripe-a',
@@ -77,7 +83,7 @@ export const KINDS: Record<KindId, Kind> = {
     happens: true,
     does: 'Ripe fruit of the first kind nourishes.',
     harms: false,
-    color: '#ffd43b',
+    color: '#c9304f',
   },
   'ripe-b': {
     id: 'ripe-b',
@@ -86,7 +92,7 @@ export const KINDS: Record<KindId, Kind> = {
     happens: true,
     does: 'Ripe fruit of the second kind nourishes.',
     harms: false,
-    color: '#fab005',
+    color: '#f5e050',
   },
   rotting: {
     id: 'rotting',
@@ -95,7 +101,7 @@ export const KINDS: Record<KindId, Kind> = {
     happens: false,
     does: 'Rotting fruit sickens.',
     harms: true,
-    color: '#b197fc',
+    color: '#8a6f63',
   },
   'fruit-right': {
     id: 'fruit-right',
@@ -104,7 +110,7 @@ export const KINDS: Record<KindId, Kind> = {
     happens: true,
     does: 'Fruit whose smell lies within 0.25 of (0.5, 0.5) nourishes.',
     harms: false,
-    color: '#ffd43b',
+    color: '#c2557a',
   },
   'fruit-wrong': {
     id: 'fruit-wrong',
@@ -113,7 +119,7 @@ export const KINDS: Record<KindId, Kind> = {
     happens: false,
     does: 'Fruit whose smell lies farther out than that sickens.',
     harms: true,
-    color: '#b197fc',
+    color: '#c2557a',
   },
 }
 
