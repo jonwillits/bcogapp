@@ -62,9 +62,15 @@ const hash = (i: number, n: number) => {
   return v - Math.floor(v)
 }
 
-/** The middle of the smell: carried down on the current, over the fish and on past it. */
+/**
+ * The middle of the smell: carried down on the current, over the fish and
+ * on past it, **in one straight line at one speed**. Nothing the fish does
+ * moves it. (It once stopped drifting sideways at the moment of the verdict,
+ * which is the moment the fish darts: from one side it then seemed to follow
+ * the fish, and from the other to bounce off it.)
+ */
 function plumeAt(show: Show): { x: number; z: number } {
-  const k = Math.min(1, show.t / T_VERDICT)
+  const k = show.t / T_VERDICT
   return { x: show.lateral * (1 - 0.75 * k), z: NOSE_Z + CURRENT * (show.t - T_VERDICT) }
 }
 
