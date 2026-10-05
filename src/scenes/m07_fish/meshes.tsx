@@ -25,7 +25,13 @@ export interface Show {
 
 export const T_VERDICT = 1.0
 export const T_OUTCOME = 1.6
-export const T_END = 2.5
+/**
+ * The outcome plays out in about a second; the rest of the time to `T_END`
+ * is still water, with the fish back in its place, before the next smell.
+ * Without it one encounter ran into the next and the stream looked frantic.
+ */
+export const T_END = 4.0
+const OUTCOME_SPAN = 0.9
 
 export function newShow(): Show {
   return { t: 0, stage: 0, lateral: 0, clock: 0 }
@@ -324,7 +330,7 @@ const BODIES: Partial<Record<KindId, Body>> = {
   chub: { radii: [0.2, 0.31, 0.31, 0.22, 0.13], gap: 0.25, wave: 0.07, lag: 0.8, beat: 6, tall: 1.4, tail: 0.36, scale: 1.5 },
 }
 
-/** How long a harmless animal takes to drift from upstream to past the fish: it is carried at about the water's speed. */
+/** How long a harmless animal takes to drift from upstream to past the fish: it is carried at about the water's speed, and is gone before the next smell. */
 const DRIFT = 1.9
 const WISPS = 60
 const WISPS_EACH = WISPS / 2
@@ -363,8 +369,6 @@ export function EncounterMesh({ world, show }: { world: FishWorld; show: Show })
     }),
     [],
   )
-  /** The harmless animal last drawn, so it can finish drifting off downstream while the next smell is already on its way. */
-  const carry = useRef<{ e: object | null; lateral: number }>({ e: null, lateral: 0 })
 
   useFrame(() => {
     const e = world.pending ?? world.last
@@ -402,42 +406,36 @@ export function EncounterMesh({ world, show }: { world: FishWorld; show: Show })
       }
     }
 
-    // An animal: the one whose outcome is being shown, or a harmless one still drifting off.
-    const last = world.last
-    let shownAnimal: typeof last = null
-    let since = 0
-    let lateral = show.lateral
-    if (!eating && last) {
-      if (show.stage === 3 && !world.pending) {
-        shownAnimal = last
-        since = show.t - T_OUTCOME
-        carry.current.e = last
-        carry.current.lateral = show.lateral
-      } else if ((show.stage === 1 || show.stage === 2) && carry.current.e === last && !last.happens) {
-        shownAnimal = last
-        since = T_END - T_OUTCOME + show.t
-        lateral = carry.current.lateral
-      }
-    }
+    // An animal, once the outcome arrives. It comes from where its smell came from.
+    const shownAnimal = !eating && show.stage === 3 && !world.pending ? world.last : null
+    const since = show.t - T_OUTCOME
+    const lateral = show.lateral
     const body = shownAnimal ? BODIES[shownAnimal.kind] : undefined
     if (animal.current) {
       const g = animal.current
-      g.visible = !!body && since >= 0 && (shownAnimal!.happens || since < DRIFT)
+      g.visible = !!body && since >= 0 && since < (shownAnimal!.happens ? OUTCOME_SPAN : DRIFT)
       if (g.visible && body) {
         let x: number
         let z: number
+        let heading: number
         if (shownAnimal!.happens) {
-          // The lunge: fast in to where the fish was, head first, then back away upstream.
-          const k = Math.min(1, since / (T_END - T_OUTCOME))
-          const into = ease(k / 0.28)
-          const away = ease((k - 0.45) / 0.55)
-          x = lateral * (1 - into) * 0.6
-          z = UPSTREAM_Z + (HOME.z - 0.2 - UPSTREAM_Z) * into - (HOME.z - UPSTREAM_Z) * 0.8 * away
+          // The lunge: fast and straight down the smell's own line to where the fish was, head first, then back away along it and out of sight.
+          const k = since / OUTCOME_SPAN
+          const reach = ease(k / 0.28) - 1.3 * ease((k - 0.45) / 0.55)
+          const from = { x: lateral * 1.25, z: UPSTREAM_Z }
+          x = from.x + (HOME.x - from.x) * reach
+          z = from.z + (HOME.z - 0.2 - from.z) * reach
+          heading = Math.atan2(-(HOME.x - from.x), -(HOME.z - 0.2 - from.z))
         } else {
-          // Carried past on the current, to one side.
-          x = lateral * 0.4 - 2.4
-          z = -5.5 + 13 * (since / DRIFT)
+          // Carried down from where its smell came from, and past the fish on that side.
+          const lane = (lateral >= 0 ? 1 : -1) * 1.7
+          const across = (t: number) => lateral + (lane - lateral) * ease(t / (0.45 * DRIFT))
+          const down = (t: number) => -5.5 + 13 * (t / DRIFT)
+          x = across(since)
+          z = down(since)
+          heading = Math.atan2(-(across(since + 0.05) - x), -(down(since + 0.05) - z))
         }
+        g.rotation.y = heading
         g.position.set(x, 0.42, z)
         g.scale.setScalar(body.scale)
         tools.skin.color.set(KINDS[shownAnimal!.kind].color)
@@ -481,8 +479,10 @@ export function EncounterMesh({ world, show }: { world: FishWorld; show: Show })
         const twig = known && e!.kind === 'twig'
         // Eaten, it is gone; left, it stays where it came to rest.
         const gone = known && e!.verdict ? ease((show.t - T_OUTCOME) / 0.3) : 0
-        fruit.current.position.set(at.x, 0.45 + 0.04 * Math.sin(show.clock * 4), at.z)
-        fruit.current.scale.setScalar((known ? 1 : 0.7) * (1 - gone))
+        // Left, it rests a moment and is then carried off downstream.
+        const off = Math.max(0, show.t - T_OUTCOME - OUTCOME_SPAN)
+        fruit.current.position.set(at.x, 0.45 + 0.04 * Math.sin(show.clock * 4), at.z + 0.5 * CURRENT * off * off)
+        fruit.current.scale.setScalar((known ? 1 : 0.7) * (1 - gone) * (1 - ease(off / 1.2)))
         round.current.visible = !twig
         stick.current.visible = twig
         round.current.scale.set(1, known && e!.kind === 'rotting' ? 0.7 : 1, 1)
@@ -529,8 +529,8 @@ export function EncounterMesh({ world, show }: { world: FishWorld; show: Show })
         <sphereGeometry args={[1, 8, 6]} />
         <meshBasicMaterial ref={wispMat} color="#ffffff" transparent opacity={0} depthWrite={false} toneMapped={false} />
       </instancedMesh>
-      {/* Local −z is forward, as for the fish; turned half round, so it heads downstream toward the fish. */}
-      <group ref={animal} visible={false} rotation={[0, Math.PI, 0]}>
+      {/* Local −z is forward, as for the fish. */}
+      <group ref={animal} visible={false}>
         {Array.from({ length: MAX_BEADS }, (_, i) => (
           <mesh key={i} ref={(el) => (beads.current[i] = el)} material={tools.skin} raycast={() => null}>
             <sphereGeometry args={[1, 12, 10]} />
