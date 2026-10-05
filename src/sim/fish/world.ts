@@ -340,6 +340,19 @@ export class FishWorld {
     this.restart()
   }
 
+  /**
+   * Learning is on and can do nothing: there are hidden units, they are set
+   * by hand, and every one of their weights is still zero. Each then gives
+   * the same output for every smell, so the output unit is given nothing
+   * that varies, and the feature space stays one flat shade whatever is
+   * run. The scene says so, because it otherwise looks like a broken rule.
+   */
+  get idleBlankHiddenLayer(): boolean {
+    const b = this.brain
+    const hidden = b.circuit.interneurons
+    return b.settings.on && b.settings.hidden === 'hand' && hidden.length > 0 && hidden.every((u) => u.baseline === 0 && u.weights.every((w) => w === 0))
+  }
+
   /** The student's hand. It moves the wiring now and the wiring *Reset* returns to. */
   wire(patch: WiringPatch): void {
     setWiring(this.brain.circuit, patch)

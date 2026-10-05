@@ -4,7 +4,7 @@ import { Button, Toggle } from '../../components/controls'
 import { fmt } from '../../components/format'
 import { FISH_RATE_RANGE, HIDDEN_MODES, MAX_RANDOM_HIDDEN, inputLabels, type HiddenMode } from '../../sim/fish/brain'
 import type { FishSceneState } from './FishScene'
-import { BACKPROP_LINE, LAB5_LINE, TARGET_LINE } from './labels'
+import { BACKPROP_LINE, BLANK_HIDDEN_LINE, LAB5_LINE, TARGET_LINE } from './labels'
 import { LearningCurve } from './plots'
 import { Content, GroupLabel, LogSlider, Note, PANEL_STYLE, RIGHT_STYLE, Row, TabBar } from './ui'
 
@@ -71,6 +71,7 @@ export function LearningTab(s: FishSceneState) {
             <Row label="Learning (locked)" value={st.on ? 'on' : 'off'} mono={false} />
           )}
           <Note>Off, the fish is Lab 4’s animal: its weights stay where they are put. On, every encounter’s outcome moves them a little.</Note>
+          {world.idleBlankHiddenLayer && <Content>{BLANK_HIDDEN_LINE}</Content>}
           {s.can('rate') ? (
             <LogSlider
               label="learning rate η"

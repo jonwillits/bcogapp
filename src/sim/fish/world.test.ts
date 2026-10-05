@@ -343,3 +343,26 @@ describe('the chemistry', () => {
     expect(criterionShift({ arousal: 1, satiety: 0.1 }, 'eat').total).toBeLessThan(0)
   })
 })
+
+describe('learning that can do nothing says so', () => {
+  it('hidden units set by hand and still all zero, with learning on: the evidence is the same for every smell, and the world flags it', () => {
+    const w = new FishWorld(5, scenarioByKey('island'), { hidden: 4, learning: { on: true } })
+    expect(w.idleBlankHiddenLayer).toBe(true)
+    w.run(1000)
+    const ev = w.testEvidence(w.tests[0])
+    expect(Math.max(...ev) - Math.min(...ev)).toBeLessThan(1e-6)
+    expect(w.idleBlankHiddenLayer).toBe(true)
+  })
+
+  it('the flag clears when a hidden weight is set, when the rule is given the hidden layer, when learning is off, and with no hidden units', () => {
+    const blank = () => new FishWorld(5, scenarioByKey('island'), { hidden: 4, learning: { on: true } })
+    const set = blank()
+    set.wire({ interneuron: 0, weight: { input: 0, value: 1 } })
+    expect(set.idleBlankHiddenLayer).toBe(false)
+    const passed = blank()
+    passed.reshape({ mode: 'pass-back' })
+    expect(passed.idleBlankHiddenLayer).toBe(false)
+    expect(new FishWorld(5, scenarioByKey('island'), { hidden: 4 }).idleBlankHiddenLayer).toBe(false)
+    expect(new FishWorld(5, scenarioByKey('island'), { learning: { on: true } }).idleBlankHiddenLayer).toBe(false)
+  })
+})

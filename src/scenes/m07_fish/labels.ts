@@ -35,6 +35,10 @@ export const TARGET_LINE = 'The target is the outcome, a moment later. Nothing i
 export const LAB5_LINE =
   'Lab 5 offered four things a weight change could depend on: Coincidence, Prediction, Teacher and Verdict. This fish’s output unit uses Prediction, Φ = a − p, and nothing else.'
 
+/** Network and Learning tabs, when learning is on over hidden units that are set by hand and still all zero. */
+export const BLANK_HIDDEN_LINE =
+  'Learning is on, but nothing can change yet. The hidden weights are set by hand and every one is still zero, so each hidden unit gives the same output for every smell. Set them on the Network tab, or choose Pass the error back or Fixed at random on the Learning tab.'
+
 export const KIND_COLORS = {
   happens: '#4f9cff',
   doesNot: '#f0a94b',

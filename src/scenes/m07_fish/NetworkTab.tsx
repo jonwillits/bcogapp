@@ -17,7 +17,7 @@ import {
 } from '../../sim/fish/brain'
 import { ROUTE_LABEL } from '../../sim/fish/scenarios'
 import type { FishSceneState } from './FishScene'
-import { DOTS_LINE, FOREBRAIN_LINE, KIND_COLORS, OUTCOME_WORDS, TWO_RECEPTORS_LINE } from './labels'
+import { DOTS_LINE, FOREBRAIN_LINE, KIND_COLORS, OUTCOME_WORDS, TWO_RECEPTORS_LINE, BLANK_HIDDEN_LINE } from './labels'
 import { FeatureSpacePlot, HiddenSpacePlot, LearningCurve, NetworkDiagram } from './plots'
 import { Content, GroupLabel, Note, PANEL_STYLE, RIGHT_STYLE, Row, TabBar } from './ui'
 
@@ -174,6 +174,7 @@ export function NetworkTab(s: FishSceneState) {
   const right = (
     <Panel title="What the network is doing" style={RIGHT_STYLE}>
       <Section key={`${world.scenario.key}-fs`} title="The feature space" defaultOpen>
+        {world.idleBlankHiddenLayer && !hide && <Content>{BLANK_HIDDEN_LINE}</Content>}
         <FeatureSpacePlot world={world} showTest={s.view.showTest} showPrototypes={s.view.showPrototypes} hoverUnit={hide ? null : s.hoverUnit} hideShading={hide} />
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, fontSize: 10.5, color: 'var(--text-muted)' }}>
           <span><span style={{ color: KIND_COLORS.happens }}>●</span> {words.happens}</span>
