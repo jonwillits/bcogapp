@@ -86,7 +86,7 @@ export function WorldTab(s: FishSceneState) {
             <Button
               variant={st.distance === 'far' ? 'primary' : 'default'}
               onClick={() => {
-                world.set({ distance: st.distance === 'far' ? 'near' : 'far' })
+                world.moveTo(st.distance === 'far' ? 'near' : 'far')
                 s.restartShow()
                 bump()
               }}
@@ -125,7 +125,7 @@ export function WorldTab(s: FishSceneState) {
             />
           )}
           <Note>
-            Far things are diluted: both receptors read {FAR_DILUTION} of what they read near. <b>Go downstream</b> changes where the fish is, and no weight. Switching a receptor on or off starts the run again with a new network.
+            Far things are diluted: both receptors read {FAR_DILUTION} of what they read near. <b>Go downstream</b> changes where the fish is, and no weight. It also switches <b>Learning on</b> off, so that what happens downstream is what the fish learned upstream; switch it back on there to watch the weights change. Switching a receptor on or off starts the run again with a new network.
           </Note>
         </>
       )}

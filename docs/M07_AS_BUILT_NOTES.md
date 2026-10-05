@@ -1,6 +1,6 @@
 # Module 7 as built — notes for the session that writes the handout
 
-Written 2026-10-04 by the session that built `m07-fish`, from the code on branch `m07-fish` and from measurements, for whoever writes `fish_lab.md`. **The handout does not exist yet.** It is written after Jon's walk-through (`LAB_7_WALKTHROUGH.md`, beside the scene spec in the course folder), from these notes as that walk corrects them. The scene is not merged and not deployed.
+Written 2026-10-04 by the session that built `m07-fish`, from the code on branch `m07-fish` and from measurements, for whoever writes `fish_lab.md`. **The handout was written from these notes on 2026-10-05**, after Jon's walk-through (`LAB_7_WALKTHROUGH.md`, beside the scene spec in the course folder) and the revisions it led to: `intro_to_bcs/pattern_recognition/fish_lab/fish_lab.md`, 39 questions, with `fish_lab_report.docx` and its generator beside it. The shorter account of what the lab is, is `LAB_7_AS_BUILT.md` beside the spec. As this is written the scene is not merged and not deployed, and the handout is not committed: Jon does both.
 
 **Every number here was measured, not predicted.** Unless a line says otherwise: six seeds (1000 to 1005), the scenario exactly as it loads with *Learning on* switched on, and accuracy on the scenario's test set. "Of 20" means seeds 1000 to 1019. The probe that produced them is `src/sim/fish/crib.probe.ts`, and `npm run closeout m07-fish` prints them. A handout that quotes a number should quote one from §3, and should say "about", because the scene opens on a random seed and a student's numbers will fall inside these ranges, not on their means.
 
@@ -30,11 +30,11 @@ A badge at the top of the stream is always on screen, as a block of six lines th
 | **Scenario** | seven entries: *Part 1 — One line will do*, *Part 2 — Jumpy or blind?*, *Part 3 — Ripe or rotting*, *Part 4 — Built in, wired at random, or learned*, *Part 5a — The eels it has smelled*, *Part 5b — Downstream*, *Closer — A new predator* | Part 1 | always |
 | **Go to phase 1**, **Go to phase 2**, **Go to phase 3: An eel comes back**, with **Now in** printing the phase | — | phase 1 | Closer |
 | **Eels and suckers stay around** (toggle) | — | off | Closer |
-| **Go downstream** (becomes **Go back upstream**) | — | upstream (near) | Part 5b |
+| **Go downstream** (becomes **Go back upstream**). Going downstream also switches *Learning on* off, and a note under the Distance controls says so | — | upstream (near) | Part 5b |
 | **Learn from every distance** (toggle) | — | off | Part 5b |
 | **Proportion of A (a built-in receptor)** (toggle), and under it once on, **Proportion only (receptors A and B disconnected)** | — | off | Part 5b |
 | **Where the encounters come from** | *a small pool* / *a stream* | pool in 5a, stream elsewhere | a menu in Part 5a; printed elsewhere |
-| **How many individuals live here** | 6 to 60, step 2 | 12 | Part 5a, while the source is a pool |
+| **How many individuals live here** | 6 to 60, step 2 | 6 | Part 5a, while the source is a pool |
 | **How much smells vary** | 0.04 to 0.20, step 0.01 | 0.06 (0.15 in Parts 2 and 5a) | a slider in Parts 1, 3, 5a; printed and locked in 2, 5b and the Closer; absent in Part 4 |
 | **Reset**, **New seed**, **Run seed** printed | — | random seed | always |
 
@@ -115,7 +115,7 @@ Every scenario loads with **learning off**, η = 0.2, the criterion at 0, both m
 | `diagnosis` | Part 2 — Jumpy or blind? | the same two; spread 0.15 | the same | no hidden units; the healthy fish: weights 2.9, −1.6, baseline −0.9 | criterion, both modulators, stakes, base rate. Nothing on the network; learning locked off | **2,000** |
 | `fruit` | Part 3 — Ripe or rotting | twig or leaf (0.15, 0.15), ripe fruit first kind (0.85, 0.15), ripe fruit second kind (0.15, 0.85), rotting fruit (0.85, 0.85); spread 0.06 | ripe nourishes; rotting sickens; a twig is nothing to eat | no hidden units; verdict to *eat* | everything on the Network and Learning tabs, the three built-in receptors, criterion, spread | 200 |
 | `island` | Part 4 — Built in, wired at random, or learned | fruit anywhere in the square, half inside the disk and half outside | nourishes within 0.25 of (0.5, 0.5); sickens outside | no hidden units; verdict to *eat* | the same as Part 3, without spread | 200 |
-| `pool` | Part 5a — The eels it has smelled | eel and sucker; **a pool of 12 individuals** (6 and 6), spread 0.15 | as Part 1 | 8 hidden units, *Pass the error back* | number of hidden units, spread, source, pool size, Learning on, rate | 200 |
+| `pool` | Part 5a — The eels it has smelled | eel and sucker; **a pool of 6 individuals** (3 and 3), spread 0.15 | as Part 1 | 8 hidden units, *Pass the error back* | number of hidden units, spread, source, pool size, Learning on, rate | 200 |
 | `downstream` | Part 5b — Downstream | eel and sucker; stream; spread 0.06; near | as Part 1 | no hidden units | Learning on, rate, and the four Distance controls | **near** 200 and **far** 200 |
 | `new-predator` | Closer — A new predator | phase 1 eel and sucker; phase 2 pike (0.15, 0.90) and chub (0.95, 0.10); phase 3 an eel next, then all four | eel and pike lunge; sucker and chub drift past | 6 hidden units, *Pass the error back*; spread 0.06 | Learning on, rate, the phase buttons, *Eels and suckers stay around* | **eel and sucker** 200, **pike and chub** 200 |
 
@@ -210,25 +210,25 @@ The test set is 2,000 encounters, about 1,000 with an eel and 1,000 without. Cou
 
 ### Part 5a — `pool`
 
-Training is the last 300 encounters as the fish met them; test is the 200-encounter test set.
+**The pool loads with six individuals, not twelve** (Jon, 2026-10-05, walk-through question 12.5). Training is the last 300 encounters as they arrived; test is the 200-encounter test set. Measured 2026-10-05.
 
 | | Training | Test | Gap |
 |---|---|---|---|
-| 12 individuals, 8 hidden, after 1,000 (83 meetings each) | 74–94% (mean 84) | 73–85% (78) | 6 |
-| after 3,000 (250 meetings) | 73–100% (89) | 73–88% (81) | 8 |
-| **after 5,000 (417 meetings)** | 72–100% (91) | 72–86% (79) | **12** |
-| after 10,000 (833 meetings) | 81–99% (94) | 68–87% (79) | 15 |
-| 12 individuals, 0 hidden, after 5,000 | 72–100% (88) | 73–87% (82) | 6 |
-| 12 individuals, 2 hidden | 71–100% (88) | 72–86% (81) | 7 |
-| 12 individuals, 3 hidden | 72–100% (90) | 72–86% (81) | 9 |
-| 6 individuals, 8 hidden | 85–100% (96) | 69–84% (78) | 18 |
+| 6 individuals, 8 hidden, after 1,000 (167 encounters each) | 60–100% (mean 88) | 69–87% (79) | 9 |
+| after 3,000 (500 each) | 79–100% (95) | 69–83% (78) | 17 |
+| **after 5,000 (833 each)** | 85–100% (96) | 69–84% (78) | **18** |
+| after 10,000 (1,667 each) | 80–100% (96) | 68–83% (77) | 19 |
+| 6 individuals, 0 hidden, after 5,000 | 80–100% (96) | 69–87% (79) | 16 |
+| 6 individuals, 2 hidden | 83–100% (96) | 69–87% (79) | 17 |
+| 6 individuals, 3 hidden | 85–100% (96) | 62–84% (75) | 21 |
+| 12 individuals, 8 hidden | 72–100% (91) | 72–86% (79) | 12 |
 | 24 individuals, 8 hidden | 82–95% (87) | 73–86% (81) | 6 |
 | 60 individuals, 8 hidden | 76–92% (85) | 75–86% (82) | 3 |
 | a stream, 8 hidden | 81–88% (84) | 77–86% (83) | 2 |
 
-**The spread across seeds is wide, and one seed in six shows no gap at all.** Training and test at 5,000, seed by seed: 92/75, 100/86, 96/77, 72/86, 92/72, 93/80. In the fourth, two or three of the twelve individuals have smells the wrong side of any sensible line, and 5,000 encounters is not enough to learn each as an exception. The handout should tell a student whose training line is not above the test line to press *New seed*, or should use six individuals, where the gap is 18 points and training reaches 85% or better in every seed.
+**Seed by seed at 5,000**, training/test: 100/81, 100/84, 93/73, 85/84, 99/69, 100/80. **Five seeds of six show a gap of 16 points or more; one (the fourth) shows almost none.** That is better than twelve individuals, where the gap was 12 on average and one seed was reversed, and it is not "every seed": the handout tells a student whose two lines end close together to press *New seed*.
 
-**Fewer hidden units helps only a little**: the test set gains 2 or 3 points on average going from eight units to none, while the gap halves. Most of the overfitting here comes from the smallness of the pool, not from the size of the network: a single line fitted to twelve individuals is already six points better on them than on the test set.
+**At six individuals a smaller network does not help.** With no hidden units at all the gap is 16 points against 18 with eight, and the test set is the same to within a point. The overfitting comes from the smallness of the pool: a single line fitted to six individuals is already 16 points better on them than on the test set. The spec's target (two or three hidden units doing at least as well on the test set as eight) held by 2 or 3 points at twelve individuals and does not hold at six, where three units come out 3 points *worse*. The test now asserts what is true: fewer units change little. **What does close the gap is a larger pool** (18, 12, 6, 3 points at 6, 12, 24 and 60) **and a stream** (2). The handout's Part 5 asks exactly that comparison.
 
 ### Part 5b — `downstream`
 
@@ -249,7 +249,7 @@ Training is the last 300 encounters as the fish met them; test is the 200-encoun
 
 - **Trained near only, the fish flees no far eel at all.** The far test sits at half right because half of it is suckers, which the fish correctly ignores.
 - **The spec's outcome to watch for happens.** With *Proportion of A* beside A and B, the fish goes on leaning on raw strength and misses half or more of the far eels, and it gets worse with more training near, not better. *Proportion only* is the built-in fix that works, and it takes about 1,000 encounters.
-- **Going downstream with learning still on** turns the fish into one that is learning from far things: it recovers within about 100 encounters and the near test then falls. The handout should say to switch *Learning on* off before *Go downstream*, or should make that recovery the next question.
+- ***Go downstream* switches learning off** (Jon, 2026-10-05, question 12.6), because a fish left learning recovers within about 100 encounters and hides the failure, and the near test then falls. Learning can be switched back on downstream; the handout does not ask for that.
 
 ### The Closer — `new-predator`
 
@@ -276,7 +276,7 @@ Training is the last 300 encounters as the fish met them; test is the 200-encoun
 | 2 | criterion, arousal; two stakes presets swept with about eight presses of *Score this criterion* each; five fish, four counts each into the By hand box; the two face-memory testers | 0 | none needed | 25 to 30 min |
 | 3 | one unit failing (2 × 1,000); the network by hand (nine sliders); threshold function (1,000); sigmoid; 1, 2, 3, 4 and 6 hidden units over three seeds each at up to 2,000; *Both together* | about 35 of 1,000 | none needed | 30 min |
 | 4 | two built-in receptors; random layers of 2, 10, 50, 200, sparse and not, at 1,000 each; the learned route at 3, 4 and 6 units, up to 5,000 each | about 30 of 1,000 | none needed | 20 to 25 min |
-| 5a | the pool at 5,000; fewer units; a larger pool; a stream | about 20 of 1,000 | none needed | 12 min |
+| 5a | the pool of six at 5,000; two hidden units; pools of 24 and 60; a stream | about 25 of 1,000 | none needed | 12 min |
 | 5b | near only (3 × 100); go downstream; the two fixes at 1,000 to 2,000 each | about 8 | a few encounters downstream, 30 s | 10 min |
 | Closer | phase 1 (1,000), phase 2 (1,000), one eel; reset and rerun with the old animals staying; optionally all four from the start (5,000) | 5 to 10 | the returning eel | 8 to 10 min |
 
@@ -288,19 +288,19 @@ Training is the last 300 encounters as the fish met them; test is the 200-encoun
 
 1. **Sigmoid width 0.25, weight range ±6** (§6.4). With width 0.25 and Lab 4's ±3, four hidden units already solved the fruit in 20 seeds of 20. The range was widened for a different reason: at ±3 a single unit learning eel from sucker pinned the weight from A at 3 within a few hundred encounters while the weight from B kept growing, which turned the line toward (3, −3) — and a line in that direction happens to sort far eels correctly, so Part 5b's failure disappeared with more training (far hit rate 0% at 300 encounters, 75% at 3,000). At ±6 nothing pins inside 3,000 encounters and the failure holds at every length of training. The criterion slider runs ±3. The learning rate runs 0.01 to 1, default 0.2: at 0.5 two hidden units solve the fruit less often (7 of 20 against 13), at 1 the island is not learned by passing the error back at any size, and at 2 nothing converges.
 2. **Starting weights under *Pass the error back* are uniform in ±1.** Measured at ±0.5, ±1, ±2, ±3 and ±5: four hidden units reach 95% on the fruit in 20, 20, 15, 14 and 11 seeds of 20.
-3. **Pike and chub moved** (§4.2). The spec's (0.35, 0.85) and (0.90, 0.30) put the four animals almost on one line, alternating harmless, dangerous, harmless, dangerous, with gaps of 0.21 to 0.32. One network then needs three boundaries along a line: it holds all four only after 5,000 to 10,000 encounters, and with the old animals staying around for 1,000 the two test sets ended at 37 to 61% and 79 to 91%. At **pike (0.15, 0.90) and chub (0.95, 0.10)** — the same sides, further out — phase 2 alone still wrecks the old test (1 to 6%), staying around holds both (98 to 100%, 100%), and all four from the start are learned by 5,000. A rectangle arrangement was also measured and was no better than the spec's. **This is a change to the world made to meet a target, so it is flagged for Jon in the walk-through.**
+3. **Pike and chub moved** (§4.2). The spec's (0.35, 0.85) and (0.90, 0.30) put the four animals almost on one line, alternating harmless, dangerous, harmless, dangerous, with gaps of 0.21 to 0.32. One network then needs three boundaries along a line: it holds all four only after 5,000 to 10,000 encounters, and with the old animals staying around for 1,000 the two test sets ended at 37 to 61% and 79 to 91%. At **pike (0.15, 0.90) and chub (0.95, 0.10)** — the same sides, further out — phase 2 alone still wrecks the old test (1 to 6%), staying around holds both (98 to 100%, 100%), and all four from the start are learned by 5,000. A rectangle arrangement was also measured and was no better than the spec's. **Accepted by Jon, 2026-10-05.**
 4. **The baseline learns, as the weight on an input that is always 1.** The spec says learning writes weights and baselines (§5.4); Lab 5's `learnWeights` wrote weights only. It now takes an optional `alwaysOn` change, which only the fish passes. `oneWriter.test.ts` asserts a baseline has the same two writers as a weight, and that nothing in Lab 4 or Lab 5 asks for it.
 5. **The four fish's criterion shifts are about one spread of the evidence**, not more (F1 −0.50, F2 +0.60, F4 −0.60, where the evidence's spread is 0.50). A first version had them at −0.8 and +0.9, and F1 then had zero to two misses in a thousand, so d′ from its counts ranged from 2.06 to 2.64.
 6. **Part 2's test set is 2,000, not 200.** At 200 a hit rate of 0.98 rests on two misses.
 7. **The d′-stability target is met over the middle half of the evidence, not the middle 80%.** The spec asked for ±0.15 on 1,000 encounters. The evidence is equal-spread Gaussian and nothing drifts, but at the ends of the middle 80% one of the two rates is within a few percent of 0 or 1 and the standard error of d′ from 1,000 encounters is about 0.13 by itself. Measured on 2,000: ±0.15 across the middle half, ±0.4 across the middle 80%. d′ on the evidence panel, computed from the distributions, does not move at all.
-8. **The second face-memory tester is d′ = 2.05**, which is 2.1 to one decimal. The spec asked the By hand box to print 2.0 for both. It prints two decimals: 1.99 and 2.05. The chapter says both are 2.0. **Flagged for Jon**: either the chapter's sentence can say "about 2.0", or the handout can ask why they differ in the second decimal.
+8. **The second face-memory tester is d′ = 2.05**, which is 2.1 to one decimal. The spec asked the By hand box to print 2.0 for both. It prints two decimals: 1.99 and 2.05. The chapter says both are 2.0. Jon's ruling, 2026-10-05: the scene stays, and the chapter's sentence is his to change to "about 2.0". The handout's Q15 asks how close the two are.
 9. **Two hidden units find two solutions to the fruit, not one.** The spec's test was that the two ripe corners land together in hidden space. They do in about two solved runs in three. In the rest the rule finds "A without B" and "B without A", and it is the twig and the rotting fruit that land together. The test asserts that some pair sharing an outcome lands together. Part 3's question about the hidden-activity space has to allow both.
 10. **Four hidden units, not three, for the island**, and slowly. See §3.
-11. **Overfitting in the pool is modest and comes mostly from the pool's size.** The 10-point target is met on average at 5,000 encounters (12 points) and not in every seed. The "fewer hidden units do better on the test set" target is met by 2 or 3 points. See §3.
+11. **Overfitting in the pool comes from the pool's size, and the pool loads at six.** At the spec's twelve individuals the gap was 12 points on average and absent in one seed of six; at six it is 18 and absent in one of six. The spec's "fewer hidden units do better on the test set" target does not hold at six. See §3.
 12. **The downstream finding.** *Proportion of A* beside A and B does not rescue the fish. *Proportion only* does. Reported, as the spec asked.
 13. **A fixed-at-random layer of two units reaches 80% in one seed of six** (target: under 80%). The mean is 62 to 70%.
 14. **Phase 3 of the Closer** puts an eel upstream next and then all four kinds, so the stream does not run dry after one encounter. Going to phase 3 before any learning is how "all four at once from the start" is run.
-15. **Learning is off when every scenario loads**, as the spec says, including the three (5a, 5b, the Closer) where there is nothing to do by hand first. The skip badge says *learning is off, so no weight changed* when that is why nothing happened. **A question for Jon** in the walk-through.
+15. **Learning is off when every scenario loads**, as the spec says, including the three (5a, 5b, the Closer) where there is nothing to do by hand first. The skip badge says *learning is off, so no weight changed* when that is why nothing happened. Jon's ruling, 2026-10-05: leave it, one rule everywhere. The handout's Part 0 says so in bold.
 16. **Cut, in the spec's cut order**: the *Morph* animation, and *Competition* as a fourth hidden-layer setting. Built from the cut list: the pair menus, *Score this criterion* with its plot, and the idle animation.
 17. **The modulators turn over for a verdict routed to *eat*.** The spec defines them for *dart to cover*. In Parts 3 and 4 they are locked at 1 and move nothing, so this is latent; if they were unlocked there, a hungry fish would eat more readily.
 18. **The engine files Labs 4 and 5 shipped changed, inertly.** `unit.ts` (`activate` takes an optional sigmoid width; `activationSlope` added), `circuit.ts` (`Circuit.output`, and `setWiring` can address it), `learning/rule.ts` (`thirdFactor` accepts `'passed-back'`; `learnWeights` accepts `alwaysOn`). The Lab 4 regression fixture and Lab 5's suite pass untouched, and both scenes' no-XOR sweeps still run.
@@ -309,17 +309,19 @@ Training is the last 300 encounters as the fish met them; test is the 200-encoun
 
 20. **The murky-water line is reworded**, and it is one of the spec's nine tested lines: *…each thing reaches it first as a smell…* where the spec's §9 has *the fish meets each thing first as a smell*. Part 5a is *The eels it has smelled* and the pool's readout is *Encounters per individual, on average*. The spec and the build prompt still say *meets*; they are Jon's to change. **The handout must follow the same rule**, and these notes' own prose below still says *met* in places where it describes runs, which is not wording to copy.
 
+21. **Jon's rulings on the walk-through's ten questions, 2026-10-05**: the moved pike and chub are accepted (3 above); the By hand box keeps two decimals (8); the handout allows either two-unit solution to the fruit (9); the island keeps its 95% bar (10); the pool loads at six (11); *Go downstream* switches learning off; every scenario still loads with learning off (15); the naive fish that flees everything stays, and is the handout's Q1; *Morph* and a competition setting stay cut (16); the lab stays at its length, about two hours.
+
 ## 6. Not verifiable from the scripted session
 
 The in-app browser throttles the frame loop, so nothing about motion was judged. For Jon at `localhost:5173/#/m07-fish`, with the crib from `npm run closeout m07-fish`: the fish's tail beat, its wandering heading, fin flutter and occasional twitch; that it turns to face each puff of smell; the dart into the weed behind the rock at the right and the drift back; the eel's lunge to where the fish was and the red ring when the fish is struck; the green ring for a meal; a sucker carried past on the left; the fruit being taken, or left and mouthed briefly; whether the specks of a smell read as a smell and their two colors as two amounts; whether the current's speed (7.5 units a second, `CURRENT` in `meshes.tsx`) is too brisk; whether the murk reads as murk; and whether the hollow test-set dots, the white boundary and the hidden-unit squares are legible on the dark theme.
 
 ## 7. State at hand-off, 2026-10-04 evening — for the session that walks and revises it
 
-**Where things stand.** Branch `m07-fish`, six commits off `main`, working tree clean, nothing pushed, nothing merged. 455 tests passed then (458 since the tests of 2026-10-05), the build is clean, and `npm run closeout m07-fish` exits 0. Jon has not walked the scene yet: `LAB_7_WALKTHROUGH.md` (course folder, beside the spec) is as the build session wrote it, with no boxes ticked and no answers under its ten questions in §12. He has opened the scene in Chrome once, has first impressions of what looks good and what does not, and will start the next session by describing them. No revision has been made in response to anything he has seen.
+**Where things stand.** Branch `m07-fish`, six commits off `main`, working tree clean, nothing pushed, nothing merged. 455 tests passed then (459 since the tests of 2026-10-05), the build is clean, and `npm run closeout m07-fish` exits 0. Jon has not walked the scene yet: `LAB_7_WALKTHROUGH.md` (course folder, beside the spec) is as the build session wrote it, with no boxes ticked and no answers under its ten questions in §12. He has opened the scene in Chrome once, has first impressions of what looks good and what does not, and will start the next session by describing them. No revision has been made in response to anything he has seen.
 
-**Since then (2026-10-04, later the same evening).** Jon described what he saw on first opening the scene. Revisions followed, to the stream view only, on 2026-10-04 and 2026-10-05: the smell, the current, the animals' shapes and colors, the fruit and the cover rock, described at the top of §1. The suite is 458 and green. The in-app browser confirmed that the new shapes draw; their motion is Jon's to check.
+**Since then (2026-10-04, later the same evening).** Jon described what he saw on first opening the scene. Revisions followed, to the stream view only, on 2026-10-04 and 2026-10-05: the smell, the current, the animals' shapes and colors, the fruit and the cover rock, described at the top of §1. The suite is 459 and green. The in-app browser confirmed that the new shapes draw; their motion is Jon's to check.
 
-**Order of work from here.** Jon's observations and walk-through notes → changes to the scene, each with its test and each re-measured if it moves a number in §3 → these notes and the close-out's claim list corrected to match → the handout, `intro_to_bcs/pattern_recognition/fish_lab/fish_lab.md`, written from these notes → merge and push, which Jon is asked about first.
+**State on 2026-10-05, after the walk.** Jon walked the scene and it is as he wants it. The handout, its report and `LAB_7_AS_BUILT.md` are written. The suite is 459 and green and `npm run closeout m07-fish` passes. **What is left is Jon's**: commit the last changes on `m07-fish` (the pool at six, *Go downstream*, the close-out entry, these notes), merge to `main` and push, which deploys; and add `pattern_recognition/fish_lab/` to `intro_to_bcs` and push it, which is what the **Lab** button fetches. Nothing in this paragraph has been pushed by a session.
 
 **What a revision has to keep true.** The seven non-negotiables in the build prompt, each held by a named test: the hidden-layer ban scoped per scene; passing the error back through `thirdFactor()` as one rule shape; the criterion never written by learning and never read by the prediction; the outcome arriving whatever the verdict; the output's Φ = a − p with the prediction held; each of the four fish differing from healthy in exactly one named property; the nine content lines on their panels. `naming.test.ts` also holds the vocabulary rules, so new on-screen text can fail it: no *meet*, *met* or *meeting* (Jon, 2026-10-05: the course's rule against anthropomorphic language; a smell reaches the fish, and the fish encounters or smells a thing), no *loss*, *epoch*, receptor biology, named cortical area, or verb that has the network knowing or deciding. A selected control changes color and never size. **A live number that can go negative keeps its sign's place** (`fmtSigned` in `components/format.ts`, or a space in a line of arithmetic), and a line of live text never wraps: Jon's rule of 2026-10-05, after a minus sign wrapped the Learning tab's arithmetic and the Network tab's *The smell now* row and shook everything below them.
 

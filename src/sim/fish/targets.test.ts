@@ -170,22 +170,28 @@ describe('the eels it has met (pool)', () => {
       return { train: w.recentTrainingAccuracy, test: w.testAccuracy(w.tests[0]) }
     })
 
-  it('twelve individuals, eight hidden units, 5,000 encounters: training accuracy runs about ten points ahead of the test set', () => {
+  it('six individuals, eight hidden units, 5,000 encounters: training accuracy runs well ahead of the test set', () => {
     const r = gap({})
     expect(mean(r.map((x) => x.train - x.test))).toBeGreaterThanOrEqual(8)
     expect(mean(r.map((x) => x.train))).toBeGreaterThan(mean(r.map((x) => x.test)))
   })
 
-  it('with two or three hidden units, test accuracy is at least as high as with eight', () => {
+  it('fewer hidden units change little: with none, two or three the test set is within five points of eight, and the gap is still wide', () => {
+    // At six individuals the overfitting comes from the pool, not from the
+    // size of the network: a single line fitted to six is already 16 points
+    // better on them than on the test set.
     const eight = mean(gap({}).map((x) => x.test))
-    expect(mean(gap({ hidden: 2 }).map((x) => x.test))).toBeGreaterThanOrEqual(eight - 0.5)
-    expect(mean(gap({ hidden: 3 }).map((x) => x.test))).toBeGreaterThanOrEqual(eight - 0.5)
+    for (const hidden of [0, 2, 3]) {
+      const r = gap({ hidden })
+      expect(Math.abs(mean(r.map((x) => x.test)) - eight)).toBeLessThanOrEqual(5)
+      expect(mean(r.map((x) => x.train - x.test))).toBeGreaterThanOrEqual(8)
+    }
   })
 
   it('a larger pool shrinks the gap, and a stream closes it: training and test within 3 points', () => {
-    const twelve = mean(gap({}).map((x) => x.train - x.test))
+    const six = mean(gap({}).map((x) => x.train - x.test))
     const sixty = mean(gap({ settings: { poolSize: 60 } }).map((x) => x.train - x.test))
-    expect(sixty).toBeLessThan(twelve - 3)
+    expect(sixty).toBeLessThan(six - 3)
     const stream = gap({ settings: { source: 'stream' } })
     expect(Math.abs(mean(stream.map((x) => x.train - x.test)))).toBeLessThanOrEqual(3)
   })

@@ -382,12 +382,11 @@ export const LABS = [
     handout: 'pattern_recognition/fish_lab/fish_lab.md',
     report: 'pattern_recognition/fish_lab/fish_lab_report.docx',
     /**
-     * Built 2026-10-04 with no handout. The handout is written after Jon's
-     * walk-through, from docs/M07_AS_BUILT_NOTES.md, so the claims below are
-     * what the SCENE makes true — what the handout may assert — and the
-     * handout should assert nothing it cannot find here.
+     * Built 2026-10-04 with no handout; the handout was written 2026-10-05,
+     * after Jon's walk-through, from docs/M07_AS_BUILT_NOTES.md. The claims
+     * below are what the SCENE makes true, and the handout asserts nothing it
+     * cannot find here.
      */
-    handoutPending: true,
 
     retired: [
       { term: /\bepochs?\b/gi, why: 'the scene counts encounters, and encounters per individual in a pool' },
@@ -467,8 +466,8 @@ export const LABS = [
       { says: 'Part 4: and Distance from the ideal strength does nothing for the fruit', test: 'a built-in receptor is a bet on one problem' },
       { says: 'Part 4: fixed at random, accuracy rises with the size of the layer, and sparse does at least as well', test: 'fixed at random: accuracy rises with the size of the layer' },
       { says: 'Part 4: passing the error back, two hidden units cannot do the island and six do in most seeds', test: 'two hidden units cannot; six reach 95% in most seeds' },
-      { says: 'Part 5: twelve individuals and eight hidden units leave training about ten points ahead of the test set after 5,000 encounters', test: 'training accuracy runs about ten points ahead of the test set' },
-      { says: 'Part 5: with two or three hidden units the test set does at least as well', test: 'with two or three hidden units, test accuracy is at least as high as with eight' },
+      { says: 'Part 5: six individuals and eight hidden units leave training well ahead of the test set after 5,000 encounters', test: 'training accuracy runs well ahead of the test set' },
+      { says: 'Part 5: fewer hidden units change little, because the overfitting comes from the smallness of the pool', test: 'fewer hidden units change little' },
       { says: 'Part 5: a larger pool shrinks the gap and a stream closes it', test: 'a larger pool shrinks the gap, and a stream closes it' },
       { says: 'Part 5: trained near only, the fish misses far eels and does not flee far suckers', test: 'trained near only: near test at least 90%; far eels are missed' },
       { says: 'Part 5: learning from every distance fixes it', test: 'learn from every distance: far test at least 85%' },

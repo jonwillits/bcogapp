@@ -46,7 +46,7 @@ describe('the seven scenarios', () => {
     expect(load('fruit').route).toBe('eat')
     expect(load('island').route).toBe('eat')
     const pool = load('pool')
-    expect(pool.pool.length).toBe(12)
+    expect(pool.pool.length).toBe(6)
     expect(pool.brain.circuit.interneurons.length).toBe(8)
     expect(pool.brain.settings.hidden).toBe('pass-back')
     const down = load('downstream')
@@ -168,8 +168,8 @@ describe('the draws are balanced', () => {
 describe('where the encounters come from', () => {
   it('a pool holds a fixed number of individuals, each with its own smell, met again and again', () => {
     const w = new FishWorld(8, scenarioByKey('pool'))
-    expect(w.pool.length).toBe(12)
-    expect(w.pool.filter((p) => KINDS[p.kind].happens).length).toBe(6)
+    expect(w.pool.length).toBe(6)
+    expect(w.pool.filter((p) => KINDS[p.kind].happens).length).toBe(3)
     const smells = JSON.stringify(w.pool.map((p) => p.smell))
     const seen = new Map<number, [number, number][]>()
     for (let i = 0; i < 1200; i++) {
@@ -179,8 +179,8 @@ describe('where the encounters come from', () => {
       seen.get(e.individual)!.push([e.x1, e.x2])
     }
     expect(JSON.stringify(w.pool.map((p) => p.smell))).toBe(smells)
-    expect(seen.size).toBe(12)
-    expect(w.meetingsPerIndividual).toBeCloseTo(100, 6)
+    expect(seen.size).toBe(6)
+    expect(w.meetingsPerIndividual).toBeCloseTo(200, 6)
     // Each sniff of one individual is its own smell plus a small jitter, far less than the kind's spread.
     for (const [who, sniffs] of seen) {
       const typical = w.pool[who].smell
@@ -341,6 +341,22 @@ describe('the chemistry', () => {
     expect(criterionShift({ arousal: 1, satiety: 0.1 }, 'dart').total).toBeGreaterThan(0)
     expect(criterionShift({ arousal: 1, satiety: 1 }, 'dart').total).toBe(0)
     expect(criterionShift({ arousal: 1, satiety: 0.1 }, 'eat').total).toBeLessThan(0)
+  })
+})
+
+describe('going downstream', () => {
+  it('switches learning off and changes no weight; going back upstream leaves learning as it is', () => {
+    const w = new FishWorld(4, scenarioByKey('downstream'), { learning: { on: true } })
+    w.run(300)
+    const before = wiringSignature(w.brain.circuit)
+    w.moveTo('far')
+    expect(w.settings.distance).toBe('far')
+    expect(w.brain.settings.on).toBe(false)
+    w.run(300)
+    expect(wiringSignature(w.brain.circuit)).toBe(before)
+    w.moveTo('near')
+    expect(w.settings.distance).toBe('near')
+    expect(w.brain.settings.on).toBe(false)
   })
 })
 

@@ -180,13 +180,13 @@ it('crib: what the panels should read', () => {
     })
   for (const n of [1000, 3000, 5000, 10000]) {
     const r = pool({}, n)
-    say(`  12 individuals, 8 hidden, after ${n}: training ${range(r.map((x) => x[0]))}%, test ${range(r.map((x) => x[1]))}%, gap ${f(mean(r.map((x) => x[0] - x[1])))} points; each seed training/test ${r.map((x) => `${f(x[0])}/${f(x[1])}`).join(' ')}; ${f(r[0][2])} meetings per individual`)
+    say(`  6 individuals, 8 hidden, after ${n}: training ${range(r.map((x) => x[0]))}%, test ${range(r.map((x) => x[1]))}%, gap ${f(mean(r.map((x) => x[0] - x[1])))} points; each seed training/test ${r.map((x) => `${f(x[0])}/${f(x[1])}`).join(' ')}; ${f(r[0][2])} encounters per individual`)
   }
   for (const hidden of [0, 2, 3]) {
     const r = pool({ hidden })
-    say(`  12 individuals, ${hidden} hidden, after 5000: training ${range(r.map((x) => x[0]))}%, test ${range(r.map((x) => x[1]))}%, gap ${f(mean(r.map((x) => x[0] - x[1])))}`)
+    say(`  6 individuals, ${hidden} hidden, after 5000: training ${range(r.map((x) => x[0]))}%, test ${range(r.map((x) => x[1]))}%, gap ${f(mean(r.map((x) => x[0] - x[1])))}`)
   }
-  for (const poolSize of [6, 24, 60]) {
+  for (const poolSize of [12, 24, 60]) {
     const r = pool({ settings: { poolSize } })
     say(`  ${poolSize} individuals, 8 hidden, after 5000: training ${range(r.map((x) => x[0]))}%, test ${range(r.map((x) => x[1]))}%, gap ${f(mean(r.map((x) => x[0] - x[1])))}`)
   }

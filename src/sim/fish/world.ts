@@ -396,6 +396,17 @@ export class FishWorld {
     this.version++
   }
 
+  /**
+   * *Go downstream* and *Go back upstream*. Going downstream switches
+   * learning off: the point of the trip is what the fish learned upstream
+   * does there, and a fish left learning relearns in about a hundred
+   * encounters and hides it. Learning can be switched back on downstream.
+   */
+  moveTo(where: 'near' | 'far'): void {
+    if (where === 'far') this.brain.settings.on = false
+    this.set({ distance: where })
+  }
+
   /** *An eel comes back*: the closer's third phase. The next thing upstream is an eel. */
   eelReturns(): void {
     this.dropPending()
