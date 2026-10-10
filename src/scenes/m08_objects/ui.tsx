@@ -1,5 +1,6 @@
 import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
 import { glimpseSummary, type GlimpseRecord } from '../../sim/objects/trials'
+import { Note } from '../m06_brain/ui'
 
 /**
  * Small shared pieces for the five tabs. Lab 6's rule holds: selection
