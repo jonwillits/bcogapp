@@ -22,7 +22,7 @@ The app is **not** a grab-bag of independent mini-apps. Most of its interactive 
 
 This is implemented as **one simulation engine, parameterized by evolutionary stage** — the same creature / sensor / nervous-system / environment framework, configured per module for which body plan, sensors, circuits, and learning rules are enabled. We build the machinery once and turn features on as the course advances, rather than rebuilding a creature each week.
 
-Around that spine sit **satellite scenes** that reuse the shared shell (camera, control panels, plots) but aren't part of the creature: the **M3** 2D neuron (ion channels, action potentials, voltage plots), the **M6** labeled-brain flythrough (may embed in the creature or stand alone), and the more abstract **M12** planning, **M13** language-structure, and **M14** symbols-vs-statistics demos.
+Around that spine sit **satellite scenes** that reuse the shared shell (camera, control panels, plots) but aren't part of the creature: the **M3** 2D neuron (ion channels, action potentials, voltage plots), the **M6** brains scene (an identification game, a stylized brain model, a tree and a bench; built 2026-09-27), the **M8** objects scene (built 2026-10-10: trained deep networks shipped as weights and run in the browser by a runtime of the app's own, with the student tested first and the network second on the same images; the creature spine resumes in a later module), and the more abstract **M12** planning, **M13** language-structure, and **M14** symbols-vs-statistics demos.
 
 **Vocabulary is chosen for the whole arc, not one module.** Because the same sensor→actuator map *becomes* a neural network in M4/M5/M7, the seam is the expensive place to change words — so M1's terms are picked to survive it:
 

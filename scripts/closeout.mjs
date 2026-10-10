@@ -58,7 +58,16 @@ head('1. The app')
 
 const tests = run('npm', ['run', 'test'])
 const testLine = (tests.out.match(/Tests\s+.*/) ?? ['(no summary)'])[0].trim()
-tests.code === 0 ? ok(`tests pass - ${testLine}`) : bad(`tests FAILED - ${testLine}`)
+if (tests.code === 0) ok(`tests pass - ${testLine}`)
+else {
+  bad(`tests FAILED - ${testLine}`)
+  // Name them: a summary line alone has sent people hunting through a 500-test suite.
+  tests.out
+    .split('\n')
+    .filter((l) => /^\s*(×|✗)|^ FAIL /.test(l))
+    .slice(0, 8)
+    .forEach((l) => console.log(`        ${l.trim()}`))
+}
 
 const build = run('npm', ['run', 'build'])
 if (build.code === 0) ok('production build clean')

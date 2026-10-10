@@ -87,8 +87,10 @@ it('crib: readout d′ per condition', () => {
   }
   for (const [k, v] of Object.entries(summary)) {
     const s = [...v].sort((a, b) => a - b)
-    console.log(`${k}: median ${s[Math.floor(s.length / 2)].toFixed(2)}, range ${s[0].toFixed(2)} to ${s[s.length - 1].toFixed(2)} (n = ${s.length})`)
+    console.log(`m08 · readout ${k}: median ${s[Math.floor(s.length / 2)].toFixed(2)}, range ${s[0].toFixed(2)} to ${s[s.length - 1].toFixed(2)} (n = ${s.length})`)
   }
   // Test views per condition, for the record.
-  for (const c of CONDITIONS) console.log(`${c}: ${TEST_VIEWS[c].map((v) => v.id).join(' ')}`)
+  for (const c of CONDITIONS) console.log(`m08 · test views, ${c}: ${TEST_VIEWS[c].map((v) => v.id).join(' ')}`)
+  console.log('m08 · the glimpse: each test panel prints Glimpses shown with mean and range; 200 to 220 ms at 60 Hz')
+  console.log('m08 · by eye: feature maps blue-white on dark, gray renders on mid-gray, dim photographs on the dark panel')
 })

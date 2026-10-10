@@ -487,7 +487,7 @@ export const LABS = [
     ],
 
     crib: 'crib: what the panels should read',
-  },,
+  },
   {
     id: 'm08-objects',
     name: 'Lab 8 — Does It Fail Where We Fail?',
@@ -549,6 +549,6 @@ export const LABS = [
       { says: 'feature maps, gray renders and grayscale photographs are legible on the dark theme', test: null },
     ],
 
-    crib: null,
+    crib: 'crib: readout',
   },
 ]
