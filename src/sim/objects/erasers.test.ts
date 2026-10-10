@@ -10,7 +10,7 @@ import { strokeLength, type Drawing } from './raster'
  * strokes and removes the same share.
  */
 interface Case { category: string; strokes: Drawing; joints: [number, number, string][]; erased: Record<string, { strokes: Drawing; removed: number; half: number; length: number }> }
-const { levels, cases } = fixtures as { levels: number[]; cases: Case[] }
+const { levels, cases } = fixtures as unknown as { levels: number[]; cases: Case[] }
 
 describe('the erasers agree with Python', () => {
   it('finds the same joints', () => {

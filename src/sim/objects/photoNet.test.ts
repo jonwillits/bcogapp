@@ -18,7 +18,7 @@ interface Case { file: string; category: string; probs: number[]; top: number; p
 const PHOTOS = join(__dirname, '..', '..', '..', 'public', 'm08', 'photos')
 const image = (file: string) => decodeGrayPng(readFileSync(join(PHOTOS, file))).data
 
-const fixtures = [standard, noise, blur] as { model: string; cases: Case[] }[]
+const fixtures = [standard, noise, blur] as unknown as { model: string; cases: Case[] }[]
 
 describe.each(fixtures)('$model runs here as it ran in Python', ({ model: name, cases }) => {
   const model = loadShippedModel(name)

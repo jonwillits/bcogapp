@@ -110,3 +110,42 @@ export function strokeLength(strokes: Drawing): number {
   for (const s of strokes) for (let k = 0; k < s[0].length - 1; k++) total += Math.sqrt(((s[0][k + 1] - s[0][k]) * (s[0][k + 1] - s[0][k])) + ((s[1][k + 1] - s[1][k]) * (s[1][k + 1] - s[1][k])))
   return total
 }
+
+/** The photo networks' resolution, for a drawing shown to them. */
+export const PHOTO_SIZE = 160
+export const PHOTO_MARGIN = 12.0
+export const PHOTO_RADIUS = 2.0
+
+/**
+ * A drawing rendered as a line drawing for the photo networks: black
+ * strokes about 4 px wide on white, at their resolution. Shared line for
+ * line with `drawing_as_photo` in `training/m08/measure_photo.py`, which
+ * scored the held-out drawings the Closer's table prints.
+ */
+export function rasterizeAsPhoto(strokes: Drawing, size = PHOTO_SIZE): Float32Array {
+  const scale = (size - 2 * PHOTO_MARGIN) / 255.0
+  const img = new Float32Array(size * size).fill(1)
+  const r2 = PHOTO_RADIUS * PHOTO_RADIUS
+  for (const s of strokes) {
+    const xs = s[0], ys = s[1]
+    const n = xs.length
+    for (let k = 0; k < Math.max(n - 1, 1); k++) {
+      const ax = xs[k] * scale + PHOTO_MARGIN, ay = ys[k] * scale + PHOTO_MARGIN
+      const bx = xs[Math.min(k + 1, n - 1)] * scale + PHOTO_MARGIN, by = ys[Math.min(k + 1, n - 1)] * scale + PHOTO_MARGIN
+      const loX = Math.max(0, Math.trunc(Math.min(ax, bx) - 3)), hiX = Math.min(size - 1, Math.trunc(Math.max(ax, bx) + 3))
+      const loY = Math.max(0, Math.trunc(Math.min(ay, by) - 3)), hiY = Math.min(size - 1, Math.trunc(Math.max(ay, by) + 3))
+      const dx = bx - ax, dy = by - ay
+      const l2 = dx * dx + dy * dy
+      for (let i = loY; i <= hiY; i++) {
+        const py = i + 0.5
+        for (let j = loX; j <= hiX; j++) {
+          const px = j + 0.5
+          const t = l2 === 0 ? 0 : Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / l2))
+          const ex = px - (ax + t * dx), ey = py - (ay + t * dy)
+          if (ex * ex + ey * ey <= r2) img[i * size + j] = 0
+        }
+      }
+    }
+  }
+  return img
+}

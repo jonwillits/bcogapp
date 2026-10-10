@@ -27,7 +27,11 @@
 "title": "Sikorsky H-3 Sea King Cockpit",
 "page": "https://www.flickr.com/photos/danramarch/6183243296",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Fixed-wing aircraft",
+"Vehicle"
+]
 },
 {
 "file": "airplane/5b6e24f2807b6a09.png",
@@ -37,7 +41,12 @@
 "title": "MiG-3 flies over the battle",
 "page": "https://www.flickr.com/photos/panzercombatii/8961944517",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Aircraft",
+"Fixed-wing aircraft",
+"Plant"
+]
 },
 {
 "file": "airplane/62cabe96a5c886c8.png",
@@ -47,7 +56,12 @@
 "title": "Spitfire",
 "page": "https://www.flickr.com/photos/davehamster/531897329",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"/m/01bqvp",
+"Aircraft",
+"Fixed-wing aircraft"
+]
 },
 {
 "file": "airplane/77e5285ad84f72a6.png",
@@ -57,7 +71,12 @@
 "title": "Douglas A-4 Skyhawk - USS Intrepid",
 "page": "https://www.flickr.com/photos/jlascar/7181691170",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Aircraft",
+"Fixed-wing aircraft",
+"Vehicle"
+]
 },
 {
 "file": "airplane/31a53a582e278b2f.png",
@@ -67,7 +86,12 @@
 "title": "Museu da TAM - S\u00e3o Carlos",
 "page": "https://www.flickr.com/photos/carlosluzz/5482032987",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Aircraft",
+"Fixed-wing aircraft",
+"Vehicle"
+]
 },
 {
 "file": "airplane/23a64316ca708bdc.png",
@@ -77,7 +101,12 @@
 "title": "Piper PA31 Navajo",
 "page": "https://www.flickr.com/photos/husseinabdallah/3357613229",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Aircraft",
+"Fixed-wing aircraft",
+"Vehicle"
+]
 },
 {
 "file": "airplane/149be220c10e5b7f.png",
@@ -87,7 +116,12 @@
 "title": "Thunderbirds Air Show 2014",
 "page": "https://www.flickr.com/photos/kennejima/15738578639",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Aircraft",
+"Fixed-wing aircraft",
+"Vehicle"
+]
 },
 {
 "file": "airplane/3766d90b31073e17.png",
@@ -97,7 +131,12 @@
 "title": "29+09 F-104F Starfighter Gate guard Jever",
 "page": "https://www.flickr.com/photos/13722921@N06/3621409895",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Aircraft",
+"Fixed-wing aircraft",
+"Vehicle"
+]
 },
 {
 "file": "airplane/73d6f39982fdc844.png",
@@ -107,7 +146,15 @@
 "title": "ScreenShot02",
 "page": "https://www.flickr.com/photos/101125222@N02/16487711035/",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Aircraft",
+"Car",
+"Fixed-wing aircraft",
+"Land vehicle",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "airplane/1ebfa61aecf7c8bc.png",
@@ -117,7 +164,12 @@
 "title": "Cessna Citation X - N299CX - Gears Up - Wells Fargo Bank Na Trustee Corporate Jet - Waukegan Regional Airport",
 "page": "https://www.flickr.com/photos/tncountryfan/7623527948",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Aircraft",
+"Fixed-wing aircraft",
+"Vehicle"
+]
 },
 {
 "file": "airplane/19e09fdd5b16a212.png",
@@ -127,7 +179,13 @@
 "title": "Spirit of St Louis",
 "page": "https://www.flickr.com/photos/cmichel67/16721724978",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Aircraft",
+"Auto part",
+"Fixed-wing aircraft",
+"Vehicle"
+]
 },
 {
 "file": "airplane/297c7a3abf85326c.png",
@@ -137,7 +195,17 @@
 "title": "POTUS.DSC_2880.6.1.12",
 "page": "https://www.flickr.com/photos/joebielawa/7317201322",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"/m/015zzv",
+"/m/01g5v",
+"/m/05czz6l",
+"/m/09cjl",
+"Aircraft",
+"Building",
+"Fixed-wing aircraft",
+"Vehicle"
+]
 },
 {
 "file": "bear/ebbb4c6127e02658.png",
@@ -147,7 +215,12 @@
 "title": "Black bear",
 "page": "https://www.flickr.com/photos/californiadfg/14920793105",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Bear",
+"Carnivore"
+]
 },
 {
 "file": "bear/07e64bb137734dbf.png",
@@ -157,7 +230,11 @@
 "title": "Laos-319",
 "page": "https://www.flickr.com/photos/nickhubbard/14571311755",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Bear"
+]
 },
 {
 "file": "bear/00424836a765c888.png",
@@ -167,7 +244,13 @@
 "title": "Chilling bear",
 "page": "https://www.flickr.com/photos/blmurch/315194901",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bear",
+"Carnivore",
+"Mammal",
+"Tree"
+]
 },
 {
 "file": "bear/e6be4b1bac13fd3b.png",
@@ -177,7 +260,12 @@
 "title": "DSC_3071",
 "page": "https://www.flickr.com/photos/psovart/1456337792",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Bear",
+"Carnivore"
+]
 },
 {
 "file": "bear/a46e8558b5aa552a.png",
@@ -187,7 +275,15 @@
 "title": "Otter",
 "page": "https://www.flickr.com/photos/grimmelm/1752720625",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"/m/0838f",
+"Bear",
+"Carnivore",
+"Marine mammal",
+"Otter",
+"Polar bear"
+]
 },
 {
 "file": "bear/d22120349e4b34d1.png",
@@ -197,7 +293,12 @@
 "title": "Bear",
 "page": "https://www.flickr.com/photos/39871249@N07/4355350360/in/album-72157622434753329/",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Bear",
+"Carnivore"
+]
 },
 {
 "file": "bear/9c240acc300ba1ab.png",
@@ -207,7 +308,16 @@
 "title": "Two wolverines at \u00c4ht\u00e4ri Zoo",
 "page": "https://www.flickr.com/photos/immortel/7961290336",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"/m/0184yy",
+"/m/01cbzq",
+"/m/02tcwp",
+"/m/0fkrk",
+"Bear",
+"Plant",
+"Tree"
+]
 },
 {
 "file": "bear/c67b5be02ad86f48.png",
@@ -217,7 +327,13 @@
 "title": "Melaka",
 "page": "https://www.flickr.com/photos/phalinn/16256211217",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Bear",
+"Carnivore",
+"Plant"
+]
 },
 {
 "file": "bear/ec34461c3b5cd072.png",
@@ -227,7 +343,14 @@
 "title": "Red Panda at Chester Zoo",
 "page": "https://www.flickr.com/photos/jjordan64816/9632649556",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"/m/083vt",
+"Bear",
+"Plant",
+"Raccoon",
+"Tree"
+]
 },
 {
 "file": "bear/3df2b6a098712fee.png",
@@ -237,7 +360,14 @@
 "title": "Calgary Zoo Alberta Canada Red Panda Ailurus Fulgens",
 "page": "https://www.flickr.com/photos/calgaryreviews/5317771307",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"Animal",
+"Bear",
+"Plant",
+"Raccoon",
+"Red panda"
+]
 },
 {
 "file": "bear/a95191730e75bfce.png",
@@ -247,7 +377,10 @@
 "title": "oh no, no bears up here, no siree bob",
 "page": "https://www.flickr.com/photos/terwilliger911/3717582265",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bear"
+]
 },
 {
 "file": "bear/8651bf53521f2efe.png",
@@ -257,7 +390,14 @@
 "title": "Linville - Grandfather Mountain - Wildlife Exhibits - Black Bear - Sticking Tongue Out",
 "page": "https://www.flickr.com/photos/jared422/15945201714",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Bear",
+"Carnivore",
+"Mammal",
+"Plant"
+]
 },
 {
 "file": "bicycle/deadb71534cb8465.png",
@@ -267,7 +407,13 @@
 "title": "Italian Post Cycle, Milan",
 "page": "https://www.flickr.com/photos/89649959@N00/2737177468",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bicycle",
+"Bicycle wheel",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "bicycle/56883813d19ec4fc.png",
@@ -277,7 +423,15 @@
 "title": "12",
 "page": "https://www.flickr.com/photos/42345348@N00/128258229",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bicycle",
+"Bicycle wheel",
+"Land vehicle",
+"Tire",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "bicycle/2c29eb397ae9ac3d.png",
@@ -287,7 +441,16 @@
 "title": "BMC Streetracer SR01 Shimano 105 Bike 043",
 "page": "https://www.flickr.com/photos/glorycycles/6881735574",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Auto part",
+"Bicycle",
+"Bicycle wheel",
+"Land vehicle",
+"Tire",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "bicycle/699d9ff34eba4ab4.png",
@@ -297,7 +460,15 @@
 "title": "Quantum Scooter",
 "page": "https://www.flickr.com/photos/faceme/7610437386",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bicycle",
+"Bicycle wheel",
+"Land vehicle",
+"Tire",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "bicycle/0c9e70186b841a3b.png",
@@ -307,7 +478,17 @@
 "title": "\u505c\u8eca\u5834",
 "page": "https://www.flickr.com/photos/pohan-camera/43739302/",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Auto part",
+"Bicycle",
+"Bicycle wheel",
+"Land vehicle",
+"Sports equipment",
+"Tire",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "bicycle/2ffa6e99db1b755c.png",
@@ -317,7 +498,11 @@
 "title": "Iced tea",
 "page": "https://www.flickr.com/photos/liste1/8451443178",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bicycle",
+"Vehicle"
+]
 },
 {
 "file": "bicycle/42732ba8b28fb607.png",
@@ -327,7 +512,17 @@
 "title": "Neil Pryde Alize Ultegra with Ultegra Tubeless Wheelset 049",
 "page": "https://www.flickr.com/photos/glorycycles/8393431138/",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Auto part",
+"Bicycle",
+"Bicycle wheel",
+"Land vehicle",
+"Sports equipment",
+"Tire",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "bicycle/23a53c2143e5dd16.png",
@@ -337,7 +532,11 @@
 "title": "Tour De Troit_15",
 "page": "https://www.flickr.com/photos/24912845@N07/15114879359",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bicycle",
+"Vehicle"
+]
 },
 {
 "file": "bicycle/d7a90c5b00ada5ae.png",
@@ -347,7 +546,17 @@
 "title": "Transporte",
 "page": "https://www.flickr.com/photos/subzonica/170853679",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"/m/06gfj",
+"Bicycle",
+"Bicycle wheel",
+"Land vehicle",
+"Mammal",
+"Tree",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "bicycle/c519c5f6b22a96b7.png",
@@ -357,7 +566,15 @@
 "title": "DSC_2988",
 "page": "https://www.flickr.com/photos/spilt-milk/20083404753",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bicycle",
+"Bicycle wheel",
+"Land vehicle",
+"Mobile phone",
+"Telephone",
+"Vehicle"
+]
 },
 {
 "file": "bicycle/9eee21c7154bc02a.png",
@@ -367,7 +584,19 @@
 "title": "Visby",
 "page": "https://www.flickr.com/photos/jcorrius/219426242",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Auto part",
+"Bicycle",
+"Bicycle wheel",
+"Building",
+"House",
+"Land vehicle",
+"Tire",
+"Vehicle",
+"Wheel",
+"Window"
+]
 },
 {
 "file": "bicycle/26e79167fc5e4444.png",
@@ -377,7 +606,17 @@
 "title": "n-DIVVY-large570 2",
 "page": "https://www.flickr.com/photos/24858199@N00/16946182271",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Auto part",
+"Bicycle",
+"Land vehicle",
+"Luggage and bags",
+"Sports equipment",
+"Tire",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "bird/3a3dcc7a620686f9.png",
@@ -387,7 +626,11 @@
 "title": "bird and lichen nest",
 "page": "https://www.flickr.com/photos/53768998@N02/4973999082",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Bird"
+]
 },
 {
 "file": "bird/7ced185b59f58279.png",
@@ -397,7 +640,11 @@
 "title": "\u30cf\u30b7\u30d3\u30ed\u30b3\u30a6",
 "page": "https://www.flickr.com/photos/ototadana/10146385683",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Bird"
+]
 },
 {
 "file": "bird/f274683259e275d1.png",
@@ -407,7 +654,10 @@
 "title": "Great Blue Heron at Vasona Lake Park",
 "page": "https://www.flickr.com/photos/ddebold/8374449251",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bird"
+]
 },
 {
 "file": "bird/3bb2c119d37cc364.png",
@@ -417,7 +667,10 @@
 "title": "Quail lookout",
 "page": "https://www.flickr.com/photos/amitp/7389478256",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bird"
+]
 },
 {
 "file": "bird/f7e89115e01bcc4b.png",
@@ -427,7 +680,11 @@
 "title": "Blue-gray gnatcatcher (Polioptila caerulea)",
 "page": "https://www.flickr.com/photos/acryptozoo/17245938561",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Bird"
+]
 },
 {
 "file": "bird/dd420c4d2a1efeaa.png",
@@ -437,7 +694,11 @@
 "title": "Who are you Aug 9",
 "page": "https://www.flickr.com/photos/the_colmans/7751170530",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Bird"
+]
 },
 {
 "file": "bird/2ab9a1df2d2b9316.png",
@@ -447,7 +708,12 @@
 "title": "I Missed The Intended Shot",
 "page": "https://www.flickr.com/photos/78428166@N00/12846902754",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Bird",
+"Plant"
+]
 },
 {
 "file": "bird/2c4cb53f64a26cfa.png",
@@ -457,7 +723,11 @@
 "title": "Marengo Ridge, Marengo IL",
 "page": "https://www.flickr.com/photos/23755697@N04/7461532170",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Bird"
+]
 },
 {
 "file": "bird/1943d9ae2ad4860b.png",
@@ -467,7 +737,10 @@
 "title": "puffin",
 "page": "https://www.flickr.com/photos/briangratwicke/9384127271",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bird"
+]
 },
 {
 "file": "bird/2fadb01375be16d6.png",
@@ -477,7 +750,12 @@
 "title": "IMG_0341",
 "page": "https://www.flickr.com/photos/purpleslog/136637555",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Bird",
+"Clothing"
+]
 },
 {
 "file": "bird/2ac755d0fca2422f.png",
@@ -487,7 +765,10 @@
 "title": "Swallow",
 "page": "https://www.flickr.com/photos/15016964@N02/20155167656",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"Bird"
+]
 },
 {
 "file": "bird/c68999c0ef281b55.png",
@@ -497,7 +778,12 @@
 "title": "Black Wheatear (Oenanthe leucura)",
 "page": "https://www.flickr.com/photos/sussexbirder/8785361568",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Bird",
+"Plant"
+]
 },
 {
 "file": "boat/699e1d37dbeb7adf.png",
@@ -507,7 +793,12 @@
 "title": "Hout Bay",
 "page": "https://www.flickr.com/photos/graeme/4181988789",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Boat",
+"Vehicle",
+"Watercraft"
+]
 },
 {
 "file": "boat/32dc3a52824337be.png",
@@ -517,7 +808,12 @@
 "title": "Stand up paddling in the Columbia River Gorge",
 "page": "https://www.flickr.com/photos/rrbill/16763023312",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Boat",
+"Vehicle",
+"Watercraft"
+]
 },
 {
 "file": "boat/f6e5d52810afa0c9.png",
@@ -527,7 +823,14 @@
 "title": "The River_v2",
 "page": "https://www.flickr.com/photos/newbobolix/8607533812/",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Boat",
+"Plant",
+"Tree",
+"Vehicle",
+"Watercraft"
+]
 },
 {
 "file": "boat/a46ade0832809059.png",
@@ -537,7 +840,11 @@
 "title": "chilling out in the muddy water.",
 "page": "https://www.flickr.com/photos/iamagenious/397416626",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Boat",
+"Vehicle"
+]
 },
 {
 "file": "boat/26a042130203c133.png",
@@ -547,7 +854,12 @@
 "title": "Camden, Maine",
 "page": "https://www.flickr.com/photos/librarygroover/7832473688",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Boat",
+"Vehicle",
+"Watercraft"
+]
 },
 {
 "file": "boat/c45eac5f8f187b84.png",
@@ -557,7 +869,12 @@
 "title": "Seaview Marina at dawn",
 "page": "https://www.flickr.com/photos/hell28k/5591582448",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Boat",
+"Vehicle",
+"Watercraft"
+]
 },
 {
 "file": "boat/0418d2f7d2e728fa.png",
@@ -567,7 +884,12 @@
 "title": "Islas DS1",
 "page": "https://www.flickr.com/photos/grassrootsgroundswell/11859014313",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Boat",
+"Vehicle",
+"Watercraft"
+]
 },
 {
 "file": "boat/191d9392f9a554ac.png",
@@ -577,7 +899,12 @@
 "title": "Helford Boats",
 "page": "https://www.flickr.com/photos/wapster/3829771185",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Boat",
+"Vehicle",
+"Watercraft"
+]
 },
 {
 "file": "boat/29cc78187d11d835.png",
@@ -587,7 +914,12 @@
 "title": "#lighthouse #tugboat #sanfrancisco #bay",
 "page": "https://www.flickr.com/photos/96223380@N02/12727220474",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Boat",
+"Vehicle",
+"Watercraft"
+]
 },
 {
 "file": "boat/2b24680922891515.png",
@@ -597,7 +929,12 @@
 "title": "Doha harbour #qatar #doha #harbour #boat #fishing #fishing_trip #morning #day #corniche #instaqatar #instadoha #instaday #instagram #instacorniche #instafishing #surfcasting #sunset",
 "page": "https://www.flickr.com/photos/daly3d/16461865036",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Boat",
+"Vehicle",
+"Watercraft"
+]
 },
 {
 "file": "boat/2b565f961a6bd662.png",
@@ -607,7 +944,12 @@
 "title": "The Edna G",
 "page": "https://www.flickr.com/photos/chefranden/15299010201",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Boat",
+"Vehicle",
+"Watercraft"
+]
 },
 {
 "file": "boat/8a25088f828cb3a8.png",
@@ -617,7 +959,12 @@
 "title": "boats docked at the jetty",
 "page": "https://www.flickr.com/photos/wildlife_encounters/16888512970",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Boat",
+"Vehicle",
+"Watercraft"
+]
 },
 {
 "file": "bottle/a254c0504d7ec5fe.png",
@@ -627,7 +974,12 @@
 "title": "Bourgogne Pinot Noir Couvent des Jacobins, Louis Jadot",
 "page": "https://www.flickr.com/photos/farehamwine/15221173971",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bottle",
+"Drink",
+"Wine"
+]
 },
 {
 "file": "bottle/7b7fdcfc6d020391.png",
@@ -637,7 +989,12 @@
 "title": "Coca Cola Signs",
 "page": "https://www.flickr.com/photos/85638163@N00/7171046091",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "validation"
+"openImagesSplit": "validation",
+"labels": [
+"Bottle",
+"Drink",
+"Poster"
+]
 },
 {
 "file": "bottle/14562a4aadd85416.png",
@@ -647,7 +1004,11 @@
 "title": "Bottle of Jack Daniel's Tennessee Whiskey",
 "page": "https://www.flickr.com/photos/bensutherland/12586531305",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bottle",
+"Drink"
+]
 },
 {
 "file": "bottle/a2b0beeaca80fee6.png",
@@ -657,7 +1018,13 @@
 "title": "Guilty pleasures de oferta no #Carreful. M\u00e1goa non ter comprado m\u00e1is.",
 "page": "https://www.flickr.com/photos/modesto/15223871154",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Beer",
+"Bottle",
+"Drink",
+"Tin can"
+]
 },
 {
 "file": "bottle/f59a886d2bd0db5d.png",
@@ -667,7 +1034,10 @@
 "title": "I think this is Japanese for very yummy!",
 "page": "https://www.flickr.com/photos/grahamhills/8576634975",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bottle"
+]
 },
 {
 "file": "bottle/483ec612d7062a27.png",
@@ -677,7 +1047,11 @@
 "title": "Pimenta",
 "page": "https://www.flickr.com/photos/conceptum/6247912110",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bottle",
+"Food"
+]
 },
 {
 "file": "bottle/34455e60f461fe2f.png",
@@ -687,7 +1061,13 @@
 "title": "Mississippi Mud Black & Tan",
 "page": "https://www.flickr.com/photos/brostad/2902533244",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bottle",
+"Drink",
+"Food",
+"Wine"
+]
 },
 {
 "file": "bottle/8108e227baef42c3.png",
@@ -697,7 +1077,11 @@
 "title": "film shoot, 10.03.10",
 "page": "https://www.flickr.com/photos/buenosaurus/5053620238",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bottle",
+"Drink"
+]
 },
 {
 "file": "bottle/914dd48f72aaec27.png",
@@ -707,7 +1091,12 @@
 "title": "Unusual Beer",
 "page": "https://www.flickr.com/photos/iluvcocacola/15791526671",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Beer",
+"Bottle",
+"Drink"
+]
 },
 {
 "file": "bottle/009d1c169f078c6a.png",
@@ -717,7 +1106,13 @@
 "title": "Blossa Gl\u00f6gg -  Spetsad med Cognac",
 "page": "https://www.flickr.com/photos/johanl/2073604595",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bottle",
+"Drink",
+"Food",
+"Wine"
+]
 },
 {
 "file": "bottle/9c7844034c8450ec.png",
@@ -727,7 +1122,11 @@
 "title": "Brewski Beer",
 "page": "https://www.flickr.com/photos/wagnertc/4799513899",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bottle",
+"Drink"
+]
 },
 {
 "file": "bottle/992c452c59ad82d9.png",
@@ -737,7 +1136,12 @@
 "title": "Southbrook 2004 'Poetica' Chardonnay",
 "page": "https://www.flickr.com/photos/ltdan/9188528974",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bottle",
+"Drink",
+"Wine"
+]
 },
 {
 "file": "car/7be4fb5a13d99f0a.png",
@@ -747,7 +1151,13 @@
 "title": "Team Corvette Racing - Corvette C6R",
 "page": "https://www.flickr.com/photos/davehamster/2604367691",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Car",
+"Land vehicle",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "car/d957dc4bb8a60fbd.png",
@@ -757,7 +1167,14 @@
 "title": "VW Passat CC",
 "page": "https://www.flickr.com/photos/51811543@N08/13598892984/",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "validation"
+"openImagesSplit": "validation",
+"labels": [
+"Building",
+"Car",
+"House",
+"Tire",
+"Wheel"
+]
 },
 {
 "file": "car/382c9d5ee86f7fc6.png",
@@ -767,7 +1184,12 @@
 "title": "P1150896",
 "page": "https://www.flickr.com/photos/seat850/6074250477",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Car",
+"Land vehicle",
+"Vehicle"
+]
 },
 {
 "file": "car/dde45aa37b5aeca6.png",
@@ -777,7 +1199,13 @@
 "title": "2011_12_20_Vegas-111-15",
 "page": "https://www.flickr.com/photos/moto_club4ag/6626336303",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Car",
+"Land vehicle",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "car/91ed9c9e47de7150.png",
@@ -787,7 +1215,14 @@
 "title": "Prior Design VW New Beetle GT3 Front bumper and Lip Splitter",
 "page": "https://www.flickr.com/photos/priordesignna/5267829415",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Auto part",
+"Car",
+"Land vehicle",
+"Vehicle",
+"Vehicle registration plate"
+]
 },
 {
 "file": "car/0ad44be9abdadfa2.png",
@@ -797,7 +1232,11 @@
 "title": "Toyota Hiace H10",
 "page": "https://www.flickr.com/photos/126433814@N04/16187921734",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Car",
+"Vehicle"
+]
 },
 {
 "file": "car/25210a1c66696366.png",
@@ -807,7 +1246,14 @@
 "title": "Untitled",
 "page": "https://www.flickr.com/photos/henryjose/6661113533",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Auto part",
+"Car",
+"Land vehicle",
+"Tree",
+"Vehicle"
+]
 },
 {
 "file": "car/6cf45753cde02514.png",
@@ -817,7 +1263,12 @@
 "title": "Datsun 180B SSS",
 "page": "https://www.flickr.com/photos/hugo90/4492166193",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Car",
+"Land vehicle",
+"Vehicle"
+]
 },
 {
 "file": "car/18702859d5a49135.png",
@@ -827,7 +1278,14 @@
 "title": "Dub Club Weekly Meet",
 "page": "https://www.flickr.com/photos/bedworth/8788376651",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Car",
+"Land vehicle",
+"Tree",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "car/8ab58d0fbe9ad717.png",
@@ -837,7 +1295,13 @@
 "title": "2015 Subaru WRX STI - Rear View Doors Open",
 "page": "https://www.flickr.com/photos/67205645@N08/12120731934",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Car",
+"Land vehicle",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "car/eaf4a405b74d3eb7.png",
@@ -847,7 +1311,12 @@
 "title": "1981 Caterham Super Seven",
 "page": "https://www.flickr.com/photos/daveseven/3448648284",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Car",
+"Land vehicle",
+"Vehicle"
+]
 },
 {
 "file": "car/7151884c7ff328a7.png",
@@ -857,7 +1326,15 @@
 "title": "1990 Ford Sierra 1.8 L",
 "page": "https://www.flickr.com/photos/92622665@N08/11966712045",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Auto part",
+"Car",
+"Land vehicle",
+"Tree",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "cat/98df113a4d34a660.png",
@@ -867,7 +1344,12 @@
 "title": "the stray",
 "page": "https://www.flickr.com/photos/shaunmalley/6328762267",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Carnivore",
+"Cat"
+]
 },
 {
 "file": "cat/deb76aeb60f5f9bf.png",
@@ -877,7 +1359,12 @@
 "title": "Little nice cat",
 "page": "https://www.flickr.com/photos/ctam/5728873450/",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Carnivore",
+"Cat"
+]
 },
 {
 "file": "cat/2f77377762014936.png",
@@ -887,7 +1374,11 @@
 "title": "Cat's eye closeup",
 "page": "https://www.flickr.com/photos/malfet/18866570441",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Cat"
+]
 },
 {
 "file": "cat/46a46b58dbf077d7.png",
@@ -897,7 +1388,12 @@
 "title": "Installing and testing the cat shelves.",
 "page": "https://www.flickr.com/photos/rberteig/14103256892",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Carnivore",
+"Cat"
+]
 },
 {
 "file": "cat/e50469bef942b853.png",
@@ -907,7 +1403,13 @@
 "title": "View from Xerri il-Bukkett terrace",
 "page": "https://www.flickr.com/photos/donotlick/4229051556",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Carnivore",
+"Cat",
+"Houseplant"
+]
 },
 {
 "file": "cat/434379afd2ee9b7a.png",
@@ -917,7 +1419,12 @@
 "title": "mwtf?",
 "page": "https://www.flickr.com/photos/altemark/4420491659",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Carnivore",
+"Cat"
+]
 },
 {
 "file": "cat/5f16ec819b7ef14e.png",
@@ -927,7 +1434,11 @@
 "title": "Table leg.",
 "page": "https://www.flickr.com/photos/50066720@N03/6714609167/",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Cat"
+]
 },
 {
 "file": "cat/2e781fb1706b1e27.png",
@@ -937,7 +1448,12 @@
 "title": "Mochi",
 "page": "https://www.flickr.com/photos/asrusch/12981329574",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Carnivore",
+"Cat"
+]
 },
 {
 "file": "cat/9b43acfe9a6cb4a7.png",
@@ -947,7 +1463,12 @@
 "title": "Checking Out",
 "page": "https://www.flickr.com/photos/bontempscharly/6035742647",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Carnivore",
+"Cat"
+]
 },
 {
 "file": "cat/93604268e6d6389b.png",
@@ -957,7 +1478,13 @@
 "title": "Gesture059",
 "page": "https://www.flickr.com/photos/24709080@N05/3931315701",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Carnivore",
+"Cat",
+"Window"
+]
 },
 {
 "file": "cat/4e3d1613460f44a0.png",
@@ -967,7 +1494,12 @@
 "title": "Ginger finds some sun!",
 "page": "https://www.flickr.com/photos/rikkis_refuge/15942017203",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Carnivore",
+"Cat"
+]
 },
 {
 "file": "cat/4ae7db63286ad68c.png",
@@ -977,7 +1509,12 @@
 "title": "3 Oct 2005",
 "page": "https://www.flickr.com/photos/kluepfel/49017727",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Carnivore",
+"Cat"
+]
 },
 {
 "file": "chair/612d6ed7755ba374.png",
@@ -987,7 +1524,12 @@
 "title": "Weaving stick :-)",
 "page": "https://www.flickr.com/photos/tusnelda/3934562280",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Chair",
+"Furniture",
+"Plant"
+]
 },
 {
 "file": "chair/1389105914780d29.png",
@@ -997,7 +1539,21 @@
 "title": "Toronto, Canada",
 "page": "https://www.flickr.com/photos/ligthelm/19796609136",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bicycle",
+"Bicycle wheel",
+"Chair",
+"Flower",
+"Flowerpot",
+"Furniture",
+"Land vehicle",
+"Plant",
+"Sports equipment",
+"Tree",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "chair/c539279a1c12cdf7.png",
@@ -1007,7 +1563,20 @@
 "title": "Fabulous Airbnb in Ume\u00e5, my first outside the UK",
 "page": "https://www.flickr.com/photos/dumbledad/14448571463",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"/m/06ht1",
+"/m/083vt",
+"/m/09qqq",
+"Bowl",
+"Building",
+"Chair",
+"Desk",
+"Furniture",
+"Shelf",
+"Table",
+"Window"
+]
 },
 {
 "file": "chair/511bb848a55e5aa7.png",
@@ -1017,7 +1586,13 @@
 "title": "DSC_0093",
 "page": "https://www.flickr.com/photos/ci_polla/4430627478/",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Chair",
+"Furniture",
+"Table",
+"Wheel"
+]
 },
 {
 "file": "chair/4c6c743835dba9d2.png",
@@ -1027,7 +1602,11 @@
 "title": "Want: Rare Rattan/Metal Lounge Chair 50s saarinen eames era",
 "page": "https://www.flickr.com/photos/wicker-furniture/7166844034",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Chair",
+"Furniture"
+]
 },
 {
 "file": "chair/a36df09c4e738d88.png",
@@ -1037,7 +1616,13 @@
 "title": "IMG_3880",
 "page": "https://www.flickr.com/photos/tahini/14834962929",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Chair",
+"Furniture",
+"Kitchen & dining room table",
+"Table"
+]
 },
 {
 "file": "chair/a2ac0541d2dbda4f.png",
@@ -1047,7 +1632,11 @@
 "title": "20101118181",
 "page": "https://www.flickr.com/photos/canadian/5224232962",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Chair",
+"Furniture"
+]
 },
 {
 "file": "chair/01502d8690650f02.png",
@@ -1057,7 +1646,20 @@
 "title": "Spunky, Coco Puff's Sister, Under Scringy's Desk",
 "page": "https://www.flickr.com/photos/jeepersmedia/12946021655",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Carnivore",
+"Chair",
+"Chest of drawers",
+"Desk",
+"Dog",
+"Drawer",
+"Filing cabinet",
+"Furniture",
+"Nightstand",
+"Table"
+]
 },
 {
 "file": "chair/537a8b18120ca4dc.png",
@@ -1067,7 +1669,13 @@
 "title": "Dreamy",
 "page": "https://www.flickr.com/photos/29901781@N02/14560044344/",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Chair",
+"Furniture",
+"Kitchen & dining room table",
+"Table"
+]
 },
 {
 "file": "chair/e8239bedac2ea773.png",
@@ -1077,7 +1685,11 @@
 "title": "Untitled",
 "page": "https://www.flickr.com/photos/blprnt/19787945686",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Chair",
+"Furniture"
+]
 },
 {
 "file": "chair/6642affb6461d568.png",
@@ -1087,7 +1699,13 @@
 "title": "Interior of the 1938 Tube Stock",
 "page": "https://www.flickr.com/photos/raver_mikey/8719513224/",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Chair",
+"Land vehicle",
+"Train",
+"Vehicle"
+]
 },
 {
 "file": "chair/6d1d1e6d7bb36183.png",
@@ -1097,7 +1715,12 @@
 "title": "Todo listo para un mus",
 "page": "https://www.flickr.com/photos/1c11/15391716713",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Chair",
+"Furniture",
+"Table"
+]
 },
 {
 "file": "clock/6f719957009afbab.png",
@@ -1107,7 +1730,10 @@
 "title": "Clock",
 "page": "https://www.flickr.com/photos/blondinrikard/15015656068",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Clock"
+]
 },
 {
 "file": "clock/f7e67a46382556e4.png",
@@ -1117,7 +1743,14 @@
 "title": "Visiting the Logan County Museum",
 "page": "https://www.flickr.com/photos/tonitunes/18781890444",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Clock",
+"Furniture",
+"Pitcher (Container)",
+"Plate",
+"Tableware"
+]
 },
 {
 "file": "clock/ec20df9b97bfefe7.png",
@@ -1127,7 +1760,12 @@
 "title": "Clock Tower, Westminster",
 "page": "https://www.flickr.com/photos/ruthanddave/162559414",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Building",
+"Clock",
+"Tower"
+]
 },
 {
 "file": "clock/0f940ebc36b21a45.png",
@@ -1137,7 +1775,10 @@
 "title": "D\u00e9compte",
 "page": "https://www.flickr.com/photos/petit_louis/11116094593/",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Clock"
+]
 },
 {
 "file": "clock/a5633b0ee42e0a0e.png",
@@ -1147,7 +1788,10 @@
 "title": "Clock - 6",
 "page": "https://www.flickr.com/photos/solvencyiiwire/7960808622",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Clock"
+]
 },
 {
 "file": "clock/46e7afac805bb63c.png",
@@ -1157,7 +1801,11 @@
 "title": "NIMR 150a: Mechanical timer",
 "page": "https://www.flickr.com/photos/125989912@N08/16730613028",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Clock",
+"Watch"
+]
 },
 {
 "file": "clock/1d45dfc45c76a35e.png",
@@ -1167,7 +1815,10 @@
 "title": "P1030384.JPG",
 "page": "https://www.flickr.com/photos/hannahdonovan/3941563326",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Clock"
+]
 },
 {
 "file": "clock/0cc3481e7de9d718.png",
@@ -1177,7 +1828,10 @@
 "title": "9 April",
 "page": "https://www.flickr.com/photos/carolynwill/2401952338",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Clock"
+]
 },
 {
 "file": "clock/09e673e92ce6c813.png",
@@ -1187,7 +1841,11 @@
 "title": "R\u00e9veil Bayard Goldorak",
 "page": "https://www.flickr.com/photos/49531439@N02/7344442768",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Alarm clock",
+"Clock"
+]
 },
 {
 "file": "clock/00259130671bd32b.png",
@@ -1197,7 +1855,11 @@
 "title": "Trip to Canada",
 "page": "https://www.flickr.com/photos/yuko_okuy/9030267166",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Christmas tree",
+"Clock"
+]
 },
 {
 "file": "clock/efe250ff574899c8.png",
@@ -1207,7 +1869,10 @@
 "title": "Rust",
 "page": "https://www.flickr.com/photos/chuckthephotographer/2284900593",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Clock"
+]
 },
 {
 "file": "clock/ff495229e0faa009.png",
@@ -1217,7 +1882,10 @@
 "title": "Tudor Gatehouse @ St. James's Palace",
 "page": "https://www.flickr.com/photos/jojo-bean/2622650106",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Clock"
+]
 },
 {
 "file": "dog/cf8c153317f970b0.png",
@@ -1227,7 +1895,12 @@
 "title": "Carson outdoor pool goes to the dogs - FMWRC - US Army - 100910",
 "page": "https://www.flickr.com/photos/familymwr/4989889242",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Carnivore",
+"Dog"
+]
 },
 {
 "file": "dog/014d42d86cb091d8.png",
@@ -1237,7 +1910,11 @@
 "title": "0104_DSC_0324",
 "page": "https://www.flickr.com/photos/300tdorg/4218931442/",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Dog",
+"Tree"
+]
 },
 {
 "file": "dog/01546c53a9d6e90b.png",
@@ -1247,7 +1924,10 @@
 "title": "DSCF6637",
 "page": "https://www.flickr.com/photos/9334511@N06/15309922000",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Dog"
+]
 },
 {
 "file": "dog/d0a67c4b313808cd.png",
@@ -1257,7 +1937,11 @@
 "title": "Attack!",
 "page": "https://www.flickr.com/photos/paulkehrer/441383004",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "validation"
+"openImagesSplit": "validation",
+"labels": [
+"/m/019sc",
+"Dog"
+]
 },
 {
 "file": "dog/5e0d29b881948fd8.png",
@@ -1267,7 +1951,13 @@
 "title": "Dog waiting... around tokyo",
 "page": "https://www.flickr.com/photos/br1dotcom/16187528745",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Carnivore",
+"Clothing",
+"Dog"
+]
 },
 {
 "file": "dog/6f03412050cfd597.png",
@@ -1277,7 +1967,11 @@
 "title": "Nemo & Kira",
 "page": "https://www.flickr.com/photos/70253321@N00/12767688484",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Dog"
+]
 },
 {
 "file": "dog/c386ad3a488c3b48.png",
@@ -1287,7 +1981,12 @@
 "title": "Pals",
 "page": "https://www.flickr.com/photos/basykes/2106994301",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Carnivore",
+"Dog"
+]
 },
 {
 "file": "dog/8617dd5cd66db8e1.png",
@@ -1297,7 +1996,14 @@
 "title": "the gift - 6",
 "page": "https://www.flickr.com/photos/intangible/3573498090",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Ball (Object)",
+"Carnivore",
+"Dog",
+"Football"
+]
 },
 {
 "file": "dog/e77fc475836b0ea7.png",
@@ -1307,7 +2013,12 @@
 "title": "Nirvana delle Caserosse",
 "page": "https://www.flickr.com/photos/70253321@N00/15373616904",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Carnivore",
+"Dog"
+]
 },
 {
 "file": "dog/7a378e67add7a8fb.png",
@@ -1317,7 +2028,10 @@
 "title": "2011 shibapalooza 4",
 "page": "https://www.flickr.com/photos/_tar0_/5951815323",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"Dog"
+]
 },
 {
 "file": "dog/b2e2260f3612d258.png",
@@ -1327,7 +2041,11 @@
 "title": "dog-pictures",
 "page": "https://www.flickr.com/photos/kinjengsubmiter/4215824273",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"/m/0fkrk",
+"Dog"
+]
 },
 {
 "file": "dog/cea10d87a4693a0f.png",
@@ -1337,7 +2055,13 @@
 "title": "Untitled",
 "page": "https://www.flickr.com/photos/narace/4830350438",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"/m/01cbzq",
+"/m/09t49",
+"Dog",
+"Tree"
+]
 },
 {
 "file": "elephant/01dd166313ba7ca5.png",
@@ -1347,7 +2071,10 @@
 "title": "Taking a shower",
 "page": "https://www.flickr.com/photos/renemensen/6868821832",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Elephant"
+]
 },
 {
 "file": "elephant/09e1c56f60e73f89.png",
@@ -1357,7 +2084,10 @@
 "title": "Circus Renz in Egmond aan de Hoef",
 "page": "https://www.flickr.com/photos/faceme/4815295765",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Elephant"
+]
 },
 {
 "file": "elephant/d1644a1d5f385ac7.png",
@@ -1367,7 +2097,12 @@
 "title": "E\u0301le\u0301phants Nationalpark d'Addo South Africa",
 "page": "https://www.flickr.com/photos/wbayercom/14931199480",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Elephant",
+"Plant"
+]
 },
 {
 "file": "elephant/9b6ec0f67f99eb2c.png",
@@ -1377,7 +2112,12 @@
 "title": "Copenhagen 2014 - Zoo",
 "page": "https://www.flickr.com/photos/michaeljohnbutton/14059397127",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"/m/0838f",
+"Elephant",
+"Plant"
+]
 },
 {
 "file": "elephant/e1e680ee88c15db2.png",
@@ -1387,7 +2127,12 @@
 "title": "trunk over ele's face_1",
 "page": "https://www.flickr.com/photos/flowcomm/5637862526",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Elephant",
+"Tree"
+]
 },
 {
 "file": "elephant/066ed679c721bf70.png",
@@ -1397,7 +2142,11 @@
 "title": "Eli Back 2",
 "page": "https://www.flickr.com/photos/phoenstudio/9573090750",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Elephant",
+"Tree"
+]
 },
 {
 "file": "elephant/5361de8aa11ceb1b.png",
@@ -1407,7 +2156,12 @@
 "title": "Intimate elephants",
 "page": "https://www.flickr.com/photos/sarahbaker/211747442",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Elephant",
+"Tree"
+]
 },
 {
 "file": "elephant/4e14987369a6a233.png",
@@ -1417,7 +2171,13 @@
 "title": "0503 Ulusaba South Africa (116)",
 "page": "https://www.flickr.com/photos/tipsfortravellers/591041265",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"/m/0fkrk",
+"Elephant",
+"Plant",
+"Tree"
+]
 },
 {
 "file": "elephant/5a5a9396819e03ca.png",
@@ -1427,7 +2187,11 @@
 "title": "kai-mook meets Dumbo",
 "page": "https://www.flickr.com/photos/frank-wouters/3549256847",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Elephant"
+]
 },
 {
 "file": "elephant/d4f9ec037dc12d67.png",
@@ -1437,7 +2201,13 @@
 "title": "DSC_0555",
 "page": "https://www.flickr.com/photos/moon-dog/2476992956",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Elephant",
+"Plant",
+"Tree"
+]
 },
 {
 "file": "elephant/1d764afdadfa72ed.png",
@@ -1447,7 +2217,10 @@
 "title": "Asiatic Elephant",
 "page": "https://www.flickr.com/photos/sbalajiv/7627793734",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Elephant"
+]
 },
 {
 "file": "elephant/afeeca47fcae19f9.png",
@@ -1457,7 +2230,13 @@
 "title": "Speedboat Safari through Chobe National Park",
 "page": "https://www.flickr.com/photos/whatleydude/3799327300",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Animal",
+"Elephant",
+"Plant",
+"Tree"
+]
 },
 {
 "file": "keyboard/3db1a8c18f56bc36.png",
@@ -1467,7 +2246,14 @@
 "title": "My new desk layout",
 "page": "https://www.flickr.com/photos/pahudson/3638531099",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Clothing",
+"Computer keyboard",
+"Computer monitor",
+"Desk",
+"Office building"
+]
 },
 {
 "file": "keyboard/2409d5d183ffa37b.png",
@@ -1477,7 +2263,10 @@
 "title": "\u5144\u3061\u3083\u3093\u306bReudo\u306eBluetooth\u30ad\u30fc\u30dc\u30fc\u30c9\u3092\u8cb0\u3063\u305f\u306e\u3060\u3051\u3069\u3055\u3063\u305d\u304f\u4f7f\u3044\u65b9\u304c\u308f\u304b\u3089\u306a\u3044\u3002\u96fb\u6e90\u30dc\u30bf\u30f3\u3069\u3053\u3002",
 "page": "https://www.flickr.com/photos/busbong/5379895246",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"Computer keyboard"
+]
 },
 {
 "file": "keyboard/f213b2963c94394b.png",
@@ -1487,7 +2276,10 @@
 "title": "Day 266",
 "page": "https://www.flickr.com/photos/data_op/2878830565",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Computer keyboard"
+]
 },
 {
 "file": "keyboard/0619b059d30924a1.png",
@@ -1497,7 +2289,11 @@
 "title": "20120724-OSEC-LSC-0790",
 "page": "https://www.flickr.com/photos/usdagov/7644427706",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Computer keyboard",
+"Laptop"
+]
 },
 {
 "file": "keyboard/bb00fe08f620a367.png",
@@ -1507,7 +2303,10 @@
 "title": "#keyboard #gaming",
 "page": "https://www.flickr.com/photos/125803282@N02/16066582370",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Computer keyboard"
+]
 },
 {
 "file": "keyboard/4b32d278b78afe47.png",
@@ -1517,7 +2316,16 @@
 "title": "machm-it.org Mitgliederversammlung",
 "page": "https://www.flickr.com/photos/hagengraf/1231940214",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Baked goods",
+"Computer keyboard",
+"Computer monitor",
+"Cookie",
+"Food",
+"Snack",
+"Tableware"
+]
 },
 {
 "file": "keyboard/0ccb79fd4d110f6f.png",
@@ -1527,7 +2335,11 @@
 "title": "Pixel Art Characters at Berlin Mini Jam @King",
 "page": "https://www.flickr.com/photos/qubodup/15872185661",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Computer keyboard",
+"Laptop"
+]
 },
 {
 "file": "keyboard/02ebf26f70a588f3.png",
@@ -1537,7 +2349,11 @@
 "title": "quadra950",
 "page": "https://www.flickr.com/photos/sakadon/2227441417",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Computer keyboard",
+"Computer monitor"
+]
 },
 {
 "file": "keyboard/690bff46ccd78834.png",
@@ -1547,7 +2363,10 @@
 "title": "iPod nano",
 "page": "https://www.flickr.com/photos/yerahg/1449366397",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Computer keyboard"
+]
 },
 {
 "file": "keyboard/2ff863a20a99c5e8.png",
@@ -1557,7 +2376,10 @@
 "title": "ZBR_2964",
 "page": "https://www.flickr.com/photos/imaginecup/5927495634/",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Computer keyboard"
+]
 },
 {
 "file": "keyboard/9d4e9630fb6e6dd7.png",
@@ -1567,7 +2389,11 @@
 "title": "Macbook in progress",
 "page": "https://www.flickr.com/photos/caius/2941723520",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Computer keyboard",
+"Laptop"
+]
 },
 {
 "file": "keyboard/94095b30b5bbbdea.png",
@@ -1577,7 +2403,18 @@
 "title": "Desk",
 "page": "https://www.flickr.com/photos/jasoncartwright/13573658/in/pool-ourbbc",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Computer keyboard",
+"Corded phone",
+"Desk",
+"Furniture",
+"Laptop",
+"Office building",
+"Office supplies",
+"Table",
+"Telephone"
+]
 },
 {
 "file": "knife/04453c7b2a60dc3d.png",
@@ -1587,7 +2424,14 @@
 "title": "Ka Bar Becker BK-77 S30V steel",
 "page": "https://www.flickr.com/photos/51792270@N03/15812226889",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Dagger",
+"Kitchen knife",
+"Knife",
+"Tool",
+"Weapon"
+]
 },
 {
 "file": "knife/3d62d16299028c97.png",
@@ -1597,7 +2441,14 @@
 "title": "2011-09-01-010 Syntt\u00e4ritarjoilu",
 "page": "https://www.flickr.com/photos/88916251@N00/6103220577/",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Kitchen knife",
+"Knife",
+"Tableware",
+"Tool",
+"Weapon"
+]
 },
 {
 "file": "knife/24c73572fe4e6dac.png",
@@ -1607,7 +2458,11 @@
 "title": "Busse Bushwacker Mistress-11",
 "page": "https://www.flickr.com/photos/51792270@N03/19898499072",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Knife",
+"Weapon"
+]
 },
 {
 "file": "knife/131a31401b071bda.png",
@@ -1617,7 +2472,14 @@
 "title": "F Dick, J K Adams",
 "page": "https://www.flickr.com/photos/dinnerseries/14610264850",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Cutting board",
+"Food",
+"Kitchen knife",
+"Kitchen utensil",
+"Knife"
+]
 },
 {
 "file": "knife/97efc9772417aaef.png",
@@ -1627,7 +2489,11 @@
 "title": "Busse Team Gemini Light Brigade TGLB",
 "page": "https://www.flickr.com/photos/51792270@N03/17404458702",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Dagger",
+"Knife"
+]
 },
 {
 "file": "knife/d931c39907c8b285.png",
@@ -1637,7 +2503,10 @@
 "title": "Busse Combat ASH1",
 "page": "https://www.flickr.com/photos/51792270@N03/16155324722",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Knife"
+]
 },
 {
 "file": "knife/0f3a8d79829e0af1.png",
@@ -1647,7 +2516,16 @@
 "title": "Truth be told...these kitchen shears aren't that great. #thingsmydadbuysatkohls",
 "page": "https://www.flickr.com/photos/arndog/17464989101",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"/m/04t7l",
+"/m/07s6nbt",
+"/m/088fh",
+"Kitchen knife",
+"Knife",
+"Scissors",
+"Tool"
+]
 },
 {
 "file": "knife/99201f85c6df019d.png",
@@ -1657,7 +2535,10 @@
 "title": "Busse Tank Buster-4",
 "page": "https://www.flickr.com/photos/51792270@N03/19356685606",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Knife"
+]
 },
 {
 "file": "knife/3041eefbd104ff42.png",
@@ -1667,7 +2548,11 @@
 "title": "Asia Cut Knives by Friedr. Dick",
 "page": "https://www.flickr.com/photos/dinnerseries/15289973115",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Kitchen knife",
+"Knife"
+]
 },
 {
 "file": "knife/0c73b72d82c32b12.png",
@@ -1677,7 +2562,10 @@
 "title": "Case Mother of Pearl Toothpick",
 "page": "https://www.flickr.com/photos/capcase/4969101471",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Knife"
+]
 },
 {
 "file": "knife/8a195e7e4803c5d9.png",
@@ -1687,7 +2575,10 @@
 "title": "Buck Bantam BLW",
 "page": "https://www.flickr.com/photos/capcase/5075274115",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Knife"
+]
 },
 {
 "file": "knife/789d9288b6ca1436.png",
@@ -1697,7 +2588,11 @@
 "title": "Dagger - Cut",
 "page": "https://www.flickr.com/photos/centralasian/3201021219",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Knife",
+"Tool"
+]
 },
 {
 "file": "oven/86b12a1ce788541d.png",
@@ -1707,7 +2602,19 @@
 "title": "seejane5",
 "page": "https://www.flickr.com/photos/this_could_be_my_house/2885931873",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"/m/0dkw5",
+"Cabinetry",
+"Countertop",
+"Cupboard",
+"Door",
+"Home appliance",
+"House",
+"Oven",
+"Washing machine",
+"Window"
+]
 },
 {
 "file": "oven/108ab3f9f0034c17.png",
@@ -1717,7 +2624,14 @@
 "title": "\u8d8a\u5f8c\u304b\u304d\u3082\u3061",
 "page": "https://www.flickr.com/photos/yto/4258082015",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Food",
+"Home appliance",
+"Kitchen appliance",
+"Microwave oven",
+"Oven"
+]
 },
 {
 "file": "oven/c40e46a982741727.png",
@@ -1727,7 +2641,10 @@
 "title": "Midnight snack",
 "page": "https://www.flickr.com/photos/grant_subaru/11551909434",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Oven"
+]
 },
 {
 "file": "oven/49f7e61e228d3311.png",
@@ -1737,7 +2654,12 @@
 "title": "GE JRS06SKSS 24&quot; Stainless Steel Electric Single Wall Oven",
 "page": "https://www.flickr.com/photos/goedekers/13084446975",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Home appliance",
+"Kitchen appliance",
+"Oven"
+]
 },
 {
 "file": "oven/60f634489460645f.png",
@@ -1747,7 +2669,18 @@
 "title": "hotel EDEN MAR | studio",
 "page": "https://www.flickr.com/photos/portobaytrade/3213297600",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bed",
+"Home appliance",
+"House",
+"Kitchen appliance",
+"Microwave oven",
+"Oven",
+"Saucer",
+"Sink",
+"Tableware"
+]
 },
 {
 "file": "oven/d0e2dba043cdc5bd.png",
@@ -1757,7 +2690,24 @@
 "title": "Family Safety Day - Camp Humphreys, Korea - 120803",
 "page": "https://www.flickr.com/photos/usaghumphreys/7745054420",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"/m/02ppnm",
+"/m/06qqb",
+"/m/083vt",
+"Bowl",
+"Cabinetry",
+"Countertop",
+"Cupboard",
+"Drawer",
+"Gas stove",
+"Home appliance",
+"Kitchen appliance",
+"Microwave oven",
+"Mobile phone",
+"Oven",
+"Waste container"
+]
 },
 {
 "file": "oven/412ec480b1652daa.png",
@@ -1767,7 +2717,12 @@
 "title": "perceptually hotter samosas",
 "page": "https://www.flickr.com/photos/unlistedsightings/5054085676",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Food",
+"Microwave oven",
+"Oven"
+]
 },
 {
 "file": "oven/7751d3a7ced10598.png",
@@ -1777,7 +2732,13 @@
 "title": "Sharp Carousel Microwave",
 "page": "https://www.flickr.com/photos/ckelly/4846047005",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Home appliance",
+"Kitchen appliance",
+"Microwave oven",
+"Oven"
+]
 },
 {
 "file": "oven/52e9aad8124a6018.png",
@@ -1787,7 +2748,16 @@
 "title": "Daisy Deco 2.jpg",
 "page": "https://www.flickr.com/photos/artobrick/16427386616",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Cabinetry",
+"Countertop",
+"Furniture",
+"Gas stove",
+"Home appliance",
+"Kitchen appliance",
+"Oven"
+]
 },
 {
 "file": "oven/19587e2bf5776e91.png",
@@ -1797,7 +2767,12 @@
 "title": "Hawaii Vacation Home",
 "page": "https://www.flickr.com/photos/coolmikeol/4209915057",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Home appliance",
+"Kitchen appliance",
+"Oven"
+]
 },
 {
 "file": "oven/02f8641eaaa3b3cc.png",
@@ -1807,7 +2782,16 @@
 "title": "LG \ub514\uc624\uc2a4 \uc2dd\uae30\uc138\ucc99\uae30 \uc2e0\uc81c\ud488 \ucd9c\uc2dc",
 "page": "https://www.flickr.com/photos/lge/4573190814/",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Countertop",
+"Food",
+"Gas stove",
+"Home appliance",
+"Kitchen appliance",
+"Microwave oven",
+"Oven"
+]
 },
 {
 "file": "oven/96decdf81acdfa3a.png",
@@ -1817,7 +2801,16 @@
 "title": "How NOT to Microwave Butter",
 "page": "https://www.flickr.com/photos/tachyondecay/3221906444",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Countertop",
+"Home appliance",
+"Kitchen appliance",
+"Microwave oven",
+"Oven",
+"Shelf",
+"Sink"
+]
 },
 {
 "file": "truck/0af76be0b9a1bfeb.png",
@@ -1827,7 +2820,11 @@
 "title": "Langdon Transport PX11BNN",
 "page": "https://www.flickr.com/photos/didbygraham/16970472365",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Car",
+"Truck"
+]
 },
 {
 "file": "truck/b2a51f691788a2a0.png",
@@ -1837,7 +2834,16 @@
 "title": "Autootjes in Amsterdam",
 "page": "https://www.flickr.com/photos/faceme/15126686815",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Bicycle",
+"Bicycle wheel",
+"Car",
+"Land vehicle",
+"Truck",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "truck/74470fc88b126a2b.png",
@@ -1847,7 +2853,16 @@
 "title": "Ford Courier and firewood",
 "page": "https://www.flickr.com/photos/hugo90/4419952861",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Auto part",
+"Car",
+"Land vehicle",
+"Truck",
+"Vehicle",
+"Wheel",
+"Window"
+]
 },
 {
 "file": "truck/661a10686c2151f3.png",
@@ -1857,7 +2872,19 @@
 "title": "finishing touches",
 "page": "https://www.flickr.com/photos/rocketjim54/72196561",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "validation"
+"openImagesSplit": "validation",
+"labels": [
+"/m/01bqvp",
+"/m/01tkqg",
+"/m/06gfj",
+"Car",
+"Land vehicle",
+"Snowplow",
+"Tree",
+"Truck",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "truck/246d686eb9f12da1.png",
@@ -1867,7 +2894,14 @@
 "title": "Woodstock, NH 4th of July Parade 2007",
 "page": "https://www.flickr.com/photos/nostri-imago/2877363837",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Car",
+"Land vehicle",
+"Truck",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "truck/cd126b500613bb05.png",
@@ -1877,7 +2911,12 @@
 "title": "image-1.gen",
 "page": "https://www.flickr.com/photos/76969036@N02/8695666329",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"Tire",
+"Truck",
+"Wheel"
+]
 },
 {
 "file": "truck/63ffbe401be5f008.png",
@@ -1887,7 +2926,15 @@
 "title": "Raymatrans (SP)",
 "page": "https://www.flickr.com/photos/25328551@N08/7068506871",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Auto part",
+"Land vehicle",
+"Plant",
+"Tree",
+"Truck",
+"Vehicle"
+]
 },
 {
 "file": "truck/76def32e61275332.png",
@@ -1897,7 +2944,12 @@
 "title": "Weekend in Wisconsin",
 "page": "https://www.flickr.com/photos/afropicmusing/3962219625",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Land vehicle",
+"Truck",
+"Vehicle"
+]
 },
 {
 "file": "truck/eaa3ac9476d5f15d.png",
@@ -1907,7 +2959,12 @@
 "title": "Willi Betz (DE)",
 "page": "https://www.flickr.com/photos/25328551@N08/4244519758",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Land vehicle",
+"Truck",
+"Vehicle"
+]
 },
 {
 "file": "truck/478641ccf5695f67.png",
@@ -1917,7 +2974,18 @@
 "title": "Untitled",
 "page": "https://www.flickr.com/photos/rickmccharles/8043719637",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "test"
+"openImagesSplit": "test",
+"labels": [
+"/m/01bqvp",
+"/m/06gfj",
+"House",
+"Plant",
+"Tire",
+"Truck",
+"Vehicle",
+"Wheel",
+"Window"
+]
 },
 {
 "file": "truck/1867274f0b872d85.png",
@@ -1927,7 +2995,15 @@
 "title": "Nice shot!",
 "page": "https://www.flickr.com/photos/olathetoyotapartscenter/16392234522",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "train"
+"openImagesSplit": "train",
+"labels": [
+"Auto part",
+"Land vehicle",
+"Tire",
+"Truck",
+"Vehicle",
+"Wheel"
+]
 },
 {
 "file": "truck/b1093225322650ae.png",
@@ -1937,7 +3013,13 @@
 "title": "Old Pickup Truck",
 "page": "https://www.flickr.com/photos/joeshlabotnik/2845483303",
 "license": "https://creativecommons.org/licenses/by/2.0/",
-"openImagesSplit": "validation"
+"openImagesSplit": "validation",
+"labels": [
+"Car",
+"Tire",
+"Truck",
+"Wheel"
+]
 }
 ]
 }

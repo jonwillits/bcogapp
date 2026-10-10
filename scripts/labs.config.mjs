@@ -487,5 +487,68 @@ export const LABS = [
     ],
 
     crib: 'crib: what the panels should read',
+  },,
+  {
+    id: 'm08-objects',
+    name: 'Lab 8 — Does It Fail Where We Fail?',
+    route: '#/m08-objects',
+    scene: 'src/scenes/m08_objects',
+    /** Sim files whose strings reach the screen: eraser names, noise names, condition names, model titles. */
+    strings: ['src/sim/objects'],
+    handout: 'perception_and_action/object_lab/object_lab.md',
+    report: 'perception_and_action/object_lab/object_lab_report.docx',
+    /** No handout yet: the claims below are what the scene makes true, which is what the handout may assert. */
+    handoutPending: true,
+
+    retired: [
+      { term: /\bloss\b|\bepochs?\b/gi, why: 'neither word is on screen: percent correct, and images' },
+      { term: /\binvariant\b|achieves? invariance/gi, why: 'invariance names the problem; what is achieved is tolerance' },
+      { term: /the network (sees|knows|thinks|understands|notices|decides|recogni[sz]es)/gi, why: 'a network labels, classifies, outputs and responds; recognize is for people' },
+      { term: /salt[- ]and[- ]pepper|uniform noise/gi, why: 'on screen they are noise A and noise B', unless: ['noise A', 'noise B'] },
+      { term: /ONNX|TensorFlow|WebAssembly/gi, why: 'no runtime is named on screen; the networks run in the browser' },
+    ],
+
+    controls: [
+      'Draw', 'Parts', 'Views', 'Noise', 'Closer', 'New seed', 'Undo', 'Clear', 'Draw this:',
+      'Center and scale the drawing first', 'Turn it upside down', 'Mirror it', 'Squash it flat', 'Squeeze it thin', 'Restore the drawing',
+      'Version B: trained on shifted, turned and resized copies', 'Show it', 'Previous', 'Next', 'Commit my answers',
+      'Mid-line', 'At the joints', 'share of ink removed', 'Commit my answer', 'Commit my answers for the ten pairs',
+      'one shoe among shoes', 'one shoe among other things', 'Start the test', 'same shoe', 'not the same shoe',
+      'Learning on', 'learning rate η', 'Skip ahead 50 steps', 'Start from new random weights', 'Label my drawing', 'By hand',
+    ],
+
+    claims: [
+      { says: 'the drawing network names at least 85% of held-out drawings (92.6%)', test: 'names the right category for most of the fixed inputs' },
+      { says: 'the browser’s drawing network gives Python’s top label on 50 fixed inputs, probabilities within 0.01', test: 'gives the same top label on every one of the fixed inputs' },
+      { says: 'every layer of the drawing network agrees with Python', test: 'every layer’s activity agrees with Python to 1e-4' },
+      { says: 'each photo network gives Python’s top label on 50 shipped photographs, probabilities within 0.01', test: 'gives the same top label on every fixed input, and probabilities within 0.01' },
+      { says: 'the readout’s input, the penultimate layer, agrees with Python', test: 'the penultimate layer agrees to 1e-2 on every unit' },
+      { says: 'the TypeScript rasterizer agrees with Python pixel for pixel', test: 'the rasterizer agrees with Python pixel for pixel' },
+      { says: 'the two erasers agree with Python and remove the same ink to within 2%', test: 'the two erasers remove the same total length to within 2%' },
+      { says: 'the browser’s noise has the statistics the networks were trained on', test: 'changes a share p of the pixels, half of them to white' },
+      { says: 'nothing a student does changes a shipped model', test: 'every shipped model hashes the same before and after a scripted session' },
+      { says: 'the readout is Lab 7’s unit, learning through thirdFactor and learnWeights only', test: 'readout.ts learns through thirdFactor, weightChange and learnWeights' },
+      { says: 'the readout reaches 95% on its training images within 500 steps', test: 'reaches 95% on its training images within 500 steps' },
+      { says: 'the three view conditions are matched for distance from the nearest learned view', test: 'the sorted distances are identical across conditions' },
+      { says: 'every view the scene asks for was rendered and shipped', test: 'learned views, wobble frames, test views and the full curve' },
+      { says: 'no network answer is rendered before Commit my answers, in Parts 2, 3 and 4', test: 'before: a Commit button, no revealed trial' },
+      { says: 'after the commit, every trial is revealed with the truth, the answer and the network’s label', test: 'after: every trial revealed' },
+      { says: 'the seed fixes the trials', test: 'the seed fixes the trials' },
+      { says: 'the developer control appears only with ?dev=1', test: 'appears only with ?dev=1' },
+      { says: 'each of the spec’s eleven lines is on its panel', test: 'the eleven lines that are content' },
+      { says: 'no loss, no epoch, no cortical area, no agentic verb about a network', test: 'no agentic verb about a network' },
+      { says: 'every shipped image is credited in a NOTICE and excluded from the GPL', test: 'every shipped file is in the NOTICE and in the manifest' },
+      { says: 'no shipped photograph carries a person, face or body-part label', test: 'no shipped photograph carries a person, face or body-part label' },
+      { says: 'nothing leaves the page: no POST, no camera, no file input, no storage', test: 'no camera, no microphone, no file input, no storage' },
+      { says: 'each part downloads under about 15 MB and the lab under about 40 MB', test: 'each part under about 15 MB and the lab under about 40 MB' },
+      { says: 'one drawing inference is under 75 ms here (300 ms at a 4× throttle)', test: 'one inference is fast enough for a live label after each stroke' },
+      { says: 'one photo inference is under 75 ms here (300 ms at a 4× throttle)', test: 'one photo inference is under 75 ms here' },
+      { says: 'selection changes a control’s color and never its size', test: 'no button style keys font weight, padding, font size or border width on state' },
+      { says: 'the spec’s measured targets, with the two that fail recorded as findings', test: 'the spec’s targets, measured' },
+      { says: 'a glimpse lasts about 200 ms in a real browser (measured by scripts/m08-timing.mjs, reported in the walk-through)', test: null },
+      { says: 'feature maps, gray renders and grayscale photographs are legible on the dark theme', test: null },
+    ],
+
+    crib: null,
   },
 ]

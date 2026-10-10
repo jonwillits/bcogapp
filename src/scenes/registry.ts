@@ -91,6 +91,7 @@ const BilaterianScene = lazy(() => import('./m04_bilaterian/BilaterianScene'))
 const LearningScene = lazy(() => import('./m05_learning/LearningScene'))
 const BrainScene = lazy(() => import('./m06_brain/BrainScene'))
 const FishScene = lazy(() => import('./m07_fish/FishScene'))
+const ObjectsScene = lazy(() => import('./m08_objects/ObjectsScene'))
 
 /**
  * Registered, runnable scenes. Order here is the order shown within a module.
@@ -215,6 +216,24 @@ export const scenes: SceneManifest[] = [
       sourceUrl: `${INTRO_BLOB}/pattern_recognition/fish_lab/fish_lab.md`,
       notYet:
         'The Lab 7 handout has not been posted yet. When it is, it will appear here without a reload of the app. Until then the scene itself is open to explore.',
+    },
+  },
+  {
+    route: 'm08-objects',
+    module: 8,
+    title: 'Does It Fail Where We Fail?',
+    blurb:
+      'Lab 8. A satellite scene with no creature in it, and the first that runs trained deep networks in the browser: take each test yourself, then watch a network take it on the same images. Drawings through a stack of convolution and pooling, two kinds of contour deletion, learned views of a shoe, and two kinds of noise.',
+    mode: 'both',
+    status: 'building',
+    Component: ObjectsScene,
+    // The handout is written after the build and Jon's walk-through, from the
+    // as-built notes, so the fetch fails until it lands.
+    lab: {
+      rawUrl: `${INTRO_RAW}/perception_and_action/object_lab/object_lab.md`,
+      sourceUrl: `${INTRO_BLOB}/perception_and_action/object_lab/object_lab.md`,
+      notYet:
+        'The Lab 8 handout has not been posted yet. When it is, it will appear here without a reload of the app. Until then the scene itself is open to explore.',
     },
   },
 ]

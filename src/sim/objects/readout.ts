@@ -13,6 +13,9 @@
  * is otherwise the same.
  */
 import type { RateUnit } from '../bilaterian/unit'
+
+/** The readout is a RateUnit: Lab 4's unit, Lab 7's output. */
+export type Readout = RateUnit
 import { learnWeights, thirdFactor, weightChange, type ConnectionLimits } from '../bilaterian/learning/rule'
 import { predictionOf } from '../fish/brain'
 import type { Rng } from '../random'

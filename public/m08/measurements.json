@@ -1,0 +1,775 @@
+{
+"writtenBy": "training/m08/ship_measurements.py",
+"networks": {
+"drawing": {
+"model": "drawing network, version A",
+"architecture": "4 \u00d7 (conv 3\u00d73, ReLU, max pool 2\u00d72) with 16, 32, 64, 96 channels, then linear 1536 \u2192 24",
+"weights": 115576,
+"input": "1 \u00d7 64 \u00d7 64, ink = 1",
+"categories": [
+"airplane",
+"bear",
+"bicycle",
+"bird",
+"boat",
+"bottle",
+"car",
+"cat",
+"chair",
+"clock",
+"dog",
+"elephant",
+"keyboard",
+"knife",
+"oven",
+"truck",
+"mushroom",
+"ice cream",
+"coffee cup",
+"bucket",
+"umbrella",
+"snowman",
+"floor lamp",
+"wine glass"
+],
+"trainingDrawings": 144000,
+"validationDrawings": 12000,
+"testDrawings": 12000,
+"perCategory": 6000,
+"augmented": false,
+"epochs": 12,
+"batch": 128,
+"seed": 1,
+"device": "mps",
+"hardware": "Apple M5 Pro, 24 GB",
+"wallClockSeconds": 119,
+"testAccuracy": 0.9261666666666667
+},
+"drawingB": {
+"model": "drawing network, version B",
+"architecture": "4 \u00d7 (conv 3\u00d73, ReLU, max pool 2\u00d72) with 16, 32, 64, 96 channels, then linear 1536 \u2192 24",
+"weights": 115576,
+"input": "1 \u00d7 64 \u00d7 64, ink = 1",
+"categories": [
+"airplane",
+"bear",
+"bicycle",
+"bird",
+"boat",
+"bottle",
+"car",
+"cat",
+"chair",
+"clock",
+"dog",
+"elephant",
+"keyboard",
+"knife",
+"oven",
+"truck",
+"mushroom",
+"ice cream",
+"coffee cup",
+"bucket",
+"umbrella",
+"snowman",
+"floor lamp",
+"wine glass"
+],
+"trainingDrawings": 144000,
+"validationDrawings": 12000,
+"testDrawings": 12000,
+"perCategory": 6000,
+"augmented": true,
+"epochs": 12,
+"batch": 128,
+"seed": 1,
+"device": "mps",
+"hardware": "Apple M5 Pro, 24 GB",
+"wallClockSeconds": 126,
+"testAccuracy": 0.8264166666666667
+},
+"photo_standard": {
+"model": "Standard",
+"diet": "standard",
+"architecture": "MobileNetV3-small (torchvision, ImageNet-pretrained), first convolution folded to one grayscale channel, last layer 1024 \u2192 16",
+"weights": 1533968,
+"input": "1 \u00d7 160 \u00d7 160 gray in [0, 1], normalized (g \u2212 0.449) / 0.226",
+"categories": [
+"airplane",
+"bear",
+"bicycle",
+"bird",
+"boat",
+"bottle",
+"car",
+"cat",
+"chair",
+"clock",
+"dog",
+"elephant",
+"keyboard",
+"knife",
+"oven",
+"truck"
+],
+"trainingImages": 9638,
+"trainingImagesPerCategory": {
+"airplane": 708,
+"bear": 140,
+"bicycle": 710,
+"bird": 710,
+"boat": 709,
+"bottle": 708,
+"car": 710,
+"cat": 710,
+"chair": 710,
+"clock": 231,
+"dog": 710,
+"elephant": 710,
+"keyboard": 710,
+"knife": 539,
+"oven": 214,
+"truck": 709
+},
+"validationImages": 640,
+"testImages": 800,
+"epochs": 10,
+"batch": 64,
+"learningRate": 0.0006,
+"seed": 1,
+"noiseA": null,
+"blur": null,
+"device": "mps",
+"hardware": "Apple M5 Pro, 24 GB",
+"wallClockSeconds": 90,
+"testAccuracyClean": 0.87375
+},
+"photo_noise": {
+"model": "Trained on noise A",
+"diet": "noise",
+"architecture": "MobileNetV3-small (torchvision, ImageNet-pretrained), first convolution folded to one grayscale channel, last layer 1024 \u2192 16",
+"weights": 1533968,
+"input": "1 \u00d7 160 \u00d7 160 gray in [0, 1], normalized (g \u2212 0.449) / 0.226",
+"categories": [
+"airplane",
+"bear",
+"bicycle",
+"bird",
+"boat",
+"bottle",
+"car",
+"cat",
+"chair",
+"clock",
+"dog",
+"elephant",
+"keyboard",
+"knife",
+"oven",
+"truck"
+],
+"trainingImages": 9638,
+"trainingImagesPerCategory": {
+"airplane": 708,
+"bear": 140,
+"bicycle": 710,
+"bird": 710,
+"boat": 709,
+"bottle": 708,
+"car": 710,
+"cat": 710,
+"chair": 710,
+"clock": 231,
+"dog": 710,
+"elephant": 710,
+"keyboard": 710,
+"knife": 539,
+"oven": 214,
+"truck": 709
+},
+"validationImages": 640,
+"testImages": 800,
+"epochs": 10,
+"batch": 64,
+"learningRate": 0.0006,
+"seed": 1,
+"noiseA": {
+"kind": "salt and pepper",
+"pPerImage": "uniform in [0, 0.35]"
+},
+"blur": null,
+"device": "mps",
+"hardware": "Apple M5 Pro, 24 GB",
+"wallClockSeconds": 112,
+"testAccuracyClean": 0.7825
+},
+"photo_blur": {
+"model": "Trained on blurred and sharp",
+"diet": "blur",
+"architecture": "MobileNetV3-small (torchvision, ImageNet-pretrained), first convolution folded to one grayscale channel, last layer 1024 \u2192 16",
+"weights": 1533968,
+"input": "1 \u00d7 160 \u00d7 160 gray in [0, 1], normalized (g \u2212 0.449) / 0.226",
+"categories": [
+"airplane",
+"bear",
+"bicycle",
+"bird",
+"boat",
+"bottle",
+"car",
+"cat",
+"chair",
+"clock",
+"dog",
+"elephant",
+"keyboard",
+"knife",
+"oven",
+"truck"
+],
+"trainingImages": 9638,
+"trainingImagesPerCategory": {
+"airplane": 708,
+"bear": 140,
+"bicycle": 710,
+"bird": 710,
+"boat": 709,
+"bottle": 708,
+"car": 710,
+"cat": 710,
+"chair": 710,
+"clock": 231,
+"dog": 710,
+"elephant": 710,
+"keyboard": 710,
+"knife": 539,
+"oven": 214,
+"truck": 709
+},
+"validationImages": 640,
+"testImages": 800,
+"epochs": 10,
+"batch": 64,
+"learningRate": 0.0006,
+"seed": 1,
+"noiseA": null,
+"blur": {
+"kind": "Gaussian",
+"sigmaPx": [
+1.0,
+4.0
+],
+"shareBlurred": 0.5
+},
+"device": "mps",
+"hardware": "Apple M5 Pro, 24 GB",
+"wallClockSeconds": 114,
+"testAccuracyClean": 0.86
+}
+},
+"part1": {
+"a": {
+"n": 200,
+"layers": [
+"input",
+"pooled 1",
+"pooled 2",
+"pooled 3",
+"pooled 4"
+],
+"shift": {
+"0": {
+"match": [
+1.0,
+1.0,
+1.0,
+1.0,
+1.0
+],
+"accuracy": 0.945
+},
+"2": {
+"match": [
+0.444638269841671,
+0.6247010445594787,
+0.7735133838653564,
+0.8054010105133057,
+0.8409853547811508
+],
+"accuracy": 0.93
+},
+"4": {
+"match": [
+0.2660253575257957,
+0.43543149836361406,
+0.4963639251887798,
+0.6476016661524773,
+0.6990679609775543
+],
+"accuracy": 0.9
+},
+"6": {
+"match": [
+0.20803609111346305,
+0.3777551628649235,
+0.3514121078699827,
+0.43852476581931116,
+0.5829157449305058
+],
+"accuracy": 0.87
+},
+"8": {
+"match": [
+0.16548837263108,
+0.3398761770874262,
+0.30049767535179855,
+0.25196927212178705,
+0.5489110779762268
+],
+"accuracy": 0.84
+}
+},
+"turn": {
+"45": {
+"match": [
+0.06727311642782297,
+0.24768933590501546,
+0.20749357825145126,
+0.11165091940172715,
+0.10557852225116221
+],
+"accuracy": 0.23
+},
+"90": {
+"match": [
+0.03243009882280603,
+0.21064538046717643,
+0.16611798148602247,
+0.07531988186965463,
+0.08013029185065534
+],
+"accuracy": 0.19
+},
+"180": {
+"match": [
+0.14312795598758385,
+0.3168768377415836,
+0.31270959266927095,
+0.24397668947582132,
+0.2258952620346099
+],
+"accuracy": 0.39
+}
+},
+"centered": {
+"smallInCorner": 0.13,
+"smallCentered": 0.31,
+"seventyPercent": 0.86,
+"rawUnaligned": 0.765
+},
+"accuracyCentered": 0.945
+},
+"b": {
+"n": 200,
+"layers": [
+"input",
+"pooled 1",
+"pooled 2",
+"pooled 3",
+"pooled 4"
+],
+"shift": {
+"0": {
+"match": [
+1.0,
+1.0,
+1.0,
+1.0,
+1.0
+],
+"accuracy": 0.885
+},
+"2": {
+"match": [
+0.444638269841671,
+0.6133950354158878,
+0.7901152530312539,
+0.8774180775880813,
+0.9076864787936211
+],
+"accuracy": 0.85
+},
+"4": {
+"match": [
+0.2660253575257957,
+0.41279447920620443,
+0.5114502230286598,
+0.724861324429512,
+0.8099623334407806
+],
+"accuracy": 0.835
+},
+"6": {
+"match": [
+0.20803609111346305,
+0.345360317453742,
+0.3417508628219366,
+0.5420377044379712,
+0.709998804628849
+],
+"accuracy": 0.865
+},
+"8": {
+"match": [
+0.16548837263108,
+0.30275806281715634,
+0.2667366005294025,
+0.3670005365461111,
+0.6493959122896195
+],
+"accuracy": 0.825
+}
+},
+"turn": {
+"45": {
+"match": [
+0.06727311642782297,
+0.20097289383411407,
+0.1298810232663527,
+0.10301145977486158,
+0.17255195239325985
+],
+"accuracy": 0.85
+},
+"90": {
+"match": [
+0.03243009882280603,
+0.16388397566974164,
+0.07910542877012632,
+0.07386470981349703,
+0.1884257991128834
+],
+"accuracy": 0.915
+},
+"180": {
+"match": [
+0.14312795598758385,
+0.2731645766459405,
+0.2470896409160923,
+0.2595464355655713,
+0.27950687922989803
+],
+"accuracy": 0.825
+}
+},
+"centered": {
+"smallInCorner": 0.06,
+"smallCentered": 0.28,
+"seventyPercent": 0.805,
+"rawUnaligned": 0.805
+},
+"accuracyCentered": 0.885
+},
+"untrained": {
+"a": {
+"intact": 0.945,
+"mirror": 0.935,
+"turn180": 0.39,
+"stretchWide": 0.68,
+"stretchTall": 0.55,
+"shrink40InCorner": 0.13
+},
+"b": {
+"intact": 0.885,
+"mirror": 0.865,
+"turn180": 0.825,
+"stretchWide": 0.45,
+"stretchTall": 0.53,
+"shrink40InCorner": 0.06
+}
+}
+},
+"part2": {
+"erasers": {
+"levels": [
+0.35,
+0.5,
+0.65
+],
+"largerN": 200,
+"accuracy": {
+"mid@0.35": 0.835,
+"joints@0.35": 0.81,
+"mid@0.5": 0.55,
+"joints@0.5": 0.585,
+"mid@0.65": 0.295,
+"joints@0.65": 0.365
+},
+"gap": {
+"0.35": 0.02499999999999991,
+"0.5": -0.03499999999999992,
+"0.65": -0.07
+},
+"displayAccuracy": {
+"mid@0.35": 0.8055555555555556,
+"joints@0.35": 0.8333333333333334,
+"mid@0.5": 0.4722222222222222,
+"joints@0.5": 0.6666666666666666,
+"mid@0.65": 0.2638888888888889,
+"joints@0.65": 0.4166666666666667
+},
+"displayN": 72,
+"excluded": {
+"wrongIntact": 14,
+"eraserShort": 12,
+"noJoints": 2
+},
+"tolerance": 0.01
+},
+"moved": {
+"pairs": [
+{
+"id": "d04",
+"category": "coffee cup",
+"what": "the handle, onto the top of the cup",
+"originalLabel": "coffee cup",
+"originalP": 1.0,
+"movedLabel": "bucket",
+"movedP": 0.9926652312278748,
+"matchMoved": 0.3825531601905823,
+"matchOrdinary": 0.18274109065532684,
+"labelChanged": true
+},
+{
+"id": "d08",
+"category": "coffee cup",
+"what": "the handle, onto the top of the cup",
+"originalLabel": "coffee cup",
+"originalP": 0.999998927116394,
+"movedLabel": "coffee cup",
+"movedP": 1.0,
+"matchMoved": 0.32585856318473816,
+"matchOrdinary": 0.18274109065532684,
+"labelChanged": false
+},
+{
+"id": "d17",
+"category": "coffee cup",
+"what": "the handle, onto the top of the cup",
+"originalLabel": "coffee cup",
+"originalP": 0.8142073154449463,
+"movedLabel": "bear",
+"movedP": 0.7904337644577026,
+"matchMoved": 0.1862671822309494,
+"matchOrdinary": 0.2866639196872711,
+"labelChanged": true
+},
+{
+"id": "d18",
+"category": "mushroom",
+"what": "the cap, under the stem",
+"originalLabel": "mushroom",
+"originalP": 0.9995580315589905,
+"movedLabel": "umbrella",
+"movedP": 0.5226244926452637,
+"matchMoved": 0.33816879987716675,
+"matchOrdinary": 0.2728290855884552,
+"labelChanged": true
+},
+{
+"id": "d25",
+"category": "mushroom",
+"what": "the cap, under the stem",
+"originalLabel": "mushroom",
+"originalP": 0.9987456798553467,
+"movedLabel": "bear",
+"movedP": 0.8302072286605835,
+"matchMoved": 0.32400405406951904,
+"matchOrdinary": 0.2728290855884552,
+"labelChanged": true
+},
+{
+"id": "d43",
+"category": "ice cream",
+"what": "the scoop, under the cone",
+"originalLabel": "ice cream",
+"originalP": 0.9999997615814209,
+"movedLabel": "chair",
+"movedP": 0.9817274808883667,
+"matchMoved": 0.07622496038675308,
+"matchOrdinary": 0.45137646794319153,
+"labelChanged": true
+},
+{
+"id": "d15",
+"category": "umbrella",
+"what": "the handle, above the canopy",
+"originalLabel": "umbrella",
+"originalP": 0.9658001661300659,
+"movedLabel": "chair",
+"movedP": 0.949427604675293,
+"matchMoved": 0.11975499987602234,
+"matchOrdinary": 0.22771798074245453,
+"labelChanged": true
+},
+{
+"id": "d13",
+"category": "snowman",
+"what": "the head, under the body",
+"originalLabel": "snowman",
+"originalP": 1.0,
+"movedLabel": "mushroom",
+"movedP": 0.9500736594200134,
+"matchMoved": 0.18681558966636658,
+"matchOrdinary": 0.2292655110359192,
+"labelChanged": true
+},
+{
+"id": "d46",
+"category": "floor lamp",
+"what": "the shade, under the base",
+"originalLabel": "floor lamp",
+"originalP": 0.9999998807907104,
+"movedLabel": "floor lamp",
+"movedP": 0.9999704360961914,
+"matchMoved": 0.45696863532066345,
+"matchOrdinary": 0.4584277868270874,
+"labelChanged": false
+},
+{
+"id": "d63",
+"category": "wine glass",
+"what": "the bowl, under the base",
+"originalLabel": "wine glass",
+"originalP": 0.9999997615814209,
+"movedLabel": "floor lamp",
+"movedP": 0.9880475997924805,
+"matchMoved": 0.2826092839241028,
+"matchOrdinary": 0.26566725969314575,
+"labelChanged": true
+}
+],
+"labelChanged": 8,
+"n": 10
+}
+},
+"part4": {
+"testImages": 800,
+"defaults": {
+"A": 0.2,
+"B": 0.35
+},
+"nets": {
+"standard": {
+"clean": 0.87375,
+"noiseA": {
+"0.0": 0.87375,
+"0.05": 0.55125,
+"0.1": 0.39375,
+"0.2": 0.15625,
+"0.35": 0.06375,
+"0.5": 0.07375
+},
+"noiseB": {
+"0.0": 0.87375,
+"0.1": 0.69625,
+"0.2": 0.49375,
+"0.35": 0.2375,
+"0.5": 0.115,
+"0.7": 0.07625
+},
+"atDefaults": {
+"A": 0.15625,
+"B": 0.2375
+}
+},
+"noise": {
+"clean": 0.78,
+"noiseA": {
+"0.0": 0.78,
+"0.05": 0.76625,
+"0.1": 0.7375,
+"0.2": 0.68375,
+"0.35": 0.58375,
+"0.5": 0.39875
+},
+"noiseB": {
+"0.0": 0.78,
+"0.1": 0.77625,
+"0.2": 0.735,
+"0.35": 0.6925,
+"0.5": 0.62875,
+"0.7": 0.4725
+},
+"atDefaults": {
+"A": 0.68375,
+"B": 0.6925
+}
+},
+"blur": {
+"clean": 0.8625,
+"noiseA": {
+"0.0": 0.8625,
+"0.05": 0.58375,
+"0.1": 0.44125,
+"0.2": 0.14375,
+"0.35": 0.07875,
+"0.5": 0.065
+},
+"noiseB": {
+"0.0": 0.8625,
+"0.1": 0.73,
+"0.2": 0.57125,
+"0.35": 0.27625,
+"0.5": 0.1725,
+"0.7": 0.10375
+},
+"atDefaults": {
+"A": 0.14375,
+"B": 0.27625
+}
+}
+},
+"drawings": {
+"n": 800,
+"perCategory": 50,
+"renderedAs": "black strokes 4 px wide on white, 160 \u00d7 160",
+"nets": {
+"standard": 0.25125,
+"noise": 0.30125,
+"blur": 0.27125,
+"drawingNetwork": 0.91875
+}
+}
+},
+"otherNoise": {
+"gaussian@0.1/standard": 0.575,
+"gaussian@0.1/noise": 0.75125,
+"gaussian@0.1/blur": 0.62125,
+"gaussian@0.2/standard": 0.26125,
+"gaussian@0.2/noise": 0.70625,
+"gaussian@0.2/blur": 0.305,
+"gaussian@0.35/standard": 0.085,
+"gaussian@0.35/noise": 0.61375,
+"gaussian@0.35/blur": 0.12125,
+"blotch@0.1/standard": 0.6775,
+"blotch@0.1/noise": 0.60625,
+"blotch@0.1/blur": 0.66625,
+"blotch@0.2/standard": 0.4675,
+"blotch@0.2/noise": 0.37375,
+"blotch@0.2/blur": 0.505,
+"blotch@0.35/standard": 0.26375,
+"blotch@0.35/noise": 0.1725,
+"blotch@0.35/blur": 0.32,
+"contrast@0.5/standard": 0.8475,
+"contrast@0.5/noise": 0.66625,
+"contrast@0.5/blur": 0.83375,
+"contrast@0.8/standard": 0.785,
+"contrast@0.8/noise": 0.3175,
+"contrast@0.8/blur": 0.7525,
+"contrast@0.9/standard": 0.685,
+"contrast@0.9/noise": 0.105,
+"contrast@0.9/blur": 0.66875
+}
+}

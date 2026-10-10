@@ -16,7 +16,7 @@ interface Case {
   rasters: Record<string, string>
   variants: Record<string, Drawing>
 }
-const cases = (fixtures as { size: number; cases: Case[] }).cases
+const cases = (fixtures as unknown as { size: number; cases: Case[] }).cases
 
 const toBits = (img: Float32Array) => Array.from(img, (v) => (v ? '1' : '0')).join('')
 

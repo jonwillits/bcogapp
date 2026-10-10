@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import fixtures from './fixtures/drawing_net.json'
+import fixturesB from './fixtures/drawing_net_b.json'
 import { loadShippedModel } from './loadModels.node'
 import { chw, classify, run, topK, weightsHash } from './net'
 import { normalize, rasterize, type Drawing } from './raster'
@@ -11,8 +12,10 @@ import { normalize, rasterize, type Drawing } from './raster'
  * the layer strip shows it.
  */
 interface Case { category: string; strokes: Drawing; probs: number[]; top: number; layers?: number[][] }
-const cases = (fixtures as { cases: Case[] }).cases
+const cases = (fixtures as unknown as { cases: Case[] }).cases
 const model = loadShippedModel('drawing')
+const casesB = (fixturesB as unknown as { cases: Case[] }).cases
+const modelB = loadShippedModel('drawing_b')
 
 describe('the drawing network runs here as it ran in Python', () => {
   it('loads with 24 labels and a 64 × 64 input', () => {
@@ -69,6 +72,16 @@ describe('the drawing network runs here as it ran in Python', () => {
     const ms = (performance.now() - t0) / 10
     // 300 ms under a 4× throttle means 75 ms here.
     expect(ms).toBeLessThan(75)
+  })
+
+  it('Version B agrees with Python too', () => {
+    let worst = 0
+    for (const c of casesB) {
+      const out = classify(modelB, rasterize(normalize(c.strokes)))
+      expect(out.top, c.category).toBe(c.top)
+      for (let i = 0; i < c.probs.length; i++) worst = Math.max(worst, Math.abs(out.probs[i] - c.probs[i]))
+    }
+    expect(worst).toBeLessThan(1e-4)
   })
 
   it('running the model changes no weight', () => {
