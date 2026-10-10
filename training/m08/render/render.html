@@ -1,0 +1,80 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>body{margin:0;background:#808080}</style></head>
+<body>
+<canvas id="c" width="224" height="224"></canvas>
+<script type="importmap">{"imports":{"three":"/three/build/three.module.js","three/addons/":"/three/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three'
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
+import { MTLLoader } from 'three/addons/loaders/MTLLoader.js'
+
+// One fixed camera and one fixed light rig; the object turns under them, as
+// on a turntable. A view around the vertical axis turns the object about the
+// world's up axis; a view around the horizontal axis tips it about the
+// camera's sideways axis, at a fixed heading.
+const SIZE = 224
+const canvas = document.getElementById('c')
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true })
+renderer.setPixelRatio(1)
+renderer.setSize(SIZE, SIZE, false)
+renderer.outputColorSpace = THREE.SRGBColorSpace
+const scene = new THREE.Scene()
+scene.background = new THREE.Color(0x808080)
+const camera = new THREE.PerspectiveCamera(30, 1, 0.01, 100)
+camera.position.set(0, 0, 4)
+camera.lookAt(0, 0, 0)
+scene.add(new THREE.HemisphereLight(0xffffff, 0x666666, 1.6))
+const key = new THREE.DirectionalLight(0xffffff, 2.0)
+key.position.set(1.5, 2.5, 3)
+scene.add(key)
+const fill = new THREE.DirectionalLight(0xffffff, 0.6)
+fill.position.set(-2, 0.5, 1.5)
+scene.add(fill)
+
+let holder = null
+
+window.loadModel = async (name) => {
+  if (holder) scene.remove(holder)
+  // One manager for the .mtl, the .obj and the texture it names, so that
+  // nothing is rendered before the texture has arrived (a map still loading
+  // renders black).
+  const manager = new THREE.LoadingManager()
+  const loaded = new Promise((resolve) => { manager.onLoad = resolve })
+  const mtl = await new MTLLoader(manager).setPath(`/models/${name}/meshes/`).setResourcePath(`/models/${name}/materials/textures/`).loadAsync('model.mtl')
+  mtl.preload()
+  const obj = await new OBJLoader(manager).setMaterials(mtl).setPath(`/models/${name}/meshes/`).loadAsync('model.obj')
+  await loaded
+  obj.traverse((m) => { if (m.isMesh) { m.material.side = THREE.DoubleSide; if (!m.geometry.attributes.normal) m.geometry.computeVertexNormals() } })
+  // Center on the bounding box and scale the bounding sphere to a fixed radius,
+  // so every object fills the frame to the same degree at the same distance.
+  const box = new THREE.Box3().setFromObject(obj)
+  const center = box.getCenter(new THREE.Vector3())
+  obj.position.sub(center)
+  const inner = new THREE.Group()
+  inner.add(obj)
+  const sphere = box.getBoundingSphere(new THREE.Sphere())
+  const s = 0.95 / sphere.radius
+  inner.scale.setScalar(s)
+  holder = new THREE.Group()
+  holder.add(inner)
+  scene.add(holder)
+  return { radius: sphere.radius, size: box.getSize(new THREE.Vector3()).toArray() }
+}
+
+/** heading: degrees about the vertical (world y) axis; pitch: degrees about the camera's x axis, applied after. */
+window.renderView = (heading, pitch, baseYaw = 0, baseRoll = 0, basePitch = 0) => {
+  holder.rotation.set(0, 0, 0)
+  // A base orientation so the object's canonical front faces the camera at
+  // heading 0 and its up is up (models are not all stored the same way).
+  const q = new THREE.Quaternion()
+  const qBase = new THREE.Quaternion().setFromEuler(new THREE.Euler(THREE.MathUtils.degToRad(basePitch), THREE.MathUtils.degToRad(baseYaw), THREE.MathUtils.degToRad(baseRoll), 'YXZ'))
+  const qHeading = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), THREE.MathUtils.degToRad(heading))
+  const qPitch = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), THREE.MathUtils.degToRad(pitch))
+  q.copy(qPitch).multiply(qHeading).multiply(qBase)
+  holder.quaternion.copy(q)
+  renderer.render(scene, camera)
+  return canvas.toDataURL('image/png')
+}
+window.ready = true
+</script>
+</body></html>

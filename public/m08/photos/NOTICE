@@ -1,0 +1,199 @@
+NOTICE for public/m08/photos/
+
+The photographs in this folder are crops of images from Open Images V7 (https://storage.googleapis.com/openimages/web/index.html), each of which its own metadata lists under the Creative Commons Attribution 2.0 licence (CC BY 2.0, https://creativecommons.org/licenses/by/2.0/). Each file is derived from the original by cropping the labeled object's box (padded to a square), converting to grayscale and resizing to 160 × 160. Images carrying any person, face or body-part label in Open Images were excluded. The box annotations are CC BY 4.0, by Google LLC.
+
+These photographs are NOT covered by the app's GNU General Public License. Each is redistributed under its own CC BY 2.0 licence with the credit below, which must travel with any copy.
+
+Files (folder/file ← author, title, original page, licence):
+  airplane/699c1d53d88329a5.png ← Daniel Ramirez, "Sikorsky H-3 Sea King Cockpit", https://www.flickr.com/photos/danramarch/6183243296, https://creativecommons.org/licenses/by/2.0/
+  airplane/5b6e24f2807b6a09.png ← Michael Wittmann, "MiG-3 flies over the battle", https://www.flickr.com/photos/panzercombatii/8961944517, https://creativecommons.org/licenses/by/2.0/
+  airplane/62cabe96a5c886c8.png ← David Merrett, "Spitfire", https://www.flickr.com/photos/davehamster/531897329, https://creativecommons.org/licenses/by/2.0/
+  airplane/77e5285ad84f72a6.png ← Jorge Láscar, "Douglas A-4 Skyhawk - USS Intrepid", https://www.flickr.com/photos/jlascar/7181691170, https://creativecommons.org/licenses/by/2.0/
+  airplane/31a53a582e278b2f.png ← Carlos Luz, "Museu da TAM - São Carlos", https://www.flickr.com/photos/carlosluzz/5482032987, https://creativecommons.org/licenses/by/2.0/
+  airplane/23a64316ca708bdc.png ← abdallahh, "Piper PA31 Navajo", https://www.flickr.com/photos/husseinabdallah/3357613229, https://creativecommons.org/licenses/by/2.0/
+  airplane/149be220c10e5b7f.png ← kennejima, "Thunderbirds Air Show 2014", https://www.flickr.com/photos/kennejima/15738578639, https://creativecommons.org/licenses/by/2.0/
+  airplane/3766d90b31073e17.png ← Jerry Gunner, "29+09 F-104F Starfighter Gate guard Jever", https://www.flickr.com/photos/13722921@N06/3621409895, https://creativecommons.org/licenses/by/2.0/
+  airplane/73d6f39982fdc844.png ← Ismaïl Taha, "ScreenShot02", https://www.flickr.com/photos/101125222@N02/16487711035/, https://creativecommons.org/licenses/by/2.0/
+  airplane/1ebfa61aecf7c8bc.png ← Larry Darling, "Cessna Citation X - N299CX - Gears Up - Wells Fargo Bank Na Trustee Corporate Jet - Waukegan Regional Airport", https://www.flickr.com/photos/tncountryfan/7623527948, https://creativecommons.org/licenses/by/2.0/
+  airplane/19e09fdd5b16a212.png ← Christopher Michel, "Spirit of St Louis", https://www.flickr.com/photos/cmichel67/16721724978, https://creativecommons.org/licenses/by/2.0/
+  airplane/297c7a3abf85326c.png ← Joe Bielawa, "POTUS.DSC_2880.6.1.12", https://www.flickr.com/photos/joebielawa/7317201322, https://creativecommons.org/licenses/by/2.0/
+  bear/ebbb4c6127e02658.png ← California Department of Fish and Wildlife, "Black bear", https://www.flickr.com/photos/californiadfg/14920793105, https://creativecommons.org/licenses/by/2.0/
+  bear/07e64bb137734dbf.png ← Nick Hubbard, "Laos-319", https://www.flickr.com/photos/nickhubbard/14571311755, https://creativecommons.org/licenses/by/2.0/
+  bear/00424836a765c888.png ← Beatrice Murch, "Chilling bear", https://www.flickr.com/photos/blmurch/315194901, https://creativecommons.org/licenses/by/2.0/
+  bear/e6be4b1bac13fd3b.png ← PS-OV-ART Patty Sue O&#x27;Hair-Vicknair, Artist, "DSC_3071", https://www.flickr.com/photos/psovart/1456337792, https://creativecommons.org/licenses/by/2.0/
+  bear/a46e8558b5aa552a.png ← James Grimmelmann, "Otter", https://www.flickr.com/photos/grimmelm/1752720625, https://creativecommons.org/licenses/by/2.0/
+  bear/d22120349e4b34d1.png ← Kathy &amp; sam, "Bear", https://www.flickr.com/photos/39871249@N07/4355350360/in/album-72157622434753329/, https://creativecommons.org/licenses/by/2.0/
+  bear/9c240acc300ba1ab.png ← Immortel, "Two wolverines at Ähtäri Zoo", https://www.flickr.com/photos/immortel/7961290336, https://creativecommons.org/licenses/by/2.0/
+  bear/c67b5be02ad86f48.png ← Phalinn Ooi, "Melaka", https://www.flickr.com/photos/phalinn/16256211217, https://creativecommons.org/licenses/by/2.0/
+  bear/ec34461c3b5cd072.png ← Jonathan Jordan, "Red Panda at Chester Zoo", https://www.flickr.com/photos/jjordan64816/9632649556, https://creativecommons.org/licenses/by/2.0/
+  bear/3df2b6a098712fee.png ← Calgary Reviews, "Calgary Zoo Alberta Canada Red Panda Ailurus Fulgens", https://www.flickr.com/photos/calgaryreviews/5317771307, https://creativecommons.org/licenses/by/2.0/
+  bear/a95191730e75bfce.png ← Jessie Pearl, "oh no, no bears up here, no siree bob", https://www.flickr.com/photos/terwilliger911/3717582265, https://creativecommons.org/licenses/by/2.0/
+  bear/8651bf53521f2efe.png ← Jared, "Linville - Grandfather Mountain - Wildlife Exhibits - Black Bear - Sticking Tongue Out", https://www.flickr.com/photos/jared422/15945201714, https://creativecommons.org/licenses/by/2.0/
+  bicycle/deadb71534cb8465.png ← jay8085, "Italian Post Cycle, Milan", https://www.flickr.com/photos/89649959@N00/2737177468, https://creativecommons.org/licenses/by/2.0/
+  bicycle/56883813d19ec4fc.png ← Joel Bombardier, "12", https://www.flickr.com/photos/42345348@N00/128258229, https://creativecommons.org/licenses/by/2.0/
+  bicycle/2c29eb397ae9ac3d.png ← Glory Cycles, "BMC Streetracer SR01 Shimano 105 Bike 043", https://www.flickr.com/photos/glorycycles/6881735574, https://creativecommons.org/licenses/by/2.0/
+  bicycle/699d9ff34eba4ab4.png ← FaceMePLS, "Quantum Scooter", https://www.flickr.com/photos/faceme/7610437386, https://creativecommons.org/licenses/by/2.0/
+  bicycle/0c9e70186b841a3b.png ← 陳 ポーハン, "停車場", https://www.flickr.com/photos/pohan-camera/43739302/, https://creativecommons.org/licenses/by/2.0/
+  bicycle/2ffa6e99db1b755c.png ← List_84, "Iced tea", https://www.flickr.com/photos/liste1/8451443178, https://creativecommons.org/licenses/by/2.0/
+  bicycle/42732ba8b28fb607.png ← Glory Cycles, "Neil Pryde Alize Ultegra with Ultegra Tubeless Wheelset 049", https://www.flickr.com/photos/glorycycles/8393431138/, https://creativecommons.org/licenses/by/2.0/
+  bicycle/23a53c2143e5dd16.png ← gregezzo, "Tour De Troit_15", https://www.flickr.com/photos/24912845@N07/15114879359, https://creativecommons.org/licenses/by/2.0/
+  bicycle/d7a90c5b00ada5ae.png ← Hernán García Crespo, "Transporte", https://www.flickr.com/photos/subzonica/170853679, https://creativecommons.org/licenses/by/2.0/
+  bicycle/c519c5f6b22a96b7.png ← yoppy, "DSC_2988", https://www.flickr.com/photos/spilt-milk/20083404753, https://creativecommons.org/licenses/by/2.0/
+  bicycle/9eee21c7154bc02a.png ← Jesús Corrius, "Visby", https://www.flickr.com/photos/jcorrius/219426242, https://creativecommons.org/licenses/by/2.0/
+  bicycle/26e79167fc5e4444.png ← John Greenfield, "n-DIVVY-large570 2", https://www.flickr.com/photos/24858199@N00/16946182271, https://creativecommons.org/licenses/by/2.0/
+  bird/3a3dcc7a620686f9.png ← Barb Barton, "bird and lichen nest", https://www.flickr.com/photos/53768998@N02/4973999082, https://creativecommons.org/licenses/by/2.0/
+  bird/7ced185b59f58279.png ← Otota DANA, "ハシビロコウ", https://www.flickr.com/photos/ototadana/10146385683, https://creativecommons.org/licenses/by/2.0/
+  bird/f274683259e275d1.png ← Don DeBold, "Great Blue Heron at Vasona Lake Park", https://www.flickr.com/photos/ddebold/8374449251, https://creativecommons.org/licenses/by/2.0/
+  bird/3bb2c119d37cc364.png ← Amit Patel, "Quail lookout", https://www.flickr.com/photos/amitp/7389478256, https://creativecommons.org/licenses/by/2.0/
+  bird/f7e89115e01bcc4b.png ← Andrew C, "Blue-gray gnatcatcher (Polioptila caerulea)", https://www.flickr.com/photos/acryptozoo/17245938561, https://creativecommons.org/licenses/by/2.0/
+  bird/dd420c4d2a1efeaa.png ← digital_image_fan, "Who are you Aug 9", https://www.flickr.com/photos/the_colmans/7751170530, https://creativecommons.org/licenses/by/2.0/
+  bird/2ab9a1df2d2b9316.png ← Tony Alter, "I Missed The Intended Shot", https://www.flickr.com/photos/78428166@N00/12846902754, https://creativecommons.org/licenses/by/2.0/
+  bird/2c4cb53f64a26cfa.png ← CheepShot, "Marengo Ridge, Marengo IL", https://www.flickr.com/photos/23755697@N04/7461532170, https://creativecommons.org/licenses/by/2.0/
+  bird/1943d9ae2ad4860b.png ← Brian Gratwicke, "puffin", https://www.flickr.com/photos/briangratwicke/9384127271, https://creativecommons.org/licenses/by/2.0/
+  bird/2fadb01375be16d6.png ← Purple Slog, "IMG_0341", https://www.flickr.com/photos/purpleslog/136637555, https://creativecommons.org/licenses/by/2.0/
+  bird/2ac755d0fca2422f.png ← Marie Hale, "Swallow", https://www.flickr.com/photos/15016964@N02/20155167656, https://creativecommons.org/licenses/by/2.0/
+  bird/c68999c0ef281b55.png ← Ron Knight, "Black Wheatear (Oenanthe leucura)", https://www.flickr.com/photos/sussexbirder/8785361568, https://creativecommons.org/licenses/by/2.0/
+  boat/699e1d37dbeb7adf.png ← Graeme Churchard, "Hout Bay", https://www.flickr.com/photos/graeme/4181988789, https://creativecommons.org/licenses/by/2.0/
+  boat/32dc3a52824337be.png ← Bill Reynolds, "Stand up paddling in the Columbia River Gorge", https://www.flickr.com/photos/rrbill/16763023312, https://creativecommons.org/licenses/by/2.0/
+  boat/f6e5d52810afa0c9.png ← Roberto Busatto, "The River_v2", https://www.flickr.com/photos/newbobolix/8607533812/, https://creativecommons.org/licenses/by/2.0/
+  boat/a46ade0832809059.png ← eric molina, "chilling out in the muddy water.", https://www.flickr.com/photos/iamagenious/397416626, https://creativecommons.org/licenses/by/2.0/
+  boat/26a042130203c133.png ← Librarygroover, "Camden, Maine", https://www.flickr.com/photos/librarygroover/7832473688, https://creativecommons.org/licenses/by/2.0/
+  boat/c45eac5f8f187b84.png ← Kylie &amp; Rob (and Helen), "Seaview Marina at dawn", https://www.flickr.com/photos/hell28k/5591582448, https://creativecommons.org/licenses/by/2.0/
+  boat/0418d2f7d2e728fa.png ← grassrootsgroundswell, "Islas DS1", https://www.flickr.com/photos/grassrootsgroundswell/11859014313, https://creativecommons.org/licenses/by/2.0/
+  boat/191d9392f9a554ac.png ← Wapster, "Helford Boats", https://www.flickr.com/photos/wapster/3829771185, https://creativecommons.org/licenses/by/2.0/
+  boat/29cc78187d11d835.png ← Mighty Travels, "#lighthouse #tugboat #sanfrancisco #bay", https://www.flickr.com/photos/96223380@N02/12727220474, https://creativecommons.org/licenses/by/2.0/
+  boat/2b24680922891515.png ← D@LY3D, "Doha harbour #qatar #doha #harbour #boat #fishing #fishing_trip #morning #day #corniche #instaqatar #instadoha #instaday #instagram #instacorniche #instafishing #surfcasting #sunset", https://www.flickr.com/photos/daly3d/16461865036, https://creativecommons.org/licenses/by/2.0/
+  boat/2b565f961a6bd662.png ← Randen Pederson, "The Edna G", https://www.flickr.com/photos/chefranden/15299010201, https://creativecommons.org/licenses/by/2.0/
+  boat/8a25088f828cb3a8.png ← Steve Slater, "boats docked at the jetty", https://www.flickr.com/photos/wildlife_encounters/16888512970, https://creativecommons.org/licenses/by/2.0/
+  bottle/a254c0504d7ec5fe.png ← Dominic Lockyer, "Bourgogne Pinot Noir Couvent des Jacobins, Louis Jadot", https://www.flickr.com/photos/farehamwine/15221173971, https://creativecommons.org/licenses/by/2.0/
+  bottle/7b7fdcfc6d020391.png ← Sh4rp_i, "Coca Cola Signs", https://www.flickr.com/photos/85638163@N00/7171046091, https://creativecommons.org/licenses/by/2.0/
+  bottle/14562a4aadd85416.png ← Ben Sutherland, "Bottle of Jack Daniel's Tennessee Whiskey", https://www.flickr.com/photos/bensutherland/12586531305, https://creativecommons.org/licenses/by/2.0/
+  bottle/a2b0beeaca80fee6.png ← Modesto del Río, "Guilty pleasures de oferta no #Carreful. Mágoa non ter comprado máis.", https://www.flickr.com/photos/modesto/15223871154, https://creativecommons.org/licenses/by/2.0/
+  bottle/f59a886d2bd0db5d.png ← Graham Hills, "I think this is Japanese for very yummy!", https://www.flickr.com/photos/grahamhills/8576634975, https://creativecommons.org/licenses/by/2.0/
+  bottle/483ec612d7062a27.png ← Evandro Sudré, "Pimenta", https://www.flickr.com/photos/conceptum/6247912110, https://creativecommons.org/licenses/by/2.0/
+  bottle/34455e60f461fe2f.png ← Bernt Rostad, "Mississippi Mud Black & Tan", https://www.flickr.com/photos/brostad/2902533244, https://creativecommons.org/licenses/by/2.0/
+  bottle/8108e227baef42c3.png ← Jane Rahman, "film shoot, 10.03.10", https://www.flickr.com/photos/buenosaurus/5053620238, https://creativecommons.org/licenses/by/2.0/
+  bottle/914dd48f72aaec27.png ← Bill &amp; Vicki T, "Unusual Beer", https://www.flickr.com/photos/iluvcocacola/15791526671, https://creativecommons.org/licenses/by/2.0/
+  bottle/009d1c169f078c6a.png ← Johan Larsson, "Blossa Glögg -  Spetsad med Cognac", https://www.flickr.com/photos/johanl/2073604595, https://creativecommons.org/licenses/by/2.0/
+  bottle/9c7844034c8450ec.png ← Wagner T. Cassimiro &quot;Aranha&quot;, "Brewski Beer", https://www.flickr.com/photos/wagnertc/4799513899, https://creativecommons.org/licenses/by/2.0/
+  bottle/992c452c59ad82d9.png ← Dan Dickinson, "Southbrook 2004 'Poetica' Chardonnay", https://www.flickr.com/photos/ltdan/9188528974, https://creativecommons.org/licenses/by/2.0/
+  car/7be4fb5a13d99f0a.png ← David Merrett, "Team Corvette Racing - Corvette C6R", https://www.flickr.com/photos/davehamster/2604367691, https://creativecommons.org/licenses/by/2.0/
+  car/d957dc4bb8a60fbd.png ← FotoSleuth, "VW Passat CC", https://www.flickr.com/photos/51811543@N08/13598892984/, https://creativecommons.org/licenses/by/2.0/
+  car/382c9d5ee86f7fc6.png ← Craig Howell, "P1150896", https://www.flickr.com/photos/seat850/6074250477, https://creativecommons.org/licenses/by/2.0/
+  car/dde45aa37b5aeca6.png ← Moto &quot;Club4AG&quot; Miwa, "2011_12_20_Vegas-111-15", https://www.flickr.com/photos/moto_club4ag/6626336303, https://creativecommons.org/licenses/by/2.0/
+  car/91ed9c9e47de7150.png ← Ray T, "Prior Design VW New Beetle GT3 Front bumper and Lip Splitter", https://www.flickr.com/photos/priordesignna/5267829415, https://creativecommons.org/licenses/by/2.0/
+  car/0ad44be9abdadfa2.png ← Jeremy, "Toyota Hiace H10", https://www.flickr.com/photos/126433814@N04/16187921734, https://creativecommons.org/licenses/by/2.0/
+  car/25210a1c66696366.png ← Henry Jose, "Untitled", https://www.flickr.com/photos/henryjose/6661113533, https://creativecommons.org/licenses/by/2.0/
+  car/6cf45753cde02514.png ← JOHN LLOYD, "Datsun 180B SSS", https://www.flickr.com/photos/hugo90/4492166193, https://creativecommons.org/licenses/by/2.0/
+  car/18702859d5a49135.png ← Mathew Bedworth, "Dub Club Weekly Meet", https://www.flickr.com/photos/bedworth/8788376651, https://creativecommons.org/licenses/by/2.0/
+  car/8ab58d0fbe9ad717.png ← Jason Stum, "2015 Subaru WRX STI - Rear View Doors Open", https://www.flickr.com/photos/67205645@N08/12120731934, https://creativecommons.org/licenses/by/2.0/
+  car/eaf4a405b74d3eb7.png ← dave_7, "1981 Caterham Super Seven", https://www.flickr.com/photos/daveseven/3448648284, https://creativecommons.org/licenses/by/2.0/
+  car/7151884c7ff328a7.png ← Charlie, "1990 Ford Sierra 1.8 L", https://www.flickr.com/photos/92622665@N08/11966712045, https://creativecommons.org/licenses/by/2.0/
+  cat/98df113a4d34a660.png ← Shaun Malley, "the stray", https://www.flickr.com/photos/shaunmalley/6328762267, https://creativecommons.org/licenses/by/2.0/
+  cat/deb76aeb60f5f9bf.png ← Cristóbal Alvarado Minic, "Little nice cat", https://www.flickr.com/photos/ctam/5728873450/, https://creativecommons.org/licenses/by/2.0/
+  cat/2f77377762014936.png ← Nikita, "Cat's eye closeup", https://www.flickr.com/photos/malfet/18866570441, https://creativecommons.org/licenses/by/2.0/
+  cat/46a46b58dbf077d7.png ← RBerteig, "Installing and testing the cat shelves.", https://www.flickr.com/photos/rberteig/14103256892, https://creativecommons.org/licenses/by/2.0/
+  cat/e50469bef942b853.png ← Jennifer Morrow, "View from Xerri il-Bukkett terrace", https://www.flickr.com/photos/donotlick/4229051556, https://creativecommons.org/licenses/by/2.0/
+  cat/434379afd2ee9b7a.png ← altemark, "mwtf?", https://www.flickr.com/photos/altemark/4420491659, https://creativecommons.org/licenses/by/2.0/
+  cat/5f16ec819b7ef14e.png ← Beckie, "Table leg.", https://www.flickr.com/photos/50066720@N03/6714609167/, https://creativecommons.org/licenses/by/2.0/
+  cat/2e781fb1706b1e27.png ← Andy Rusch, "Mochi", https://www.flickr.com/photos/asrusch/12981329574, https://creativecommons.org/licenses/by/2.0/
+  cat/9b43acfe9a6cb4a7.png ← Charles Barilleaux, "Checking Out", https://www.flickr.com/photos/bontempscharly/6035742647, https://creativecommons.org/licenses/by/2.0/
+  cat/93604268e6d6389b.png ← letmebeyourswearword, "Gesture059", https://www.flickr.com/photos/24709080@N05/3931315701, https://creativecommons.org/licenses/by/2.0/
+  cat/4e3d1613460f44a0.png ← Rikki&#x27;s  Refuge, "Ginger finds some sun!", https://www.flickr.com/photos/rikkis_refuge/15942017203, https://creativecommons.org/licenses/by/2.0/
+  cat/4ae7db63286ad68c.png ← Tobias Klüpfel, "3 Oct 2005", https://www.flickr.com/photos/kluepfel/49017727, https://creativecommons.org/licenses/by/2.0/
+  chair/612d6ed7755ba374.png ← storebukkebruse, "Weaving stick :-)", https://www.flickr.com/photos/tusnelda/3934562280, https://creativecommons.org/licenses/by/2.0/
+  chair/1389105914780d29.png ← Rick Ligthelm, "Toronto, Canada", https://www.flickr.com/photos/ligthelm/19796609136, https://creativecommons.org/licenses/by/2.0/
+  chair/c539279a1c12cdf7.png ← Tim Regan, "Fabulous Airbnb in Umeå, my first outside the UK", https://www.flickr.com/photos/dumbledad/14448571463, https://creativecommons.org/licenses/by/2.0/
+  chair/511bb848a55e5aa7.png ← Paola Sucato, "DSC_0093", https://www.flickr.com/photos/ci_polla/4430627478/, https://creativecommons.org/licenses/by/2.0/
+  chair/4c6c743835dba9d2.png ← Wicker Paradise, "Want: Rare Rattan/Metal Lounge Chair 50s saarinen eames era", https://www.flickr.com/photos/wicker-furniture/7166844034, https://creativecommons.org/licenses/by/2.0/
+  chair/a36df09c4e738d88.png ← Mr Thinktank, "IMG_3880", https://www.flickr.com/photos/tahini/14834962929, https://creativecommons.org/licenses/by/2.0/
+  chair/a2ac0541d2dbda4f.png ← Mike, "20101118181", https://www.flickr.com/photos/canadian/5224232962, https://creativecommons.org/licenses/by/2.0/
+  chair/01502d8690650f02.png ← Mike Mozart, "Spunky, Coco Puff's Sister, Under Scringy's Desk", https://www.flickr.com/photos/jeepersmedia/12946021655, https://creativecommons.org/licenses/by/2.0/
+  chair/537a8b18120ca4dc.png ← Bill Sutton, "Dreamy", https://www.flickr.com/photos/29901781@N02/14560044344/, https://creativecommons.org/licenses/by/2.0/
+  chair/e8239bedac2ea773.png ← Jer Thorp, "Untitled", https://www.flickr.com/photos/blprnt/19787945686, https://creativecommons.org/licenses/by/2.0/
+  chair/6642affb6461d568.png ← Mikey, "Interior of the 1938 Tube Stock", https://www.flickr.com/photos/raver_mikey/8719513224/, https://creativecommons.org/licenses/by/2.0/
+  chair/6d1d1e6d7bb36183.png ← Aitor Calero, "Todo listo para un mus", https://www.flickr.com/photos/1c11/15391716713, https://creativecommons.org/licenses/by/2.0/
+  clock/6f719957009afbab.png ← Blondinrikard Fröberg, "Clock", https://www.flickr.com/photos/blondinrikard/15015656068, https://creativecommons.org/licenses/by/2.0/
+  clock/f7e67a46382556e4.png ← Tonya Stinson, "Visiting the Logan County Museum", https://www.flickr.com/photos/tonitunes/18781890444, https://creativecommons.org/licenses/by/2.0/
+  clock/ec20df9b97bfefe7.png ← Ruth Hartnup, "Clock Tower, Westminster", https://www.flickr.com/photos/ruthanddave/162559414, https://creativecommons.org/licenses/by/2.0/
+  clock/0f940ebc36b21a45.png ← Petit_louis, "Décompte", https://www.flickr.com/photos/petit_louis/11116094593/, https://creativecommons.org/licenses/by/2.0/
+  clock/a5633b0ee42e0a0e.png ← Gideon Benari, "Clock - 6", https://www.flickr.com/photos/solvencyiiwire/7960808622, https://creativecommons.org/licenses/by/2.0/
+  clock/46e7afac805bb63c.png ← NIMR London, "NIMR 150a: Mechanical timer", https://www.flickr.com/photos/125989912@N08/16730613028, https://creativecommons.org/licenses/by/2.0/
+  clock/1d45dfc45c76a35e.png ← Hannah Donovan, "P1030384.JPG", https://www.flickr.com/photos/hannahdonovan/3941563326, https://creativecommons.org/licenses/by/2.0/
+  clock/0cc3481e7de9d718.png ← Carolyn Williams, "9 April", https://www.flickr.com/photos/carolynwill/2401952338, https://creativecommons.org/licenses/by/2.0/
+  clock/09e673e92ce6c813.png ← Musée de l&#x27;horlogerie, "Réveil Bayard Goldorak", https://www.flickr.com/photos/49531439@N02/7344442768, https://creativecommons.org/licenses/by/2.0/
+  clock/00259130671bd32b.png ← yuko, "Trip to Canada", https://www.flickr.com/photos/yuko_okuy/9030267166, https://creativecommons.org/licenses/by/2.0/
+  clock/efe250ff574899c8.png ← Chuck Abbe, "Rust", https://www.flickr.com/photos/chuckthephotographer/2284900593, https://creativecommons.org/licenses/by/2.0/
+  clock/ff495229e0faa009.png ← jojo-bean, "Tudor Gatehouse @ St. James's Palace", https://www.flickr.com/photos/jojo-bean/2622650106, https://creativecommons.org/licenses/by/2.0/
+  dog/cf8c153317f970b0.png ← U.S. Army, "Carson outdoor pool goes to the dogs - FMWRC - US Army - 100910", https://www.flickr.com/photos/familymwr/4989889242, https://creativecommons.org/licenses/by/2.0/
+  dog/014d42d86cb091d8.png ← Jurgen, "0104_DSC_0324", https://www.flickr.com/photos/300tdorg/4218931442/, https://creativecommons.org/licenses/by/2.0/
+  dog/01546c53a9d6e90b.png ← Canine To Five, "DSCF6637", https://www.flickr.com/photos/9334511@N06/15309922000, https://creativecommons.org/licenses/by/2.0/
+  dog/d0a67c4b313808cd.png ← Paul Kehrer, "Attack!", https://www.flickr.com/photos/paulkehrer/441383004, https://creativecommons.org/licenses/by/2.0/
+  dog/5e0d29b881948fd8.png ← Bruno Cordioli, "Dog waiting... around tokyo", https://www.flickr.com/photos/br1dotcom/16187528745, https://creativecommons.org/licenses/by/2.0/
+  dog/6f03412050cfd597.png ← fugzu, "Nemo & Kira", https://www.flickr.com/photos/70253321@N00/12767688484, https://creativecommons.org/licenses/by/2.0/
+  dog/c386ad3a488c3b48.png ← Bev Sykes, "Pals", https://www.flickr.com/photos/basykes/2106994301, https://creativecommons.org/licenses/by/2.0/
+  dog/8617dd5cd66db8e1.png ← IntangibleArts, "the gift - 6", https://www.flickr.com/photos/intangible/3573498090, https://creativecommons.org/licenses/by/2.0/
+  dog/e77fc475836b0ea7.png ← fugzu, "Nirvana delle Caserosse", https://www.flickr.com/photos/70253321@N00/15373616904, https://creativecommons.org/licenses/by/2.0/
+  dog/7a378e67add7a8fb.png ← Taro the Shiba Inu, "2011 shibapalooza 4", https://www.flickr.com/photos/_tar0_/5951815323, https://creativecommons.org/licenses/by/2.0/
+  dog/b2e2260f3612d258.png ← Kinjeng Submiter, "dog-pictures", https://www.flickr.com/photos/kinjengsubmiter/4215824273, https://creativecommons.org/licenses/by/2.0/
+  dog/cea10d87a4693a0f.png ← Nari Sin, "Untitled", https://www.flickr.com/photos/narace/4830350438, https://creativecommons.org/licenses/by/2.0/
+  elephant/01dd166313ba7ca5.png ← Alias 0591, "Taking a shower", https://www.flickr.com/photos/renemensen/6868821832, https://creativecommons.org/licenses/by/2.0/
+  elephant/09e1c56f60e73f89.png ← FaceMePLS, "Circus Renz in Egmond aan de Hoef", https://www.flickr.com/photos/faceme/4815295765, https://creativecommons.org/licenses/by/2.0/
+  elephant/d1644a1d5f385ac7.png ← Werner  Bayer, "Éléphants Nationalpark d'Addo South Africa", https://www.flickr.com/photos/wbayercom/14931199480, https://creativecommons.org/licenses/by/2.0/
+  elephant/9b6ec0f67f99eb2c.png ← Michael Button, "Copenhagen 2014 - Zoo", https://www.flickr.com/photos/michaeljohnbutton/14059397127, https://creativecommons.org/licenses/by/2.0/
+  elephant/e1e680ee88c15db2.png ← flowcomm, "trunk over ele's face_1", https://www.flickr.com/photos/flowcomm/5637862526, https://creativecommons.org/licenses/by/2.0/
+  elephant/066ed679c721bf70.png ← Michael Lehmann, "Eli Back 2", https://www.flickr.com/photos/phoenstudio/9573090750, https://creativecommons.org/licenses/by/2.0/
+  elephant/5361de8aa11ceb1b.png ← S B, "Intimate elephants", https://www.flickr.com/photos/sarahbaker/211747442, https://creativecommons.org/licenses/by/2.0/
+  elephant/4e14987369a6a233.png ← Gary Bembridge, "0503 Ulusaba South Africa (116)", https://www.flickr.com/photos/tipsfortravellers/591041265, https://creativecommons.org/licenses/by/2.0/
+  elephant/5a5a9396819e03ca.png ← belgianchocolate, "kai-mook meets Dumbo", https://www.flickr.com/photos/frank-wouters/3549256847, https://creativecommons.org/licenses/by/2.0/
+  elephant/d4f9ec037dc12d67.png ← Tanner Ford, "DSC_0555", https://www.flickr.com/photos/moon-dog/2476992956, https://creativecommons.org/licenses/by/2.0/
+  elephant/1d764afdadfa72ed.png ← Balaji Venkatesh Sivaramakrishnan, "Asiatic Elephant", https://www.flickr.com/photos/sbalajiv/7627793734, https://creativecommons.org/licenses/by/2.0/
+  elephant/afeeca47fcae19f9.png ← whatleydude, "Speedboat Safari through Chobe National Park", https://www.flickr.com/photos/whatleydude/3799327300, https://creativecommons.org/licenses/by/2.0/
+  keyboard/3db1a8c18f56bc36.png ← Paul Hudson, "My new desk layout", https://www.flickr.com/photos/pahudson/3638531099, https://creativecommons.org/licenses/by/2.0/
+  keyboard/2409d5d183ffa37b.png ← senov, "兄ちゃんにReudoのBluetoothキーボードを貰ったのだけどさっそく使い方がわからない。電源ボタンどこ。", https://www.flickr.com/photos/busbong/5379895246, https://creativecommons.org/licenses/by/2.0/
+  keyboard/f213b2963c94394b.png ← Okko Pyykkö, "Day 266", https://www.flickr.com/photos/data_op/2878830565, https://creativecommons.org/licenses/by/2.0/
+  keyboard/0619b059d30924a1.png ← U.S. Department of Agriculture, "20120724-OSEC-LSC-0790", https://www.flickr.com/photos/usdagov/7644427706, https://creativecommons.org/licenses/by/2.0/
+  keyboard/bb00fe08f620a367.png ← Elias Vincent, "#keyboard #gaming", https://www.flickr.com/photos/125803282@N02/16066582370, https://creativecommons.org/licenses/by/2.0/
+  keyboard/4b32d278b78afe47.png ← Christine und Hagen Graf, "machm-it.org Mitgliederversammlung", https://www.flickr.com/photos/hagengraf/1231940214, https://creativecommons.org/licenses/by/2.0/
+  keyboard/0ccb79fd4d110f6f.png ← Iwan Gabovitch, "Pixel Art Characters at Berlin Mini Jam @King", https://www.flickr.com/photos/qubodup/15872185661, https://creativecommons.org/licenses/by/2.0/
+  keyboard/02ebf26f70a588f3.png ← Sakai Yuya, "quadra950", https://www.flickr.com/photos/sakadon/2227441417, https://creativecommons.org/licenses/by/2.0/
+  keyboard/690bff46ccd78834.png ← Yeray Hdez Guerra, "iPod nano", https://www.flickr.com/photos/yerahg/1449366397, https://creativecommons.org/licenses/by/2.0/
+  keyboard/2ff863a20a99c5e8.png ← ImagineCup, "ZBR_2964", https://www.flickr.com/photos/imaginecup/5927495634/, https://creativecommons.org/licenses/by/2.0/
+  keyboard/9d4e9630fb6e6dd7.png ← Caius Durling, "Macbook in progress", https://www.flickr.com/photos/caius/2941723520, https://creativecommons.org/licenses/by/2.0/
+  keyboard/94095b30b5bbbdea.png ← Jason Cartwright, "Desk", https://www.flickr.com/photos/jasoncartwright/13573658/in/pool-ourbbc, https://creativecommons.org/licenses/by/2.0/
+  knife/04453c7b2a60dc3d.png ← twintiger007, "Ka Bar Becker BK-77 S30V steel", https://www.flickr.com/photos/51792270@N03/15812226889, https://creativecommons.org/licenses/by/2.0/
+  knife/3d62d16299028c97.png ← Antti Kultanen, "2011-09-01-010 Synttäritarjoilu", https://www.flickr.com/photos/88916251@N00/6103220577/, https://creativecommons.org/licenses/by/2.0/
+  knife/24c73572fe4e6dac.png ← twintiger007, "Busse Bushwacker Mistress-11", https://www.flickr.com/photos/51792270@N03/19898499072, https://creativecommons.org/licenses/by/2.0/
+  knife/131a31401b071bda.png ← Didriks, "F Dick, J K Adams", https://www.flickr.com/photos/dinnerseries/14610264850, https://creativecommons.org/licenses/by/2.0/
+  knife/97efc9772417aaef.png ← twintiger007, "Busse Team Gemini Light Brigade TGLB", https://www.flickr.com/photos/51792270@N03/17404458702, https://creativecommons.org/licenses/by/2.0/
+  knife/d931c39907c8b285.png ← twintiger007, "Busse Combat ASH1", https://www.flickr.com/photos/51792270@N03/16155324722, https://creativecommons.org/licenses/by/2.0/
+  knife/0f3a8d79829e0af1.png ← Arnold Gatilao, "Truth be told...these kitchen shears aren't that great. #thingsmydadbuysatkohls", https://www.flickr.com/photos/arndog/17464989101, https://creativecommons.org/licenses/by/2.0/
+  knife/99201f85c6df019d.png ← twintiger007, "Busse Tank Buster-4", https://www.flickr.com/photos/51792270@N03/19356685606, https://creativecommons.org/licenses/by/2.0/
+  knife/3041eefbd104ff42.png ← Didriks, "Asia Cut Knives by Friedr. Dick", https://www.flickr.com/photos/dinnerseries/15289973115, https://creativecommons.org/licenses/by/2.0/
+  knife/0c73b72d82c32b12.png ← James Case, "Case Mother of Pearl Toothpick", https://www.flickr.com/photos/capcase/4969101471, https://creativecommons.org/licenses/by/2.0/
+  knife/8a195e7e4803c5d9.png ← James Case, "Buck Bantam BLW", https://www.flickr.com/photos/capcase/5075274115, https://creativecommons.org/licenses/by/2.0/
+  knife/789d9288b6ca1436.png ← cea +, "Dagger - Cut", https://www.flickr.com/photos/centralasian/3201021219, https://creativecommons.org/licenses/by/2.0/
+  oven/86b12a1ce788541d.png ← Tim Crowe, "seejane5", https://www.flickr.com/photos/this_could_be_my_house/2885931873, https://creativecommons.org/licenses/by/2.0/
+  oven/108ab3f9f0034c17.png ← Tatsuo Yamashita, "越後かきもち", https://www.flickr.com/photos/yto/4258082015, https://creativecommons.org/licenses/by/2.0/
+  oven/c40e46a982741727.png ← Grant.C, "Midnight snack", https://www.flickr.com/photos/grant_subaru/11551909434, https://creativecommons.org/licenses/by/2.0/
+  oven/49f7e61e228d3311.png ← Goedeker&#x27;s, "GE JRS06SKSS 24&quot; Stainless Steel Electric Single Wall Oven", https://www.flickr.com/photos/goedekers/13084446975, https://creativecommons.org/licenses/by/2.0/
+  oven/60f634489460645f.png ← PortoBay Hotels &amp; Resorts, "hotel EDEN MAR | studio", https://www.flickr.com/photos/portobaytrade/3213297600, https://creativecommons.org/licenses/by/2.0/
+  oven/d0e2dba043cdc5bd.png ← USAG- Humphreys, "Family Safety Day - Camp Humphreys, Korea - 120803", https://www.flickr.com/photos/usaghumphreys/7745054420, https://creativecommons.org/licenses/by/2.0/
+  oven/412ec480b1652daa.png ← Satish Krishnamurthy, "perceptually hotter samosas", https://www.flickr.com/photos/unlistedsightings/5054085676, https://creativecommons.org/licenses/by/2.0/
+  oven/7751d3a7ced10598.png ← Chris Kelly, "Sharp Carousel Microwave", https://www.flickr.com/photos/ckelly/4846047005, https://creativecommons.org/licenses/by/2.0/
+  oven/52e9aad8124a6018.png ← Arto Brick, "Daisy Deco 2.jpg", https://www.flickr.com/photos/artobrick/16427386616, https://creativecommons.org/licenses/by/2.0/
+  oven/19587e2bf5776e91.png ← Michael Ocampo, "Hawaii Vacation Home", https://www.flickr.com/photos/coolmikeol/4209915057, https://creativecommons.org/licenses/by/2.0/
+  oven/02f8641eaaa3b3cc.png ← LG전자, "LG 디오스 식기세척기 신제품 출시", https://www.flickr.com/photos/lge/4573190814/, https://creativecommons.org/licenses/by/2.0/
+  oven/96decdf81acdfa3a.png ← Ben Babcock, "How NOT to Microwave Butter", https://www.flickr.com/photos/tachyondecay/3221906444, https://creativecommons.org/licenses/by/2.0/
+  truck/0af76be0b9a1bfeb.png ← Graham Richardson, "Langdon Transport PX11BNN", https://www.flickr.com/photos/didbygraham/16970472365, https://creativecommons.org/licenses/by/2.0/
+  truck/b2a51f691788a2a0.png ← FaceMePLS, "Autootjes in Amsterdam", https://www.flickr.com/photos/faceme/15126686815, https://creativecommons.org/licenses/by/2.0/
+  truck/74470fc88b126a2b.png ← JOHN LLOYD, "Ford Courier and firewood", https://www.flickr.com/photos/hugo90/4419952861, https://creativecommons.org/licenses/by/2.0/
+  truck/661a10686c2151f3.png ← jim simonson, "finishing touches", https://www.flickr.com/photos/rocketjim54/72196561, https://creativecommons.org/licenses/by/2.0/
+  truck/246d686eb9f12da1.png ← Cliff, "Woodstock, NH 4th of July Parade 2007", https://www.flickr.com/photos/nostri-imago/2877363837, https://creativecommons.org/licenses/by/2.0/
+  truck/cd126b500613bb05.png ← David Guo, "image-1.gen", https://www.flickr.com/photos/76969036@N02/8695666329, https://creativecommons.org/licenses/by/2.0/
+  truck/63ffbe401be5f008.png ← NotrucksNolife, "Raymatrans (SP)", https://www.flickr.com/photos/25328551@N08/7068506871, https://creativecommons.org/licenses/by/2.0/
+  truck/76def32e61275332.png ← afromusing, "Weekend in Wisconsin", https://www.flickr.com/photos/afropicmusing/3962219625, https://creativecommons.org/licenses/by/2.0/
+  truck/eaa3ac9476d5f15d.png ← NotrucksNolife, "Willi Betz (DE)", https://www.flickr.com/photos/25328551@N08/4244519758, https://creativecommons.org/licenses/by/2.0/
+  truck/478641ccf5695f67.png ← Rick McCharles, "Untitled", https://www.flickr.com/photos/rickmccharles/8043719637, https://creativecommons.org/licenses/by/2.0/
+  truck/1867274f0b872d85.png ← Tom Blackman, "Nice shot!", https://www.flickr.com/photos/olathetoyotapartscenter/16392234522, https://creativecommons.org/licenses/by/2.0/
+  truck/b1093225322650ae.png ← Joe Shlabotnik, "Old Pickup Truck", https://www.flickr.com/photos/joeshlabotnik/2845483303, https://creativecommons.org/licenses/by/2.0/

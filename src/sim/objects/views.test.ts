@@ -1,0 +1,67 @@
+import { describe, it, expect } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { makeRng } from '../random'
+import { CONDITIONS, LEARNED_VIEWS, TEST_VIEWS, WOBBLE_FRAMES, allViews, distanceFromLearned, viewTrials } from './views'
+
+/**
+ * The matched-distance design is the point of Part 3 (spec §6.3, §11): the
+ * three conditions have the same distribution of distances from the
+ * nearest learned view. And every view the scene can ask for was rendered
+ * and shipped.
+ */
+const manifest = JSON.parse(readFileSync(join(__dirname, '..', '..', '..', 'public', 'm08', 'scanned', 'manifest.json'), 'utf-8')) as { views: { id: string }[]; objects: { id: string; set: string }[] }
+const rendered = new Set(manifest.views.map((v) => v.id))
+
+describe('the three conditions are matched for distance from the nearest learned view', () => {
+  it('each condition has four views, and the sorted distances are identical across conditions', () => {
+    const dist = CONDITIONS.map((c) => TEST_VIEWS[c].map(distanceFromLearned).sort((a, b) => a - b))
+    for (const d of dist) expect(d.length).toBe(4)
+    expect(dist[1]).toEqual(dist[0])
+    expect(dist[2]).toEqual(dist[0])
+    expect(dist[0]).toEqual([15, 15, 30, 30])
+  })
+
+  it('no test view is a learned view, and between-views lie between the learned headings', () => {
+    for (const c of CONDITIONS) for (const v of TEST_VIEWS[c]) expect(LEARNED_VIEWS).not.toContain(v.id)
+    for (const v of TEST_VIEWS.between) { expect(v.heading).toBeGreaterThan(0); expect(v.heading).toBeLessThan(75) }
+    for (const v of TEST_VIEWS.beyond) expect(v.heading > 75 || v.heading < 0 || v.heading > 180).toBe(true)
+    for (const v of TEST_VIEWS['right-angles']) { expect(v.heading).toBe(0); expect(v.pitch).not.toBe(0) }
+  })
+})
+
+describe('every view the scene asks for was shipped', () => {
+  it('learned views, wobble frames, test views and the full curve', () => {
+    for (const v of LEARNED_VIEWS) expect(rendered.has(v), v).toBe(true)
+    for (const frames of Object.values(WOBBLE_FRAMES)) for (const f of frames) expect(rendered.has(f), f).toBe(true)
+    for (const c of CONDITIONS) for (const v of TEST_VIEWS[c]) expect(rendered.has(v.id), v.id).toBe(true)
+    const all = allViews()
+    expect(all.vertical.length).toBe(24)
+    expect(all.horizontal.length).toBe(24)
+    for (const v of [...all.vertical, ...all.horizontal]) expect(rendered.has(v.id), v.id).toBe(true)
+  })
+
+  it('eight shoes and eight other things', () => {
+    expect(manifest.objects.filter((o) => o.set === 'shoe').length).toBe(8)
+    expect(manifest.objects.filter((o) => o.set === 'other').length).toBe(8)
+  })
+})
+
+describe('the trial list', () => {
+  const shoes = manifest.objects.filter((o) => o.set === 'shoe').map((o) => o.id)
+  it('is 24 trials, half target and half not in every condition, each test view used once for the target', () => {
+    const t = viewTrials(shoes[0], shoes.slice(1), makeRng(5))
+    expect(t.length).toBe(24)
+    for (const c of CONDITIONS) {
+      const here = t.filter((x) => x.condition === c)
+      expect(here.length).toBe(8)
+      expect(here.filter((x) => x.target).length).toBe(4)
+      expect(new Set(here.filter((x) => x.target).map((x) => x.view.id)).size).toBe(4)
+      for (const x of here.filter((y) => !y.target)) expect(x.object).not.toBe(shoes[0])
+    }
+  })
+  it('is fixed by the seed', () => {
+    expect(viewTrials(shoes[0], shoes.slice(1), makeRng(5))).toEqual(viewTrials(shoes[0], shoes.slice(1), makeRng(5)))
+    expect(viewTrials(shoes[0], shoes.slice(1), makeRng(6))).not.toEqual(viewTrials(shoes[0], shoes.slice(1), makeRng(5)))
+  })
+})

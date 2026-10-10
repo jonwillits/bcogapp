@@ -1,0 +1,447 @@
+{
+ "size": 160,
+ "background": "neutral gray, 0x808080",
+ "views": [
+  {
+   "id": "h000",
+   "heading": 0,
+   "pitch": 0
+  },
+  {
+   "id": "h015",
+   "heading": 15,
+   "pitch": 0
+  },
+  {
+   "id": "h030",
+   "heading": 30,
+   "pitch": 0
+  },
+  {
+   "id": "h045",
+   "heading": 45,
+   "pitch": 0
+  },
+  {
+   "id": "h060",
+   "heading": 60,
+   "pitch": 0
+  },
+  {
+   "id": "h075",
+   "heading": 75,
+   "pitch": 0
+  },
+  {
+   "id": "h090",
+   "heading": 90,
+   "pitch": 0
+  },
+  {
+   "id": "h105",
+   "heading": 105,
+   "pitch": 0
+  },
+  {
+   "id": "h120",
+   "heading": 120,
+   "pitch": 0
+  },
+  {
+   "id": "h135",
+   "heading": 135,
+   "pitch": 0
+  },
+  {
+   "id": "h150",
+   "heading": 150,
+   "pitch": 0
+  },
+  {
+   "id": "h165",
+   "heading": 165,
+   "pitch": 0
+  },
+  {
+   "id": "h180",
+   "heading": 180,
+   "pitch": 0
+  },
+  {
+   "id": "h195",
+   "heading": 195,
+   "pitch": 0
+  },
+  {
+   "id": "h210",
+   "heading": 210,
+   "pitch": 0
+  },
+  {
+   "id": "h225",
+   "heading": 225,
+   "pitch": 0
+  },
+  {
+   "id": "h240",
+   "heading": 240,
+   "pitch": 0
+  },
+  {
+   "id": "h255",
+   "heading": 255,
+   "pitch": 0
+  },
+  {
+   "id": "h270",
+   "heading": 270,
+   "pitch": 0
+  },
+  {
+   "id": "h285",
+   "heading": 285,
+   "pitch": 0
+  },
+  {
+   "id": "h300",
+   "heading": 300,
+   "pitch": 0
+  },
+  {
+   "id": "h315",
+   "heading": 315,
+   "pitch": 0
+  },
+  {
+   "id": "h330",
+   "heading": 330,
+   "pitch": 0
+  },
+  {
+   "id": "h345",
+   "heading": 345,
+   "pitch": 0
+  },
+  {
+   "id": "p015",
+   "heading": 0,
+   "pitch": 15
+  },
+  {
+   "id": "p030",
+   "heading": 0,
+   "pitch": 30
+  },
+  {
+   "id": "p045",
+   "heading": 0,
+   "pitch": 45
+  },
+  {
+   "id": "p060",
+   "heading": 0,
+   "pitch": 60
+  },
+  {
+   "id": "p075",
+   "heading": 0,
+   "pitch": 75
+  },
+  {
+   "id": "p090",
+   "heading": 0,
+   "pitch": 90
+  },
+  {
+   "id": "p105",
+   "heading": 0,
+   "pitch": 105
+  },
+  {
+   "id": "p120",
+   "heading": 0,
+   "pitch": 120
+  },
+  {
+   "id": "p135",
+   "heading": 0,
+   "pitch": 135
+  },
+  {
+   "id": "p150",
+   "heading": 0,
+   "pitch": 150
+  },
+  {
+   "id": "p165",
+   "heading": 0,
+   "pitch": 165
+  },
+  {
+   "id": "p180",
+   "heading": 0,
+   "pitch": 180
+  },
+  {
+   "id": "p195",
+   "heading": 0,
+   "pitch": 195
+  },
+  {
+   "id": "p210",
+   "heading": 0,
+   "pitch": 210
+  },
+  {
+   "id": "p225",
+   "heading": 0,
+   "pitch": 225
+  },
+  {
+   "id": "p240",
+   "heading": 0,
+   "pitch": 240
+  },
+  {
+   "id": "p255",
+   "heading": 0,
+   "pitch": 255
+  },
+  {
+   "id": "p270",
+   "heading": 0,
+   "pitch": 270
+  },
+  {
+   "id": "p285",
+   "heading": 0,
+   "pitch": 285
+  },
+  {
+   "id": "p300",
+   "heading": 0,
+   "pitch": 300
+  },
+  {
+   "id": "p315",
+   "heading": 0,
+   "pitch": 315
+  },
+  {
+   "id": "p330",
+   "heading": 0,
+   "pitch": 330
+  },
+  {
+   "id": "p345",
+   "heading": 0,
+   "pitch": 345
+  },
+  {
+   "id": "w350",
+   "heading": 350,
+   "pitch": 0
+  },
+  {
+   "id": "w355",
+   "heading": 355,
+   "pitch": 0
+  },
+  {
+   "id": "w005",
+   "heading": 5,
+   "pitch": 0
+  },
+  {
+   "id": "w010",
+   "heading": 10,
+   "pitch": 0
+  },
+  {
+   "id": "w065",
+   "heading": 65,
+   "pitch": 0
+  },
+  {
+   "id": "w070",
+   "heading": 70,
+   "pitch": 0
+  },
+  {
+   "id": "w080",
+   "heading": 80,
+   "pitch": 0
+  },
+  {
+   "id": "w085",
+   "heading": 85,
+   "pitch": 0
+  }
+ ],
+ "objects": [
+  {
+   "id": "shoe00",
+   "set": "shoe",
+   "name": "ASICS_GEL1140V_WhiteBlackSilver",
+   "title": "ASICS GEL1140V WhiteBlackSilver",
+   "description": "ASICS GEL-1140V\u2122 - White/Black/Silver",
+   "source": "https://app.gazebosim.org/GoogleResearch/fuel/models/ASICS_GEL1140V_WhiteBlackSilver",
+   "license": "Creative Commons Attribution 4.0 International",
+   "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+   "id": "shoe01",
+   "set": "shoe",
+   "name": "ASICS_GEL1140V_WhiteRoyalSilver",
+   "title": "ASICS GEL1140V WhiteRoyalSilver",
+   "description": "ASICS GEL-1140V\u2122 - White/Royal/Silver",
+   "source": "https://app.gazebosim.org/GoogleResearch/fuel/models/ASICS_GEL1140V_WhiteRoyalSilver",
+   "license": "Creative Commons Attribution 4.0 International",
+   "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+   "id": "shoe02",
+   "set": "shoe",
+   "name": "ASICS_GELChallenger_9_Royal_BlueWhiteBlack",
+   "title": "ASICS GELChallenger 9 Royal BlueWhiteBlack",
+   "description": "ASICS GEL-Challenger\u00ae 9 - Royal Blue/White/Black",
+   "source": "https://app.gazebosim.org/GoogleResearch/fuel/models/ASICS_GELChallenger_9_Royal_BlueWhiteBlack",
+   "license": "Creative Commons Attribution 4.0 International",
+   "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+   "id": "shoe03",
+   "set": "shoe",
+   "name": "ASICS_GELResolution_5_Flash_YellowBlackSilver",
+   "title": "ASICS GELResolution 5 Flash YellowBlackSilver",
+   "description": "ASICS GEL-Resolution\u00ae 5 - Flash Yellow/Black/Silver",
+   "source": "https://app.gazebosim.org/GoogleResearch/fuel/models/ASICS_GELResolution_5_Flash_YellowBlackSilver",
+   "license": "Creative Commons Attribution 4.0 International",
+   "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+   "id": "shoe04",
+   "set": "shoe",
+   "name": "ASICS_HyperRocketgirl_SP_5_WhiteMalibu_BlueBlack",
+   "title": "ASICS HyperRocketgirl SP 5 WhiteMalibu BlueBlack",
+   "description": "ASICS Hyper-Rocketgirl\u2122 SP 5 - White/Malibu Blue/Black",
+   "source": "https://app.gazebosim.org/GoogleResearch/fuel/models/ASICS_HyperRocketgirl_SP_5_WhiteMalibu_BlueBlack",
+   "license": "Creative Commons Attribution 4.0 International",
+   "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+   "id": "shoe05",
+   "set": "shoe",
+   "name": "Reebok_REALFLEX_SELECT",
+   "title": "Reebok REALFLEX SELECT",
+   "description": "Reebok REALFLEX SELECT",
+   "source": "https://app.gazebosim.org/GoogleResearch/fuel/models/Reebok_REALFLEX_SELECT",
+   "license": "Creative Commons Attribution 4.0 International",
+   "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+   "id": "shoe06",
+   "set": "shoe",
+   "name": "Reebok_SMOOTHFLEX_CUSHRUN_20",
+   "title": "Reebok SMOOTHFLEX CUSHRUN 20",
+   "description": "Reebok SMOOTHFLEX CUSHRUN 2.0",
+   "source": "https://app.gazebosim.org/GoogleResearch/fuel/models/Reebok_SMOOTHFLEX_CUSHRUN_20",
+   "license": "Creative Commons Attribution 4.0 International",
+   "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+   "id": "shoe07",
+   "set": "shoe",
+   "name": "Reebok_TURBO_RC",
+   "title": "Reebok TURBO RC",
+   "description": "Reebok TURBO RC",
+   "source": "https://app.gazebosim.org/GoogleResearch/fuel/models/Reebok_TURBO_RC",
+   "license": "Creative Commons Attribution 4.0 International",
+   "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+   "id": "other08",
+   "set": "other",
+   "name": "Android_Figure_Orange",
+   "title": "Android Figure Orange",
+   "description": "Android Figure, Orange",
+   "source": "https://app.gazebosim.org/GoogleResearch/fuel/models/Android_Figure_Orange",
+   "license": "Creative Commons Attribution 4.0 International",
+   "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+   "id": "other09",
+   "set": "other",
+   "name": "DPC_Handmade_Hat_Brown",
+   "title": "DPC Handmade Hat Brown",
+   "description": "DPC Handmade Hat, Brown",
+   "source": "https://app.gazebosim.org/GoogleResearch/fuel/models/DPC_Handmade_Hat_Brown",
+   "license": "Creative Commons Attribution 4.0 International",
+   "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+   "id": "other10",
+   "set": "other",
+   "name": "Razer_Taipan_White_Ambidextrous_Gaming_Mouse",
+   "title": "Razer Taipan White Ambidextrous Gaming Mouse",
+   "description": "Razer Taipan White - Ambidextrous Gaming Mouse",
+   "source": "https://app.gazebosim.org/GoogleResearch/fuel/models/Razer_Taipan_White_Ambidextrous_Gaming_Mouse",
+   "license": "Creative Commons Attribution 4.0 International",
+   "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+   "id": "other11",
+   "set": "other",
+   "name": "STACKING_RING",
+   "title": "STACKING RING",
+   "description": "STACKING RING",
+   "source": "https://app.gazebosim.org/GoogleResearch/fuel/models/STACKING_RING",
+   "license": "Creative Commons Attribution 4.0 International",
+   "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+   "id": "other12",
+   "set": "other",
+   "name": "Sapota_Threshold_4_Ceramic_Round_Planter_Red",
+   "title": "Sapota Threshold 4 Ceramic Round Planter Red",
+   "description": "Sapota Threshold 4\" Ceramic Round Planter Red",
+   "source": "https://app.gazebosim.org/GoogleResearch/fuel/models/Sapota_Threshold_4_Ceramic_Round_Planter_Red",
+   "license": "Creative Commons Attribution 4.0 International",
+   "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+   "id": "other13",
+   "set": "other",
+   "name": "Schleich_Hereford_Bull",
+   "title": "Schleich Hereford Bull",
+   "description": "Schleich Hereford Bull",
+   "source": "https://app.gazebosim.org/GoogleResearch/fuel/models/Schleich_Hereford_Bull",
+   "license": "Creative Commons Attribution 4.0 International",
+   "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+   "id": "other14",
+   "set": "other",
+   "name": "Threshold_Bead_Cereal_Bowl_White",
+   "title": "Threshold Bead Cereal Bowl White",
+   "description": "Threshold Bead Cereal Bowl, White",
+   "source": "https://app.gazebosim.org/GoogleResearch/fuel/models/Threshold_Bead_Cereal_Bowl_White",
+   "license": "Creative Commons Attribution 4.0 International",
+   "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+  },
+  {
+   "id": "other15",
+   "set": "other",
+   "name": "Jansport_School_Backpack_Blue_Streak",
+   "title": "Jansport School Backpack Blue Streak",
+   "description": "Jansport School Backpack, Blue Streak",
+   "source": "https://app.gazebosim.org/GoogleResearch/fuel/models/Jansport_School_Backpack_Blue_Streak",
+   "license": "Creative Commons Attribution 4.0 International",
+   "licenseUrl": "http://creativecommons.org/licenses/by/4.0/"
+  }
+ ],
+ "learnedViews": [
+  "h000",
+  "h075"
+ ]
+}

@@ -1,0 +1,79 @@
+NOTICE for public/m08/drawings/
+
+The drawings in display.json (and the held-out drawings used to score the networks) are from the Quick, Draw! dataset (https://quickdraw.withgoogle.com/data), made available by Google under the Creative Commons Attribution 4.0 International licence (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/). Each is stored as its stroke vectors, from the 'simplified' files, unchanged except for the dataset's own normalization. The drawings were made by anonymous players of the game Quick, Draw!; the dataset does not name them.
+
+These drawings are NOT covered by the app's GNU General Public License. They are redistributed under CC BY 4.0 with this credit, which must travel with any copy.
+
+Drawings in display.json (id, category, Quick, Draw! key_id):
+  d00  airplane  5522475985141760
+  d01  boat  4609876821016576
+  d02  boat  6652265119088640
+  d03  dog  5811009337950208
+  d04  coffee cup  4880791496556544
+  d05  umbrella  5300468504854528
+  d06  elephant  6134027687821312
+  d07  floor lamp  5004566078685184
+  d08  coffee cup  4905726969380864
+  d09  bucket  6608849190518784
+  d10  snowman  5991222592143360
+  d11  elephant  5863712466403328
+  d12  bird  6704335847161856
+  d13  snowman  6223312529129472
+  d14  elephant  5080927430508544
+  d15  umbrella  6081600515211264
+  d16  bicycle  6009586534318080
+  d17  coffee cup  6404009684369408
+  d18  mushroom  5697695668764672
+  d19  car  6151223730241536
+  d20  cat  6442155469963264
+  d21  dog  4748801568931840
+  d22  knife  5558254639775744
+  d23  truck  5150402397863936
+  d24  bird  5950354338349056
+  d25  mushroom  5418548664991744
+  d26  clock  6217753142755328
+  d27  bottle  6612378416316416
+  d28  dog  6688608180240384
+  d29  keyboard  4641137002283008
+  d30  oven  6616535944658944
+  d31  knife  5974938966032384
+  d32  floor lamp  5018616078532608
+  d33  boat  5424895821348864
+  d34  knife  6661783957798912
+  d35  mushroom  6191221317828608
+  d36  oven  6608229876367360
+  d37  keyboard  4978671620194304
+  d38  bicycle  5238006497673216
+  d39  bucket  5428540688302080
+  d40  bear  4649893299748864
+  d41  chair  5857039832055808
+  d42  cat  6031627899633664
+  d43  ice cream  6590935959863296
+  d44  bird  5769834996432896
+  d45  chair  5374828687130624
+  d46  floor lamp  6701500476686336
+  d47  cat  4768205891436544
+  d48  chair  6338015783813120
+  d49  bear  4981651807404032
+  d50  snowman  6453825009352704
+  d51  bicycle  6375507056656384
+  d52  wine glass  6194382262763520
+  d53  bottle  4997034400546816
+  d54  ice cream  4811041764540416
+  d55  airplane  6252472349753344
+  d56  wine glass  5773169367449600
+  d57  bucket  6469733593382912
+  d58  bear  6296721652973568
+  d59  keyboard  5788813886488576
+  d60  umbrella  5691623792967680
+  d61  car  5144422381518848
+  d62  airplane  4688088448106496
+  d63  wine glass  5761447730610176
+  d64  clock  6419324413673472
+  d65  oven  5741304635981824
+  d66  ice cream  5251785956524032
+  d67  truck  6533849032949760
+  d68  clock  5675736679579648
+  d69  truck  6510100460077056
+  d70  car  4722255462400000
+  d71  bottle  5835139655401472

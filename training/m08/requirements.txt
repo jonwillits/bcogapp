@@ -1,0 +1,8 @@
+# Pinned to what trained the Module 8 networks on 2026-10-10 (Python 3.14.6, macOS, Apple M5 Pro).
+torch==2.13.0
+torchvision==0.28.0
+numpy==2.4.6
+pillow==12.3.0
+onnx==1.23.2
+onnxruntime==1.31.0
+onnxscript==0.7.2
