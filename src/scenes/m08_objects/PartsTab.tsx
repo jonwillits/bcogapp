@@ -25,6 +25,7 @@ export const MOVED_PROMPTS: { category: string; what: string }[] = [
   { category: 'coffee cup', what: 'the handle on top' },
 ]
 export type StillAnswer = 'yes' | 'no' | 'only just'
+export const NO_JOINTS_LINE = 'This drawing has no joint: no corner, no stroke end near another stroke, no crossing. The gaps went mid-line instead.'
 export type PartsStep = '1' | '2' | '3' | '4'
 export const PARTS_STEPS: { id: PartsStep; label: string }[] = [
   { id: '1', label: 'Step 1 · Contour deletion' },
@@ -204,7 +205,8 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-start' }}>
         <DrawPad drawing={own} onChange={setOwn} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{ERASER_LABEL[ownEraser]}, {Math.round((ownErased?.removed ?? ownLevel) * 100)}% of the ink removed</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{ERASER_LABEL[ownEraser]}, {Math.round((ownErased?.removed ?? ownLevel) * 100)}% of the ink removed{ownErased ? `, ${findJoints(resample(normalize(own))).length} joints found` : ''}</div>
+          {ownErased?.fellBack && <Note>{NO_JOINTS_LINE}</Note>}
           {ownErased ? <StrokesView strokes={ownErased.strokes} display={192} testId="own-erased" /> : <div style={{ width: 192, height: 192, borderRadius: 6, border: '1px dashed var(--border)' }} />}
           {ownLabels && (
             <div style={{ display: 'flex', gap: 12 }}>
