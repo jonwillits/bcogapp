@@ -44,9 +44,11 @@ export interface PartsProps {
   moved?: { pairs: MovedPair[] }
   measurements?: Measurements
   initial?: { answers?: (string | null)[]; committed?: boolean; step?: PartsStep }
+  /** The student's drawing from the Draw tab, loaded into Step 2's pad. */
+  fromPart1?: Drawing
 }
 
-export function PartsTab({ seed, mode, header, model: givenModel, display: givenDisplay, moved: givenMoved, measurements: givenM, initial }: PartsProps) {
+export function PartsTab({ seed, mode, header, model: givenModel, display: givenDisplay, moved: givenMoved, measurements: givenM, initial, fromPart1 }: PartsProps) {
   const model = useModel('drawing', givenModel)
   const display = useJson<DisplayManifest>('drawings/display.json', givenDisplay)
   const movedSet = useJson<{ pairs: MovedPair[] }>('drawings/moved.json', givenMoved)
@@ -72,7 +74,7 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
   }, [test.committed, model, erased, labels])
 
   // Step 2: the erasers on the student's own drawing.
-  const [own, setOwn] = useState<Drawing>([])
+  const [own, setOwn] = useState<Drawing>(fromPart1 ?? [])
   const [ownEraser, setOwnEraser] = useState<EraserKind>('mid')
   const [ownLevel, setOwnLevel] = useState(DELETION_LEVEL)
   const ownErased = useMemo(() => (own.length ? erase(normalize(own), ownLevel, ownEraser) : null), [own, ownEraser, ownLevel])
@@ -153,7 +155,7 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
       <Content>{OUR_NETWORKS_LINE}</Content>
       </>}
       {step === '2' && <>
-      <Note>Draw, then apply either eraser and watch the labels.</Note>
+      <Note>Your drawing from the Draw tab is on the pad; keep it, or clear it and draw something with parts. Apply either eraser and watch the labels.</Note>
       <Choice value={ownEraser} options={[{ id: 'mid', label: ERASER_LABEL.mid }, { id: 'joints', label: ERASER_LABEL.joints }]} onChange={setOwnEraser} />
       <label style={{ fontSize: 12, display: 'flex', flexDirection: 'column', gap: 3 }}>
         <span style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>share of ink removed</span><span style={{ fontFamily: 'var(--font-mono)' }}>{Math.round(ownLevel * 100)}%</span></span>

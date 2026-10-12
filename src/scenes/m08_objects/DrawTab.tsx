@@ -37,8 +37,11 @@ export function layerMatches(model: Model, a: Map<string, Tensor>, b: Map<string
   return names.map((n) => match(chw(a.get(n)!), chw(b.get(n)!)))
 }
 
-export function DrawTab({ seed, header, model: givenModel, measurements: givenM, initial }: { seed: number; header?: ReactNode; model?: Model; measurements?: Measurements; initial?: { drawing?: Drawing; centered?: boolean } }) {
-  const [drawing, setDrawing] = useState<Drawing>(initial?.drawing ?? [])
+export function DrawTab({ seed, header, model: givenModel, measurements: givenM, initial, drawing: given, onDrawing }: { seed: number; header?: ReactNode; model?: Model; measurements?: Measurements; initial?: { drawing?: Drawing; centered?: boolean }; drawing?: Drawing; onDrawing?: (d: Drawing) => void }) {
+  // The drawing lives in the scene when it is given one, so it survives a change of tab.
+  const [own, setOwn] = useState<Drawing>(initial?.drawing ?? [])
+  const drawing = given ?? own
+  const setDrawing = (d: Drawing) => { setOwn(d); onDrawing?.(d) }
   const [kept, setKept] = useState<Drawing | null>(null)
   const [centered, setCentered] = useState(initial?.centered ?? true)
   const [versionB, setVersionB] = useState(false)

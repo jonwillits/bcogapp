@@ -16,13 +16,13 @@ import { Btn, Content, FixedLines, GrayImage, GroupLabel, Note, ObjectsLayout, P
  * drawing; the larger test's numbers for held-out drawings; and the
  * reading's clock.
  */
-export function CloserTab({ seed, header, model: givenModel, photos: givenPhotos, measurements: givenM }: { seed: number; header?: ReactNode; model?: Model; photos?: PhotosManifest; measurements?: Measurements }) {
+export function CloserTab({ seed, header, model: givenModel, photos: givenPhotos, measurements: givenM, fromPart1 }: { seed: number; header?: ReactNode; model?: Model; photos?: PhotosManifest; measurements?: Measurements; fromPart1?: Drawing }) {
   const drawingNet = useModel('drawing', givenModel)
   const photos = useJson<PhotosManifest>('photos/manifest.json', givenPhotos)
   const measurements = useJson<Measurements>('measurements.json', givenM)
   const names = photos?.categories ?? []
   const prompt = names.length ? names[makeRng(seed ^ 0xc10).int(names.length)] : '…'
-  const [drawing, setDrawing] = useState<Drawing>([])
+  const [drawing, setDrawing] = useState<Drawing>(fromPart1 ?? [])
   const [asPhoto, setAsPhoto] = useState<Float32Array | null>(null)
   const [labels, setLabels] = useState<Map<ModelName, string>>(new Map())
   const [busy, setBusy] = useState(false)
@@ -50,7 +50,7 @@ export function CloserTab({ seed, header, model: givenModel, photos: givenPhotos
 
   const left = (
     <Panel title="The Closer" style={PANEL_STYLE}>
-      <Note>Draw one of the sixteen categories. The three photo networks, which have never been shown a drawing, label it. The drawing network labels it too.</Note>
+      <Note>Your drawing from the Draw tab is on the pad; keep it if it is one of the sixteen categories, or clear it and draw one. The three photo networks, which have never been shown a drawing, label it. The drawing network labels it too.</Note>
       <Btn primary disabled={!drawing.length || busy} onClick={label}>Label my drawing</Btn>
       <Content>{EYE_LINE}</Content>
       <Content>{OUR_NETWORKS_LINE}</Content>

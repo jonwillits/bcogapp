@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Panel } from '../../components/Panel'
 import { randomSeed } from '../../sim/random'
+import type { Drawing } from '../../sim/objects/raster'
 import { DEFAULT_MODES, MODE_LABEL, TEST_LABEL, type TestId, type TestMode } from '../../sim/objects/config'
 import { DEFAULT_NOISE, NOISE_A_RANGE, NOISE_B_RANGE } from '../../sim/objects/noise'
 import { Slider } from '../../components/controls'
@@ -45,6 +46,8 @@ export default function ObjectsScene({ dev: devGiven }: { dev?: boolean } = {}) 
   const [tab, setTab] = useState<Tab>('draw')
   const [seed, setSeed] = useState(() => randomSeed())
   const [config, setConfig] = useState<SceneConfig>(DEFAULT_CONFIG)
+  // The student's drawing from the Draw tab, kept across tabs: Part 2's Step 2 and the Closer start from it (Jon, 2026-10-12).
+  const [drawing, setDrawing] = useState<Drawing>([])
   const dev = devGiven ?? isDev()
   useEffect(() => {
     const on = () => setSeed((s) => s)
@@ -69,11 +72,11 @@ export default function ObjectsScene({ dev: devGiven }: { dev?: boolean } = {}) 
     [tab, seed, dev, config],
   )
 
-  if (tab === 'parts') return <PartsTab key={seed} seed={seed} mode={config.modes.parts} header={header} />
+  if (tab === 'parts') return <PartsTab key={seed} seed={seed} mode={config.modes.parts} header={header} fromPart1={drawing} />
   if (tab === 'views') return <ViewsTab key={seed} seed={seed} mode={config.modes.views} header={header} />
   if (tab === 'noise') return <NoiseTab key={seed} seed={seed} mode={config.modes.noise} noise={config.noise} header={header} />
-  if (tab === 'closer') return <CloserTab seed={seed} header={header} />
-  return <DrawTab seed={seed} header={header} />
+  if (tab === 'closer') return <CloserTab seed={seed} header={header} fromPart1={drawing} />
+  return <DrawTab seed={seed} header={header} drawing={drawing} onDrawing={setDrawing} />
 }
 
 /** One photograph clean and under both noises at the strengths now set, so they can be judged without taking the test. Developer control only. */
