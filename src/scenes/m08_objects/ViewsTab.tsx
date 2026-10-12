@@ -16,7 +16,7 @@ import { ByHandBox } from '../m07_fish/DecisionTab'
 import { Section } from '../../components/Section'
 import { GLIMPSE_LINE, OUR_NETWORKS_LINE, READOUT_LINE } from './lines'
 import { loadGray, scannedPath, useJson, type ScannedManifest } from './data'
-import { Btn, Choice, Content, FixedLines, GlimpseSummary, GrayImage, GroupLabel, Note, ObjectsLayout, PANEL_STYLE, RIGHT_STYLE, StageTitle, TrialNav } from './ui'
+import { Btn, Choice, Content, FixedLines, GlimpseSummary, GrayImage, GroupLabel, Intro, Note, ObjectsLayout, PANEL_STYLE, RIGHT_STYLE, StageTitle, TrialNav } from './ui'
 
 /**
  * Part 3, Views (spec §6.3), as one run (Jon, 2026-10-12): an introduction,
@@ -232,14 +232,7 @@ export function ViewsTab({ seed, mode, header, manifest: given, initial }: Views
   const stage = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <StageTitle sub={manifest ? `8 shoes and 8 other things, rendered every 15° · ${N} trials, both sets in one run` : 'Loading the scanned objects…'}>Part 3 — Views</StageTitle>
-      {phase === 'intro' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 560 }} data-intro>
-          <GroupLabel>What will happen</GroupLabel>
-          {INTRO_LINES.map((l) => <Note key={l}>{l}</Note>)}
-          <Content>{FIVE_MINUTES_LINE}</Content>
-          <div><Btn primary onClick={() => setPhase('study')} disabled={!target}>Begin</Btn></div>
-        </div>
-      )}
+      {phase === 'intro' && <Intro title="What will happen" lines={INTRO_LINES} time={FIVE_MINUTES_LINE} onBegin={() => setPhase('study')} disabled={!target} />}
       {phase === 'study' && target && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <GroupLabel>Study the shoe</GroupLabel>

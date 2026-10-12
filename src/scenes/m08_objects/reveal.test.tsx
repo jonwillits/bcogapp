@@ -26,7 +26,8 @@ const model = loadShippedModel('drawing')
 
 describe('Parts: nothing from the network before the commit', () => {
   const answers = new Array(12).fill('cat')
-  const before = renderToStaticMarkup(<PartsTab seed={7} mode="free" model={model} display={display} moved={moved} measurements={measurements} initial={{ answers, committed: false }} />)
+  const before = renderToStaticMarkup(<PartsTab seed={7} mode="free" model={model} display={display} moved={moved} measurements={measurements} initial={{ answers, committed: false, begun: true }} />)
+  const intro = renderToStaticMarkup(<PartsTab seed={7} mode="free" model={model} display={display} moved={moved} measurements={measurements} />)
   const after = renderToStaticMarkup(<PartsTab seed={7} mode="free" model={model} display={display} moved={moved} measurements={measurements} initial={{ answers, committed: true }} />)
 
   it('before: a Commit button, no revealed trial, no network label, no larger-test table, and no category attached to a trial', () => {
@@ -47,6 +48,12 @@ describe('Parts: nothing from the network before the commit', () => {
     expect(after).toMatch(/>ink removed</)
     expect(after).toContain('At the joints')
     expect(after).not.toMatch(/>Commit my answers</)
+  })
+
+  it('opens on an introduction with Begin, and no trial', () => {
+    expect(intro).toMatch(/data-intro/)
+    expect(intro).toContain('>Begin<')
+    expect(intro).not.toMatch(/data-strokes="trial-/)
   })
 
   it('the seed fixes the trials', () => {
@@ -89,7 +96,8 @@ describe('Views: nothing from the readout before the commit', () => {
 
 describe('Noise: nothing from the networks before the commit', () => {
   const answers = new Array(36).fill('car')
-  const before = renderToStaticMarkup(<NoiseTab seed={7} mode="free" noise={{ A: 0.2, B: 0.35 }} photos={photos} measurements={measurements} initial={{ answers, committed: false }} />)
+  const before = renderToStaticMarkup(<NoiseTab seed={7} mode="free" noise={{ A: 0.2, B: 0.35 }} photos={photos} measurements={measurements} initial={{ answers, committed: false, begun: true }} />)
+  const intro = renderToStaticMarkup(<NoiseTab seed={7} mode="free" noise={{ A: 0.2, B: 0.35 }} photos={photos} measurements={measurements} />)
   const after = renderToStaticMarkup(<NoiseTab seed={7} mode="free" noise={{ A: 0.2, B: 0.35 }} photos={photos} measurements={measurements} initial={{ answers, committed: true }} />)
 
   it('before: no revealed trial, no percent table, no larger test, and no category or file attached to a trial', () => {
@@ -99,6 +107,13 @@ describe('Noise: nothing from the networks before the commit', () => {
     expect(before).not.toMatch(/it is: /)
     expect(before).not.toMatch(/held-out photographs/)
     for (const img of photos.images) expect(before).not.toContain(img.file)
+  })
+
+  it('opens on an introduction that says the conditions are mixed and not announced, with Begin', () => {
+    expect(intro).toMatch(/data-intro/)
+    expect(intro).toContain('mixed in one order and not announced')
+    expect(intro).toContain('>Begin<')
+    expect(intro).not.toMatch(/data-phase/)
   })
 
   it('after: the table with the three networks, the student and chance; every trial revealed', () => {

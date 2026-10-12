@@ -11,7 +11,7 @@ import { DrawPad } from './DrawPad'
 import { Glimpse } from './Glimpse'
 import { ERASERS_LINE, GLIMPSE_LINE, LARGER_TEST_LINE, OUR_NETWORKS_LINE } from './lines'
 import { useJson, useModel, type DisplayManifest, type Measurements, type MovedPair } from './data'
-import { Btn, Choice, Content, FixedLines, GroupLabel, NameGrid, Note, ObjectsLayout, PANEL_STYLE, ResultTable, RIGHT_STYLE, StageTitle, StrokesView, pct, withArticle, GlimpseSummary, TrialNav } from './ui'
+import { Btn, Choice, Content, FixedLines, GroupLabel, NameGrid, Note, ObjectsLayout, PANEL_STYLE, ResultTable, RIGHT_STYLE, StageTitle, StrokesView, pct, withArticle, GlimpseSummary, TrialNav, Intro } from './ui'
 
 /**
  * Part 2, Parts (spec §6.2): contour deletion with the student first, the
@@ -25,6 +25,12 @@ export const MOVED_PROMPTS: { category: string; what: string }[] = [
   { category: 'coffee cup', what: 'the handle on top' },
 ]
 export type StillAnswer = 'yes' | 'no' | 'only just'
+export const PARTS_INTRO_LINES = [
+  'Twelve line drawings, one at a time, each with half its ink erased. Name each one from the grid of 24; you can go back. Then commit.',
+  'Six have their gaps in the middles of the lines, six at the corners and joins, mixed in one order and not announced.',
+  'Then the drawing network names the same twelve, and its scores on a larger set sit beside yours.',
+]
+export const PARTS_TIME_LINE = 'The twelve take about three minutes. Do not press Begin until you are ready to go through to the end.'
 export const MOVED_SCALE_LINE = 'Both versions are centered and scaled like every drawing the network receives, so a moved version that is taller or wider than the original is also drawn a little smaller.'
 export const NO_JOINTS_LINE = 'This drawing has no joint: no corner, no stroke end near another stroke, no crossing. The gaps went mid-line instead.'
 export type PartsStep = '1' | '2' | '3' | '4'
@@ -44,7 +50,7 @@ export interface PartsProps {
   display?: DisplayManifest
   moved?: { pairs: MovedPair[] }
   measurements?: Measurements
-  initial?: { answers?: (string | null)[]; committed?: boolean; step?: PartsStep }
+  initial?: { answers?: (string | null)[]; committed?: boolean; step?: PartsStep; begun?: boolean }
   /** The student's drawing from the Draw tab, loaded into Step 2's pad. */
   fromPart1?: Drawing
 }
@@ -64,6 +70,7 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
   const masks = useMemo(() => erased.map((e, i) => scrambledMask(rasterize(e.strokes), SIZE, 8, makeRng(seed ^ (0x51 + i)))), [erased, seed])
   const [test, setTest] = useState<TestState<string>>(() => { const t = newTest<string>(trials.length || 12); if (initial?.answers) t.answers = initial.answers; t.committed = initial?.committed ?? false; return t })
   const [at, setAt] = useState(0)
+  const [begun, setBegun] = useState(initial?.begun ?? initial?.committed ?? false)
   const answer = (i: number, v: string) => setTest((t) => ({ ...t, answers: t.answers.map((a, k) => (k === i ? v : a)) }))
   const commit = () => setTest((t) => ({ ...t, committed: true }))
   const logGlimpse = (i: number, ms: number) => setTest((t) => ({ ...t, glimpses: [...t.glimpses, { trial: i, shownMs: ms }] }))
@@ -177,7 +184,8 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
   const stage = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <StageTitle sub={display ? `${display.drawings.length} display drawings · ${labels.length || 24} categories · ${PARTS_STEPS.find((x) => x.id === step)!.label}` : 'Loading the display drawings…'}>Part 2 — Parts</StageTitle>
-      {step === '1' && trial && !test.committed && (
+      {step === '1' && !begun && !test.committed && <Intro title="What will happen" lines={PARTS_INTRO_LINES} time={PARTS_TIME_LINE} onBegin={() => setBegun(true)} disabled={!trials.length} />}
+      {step === '1' && begun && trial && !test.committed && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <Glimpse mode={mode} trial={at} image={null} mask={masks[at]} size={SIZE} display={256} onShown={(ms) => logGlimpse(at, ms)} render={<StrokesView strokes={erased[at].strokes} display={256} testId={`trial-${at}`} />}>
             <NameGrid names={labels} value={test.answers[at]} onChange={(v) => answer(at, v)} columns={4} />

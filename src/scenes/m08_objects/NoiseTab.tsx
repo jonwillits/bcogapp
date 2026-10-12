@@ -10,7 +10,7 @@ import { allAnswered, newTest, noiseTrials, type NoiseTrial, type TestState } fr
 import { Glimpse } from './Glimpse'
 import { EYE_LINE, GLIMPSE_LINE, LARGER_TEST_LINE, OUR_NETWORKS_LINE } from './lines'
 import { loadGray, photoPath, useJson, type Measurements, type PhotosManifest } from './data'
-import { Content, FixedLines, GroupLabel, NameGrid, Note, ObjectsLayout, PANEL_STYLE, ResultTable, RIGHT_STYLE, StageTitle, pct, GlimpseSummary, TrialNav } from './ui'
+import { Content, FixedLines, GroupLabel, Intro, NameGrid, Note, ObjectsLayout, PANEL_STYLE, ResultTable, RIGHT_STYLE, StageTitle, pct, GlimpseSummary, TrialNav } from './ui'
 
 /**
  * Part 4, Noise (spec §6.4): grayscale photographs clean, with noise A and
@@ -21,6 +21,12 @@ import { Content, FixedLines, GroupLabel, NameGrid, Note, ObjectsLayout, PANEL_S
 const SIZE = 160
 const CONDITIONS: NoiseKind[] = ['clean', 'A', 'B']
 export const CHANCE = 1 / 16
+export const NOISE_INTRO_LINES = [
+  'Thirty-six grayscale photographs, one at a time, from sixteen categories. Name each one from the grid; you can go back. Then commit.',
+  'Twelve are clean, twelve have noise A, and twelve have noise B, mixed in one order and not announced, so the pictures will look very different from one to the next. Noise A replaces a share of the pixels with black or white; noise B nudges every pixel by a random amount.',
+  'Then three networks, trained on three diets, name the same thirty-six, and a table sets their scores beside yours.',
+]
+export const NOISE_TIME_LINE = 'The thirty-six take about five minutes without a break. Do not press Begin until you are ready to go through to the end.'
 
 export interface NoiseProps {
   seed: number
@@ -29,7 +35,7 @@ export interface NoiseProps {
   header?: ReactNode
   photos?: PhotosManifest
   measurements?: Measurements
-  initial?: { answers?: (string | null)[]; committed?: boolean }
+  initial?: { answers?: (string | null)[]; committed?: boolean; begun?: boolean }
 }
 
 export function NoiseTab({ seed, mode, noise, header, photos: given, measurements: givenM, initial }: NoiseProps) {
@@ -39,6 +45,7 @@ export function NoiseTab({ seed, mode, noise, header, photos: given, measurement
   const trials = useMemo<NoiseTrial[]>(() => (photos ? noiseTrials(photos.images, makeRng(seed ^ 0x4d)) : []), [photos, seed])
   const [test, setTest] = useState<TestState<string>>(() => { const t = newTest<string>(36); if (initial?.answers) t.answers = initial.answers; t.committed = initial?.committed ?? false; return t })
   const [at, setAt] = useState(0)
+  const [begun, setBegun] = useState(initial?.begun ?? initial?.committed ?? false)
   useEffect(() => { for (const n of PHOTO_NETS) warmUp(n) }, [])
 
   const [pixels, setPixels] = useState<Map<string, Float32Array>>(new Map())
@@ -105,7 +112,8 @@ export function NoiseTab({ seed, mode, noise, header, photos: given, measurement
   const stage = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <StageTitle sub={photos ? `${photos.images.length} photographs from Open Images, ${SIZE} × ${SIZE}, grayscale` : 'Loading the photographs…'}>Part 4 — Noise</StageTitle>
-      {trial && !test.committed && (
+      {!begun && !test.committed && <Intro title="What will happen" lines={NOISE_INTRO_LINES} time={NOISE_TIME_LINE} onBegin={() => setBegun(true)} disabled={!trials.length} />}
+      {begun && trial && !test.committed && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <Glimpse mode={mode} trial={at} image={shown.get(at) ?? null} mask={mask} size={SIZE} display={320} onShown={(ms) => setTest((t) => ({ ...t, glimpses: [...t.glimpses, { trial: at, shownMs: ms }] }))}>
             <NameGrid names={names} value={test.answers[at]} onChange={(v) => setTest((t) => ({ ...t, answers: t.answers.map((a, k) => (k === at ? v : a)) }))} columns={4} />

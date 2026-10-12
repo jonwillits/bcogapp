@@ -197,3 +197,21 @@ export function TrialNav({ at, n, answered, onPrev, onNext, onCommit, canCommit,
     </div>
   )
 }
+
+/** An orienting screen on the stage before a test: what will happen, how long it takes, and Begin (Jon, 2026-10-12, after Part 3's). */
+export function Intro({ title, lines, time, onBegin, disabled }: { title: string; lines: string[]; time: string; onBegin: () => void; disabled?: boolean }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 560 }} data-intro>
+      <GroupLabelLocal>{title}</GroupLabelLocal>
+      {lines.map((l) => <Note key={l}>{l}</Note>)}
+      <ContentLocal>{time}</ContentLocal>
+      <div><Btn primary onClick={onBegin} disabled={disabled}>Begin</Btn></div>
+    </div>
+  )
+}
+function GroupLabelLocal({ children }: { children: ReactNode }) {
+  return <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase', color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', paddingBottom: 3, marginTop: 2 }}>{children}</div>
+}
+function ContentLocal({ children }: { children: ReactNode }) {
+  return <p style={{ margin: 0, fontSize: 11.5, lineHeight: 1.45, color: 'var(--text)', borderLeft: '2px solid var(--accent)', paddingLeft: 8 }}>{children}</p>
+}
