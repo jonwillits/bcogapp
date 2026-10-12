@@ -39,7 +39,5 @@ export function addNoise(img: Float32Array, kind: NoiseKind, strength: number, r
   return img.slice()
 }
 
-/** The default strengths, set during the walk-through with the developer control (spec §6.4). */
+/** The strengths the larger test was scored at; in the scene each student's strength adapts from here (`STAIRCASE` in config.ts). */
 export const DEFAULT_NOISE = { A: 0.2, B: 0.35 }
-export const NOISE_A_RANGE = { min: 0, max: 0.6, step: 0.01 }
-export const NOISE_B_RANGE = { min: 0, max: 0.9, step: 0.01 }

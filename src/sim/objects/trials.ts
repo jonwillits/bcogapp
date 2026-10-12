@@ -11,7 +11,7 @@ import type { Rng } from '../random'
 import type { EraserKind } from './erasers'
 import type { NoiseKind } from './noise'
 import { shuffle } from './views'
-import { PART2_TRIALS, PART4_PER_CONDITION } from './config'
+import { PART2_TRIALS, PART4_PER_CONDITION, STAIRCASE } from './config'
 
 export interface DisplayDrawing {
   id: string
@@ -86,4 +86,28 @@ export function glimpseSummary(records: GlimpseRecord[]): { n: number; mean: num
   if (!records.length) return null
   const v = records.map((r) => r.shownMs)
   return { n: v.length, mean: v.reduce((a, b) => a + b, 0) / v.length, min: Math.min(...v), max: Math.max(...v) }
+}
+
+/** The next level of a staircase after an answer: harder by one step when right, easier when wrong, within its range. */
+export function nextLevel(kind: 'A' | 'B', level: number, correct: boolean): number {
+  const s = STAIRCASE[kind]
+  const next = correct ? level + s.step : level - s.step
+  return Math.round(Math.max(s.min, Math.min(s.max, next)) * 1000) / 1000
+}
+
+/** Where a staircase settled: the mean of its last `tail` levels (the strengths of the later trials), or null with no trials. */
+export function settledLevel(levels: number[], tail = 6): number | null {
+  if (!levels.length) return null
+  const last = levels.slice(-tail)
+  return last.reduce((a, b) => a + b, 0) / last.length
+}
+
+/** A network's score at a level, read off the larger test's sweep by linear interpolation. */
+export function scoreAtLevel(sweep: Record<string, number>, level: number): number {
+  const pts = Object.entries(sweep).map(([k, v]) => [parseFloat(k), v] as [number, number]).sort((a, b) => a[0] - b[0])
+  if (level <= pts[0][0]) return pts[0][1]
+  for (let i = 1; i < pts.length; i++) {
+    if (level <= pts[i][0]) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; return y0 + ((level - x0) / (x1 - x0)) * (y1 - y0) }
+  }
+  return pts[pts.length - 1][1]
 }

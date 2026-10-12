@@ -13,14 +13,25 @@ export const TEST_LABEL: Record<TestId, string> = { parts: 'Part 2: contour dele
 export const MODE_LABEL: Record<TestMode, string> = { glimpse: 'glimpse', free: 'free' }
 
 /**
- * Part 2 and Part 3 are fixed as free (Jon, 2026-10-12, on his walk);
- * their switches are gone from the developer control and `config.test.ts`
- * pins them. Part 4 loads as glimpse, the spec's preference, and keeps
- * its switch until Jon decides.
+ * Every test's mode is decided (Jon, 2026-10-12, on his walk): Parts 2 and
+ * 3 free, Part 4 glimpse. The developer control of spec §7 is retired and
+ * `config.test.ts` pins the modes.
  */
 export const DEFAULT_MODES: Record<TestId, TestMode> = { parts: 'free', views: 'free', noise: 'glimpse' }
-/** The tests whose mode is still Jon's to choose; only these get a switch in the developer control. */
-export const UNDECIDED_TESTS: TestId[] = ['noise']
+/** The tests whose mode is still to be chosen: none. */
+export const UNDECIDED_TESTS: TestId[] = []
+
+/**
+ * Part 4's noise strengths are not fixed but adaptive (Jon, 2026-10-12): a
+ * one-up, one-down staircase per kind of noise. A right answer makes the
+ * next trial of that kind harder by one step, a wrong one easier, so each
+ * student ends near the strength where they are half right. Every trial's
+ * strength is logged, and the networks take the same noisy images.
+ */
+export const STAIRCASE = {
+  A: { start: 0.2, step: 0.05, min: 0.05, max: 0.6 },
+  B: { start: 0.35, step: 0.1, min: 0.1, max: 0.9 },
+} as const
 
 /** About a fifth of a second, scheduled on animation frames; the duration actually shown is logged on every trial. */
 export const GLIMPSE_MS = 200

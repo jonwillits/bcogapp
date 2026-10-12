@@ -15,7 +15,7 @@ const URL = process.argv[2] ?? 'http://localhost:5173/?dev=1#/m08-objects'
 const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: 1400, height: 900 } })
 await page.goto(URL)
-await page.waitForSelector('[data-dev-control]')
+await page.waitForSelector('[role=tablist]')
 
 /** Click a button by its exact text from inside the page: the presenter re-renders as its phase changes, which a locator sees as an unstable element. */
 const click = (text) => page.evaluate((t) => { const b = [...document.querySelectorAll('button')].find((x) => x.textContent.trim() === t && !x.disabled); if (b) b.click(); return !!b }, text)
@@ -24,6 +24,7 @@ async function glimpses(tab, nameToClick, n) {
   await page.evaluate((t) => [...document.querySelectorAll('button[role=tab]')].find((b) => b.textContent.startsWith(t)).click(), tab)
   await page.waitForTimeout(1500)
   for (let i = 0; i < n; i++) {
+    await click('Begin')
     if (await click('Show it')) await page.waitForSelector('[data-phase="mask"]', { timeout: 5000 })
     await click(nameToClick)
     await page.waitForTimeout(40)

@@ -98,9 +98,9 @@ describe('Views: nothing from the readout before the commit', () => {
 
 describe('Noise: nothing from the networks before the commit', () => {
   const answers = new Array(36).fill('car')
-  const before = renderToStaticMarkup(<NoiseTab seed={7} mode="free" noise={{ A: 0.2, B: 0.35 }} photos={photos} measurements={measurements} initial={{ answers, committed: false, begun: true }} />)
-  const intro = renderToStaticMarkup(<NoiseTab seed={7} mode="free" noise={{ A: 0.2, B: 0.35 }} photos={photos} measurements={measurements} />)
-  const after = renderToStaticMarkup(<NoiseTab seed={7} mode="free" noise={{ A: 0.2, B: 0.35 }} photos={photos} measurements={measurements} initial={{ answers, committed: true }} />)
+  const before = renderToStaticMarkup(<NoiseTab seed={7} mode="free" photos={photos} measurements={measurements} initial={{ answers, committed: false, begun: true }} />)
+  const intro = renderToStaticMarkup(<NoiseTab seed={7} mode="free" photos={photos} measurements={measurements} />)
+  const after = renderToStaticMarkup(<NoiseTab seed={7} mode="free" photos={photos} measurements={measurements} initial={{ answers, committed: true }} />)
 
   it('before: no revealed trial, no percent table, no larger test, and no category or file attached to a trial', () => {
     expect(before).toContain('Commit my answers')
@@ -114,6 +114,7 @@ describe('Noise: nothing from the networks before the commit', () => {
   it('opens on an introduction that says the conditions are mixed and not announced, with Begin', () => {
     expect(intro).toMatch(/data-intro/)
     expect(intro).toContain('mixed in one order and not announced')
+    expect(intro).toContain('The noise adapts to you')
     expect(intro).toContain('>Begin<')
     expect(intro).not.toMatch(/data-phase/)
   })
@@ -126,9 +127,8 @@ describe('Noise: nothing from the networks before the commit', () => {
   })
 })
 
-describe('the developer control', () => {
-  it('appears only with ?dev=1', () => {
-    expect(renderToStaticMarkup(<ObjectsScene dev={false} />)).not.toMatch(/data-dev-control/)
-    expect(renderToStaticMarkup(<ObjectsScene dev={true} />)).toMatch(/data-dev-control/)
+describe('the developer control is retired', () => {
+  it('every mode is decided and no control is rendered', () => {
+    expect(renderToStaticMarkup(<ObjectsScene />)).not.toMatch(/data-dev-control|Developer control/)
   })
 })

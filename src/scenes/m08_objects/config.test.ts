@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { DEFAULT_MODES, GLIMPSE_MS, DELETION_LEVEL, PART2_TRIALS, PART4_PER_CONDITION, UNDECIDED_TESTS, VIEWS_PER_CONDITION } from '../../sim/objects/config'
-import { DEFAULT_NOISE } from '../../sim/objects/noise'
+import { DEFAULT_MODES, GLIMPSE_MS, DELETION_LEVEL, PART2_TRIALS, PART4_PER_CONDITION, STAIRCASE, UNDECIDED_TESTS, VIEWS_PER_CONDITION } from '../../sim/objects/config'
 import { isDev } from './ObjectsScene'
 
 /**
@@ -9,9 +8,9 @@ import { isDev } from './ObjectsScene'
  * fifth of a second, and the developer control is gated on `?dev=1`.
  */
 describe('the configuration', () => {
-  it('Part 2 and Part 3 are fixed as free (Jon, 2026-10-12); Part 4 loads as glimpse and is still undecided', () => {
+  it('every mode is decided (Jon, 2026-10-12): Parts 2 and 3 free, Part 4 glimpse', () => {
     expect(DEFAULT_MODES).toEqual({ parts: 'free', views: 'free', noise: 'glimpse' })
-    expect(UNDECIDED_TESTS).toEqual(['noise'])
+    expect(UNDECIDED_TESTS).toEqual([])
   })
   it('Part 3 has four views per condition, 24 trials per set (Jon, 2026-10-12)', () => {
     expect(VIEWS_PER_CONDITION).toBe(4)
@@ -24,10 +23,13 @@ describe('the configuration', () => {
     expect(PART2_TRIALS).toBe(12)
     expect(PART4_PER_CONDITION).toBe(12)
   })
-  it('the noise strengths the walk-through starts from', () => {
-    expect(DEFAULT_NOISE).toEqual({ A: 0.2, B: 0.35 })
+  it('the staircases start where the larger test was scored, and move one step a trial', () => {
+    expect(STAIRCASE.A.start).toBe(0.2)
+    expect(STAIRCASE.B.start).toBe(0.35)
+    expect(STAIRCASE.A.step).toBe(0.05)
+    expect(STAIRCASE.B.step).toBe(0.1)
   })
-  it('?dev=1 in the query or after the hash shows the developer control; nothing else does', () => {
+  it('?dev=1 in the query or after the hash exposes the benchmark hook; nothing else does', () => {
     expect(isDev('?dev=1', '#/m08-objects')).toBe(true)
     expect(isDev('', '#/m08-objects?dev=1')).toBe(true)
     expect(isDev('', '#/m08-objects')).toBe(false)
