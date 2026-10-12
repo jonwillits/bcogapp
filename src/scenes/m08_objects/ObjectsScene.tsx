@@ -5,7 +5,8 @@ import { DEFAULT_MODES, MODE_LABEL, TEST_LABEL, type TestId, type TestMode } fro
 import { DEFAULT_NOISE, NOISE_A_RANGE, NOISE_B_RANGE } from '../../sim/objects/noise'
 import { Slider } from '../../components/controls'
 import { NETWORKS_LINE, TRAINED_BEFORE_LINE } from './lines'
-import { Btn, Content, GrayImage, GroupLabel, Note, TabBar, type Tab } from './ui'
+import { Btn, Content, GrayImage, Note, TabBar, type Tab } from './ui'
+import { Section } from '../../components/Section'
 import { loadGray, photoPath, useJson, type PhotosManifest } from './data'
 import { addNoise } from '../../sim/objects/noise'
 import { makeRng } from '../../sim/random'
@@ -104,7 +105,7 @@ function NoisePreview({ noise }: { noise: { A: number; B: number } }) {
 export function DevControl({ config, onChange }: { config: SceneConfig; onChange: (c: SceneConfig) => void }) {
   return (
     <div data-dev-control style={{ display: 'flex', flexDirection: 'column', gap: 6, border: '1px dashed var(--accent)', borderRadius: 8, padding: 8 }}>
-      <GroupLabel>Developer control</GroupLabel>
+      <Section title="Developer control" defaultOpen={false}>
       {(Object.keys(config.modes) as TestId[]).map((t) => (
         <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5 }}>
           <span style={{ flex: 1 }}>{TEST_LABEL[t]}</span>
@@ -125,6 +126,7 @@ export function DevControl({ config, onChange }: { config: SceneConfig; onChange
       <Slider label="Part 4: noise B strength (width)" value={config.noise.B} min={NOISE_B_RANGE.min} max={NOISE_B_RANGE.max} step={NOISE_B_RANGE.step} onChange={(v) => onChange({ ...config, noise: { ...config.noise, B: v } })} />
       <NoisePreview noise={config.noise} />
       <Note>A change of mode or strength takes effect when that part is next opened: switch to another tab and back. The seed, and so the trials, stay the same; <i>New seed</i> is for a fresh set. The sliders touch Part 4 only; Part 2's erasers always remove half the ink.</Note>
+      </Section>
     </div>
   )
 }

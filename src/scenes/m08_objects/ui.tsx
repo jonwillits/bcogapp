@@ -8,7 +8,14 @@ import { Note } from '../m06_brain/ui'
  * generic pieces (Btn, Choice, Note, GroupLabel, StageTitle, the panel
  * widths) are Lab 6's own, imported rather than copied.
  */
-export { Btn, Choice, Note, GroupLabel, StageTitle, PANEL_STYLE, RIGHT_STYLE } from '../m06_brain/ui'
+export { Btn, Choice, Note, GroupLabel, StageTitle, RIGHT_STYLE } from '../m06_brain/ui'
+
+/**
+ * The left column scrolls as one piece. Lab 6's panel capped its own height
+ * and scrolled inside; with a tall header above it (the developer control)
+ * the panel shrank to a sliver and could not be reached (Jon, 2026-10-12).
+ */
+export const PANEL_STYLE: CSSProperties = { width: 300, flexShrink: 0 }
 export { BrainLayout as ObjectsLayout } from '../m06_brain/layout'
 
 export type Tab = 'draw' | 'parts' | 'views' | 'noise' | 'closer'
