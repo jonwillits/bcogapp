@@ -11,7 +11,7 @@ import { DrawPad } from './DrawPad'
 import { Glimpse } from './Glimpse'
 import { ERASERS_LINE, GLIMPSE_LINE, LARGER_TEST_LINE, OUR_NETWORKS_LINE } from './lines'
 import { useJson, useModel, type DisplayManifest, type Measurements, type MovedPair } from './data'
-import { Btn, Choice, Content, FixedLines, GroupLabel, NameGrid, Note, ObjectsLayout, PANEL_STYLE, ResultTable, RIGHT_STYLE, StageTitle, StrokesView, pct, withArticle, GlimpseSummary } from './ui'
+import { Btn, Choice, Content, FixedLines, GroupLabel, NameGrid, Note, ObjectsLayout, PANEL_STYLE, ResultTable, RIGHT_STYLE, StageTitle, StrokesView, pct, withArticle, GlimpseSummary, TrialNav } from './ui'
 
 /**
  * Part 2, Parts (spec §6.2): contour deletion with the student first, the
@@ -138,14 +138,8 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
       <Choice value={step} options={PARTS_STEPS} onChange={setStep} />
       {step === '1' && <>
       <Note>Twelve drawings, each with half its ink removed by one of two erasers. Name each one. The network takes the same twelve after you commit.</Note>
-      <Note>Trial {Math.min(at + 1, trials.length || 12)} of {trials.length || 12} · {test.answers.filter((a) => a !== null).length} answered · viewing: {mode}</Note>
+      <Note>Viewing: {mode}. The trials and the commit are on the stage.</Note>
       {mode === 'glimpse' && <Content>{GLIMPSE_LINE}</Content>}
-      <div style={{ display: 'flex', gap: 4 }}>
-        <Btn small onClick={() => setAt((i) => Math.max(0, i - 1))} disabled={at === 0}>Previous</Btn>
-        <Btn small onClick={() => setAt((i) => Math.min(trials.length - 1, i + 1))} disabled={at >= trials.length - 1}>Next</Btn>
-      </div>
-      {!test.committed && <Btn primary disabled={!trials.length || !allAnswered(test)} onClick={commit}>Commit my answers</Btn>}
-      {!test.committed && trials.length > 0 && !allAnswered(test) && <Note>The button is available once every drawing has a name.</Note>}
       {test.committed && (
         <>
           <Note><b>Committed.</b> Your results and the network’s are on the right.</Note>
@@ -184,10 +178,11 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <StageTitle sub={display ? `${display.drawings.length} display drawings · ${labels.length || 24} categories · ${PARTS_STEPS.find((x) => x.id === step)!.label}` : 'Loading the display drawings…'}>Part 2 — Parts</StageTitle>
       {step === '1' && trial && !test.committed && (
-        <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <Glimpse mode={mode} trial={at} image={null} mask={masks[at]} size={SIZE} display={256} onShown={(ms) => logGlimpse(at, ms)} render={<StrokesView strokes={erased[at].strokes} display={256} testId={`trial-${at}`} />}>
             <NameGrid names={labels} value={test.answers[at]} onChange={(v) => answer(at, v)} columns={4} />
           </Glimpse>
+          <TrialNav at={at} n={trials.length || 12} answered={test.answers.filter((a) => a !== null).length} onPrev={() => setAt((i) => Math.max(0, i - 1))} onNext={() => setAt((i) => Math.min(trials.length - 1, i + 1))} onCommit={commit} canCommit={trials.length > 0 && allAnswered(test)} committed={test.committed} />
         </div>
       )}
       {step === '1' && test.committed && reveal && (

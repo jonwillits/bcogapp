@@ -1,6 +1,6 @@
 import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
 import { glimpseSummary, type GlimpseRecord } from '../../sim/objects/trials'
-import { Note } from '../m06_brain/ui'
+import { Btn, Note } from '../m06_brain/ui'
 
 /**
  * Small shared pieces for the five tabs. Lab 6's rule holds: selection
@@ -181,4 +181,19 @@ export function GlimpseSummary({ records }: { records: GlimpseRecord[] }) {
   const g = glimpseSummary(records)
   if (!g) return null
   return <Note data-glimpse-summary>Glimpses shown: {g.n}, mean {Math.round(g.mean)} ms, from {Math.round(g.min)} to {Math.round(g.max)} ms.</Note>
+}
+
+/** Previous, Next and the commit, on the stage under the trial, where the test is (Jon, 2026-10-12). */
+export function TrialNav({ at, n, answered, onPrev, onNext, onCommit, canCommit, committed }: { at: number; n: number; answered: number; onPrev: () => void; onNext: () => void; onCommit: () => void; canCommit: boolean; committed: boolean }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11.5, whiteSpace: 'pre' }}>{`trial ${String(Math.min(at + 1, n)).padStart(2)} of ${n}   answered ${String(answered).padStart(2)}`}</div>
+      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+        <Btn small onClick={onPrev} disabled={at === 0}>Previous</Btn>
+        <Btn small onClick={onNext} disabled={at >= n - 1}>Next</Btn>
+        {!committed && <Btn primary disabled={!canCommit} onClick={onCommit}>Commit my answers</Btn>}
+      </div>
+      {!committed && !canCommit && <Note>The button is available once every trial has an answer.</Note>}
+    </div>
+  )
 }

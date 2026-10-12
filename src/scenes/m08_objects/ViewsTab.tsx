@@ -4,7 +4,7 @@ import { fmtSigned } from '../../components/format'
 import { Toggle } from '../../components/controls'
 import { makeRng, type Rng } from '../../sim/random'
 import { emptyCounts, tally, type Counts } from '../../sim/fish/sdt'
-import { READOUT_SKIP, READOUT_TARGET, STUDY_SECONDS, type TestMode } from '../../sim/objects/config'
+import { READOUT_SKIP, READOUT_TARGET, STUDY_SECONDS, VIEWS_PER_CONDITION, type TestMode } from '../../sim/objects/config'
 import { featuresWith, warmUp } from '../../sim/objects/inferClient'
 import { scrambledMask } from '../../sim/objects/mask'
 import { DEFAULT_READOUT_RATE, makeReadout, readoutEvidence, readoutLearn, readoutSays, type Readout } from '../../sim/objects/readout'
@@ -16,7 +16,7 @@ import { ByHandBox } from '../m07_fish/DecisionTab'
 import { Section } from '../../components/Section'
 import { GLIMPSE_LINE, OUR_NETWORKS_LINE, READOUT_LINE } from './lines'
 import { loadGray, scannedPath, useJson, type ScannedManifest } from './data'
-import { Btn, Choice, Content, FixedLines, GrayImage, GroupLabel, Note, ObjectsLayout, PANEL_STYLE, RIGHT_STYLE, StageTitle, GlimpseSummary } from './ui'
+import { Btn, Choice, Content, FixedLines, GrayImage, GroupLabel, Note, ObjectsLayout, PANEL_STYLE, RIGHT_STYLE, StageTitle, GlimpseSummary, TrialNav } from './ui'
 
 /**
  * Part 3, Views (spec §6.3): a study phase, the student's test on 24
@@ -28,6 +28,15 @@ const SIZE = 160
 type Answer = 'same' | 'not'
 const ANSWERS: { id: Answer; label: string }[] = [{ id: 'same', label: 'same shoe' }, { id: 'not', label: 'not the same shoe' }]
 const FRAME_MS = 140
+type Phase = 'intro' | 'study' | 'test' | 'done'
+const N = 6 * VIEWS_PER_CONDITION
+export const CONVERGED_LINE = 'Every training image is right now, so the prediction error is near zero and further steps change the weights very little.'
+export const INTRO_LINES = [
+  'You will learn one shoe from two views, each shown wobbling for ten seconds.',
+  `Then ${N} pictures, one at a time: is it the same shoe, or not? Answer each; you can go back. Then commit.`,
+  'Then a readout unit on a frozen photo network learns the same shoe from the same two views and takes the same test, and its scorecards sit beside yours.',
+  'Do Set 1, one shoe among shoes, first. Copy its lines into your report, then go on to Set 2, one shoe among other things.',
+]
 export const SKIP_LABEL = `Skip ahead ${READOUT_SKIP} steps`
 
 export interface ViewsProps {
@@ -35,7 +44,7 @@ export interface ViewsProps {
   mode: TestMode
   header?: ReactNode
   manifest?: ScannedManifest
-  initial?: { phase?: 'study' | 'test' | 'done'; answers?: (Answer | null)[]; committed?: boolean; set?: ViewSet }
+  initial?: { phase?: Phase; answers?: (Answer | null)[]; committed?: boolean; set?: ViewSet }
 }
 
 export function ViewsTab({ seed, mode, header, manifest: given, initial }: ViewsProps) {
@@ -46,8 +55,8 @@ export function ViewsTab({ seed, mode, header, manifest: given, initial }: Views
   const [set, setSet] = useState<ViewSet>(initial?.set ?? 'shoes')
   const others = useMemo(() => (set === 'shoes' ? shoes.filter((s) => s !== target) : things), [set, shoes, things, target])
   const trials = useMemo<ViewTrial[]>(() => (target && others.length ? viewTrials(target, others, makeRng(seed ^ (set === 'shoes' ? 0x11 : 0x22))) : []), [target, others, seed, set])
-  const [phase, setPhase] = useState<'study' | 'test' | 'done'>(initial?.phase ?? 'study')
-  const [test, setTest] = useState<TestState<Answer>>(() => { const t = newTest<Answer>(24); if (initial?.answers) t.answers = initial.answers; t.committed = initial?.committed ?? false; return t })
+  const [phase, setPhase] = useState<Phase>(initial?.phase ?? 'intro')
+  const [test, setTest] = useState<TestState<Answer>>(() => { const t = newTest<Answer>(N); if (initial?.answers) t.answers = initial.answers; t.committed = initial?.committed ?? false; return t })
   const [at, setAt] = useState(0)
   useEffect(() => { warmUp('photo_standard') }, [])
 
@@ -128,6 +137,7 @@ export function ViewsTab({ seed, mode, header, manifest: given, initial }: Views
   const [lastPhi, setLastPhi] = useState<number | null>(null)
   const [rate, setRate] = useState(DEFAULT_READOUT_RATE)
   if (!unitRef.current || unitRef.current.rng === null) { const rng = makeRng(seed ^ 0x9e); unitRef.current = { unit: makeReadout(rng), rng, steps: 0 } }
+  const startSet = (v: ViewSet) => { setSet(v); setPhase('intro'); setTest(newTest<Answer>(N)); setAt(0); resetReadout(); setLearning(false) }
   const resetReadout = () => { const rng = makeRng(seed ^ 0x9e); unitRef.current = { unit: makeReadout(rng), rng, steps: 0 }; setLastPhi(null); bump((x) => x + 1) }
   const skip = (n: number) => {
     const r = unitRef.current!
@@ -162,22 +172,11 @@ export function ViewsTab({ seed, mode, header, manifest: given, initial }: Views
     <Panel title="Views" style={PANEL_STYLE}>
       <Note>Learn one shoe from two views, then say for each picture whether it is the same shoe. The views you are tested on lie between the learned views, beyond them, or at right angles to them, at matched distances.</Note>
       <GroupLabel>The set</GroupLabel>
-      <Choice value={set} options={[{ id: 'shoes', label: SET_LABEL.shoes }, { id: 'things', label: SET_LABEL.things }]} onChange={(v) => { setSet(v); setPhase('study'); setTest(newTest<Answer>(24)); setAt(0); resetReadout(); setLearning(false) }} />
+      <Choice value={set} options={[{ id: 'shoes', label: `Set 1 · ${SET_LABEL.shoes}` }, { id: 'things', label: `Set 2 · ${SET_LABEL.things}` }]} onChange={(v) => startSet(v)} />
       <Note>Target: <span style={{ fontFamily: 'var(--font-mono)' }}>{target ?? '…'}</span>, chosen by the seed. The other objects are the seven other shoes, or the eight other things.</Note>
-      <GroupLabel>Step 1 · Study</GroupLabel>
-      <Note>Each learned view wobbles ±10° for {STUDY_SECONDS} seconds: {LEARNED_VIEWS[0].replace('h', '')}° then {LEARNED_VIEWS[1].replace('h', '')}° around the vertical axis.</Note>
-      {phase === 'study' && <Btn primary disabled={!studyDone} onClick={() => setPhase('test')}>Start the test</Btn>}
-      <GroupLabel>Step 2 · Your test</GroupLabel>
-      <Note>Trial {Math.min(at + 1, 24)} of 24 · {test.answers.filter((a) => a).length} answered · viewing: {mode}</Note>
+      <Note>Viewing: {mode}. The study, the test and the commit are on the stage.</Note>
       {mode === 'glimpse' && <Content>{GLIMPSE_LINE}</Content>}
-      {phase === 'test' && (
-        <div style={{ display: 'flex', gap: 4 }}>
-          <Btn small onClick={() => setAt((i) => Math.max(0, i - 1))} disabled={at === 0}>Previous</Btn>
-          <Btn small onClick={() => setAt((i) => Math.min(23, i + 1))} disabled={at >= 23}>Next</Btn>
-        </div>
-      )}
-      {phase === 'test' && !test.committed && <Btn primary disabled={!allAnswered(test)} onClick={() => { setTest((t) => ({ ...t, committed: true })); setPhase('done') }}>Commit my answers</Btn>}
-      <GroupLabel>Step 3 · The readout</GroupLabel>
+      <GroupLabel>The readout</GroupLabel>
       <Content>{READOUT_LINE}</Content>
       <Note>One unit reads the Standard network’s penultimate layer (1,024 numbers) and learns by Lab 5’s Prediction rule, Δbᵢ = η · xᵢ · Φ with Φ = a − p: the target shoe’s learned views (a = 1) against the same views of the other objects (a = 0).</Note>
       <Note>Features ready: {featuresReady} of {featureKeys.length}.</Note>
@@ -189,6 +188,7 @@ export function ViewsTab({ seed, mode, header, manifest: given, initial }: Views
       <Btn onClick={() => skip(READOUT_SKIP)} disabled={!learning || !trainReady || !test.committed}>{SKIP_LABEL}</Btn>
       <Btn small onClick={resetReadout}>Start from new random weights</Btn>
       <FixedLines lines={[`steps so far:        ${String(unitRef.current.steps).padStart(5)}`, `training images:     ${String(trainKeys.length).padStart(5)}`, trainAcc === null ? null : `right on them:        ${Math.round(trainAcc * 100)}%${trainAcc >= READOUT_TARGET ? '  (at the target)' : ''}`]} />
+      {trainAcc !== null && trainAcc >= 1 && unitRef.current.steps > 0 && <Note>{CONVERGED_LINE}</Note>}
       <GroupLabel>The unit’s numbers</GroupLabel>
       <FixedLines lines={[`baseline b₀:          ${fmtSigned(unitRef.current.unit.baseline)}`, `weight b₁ (unit 1):   ${fmtSigned(unitRef.current.unit.weights[0])}`, `weight b₂ (unit 2):   ${fmtSigned(unitRef.current.unit.weights[1])}`, `criterion θ:          ${fmtSigned(unitRef.current.unit.threshold)}`, `last prediction error Φ: ${lastPhi === null ? '' : fmtSigned(lastPhi)}`]} />
       <Note>1,024 weights in all; two are printed. The criterion is the unit’s threshold: evidence at or above it is <i>same shoe</i>. Learning never writes it.</Note>
@@ -200,16 +200,33 @@ export function ViewsTab({ seed, mode, header, manifest: given, initial }: Views
   const stage = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <StageTitle sub={manifest ? `${SET_LABEL[set]} · 8 shoes and 8 other things, rendered every 15°` : 'Loading the scanned objects…'}>Part 3 — Views</StageTitle>
+      {phase === 'intro' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 560 }} data-intro>
+          <GroupLabel>{set === 'shoes' ? 'Set 1 · one shoe among shoes' : 'Set 2 · one shoe among other things'}</GroupLabel>
+          {INTRO_LINES.map((l) => <Note key={l}>{l}</Note>)}
+          <div><Btn primary onClick={() => setPhase('study')} disabled={!target}>Begin</Btn></div>
+        </div>
+      )}
       {phase === 'study' && target && (
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <GrayImage image={pixels.get(studyKey) ?? null} size={SIZE} display={320} alt="the target shoe, wobbling around a learned view" testId="study" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <GroupLabel>Study the shoe</GroupLabel>
+          {studyDone ? (
+            <div style={{ width: 320, height: 320, borderRadius: 6, border: '1px dashed var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: 12 }}>study done</div>
+          ) : (
+            <GrayImage image={pixels.get(studyKey) ?? null} size={SIZE} display={320} alt="the target shoe, wobbling around a learned view" testId="study" />
+          )}
           <FixedLines lines={[`learned view ${studyAt.view + 1} of 2: ${LEARNED_VIEWS[studyAt.view].replace('h', '')}°`, `seconds left: ${String(Math.ceil(studyAt.left)).padStart(2)}`]} />
+          <div><Btn primary disabled={!studyDone} onClick={() => setPhase('test')}>Start the test</Btn></div>
         </div>
       )}
       {phase === 'test' && trial && (
-        <Glimpse mode={mode} trial={at} image={pixels.get(trialKey) ?? null} mask={mask} size={SIZE} display={320} onShown={(ms) => setTest((t) => ({ ...t, glimpses: [...t.glimpses, { trial: at, shownMs: ms }] }))}>
-          <Choice value={test.answers[at]} options={ANSWERS} onChange={(v) => setTest((t) => ({ ...t, answers: t.answers.map((a, k) => (k === at ? v : a)) }))} />
-        </Glimpse>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <GroupLabel>Your test</GroupLabel>
+          <Glimpse mode={mode} trial={at} image={pixels.get(trialKey) ?? null} mask={mask} size={SIZE} display={320} onShown={(ms) => setTest((t) => ({ ...t, glimpses: [...t.glimpses, { trial: at, shownMs: ms }] }))}>
+            <Choice value={test.answers[at]} options={ANSWERS} onChange={(v) => setTest((t) => ({ ...t, answers: t.answers.map((a, k) => (k === at ? v : a)) }))} />
+          </Glimpse>
+          <TrialNav at={at} n={N} answered={test.answers.filter((a) => a).length} onPrev={() => setAt((i) => Math.max(0, i - 1))} onNext={() => setAt((i) => Math.min(N - 1, i + 1))} onCommit={() => { setTest((t) => ({ ...t, committed: true })); setPhase('done') }} canCommit={allAnswered(test)} committed={test.committed} />
+        </div>
       )}
       {test.committed && (
         <>
@@ -220,7 +237,7 @@ export function ViewsTab({ seed, mode, header, manifest: given, initial }: Views
           <GroupLabel>The readout’s scorecards, on the same 24 trials</GroupLabel>
           {testReady ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))', gap: 10 }} data-readout-scorecards>
-              {CONDITIONS.map((c) => <Scorecard key={c} counts={readoutCounts(c)!} title={CONDITION_LABEL[c]} who={`the readout after ${unitRef.current!.steps} steps`} />)}
+              {CONDITIONS.map((c) => <Scorecard key={c} counts={readoutCounts(c)!} title={CONDITION_LABEL[c]} who="the readout" steps={unitRef.current!.steps} />)}
             </div>
           ) : (
             <Note>Computing the test images’ features…</Note>
@@ -228,6 +245,7 @@ export function ViewsTab({ seed, mode, header, manifest: given, initial }: Views
           <GroupLabel>The view-generalization curve</GroupLabel>
           <Note>The readout’s evidence for the target at every rendered view: around the vertical axis (left) and the horizontal axis (right). The learned views are marked; the criterion is the dashed line. Above it the readout says <i>same shoe</i>.</Note>
           {curve && <CurvePlot curve={curve} />}
+          {set === 'shoes' && <div><Btn primary onClick={() => startSet('things')}>Go on to Set 2: one shoe among other things</Btn></div>}
           <GroupLabel>The trials, revealed</GroupLabel>
           <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, whiteSpace: 'pre', lineHeight: 1.5 }}>
             {trials.map((t, i) => `#${String(i + 1).padStart(2)}  ${CONDITION_LABEL[t.condition].padEnd(15)} ${t.view.id}  ${(t.target ? 'the target' : t.object).padEnd(12)}  you: ${(test.answers[i] ?? '').padEnd(4)}  readout: ${testReady ? (readoutSays(unitRef.current!.unit, features.get(`${t.object}/${t.view.id}`)!) ? 'same' : 'not') : '…'}`).join('\n')}

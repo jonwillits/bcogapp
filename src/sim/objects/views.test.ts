@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { makeRng } from '../random'
-import { CONDITIONS, LEARNED_VIEWS, TEST_VIEWS, WOBBLE_FRAMES, allViews, distanceFromLearned, viewTrials } from './views'
+import { CONDITIONS, LEARNED_VIEWS, TEST_VIEWS, TEST_VIEWS_BY_COUNT, WOBBLE_FRAMES, allViews, distanceFromLearned, viewTrials } from './views'
+import { VIEWS_PER_CONDITION } from './config'
 
 /**
  * The matched-distance design is the point of Part 3 (spec §6.3, §11): the
@@ -14,12 +15,15 @@ const manifest = JSON.parse(readFileSync(join(__dirname, '..', '..', '..', 'publ
 const rendered = new Set(manifest.views.map((v) => v.id))
 
 describe('the three conditions are matched for distance from the nearest learned view', () => {
-  it('each condition has four views, and the sorted distances are identical across conditions', () => {
-    const dist = CONDITIONS.map((c) => TEST_VIEWS[c].map(distanceFromLearned).sort((a, b) => a - b))
-    for (const d of dist) expect(d.length).toBe(4)
-    expect(dist[1]).toEqual(dist[0])
-    expect(dist[2]).toEqual(dist[0])
-    expect(dist[0]).toEqual([15, 15, 30, 30])
+  it('each condition has the same number of views, and the sorted distances are identical across conditions, at both counts', () => {
+    for (const n of [3, 4] as const) {
+      const dist = CONDITIONS.map((c) => TEST_VIEWS_BY_COUNT[n][c].map(distanceFromLearned).sort((a, b) => a - b))
+      for (const d of dist) expect(d.length).toBe(n)
+      expect(dist[1]).toEqual(dist[0])
+      expect(dist[2]).toEqual(dist[0])
+      expect(dist[0]).toEqual(n === 4 ? [15, 15, 30, 30] : [15, 30, 30])
+    }
+    expect(TEST_VIEWS).toBe(TEST_VIEWS_BY_COUNT[VIEWS_PER_CONDITION])
   })
 
   it('no test view is a learned view, and between-views lie between the learned headings', () => {
@@ -49,14 +53,14 @@ describe('every view the scene asks for was shipped', () => {
 
 describe('the trial list', () => {
   const shoes = manifest.objects.filter((o) => o.set === 'shoe').map((o) => o.id)
-  it('is 24 trials, half target and half not in every condition, each test view used once for the target', () => {
+  it('is 6 × views-per-condition trials, half target and half not in every condition, each test view used once for the target', () => {
     const t = viewTrials(shoes[0], shoes.slice(1), makeRng(5))
-    expect(t.length).toBe(24)
+    expect(t.length).toBe(6 * VIEWS_PER_CONDITION)
     for (const c of CONDITIONS) {
       const here = t.filter((x) => x.condition === c)
-      expect(here.length).toBe(8)
-      expect(here.filter((x) => x.target).length).toBe(4)
-      expect(new Set(here.filter((x) => x.target).map((x) => x.view.id)).size).toBe(4)
+      expect(here.length).toBe(2 * VIEWS_PER_CONDITION)
+      expect(here.filter((x) => x.target).length).toBe(VIEWS_PER_CONDITION)
+      expect(new Set(here.filter((x) => x.target).map((x) => x.view.id)).size).toBe(VIEWS_PER_CONDITION)
       for (const x of here.filter((y) => !y.target)) expect(x.object).not.toBe(shoes[0])
     }
   })

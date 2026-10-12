@@ -12,7 +12,7 @@ import { Note } from './ui'
  * or 1 is common; Lab 7's By hand repair (half a response short of the end)
  * is applied and a line says so.
  */
-export function Scorecard({ counts, title, who }: { counts: Counts; title: string; who: string }) {
+export function Scorecard({ counts, title, who, steps }: { counts: Counts; title: string; who: string; steps?: number }) {
   const r = byHand(counts)
   const repaired = counts.hits === 0 || counts.misses === 0 || counts.falseAlarms === 0 || counts.correctRejections === 0
   const cell: CSSProperties = { border: '1px solid var(--border)', padding: '4px 6px', fontSize: 11.5, textAlign: 'center' }
@@ -20,7 +20,8 @@ export function Scorecard({ counts, title, who }: { counts: Counts; title: strin
   const big: CSSProperties = { fontFamily: 'var(--font-mono)', fontSize: 14, display: 'block' }
   return (
     <div data-scorecard={`${who}/${title}`} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <div style={{ fontSize: 12 }}><b>{title}</b> <span style={{ color: 'var(--text-muted)' }}>· {who}</span></div>
+      <div style={{ fontSize: 12 }}><b>{title}</b></div>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'pre' }}>{steps === undefined ? who : `${who}, after ${String(steps).padStart(5)} steps`}</div>
       <table style={{ borderCollapse: 'collapse', width: '100%' }}>
         <tbody>
           <tr>

@@ -24,6 +24,8 @@ export const DELETION_LEVEL = 0.5
 export const PART2_TRIALS = 12
 /** Twelve photographs per condition: clean, noise A, noise B. */
 export const PART4_PER_CONDITION = 12
+/** Test views per condition in Part 3: 4 (24 trials) or 3 (18). Jon's call, 2026-10-12. */
+export const VIEWS_PER_CONDITION: 3 | 4 = 4
 /** How long each learned view's wobble is shown in the study phase, seconds. */
 export const STUDY_SECONDS = 10
 /** One press of *Skip ahead*. */

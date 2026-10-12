@@ -13,6 +13,7 @@
  * `views.test.ts` pins that the three multisets of distances are equal.
  */
 import type { Rng } from '../random'
+import { VIEWS_PER_CONDITION } from './config'
 
 export type Condition = 'between' | 'beyond' | 'right-angles'
 export const CONDITIONS: Condition[] = ['between', 'beyond', 'right-angles']
@@ -32,11 +33,24 @@ export interface View {
   pitch: number
 }
 
-export const TEST_VIEWS: Record<Condition, View[]> = {
-  between: [15, 30, 45, 60].map((h) => ({ id: `h${pad(h)}`, heading: h, pitch: 0 })),
-  beyond: [345, 330, 90, 105].map((h) => ({ id: `h${pad(h)}`, heading: h, pitch: 0 })),
-  'right-angles': [15, 30, 345, 330].map((p) => ({ id: `p${pad(p)}`, heading: 0, pitch: p })),
+/**
+ * Views per condition: 4 gives 24 trials, with distances {15, 15, 30, 30}
+ * in every condition; 3 gives 18, with {15, 30, 30}. Either is matched;
+ * which one is used is `VIEWS_PER_CONDITION` in config.ts.
+ */
+export const TEST_VIEWS_BY_COUNT: Record<3 | 4, Record<Condition, View[]>> = {
+  4: {
+    between: [15, 30, 45, 60].map((h) => ({ id: `h${pad(h)}`, heading: h, pitch: 0 })),
+    beyond: [345, 330, 90, 105].map((h) => ({ id: `h${pad(h)}`, heading: h, pitch: 0 })),
+    'right-angles': [15, 30, 345, 330].map((p) => ({ id: `p${pad(p)}`, heading: 0, pitch: p })),
+  },
+  3: {
+    between: [15, 30, 45].map((h) => ({ id: `h${pad(h)}`, heading: h, pitch: 0 })),
+    beyond: [345, 330, 105].map((h) => ({ id: `h${pad(h)}`, heading: h, pitch: 0 })),
+    'right-angles': [15, 30, 330].map((p) => ({ id: `p${pad(p)}`, heading: 0, pitch: p })),
+  },
 }
+export const TEST_VIEWS: Record<Condition, View[]> = TEST_VIEWS_BY_COUNT[VIEWS_PER_CONDITION]
 
 function pad(n: number): string {
   return String(n).padStart(3, '0')
@@ -73,10 +87,10 @@ export interface ViewTrial {
 }
 
 /**
- * The 24 trials of one set: for each condition, the target at each of its
- * four test views, and four other objects at the same four views, one
- * each, chosen and ordered by the seed. Half target, half not, in every
- * condition.
+ * The trials of one set (24 with four views per condition, 18 with three):
+ * for each condition, the target at each of its test views, and other
+ * objects at the same views, one each, chosen and ordered by the seed. Half
+ * target, half not, in every condition.
  */
 export function viewTrials(target: string, others: string[], rng: Rng): ViewTrial[] {
   const trials: ViewTrial[] = []

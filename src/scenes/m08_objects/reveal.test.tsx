@@ -74,6 +74,7 @@ describe('Views: nothing from the readout before the commit', () => {
 
   it('after: the student’s three scorecards, and the trial list', () => {
     expect((after.match(/data-scorecard="you\//g) ?? []).length).toBe(3)
+    expect(after).toContain('Go on to Set 2')
     expect(after).toContain('The trials, revealed')
     expect(after).not.toContain('Commit my answers')
   })

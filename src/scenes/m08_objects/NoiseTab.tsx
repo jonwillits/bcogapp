@@ -10,7 +10,7 @@ import { allAnswered, newTest, noiseTrials, type NoiseTrial, type TestState } fr
 import { Glimpse } from './Glimpse'
 import { EYE_LINE, GLIMPSE_LINE, LARGER_TEST_LINE, OUR_NETWORKS_LINE } from './lines'
 import { loadGray, photoPath, useJson, type Measurements, type PhotosManifest } from './data'
-import { Btn, Content, FixedLines, GroupLabel, NameGrid, Note, ObjectsLayout, PANEL_STYLE, ResultTable, RIGHT_STYLE, StageTitle, pct, GlimpseSummary } from './ui'
+import { Content, FixedLines, GroupLabel, NameGrid, Note, ObjectsLayout, PANEL_STYLE, ResultTable, RIGHT_STYLE, StageTitle, pct, GlimpseSummary, TrialNav } from './ui'
 
 /**
  * Part 4, Noise (spec §6.4): grayscale photographs clean, with noise A and
@@ -91,14 +91,8 @@ export function NoiseTab({ seed, mode, noise, header, photos: given, measurement
     <Panel title="Noise" style={PANEL_STYLE}>
       <Note>Thirty-six grayscale photographs: twelve clean, twelve with noise A, twelve with noise B, in an order set by the seed. Name each from the sixteen categories. Then three networks, trained on three diets, take the same thirty-six.</Note>
       <GroupLabel>Your test</GroupLabel>
-      <Note>Trial {Math.min(at + 1, 36)} of 36 · {test.answers.filter((a) => a !== null).length} answered · viewing: {mode}</Note>
+      <Note>Viewing: {mode}. The trials and the commit are on the stage.</Note>
       {mode === 'glimpse' && <Content>{GLIMPSE_LINE}</Content>}
-      <div style={{ display: 'flex', gap: 4 }}>
-        <Btn small onClick={() => setAt((i) => Math.max(0, i - 1))} disabled={at === 0}>Previous</Btn>
-        <Btn small onClick={() => setAt((i) => Math.min(35, i + 1))} disabled={at >= 35}>Next</Btn>
-      </div>
-      {!test.committed && <Btn primary disabled={!trials.length || !allAnswered(test)} onClick={() => setTest((t) => ({ ...t, committed: true }))}>Commit my answers</Btn>}
-      {!test.committed && trials.length > 0 && !allAnswered(test) && <Note>The button is available once every photograph has a name.</Note>}
       <FixedLines lines={[`noise A strength: ${noise.A.toFixed(2)} of pixels`, `noise B strength: ±${noise.B.toFixed(2)}`]} />
       <Note>Noise A replaces a share of the pixels with black or white. Noise B adds a random amount, up to its width, to every pixel. Both are made in this browser from the seed.</Note>
       <GroupLabel>The three networks</GroupLabel>
@@ -112,9 +106,12 @@ export function NoiseTab({ seed, mode, noise, header, photos: given, measurement
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <StageTitle sub={photos ? `${photos.images.length} photographs from Open Images, ${SIZE} × ${SIZE}, grayscale` : 'Loading the photographs…'}>Part 4 — Noise</StageTitle>
       {trial && !test.committed && (
-        <Glimpse mode={mode} trial={at} image={shown.get(at) ?? null} mask={mask} size={SIZE} display={320} onShown={(ms) => setTest((t) => ({ ...t, glimpses: [...t.glimpses, { trial: at, shownMs: ms }] }))}>
-          <NameGrid names={names} value={test.answers[at]} onChange={(v) => setTest((t) => ({ ...t, answers: t.answers.map((a, k) => (k === at ? v : a)) }))} columns={4} />
-        </Glimpse>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Glimpse mode={mode} trial={at} image={shown.get(at) ?? null} mask={mask} size={SIZE} display={320} onShown={(ms) => setTest((t) => ({ ...t, glimpses: [...t.glimpses, { trial: at, shownMs: ms }] }))}>
+            <NameGrid names={names} value={test.answers[at]} onChange={(v) => setTest((t) => ({ ...t, answers: t.answers.map((a, k) => (k === at ? v : a)) }))} columns={4} />
+          </Glimpse>
+          <TrialNav at={at} n={36} answered={test.answers.filter((a) => a !== null).length} onPrev={() => setAt((i) => Math.max(0, i - 1))} onNext={() => setAt((i) => Math.min(35, i + 1))} onCommit={() => setTest((t) => ({ ...t, committed: true }))} canCommit={trials.length > 0 && allAnswered(test)} committed={test.committed} />
+        </div>
       )}
       {test.committed && (
         <>

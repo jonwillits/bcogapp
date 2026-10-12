@@ -74,7 +74,7 @@ export function Glimpse({
   }, [phase, mode, onShown])
 
   const stage = (
-    <div style={{ width: display, height: display, display: 'grid', placeItems: 'center' }} data-phase={phase}>
+    <div style={{ width: display, height: display, display: 'flex', alignItems: 'flex-start' }} data-phase={phase}>
       {phase === 'ready' && (
         <button type="button" onClick={() => setPhase('image')} style={{ padding: '10px 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--accent)', background: 'var(--accent)', color: '#0b111c', fontWeight: 600, cursor: 'pointer' }}>
           Show it
@@ -85,7 +85,7 @@ export function Glimpse({
     </div>
   )
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-start' }}>
       {stage}
       {(phase === 'mask' || mode === 'free') && <div style={{ width: '100%' }}>{children}</div>}
       {phase === 'image' && mode === 'glimpse' && <div style={{ fontSize: 11, color: 'var(--text-muted)', height: 16 }}>…</div>}
