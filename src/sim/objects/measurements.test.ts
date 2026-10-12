@@ -50,10 +50,13 @@ describe('the spec’s targets, measured', () => {
     expect(gap['0.5']).toBeLessThan(0.1)
   })
 
-  it('Part 2: the moved-part pairs are reported, and the network’s label changed on most', () => {
+  it('Part 2: the moved-part pairs are reported; the network keeps its label on most (the reading’s finding), including both mushrooms with the cap under the stem', () => {
     const mv = (m as M).part2.moved
     expect(mv.n).toBe(10)
-    expect(mv.labelChanged).toBeGreaterThanOrEqual(6)
+    expect(mv.labelChanged).toBe(4)
+    for (const p of mv.pairs.filter((x) => x.category === 'mushroom')) expect(p.movedLabel).toBe('mushroom')
+    // The part is placed just on the other side of the rest, so the moved version is at most a little larger; the first version shoved it away and halved the size.
+    for (const p of mv.pairs) expect((p as { sizeRatio: number }).sizeRatio).toBeLessThan(1.6)
   })
 
   it('Part 4: Trained on noise A beats Standard on noise A by at least 20 points', () => {

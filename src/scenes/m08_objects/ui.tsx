@@ -102,11 +102,22 @@ export function GrayImage({ image, size, display, alt, testId }: { image: Float3
 export function StrokesView({ strokes, display, ink = '#0b111c', paper = '#f2f4f7', testId }: { strokes: [number[], number[]][]; display: number; ink?: string; paper?: string; testId?: string }) {
   return (
     <svg width={display} height={display} viewBox="0 0 256 256" role="img" data-strokes={testId} style={{ background: paper, borderRadius: 6, border: '1px solid var(--border)', display: 'block' }}>
-      {strokes.map((s, i) => (
-        <polyline key={i} points={s[0].map((x, k) => `${x},${s[1][k]}`).join(' ')} fill="none" stroke={ink} strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" />
-      ))}
+      {strokes.map((s, i) =>
+        // A stroke of one point, or one shorter than its own width, is a dot; a polyline would draw nothing.
+        s[0].length === 1 || strokeSpan(s) < 3 ? (
+          <circle key={i} cx={s[0][0]} cy={s[1][0]} r={2.5} fill={ink} />
+        ) : (
+          <polyline key={i} points={s[0].map((x, k) => `${x},${s[1][k]}`).join(' ')} fill="none" stroke={ink} strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" />
+        ),
+      )}
     </svg>
   )
+}
+
+function strokeSpan(s: [number[], number[]]): number {
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity
+  for (let i = 0; i < s[0].length; i++) { x0 = Math.min(x0, s[0][i]); x1 = Math.max(x1, s[0][i]); y0 = Math.min(y0, s[1][i]); y1 = Math.max(y1, s[1][i]) }
+  return Math.max(x1 - x0, y1 - y0)
 }
 
 /** A grid of names to answer with. The names are words, so nothing needs a licence. */

@@ -25,6 +25,7 @@ export const MOVED_PROMPTS: { category: string; what: string }[] = [
   { category: 'coffee cup', what: 'the handle on top' },
 ]
 export type StillAnswer = 'yes' | 'no' | 'only just'
+export const MOVED_SCALE_LINE = 'Both versions are centered and scaled like every drawing the network receives, so a moved version that is taller or wider than the original is also drawn a little smaller.'
 export const NO_JOINTS_LINE = 'This drawing has no joint: no corner, no stroke end near another stroke, no crossing. The gaps went mid-line instead.'
 export type PartsStep = '1' | '2' | '3' | '4'
 export const PARTS_STEPS: { id: PartsStep; label: string }[] = [
@@ -221,6 +222,7 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
       </>}
       {step === '3' && <>
       <GroupLabel>One part moved</GroupLabel>
+      <Note>{MOVED_SCALE_LINE}</Note>
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-start' }}>
         <DrawPad drawing={first} onChange={setFirst} prompt={withArticle(prompt.category)} />
         <DrawPad drawing={second} onChange={setSecond} prompt={`the same ${prompt.category}, ${prompt.what}`} />
@@ -232,14 +234,15 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
       </>}
       {step === '4' && <>
       <GroupLabel>A built set of moved-part pairs</GroupLabel>
+      <Note>{MOVED_SCALE_LINE}</Note>
       {movedSet && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))', gap: 8 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(330px, 1fr))', gap: 8 }}>
           {movedSet.pairs.map((p, i) => (
             <div key={p.id} data-built-pair={p.id} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 6, fontSize: 11, display: 'flex', flexDirection: 'column', gap: 4 }}>
               <div><b>{p.category}</b> · {p.what}</div>
               <div style={{ display: 'flex', gap: 6 }}>
-                <StrokesView strokes={normalize(p.original)} display={120} />
-                <StrokesView strokes={normalize(p.moved)} display={120} />
+                <StrokesView strokes={normalize(p.original)} display={150} />
+                <StrokesView strokes={normalize(p.moved)} display={150} />
               </div>
               <Choice value={builtAnswers[i]} options={STILL_OPTIONS} onChange={(v) => setBuiltAnswers((a) => a.map((x, k) => (k === i ? v : x)))} disabledIds={builtCommitted ? STILL_OPTIONS.map((o) => o.id) : []} />
               {builtReveal && <FixedLines lines={[`original: ${builtReveal[i].a}`, `moved:    ${builtReveal[i].b}`, `match ${builtReveal[i].matchMoved.toFixed(2)}, ordinary pair ${builtReveal[i].ordinary.toFixed(2)}`]} />}
