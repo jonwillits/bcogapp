@@ -25,6 +25,13 @@ export const MOVED_PROMPTS: { category: string; what: string }[] = [
   { category: 'coffee cup', what: 'the handle on top' },
 ]
 export type StillAnswer = 'yes' | 'no' | 'only just'
+export type PartsStep = '1' | '2' | '3' | '4'
+export const PARTS_STEPS: { id: PartsStep; label: string }[] = [
+  { id: '1', label: 'Step 1 · Contour deletion' },
+  { id: '2', label: 'Step 2 · Your drawing' },
+  { id: '3', label: 'Step 3 · Move one part' },
+  { id: '4', label: 'Step 4 · Built pairs' },
+]
 export const STILL_OPTIONS: { id: StillAnswer; label: string }[] = [{ id: 'yes', label: 'yes' }, { id: 'no', label: 'no' }, { id: 'only just', label: 'only just' }]
 
 export interface PartsProps {
@@ -35,7 +42,7 @@ export interface PartsProps {
   display?: DisplayManifest
   moved?: { pairs: MovedPair[] }
   measurements?: Measurements
-  initial?: { answers?: (string | null)[]; committed?: boolean }
+  initial?: { answers?: (string | null)[]; committed?: boolean; step?: PartsStep }
 }
 
 export function PartsTab({ seed, mode, header, model: givenModel, display: givenDisplay, moved: givenMoved, measurements: givenM, initial }: PartsProps) {
@@ -44,6 +51,8 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
   const movedSet = useJson<{ pairs: MovedPair[] }>('drawings/moved.json', givenMoved)
   const measurements = useJson<Measurements>('measurements.json', givenM)
   const labels = model?.desc.labels ?? []
+  // One step at a time: four steps stacked on one stage were confusing (Jon, 2026-10-12).
+  const [step, setStep] = useState<PartsStep>(initial?.step ?? '1')
 
   // Step 1: the trials, from the seed.
   const trials = useMemo<PartsTrial[]>(() => (display ? partsTrials(display.drawings, makeRng(seed ^ 0x2a7)) : []), [display, seed])
@@ -122,8 +131,9 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
   const trial = trials[at]
   const left = (
     <Panel title="Parts" style={PANEL_STYLE}>
+      <Choice value={step} options={PARTS_STEPS} onChange={setStep} />
+      {step === '1' && <>
       <Note>Twelve drawings, each with half its ink removed by one of two erasers. Name each one. The network takes the same twelve after you commit.</Note>
-      <GroupLabel>Step 1 · Contour deletion</GroupLabel>
       <Note>Trial {Math.min(at + 1, trials.length || 12)} of {trials.length || 12} · {test.answers.filter((a) => a !== null).length} answered · viewing: {mode}</Note>
       {mode === 'glimpse' && <Content>{GLIMPSE_LINE}</Content>}
       <div style={{ display: 'flex', gap: 4 }}>
@@ -140,32 +150,43 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
       )}
       <Content>{ERASERS_LINE}</Content>
       <Content>{OUR_NETWORKS_LINE}</Content>
-      <GroupLabel>Step 2 · The erasers on your drawing</GroupLabel>
+      </>}
+      {step === '2' && <>
+      <Note>Draw, then apply either eraser and watch the labels.</Note>
       <Choice value={ownEraser} options={[{ id: 'mid', label: ERASER_LABEL.mid }, { id: 'joints', label: ERASER_LABEL.joints }]} onChange={setOwnEraser} />
       <label style={{ fontSize: 12, display: 'flex', flexDirection: 'column', gap: 3 }}>
         <span style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>share of ink removed</span><span style={{ fontFamily: 'var(--font-mono)' }}>{Math.round(ownLevel * 100)}%</span></span>
         <input type="range" min={0.2} max={0.8} step={0.05} value={ownLevel} onChange={(e) => setOwnLevel(parseFloat(e.target.value))} />
       </label>
-      <GroupLabel>Step 3 · Move one part</GroupLabel>
+      <Content>{ERASERS_LINE}</Content>
+      </>}
+      {step === '3' && <>
       <Choice value={String(promptIdx)} options={MOVED_PROMPTS.map((p, i) => ({ id: String(i), label: p.category }))} onChange={(v) => { setPromptIdx(Number(v)); setFirst([]); setSecond([]); setStill(null); setStillCommitted(false) }} />
       <Note>Draw {withArticle(prompt.category)} on the first pad, then the same {prompt.category} with one part moved on the second: {prompt.what}.</Note>
       <Note>Is the moved version still {withArticle(prompt.category)}?</Note>
       <Choice value={still} options={STILL_OPTIONS} onChange={(v) => setStill(v)} disabledIds={stillCommitted ? STILL_OPTIONS.map((o) => o.id) : []} />
       {!stillCommitted && <Btn primary disabled={!first.length || !second.length || !still} onClick={() => setStillCommitted(true)}>Commit my answer</Btn>}
+      <Content>{OUR_NETWORKS_LINE}</Content>
+      </>}
+      {step === '4' && <>
+      <Note>Ten display drawings, each with one group of strokes moved by hand. For each pair: is the moved version still the same object? Commit, and the network’s labels appear.</Note>
+      {!builtCommitted && <Btn primary disabled={!movedSet || builtAnswers.slice(0, movedSet?.pairs.length ?? 10).some((a) => a === null)} onClick={() => setBuiltCommitted(true)}>Commit my answers for the ten pairs</Btn>}
+      <Content>{OUR_NETWORKS_LINE}</Content>
+      </>}
     </Panel>
   )
 
   const stage = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <StageTitle sub={display ? `${display.drawings.length} display drawings · ${labels.length || 24} categories` : 'Loading the display drawings…'}>Part 2 — Parts</StageTitle>
-      {trial && !test.committed && (
+      <StageTitle sub={display ? `${display.drawings.length} display drawings · ${labels.length || 24} categories · ${PARTS_STEPS.find((x) => x.id === step)!.label}` : 'Loading the display drawings…'}>Part 2 — Parts</StageTitle>
+      {step === '1' && trial && !test.committed && (
         <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <Glimpse mode={mode} trial={at} image={null} mask={masks[at]} size={SIZE} display={256} onShown={(ms) => logGlimpse(at, ms)} render={<StrokesView strokes={erased[at].strokes} display={256} testId={`trial-${at}`} />}>
             <NameGrid names={labels} value={test.answers[at]} onChange={(v) => answer(at, v)} columns={4} />
           </Glimpse>
         </div>
       )}
-      {test.committed && reveal && (
+      {step === '1' && test.committed && reveal && (
         <>
           <GroupLabel>The twelve, revealed</GroupLabel>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8 }}>
@@ -178,7 +199,8 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
           </div>
         </>
       )}
-      <GroupLabel>Step 2 · Your drawing, erased</GroupLabel>
+      {step === '2' && <>
+      <GroupLabel>Your drawing, erased</GroupLabel>
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-start' }}>
         <DrawPad drawing={own} onChange={setOwn} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -192,7 +214,9 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
           )}
         </div>
       </div>
-      <GroupLabel>Step 3 · One part moved</GroupLabel>
+      </>}
+      {step === '3' && <>
+      <GroupLabel>One part moved</GroupLabel>
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-start' }}>
         <DrawPad drawing={first} onChange={setFirst} prompt={withArticle(prompt.category)} />
         <DrawPad drawing={second} onChange={setSecond} prompt={`the same ${prompt.category}, ${prompt.what}`} />
@@ -201,8 +225,9 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
           <FixedLines lines={pairReveal ? [`original:  ${pairReveal.a}`, `moved:     ${pairReveal.b}`, `last layer, original vs moved:    ${pairReveal.matchMoved.toFixed(2)}`, `last layer, two ordinary ${prompt.category.padEnd(10)}: ${Number.isFinite(pairReveal.ordinary) ? pairReveal.ordinary.toFixed(2) : '—'}`] : [null, null, null, null]} />
         </div>
       </div>
-      <GroupLabel>Step 4 · A built set of moved-part pairs</GroupLabel>
-      <Note>Ten display drawings, each with one group of strokes moved by hand. For each pair: is the moved version still the same object? Commit, and the network’s labels appear.</Note>
+      </>}
+      {step === '4' && <>
+      <GroupLabel>A built set of moved-part pairs</GroupLabel>
       {movedSet && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(270px, 1fr))', gap: 8 }}>
           {movedSet.pairs.map((p, i) => (
@@ -218,7 +243,7 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
           ))}
         </div>
       )}
-      {!builtCommitted && <Btn primary disabled={!movedSet || builtAnswers.slice(0, movedSet?.pairs.length ?? 10).some((a) => a === null)} onClick={() => setBuiltCommitted(true)}>Commit my answers for the ten pairs</Btn>}
+      </>}
     </div>
   )
 

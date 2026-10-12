@@ -5,7 +5,10 @@ import { DEFAULT_MODES, MODE_LABEL, TEST_LABEL, type TestId, type TestMode } fro
 import { DEFAULT_NOISE, NOISE_A_RANGE, NOISE_B_RANGE } from '../../sim/objects/noise'
 import { Slider } from '../../components/controls'
 import { NETWORKS_LINE, TRAINED_BEFORE_LINE } from './lines'
-import { Btn, Content, GroupLabel, Note, TabBar, type Tab } from './ui'
+import { Btn, Content, GrayImage, GroupLabel, Note, TabBar, type Tab } from './ui'
+import { loadGray, photoPath, useJson, type PhotosManifest } from './data'
+import { addNoise } from '../../sim/objects/noise'
+import { makeRng } from '../../sim/random'
 import { DrawTab } from './DrawTab'
 import { PartsTab } from './PartsTab'
 import { ViewsTab } from './ViewsTab'
@@ -72,6 +75,31 @@ export default function ObjectsScene({ dev: devGiven }: { dev?: boolean } = {}) 
   return <DrawTab seed={seed} header={header} />
 }
 
+/** One photograph clean and under both noises at the strengths now set, so they can be judged without taking the test. Developer control only. */
+function NoisePreview({ noise }: { noise: { A: number; B: number } }) {
+  const photos = useJson<PhotosManifest>('photos/manifest.json')
+  const [px, setPx] = useState<Float32Array | null>(null)
+  const file = photos?.images.find((i) => i.category === 'dog')?.file ?? photos?.images[0]?.file
+  useEffect(() => {
+    if (!file) return
+    let live = true
+    loadGray(photoPath(file), 160).then((p) => { if (live) setPx(p) }).catch(() => {})
+    return () => { live = false }
+  }, [file])
+  const shown = useMemo(() => (px ? [px, addNoise(px, 'A', noise.A, makeRng(1)), addNoise(px, 'B', noise.B, makeRng(2))] : null), [px, noise])
+  if (!shown) return null
+  return (
+    <div style={{ display: 'flex', gap: 4 }} data-noise-preview>
+      {(['clean', 'A', 'B'] as const).map((k, i) => (
+        <div key={k} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, fontSize: 10, color: 'var(--text-muted)' }}>
+          <GrayImage image={shown[i]} size={160} display={84} alt={`preview, ${k}`} />
+          {k === 'clean' ? 'clean' : `noise ${k}`}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 /** Shown only with `?dev=1`: each test's viewing mode, and Part 4's two noise strengths. Removed for a test once Jon has chosen (spec §7). */
 export function DevControl({ config, onChange }: { config: SceneConfig; onChange: (c: SceneConfig) => void }) {
   return (
@@ -93,9 +121,10 @@ export function DevControl({ config, onChange }: { config: SceneConfig; onChange
           ))}
         </div>
       ))}
-      <Slider label="noise A strength (share of pixels)" value={config.noise.A} min={NOISE_A_RANGE.min} max={NOISE_A_RANGE.max} step={NOISE_A_RANGE.step} onChange={(v) => onChange({ ...config, noise: { ...config.noise, A: v } })} />
-      <Slider label="noise B strength (width)" value={config.noise.B} min={NOISE_B_RANGE.min} max={NOISE_B_RANGE.max} step={NOISE_B_RANGE.step} onChange={(v) => onChange({ ...config, noise: { ...config.noise, B: v } })} />
-      <Note>A change of mode or strength takes effect when that part is next opened.</Note>
+      <Slider label="Part 4: noise A strength (share of pixels)" value={config.noise.A} min={NOISE_A_RANGE.min} max={NOISE_A_RANGE.max} step={NOISE_A_RANGE.step} onChange={(v) => onChange({ ...config, noise: { ...config.noise, A: v } })} />
+      <Slider label="Part 4: noise B strength (width)" value={config.noise.B} min={NOISE_B_RANGE.min} max={NOISE_B_RANGE.max} step={NOISE_B_RANGE.step} onChange={(v) => onChange({ ...config, noise: { ...config.noise, B: v } })} />
+      <NoisePreview noise={config.noise} />
+      <Note>A change of mode or strength takes effect when that part is next opened: switch to another tab and back. The seed, and so the trials, stay the same; <i>New seed</i> is for a fresh set. The sliders touch Part 4 only; Part 2's erasers always remove half the ink.</Note>
     </div>
   )
 }
