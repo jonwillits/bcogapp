@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Panel } from '../../components/Panel'
 import { randomSeed } from '../../sim/random'
 import type { Drawing } from '../../sim/objects/raster'
-import { DEFAULT_MODES, MODE_LABEL, TEST_LABEL, type TestId, type TestMode } from '../../sim/objects/config'
+import { DEFAULT_MODES, MODE_LABEL, TEST_LABEL, UNDECIDED_TESTS, type TestId, type TestMode } from '../../sim/objects/config'
 import { DEFAULT_NOISE, NOISE_A_RANGE, NOISE_B_RANGE } from '../../sim/objects/noise'
 import { Slider } from '../../components/controls'
 import { NETWORKS_LINE, TRAINED_BEFORE_LINE } from './lines'
@@ -104,12 +104,12 @@ function NoisePreview({ noise }: { noise: { A: number; B: number } }) {
   )
 }
 
-/** Shown only with `?dev=1`: each test's viewing mode, and Part 4's two noise strengths. Removed for a test once Jon has chosen (spec §7). */
+/** Shown only with `?dev=1`: the viewing mode of each test still undecided, and Part 4's two noise strengths. A test's switch goes once Jon has chosen (spec §7): Parts 2 and 3 are fixed as free. */
 export function DevControl({ config, onChange }: { config: SceneConfig; onChange: (c: SceneConfig) => void }) {
   return (
     <div data-dev-control style={{ display: 'flex', flexDirection: 'column', gap: 6, border: '1px dashed var(--accent)', borderRadius: 8, padding: 8 }}>
       <Section title="Developer control" defaultOpen={false}>
-      {(Object.keys(config.modes) as TestId[]).map((t) => (
+      {UNDECIDED_TESTS.map((t) => (
         <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11.5 }}>
           <span style={{ flex: 1 }}>{TEST_LABEL[t]}</span>
           {(['glimpse', 'free'] as TestMode[]).map((m) => (

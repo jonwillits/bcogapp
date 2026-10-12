@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { makeRng } from '../random'
-import { CONDITIONS, LEARNED_VIEWS, TEST_VIEWS, TEST_VIEWS_BY_COUNT, WOBBLE_FRAMES, allViews, distanceFromLearned, viewTrials } from './views'
+import { CONDITIONS, LEARNED_VIEWS, TEST_VIEWS, TEST_VIEWS_BY_COUNT, WOBBLE_FRAMES, allViews, bothSetTrials, distanceFromLearned, viewTrials } from './views'
 import { VIEWS_PER_CONDITION } from './config'
 
 /**
@@ -67,5 +67,21 @@ describe('the trial list', () => {
   it('is fixed by the seed', () => {
     expect(viewTrials(shoes[0], shoes.slice(1), makeRng(5))).toEqual(viewTrials(shoes[0], shoes.slice(1), makeRng(5)))
     expect(viewTrials(shoes[0], shoes.slice(1), makeRng(6))).not.toEqual(viewTrials(shoes[0], shoes.slice(1), makeRng(5)))
+  })
+})
+
+describe('both sets in one run', () => {
+  const shoes = manifest.objects.filter((o) => o.set === 'shoe').map((o) => o.id)
+  const things = manifest.objects.filter((o) => o.set === 'other').map((o) => o.id)
+  it('is 48 trials, 24 per set, each set half target and half not in every condition, and the non-targets of each set come from that set', () => {
+    const t = bothSetTrials(shoes[0], shoes.slice(1), things, makeRng(9))
+    expect(t.length).toBe(12 * VIEWS_PER_CONDITION)
+    for (const set of ['shoes', 'things'] as const) {
+      const here = t.filter((x) => x.set === set)
+      expect(here.length).toBe(6 * VIEWS_PER_CONDITION)
+      for (const c of CONDITIONS) expect(here.filter((x) => x.condition === c && x.target).length).toBe(VIEWS_PER_CONDITION)
+      for (const x of here.filter((y) => !y.target)) expect(set === 'shoes' ? shoes : things).toContain(x.object)
+    }
+    expect(bothSetTrials(shoes[0], shoes.slice(1), things, makeRng(9))).toEqual(t)
   })
 })

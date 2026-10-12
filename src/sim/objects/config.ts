@@ -12,8 +12,15 @@ export type TestMode = 'glimpse' | 'free'
 export const TEST_LABEL: Record<TestId, string> = { parts: 'Part 2: contour deletion', views: 'Part 3: views', noise: 'Part 4: noise' }
 export const MODE_LABEL: Record<TestMode, string> = { glimpse: 'glimpse', free: 'free' }
 
-/** The defaults the spec names: Part 2 glimpse, Part 3 free, Part 4 glimpse. */
-export const DEFAULT_MODES: Record<TestId, TestMode> = { parts: 'glimpse', views: 'free', noise: 'glimpse' }
+/**
+ * Part 2 and Part 3 are fixed as free (Jon, 2026-10-12, on his walk);
+ * their switches are gone from the developer control and `config.test.ts`
+ * pins them. Part 4 loads as glimpse, the spec's preference, and keeps
+ * its switch until Jon decides.
+ */
+export const DEFAULT_MODES: Record<TestId, TestMode> = { parts: 'free', views: 'free', noise: 'glimpse' }
+/** The tests whose mode is still Jon's to choose; only these get a switch in the developer control. */
+export const UNDECIDED_TESTS: TestId[] = ['noise']
 
 /** About a fifth of a second, scheduled on animation frames; the duration actually shown is logged on every trial. */
 export const GLIMPSE_MS = 200

@@ -59,9 +59,10 @@ describe('Parts: nothing from the network before the commit', () => {
 })
 
 describe('Views: nothing from the readout before the commit', () => {
-  const answers = new Array(24).fill('same')
+  const answers = new Array(48).fill('same')
   const before = renderToStaticMarkup(<ViewsTab seed={7} mode="free" manifest={scanned} initial={{ phase: 'test', answers, committed: false }} />)
   const after = renderToStaticMarkup(<ViewsTab seed={7} mode="free" manifest={scanned} initial={{ phase: 'done', answers, committed: true }} />)
+  const intro = renderToStaticMarkup(<ViewsTab seed={7} mode="free" manifest={scanned} />)
 
   it('before: a Commit button, no scorecard, no readout scorecard, no curve, no trial list naming the target', () => {
     expect(before).toContain('Commit my answers')
@@ -72,9 +73,15 @@ describe('Views: nothing from the readout before the commit', () => {
     expect(before).not.toMatch(/readout: (same|not)/)
   })
 
-  it('after: the student’s three scorecards, and the trial list', () => {
-    expect((after.match(/data-scorecard="you\//g) ?? []).length).toBe(3)
-    expect(after).toContain('Go on to Set 2')
+  it('the introduction warns that the run takes about five minutes and says not to begin until ready', () => {
+    expect(intro).toMatch(/data-intro/)
+    expect(intro).toContain('about five minutes')
+    expect(intro).toContain('Do not press Begin until you are ready')
+    expect(intro).toContain('>Begin<')
+  })
+
+  it('after: the student’s six scorecards (two sets by three conditions), and the trial list', () => {
+    expect((after.match(/data-scorecard="you\//g) ?? []).length).toBe(6)
     expect(after).toContain('The trials, revealed')
     expect(after).not.toContain('Commit my answers')
   })

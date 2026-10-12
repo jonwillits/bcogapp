@@ -122,3 +122,19 @@ export function allViews(): { vertical: View[]; horizontal: View[] } {
   for (let p = 15; p < 360; p += 15) horizontal.push({ id: `p${pad(p)}`, heading: 0, pitch: p })
   return { vertical, horizontal }
 }
+
+/**
+ * Both sets in one run (Jon, 2026-10-12): the shoes set's trials and the
+ * other-things set's, each half target, mixed into one seeded order. The
+ * target is the same shoe in both; only the other objects differ, so one
+ * study serves both.
+ */
+export interface SetTrial extends ViewTrial {
+  set: ViewSet
+}
+
+export function bothSetTrials(target: string, otherShoes: string[], things: string[], rng: Rng): SetTrial[] {
+  const a = viewTrials(target, otherShoes, rng).map((t) => ({ ...t, set: 'shoes' as ViewSet }))
+  const b = viewTrials(target, things, rng).map((t) => ({ ...t, set: 'things' as ViewSet }))
+  return shuffle([...a, ...b], rng)
+}
