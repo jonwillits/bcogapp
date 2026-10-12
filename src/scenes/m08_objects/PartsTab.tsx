@@ -204,6 +204,7 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
               </div>
             ))}
           </div>
+          <div><Btn primary onClick={() => setStep('2')}>Go on to Step 2: your drawing</Btn></div>
         </>
       )}
       {step === '2' && <>
@@ -222,6 +223,7 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
           )}
         </div>
       </div>
+      <div><Btn primary onClick={() => setStep('3')}>Go on to Step 3: move one part</Btn></div>
       </>}
       {step === '3' && <>
       <GroupLabel>One part moved</GroupLabel>
@@ -234,6 +236,7 @@ export function PartsTab({ seed, mode, header, model: givenModel, display: given
           <FixedLines lines={pairReveal ? [`original:  ${pairReveal.a}`, `moved:     ${pairReveal.b}`, `last layer, original vs moved:    ${pairReveal.matchMoved.toFixed(2)}`, `last layer, two ordinary ${prompt.category.padEnd(10)}: ${Number.isFinite(pairReveal.ordinary) ? pairReveal.ordinary.toFixed(2) : '—'}`] : [null, null, null, null]} />
         </div>
       </div>
+      {stillCommitted && <div><Btn primary onClick={() => setStep('4')}>Go on to Step 4: the built pairs</Btn></div>}
       </>}
       {step === '4' && <>
       <GroupLabel>A built set of moved-part pairs</GroupLabel>

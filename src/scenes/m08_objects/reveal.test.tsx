@@ -48,6 +48,8 @@ describe('Parts: nothing from the network before the commit', () => {
     expect(after).toMatch(/>ink removed</)
     expect(after).toContain('At the joints')
     expect(after).not.toMatch(/>Commit my answers</)
+    expect(after).toContain('Go on to Step 2')
+    expect(before).not.toContain('Go on to Step 2')
   })
 
   it('opens on an introduction with Begin, and no trial', () => {
