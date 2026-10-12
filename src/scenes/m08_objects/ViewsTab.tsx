@@ -33,7 +33,8 @@ const FRAME_MS = 140
 type Phase = 'intro' | 'study' | 'test' | 'done'
 const SETS: ViewSet[] = ['shoes', 'things']
 export const N = 12 * VIEWS_PER_CONDITION
-export const SKIP_LABEL = `Skip ahead ${READOUT_SKIP} steps`
+// A plain literal, so the close-out's control check can find it; `config.test.ts` holds it to READOUT_SKIP.
+export const SKIP_LABEL = 'Skip ahead 50 steps'
 export const CONVERGED_LINE = 'Every training image is right now, so the prediction error is near zero and further steps change the weights very little.'
 export const INTRO_LINES = [
   'You will learn one shoe from two views, each shown wobbling for ten seconds.',

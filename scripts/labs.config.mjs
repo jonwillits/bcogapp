@@ -497,8 +497,6 @@ export const LABS = [
     strings: ['src/sim/objects'],
     handout: 'perception_and_action/object_lab/object_lab.md',
     report: 'perception_and_action/object_lab/object_lab_report.docx',
-    /** No handout yet: the claims below are what the scene makes true, which is what the handout may assert. */
-    handoutPending: true,
 
     retired: [
       { term: /\bloss\b|\bepochs?\b/gi, why: 'neither word is on screen: percent correct, and images' },
@@ -534,7 +532,10 @@ export const LABS = [
       { says: 'no network answer is rendered before Commit my answers, in Parts 2, 3 and 4', test: 'before: a Commit button, no revealed trial' },
       { says: 'after the commit, every trial is revealed with the truth, the answer and the network’s label', test: 'after: every trial revealed' },
       { says: 'the seed fixes the trials', test: 'the seed fixes the trials' },
-      { says: 'the developer control appears only with ?dev=1', test: 'appears only with ?dev=1' },
+      { says: 'every test’s viewing mode is decided (Parts 2 and 3 free, Part 4 glimpse) and no developer control is rendered', test: 'every mode is decided and no control is rendered' },
+      { says: 'Part 4’s noise adapts: one step harder after a right answer, one step easier after a wrong one, within its range', test: 'moves one step harder on a right answer' },
+      { says: 'Part 3 is one run of 48 trials, both sets mixed, half target in every condition', test: 'is 48 trials, 24 per set' },
+      { says: 'Parts 2, 3 and 4 each open on an introduction with Begin, and Part 3’s warns that the run takes about five minutes', test: 'opens on an introduction' },
       { says: 'each of the spec’s eleven lines is on its panel', test: 'the eleven lines that are content' },
       { says: 'no loss, no epoch, no cortical area, no agentic verb about a network', test: 'no agentic verb about a network' },
       { says: 'every shipped image is credited in a NOTICE and excluded from the GPL', test: 'every shipped file is in the NOTICE and in the manifest' },

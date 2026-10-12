@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
-import { DEFAULT_MODES, GLIMPSE_MS, DELETION_LEVEL, PART2_TRIALS, PART4_PER_CONDITION, STAIRCASE, UNDECIDED_TESTS, VIEWS_PER_CONDITION } from '../../sim/objects/config'
+import { DEFAULT_MODES, GLIMPSE_MS, DELETION_LEVEL, PART2_TRIALS, PART4_PER_CONDITION, READOUT_SKIP, STAIRCASE, UNDECIDED_TESTS, VIEWS_PER_CONDITION } from '../../sim/objects/config'
 import { isDev } from './ObjectsScene'
+import { SKIP_LABEL } from './ViewsTab'
 
 /**
  * Both viewing modes exist until Jon chooses (spec §7): the defaults are
@@ -14,6 +15,9 @@ describe('the configuration', () => {
   })
   it('Part 3 has four views per condition, 24 trials per set (Jon, 2026-10-12)', () => {
     expect(VIEWS_PER_CONDITION).toBe(4)
+  })
+  it('the Skip ahead button names the configured number of steps', () => {
+    expect(SKIP_LABEL).toBe(`Skip ahead ${READOUT_SKIP} steps`)
   })
   it('the glimpse is about a fifth of a second', () => {
     expect(GLIMPSE_MS).toBe(200)

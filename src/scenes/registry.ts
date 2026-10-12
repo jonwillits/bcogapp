@@ -225,13 +225,15 @@ export const scenes: SceneManifest[] = [
     blurb:
       'Lab 8. A satellite scene with no creature in it, and the first that runs trained deep networks in the browser: take each test yourself, then watch a network take it on the same images. Drawings through a stack of convolution and pooling, two kinds of contour deletion, learned views of a shoe, and two kinds of noise.',
     mode: 'both',
-    status: 'building',
+    status: 'done',
     Component: ObjectsScene,
     // The handout is written after the build and Jon's walk-through, from the
     // as-built notes, so the fetch fails until it lands.
     lab: {
       rawUrl: `${INTRO_RAW}/perception_and_action/object_lab/object_lab.md`,
       sourceUrl: `${INTRO_BLOB}/perception_and_action/object_lab/object_lab.md`,
+      reportUrl: `${INTRO_BLOB}/perception_and_action/object_lab/object_lab_report.docx`,
+      reportLabel: 'Lab 8 report (.docx)',
       notYet:
         'The Lab 8 handout has not been posted yet. When it is, it will appear here without a reload of the app. Until then the scene itself is open to explore.',
     },

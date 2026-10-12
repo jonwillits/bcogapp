@@ -1,6 +1,6 @@
 # Module 8 as built — notes for the session that writes the handout
 
-Written 2026-10-10 by the session that built `m08-objects`, from the code on branch `m08-objects` and from measurements, for whoever writes `intro_to_bcs/perception_and_action/object_lab/object_lab.md`. **Jon has not yet walked the scene**; the walk-through is `course_creation/labs/08_perception_and_action/LAB_8_WALKTHROUGH.md` in the course folder, beside the spec, and its §9 holds the judgment calls and its §10 the targets the networks did not meet. Nothing is merged or pushed.
+Written 2026-10-10 by the session that built `m08-objects`, from the code on branch `m08-objects` and from measurements, for whoever writes `intro_to_bcs/perception_and_action/object_lab/object_lab.md`. **Jon walked the scene on 2026-10-12** (`course_creation/labs/08_perception_and_action/LAB_8_WALKTHROUGH.md` beside the spec, revised in place; §9 holds the decisions and §10 the targets the networks did not meet), and **the handout was written the same day** from these notes: `object_lab.md`, 22 questions, with `object_lab_report.docx` and `build_report.py`, to the course voice guide. Nothing is merged or pushed.
 
 **Every number here was measured, not predicted.** Part 1, Part 2 and Part 4 numbers come from Python (`training/m08/measure_*.py`), over held-out sets that do not ship, on the exported weights as the browser has them (float16 for the photo networks), and are shipped in `public/m08/measurements.json`, which the scene prints and `measurements.test.ts` pins. Part 3's readout numbers come from `src/sim/objects/readout.probe.ts`, which trains the same unit through the same rule on the same shipped images in the same runtime, over 8 targets and 5 seeds (1000 to 1004). A handout that quotes a number should quote one from §4 and say "about".
 
@@ -10,7 +10,7 @@ Written 2026-10-10 by the session that built `m08-objects`, from the code on bra
 
 ## 1. Every control, as it shipped
 
-The header panel, titled **Lab 8: Does It Fail Where We Fail?**, is on every tab: five tabs (**Draw** Part 1, **Parts** Part 2, **Views** Part 3, **Noise** Part 4, **Closer**), the about line, the two lines of §8 that belong on every tab, the **Run seed** with **New seed**, and with `?dev=1` the **Developer control** (glimpse/free per test; **noise A strength (share of pixels)** 0 to 0.6, loaded 0.20; **noise B strength (width)** 0 to 0.9, loaded 0.35). The layout is Lab 6's three columns: controls, a scrolling stage, an inspector. A tab keeps its state while it shows and starts fresh when returned to; a new seed restarts the open part.
+The header panel, titled **Lab 8: Does It Fail Where We Fail?**, is on every tab: five tabs (**Draw** Part 1, **Parts** Part 2, **Views** Part 3, **Noise** Part 4, **Closer**), the about line, the two lines of §8 that belong on every tab, and the **Run seed** with **New seed**. The developer control of spec §7 was retired on 2026-10-12 once every mode was decided and the noise made adaptive; `?dev=1` now exposes only the benchmark hook. The layout is Lab 6's three columns: controls, a scrolling stage, an inspector. A tab keeps its state while it shows and starts fresh when returned to; a new seed restarts the open part.
 
 ### Draw tab (left panel "Inside the stack")
 
@@ -27,7 +27,7 @@ Stage: *As the network receives it (64 × 64)*; *The five most likely labels* as
 
 | Name on screen | Range | Default | Where |
 |---|---|---|---|
-| Step 1: **Show it**, the grid of 24 names, **Previous**, **Next**, **Commit my answers** | 12 trials | viewing mode from the configuration (glimpse) | stage and left |
+| Step 1: **Begin** on an orienting screen, then the grid of 24 names, **Previous**, **Next**, **Commit my answers** under the drawing | 12 trials | free (fixed, Jon 2026-10-12) | stage |
 | Step 2: **Mid-line** / **At the joints**; **share of ink removed** | 20% to 80%, step 5 | Mid-line, 50% | left; the pad and the erased drawing on the stage |
 | Step 3: the prompt chip (**mushroom**, **ice cream**, **coffee cup**); two pads; **yes** / **no** / **only just**; **Commit my answer** | — | from the seed | left and stage |
 | Step 4: ten pairs each with **yes** / **no** / **only just**; **Commit my answers for the ten pairs** | — | — | stage |
@@ -36,20 +36,20 @@ After Step 1's commit: four fixed lines on the left (your percent per eraser, th
 
 ### Views tab (left panel "Views")
 
+**One run, both sets** (revised 2026-10-12 on Jon's walk). The stage opens on *What will happen* with **Begin**, and the warning that the run takes about five minutes without a break. Then the study (the target wobbling ±10° around 0° then 75°, 10 s each; the image goes when the study ends), **Start the test**, 48 trials in one seeded order with both sets mixed (**same shoe** / **not the same shoe**; *Previous*, *Next*, *Commit my answers* on the stage under the picture), and after the commit six scorecards for the student by set and condition, six for the readouts, two pairs of curves, and the trial list.
+
 | Name on screen | Range | Default | Where |
 |---|---|---|---|
-| **one shoe among shoes** / **one shoe among other things** | — | shoes | left |
-| Step 1: the study wobble; **Start the test** (enabled after both learned views, 10 s each) | — | — | left and stage |
-| Step 2: **same shoe** / **not the same shoe**, **Previous**, **Next**, **Commit my answers** | 24 trials | free | stage and left |
-| Step 3: **Learning on**; **learning rate η** | 0.005 to 0.2, step 0.005 | off; 0.050 | left |
-| **Skip ahead 50 steps** (enabled after the commit, with learning on and the features ready); **Start from new random weights** | — | — | left |
+| **Begin**, **Start the test**, **same shoe** / **not the same shoe**, **Previous**, **Next**, **Commit my answers** | 48 trials | free (fixed, Jon 2026-10-12) | stage |
+| **Learning on**; **learning rate η** | 0.005 to 0.2, step 0.005 | off; 0.050 | left |
+| **Skip ahead 50 steps** (enabled after the commit, with learning on and the features ready; moves both readouts); **Start from new random weights** | — | — | left |
 | **By hand** (Lab 7's box, collapsed) | — | 42, 8, 8, 42 | right |
 
-Fixed lines on the left: *Features ready: n of 137*; steps so far, training images (80), percent right on them; *The unit's numbers*: baseline b₀, weights b₁ and b₂, criterion θ, last prediction error Φ (all signed with the sign's place kept). After the commit the stage shows **your scorecards** per condition, **the readout's scorecards** titled *the readout after N steps*, **the view-generalization curve** (two plots), and the trial list. Lines: the readout line, the our-networks line, the glimpse line in glimpse mode, the correction line under any card with a rate of 0 or 1, *Glimpses shown*.
+Fixed lines on the left: *Features ready: n of 229*; steps so far; training images, shoes (80) and things (90); percent right on each with *(at the target)* at 95%; a line when both are at 100% saying the prediction error is near zero; then *The units' numbers* for each readout: baseline b₀, weight b₁, criterion θ, last prediction error Φ (signed with the sign's place kept). Lines: the readout line, the our-networks line, the glimpse line in glimpse mode, the correction line under any card with a rate of 0 or 1, *Glimpses shown*.
 
 ### Noise tab (left panel "Noise")
 
-**Show it**, the grid of 16 names, **Previous**, **Next**, **Commit my answers**, 36 trials; the strengths printed as two fixed lines. After the commit: the table *Percent correct on the thirty-six* (Standard, Trained on noise A, Trained on blurred and sharp, you, chance (1 in 16) by clean, noise A, noise B; the networks' cells fill six trials at a time), every trial revealed, and on the right **The larger test** at the loaded strengths and across strengths. Lines: the eye line, the our-networks line, the glimpse line in glimpse mode, *Glimpses shown*.
+**Begin** on an orienting screen that says the three conditions are mixed and not announced and that the noise adapts; then **Show it** (glimpse, fixed, Jon 2026-10-12), the grid of 16 names, **Previous**, **Next**, **Commit my answers** under the picture, 36 trials. **The strengths are adaptive** (Jon, 2026-10-12): a one-up, one-down staircase per kind of noise, A from 0.20 by 0.05 within 0.05 to 0.60, B from ±0.35 by 0.10 within 0.10 to 0.90 (`STAIRCASE` in config.ts); a trial's strength is fixed the first time it is shown and logged; a first answer moves its kind's level; a changed answer does not change a strength already shown. The two current levels are fixed lines on the left. After the commit: the table *Percent correct on the thirty-six* (the three networks on the same noisy images, you, chance), **Where your noise settled** (the mean of the last six levels per kind, the twelve levels in order, and each network's score at the settled level read off the larger test's sweep by interpolation), every trial revealed with its strength, and on the right **The larger test** at the starting strengths and across strengths. Lines: the eye line, the our-networks line, the glimpse line, *Glimpses shown*.
 
 ### Closer tab
 
@@ -83,11 +83,11 @@ All trained 2026-10-10 on an Apple M5 Pro (24 GB) through PyTorch's MPS backend,
 
 **Scanned objects** (`public/m08/scanned/`, 880 files, 2.9 MB): eight shoes (`shoe00` to `shoe07`: ASICS GEL-1140V white/black/silver and white/royal/silver, GEL-Challenger 9, GEL-Resolution 5, Hyper-Rocketgirl SP 5; Reebok REALFLEX SELECT, SMOOTHFLEX CUSHRUN 2.0, TURBO RC) and eight other things (`other08` to `other15`: an Android figure, a brown hat, a gaming mouse, a stacking ring, a red ceramic planter, a Schleich Hereford bull, a white cereal bowl, a JanSport backpack), rendered with Three.js in headless Chromium through Playwright (`render_gso.mjs`): fixed camera, hemisphere plus two directional lights fixed in the world, the object turned on a turntable, neutral gray 0x808080, bounding sphere scaled to one size, 224 × 224 then grayscale 160 × 160. **55 views per object**: headings 0° to 345° every 15° at eye level (`h000`…`h345`), pitches 15° to 345° every 15° at heading 0 (`p015`…`p345`), and the wobble frames ±5° and ±10° around 0° and 75° (`w350`, `w355`, `w005`, `w010`, `w065`, `w070`, `w080`, `w085`). The 3D models never ship.
 
-**The view design.** Learned views `h000` and `h075`, each shown as five frames. Test views, four per condition: **between** 15°, 30°, 45°, 60°; **beyond** 345°, 330°, 90°, 105°; **at right angles** tipped 15°, 30°, −15°, −30°. Distances from the nearest learned view are {15, 15, 30, 30} in every condition (`views.test.ts`). A set's 24 trials: the target at each of its 12 test views, and 12 other objects (drawn from the set's seven or eight others) at the same views, in a seeded order.
+**The view design.** Learned views `h000` and `h075`, each shown as five frames. Test views, four per condition (`VIEWS_PER_CONDITION`; three is also matched, at 18 trials per set): **between** 15°, 30°, 45°, 60°; **beyond** 345°, 330°, 90°, 105°; **at right angles** tipped 15°, 30°, −15°, −30°. Distances from the nearest learned view are {15, 15, 30, 30} in every condition (`views.test.ts`). A set's 24 trials: the target at each of its 12 test views, and 12 other objects (drawn from the set's seven or eight others) at the same views; the two sets' 48 trials are mixed in one seeded order (`bothSetTrials`).
 
 **Drawings** (`public/m08/drawings/`): `display.json`, 72 drawings (3 per category) from the test split, chosen so that the network names the intact drawing and both erasers reach 35%, 50% and 65% to within 1% (14 drawings excluded for a wrong intact label, 12 because an eraser fell short, 2 for having no joint), each with its joints precomputed; `moved.json`, the ten moved-part pairs with the stroke group, the placement (the part's box put just above or below the rest's box, centered, a 4-unit gap) and what moved. Credited by Quick, Draw! key in the NOTICE. **The deletion levels**: the student's test at 50%; the larger test at 35%, 50% and 65%. **The erasers**: joints are corners (a turn over 60° within a 12-unit window), stroke ends within 10 units of another stroke, and crossings; gaps grow by bisection until the asked share of total stroke length is gone; pieces under 2 units are dropped.
 
-**Noise**: A is salt and pepper (each pixel replaced by 0 or 1 with probability p); B is uniform (U(−w, w) added, clipped). Loaded strengths A 0.20, B 0.35. The browser generator is pinned to the Python one's statistics (`noise.test.ts`). The mask is the image's own 16 × 16 (photographs) or 8 × 8 (drawings) patches scrambled, from the seed.
+**Noise**: A is salt and pepper (each pixel replaced by 0 or 1 with probability p); B is uniform (U(−w, w) added, clipped). Strengths adapt per student from A 0.20 and B 0.35, where the larger test was scored. The browser generator is pinned to the Python one's statistics (`noise.test.ts`). The mask is the image's own 16 × 16 (photographs) or 8 × 8 (drawings) patches scrambled, from the seed.
 
 ---
 
@@ -120,7 +120,7 @@ Centering off: shrunk to 40% in a corner 13%; shrunk to 40% centered 31%; at 70%
 
 Over 200 held-out drawings per eraser that the network names intact. **The moved-part set** (the part placed just on the other side of the rest, so the moved version's longer side is 0.98 to 1.54 times the original's and the dataset's scaling leaves its size about the same): the label changed on **4 of 10** (d04 coffee cup → bucket 0.61; d17 coffee cup → snowman 1.00; d43 ice cream → chair 1.00; d15 umbrella → floor lamp 0.91) and stayed on 6 (d08 coffee cup 0.99; **d18 and d25 mushroom, 0.98 and 1.00, with the cap under the stem**; d13 snowman 0.57; d46 floor lamp 1.00; d63 wine glass 1.00). Last-layer match, moved pair against an ordinary pair of the category: 0.27/0.18, 0.17/0.18, 0.11/0.29, 0.90/0.27, 0.71/0.27, 0.02/0.45, 0.15/0.23, 0.19/0.23, 0.81/0.46, 0.58/0.27. A first version shoved the part 200 units away, which halved the moved version after scaling and changed the label on 8 of 10; that was a size change on top of the move, and Jon caught it on 2026-10-12.
 
-### Part 3 (`readout.probe.ts`, 8 targets × 5 seeds, η 0.05)
+### Part 3 (`readout.probe.ts`, 8 targets × 5 seeds, η 0.05; the probe trains one readout per set as the scene does)
 
 Steps to 95% on the 80 training images: shoes 20 to 230 (median 80); other things 10 to 70 (median 40). d′ by hand on the 24 trials (median; range), from four trials of each kind so the values are 0, ±0.48, ±0.67, ±1.15, ±1.35, ±1.82 or ±2.30:
 
@@ -165,7 +165,7 @@ A walk by the build session with no writing, in the in-app browser: Part 1 about
 4. **The tolerance plots are shown only with centering off.** With it on, a shift or a turn would be undone before the network saw it and the plot would show tolerance from the preprocessing; a line on the stage says so. (Walk-through 9.1.)
 5. **The readout reads the 1,024-unit penultimate layer** (the classifier's hidden layer after its hardswish), not the 576 pooled convolutional features; η loads at 0.05, starting weights ±0.05, a wide ±6 range.
 6. **d′ uses Lab 7's existing repair** (half a response short of the end), not the add-0.5 one, because Lab 7's By hand box already had it; the scene prints the line when it applied.
-7. **Both viewing modes shipped with the spec's defaults** (glimpse, free, glimpse) and the developer control; nothing is fixed yet. A timer stands guard behind the animation-frame schedule so a stalled tab still gets its mask.
+7. **Every mode is decided** (Jon, 2026-10-12): Parts 2 and 3 free, Part 4 glimpse, pinned by test; **Part 4's strengths adapt by staircase** instead of being set by Jon; the developer control is retired. A timer stands guard behind the animation-frame schedule so a stalled tab still gets its mask.
 8. **Noise B does not break the noise-trained network** (target: at most 20%; measured 69%). Kept as uniform noise, the spec's starting pair, and raised in the walk-through with the measurements of three other kinds of change; Jon decides.
 9. **No eraser gap for the network** (a finding, not a target), and **the moved-part pairs keep the network's label on 6 of 10**, both mushrooms among them: the reading's finding that networks confuse a moved version with the original, reproduced. Both reported as findings.
 10. **The blur-trained network beats Standard on drawings by 2 points**, within error; the noise-trained network is highest at 30%.
