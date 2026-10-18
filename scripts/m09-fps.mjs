@@ -52,7 +52,7 @@ async function measure(label) {
   const block = await page.evaluate(() => new Promise((resolve) => {
     let worst = 0
     const obs = new PerformanceObserver((list) => { for (const e of list.getEntries()) worst = Math.max(worst, e.duration) })
-    obs.observe({ type: 'longtask', buffered: true })
+    obs.observe({ type: 'longtask' })
     const b = [...document.querySelectorAll('button')].find((x) => x.textContent.trim().startsWith('Skip ahead 2 minutes'))
     const t0 = performance.now()
     b.click()

@@ -39,7 +39,7 @@ function scripted(plan: TrialPlan, seed: number): HomingTrial {
   return trial
 }
 
-it('crib: what the panels should read', () => {
+it('crib: what the rat’s panels should read', () => {
   // ───── Part 3, the spatial system
   say('PART 3 · the card and the heading')
   const controlAt: number[] = []

@@ -560,6 +560,7 @@ export const LABS = [
     /** Sim files whose strings reach the screen: the navigators' names and lines, the rats' labels and reveal lines, the strategies, the habitats, the result lines. */
     strings: ['src/sim/rodent'],
     handout: 'spatial_cognition/way_home_lab/way_home_lab.md',
+    report: 'spatial_cognition/way_home_lab/way_home_lab_report.docx',
     handoutPending: true,
     /**
      * Built 2026-10-18 with no handout; the handout is written after Jon's
@@ -642,6 +643,6 @@ export const LABS = [
       { says: 'Look: the night scene, the heat maps and the rings are legible on the dark theme', test: null },
     ],
 
-    crib: 'crib: what the panels should read',
+    crib: 'crib: what the rat’s panels should read',
   },
 ]
