@@ -92,6 +92,7 @@ const LearningScene = lazy(() => import('./m05_learning/LearningScene'))
 const BrainScene = lazy(() => import('./m06_brain/BrainScene'))
 const FishScene = lazy(() => import('./m07_fish/FishScene'))
 const ObjectsScene = lazy(() => import('./m08_objects/ObjectsScene'))
+const RatScene = lazy(() => import('./m09_rat/RatScene'))
 
 /**
  * Registered, runnable scenes. Order here is the order shown within a module.
@@ -236,6 +237,24 @@ export const scenes: SceneManifest[] = [
       reportLabel: 'Lab 8 report (.docx)',
       notYet:
         'The Lab 8 handout has not been posted yet. When it is, it will appear here without a reload of the app. Until then the scene itself is open to explore.',
+    },
+  },
+  {
+    route: 'm09-rat',
+    module: 9,
+    title: 'The Way Home',
+    blurb:
+      'Lab 9. The animal becomes a small mammal on the forest floor at night, and for the first time you move through a 3D world rather than looking into one. Find the nest in the dark and by moonlight, run a plus maze, a water maze and Tolman’s radiating paths on rats that each rely on one kind of knowledge, then be the rat while simulated head-direction, place, grid and border cells fire beside the view. The fourth stage of the evolving-creature engine.',
+    mode: 'both',
+    status: 'building',
+    Component: RatScene,
+    // The handout is written after the build and Jon's walk-through, from the
+    // as-built notes, so the fetch fails until it lands.
+    lab: {
+      rawUrl: `${INTRO_RAW}/spatial_cognition/way_home_lab/way_home_lab.md`,
+      sourceUrl: `${INTRO_BLOB}/spatial_cognition/way_home_lab/way_home_lab.md`,
+      notYet:
+        'The Lab 9 handout has not been posted yet. When it is, it will appear here without a reload of the app. Until then the scene itself is open to explore.',
     },
   },
 ]
