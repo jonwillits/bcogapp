@@ -106,12 +106,18 @@ export default function RatScene() {
 
   // A throttled re-render while the sim runs: the panels redraw a few times a second, not every frame.
   const lastPanel = useRef(0)
+  const lastRecording = useRef(0)
   const onTick = () => {
     clockRef.current += DT
     const now = performance.now()
     if (now - lastPanel.current > 120) {
       lastPanel.current = now
       bump()
+    }
+    // The recording panel is memoized and listens to its store: tell it twice a second while the rat moves.
+    if (tab === 'cells' && now - lastRecording.current > 500) {
+      lastRecording.current = now
+      stores.cells.changed()
     }
   }
 

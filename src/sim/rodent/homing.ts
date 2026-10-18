@@ -82,9 +82,9 @@ export interface TrialRecord {
 export type NavigatorId = 'runningSum' | 'landmarks' | 'averaging' | 'followingOne'
 
 export const NAVIGATORS: { id: NavigatorId; label: string; line: string }[] = [
-  { id: 'runningSum', label: 'Running sum only', line: 'Path integration with seeded noise in turn and step, and no landmarks.' },
+  { id: 'runningSum', label: 'Running sum only', line: 'Path integration with seeded noise in turn and step, and no landmarks: it walks the home vector its running sum gives.' },
   { id: 'landmarks', label: 'Landmarks only', line: 'Heads for where the landmarks say the nest is. In the dark, it has nothing to go on and stops where it is.' },
-  { id: 'averaging', label: 'Averaging', line: 'Weights its running sum and the landmarks by how reliable each is.' },
+  { id: 'averaging', label: 'Averaging', line: 'Weights its running sum and the landmarks by how reliable each is: cue combination.' },
   { id: 'followingOne', label: 'Following one', line: 'Averages when the two disagree by a little, and follows the landmarks alone when they disagree by a lot.' },
 ]
 

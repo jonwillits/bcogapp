@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Panel } from '../../components/Panel'
 import { CELL_KEYS } from '../../sim/rodent/recording'
 import { GRID_SPACINGS } from '../../sim/rodent/spatial/maps'
@@ -9,7 +10,7 @@ import { HeatMap, PolarPlot, Rings } from './RecordingPanel'
 import { Btn, Choice, Content, FixedLines, GroupLabel, Intro, Note, PANEL_STYLE, WIDE_RIGHT_STYLE } from './ui'
 import { ESTIMATE_LINE, GRID_LINE, LESION_ASSUMPTION_LINE, MAP_RULE_LINE, MODELS_LINE, PLACE_LINE, RINGS_LINE, THREE_GROUPS_LINE, TWO_RINGS_LINE } from './lines'
 import { DAY_SKIP, SKIPS, STEPS, type CellsStore, type Step } from './cellsStore'
-import { useStore } from './useStore'
+import { useStore, useThrottledStore } from './useStore'
 
 /**
  * Part 3's panels (spec §9). Left: the step, its orienting screen, the
@@ -132,8 +133,10 @@ function MoveCardButton({ store }: { store: CellsStore }) {
   )
 }
 
-export function CellsRight({ store }: { store: CellsStore }) {
-  const s = useStore(store)
+/** Memoized, so the scene's own re-renders do not redraw it; it redraws on the store's notices, at most twice a second. */
+export const CellsRight = memo(function CellsRight({ store }: { store: CellsStore }) {
+  // The maps are the cost: redraw this panel at most twice a second.
+  const s = useThrottledStore(store, 500)
   const session = s.session
   const hd = session.spatial.hd
   const lower = hd.decodeLower()
@@ -144,7 +147,7 @@ export function CellsRight({ store }: { store: CellsStore }) {
     <Panel title="The recording" style={WIDE_RIGHT_STYLE}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-recording>
         <FixedLines lines={s.lines()} testId="recording-lines" />
-        <GroupLabel>The rings</GroupLabel>
+        <GroupLabel>The rings: a ring attractor below, the recorded cells above</GroupLabel>
         <Rings lower={hd.lowerRate} upper={hd.upperRate} lowerHeading={lower.heading} upperHeading={upper.heading} lowerStrength={lower.strength} upperStrength={upper.strength} />
         <Content>{TWO_RINGS_LINE}</Content>
         <Content>{RINGS_LINE}</Content>
@@ -155,7 +158,7 @@ export function CellsRight({ store }: { store: CellsStore }) {
             return <PolarPlot key={k} rates={t.rates} label={`HD ${Math.round(deg(HeadDirection.preferred(HD_SHOWN[i])))}°`} preferred={t.index > 0.2 ? t.preferred : undefined} />
           })}
         </div>
-        <GroupLabel>Place cells</GroupLabel>
+        <GroupLabel>Firing maps: place cells</GroupLabel>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {s.placeShown.map((i) => (
             <HeatMap key={i} map={maps.rateMap(CELL_KEYS.place[i])} nx={maps.nx} ny={maps.ny} label={`place ${i + 1}`} />
@@ -203,4 +206,4 @@ export function CellsRight({ store }: { store: CellsStore }) {
       </div>
     </Panel>
   )
-}
+})

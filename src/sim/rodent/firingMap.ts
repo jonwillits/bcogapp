@@ -83,8 +83,18 @@ export class FiringMaps {
     return total ? visited / total : 0
   }
 
-  /** Spikes per second in each bin, lightly smoothed; NaN where the rat has not been. */
+  private cache = new Map<string, { at: number; map: Float32Array }>()
+
+  /** Spikes per second in each bin, lightly smoothed; NaN where the rat has not been. Cached until the record grows. */
   rateMap(key: string): Float32Array {
+    const hit = this.cache.get(key)
+    if (hit && hit.at === this.seconds) return hit.map
+    const map = this.computeRateMap(key)
+    this.cache.set(key, { at: this.seconds, map })
+    return map
+  }
+
+  private computeRateMap(key: string): Float32Array {
     const spikes = this.spikes.get(key) ?? new Float32Array(this.n)
     const sm = smooth(spikes, this.nx, this.ny)
     const oc = smooth(this.occupancy, this.nx, this.ny)

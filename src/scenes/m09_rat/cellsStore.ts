@@ -28,7 +28,7 @@ export const STEPS: StepSpec[] = [
   { step: 1, title: 'Step 1 — Fill the maps', minutes: 4, what: ['A 1 m square box, lit, with a white card on one wall. Drive for a minute, then let the rat explore and skip ahead.', 'The firing maps fill in: one patch per place cell, a lattice per grid cell, a band along a wall per border cell, a lobe per head-direction cell. The estimate and the true path lie on top of each other.'] },
   { step: 2, title: 'Step 2 — Lights out', minutes: 5, what: ['The lights go out. A fresh set of maps records in the dark beside the pinned maps from the light.', 'Drive along a wall, then into the middle, and watch the gap between the estimate and the true path. Then the lights come back on.'], question: 'In the dark, what happens to the place fields?', choices: ['they stay where they were, as sharp', 'they smear and drift', 'they disappear', 'they move to new places and stay there'] },
   { step: 3, title: 'Step 3 — Turn the card', minutes: 5, what: ['First out of sight: the rat is taken out, the card moved 90° around the walls, and the rat put back.', 'Then in sight: the card is moved while the rat faces it, several times.'], question: 'When the card is turned 90° while the rat is out of the box, what do the head-direction cells do?', choices: ['each keeps its preferred direction', 'every preferred direction turns 90°, all together', 'the preferred directions scatter', 'the cells stop firing'] },
-  { step: 4, title: 'Step 4 — A new room', minutes: 5, what: ['The rat is moved to a round box with blue walls and a black card. Then back to the first box.'], question: 'In the new room, what do the place cells do?', choices: ['they fire in the same places', 'some fire in new places and others fall silent', 'they all fall silent', 'they fire everywhere'] },
+  { step: 4, title: 'Step 4 — A new room', minutes: 5, what: ['The rat is moved to a round box with blue walls and a black card: remapping. Then back to the first box, and its map returns.'], question: 'In the new room, what do the place cells do?', choices: ['they fire in the same places', 'some fire in new places and others fall silent', 'they all fall silent', 'they fire everywhere'] },
   { step: 5, title: 'Step 5 — Without the turn signal', minutes: 5, what: ['The vestibular input is removed. The card stays in view. Skip ahead a day.'], question: 'With the turn signal gone and the card in view, what do the head-direction cells do over a day?', choices: ['they keep their tuning, held by the card', 'they keep firing, but not for any one heading', 'they stop firing', 'they turn with the card as before'] },
 ]
 
@@ -38,8 +38,8 @@ export const SKIPS = [
 ] as const
 /** Step 5's day, compressed: the lesion's effect is complete well inside it (`recording.test.ts`). */
 export const DAY_SKIP = { label: 'Skip ahead 1 day (30 simulated minutes)', seconds: 30 * 60 } as const
-/** Seconds of simulated time paid per slice of a skip, on a timer. */
-export const SKIP_SLICE = 20
+/** Seconds of simulated time paid per slice of a skip, on a timer: 250 steps, about 20 ms on the development Mac. */
+export const SKIP_SLICE = 5
 
 export class CellsStore {
   readonly seed: number
@@ -204,12 +204,18 @@ export class CellsStore {
     if (this.skipping) return
     this.skipping = true
     const total = this.owed
+    let lastBump = 0
     const pay = () => {
       const n = Math.min(SKIP_SLICE, this.owed)
       this.session.run(n)
       this.owed -= n
       this.skipBadge = `Skipping ahead — ${Math.round(this.owed)} s to go`
-      bump()
+      // The panels redraw a few times a second during a skip, not once a slice: the maps are the cost.
+      const now = performance.now()
+      if (now - lastBump > 400) {
+        lastBump = now
+        bump()
+      }
       if (this.owed > 0) setTimeout(pay, 0)
       else {
         this.skipping = false

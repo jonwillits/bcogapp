@@ -67,7 +67,7 @@ export const STRATEGIES: { id: Strategy; label: string }[] = [
   { id: 'beacon', label: 'beacon' },
   { id: 'route', label: 'route' },
   { id: 'snapshot', label: 'snapshot' },
-  { id: 'map', label: 'map' },
+  { id: 'map', label: 'map (survey knowledge: a cognitive map)' },
   { id: 'no hippocampus', label: 'damage to the hippocampus' },
   { id: 'no striatum', label: 'damage to the striatum' },
 ]

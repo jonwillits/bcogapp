@@ -36,7 +36,7 @@ export function RatsLeft({ store, header }: { store: RatsStore; header: React.Re
           <Choice value={t.apparatus} options={APPARATUS} onChange={(a) => s.set('apparatus', a)} />
           {t.apparatus === 'plus' && (
             <>
-              <Note>Training from the south arm to food in the east arm; the probe starts from the north arm.</Note>
+              <Note>Training from the south arm to food in the east arm; the probe starts from the north arm. Going to the place is place learning; repeating the turn is response learning.</Note>
               <span style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>Training trials</span>
               <Choice value={String(t.training)} options={[4, 16, 64].map((n) => ({ id: String(n), label: String(n) }))} onChange={(v) => s.set('training', Number(v) as 4 | 16 | 64)} />
             </>
@@ -139,11 +139,13 @@ export function RatsRight({ store }: { store: RatsStore }) {
               )}
             </div>
             {(!rat.hidden || s.revealed.has(rat.id)) && (
-              <Note style={{ paddingLeft: 32 }} data-revealed={rat.id}>
-                {rat.hidden ? `${STRATEGIES.find((st) => st.id === rat.strategy)?.label}. ` : ''}
-                {rat.reveal}
-                {rat.hidden && s.diagnoses[rat.id] ? ` You said: ${STRATEGIES.find((st) => st.id === s.diagnoses[rat.id])?.label}.` : ''}
-              </Note>
+              <div data-revealed={rat.id}>
+                <Note style={{ paddingLeft: 32 }}>
+                  {rat.hidden ? `${STRATEGIES.find((st) => st.id === rat.strategy)?.label}. ` : ''}
+                  {rat.reveal}
+                  {rat.hidden && s.diagnoses[rat.id] ? ` You said: ${STRATEGIES.find((st) => st.id === s.diagnoses[rat.id])?.label}.` : ''}
+                </Note>
+              </div>
             )}
           </div>
         ))}
