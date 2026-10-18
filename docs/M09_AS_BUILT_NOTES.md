@@ -212,7 +212,7 @@ One sim step of Part 3 is 47 µs headless; a frame's six steps 0.3 ms; a skip sl
 
 ### 4.7 Frames per second (`scripts/m09-fps.mjs`, headed Chromium on the development Mac, driving forward and turning)
 
-75 in every case: the range in eye view, in follow view, and in eye view with Low detail; the box in both views; with and without Chrome's 4× CPU throttle. That is the display's refresh rate; the drawing is light enough that the CPU throttle does not reach it. Under the throttle the longest main-thread block during *Skip ahead 2 minutes* was 90 ms. A Chromebook's GPU is the number still to be seen. (Headless Chromium's software renderer gave 4 to 7 and means nothing.)
+75 in every case: the range in eye view, in follow view, and in eye view with Low detail; the box in both views; with and without Chrome's 4× CPU throttle. That is the display's refresh rate; the drawing is light enough that the CPU throttle does not reach it. On an idle machine no main-thread block during *Skip ahead 2 minutes* reached 50 ms, throttled or not; the skip takes about 0.3 s unthrottled and 1 s throttled. Measured while the test suite ran, the frame rate fell to 10 and a block reached 79 ms, so the script is only meaningful with nothing else running. A Chromebook's GPU is the number still to be seen. (Headless Chromium's software renderer gave 4 to 7 and means nothing.)
 
 ### 4.8 What is tested, and what only a person can see
 
@@ -243,7 +243,7 @@ Not *cue card* (it is the white card or the black card). Not *head-direction rin
 
 ## 7. State at hand-off, 2026-10-18
 
-Branch `m09-rat`, six commits off `main`, working tree clean after the last commit, nothing pushed, nothing merged. 672 tests pass (one Lab 8 speed test at 75 ms fails when the machine is busy and passes alone); the build is clean; `npm run closeout m09-rat` prints the 49 claims and the crib. Jon has not walked the scene. The walk-through is written. The handout waits on the walk.
+Branch `m09-rat`, seven commits off `main`, working tree clean after the last commit, nothing pushed, nothing merged. 672 tests pass (one Lab 8 speed test at 75 ms fails when the machine is busy, as it did when the close-out ran beside the frame-rate script, and passes alone); the build is clean; `npm run closeout m09-rat` prints the 49 claims and the crib. Jon has not walked the scene. The walk-through is written. The handout waits on the walk.
 
 **If a change moves a number.** §4 is quoted by the walk-through and will be quoted by the handout. Re-run the crib (`PROBE=1 PROBE_DIR=src/sim/rodent npx vitest run --disable-console-intercept -t "crib:"`, about ten minutes), correct §4 and the walk-through, and any band in `recording.test.ts`, `homing.test.ts`, `rats.test.ts` or `patch.test.ts` that the change crosses. `tune.probe.ts` is the record of how the ring's constants were chosen.
 
