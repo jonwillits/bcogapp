@@ -18,6 +18,12 @@ import { describe, it, expect } from 'vitest'
  * too and must contain no write at all. And the fish's rule moves a baseline
  * — the weight on an input that is always 1 — through `learnWeights` itself,
  * which only Module 7 asks it to do.
+ *
+ * Module 9 extends it again. The rat's two head-direction rings are built
+ * from rate units whose weights are set at construction and never written;
+ * the landmark weights onto the upper ring are the scene's one learner and
+ * are written only by `learnWeights`. `src/sim/rodent/` and its scene are
+ * walked and must contain no write at all.
  */
 
 const sim = import.meta.glob('../**/*.ts', { query: '?raw', import: 'default', eager: true }) as Record<string, string>
@@ -35,7 +41,15 @@ const fishScene = import.meta.glob('../../../scenes/m07_fish/*.{ts,tsx}', {
   eager: true,
 }) as Record<string, string>
 
-const production = Object.entries({ ...sim, ...scenes, ...fish, ...fishScene }).filter(
+// Module 9's rat: two rings and learned landmark weights, and again no writer of its own.
+const rodent = import.meta.glob('../../rodent/**/*.ts', { query: '?raw', import: 'default', eager: true }) as Record<string, string>
+const ratScene = import.meta.glob('../../../scenes/m09_rat/**/*.{ts,tsx}', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>
+
+const production = Object.entries({ ...sim, ...scenes, ...fish, ...fishScene, ...rodent, ...ratScene }).filter(
   ([p]) => !p.includes('.test.') && !p.includes('.probe.'),
 )
 
@@ -122,6 +136,17 @@ describe('exactly two code paths write a stored weight', () => {
       if (!path.includes('/fish/') && !path.includes('/m07_fish/')) continue
       expect([...src.matchAll(WEIGHT_WRITE)].length, path).toBe(0)
       expect([...src.matchAll(WEIGHTS_REPLACED)].length, path).toBe(0)
+    }
+  })
+
+  it('the rat reaches a weight only through learnWeights, and only for the upper ring’s view weights', () => {
+    const ring = production.find(([p]) => p.endsWith('/rodent/spatial/ring.ts'))![1]
+    expect(ring).toMatch(/learnWeights\(this\.upper\[j\], /)
+    for (const [path, src] of production) {
+      if (!path.includes('/rodent/') && !path.includes('/m09_rat/')) continue
+      expect([...src.matchAll(WEIGHT_WRITE)].length, path).toBe(0)
+      expect([...src.matchAll(WEIGHTS_REPLACED)].length, path).toBe(0)
+      expect(src, path).not.toMatch(/alwaysOn/)
     }
   })
 
