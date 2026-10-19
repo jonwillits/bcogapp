@@ -32,7 +32,7 @@ export function Rings({ lower, upper, lowerHeading, upperHeading, lowerStrength,
           {label}
         </text>
         <text x={size - 6} y={size - 6} fontSize={9} textAnchor="end" fill="var(--text-muted)">
-          {strength > 0.3 ? `bump at ${Math.round(((deg(heading) % 360) + 360) % 360)}°` : 'no bump'}
+          {strength > 0.3 ? `bump at ${((Math.round(deg(heading)) % 360) + 360) % 360}°` : 'no bump'}
         </text>
       </svg>
     )
