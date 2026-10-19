@@ -129,7 +129,8 @@ function LandmarkMesh({ l, at }: { l: RangeLandmark; at: { x: number; y: number 
   }
   if (l.kind === 'log') {
     return (
-      <mesh position={[x, 0.22, z]} rotation={[0, 0.5, Math.PI / 2]}>
+      <mesh position={[x, 0.19, z]} rotation={[0, 0.5, Math.PI / 2]}>
+        {/* a round log lies on a line; set it 3 cm into the litter so the line is a bed */}
         <cylinderGeometry args={[0.22, 0.26, l.size, 9]} />
         <meshStandardMaterial color="#4b3b2a" roughness={1} />
       </mesh>
@@ -137,14 +138,16 @@ function LandmarkMesh({ l, at }: { l: RangeLandmark; at: { x: number; y: number 
   }
   if (l.kind === 'stump') {
     return (
-      <mesh position={[x, 0.25, z]}>
+      <mesh position={[x, 0.22, z]}>
         <cylinderGeometry args={[0.28, 0.34, 0.5, 9]} />
         <meshStandardMaterial color="#5c4a36" roughness={1} />
       </mesh>
     )
   }
   return (
-    <mesh position={[x, l.size * 0.35, z]} rotation={[0.3, 0.7, 0]} scale={[1.2, 0.8, 1]}>
+    // A rock sits a third of its height into the ground, as a rock on a forest floor does; placed by its
+    // center a vertex would balance on the surface.
+    <mesh position={[x, l.size * 0.18, z]} rotation={[0.15, 0.7, 0]} scale={[1.2, 0.8, 1]}>
       <dodecahedronGeometry args={[l.size * 0.5, 0]} />
       <meshStandardMaterial color={l.id === 'split rock' ? '#6b6a66' : '#55585e'} roughness={1} />
     </mesh>
@@ -159,7 +162,8 @@ function Nest() {
         <circleGeometry args={[0.35, 16]} />
         <meshStandardMaterial color="#060504" />
       </mesh>
-      <mesh position={[0, 0.1, 0]} rotation={[0, 0.4, 0]}>
+      {/* a half torus's end faces are horizontal disks at its center height, so the arch is set with its feet 3 cm into the ground */}
+      <mesh position={[0, -0.03, 0]} rotation={[0, 0.4, 0]}>
         <torusGeometry args={[0.45, 0.1, 8, 14, Math.PI]} />
         <meshStandardMaterial color="#3d2f22" roughness={1} />
       </mesh>

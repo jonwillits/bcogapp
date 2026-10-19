@@ -20,13 +20,21 @@ const BELLY = '#c9b9a2'
 const EAR = '#d9a6a0'
 const EYE = '#1a1410'
 const TAIL = '#c79c90'
+/** Where the feet rest, in the body's frame: left fore, right fore, left hind, right hind. */
+const FEET: [number, number][] = [
+  [0.03, 0.02],
+  [0.03, -0.02],
+  [-0.06, 0.024],
+  [-0.06, -0.024],
+]
 
 export function RatMesh({ pose, anim, moving, visible = true, scale = 1 }: { pose: () => Pose; anim: Rng; moving: () => boolean; visible?: boolean; scale?: number }) {
   const group = useRef<THREE.Group>(null)
   const head = useRef<THREE.Group>(null)
   const whiskL = useRef<THREE.Group>(null)
   const whiskR = useRef<THREE.Group>(null)
-  const state = useRef({ clock: 0, yaw: 0, yawTarget: 0, rear: 0, rearing: 0, nextEvent: 2 })
+  const feet = useRef<(THREE.Mesh | null)[]>([null, null, null, null])
+  const state = useRef({ clock: 0, yaw: 0, yawTarget: 0, rear: 0, rearing: 0, nextEvent: 2, lastX: NaN, lastY: NaN, stride: 0, gait: 0 })
   const tail = useMemo(() => {
     const curve = new THREE.QuadraticBezierCurve3(new THREE.Vector3(-0.09, 0.025, 0), new THREE.Vector3(-0.17, 0.05, 0.02), new THREE.Vector3(-0.23, 0.015, 0.05))
     return new THREE.TubeGeometry(curve, 12, 0.006, 6, false)
@@ -58,12 +66,27 @@ export function RatMesh({ pose, anim, moving, visible = true, scale = 1 }: { pos
     if (head.current) head.current.rotation.set(0, st.yaw, 0)
     g.rotation.z = 0
     g.rotation.x = 0
-    // A rear: pitch the whole body up about the hind feet.
-    g.rotation.z = -0.9 * st.rear
+    // A rear: the nose rises and the body pitches up about the hind feet (+z lifts +x, the nose, in this frame).
+    g.rotation.z = 0.9 * st.rear
     g.position.y = 0.05 * st.rear
-    const whisk = Math.sin(st.clock * 11) * (moving() ? 0.25 : 0.18)
-    if (whiskL.current) whiskL.current.rotation.y = 0.35 + whisk
-    if (whiskR.current) whiskR.current.rotation.y = -0.35 - whisk
+    // Whisking: both fans sweep forward and back together, in bouts that wax and wane, with a small lag between the sides.
+    const bout = 0.04 + 0.08 * (0.5 + 0.5 * Math.sin(st.clock * 0.7))
+    const amp = bout * (moving() ? 1.3 : 1)
+    if (whiskL.current) whiskL.current.rotation.y = amp * Math.sin(st.clock * 44)
+    if (whiskR.current) whiskR.current.rotation.y = -amp * Math.sin(st.clock * 44 + 0.4)
+    // The feet: a trot, diagonal pairs together, at a stride rate that rises with the speed the pose is changing at.
+    const speed = Number.isFinite(st.lastX) && dt > 0 ? Math.hypot(p.x - st.lastX, p.y - st.lastY) / dt : 0
+    st.lastX = p.x
+    st.lastY = p.y
+    const walking = moving() && speed > 0.02
+    st.gait += ((walking ? 1 : 0) - st.gait) * Math.min(1, dt * 8)
+    if (walking) st.stride += dt * (3 + 3 * Math.min(speed, 1.5)) * Math.PI * 2
+    feet.current.forEach((f, i) => {
+      if (!f) return
+      const phase = st.stride + (i === 1 || i === 2 ? Math.PI : 0)
+      f.position.x = FEET[i][0] + 0.014 * Math.cos(phase) * st.gait
+      f.position.y = 0.006 + 0.012 * Math.max(0, Math.sin(phase)) * st.gait
+    })
   })
 
   if (!visible) return null
@@ -100,31 +123,23 @@ export function RatMesh({ pose, anim, moving, visible = true, scale = 1 }: { pos
             </mesh>
           </group>
         ))}
-        <group ref={whiskL} position={[0.045, -0.002, 0.012]}>
-          {[-0.2, 0, 0.2].map((a) => (
-            <mesh key={a} rotation={[a, 0.4, 0]} position={[0.02, 0, 0.02]}>
-              <boxGeometry args={[0.05, 0.0012, 0.0012]} />
-              <meshStandardMaterial color="#e8e2d6" />
-            </mesh>
-          ))}
-        </group>
-        <group ref={whiskR} position={[0.045, -0.002, -0.012]}>
-          {[-0.2, 0, 0.2].map((a) => (
-            <mesh key={a} rotation={[a, -0.4, 0]} position={[0.02, 0, -0.02]}>
-              <boxGeometry args={[0.05, 0.0012, 0.0012]} />
-              <meshStandardMaterial color="#e8e2d6" />
-            </mesh>
-          ))}
-        </group>
+        {/* whiskers: a fan of four per side, each rod rooted at the snout and spread from forward to sideways, the outer ones drooping */}
+        {[1, -1].map((side) => (
+          <group key={side} ref={side === 1 ? whiskL : whiskR} position={[0.048, -0.004, side * 0.012]}>
+            {[0, 1, 2, 3].map((k) => (
+              <group key={k} rotation={[0, side * (0.3 + 0.32 * k), -0.05 - 0.1 * k]}>
+                <mesh position={[0.026, 0, 0]}>
+                  <boxGeometry args={[0.052 - 0.006 * k, 0.0007, 0.0007]} />
+                  <meshStandardMaterial color="#e8e2d6" />
+                </mesh>
+              </group>
+            ))}
+          </group>
+        ))}
       </group>
-      {/* feet */}
-      {[
-        [0.03, 0.02],
-        [0.03, -0.02],
-        [-0.06, 0.024],
-        [-0.06, -0.024],
-      ].map(([x, z], i) => (
-        <mesh key={i} position={[x, 0.006, z]}>
+      {/* feet: left fore, right fore, left hind, right hind; they step in useFrame while the rat moves */}
+      {FEET.map(([x, z], i) => (
+        <mesh key={i} ref={(m) => void (feet.current[i] = m)} position={[x, 0.006, z]}>
           <sphereGeometry args={[0.008, 6, 6]} />
           <meshStandardMaterial color={EAR} />
         </mesh>
