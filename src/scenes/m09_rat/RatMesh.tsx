@@ -123,13 +123,13 @@ export function RatMesh({ pose, anim, moving, visible = true, scale = 1 }: { pos
             </mesh>
           </group>
         ))}
-        {/* whiskers: a fan of four per side, each rod rooted at the snout and spread from forward to sideways, the outer ones drooping */}
+        {/* whiskers: a fan of four per side, rooted in the snout's own flank (the cone is 6 mm wide at x = 0.038) and spread from forward to sideways, the outer ones drooping a little */}
         {[1, -1].map((side) => (
-          <group key={side} ref={side === 1 ? whiskL : whiskR} position={[0.048, -0.004, side * 0.012]}>
+          <group key={side} ref={side === 1 ? whiskL : whiskR} position={[0.038, -0.001, side * 0.0065]}>
             {[0, 1, 2, 3].map((k) => (
-              <group key={k} rotation={[0, side * (0.3 + 0.32 * k), -0.05 - 0.1 * k]}>
-                <mesh position={[0.026, 0, 0]}>
-                  <boxGeometry args={[0.052 - 0.006 * k, 0.0007, 0.0007]} />
+              <group key={k} rotation={[0, side * (0.35 + 0.3 * k), -0.06 * k]}>
+                <mesh position={[0.022, 0, 0]}>
+                  <boxGeometry args={[0.045 - 0.005 * k, 0.0014, 0.0014]} />
                   <meshStandardMaterial color="#e8e2d6" />
                 </mesh>
               </group>

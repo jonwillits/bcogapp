@@ -121,7 +121,8 @@ export default function RatScene() {
     }
   }
 
-  const fov = narrow ? FOV_NARROW : FOV_NORMAL
+  // Follow view is always the narrower field (Jon, 2026-10-19: it looks better there); the box narrows eye view.
+  const fov = view === 'follow' || narrow ? FOV_NARROW : FOV_NORMAL
   const header = (
     <Panel title="Lab 9: The Way Home" style={{ width: 310 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -246,7 +247,7 @@ function WorldLeft({ header }: { header: React.ReactNode }) {
           <GroupLabel>The two views</GroupLabel>
           <Note>Eye view is the animal’s own eyes, low to the ground. Follow view sits behind the animal and a little above it, and shows no more of the world than the eye view does. Switch at any time with the View buttons above.</Note>
           <GroupLabel>Comfort</GroupLabel>
-          <Note>There is no head bob and the pace is constant. Narrower view reduces the field of view. Low detail halves the draw distance and the ground clutter for a slower machine; it changes nothing the sim does.</Note>
+          <Note>There is no head bob and the pace is constant. Follow view uses a narrower field; Narrower view narrows the eye view too. Low detail halves the draw distance and the ground clutter for a slower machine; it changes nothing the sim does.</Note>
           <GroupLabel>The rule of the lab</GroupLabel>
           <Content>{COMMIT_RULE_LINE}</Content>
           <GroupLabel>The parts</GroupLabel>
