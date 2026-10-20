@@ -1,6 +1,9 @@
 import { makeRng, type Rng } from '../random'
 import { ARMS, PLUS, WATER, PATHS, armByTurn, armToward, foodBox, lampPosition, pathToward, type Arm, type TestSettings } from './lab'
 import { rad, wrap } from './spatial/angles'
+/** A result row: the label padded to one width, the value right-aligned so the numbers line up (Jon, 2026-10-20). */
+const row = (label: string, value: string) => `${label.padEnd(40)}${value.padStart(10)}`
+
 
 /**
  * The seven programmed rats of Part 2 (spec §8.1) and what each does on
@@ -183,7 +186,7 @@ function runPlus(rat: ProgrammedRat, t: TestSettings, rng: Rng): RunResult {
     trials,
     place,
     turn,
-    lines: [`Probe trials from the north arm: ${t.trials}`, `Ended at the east arm (the place): ${place}`, `Ended at the west arm (the same turn): ${turn}`, `Ended elsewhere: ${t.trials - place - turn}`],
+    lines: [row('Probe trials from the north arm', String(t.trials)), row('Ended at the east arm (the place)', String(place)), row('Ended at the west arm (the same turn)', String(turn)), row('Ended elsewhere', String(t.trials - place - turn))],
   }
 }
 
@@ -315,9 +318,10 @@ function runWater(rat: ProgrammedRat, t: TestSettings, rng: Rng): RunResult {
     found: foundN,
     quarters,
     lines: [
-      `Test trials: ${counted.length}${trainingTrials ? ` (after ${trainingTrials} training trials)` : ''}`,
-      `Found the platform within ${WATER.cap} s: ${foundN} of ${counted.length}`,
-      `Mean time to the platform: ${meanLatency.toFixed(1)} s`,
+      row('Test trials', String(counted.length)),
+      ...(trainingTrials ? [row('Training trials before them', String(trainingTrials))] : []),
+      row(`Found the platform within ${WATER.cap} s`, `${foundN} of ${counted.length}`),
+      row('Mean time to the platform', `${meanLatency.toFixed(1)} s`),
       `Probe, platform removed: ${Math.round(quarters[0] * 100)}% in the platform’s quarter, ${Math.round(quarters[1] * 100)}% in the rotated quarter`,
     ],
   }
@@ -413,7 +417,7 @@ function runPaths(rat: ProgrammedRat, t: TestSettings, rng: Rng): RunResult {
     rat: rat.id,
     trials,
     pathCounts: counts,
-    lines: [`Trials: ${t.trials}`, `Most taken: path ${best} (${counts[best - 1]} of ${t.trials})`, `Path 6, nearest the old food box: ${counts[5]}`, `Paths 4 and 5, beside the blocked route: ${besideN}`],
+    lines: [row('Trials', String(t.trials)), row('Most taken', `path ${best}, ${counts[best - 1]} of ${t.trials}`), row('Path 6, nearest the old food box', String(counts[5])), row('Paths 4 and 5, beside the blocked route', String(besideN))],
   }
 }
 

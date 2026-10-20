@@ -189,7 +189,7 @@ export default function RatScene() {
         drivingTab || tab === 'patches' ? (
           <div style={{ display: 'flex', gap: 14, alignItems: 'center', pointerEvents: 'auto' }}>
             {drivingTab && <DrivePad onKey={press} />}
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{drivingTab ? (tab === 'home' ? 'Arrow keys or WASD drive the animal · Enter is Here is my nest' : 'Arrow keys or WASD drive the animal') : 'The forager drives itself tonight'}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{drivingTab ? (tab === 'home' ? 'Arrow keys or WASD drive the animal · Enter is “Here is my nest”' : 'Arrow keys or WASD drive the animal') : 'The forager drives itself tonight'}</div>
           </div>
         ) : undefined
       }
@@ -212,11 +212,11 @@ function Overlays({ tab, stores }: { tab: Tab; stores: Stores }) {
   return (
     <>
       {fade > 0 && <div style={{ position: 'absolute', inset: 0, background: '#000', opacity: fade, pointerEvents: 'none' }} data-fade />}
-      {homeIntro && <OrientingPanel title={BLOCKS.find((b) => b.id === home.block)!.title} lines={homeIntro.lines} content={homeIntro.content} footer={`${homeIntro.time} Press Begin on the left.`} />}
-      {cellsSpec && <OrientingPanel title={cellsSpec.title} lines={cellsSpec.what} footer={cells.state === 'intro' ? `About ${cellsSpec.minutes} minutes. Press Begin on the left.` : 'Choose a prediction on the left and press Commit my prediction.'} />}
-      {tab === 'world' && !world.started && <OrientingPanel title={WORLD_INTRO.title} lines={WORLD_INTRO.lines} content={WORLD_INTRO.content} footer={`${WORLD_INTRO.time} Press Begin on the left.`} />}
-      {tab === 'rats' && !rats.started && <OrientingPanel title={RATS_INTRO.title} lines={RATS_INTRO.lines} content={RATS_INTRO.content} footer={`${RATS_INTRO.time} Press Begin on the left.`} />}
-      {tab === 'patches' && !patches.started && <OrientingPanel title={PATCH_INTRO.title} lines={PATCH_INTRO.lines} content={PATCH_INTRO.content} footer={`${PATCH_INTRO.time} Press Begin on the left.`} />}
+      {homeIntro && <OrientingPanel title={BLOCKS.find((b) => b.id === home.block)!.title} lines={homeIntro.lines} content={homeIntro.content} footer={`${homeIntro.time} Press “Begin” on the left.`} />}
+      {cellsSpec && <OrientingPanel title={cellsSpec.title} lines={cellsSpec.what} footer={cells.state === 'intro' ? `About ${cellsSpec.minutes} minutes. Press “Begin” on the left.` : 'Choose a prediction on the left and press “Commit my prediction”.'} />}
+      {tab === 'world' && !world.started && <OrientingPanel title={WORLD_INTRO.title} lines={WORLD_INTRO.lines} content={WORLD_INTRO.content} footer={`${WORLD_INTRO.time} Press “Begin” on the left.`} />}
+      {tab === 'rats' && !rats.started && <OrientingPanel title={RATS_INTRO.title} lines={RATS_INTRO.lines} content={RATS_INTRO.content} footer={`${RATS_INTRO.time} Press “Begin” on the left.`} />}
+      {tab === 'patches' && !patches.started && <OrientingPanel title={PATCH_INTRO.title} lines={PATCH_INTRO.lines} content={PATCH_INTRO.content} footer={`${PATCH_INTRO.time} Press “Begin” on the left.`} />}
       {badge && (
         <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', padding: '6px 12px', borderRadius: 999, background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 12, whiteSpace: 'nowrap' }}>{badge}</div>
       )}

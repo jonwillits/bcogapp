@@ -22,18 +22,18 @@ export const INTRO: Record<Block, { lines: string[]; content?: string[]; time: s
       'You are a small mammal on the forest floor at night. You are a few steps from your nest, which is the dark hole under the arched root. You are hungry, and there are beetles to go and eat. A beetle is a small green glint among the leaves. In Step 1, your job is just to get the feel of the keys and the two views. Nothing is scored.',
       'Up arrow or W walks forward. Left and right arrows, or A and D, turn. Down arrow or S steps back slowly. The buttons under the view do the same, if you prefer to click.',
       'There are two ways to view the world, which you can switch between in the panel on the left. Eye view, the default, shows the world through the animal’s own eyes. Follow view shows the animal from behind and a little above. Switch between them at any time; the trial does not care which you use.',
-      'Walk out to the beetle. It is eaten, and disappears, when you reach it. After you eat the beetle, walk back to the nest and press Here is my nest, or press the Enter key. There are two of these practice trials. Do one in each view, eye view and follow view.',
-      'If something interrupts a trial, Restart trial starts it again on a fresh trip with the same number of beetles. The reveal counts restarts.',
+      'Walk out to the beetle. It is eaten, and disappears, when you reach it. After you eat the beetle, walk back to the nest and press “Here is my nest”, or press the “Enter” key. There are two of these practice trials. Do one in each view, eye view and follow view.',
+      'If something interrupts a trial, “Restart trial” starts it again on a fresh trip with the same number of beetles. The reveal counts restarts.',
     ],
     content: [SCREEN_LINE, COMFORT_LINE],
     time: 'About 3 minutes.',
   },
   dark: {
     lines: [
-      'For this step, the range is bare. There is no log, no rocks, no stump and no tree. You start at the nest, a plain spot on the ground that you will not see again once you leave it. Beetles appear one at a time: each new one appears after you eat the last, a few meters from it. Walk to each. After you eat the last beetle, your job is to walk back to where you started. When you get there, press Here is my nest, or press the Enter key. Remember, you will not see your nest: you are working out where it was.',
+      'For this step, the range is bare. There is no log, no rocks, no stump and no tree. You start at the nest, a plain spot on the ground that you will not see again once you leave it. Beetles appear one at a time: each new one appears after you eat the last, a few meters from it. Walk to each. After you eat the last beetle, your job is to walk back to where you started. When you get there, press “Here is my nest”, or press the “Enter” key. Remember, you will not see your nest: you are working out where it was.',
       'With nothing on the ground to steer by, the only way back is what the reading calls path integration: a running sum of your own turns and distances, kept as you go, that points to the start from wherever you are. Keep track of your own turns and distances as you go. That is all there will be.',
       'There are eight trials, in moonlight throughout, with two, three or four beetles each, in an order set by your seed. The farther you walk, the more there is to keep track of.',
-      'Each trial ends where you press Here is my nest, or after two minutes.',
+      'Each trial ends where you press “Here is my nest”, or after two minutes.',
     ],
     time: 'About 8 minutes.',
   },
@@ -48,7 +48,7 @@ export const INTRO: Record<Block, { lines: string[]; content?: string[]; time: s
   picture: {
     lines: [
       'Before each trial you see a still picture in the lower right of the view: the scene from the nest, facing north, in moonlight. Then the screen fades and you are set down somewhere else, as if carried, with no trip out. The picture stays in its corner.',
-      'A stored view of a place is what the reading calls a snapshot. Find the nest by matching what you see to the picture, and press Here is my nest.',
+      'A stored view of a place is what the reading calls a snapshot. Find the nest by matching what you see to the picture, and press “Here is my nest”.',
       'Four trials: two set down near the nest, two set down far from it. Being carried registers as no movement, so there is no running sum to fall back on.',
     ],
     time: 'About 5 minutes.',
@@ -56,7 +56,7 @@ export const INTRO: Record<Block, { lines: string[]; content?: string[]; time: s
   moved: {
     lines: [
       'Moonlight on the way out, with the tall tree hidden by cloud, so the near landmarks are the only landmarks. Two or three beetles a trial.',
-      'At the last beetle something startles you: the screen goes dark for two seconds. The return is in moonlight. Walk home and press Here is my nest.',
+      'At the last beetle something startles you: the screen goes dark for two seconds. The return is in moonlight. Walk home and press “Here is my nest”.',
       'The reading says a landmark is worth using only if it stays where it is, and asks what an animal does when its running sum and its landmarks disagree. Four trials; on some of them, the range after the startle is not quite as it was.',
     ],
     time: 'About 5 minutes.',
@@ -104,7 +104,7 @@ export function HomeLeft({ store, header }: { store: HomeStore; header: React.Re
                   Restart trial
                 </Btn>
               </div>
-              <Note>Nothing about where the nest truly is appears until you commit the block’s trials.</Note>
+              <Note>Nothing about where the nest truly is appears until you press “Commit my trials”.</Note>
             </>
           )}
           {s.state === 'awaiting-commit' && (
@@ -139,7 +139,7 @@ export function HomeRight({ store }: { store: HomeStore }) {
   if (!reveal) {
     return (
       <Panel title="The reveal" style={RIGHT_STYLE}>
-        <Note>{s.state === 'intro' ? 'Press Begin on the left.' : 'The overhead view, the errors and the navigators appear here after Commit my trials.'}</Note>
+        <Note>{s.state === 'intro' ? 'Press “Begin” on the left.' : 'The overhead view, the errors and the navigators appear here after “Commit my trials”.'}</Note>
       </Panel>
     )
   }

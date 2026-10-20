@@ -135,7 +135,8 @@ export class PatchStore {
     const n = this.night
     if (!n) return ['No night run yet', null, null, null]
     const r = n.result()
-    return [`Night: ${(n.time / 3600).toFixed(2).padStart(5)} h of ${NIGHT / 3600}`, `Beetles found ${String(r.beetles).padStart(4)}`, `Patches visited ${String(r.patches).padStart(3)}`, `Beetles per minute ${r.perMinute.toFixed(2).padStart(5)}`]
+    const row = (label: string, value: string, unit: string) => `${label.padEnd(20)}${value.padStart(6)}${unit ? ` ${unit}` : ''}`
+    return [row('Night', (n.time / 3600).toFixed(2), `h of ${NIGHT / 3600}`), row('Beetles found', String(r.beetles), ''), row('Patches visited', String(r.patches), ''), row('Beetles per minute', r.perMinute.toFixed(2), '')]
   }
 
   bestFor(h: Habitat): number | null {

@@ -25,10 +25,10 @@ export interface StepSpec {
 }
 
 export const STEPS: StepSpec[] = [
-  { step: 1, title: 'Step 1 — Fill the maps', minutes: 4, what: ['You are the rat now, in a 1 m square box with gray walls, a dark floor and a white card on the north wall. Beside the view, simulated cells fire from the rat’s own estimate of where it is and which way it faces: head-direction cells, shown on the two rings and as eight polar plots; place cells, grid cells and border cells, shown as firing maps.', 'A firing map is spikes divided by time spent, so it fills in only where the rat has been. Drive for a minute to see the maps start, then press Let it explore by itself and skip ahead, as a recording session would run on for an hour.', 'Watch the line that says whether the white card holds the heading, and the one under it that counts the minutes in this room.'] },
-  { step: 2, title: 'Step 2 — Lights out', minutes: 5, what: ['The maps from the light are pinned below the recording. Then the lights go out, and a fresh set of maps records in the dark.', 'In the dark the rat has only its own turns and steps to go by, as you had on the bare ground in Part 1. Drive along a wall, then across the middle, and watch the overhead inset, where the true path is amber and the estimate is dashed blue, and the line that gives the gap between them. Lights on ends the step.', 'Predict first, on the left, what the place fields do in the dark.'], question: 'In the dark, what happens to the place fields?', choices: ['they stay where they were, as sharp', 'they smear and drift', 'they disappear', 'they move to new places and stay there'] },
-  { step: 3, title: 'Step 3 — Turn the card', minutes: 5, what: ['Two changes to the card. First out of sight: the rat is taken out of the box, the white card is moved a quarter turn around the walls, and the rat is put back. Give it two minutes with a skip, then compare the new maps with the pinned ones.', 'Then in sight: face the card and press Move the card, which moves it a quarter turn whichever way keeps it in view. Watch the lower ring after each move, and the line that says whether the card holds the heading. Keep going until something changes.', 'Predict first what the head-direction cells do when the card is turned out of sight.'], question: 'When the card is turned 90° while the rat is out of the box, what do the head-direction cells do?', choices: ['each keeps its preferred direction', 'every preferred direction turns 90°, all together', 'the preferred directions scatter', 'the cells stop firing'] },
-  { step: 4, title: 'Step 4 — A new room', minutes: 5, what: ['The rat is carried to a round box, 1.1 m across, with blue walls, a pale floor and a black card on the east side: a new room, and what the reading calls remapping. The first box’s maps are pinned for comparison. Drive, and let it explore, until the new maps fill. Then Back to the first room returns the rat, and you can compare again.', 'Predict first what the place cells do in the new room.'], question: 'In the new room, what do the place cells do?', choices: ['they fire in the same places', 'some fire in new places and others fall silent', 'they all fall silent', 'they fire everywhere'] },
+  { step: 1, title: 'Step 1 — Fill the maps', minutes: 4, what: ['You are the rat now, in a 1 m square box with gray walls, a dark floor and a white card on the north wall. Beside the view, simulated cells fire from the rat’s own estimate of where it is and which way it faces: head-direction cells, shown on the two rings and as eight polar plots; place cells, grid cells and border cells, shown as firing maps.', 'A firing map is spikes divided by time spent, so it fills in only where the rat has been. Drive for a minute to see the maps start, then press “Let it explore by itself” and skip ahead, as a recording session would run on for an hour.', 'Watch the line that says whether the white card holds the heading, and the one under it that counts the minutes in this room.'] },
+  { step: 2, title: 'Step 2 — Lights out', minutes: 5, what: ['The maps from the light are pinned below the recording. Then the lights go out, and a fresh set of maps records in the dark.', 'In the dark the rat has only its own turns and steps to go by, as you had on the bare ground in Part 1. Drive along a wall, then across the middle, and watch the overhead inset, where the true path is amber and the estimate is dashed blue, and the line that gives the gap between them. “Lights on” ends the step.', 'Predict first, on the left, what the place fields do in the dark.'], question: 'In the dark, what happens to the place fields?', choices: ['they stay where they were, as sharp', 'they smear and drift', 'they disappear', 'they move to new places and stay there'] },
+  { step: 3, title: 'Step 3 — Turn the card', minutes: 5, what: ['Two changes to the card. First out of sight: the rat is taken out of the box, the white card is moved a quarter turn around the walls, and the rat is put back. Give it two minutes with a skip, then compare the new maps with the pinned ones.', 'Then in sight: face the card and press “Move the card”, which moves it a quarter turn whichever way keeps it in view. Watch the lower ring after each move, and the line that says whether the card holds the heading. Keep going until something changes.', 'Predict first what the head-direction cells do when the card is turned out of sight.'], question: 'When the card is turned 90° while the rat is out of the box, what do the head-direction cells do?', choices: ['each keeps its preferred direction', 'every preferred direction turns 90°, all together', 'the preferred directions scatter', 'the cells stop firing'] },
+  { step: 4, title: 'Step 4 — A new room', minutes: 5, what: ['The rat is carried to a round box, 1.1 m across, with blue walls, a pale floor and a black card on the east side: a new room, and what the reading calls remapping. The first box’s maps are pinned for comparison. Drive, and let it explore, until the new maps fill. Then “Back to the first room” returns the rat, and you can compare again.', 'Predict first what the place cells do in the new room.'], question: 'In the new room, what do the place cells do?', choices: ['they fire in the same places', 'some fire in new places and others fall silent', 'they all fall silent', 'they fire everywhere'] },
   { step: 5, title: 'Step 5 — Without the turn signal', minutes: 5, what: ['The turn pathway, the vestibular input that moves the lower ring’s bump, is removed. The card stays in view. Skip ahead one day, which here is thirty simulated minutes, and watch the two rings, the eight polar plots and the line for directional tuning.', 'The reading reports what the cells did in rats after this lesion; it does not say what the lower stage of the chain did. The assumption this model makes is printed beside the step.', 'Predict first what the head-direction cells do over the day.'], question: 'With the turn signal gone and the card in view, what do the head-direction cells do over a day?', choices: ['they keep their tuning, held by the card', 'they keep firing, but not for any one heading', 'they stop firing', 'they turn with the card as before'] },
 ]
 
@@ -37,6 +37,11 @@ export const SKIPS = [
   { label: 'Skip ahead 10 minutes', seconds: 600 },
 ] as const
 /** Step 5's day, compressed: the lesion's effect is complete well inside it (`recording.test.ts`). */
+/** A row of a fixed block: the label padded to one width, the value right-aligned so the decimals line up (Jon, 2026-10-20). WIDE fits the recording panel, NARROW the side panel. */
+export const WIDE = 48
+export const NARROW = 33
+export const row = (width: number, label: string, value: string, unit: string) => `${label.padEnd(width)}${value.padStart(6)}${unit ? ` ${unit}` : ''}`
+
 export const DAY_SKIP = { label: 'Skip ahead 1 day (30 simulated minutes)', seconds: 30 * 60 } as const
 /** Seconds of simulated time paid per slice of a skip, on a timer: 250 steps, about 20 ms on the development Mac. */
 export const SKIP_SLICE = 5
@@ -267,19 +272,19 @@ export class CellsStore {
     const e = s.errors()
     const room = s.room.id === 'box-a' ? 'the first box' : s.room.id === 'box-b' ? 'the round box' : s.room.id
     const control = s.cardControls ? `The ${s.cardId} holds the heading` : `The ${s.cardId} does not hold the heading yet`
-    const when = s.controlAt !== null ? `It took control after ${(s.controlAt / 60).toFixed(1)} min in this room` : `Time in this room ${(s.spatial.timeInRoom / 60).toFixed(1)} min`
+    const when = s.controlAt !== null ? row(WIDE, 'It took control after, in this room', (s.controlAt / 60).toFixed(1), 'min') : row(WIDE, 'Time in this room', (s.spatial.timeInRoom / 60).toFixed(1), 'min')
     const tuning = s.hdTuningIndex()
-    const drift = this.offsetAtLightsOut !== null && !s.lit ? `Drift of the bump since lights out ${fmtSigned(deg(angleDiff(rad(this.offsetAtLightsOut), rad(e.heading))), 0).padStart(5)}°` : null
+    const drift = this.offsetAtLightsOut !== null && !s.lit ? row(WIDE, 'Drift of the bump since lights out', fmtSigned(deg(angleDiff(rad(this.offsetAtLightsOut), rad(e.heading))), 0), '°') : null
     return [
       `Room: ${room}, ${s.lit ? 'lit' : 'dark'}`,
-      `Simulated time ${(s.time / 60).toFixed(1).padStart(5)} min`,
-      `Gap between the estimate and the true position ${(e.position * 100).toFixed(0).padStart(3)} cm`,
-      `The bump against the true heading ${fmtSigned(e.heading, 0).padStart(5)}°`,
+      row(WIDE, 'Simulated time', (s.time / 60).toFixed(1), 'min'),
+      row(WIDE, 'Gap between the estimate and the true position', (e.position * 100).toFixed(0), 'cm'),
+      row(WIDE, 'The bump against the true heading', fmtSigned(e.heading, 0), '°'),
       drift,
       control,
       when,
-      `Directional tuning of the shown cells (0 to 1) ${tuning.toFixed(2)}`,
-      s.seenMoves ? `Card moves seen by the rat in this room: ${s.seenMoves}` : null,
+      row(WIDE, 'Directional tuning of the shown cells (0 to 1)', tuning.toFixed(2), ''),
+      s.seenMoves ? row(WIDE, 'Card moves seen by the rat in this room', String(s.seenMoves), '') : null,
       s.spatial.hd.pathway ? 'Turn pathway: intact' : 'Turn pathway: removed',
     ]
   }
@@ -292,18 +297,18 @@ export class CellsStore {
       const now = s.hdPreferred()
       const shifts = now.map((a, i) => deg(angleDiff(rad(this.preferredBefore![i]), rad(a))))
       const mean = shifts.reduce((x, y) => x + y, 0) / shifts.length
-      return [`Preferred directions since the turn: ${shifts.map((d) => fmtSigned(d, 0).padStart(5)).join(' ')}°`, `Mean turn of the eight cells ${fmtSigned(mean, 0)}°`, s.cardControls ? 'The card holds the heading' : 'The card no longer holds the heading']
+      return [`Preferred directions since the turn: ${shifts.map((d) => fmtSigned(d, 0).padStart(5)).join(' ')}°`, row(NARROW, 'Mean turn of the eight cells', fmtSigned(mean, 0), '°'), s.cardControls ? 'The card holds the heading' : 'The card no longer holds the heading']
     }
     if (this.step === 4) {
       const map = s.spatial.map
       const silent = map ? map.fields.filter((f) => !f).length : 0
-      return [`Map in use: room map ${map?.id ?? '-'} of ${s.spatial.maps.maps.length} stored`, `Place cells silent in this room: ${silent} of ${CELL_KEYS.place.length}`, s.controlAt !== null ? `The card took control after ${(s.controlAt / 60).toFixed(1)} min` : `The card does not control the heading yet (${(s.spatial.timeInRoom / 60).toFixed(1)} min in this room)`]
+      return [`Map in use: room map ${map?.id ?? '-'} of ${s.spatial.maps.maps.length} stored`, row(NARROW, 'Place cells silent in this room', `${silent} of ${CELL_KEYS.place.length}`, ''), s.controlAt !== null ? `The card took control after ${(s.controlAt / 60).toFixed(1)} min` : `The card does not control the heading yet (${(s.spatial.timeInRoom / 60).toFixed(1)} min in this room)`]
     }
     if (this.step === 5) {
-      return [`Turn pathway: ${s.spatial.hd.pathway ? 'intact' : 'removed'}`, `Lower ring bump strength ${s.spatial.hd.decodeLower().strength.toFixed(2)}`, `Directional tuning of the shown cells ${s.hdTuningIndex().toFixed(2)}`]
+      return [`Turn pathway: ${s.spatial.hd.pathway ? 'intact' : 'removed'}`, row(NARROW, 'Lower ring bump strength', s.spatial.hd.decodeLower().strength.toFixed(2), ''), row(NARROW, 'Directional tuning (0 to 1)', s.hdTuningIndex().toFixed(2), '')]
     }
     if (this.step === 2) {
-      return [`Lights: ${s.lit ? 'on' : 'off'}`, `Gap between the estimate and the true position ${(s.errors().position * 100).toFixed(0)} cm`, null]
+      return [`Lights: ${s.lit ? 'on' : 'off'}`, row(NARROW, 'Gap, estimate to true position', (s.errors().position * 100).toFixed(0), 'cm'), null]
     }
     return [null, null, null]
   }
