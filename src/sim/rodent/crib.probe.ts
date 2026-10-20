@@ -190,20 +190,21 @@ it('crib: what the rat’s panels should read', () => {
 
   // ───── Part 1
   say('PART 1 · the navigators')
-  const byLegs = new Map<number, Record<string, number[]>>()
+  const byLegs = new Map<string, Record<string, number[]>>()
   for (const seed of SEEDS20) {
     for (const plan of planBlock('dark', 4000 + seed)) {
       const t = scripted(plan, 4000 + seed)
       const navs = runNavigators(t.record, 4000 + seed)
-      const rec = byLegs.get(plan.legs.length) ?? {}
+      const key = `${plan.lightBack === 'dark' ? 'dark' : 'bare ground'}, ${plan.legs.length} legs`
+      const rec = byLegs.get(key) ?? {}
       for (const n of navs) (rec[n.id] ??= []).push(n.error)
       ;(rec.length ??= []).push(t.record.outwardLength)
-      byLegs.set(plan.legs.length, rec)
+      byLegs.set(key, rec)
     }
   }
-  for (const legs of [2, 3, 4]) {
-    const r = byLegs.get(legs)!
-    say(`  dark, ${legs} legs (outward ${range(r.length, 0)} m): Running sum only error ${range(r.runningSum, 1)} m; Landmarks only ${range(r.landmarks, 1)} m (stops at the last beetle); Averaging ${range(r.averaging, 1)} m; Following one ${range(r.followingOne, 1)} m`)
+  for (const key of ['bare ground, 2 legs', 'bare ground, 3 legs', 'bare ground, 4 legs', 'dark, 3 legs']) {
+    const r = byLegs.get(key)!
+    say(`  ${key} (outward ${range(r.length, 0)} m): Running sum only error ${range(r.runningSum, 1)} m; Landmarks only ${range(r.landmarks, 1)} m (stops at the last beetle); Averaging ${range(r.averaging, 1)} m; Following one ${range(r.followingOne, 1)} m`)
   }
   const moon: Record<string, number[]> = {}
   for (const seed of SEEDS20) for (const plan of planBlock('moonlight', 5000 + seed)) {

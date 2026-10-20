@@ -38,7 +38,7 @@ describe('the trip record and the navigators', () => {
   })
 
   it('every trial records the time spent in each view, and the trip record is complete: every step’s pose and command, every beetle, the light', () => {
-    const plan = planBlock('dark', 5)[0]
+    const plan = planBlock('dark', 5).at(-1)!
     const t = scripted(plan, 5, 'follow')
     expect(t.record.viewSeconds.follow).toBeGreaterThan(5)
     expect(t.record.viewSeconds.eye).toBe(0)
@@ -109,7 +109,7 @@ describe('the navigators on the moved landmarks (§7.5, §7.6)', () => {
   })
 
   it('in the dark, Landmarks only stops where it is, and in moonlight it ends at the nest when a near landmark is in view', () => {
-    const dark = planBlock('dark', 21)[0]
+    const dark = planBlock('dark', 21).at(-1)!
     const t = scripted(dark, 21)
     const nav = runNavigators(t.record, 21).find((n) => n.id === 'landmarks')!
     const last = t.record.steps.filter((s) => s.phase === 'out').at(-1)!

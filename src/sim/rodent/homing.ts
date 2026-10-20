@@ -19,7 +19,7 @@ export type Phase = 'out' | 'return' | 'done'
 
 export const BLOCKS: { id: Block; title: string; trials: number; minutes: number }[] = [
   { id: 'practice', title: 'Step 1 — Practice', trials: 2, minutes: 3 },
-  { id: 'dark', title: 'Step 2 — Home in the dark', trials: 6, minutes: 6 },
+  { id: 'dark', title: 'Step 2 — Home across bare ground', trials: 6, minutes: 6 },
   { id: 'moonlight', title: 'Step 3 — Home by moonlight', trials: 4, minutes: 4 },
   { id: 'picture', title: 'Step 4 — A picture of home', trials: 4, minutes: 5 },
   { id: 'moved', title: 'Step 5 — When the landmarks move', trials: 4, minutes: 5 },
@@ -28,6 +28,8 @@ export const BLOCKS: { id: Block; title: string; trials: number; minutes: number
 export const DT = 0.02
 /** A return is ended where the forager stands after this long. */
 export const RETURN_CAP = 120
+/** Step 2: trials from this index on are dark on the way back. */
+export const DARK_FROM = 4
 /** Step 4's set-down distances. */
 export const PICTURE_NEAR = 3
 export const PICTURE_FAR = 20
@@ -60,6 +62,8 @@ export interface TrialPlan {
   lightOut: Light
   lightBack: Light
   treeHidden: boolean
+  /** The bare range: no landmarks, no tree, no nest to see (Step 2). */
+  bare: boolean
 }
 
 export interface TrialRecord {
@@ -127,7 +131,7 @@ export function planBlock(block: Block, seed: number): TrialPlan[] {
     const dists = [PICTURE_NEAR, PICTURE_FAR, PICTURE_NEAR, PICTURE_FAR]
     for (let i = 0; i < spec.trials; i++) {
       const a = rng.range(0, 2 * Math.PI)
-      plans.push({ block, index: i, legs: [], setDown: { x: dists[i] * Math.cos(a), y: dists[i] * Math.sin(a), heading: rng.range(-Math.PI, Math.PI) }, move: 0, lightOut: 'moonlight', lightBack: 'moonlight', treeHidden: false })
+      plans.push({ block, index: i, legs: [], setDown: { x: dists[i] * Math.cos(a), y: dists[i] * Math.sin(a), heading: rng.range(-Math.PI, Math.PI) }, move: 0, lightOut: 'moonlight', lightBack: 'moonlight', treeHidden: false, bare: false })
     }
     return plans
   }
@@ -140,11 +144,14 @@ export function planBlock(block: Block, seed: number): TrialPlan[] {
     }
     for (let i = 0; i < spec.trials; i++) {
       // Short trips, so the near landmarks are in view at the last beetle.
-      plans.push({ block, index: i, legs: legsFor(rng, 2 + rng.int(2), 3, 3.6), move: moves[i], lightOut: 'moonlight', lightBack: 'moonlight', treeHidden: true })
+      plans.push({ block, index: i, legs: legsFor(rng, 2 + rng.int(2), 3, 3.6), move: moves[i], lightOut: 'moonlight', lightBack: 'moonlight', treeHidden: true, bare: false })
     }
     return plans
   }
-  const legCounts = block === 'practice' ? [1, 1] : block === 'dark' ? [2, 3, 4, 2, 3, 4] : [3, 3, 3, 3]
+  // Step 2 (Jon's walk, 2026-10-19): the bare range, four trials in moonlight with two, three, four and three beetles, then
+  // two more of three beetles in which the light goes out at the last beetle. The chapter's path integrator is the ant on
+  // featureless ground in daylight; the dark had taken away the ground moving past as well as the landmarks.
+  const legCounts = block === 'practice' ? [1, 1] : block === 'dark' ? [2, 3, 4, 3, 3, 3] : [3, 3, 3, 3]
   for (let i = 0; i < spec.trials; i++) {
     plans.push({
       block,
@@ -152,8 +159,9 @@ export function planBlock(block: Block, seed: number): TrialPlan[] {
       legs: legsFor(rng, legCounts[i], 4.5, 7.5),
       move: 0,
       lightOut: 'moonlight',
-      lightBack: block === 'dark' ? 'dark' : 'moonlight',
+      lightBack: block === 'dark' && i >= DARK_FROM ? 'dark' : 'moonlight',
       treeHidden: false,
+      bare: block === 'dark',
     })
   }
   return plans
@@ -240,7 +248,7 @@ export class HomingTrial {
 
   /** The landmarks the forager can see now. */
   visible() {
-    return visibleLandmarks(this.body.x, this.body.y, this.blackout > 0 ? 'dark' : this.light, this.plan.treeHidden, this.moved ?? undefined)
+    return visibleLandmarks(this.body.x, this.body.y, this.blackout > 0 ? 'dark' : this.light, this.plan.treeHidden, this.moved ?? undefined, this.plan.bare)
   }
 
   step(dt: number, cmd: Command): void {
@@ -332,7 +340,7 @@ export function runNavigators(record: TrialRecord, seed: number): NavigatorResul
   const moved = plan.block === 'moved' && plan.move !== 0 ? rotateNearLandmarks(plan.legs[plan.legs.length - 1], plan.move) : undefined
   const results: NavigatorResult[] = []
   for (const nav of NAVIGATORS) {
-    const e = navigate(nav.id, out, last, lightBack, plan.treeHidden, moved, rng.fork(), plan.block === 'picture')
+    const e = navigate(nav.id, out, last, lightBack, plan.treeHidden, moved, rng.fork(), plan.block === 'picture', plan.bare)
     results.push({
       id: nav.id,
       endpoint: e,
@@ -345,8 +353,8 @@ export function runNavigators(record: TrialRecord, seed: number): NavigatorResul
 }
 
 /** The position the landmarks in view say the forager is at: exact up to the landmarks' own move, with a little noise. */
-function landmarkFix(x: number, y: number, light: Light, treeHidden: boolean, moved: Map<string, { x: number; y: number }> | undefined, rng: Rng): { x: number; y: number } | null {
-  const seen = visibleLandmarks(x, y, light, treeHidden, moved).filter((l) => !l.distant)
+function landmarkFix(x: number, y: number, light: Light, treeHidden: boolean, moved: Map<string, { x: number; y: number }> | undefined, rng: Rng, bare = false): { x: number; y: number } | null {
+  const seen = visibleLandmarks(x, y, light, treeHidden, moved, bare).filter((l) => !l.distant)
   if (!seen.length) return null
   // Each near landmark is known at its unmoved place; the fix is where the configuration seen puts the forager.
   let fx = 0
@@ -370,6 +378,7 @@ function navigate(
   moved: Map<string, { x: number; y: number }> | undefined,
   rng: Rng,
   carried: boolean,
+  bare: boolean,
 ): { x: number; y: number } {
   const n = NAVIGATOR_NOISE
   // 1. The running sum over the outward trip, with its own seeded noise.
@@ -400,14 +409,14 @@ function navigate(
   // The true position now, and the estimate of it.
   const pos = { x: last.x, y: last.y }
   const est = { x: ex, y: ey }
-  if (id === 'runningSum') return walkHome(pos, est, eh, variance, light, treeHidden, moved, rng, 'none')
+  if (id === 'runningSum') return walkHome(pos, est, eh, variance, light, treeHidden, moved, rng, 'none', bare)
   if (id === 'landmarks') {
-    const fix = landmarkFix(pos.x, pos.y, light, treeHidden, moved, rng)
+    const fix = landmarkFix(pos.x, pos.y, light, treeHidden, moved, rng, bare)
     if (!fix) return pos
     // Straight to where the landmarks say the nest is: the move from the fix to the nest, applied to where it stands.
     return { x: pos.x - fix.x + RANGE.nest.x, y: pos.y - fix.y + RANGE.nest.y }
   }
-  return walkHome(pos, est, eh, variance, light, treeHidden, moved, rng, id === 'averaging' ? 'average' : 'followOne')
+  return walkHome(pos, est, eh, variance, light, treeHidden, moved, rng, id === 'averaging' ? 'average' : 'followOne', bare)
 }
 
 /**
@@ -431,6 +440,7 @@ function walkHome(
   moved: Map<string, { x: number; y: number }> | undefined,
   rng: Rng,
   mode: 'none' | 'average' | 'followOne',
+  bare = false,
 ): { x: number; y: number } {
   const n = NAVIGATOR_NOISE
   const speed = RANGE_LOCOMOTION.speed
@@ -443,7 +453,7 @@ function walkHome(
     est.x = sum.x
     est.y = sum.y
     if (mode !== 'none') {
-      const fix = landmarkFix(pos.x, pos.y, light, treeHidden, moved, rng)
+      const fix = landmarkFix(pos.x, pos.y, light, treeHidden, moved, rng, bare)
       if (fix) {
         // How far apart the two sources put the nest: the gap between where each says the walker is.
         const disagree = Math.hypot(sum.x - fix.x, sum.y - fix.y)

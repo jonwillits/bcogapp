@@ -9,7 +9,7 @@ import { radiusAt, type Shape } from '../../sim/rodent/shape'
  * shows the box with the rat's true path and its estimate drawn together.
  */
 
-export function RangeOverhead({ size = 240, extent, out, back, endpoint, navigators, moved, children, label }: { size?: number; extent?: number; out: { x: number; y: number }[]; back: { x: number; y: number }[]; endpoint: { x: number; y: number } | null; navigators?: { label: string; x: number; y: number }[]; moved?: Map<string, { x: number; y: number }> | null; children?: ReactNode; label?: string }) {
+export function RangeOverhead({ size = 240, extent, out, back, endpoint, navigators, moved, bare, children, label }: { size?: number; extent?: number; out: { x: number; y: number }[]; back: { x: number; y: number }[]; endpoint: { x: number; y: number } | null; navigators?: { label: string; x: number; y: number }[]; moved?: Map<string, { x: number; y: number }> | null; bare?: boolean; children?: ReactNode; label?: string }) {
   const all = [...out, ...back, ...(endpoint ? [endpoint] : []), ...(navigators ?? []), RANGE.nest]
   const r = extent ?? Math.max(6, ...all.map((p) => Math.hypot(p.x, p.y))) * 1.15
   const S = (v: number) => (v / r) * (size / 2 - 6)
@@ -18,7 +18,7 @@ export function RangeOverhead({ size = 240, extent, out, back, endpoint, navigat
   const path = (pts: { x: number; y: number }[]) => pts.map((p, i) => `${i ? 'L' : 'M'}${X(p.x).toFixed(1)},${Y(p.y).toFixed(1)}`).join(' ')
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ display: 'block', background: 'var(--bg)', borderRadius: 8 }} role="img" aria-label={label ?? 'overhead view'} data-overhead>
-      {LANDMARKS.filter((l) => !l.distant).map((l) => {
+      {!bare && LANDMARKS.filter((l) => !l.distant).map((l) => {
         const p = moved?.get(l.id) ?? l
         return <circle key={l.id} cx={X(p.x)} cy={Y(p.y)} r={Math.max(2, S(l.size / 2))} fill="none" stroke="var(--text-muted)" strokeWidth={1} />
       })}

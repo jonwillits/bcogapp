@@ -48,9 +48,9 @@ export const LANDMARKS: RangeLandmark[] = [
 export const NEAR_LANDMARKS = LANDMARKS.filter((l) => !l.distant)
 export const TALL_TREE = LANDMARKS.find((l) => l.distant)!
 
-/** Which landmarks can be seen from a point, in a light level, with the tall tree possibly hidden by cloud. */
-export function visibleLandmarks(x: number, y: number, light: Light, treeHidden = false, moved?: Map<string, { x: number; y: number }>): RangeLandmark[] {
-  if (light === 'dark') return []
+/** Which landmarks can be seen from a point, in a light level, with the tall tree possibly hidden by cloud, or none at all on the bare range. */
+export function visibleLandmarks(x: number, y: number, light: Light, treeHidden = false, moved?: Map<string, { x: number; y: number }>, bare = false): RangeLandmark[] {
+  if (light === 'dark' || bare) return []
   return LANDMARKS.filter((l) => {
     if (l.distant) return !treeHidden
     const p = moved?.get(l.id) ?? l

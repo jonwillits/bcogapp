@@ -212,12 +212,14 @@ export interface RangeViewProps {
   showNest: boolean
   treeHidden?: boolean
   moved?: Map<string, { x: number; y: number }> | null
+  /** The bare range (Part 1, Step 2): the ground and the sky, no landmarks, no nest, no stream bank. */
+  bare?: boolean
   beetle?: { x: number; y: number } | null
   patches?: { x: number; y: number }[]
   clock: () => number
 }
 
-export function RangeView({ light, lowDetail, pose, showNest, treeHidden, moved, beetle, patches, clock }: RangeViewProps) {
+export function RangeView({ light, lowDetail, pose, showNest, treeHidden, moved, bare, beetle, patches, clock }: RangeViewProps) {
   // Fog: exp2, set so the near landmarks fade by about 10 m in moonlight and everything but the ground by 2 m in the dark.
   const density = light === 'dark' ? (lowDetail ? 1.0 : 0.9) : lowDetail ? 0.17 : 0.13
   const fogColor = light === 'dark' ? DARK_FOG : MOON_FOG
@@ -230,17 +232,21 @@ export function RangeView({ light, lowDetail, pose, showNest, treeHidden, moved,
       <NearLight pose={pose} light={light} />
       <Ground lowDetail={lowDetail} />
       <Clutter lowDetail={lowDetail} />
-      {LANDMARKS.map((l) => (treeHidden && l.distant ? null : <LandmarkMesh key={l.id} l={l} at={moved?.get(l.id) ?? l} />))}
+      {!bare && LANDMARKS.map((l) => (treeHidden && l.distant ? null : <LandmarkMesh key={l.id} l={l} at={moved?.get(l.id) ?? l} />))}
       {/* the stream bank along the west edge: a dark strip, and a darker water surface beyond */}
-      <mesh position={[RANGE.streamBankX - 3, -0.15, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[6, 90]} />
-        <meshStandardMaterial color="#0a1a2a" roughness={0.2} metalness={0.3} />
-      </mesh>
-      <mesh position={[RANGE.streamBankX, 0.08, 0]}>
-        <boxGeometry args={[0.6, 0.16, 90]} />
-        <meshStandardMaterial color="#2b2418" />
-      </mesh>
-      {showNest && <Nest />}
+      {!bare && (
+        <>
+          <mesh position={[RANGE.streamBankX - 3, -0.15, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[6, 90]} />
+            <meshStandardMaterial color="#0a1a2a" roughness={0.2} metalness={0.3} />
+          </mesh>
+          <mesh position={[RANGE.streamBankX, 0.08, 0]}>
+            <boxGeometry args={[0.6, 0.16, 90]} />
+            <meshStandardMaterial color="#2b2418" />
+          </mesh>
+        </>
+      )}
+      {showNest && !bare && <Nest />}
       {beetle && <Beetle at={beetle} clock={clock} />}
       {patches?.map((p, i) => <LeafPile key={i} at={p} />)}
     </>

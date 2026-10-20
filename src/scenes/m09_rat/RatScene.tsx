@@ -7,20 +7,21 @@ import { makeRng, randomSeed } from '../../sim/random'
 import { STILL, type Command, type Pose } from '../../sim/rodent/body'
 import { distanceToBoundary } from '../../sim/rodent/shape'
 import { RANGE } from '../../sim/rodent/range'
+import { BLOCKS } from '../../sim/rodent/homing'
 import { AnimalCamera, BOX_SCALE, FOV_NARROW, FOV_NORMAL, RANGE_SCALE, type View } from './AnimalCamera'
 import { RatMesh } from './RatMesh'
 import { RangeView, NIGHT_SKY } from './RangeView'
 import { BoxView } from './BoxView'
 import { LabView } from './LabView'
 import { commandOf, useDriveKeys } from './keys'
-import { Btn, Choice, Content, DrivePad, FixedLines, GroupLabel, Note, PANEL_STYLE, TabBar, type Tab } from './ui'
+import { Btn, Choice, Content, DrivePad, FixedLines, GroupLabel, Note, OrientingPanel, PANEL_STYLE, TabBar, type Tab } from './ui'
 import { COMMIT_RULE_LINE, RATS_LINE } from './lines'
 import { HomeStore } from './homeStore'
-import { CellsStore } from './cellsStore'
+import { CellsStore, STEPS } from './cellsStore'
 import { RatsStore } from './ratsStore'
 import { PatchStore } from './patchStore'
 import { WorldStore } from './worldStore'
-import { HomeLeft, HomeRight } from './HomeTab'
+import { HomeLeft, HomeRight, INTRO as HOME_INTRO } from './HomeTab'
 import { CellsLeft, CellsRight } from './CellsTab'
 import { RatsLeft, RatsRight } from './RatsTab'
 import { PatchLeft, PatchRight } from './PatchTab'
@@ -202,9 +203,13 @@ function Overlays({ tab, stores }: { tab: Tab; stores: Stores }) {
   const fade = tab === 'home' ? (home.state === 'trials' ? Math.min(1, home.fade / 0.6) : 0) : tab === 'cells' ? Math.min(1, cells.fade / 0.6) : 0
   const badge = tab === 'cells' ? cells.skipBadge : tab === 'patches' ? patches.badge : ''
   const picture = tab === 'home' && home.block === 'picture' && home.state === 'trials' && home.trial
+  const homeIntro = tab === 'home' && home.state === 'intro' ? HOME_INTRO[home.block] : null
+  const cellsSpec = tab === 'cells' && (cells.state === 'intro' || cells.state === 'predict') ? STEPS.find((st) => st.step === cells.step) : undefined
   return (
     <>
       {fade > 0 && <div style={{ position: 'absolute', inset: 0, background: '#000', opacity: fade, pointerEvents: 'none' }} data-fade />}
+      {homeIntro && <OrientingPanel title={BLOCKS.find((b) => b.id === home.block)!.title} lines={homeIntro.lines} content={homeIntro.content} footer={`${homeIntro.time} Press Begin on the left.`} />}
+      {cellsSpec && <OrientingPanel title={cellsSpec.title} lines={cellsSpec.what} footer={cells.state === 'intro' ? `About ${cellsSpec.minutes} minutes. Press Begin on the left.` : 'Choose a prediction on the left and press Commit my prediction.'} />}
       {badge && (
         <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', padding: '6px 12px', borderRadius: 999, background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 12, whiteSpace: 'nowrap' }}>{badge}</div>
       )}
@@ -274,10 +279,11 @@ function HomeCanvas({ store, view, fov, lowDetail, anim, clock }: { store: HomeS
   const t = s.trial
   const pose = (): Pose => (t ? t.body.pose : { x: 0, y: 0, heading: Math.PI / 2 })
   const light = t ? (t.blackout > 0 ? 'dark' : t.light) : 'moonlight'
-  const showNest = !t || s.block === 'practice' || t.done
+  // The nest is drawn in practice and between blocks, never at a trial's end: how far off the student ended waits for the commit.
+  const showNest = !t || s.block === 'practice'
   return (
     <>
-      <RangeView light={light} lowDetail={lowDetail} pose={pose} showNest={showNest} treeHidden={t?.plan.treeHidden} moved={t?.moved ?? null} beetle={t?.currentBeetle ?? null} clock={clock} />
+      <RangeView light={light} lowDetail={lowDetail} pose={pose} showNest={showNest} treeHidden={t?.plan.treeHidden} moved={t?.moved ?? null} bare={t?.plan.bare} beetle={t?.currentBeetle ?? null} clock={clock} />
       <RatMesh pose={pose} anim={anim} moving={() => !!t && (t.body.lastStep !== 0 || t.body.lastTurn !== 0)} visible={view === 'follow'} />
       <AnimalCamera pose={pose} view={view} fov={fov} scale={RANGE_SCALE} />
     </>

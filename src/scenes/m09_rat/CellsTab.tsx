@@ -34,7 +34,7 @@ export function CellsLeft({ store, header }: { store: CellsStore; header: React.
           <GroupLabel>Step</GroupLabel>
           <Choice value={String(s.step)} options={STEPS.map((st) => ({ id: String(st.step), label: `Step ${st.step}`, title: st.title }))} onChange={(v) => s.open(Number(v) as Step)} disabledIds={STEPS.filter((st) => !s.canOpen(st.step)).map((st) => String(st.step))} />
           <Note>{spec.title}</Note>
-          {s.state === 'intro' && <Intro title="What will happen" lines={spec.what} time={`About ${spec.minutes} minutes. Drive for the first minute, then let the rat explore and skip the rest.`} onBegin={() => s.begin()} />}
+          {s.state === 'intro' && <Intro time={`About ${spec.minutes} minutes. Drive for the first minute, then let the rat explore and skip the rest.`} onBegin={() => s.begin()} />}
           {s.state === 'predict' && spec.question && spec.choices && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-predict>
               <GroupLabel>Predict first</GroupLabel>
