@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { HomingTrial, planBlock, runNavigators, NAVIGATOR_NOISE, DT, type TrialPlan, type View } from './homing'
+import { HomingTrial, planBlock, replanTrip, runNavigators, NAVIGATOR_NOISE, DT, type TrialPlan, type View } from './homing'
 import { RANGE, SMALL_MOVE, LARGE_MOVE } from './range'
 import { angleDiff } from './spatial/angles'
 
@@ -148,5 +148,21 @@ describe('the trips of Step 2 (Jon, 2026-10-20)', () => {
       }
     }
     expect(orders.size).toBeGreaterThan(3)
+  })
+})
+
+describe('Restart trial (Jon, 2026-10-20)', () => {
+  it('a restart draws a fresh trip of the same beetle count, never the picture block, and the record counts it', () => {
+    const plan = planBlock('dark', 9)[2]
+    const again = replanTrip(plan, 9, 1)
+    expect(again.legs.length).toBe(plan.legs.length)
+    expect(again.legs[0].x === plan.legs[0].x && again.legs[0].y === plan.legs[0].y).toBe(false)
+    expect(replanTrip(again, 9, 2).legs[0].x).not.toBe(again.legs[0].x)
+    expect(replanTrip(plan, 9, 1).legs[0].x).toBe(again.legs[0].x)
+    const pic = planBlock('picture', 9)[0]
+    expect(replanTrip(pic, 9, 1)).toBe(pic)
+    const t = new HomingTrial(again, 9, 1)
+    expect(t.record.restarts).toBe(1)
+    expect(scripted(plan, 9).record.restarts).toBe(0)
   })
 })

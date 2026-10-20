@@ -1,4 +1,4 @@
-import { BLOCKS, HomingTrial, planBlock, runNavigators, type Block, type NavigatorResult, type TrialRecord, type View } from '../../sim/rodent/homing'
+import { BLOCKS, HomingTrial, planBlock, runNavigators, type Block, type NavigatorResult, type TrialRecord, type View, replanTrip } from '../../sim/rodent/homing'
 import type { Command } from '../../sim/rodent/body'
 
 /**
@@ -117,6 +117,23 @@ export class HomeStore {
     if (!this.trial || this.trial.done) return
     this.trial.here()
     if (this.trial.done) this.trialEnded()
+  }
+
+  /** Whether the trial now running can be restarted: not in the picture block, not during the startle. */
+  get canRestart(): boolean {
+    return this.state === 'trials' && !!this.trial && !this.trial.done && this.trial.plan.block !== 'picture' && this.trial.blackout <= 0
+  }
+
+  /** Restart trial (Jon, 2026-10-20): the trial starts again on a fresh trip of the same beetle count, and the record counts the restart. */
+  restartTrial(): void {
+    if (!this.canRestart || !this.trial) return
+    const restarts = this.trial.record.restarts + 1
+    const plan = replanTrip(this.plans[this.trialIndex], this.seed, restarts)
+    this.plans[this.trialIndex] = plan
+    this.trial = new HomingTrial(plan, this.seed, restarts)
+    this.trial.setView(this.view)
+    this.fade = FADE
+    this.changed()
   }
 
   private trialEnded(): void {

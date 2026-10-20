@@ -23,6 +23,7 @@ export const INTRO: Record<Block, { lines: string[]; content?: string[]; time: s
       'Up arrow or W walks forward. Left and right arrows, or A and D, turn. Down arrow or S steps back slowly. The buttons under the view do the same, if you prefer to click.',
       'There are two ways to view the world, which you can switch between in the panel on the left. Eye view, the default, shows the world through the animal’s own eyes. Follow view shows the animal from behind and a little above. Switch between them at any time; the trial does not care which you use.',
       'Walk out to the beetle. It is eaten, and disappears, when you reach it. After you eat the beetle, walk back to the nest and press Here is my nest, or press the Enter key. There are two of these practice trials. Do one in each view, eye view and follow view.',
+      'If something interrupts a trial, Restart trial starts it again on a fresh trip with the same number of beetles. The reveal counts restarts.',
     ],
     content: [SCREEN_LINE, COMFORT_LINE],
     time: 'About 3 minutes.',
@@ -95,9 +96,12 @@ export function HomeLeft({ store, header }: { store: HomeStore; header: React.Re
           {s.state === 'trials' && (
             <>
               <FixedLines lines={s.statusLines()} testId="status" />
-              <div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 <Btn primary onClick={() => s.here()} disabled={!s.trial || s.trial.phase !== 'return' || s.trial.blackout > 0}>
                   Here is my nest
+                </Btn>
+                <Btn onClick={() => s.restartTrial()} disabled={!s.canRestart}>
+                  Restart trial
                 </Btn>
               </div>
               <Note>Nothing about where the nest truly is appears until you commit the block’s trials.</Note>
@@ -159,6 +163,7 @@ export function HomeRight({ store }: { store: HomeStore }) {
                   `${row('Error from the nest', r.error ?? 0, 'm')}${r.timedOut ? '  (time ran out)' : ''}`,
                   row('Time in eye view', r.viewSeconds.eye, 's'),
                   row('Time in follow view', r.viewSeconds.follow, 's'),
+                  `${'Restarts'.padEnd(ROW)}${r.restarts.toString().padStart(5)}`,
                   r.plan.block === 'moved' ? `${'Landmarks moved'.padEnd(ROW)}${r.plan.move === 0 ? 'not on this trial' : `${Math.round((Math.abs(r.plan.move) * 180) / Math.PI).toString().padStart(5)}°`}` : null,
                   r.plan.block === 'moved' && r.plan.move !== 0 ? `${'Score on the line'.padEnd(ROW)}${(r.conflictScore ?? 0).toFixed(2).padStart(5)}` : null,
                 ]}

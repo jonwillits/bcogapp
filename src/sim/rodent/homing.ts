@@ -81,6 +81,8 @@ export interface TrialRecord {
   timedOut: boolean
   /** Length of the outward path, meters. */
   outwardLength: number
+  /** How many times the student restarted this trial; each restart drew a fresh trip (Jon, 2026-10-20). */
+  restarts: number
 }
 
 export type NavigatorId = 'runningSum' | 'landmarks' | 'averaging' | 'followingOne'
@@ -177,6 +179,19 @@ export function planBlock(block: Block, seed: number): TrialPlan[] {
 /** A beetle, and the straight walk to it from the last, stay this far beyond any near landmark's footprint, so no landmark hides a beetle (Jon's walk, 2026-10-19). */
 export const BEETLE_CLEARANCE = 1.0
 
+/**
+ * Restart trial: a fresh trip of the same beetle count for a plan, drawn
+ * from the seed, the trial and the attempt, so a restarted trial is not a
+ * practiced one. The picture block has no trip and is not restarted.
+ */
+export function replanTrip(plan: TrialPlan, seed: number, attempt: number): TrialPlan {
+  if (plan.block === 'picture') return plan
+  const rng = makeRng((seed ^ 0x5e57a27) + plan.index * 7877 + attempt * 104651)
+  const n = plan.legs.length
+  const legs = plan.block === 'moved' ? legsFor(rng, n, 3, 3.6, 0) : legsFor(rng, n, 4.5, 7.5, plan.block === 'dark' ? HOME_SHARE : 0)
+  return { ...plan, legs }
+}
+
 /** Beetles each a few meters from the last, with a minimum angle between legs so no trip is a straight line, each in the clear of the landmarks, and each at least HOME_SHARE of the path so far from the nest. */
 function legsFor(rng: Rng, n: number, minLen: number, maxLen: number, homeShare: number): Leg[] {
   const legs: Leg[] = []
@@ -233,14 +248,14 @@ export class HomingTrial {
   readonly record: TrialRecord
   private view: View = 'eye'
 
-  constructor(plan: TrialPlan, seed: number) {
+  constructor(plan: TrialPlan, seed: number, restarts = 0) {
     this.plan = plan
-    const rng = makeRng(seed ^ (plan.index + 1) * 7919)
+    const rng = makeRng((seed ^ (plan.index + 1) * 7919) + restarts * 60493)
     const start: Pose = plan.setDown ?? { x: 0, y: 0, heading: rng.range(-Math.PI, Math.PI) }
     this.body = new Body(rng.fork(), RANGE_LOCOMOTION, start)
     this.phase = plan.legs.length ? 'out' : 'return'
     this.light = plan.lightOut
-    this.record = { plan, steps: [], beetlesAt: [], viewSeconds: { eye: 0, follow: 0 }, endpoint: null, error: null, conflictScore: null, timedOut: false, outwardLength: 0 }
+    this.record = { plan, steps: [], beetlesAt: [], viewSeconds: { eye: 0, follow: 0 }, endpoint: null, error: null, conflictScore: null, timedOut: false, outwardLength: 0, restarts }
   }
 
   /** Which view the student is in; the trial only counts the time. The view changes nothing below this line. */
