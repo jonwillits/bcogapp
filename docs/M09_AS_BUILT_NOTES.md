@@ -154,14 +154,14 @@ Headless in `src/sim/rodent/spatial/`. The body (`body.ts`) is the only file tha
 
 | Block | Outward path | Running sum only | Landmarks only | Averaging | Following one |
 |---|---|---|---|---|---|
-| dark, 2 legs | 8 to 14 m | 0.2 to 1.7 (mean 0.6) | 3.8 to 12.4 (7.4): stops at the last beetle | 0.2 to 2.3 (0.6) | 0.3 to 1.9 (0.7) |
-| dark, 3 legs | 13 to 19 m | 0.2 to 4.3 (1.0) | 1.6 to 15.1 (9.6) | 0.2 to 2.2 (0.8) | 0.1 to 2.8 (0.9) |
-| dark, 4 legs | 18 to 26 m | 0.2 to 4.5 (1.0) | 2.0 to 20.9 (10.4) | 0.1 to 2.6 (0.9) | 0.2 to 3.1 (1.0) |
-| moonlight, 3 legs | | 0.1 to 2.0 (0.8) | 0.0 to 17.4 (1.4) | 0.0 to 0.9 (0.4) | 0.1 to 1.0 (0.5) |
+| dark, 2 legs | 9 to 13 m | 0.2 to 2.0 (mean 0.7) | 3.8 to 11.8 (8.8): stops at the last beetle | 0.2 to 1.9 (0.7) | 0.3 to 1.9 (0.7) |
+| dark, 3 legs | 13 to 20 m | 0.3 to 2.8 (0.9) | 1.3 to 16.5 (10.0) | 0.2 to 1.7 (0.8) | 0.1 to 1.8 (0.8) |
+| dark, 4 legs | 17 to 26 m | 0.2 to 2.5 (0.9) | 4.4 to 19.0 (12.4) | 0.3 to 4.5 (1.2) | 0.2 to 4.5 (1.0) |
+| moonlight, 3 legs | | 0.1 to 2.5 (0.9) | 0.1 to 16.0 (1.2) | 0.1 to 1.0 (0.5) | 0.1 to 1.0 (0.5) |
 
-Errors in meters from the nest. In the dark the running sum's error grows with the path; averaging and following one have nothing to average with and end where the running sum does. In moonlight *Landmarks only* ends at the nest when a near landmark is in view at the last beetle and otherwise stops where it is (one trial in twenty ended 17 m off).
+Errors in meters from the nest. In the dark the running sum's error grows with the path; averaging and following one have nothing to average with and end where the running sum does. In moonlight *Landmarks only* ends at the nest when a near landmark is in view at the last beetle and otherwise stops where it is (one trial in twenty ended 16 m off). Re-measured 2026-10-19 after the beetle clearance redrew every trip; the first build's ranges were within a meter of these.
 
-**The moved landmarks** (score on the 0-to-1 line, medians over twenty seeds): Running sum only 0.09 on the small move and 0.04 on the large; Landmarks only 0.88 and 0.83; Averaging 0.69 and 0.62; **Following one 0.67 and 0.99**. The 15° move puts the two nests about 2 m apart, the 60° move about 7 m; the threshold is 3.5 m.
+**The moved landmarks** (score on the 0-to-1 line, medians over twenty seeds): Running sum only 0.08 on the small move and 0.05 on the large; Landmarks only 0.96 and 0.86; Averaging 0.65 and 0.61; **Following one 0.69 and 0.97**. The 15° move puts the two nests about 2 m apart, the 60° move about 7 m; the threshold is 3.5 m.
 
 **The picture block**: set down 3, 20, 3, 20 m from the nest. The running-sum navigators stay where they were set down; Landmarks only goes to the nest when a near landmark is within 10 m.
 
