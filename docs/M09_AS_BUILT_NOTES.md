@@ -154,12 +154,13 @@ Headless in `src/sim/rodent/spatial/`. The body (`body.ts`) is the only file tha
 
 | Block | Outward path | Running sum only | Landmarks only | Averaging | Following one |
 |---|---|---|---|---|---|
-| dark, 2 legs | 9 to 13 m | 0.2 to 2.0 (mean 0.7) | 3.8 to 11.8 (8.8): stops at the last beetle | 0.2 to 1.9 (0.7) | 0.3 to 1.9 (0.7) |
-| dark, 3 legs | 13 to 20 m | 0.3 to 2.8 (0.9) | 1.3 to 16.5 (10.0) | 0.2 to 1.7 (0.8) | 0.1 to 1.8 (0.8) |
-| dark, 4 legs | 17 to 26 m | 0.2 to 2.5 (0.9) | 4.4 to 19.0 (12.4) | 0.3 to 4.5 (1.2) | 0.2 to 4.5 (1.0) |
+| bare ground, 2 legs | 9 to 13 m | 0.2 to 1.6 (mean 0.6) | 3.8 to 11.2 (8.2): stops at the last beetle | 0.3 to 1.4 (0.7) | 0.3 to 1.5 (0.7) |
+| bare ground, 3 legs | 14 to 20 m | 0.3 to 2.8 (1.0) | 1.3 to 16.5 (10.1) | 0.2 to 3.6 (0.9) | 0.1 to 2.0 (0.8) |
+| bare ground, 4 legs | 19 to 25 m | 0.2 to 1.4 (0.8) | 4.4 to 19.0 (12.7) | 0.3 to 3.1 (1.2) | 0.2 to 2.4 (0.9) |
+| bare ground, dark return, 3 legs | 12 to 19 m | 0.2 to 2.3 (0.9) | 5.6 to 16.7 (11.6) | 0.3 to 3.3 (1.0) | 0.0 to 1.9 (0.9) |
 | moonlight, 3 legs | | 0.1 to 2.5 (0.9) | 0.1 to 16.0 (1.2) | 0.1 to 1.0 (0.5) | 0.1 to 1.0 (0.5) |
 
-Errors in meters from the nest. In the dark the running sum's error grows with the path; averaging and following one have nothing to average with and end where the running sum does. In moonlight *Landmarks only* ends at the nest when a near landmark is in view at the last beetle and otherwise stops where it is (one trial in twenty ended 16 m off). Re-measured 2026-10-19 after the beetle clearance redrew every trip; the first build's ranges were within a meter of these.
+Errors in meters from the nest. On the bare range, lit or dark, the running sum's mean error grows with the path only a little (0.6 to 1.0 to 0.8 m), too little to show in six trials; averaging and following one have nothing to average with and end where the running sum does. Re-measured 2026-10-20 for the bare-ground block. In moonlight *Landmarks only* ends at the nest when a near landmark is in view at the last beetle and otherwise stops where it is (one trial in twenty ended 16 m off). Re-measured 2026-10-19 after the beetle clearance redrew every trip; the first build's ranges were within a meter of these.
 
 **The moved landmarks** (score on the 0-to-1 line, medians over twenty seeds): Running sum only 0.08 on the small move and 0.05 on the large; Landmarks only 0.96 and 0.86; Averaging 0.65 and 0.61; **Following one 0.69 and 0.97**. The 15° move puts the two nests about 2 m apart, the 60° move about 7 m; the threshold is 3.5 m.
 
