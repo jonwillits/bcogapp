@@ -19,6 +19,8 @@ export interface BlockReveal {
 
 /** The fade through black between trials, seconds. */
 export const FADE = 1.2
+/** The phase line on the return, drawn in the accent color so the change of goal is seen as well as read (Jon, 2026-10-20). */
+export const RETURN_LINE = 'Find the nest'
 
 export class HomeStore {
   readonly seed: number
@@ -187,18 +189,18 @@ export class HomeStore {
     if (n) this.open(n)
   }
 
-  /** The status lines over the stage while a trial runs: fixed wording, one fact to a line. */
-  statusLines(): (string | null)[] {
+  /** The status lines over the stage while a trial runs: one fact to a line; three lines on the way out, four on the return (Jon, 2026-10-20: no light line, and the button's name in quotes). */
+  statusLines(): string[] {
     const t = this.trial
-    if (!t) return [null, null, null, null, null]
+    if (!t) return []
     const n = this.plans.length
     const legs = t.plan.legs.length
-    return [
+    const lines = [
       `Trial ${this.trialIndex + 1} of ${n}`,
       legs ? `Beetles taken ${t.beetle} of ${legs}` : 'Set down somewhere else',
-      t.phase === 'out' ? 'Walk to the beetle' : t.phase === 'return' ? 'Find the nest' : 'Trial over',
-      t.phase === 'return' ? 'then press Here is my nest' : null,
-      t.blackout > 0 ? 'Startled' : t.light === 'dark' ? 'Dark' : 'Moonlight',
+      t.blackout > 0 ? 'Startled' : t.phase === 'out' ? 'Walk to the beetle' : t.phase === 'return' ? RETURN_LINE : 'Trial over',
     ]
+    if (t.phase === 'return' && t.blackout <= 0) lines.push('then press “Here is my nest”')
+    return lines
   }
 }

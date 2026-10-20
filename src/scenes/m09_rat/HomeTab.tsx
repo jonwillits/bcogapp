@@ -2,9 +2,9 @@ import { Panel } from '../../components/Panel'
 import { BLOCKS, NAVIGATORS, type Block } from '../../sim/rodent/homing'
 import { rotateNearLandmarks } from '../../sim/rodent/range'
 import { RangeOverhead } from './Overhead'
-import { Btn, Choice, ConflictLine, Content, DotPlot, FixedLines, GroupLabel, Intro, Note, PANEL_STYLE, RIGHT_STYLE, m1 } from './ui'
+import { Btn, Choice, ConflictLine, Content, DotPlot, FixedLines, GroupLabel, Intro, Note, PANEL_STYLE, RIGHT_STYLE, m1, statusStyle } from './ui'
 import { COMFORT_LINE, NAVIGATORS_LINE, SCREEN_LINE } from './lines'
-import type { HomeStore } from './homeStore'
+import { RETURN_LINE, type HomeStore } from './homeStore'
 import { useStore } from './useStore'
 
 /**
@@ -95,7 +95,7 @@ export function HomeLeft({ store, header }: { store: HomeStore; header: React.Re
           )}
           {s.state === 'trials' && (
             <>
-              <FixedLines lines={s.statusLines()} testId="status" />
+              <FixedLines lines={s.statusLines()} testId="status" lineStyle={statusStyle(RETURN_LINE)} />
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 <Btn primary onClick={() => s.here()} disabled={!s.trial || s.trial.phase !== 'return' || s.trial.blackout > 0}>
                   Here is my nest
@@ -149,6 +149,7 @@ export function HomeRight({ store }: { store: HomeStore }) {
   return (
     <Panel title="The reveal" style={RIGHT_STYLE}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }} data-reveal>
+        <Note>In each overhead: your path out in amber, with a numbered dot at each beetle; your return dashed in blue; the nest a green dot; where you pressed the button a blue ring{scored ? '; where each program ended a red square' : ''}.</Note>
         {records.map((r, i) => {
           const out = r.steps.filter((st) => st.phase === 'out')
           const back = r.steps.filter((st) => st.phase === 'return')
@@ -156,7 +157,7 @@ export function HomeRight({ store }: { store: HomeStore }) {
           return (
             <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-trial-reveal={i}>
               <GroupLabel>{`Trial ${i + 1}`}</GroupLabel>
-              <RangeOverhead bare={r.plan.bare} out={out.map((p) => ({ x: p.x, y: p.y }))} back={back.map((p) => ({ x: p.x, y: p.y }))} endpoint={r.endpoint} navigators={scored ? navs.map((n) => ({ label: NAVIGATORS.find((x) => x.id === n.id)!.label, x: n.endpoint.x, y: n.endpoint.y })) : undefined} moved={r.plan.block === 'moved' && r.plan.move !== 0 ? rotateNearLandmarks(r.plan.legs[r.plan.legs.length - 1], r.plan.move) : null} label={`trial ${i + 1} overhead`} />
+              <RangeOverhead bare={r.plan.bare} beetles={r.plan.legs} out={out.map((p) => ({ x: p.x, y: p.y }))} back={back.map((p) => ({ x: p.x, y: p.y }))} endpoint={r.endpoint} navigators={scored ? navs.map((n) => ({ label: NAVIGATORS.find((x) => x.id === n.id)!.label, x: n.endpoint.x, y: n.endpoint.y })) : undefined} moved={r.plan.block === 'moved' && r.plan.move !== 0 ? rotateNearLandmarks(r.plan.legs[r.plan.legs.length - 1], r.plan.move) : null} label={`trial ${i + 1} overhead`} />
               <FixedLines
                 lines={[
                   row('Outward path', r.outwardLength, 'm'),
@@ -166,7 +167,7 @@ export function HomeRight({ store }: { store: HomeStore }) {
                   `${'Restarts'.padEnd(ROW)}${r.restarts.toString().padStart(5)}`,
                   r.plan.block === 'moved' ? `${'Landmarks moved'.padEnd(ROW)}${r.plan.move === 0 ? 'not on this trial' : `${Math.round((Math.abs(r.plan.move) * 180) / Math.PI).toString().padStart(5)}°`}` : null,
                   r.plan.block === 'moved' && r.plan.move !== 0 ? `${'Score on the line'.padEnd(ROW)}${(r.conflictScore ?? 0).toFixed(2).padStart(5)}` : null,
-                ]}
+                ].filter((l): l is string => l !== null)}
               />
               {r.plan.block === 'moved' && r.plan.move !== 0 && <ConflictLine score={r.conflictScore} others={navs.map((n) => ({ label: NAVIGATORS.find((x) => x.id === n.id)!.label, score: n.conflictScore ?? 0 }))} />}
               {scored && (

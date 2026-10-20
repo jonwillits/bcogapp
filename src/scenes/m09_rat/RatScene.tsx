@@ -14,9 +14,9 @@ import { RangeView, NIGHT_SKY } from './RangeView'
 import { BoxView } from './BoxView'
 import { LabView } from './LabView'
 import { commandOf, useDriveKeys } from './keys'
-import { Btn, Choice, Content, DrivePad, FixedLines, GroupLabel, Intro, Note, OrientingPanel, PANEL_STYLE, TabBar, type Tab } from './ui'
+import { Btn, Choice, Content, DrivePad, FixedLines, GroupLabel, Intro, Note, OrientingPanel, PANEL_STYLE, TabBar, statusStyle, type Tab } from './ui'
 import { COMMIT_RULE_LINE, RATS_LINE } from './lines'
-import { HomeStore } from './homeStore'
+import { HomeStore, RETURN_LINE } from './homeStore'
 import { CellsStore, STEPS } from './cellsStore'
 import { RatsStore } from './ratsStore'
 import { PatchStore } from './patchStore'
@@ -222,7 +222,7 @@ function Overlays({ tab, stores }: { tab: Tab; stores: Stores }) {
       )}
       {tab === 'home' && home.state === 'trials' && (
         <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', padding: '6px 12px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 12, width: 260, textAlign: 'center' }}>
-          <FixedLines lines={home.statusLines()} />
+          <FixedLines lines={home.statusLines()} lineStyle={statusStyle(RETURN_LINE)} />
         </div>
       )}
       {picture && (

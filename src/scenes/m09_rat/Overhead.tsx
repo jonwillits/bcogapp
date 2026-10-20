@@ -9,7 +9,7 @@ import { radiusAt, type Shape } from '../../sim/rodent/shape'
  * shows the box with the rat's true path and its estimate drawn together.
  */
 
-export function RangeOverhead({ size = 240, extent, out, back, endpoint, navigators, moved, bare, children, label }: { size?: number; extent?: number; out: { x: number; y: number }[]; back: { x: number; y: number }[]; endpoint: { x: number; y: number } | null; navigators?: { label: string; x: number; y: number }[]; moved?: Map<string, { x: number; y: number }> | null; bare?: boolean; children?: ReactNode; label?: string }) {
+export function RangeOverhead({ size = 240, extent, out, back, endpoint, navigators, moved, bare, beetles, children, label }: { size?: number; extent?: number; out: { x: number; y: number }[]; back: { x: number; y: number }[]; endpoint: { x: number; y: number } | null; navigators?: { label: string; x: number; y: number }[]; moved?: Map<string, { x: number; y: number }> | null; bare?: boolean; beetles?: { x: number; y: number }[]; children?: ReactNode; label?: string }) {
   const all = [...out, ...back, ...(endpoint ? [endpoint] : []), ...(navigators ?? []), RANGE.nest]
   const r = extent ?? Math.max(6, ...all.map((p) => Math.hypot(p.x, p.y))) * 1.15
   const S = (v: number) => (v / r) * (size / 2 - 6)
@@ -24,6 +24,14 @@ export function RangeOverhead({ size = 240, extent, out, back, endpoint, navigat
       })}
       <path d={path(out)} fill="none" stroke="var(--sensor)" strokeWidth={1.5} />
       <path d={path(back)} fill="none" stroke="var(--accent)" strokeWidth={1.5} strokeDasharray="4 2" />
+      {beetles?.map((b, i) => (
+        <g key={i} data-beetle={i + 1}>
+          <circle cx={X(b.x)} cy={Y(b.y)} r={4} fill="var(--sensor)" />
+          <text x={X(b.x)} y={Y(b.y) + 2.5} fontSize={7} textAnchor="middle" fill="var(--bg)">
+            {i + 1}
+          </text>
+        </g>
+      ))}
       <circle cx={X(RANGE.nest.x)} cy={Y(RANGE.nest.y)} r={4} fill="var(--actuator)" data-nest />
       {endpoint && <circle cx={X(endpoint.x)} cy={Y(endpoint.y)} r={4} fill="none" stroke="var(--accent)" strokeWidth={2} data-endpoint />}
       {navigators?.map((n) => (

@@ -56,17 +56,20 @@ export function Content({ children }: { children: ReactNode }) {
 }
 
 /** A block of fixed lines: one fact to a line, each worded one way, a line with nothing to say yet left empty. */
-export function FixedLines({ lines, mono = true, testId }: { lines: (string | null)[]; mono?: boolean; testId?: string }) {
+export function FixedLines({ lines, mono = true, testId, lineStyle }: { lines: (string | null)[]; mono?: boolean; testId?: string; lineStyle?: (line: string | null, i: number) => CSSProperties | undefined }) {
   return (
     <div data-lines={testId} style={{ fontFamily: mono ? 'var(--font-mono)' : undefined, fontSize: 11.5, whiteSpace: 'pre', lineHeight: 1.5, overflow: 'hidden' }}>
       {lines.map((l, i) => (
-        <div key={i} data-line={i}>
+        <div key={i} data-line={i} style={lineStyle?.(l, i)}>
           {l ?? ' '}
         </div>
       ))}
     </div>
   )
 }
+
+/** The status box's phase line changes color on the return: color only, never size (Jon's rule). */
+export const statusStyle = (returnLine: string) => (l: string | null) => (l === returnLine ? { color: 'var(--accent)' } : undefined)
 
 /**
  * An orienting screen before a test (Lab 8's rule): the description is the
