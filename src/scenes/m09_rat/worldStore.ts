@@ -1,6 +1,6 @@
 import { makeRng } from '../../sim/random'
 import { Body, RANGE_LOCOMOTION, type Command } from '../../sim/rodent/body'
-import { RANGE } from '../../sim/rodent/range'
+import { RANGE, pushOut } from '../../sim/rodent/range'
 
 /**
  * Part 0's state (spec §0): the tour. The range in moonlight with the nest
@@ -23,6 +23,9 @@ export class WorldStore {
 
   step(dt: number, cmd: Command): void {
     this.body.step(dt, cmd, null)
+    const clear = pushOut(this.body.x, this.body.y, this.body.loco.radius)
+    this.body.x = clear.x
+    this.body.y = clear.y
     const r = Math.hypot(this.body.x, this.body.y)
     if (r > RANGE.radius) {
       this.body.x *= RANGE.radius / r

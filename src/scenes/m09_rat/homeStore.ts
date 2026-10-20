@@ -159,13 +159,14 @@ export class HomeStore {
   /** The status lines over the stage while a trial runs: fixed wording, one fact to a line. */
   statusLines(): (string | null)[] {
     const t = this.trial
-    if (!t) return [null, null, null, null]
+    if (!t) return [null, null, null, null, null]
     const n = this.plans.length
     const legs = t.plan.legs.length
     return [
       `Trial ${this.trialIndex + 1} of ${n}`,
       legs ? `Beetles taken ${t.beetle} of ${legs}` : 'Set down somewhere else',
-      t.phase === 'out' ? 'Walk to the beetle' : t.phase === 'return' ? 'Find the nest, then press Here is my nest' : 'Trial over',
+      t.phase === 'out' ? 'Walk to the beetle' : t.phase === 'return' ? 'Find the nest' : 'Trial over',
+      t.phase === 'return' ? 'then press Here is my nest' : null,
       t.blackout > 0 ? 'Startled' : t.light === 'dark' ? 'Dark' : 'Moonlight',
     ]
   }

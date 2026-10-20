@@ -1,6 +1,6 @@
 import { makeRng, type Rng } from '../random'
 import { Body, RANGE_LOCOMOTION, STILL, type Command, type Pose } from './body'
-import { LANDMARKS, NEAR_LANDMARKS, RANGE, SMALL_MOVE, LARGE_MOVE, impliedNest, rotateNearLandmarks, visibleLandmarks, type Light } from './range'
+import { LANDMARKS, NEAR_LANDMARKS, RANGE, SMALL_MOVE, LARGE_MOVE, impliedNest, pushOut, rotateNearLandmarks, visibleLandmarks, walkIsClear, type Light } from './range'
 import { SENSE_NOISE } from './body'
 import { angleDiff, wrap } from './spatial/angles'
 
@@ -159,26 +159,40 @@ export function planBlock(block: Block, seed: number): TrialPlan[] {
   return plans
 }
 
-/** Beetles each a few meters from the last, with a minimum angle between legs so no trip is a straight line. */
+/** A beetle, and the straight walk to it from the last, stay this far beyond any near landmark's footprint, so no landmark hides a beetle (Jon's walk, 2026-10-19). */
+export const BEETLE_CLEARANCE = 1.0
+
+/** Beetles each a few meters from the last, with a minimum angle between legs so no trip is a straight line, and each in the clear of the landmarks. */
 function legsFor(rng: Rng, n: number, minLen: number, maxLen: number): Leg[] {
   const legs: Leg[] = []
   let x = 0
   let y = 0
   let heading = rng.range(0, 2 * Math.PI)
   for (let i = 0; i < n; i++) {
-    if (i > 0) {
-      const turn = (rng.next() < 0.5 ? 1 : -1) * rng.range(Math.PI / 4, (3 * Math.PI) / 4)
-      heading = wrap(heading + turn)
+    let nx = x
+    let ny = y
+    let h = heading
+    // Draw legs until the walk is clear of the landmarks; after many tries take the last.
+    for (let tries = 0; tries < 40; tries++) {
+      h = heading
+      if (i > 0) {
+        const turn = (rng.next() < 0.5 ? 1 : -1) * rng.range(Math.PI / 4, (3 * Math.PI) / 4)
+        h = wrap(heading + turn)
+      } else if (tries > 0) h = rng.range(0, 2 * Math.PI)
+      const len = rng.range(minLen, maxLen)
+      nx = x + len * Math.cos(h)
+      ny = y + len * Math.sin(h)
+      // Keep well inside the range.
+      const r = Math.hypot(nx, ny)
+      if (r > RANGE.radius - 6) {
+        nx *= (RANGE.radius - 6) / r
+        ny *= (RANGE.radius - 6) / r
+      }
+      if (walkIsClear(x, y, nx, ny, BEETLE_CLEARANCE)) break
     }
-    const len = rng.range(minLen, maxLen)
-    x += len * Math.cos(heading)
-    y += len * Math.sin(heading)
-    // Keep well inside the range.
-    const r = Math.hypot(x, y)
-    if (r > RANGE.radius - 6) {
-      x *= (RANGE.radius - 6) / r
-      y *= (RANGE.radius - 6) / r
-    }
+    x = nx
+    y = ny
+    heading = h
     legs.push({ x, y })
   }
   return legs
@@ -239,6 +253,10 @@ export class HomingTrial {
     }
     const before = { x: this.body.x, y: this.body.y }
     this.body.step(dt, cmd, null)
+    // Stopped by the landmarks, where they stand now.
+    const clear = pushOut(this.body.x, this.body.y, this.body.loco.radius, this.moved)
+    this.body.x = clear.x
+    this.body.y = clear.y
     // Kept within the range.
     const r = Math.hypot(this.body.x, this.body.y)
     if (r > RANGE.radius) {
