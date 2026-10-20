@@ -92,6 +92,19 @@ export function Intro({ time, onBegin, disabled, extra }: { time: string; onBegi
   )
 }
 
+/** Lines that start with "- " are bullets; a run of them is one list. */
+function groupBullets(lines: string[]): (string | string[])[] {
+  const out: (string | string[])[] = []
+  for (const l of lines) {
+    if (l.startsWith('- ')) {
+      const last = out[out.length - 1]
+      if (Array.isArray(last)) last.push(l.slice(2))
+      else out.push([l.slice(2)])
+    } else out.push(l)
+  }
+  return out
+}
+
 /** The description of a step, centered over the view while the step waits to begin: the title, what will happen, the content lines, and what to press. */
 export function OrientingPanel({ title, lines, content, footer }: { title: string; lines: string[]; content?: string[]; footer: string }) {
   return (
@@ -101,11 +114,19 @@ export function OrientingPanel({ title, lines, content, footer }: { title: strin
     >
       <div style={{ fontSize: 14, fontWeight: 600 }}>{title}</div>
       <GroupLabel>What will happen</GroupLabel>
-      {lines.map((l) => (
-        <p key={l} style={{ margin: 0 }}>
-          {l}
-        </p>
-      ))}
+      {groupBullets(lines).map((block, i) =>
+        typeof block === 'string' ? (
+          <p key={i} style={{ margin: 0 }}>
+            {block}
+          </p>
+        ) : (
+          <ul key={i} style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {block.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        ),
+      )}
       {content?.map((l) => (
         <Content key={l}>{l}</Content>
       ))}
