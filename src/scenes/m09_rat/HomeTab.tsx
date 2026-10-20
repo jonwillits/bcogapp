@@ -22,7 +22,7 @@ const INTRO: Record<Block, { lines: string[]; content?: string[]; time: string }
     time: 'About 3 minutes.',
   },
   dark: {
-    lines: ['You start at the nest, and it disappears from view. Beetles appear one at a time; walk to each.', 'At the last beetle the light goes out. Walk back to where you think the nest is and press Here is my nest.', 'Six trials, from two legs to four. Each return ends where you press the button, or after two minutes.'],
+    lines: ['You start at the nest, and it disappears from view. Beetles appear one at a time; walk to each.', 'At the last beetle the light goes out. Walk back to where you think the nest is and press Here is my nest.', 'The landmarks are in view on the way out and gone on the way back. Keep track of your own turns and distances as you go: that is all there will be.', 'Six trials, from two legs to four. Each return ends where you press the button, or after two minutes.'],
     time: 'About 6 minutes.',
   },
   moonlight: {
