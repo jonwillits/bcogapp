@@ -19,7 +19,7 @@ export type Phase = 'out' | 'return' | 'done'
 
 export const BLOCKS: { id: Block; title: string; trials: number; minutes: number }[] = [
   { id: 'practice', title: 'Step 1 — Practice', trials: 2, minutes: 3 },
-  { id: 'dark', title: 'Step 2 — Home across bare ground', trials: 6, minutes: 6 },
+  { id: 'dark', title: 'Step 2 — Home across bare ground', trials: 8, minutes: 8 },
   { id: 'moonlight', title: 'Step 3 — Home by moonlight', trials: 4, minutes: 4 },
   { id: 'picture', title: 'Step 4 — A picture of home', trials: 4, minutes: 5 },
   { id: 'moved', title: 'Step 5 — When the landmarks move', trials: 4, minutes: 5 },
@@ -28,8 +28,8 @@ export const BLOCKS: { id: Block; title: string; trials: number; minutes: number
 export const DT = 0.02
 /** A return is ended where the forager stands after this long. */
 export const RETURN_CAP = 120
-/** Step 2: trials from this index on are dark on the way back. */
-export const DARK_FROM = 4
+/** Step 2: every beetle sits at least this share of the path walked so far from the nest, so a trip never doubles back to the start and the distance home grows with the path (Jon, 2026-10-20). Steps 3 and 5 keep their trips as first measured. */
+export const HOME_SHARE = 0.5
 /** Step 4's set-down distances. */
 export const PICTURE_NEAR = 3
 export const PICTURE_FAR = 20
@@ -144,22 +144,29 @@ export function planBlock(block: Block, seed: number): TrialPlan[] {
     }
     for (let i = 0; i < spec.trials; i++) {
       // Short trips, so the near landmarks are in view at the last beetle.
-      plans.push({ block, index: i, legs: legsFor(rng, 2 + rng.int(2), 3, 3.6), move: moves[i], lightOut: 'moonlight', lightBack: 'moonlight', treeHidden: true, bare: false })
+      plans.push({ block, index: i, legs: legsFor(rng, 2 + rng.int(2), 3, 3.6, 0), move: moves[i], lightOut: 'moonlight', lightBack: 'moonlight', treeHidden: true, bare: false })
     }
     return plans
   }
-  // Step 2 (Jon's walk, 2026-10-19): the bare range, four trials in moonlight with two, three, four and three beetles, then
-  // two more of three beetles in which the light goes out at the last beetle. The chapter's path integrator is the ant on
-  // featureless ground in daylight; the dark had taken away the ground moving past as well as the landmarks.
-  const legCounts = block === 'practice' ? [1, 1] : block === 'dark' ? [2, 3, 4, 3, 3, 3] : [3, 3, 3, 3]
+  // Step 2 (Jon's walk, 2026-10-19 and 2026-10-20): the bare range in moonlight, eight trials, three of two beetles, three of
+  // three and two of four, in an order set by the seed. The chapter's path integrator is the ant on featureless ground in
+  // daylight; the dark had taken away the ground moving past as well as the landmarks, and the order is shuffled so that
+  // practice and fatigue do not run with path length.
+  const legCounts = block === 'practice' ? [1, 1] : block === 'dark' ? [2, 2, 2, 3, 3, 3, 4, 4] : [3, 3, 3, 3]
+  if (block === 'dark') {
+    for (let i = legCounts.length - 1; i > 0; i--) {
+      const j = rng.int(i + 1)
+      ;[legCounts[i], legCounts[j]] = [legCounts[j], legCounts[i]]
+    }
+  }
   for (let i = 0; i < spec.trials; i++) {
     plans.push({
       block,
       index: i,
-      legs: legsFor(rng, legCounts[i], 4.5, 7.5),
+      legs: legsFor(rng, legCounts[i], 4.5, 7.5, block === 'dark' ? HOME_SHARE : 0),
       move: 0,
       lightOut: 'moonlight',
-      lightBack: block === 'dark' && i >= DARK_FROM ? 'dark' : 'moonlight',
+      lightBack: 'moonlight',
       treeHidden: false,
       bare: block === 'dark',
     })
@@ -170,17 +177,18 @@ export function planBlock(block: Block, seed: number): TrialPlan[] {
 /** A beetle, and the straight walk to it from the last, stay this far beyond any near landmark's footprint, so no landmark hides a beetle (Jon's walk, 2026-10-19). */
 export const BEETLE_CLEARANCE = 1.0
 
-/** Beetles each a few meters from the last, with a minimum angle between legs so no trip is a straight line, and each in the clear of the landmarks. */
-function legsFor(rng: Rng, n: number, minLen: number, maxLen: number): Leg[] {
+/** Beetles each a few meters from the last, with a minimum angle between legs so no trip is a straight line, each in the clear of the landmarks, and each at least HOME_SHARE of the path so far from the nest. */
+function legsFor(rng: Rng, n: number, minLen: number, maxLen: number, homeShare: number): Leg[] {
   const legs: Leg[] = []
   let x = 0
   let y = 0
+  let walked = 0
   let heading = rng.range(0, 2 * Math.PI)
   for (let i = 0; i < n; i++) {
     let nx = x
     let ny = y
     let h = heading
-    // Draw legs until the walk is clear of the landmarks; after many tries take the last.
+    // Draw legs until the walk is clear of the landmarks and the beetle is far enough from the nest; after many tries take the last.
     for (let tries = 0; tries < 40; tries++) {
       h = heading
       if (i > 0) {
@@ -196,8 +204,10 @@ function legsFor(rng: Rng, n: number, minLen: number, maxLen: number): Leg[] {
         nx *= (RANGE.radius - 6) / r
         ny *= (RANGE.radius - 6) / r
       }
-      if (walkIsClear(x, y, nx, ny, BEETLE_CLEARANCE)) break
+      const farEnough = Math.hypot(nx, ny) >= homeShare * (walked + Math.hypot(nx - x, ny - y))
+      if (farEnough && walkIsClear(x, y, nx, ny, BEETLE_CLEARANCE)) break
     }
+    walked += Math.hypot(nx - x, ny - y)
     x = nx
     y = ny
     heading = h

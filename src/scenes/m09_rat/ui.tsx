@@ -150,7 +150,7 @@ export const m1 = (v: number) => `${v.toFixed(1).padStart(5)} m`
 export const pct = (v: number) => `${Math.round(v * 100)}%`
 
 /** A small SVG plot of points, x against y, with optional reference lines. */
-export function DotPlot({ points, xLabel, yLabel, width = 300, height = 150, xMax, yMax, marks }: { points: { x: number; y: number; label?: string }[]; xLabel: string; yLabel: string; width?: number; height?: number; xMax?: number; yMax?: number; marks?: { x: number; label: string }[] }) {
+export function DotPlot({ points, xLabel, yLabel, width = 300, height = 150, xMax, yMax, marks, legend }: { points: { x: number; y: number; label?: string; color?: string }[]; xLabel: string; yLabel: string; width?: number; height?: number; xMax?: number; yMax?: number; marks?: { x: number; label: string }[]; legend?: { label: string; color: string }[] }) {
   const pad = { l: 36, r: 10, t: 10, b: 28 }
   const mx = xMax ?? Math.max(1, ...points.map((p) => p.x), ...(marks ?? []).map((m) => m.x)) * 1.1
   const my = yMax ?? Math.max(1, ...points.map((p) => p.y)) * 1.15
@@ -169,9 +169,17 @@ export function DotPlot({ points, xLabel, yLabel, width = 300, height = 150, xMa
         </g>
       ))}
       {points.map((p, i) => (
-        <circle key={i} cx={X(p.x)} cy={Y(p.y)} r={3.5} fill="var(--accent)">
+        <circle key={i} cx={X(p.x)} cy={Y(p.y)} r={3.5} fill={p.color ?? 'var(--accent)'}>
           {p.label && <title>{p.label}</title>}
         </circle>
+      ))}
+      {legend?.map((l, i) => (
+        <g key={l.label} data-legend={l.label}>
+          <circle cx={pad.l + 8} cy={pad.t + 8 + i * 12} r={3.5} fill={l.color} />
+          <text x={pad.l + 16} y={pad.t + 11 + i * 12} fontSize={9} fill="var(--text-muted)">
+            {l.label}
+          </text>
+        </g>
       ))}
       <text x={(pad.l + width - pad.r) / 2} y={height - 8} fontSize={10} textAnchor="middle" fill="var(--text-muted)">
         {xLabel}

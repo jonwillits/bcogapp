@@ -31,10 +31,10 @@ export const INTRO: Record<Block, { lines: string[]; content?: string[]; time: s
     lines: [
       'For this step, the range is bare. There is no log, no rocks, no stump and no tree. You start at the nest, a plain spot on the ground that you will not see again once you leave it. Beetles appear one at a time: each new one appears after you eat the last, a few meters from it. Walk to each. After you eat the last beetle, your job is to walk back to where you started. When you get there, press Here is my nest, or press the Enter key. Remember, you will not see your nest: you are working out where it was.',
       'With nothing on the ground to steer by, the only way back is what the reading calls path integration: a running sum of your own turns and distances, kept as you go, that points to the start from wherever you are. Keep track of your own turns and distances as you go. That is all there will be.',
-      'There are six trials. Four in moonlight, with two to four beetles on each trial. Then two more trials with three beetles each, in which the light goes out after you eat the last beetle, and nothing is left that you can see but the ground within a step or two.',
+      'There are eight trials, in moonlight throughout, with two, three or four beetles each, in an order set by your seed. The farther you walk, the more there is to keep track of.',
       'Each trial ends where you press Here is my nest, or after two minutes.',
     ],
-    time: 'About 6 minutes.',
+    time: 'About 8 minutes.',
   },
   moonlight: {
     lines: [
@@ -65,6 +65,8 @@ export const INTRO: Record<Block, { lines: string[]; content?: string[]; time: s
 const shortTitle = (b: Block) => BLOCKS.find((x) => x.id === b)!.title.replace(/ — .*/, '')
 /** The reveal's rows: a label padded to one width, then the number right-aligned so the decimals line up (Jon, 2026-10-20). */
 const ROW = 22
+/** The error plot's dots by the trip's beetle count (Jon, 2026-10-20). */
+const BEETLE_COLORS: Record<number, string> = { 2: 'var(--accent)', 3: 'var(--sensor)', 4: 'var(--actuator)' }
 const row = (label: string, v: number, unit: string) => `${label.padEnd(ROW)}${v.toFixed(1).padStart(5)} ${unit}`
 
 export function HomeLeft({ store, header }: { store: HomeStore; header: React.ReactNode }) {
@@ -139,7 +141,7 @@ export function HomeRight({ store }: { store: HomeStore }) {
   }
   const { records, navigators } = reveal
   const scored = s.block !== 'practice'
-  const errorPoints = records.map((r, i) => ({ x: r.outwardLength, y: r.error ?? 0, label: `trial ${i + 1}${r.plan.lightBack === 'dark' ? ', dark' : ''}` }))
+  const errorPoints = records.map((r, i) => ({ x: r.outwardLength, y: r.error ?? 0, label: `trial ${i + 1}, ${r.plan.legs.length} beetles`, color: BEETLE_COLORS[r.plan.legs.length] ?? 'var(--accent)' }))
   return (
     <Panel title="The reveal" style={RIGHT_STYLE}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }} data-reveal>
@@ -154,7 +156,6 @@ export function HomeRight({ store }: { store: HomeStore }) {
               <FixedLines
                 lines={[
                   row('Outward path', r.outwardLength, 'm'),
-                  r.plan.block === 'dark' ? `${'Return'.padEnd(ROW)}${r.plan.lightBack === 'dark' ? 'in the dark' : 'in moonlight'}` : null,
                   `${row('Error from the nest', r.error ?? 0, 'm')}${r.timedOut ? '  (time ran out)' : ''}`,
                   row('Time in eye view', r.viewSeconds.eye, 's'),
                   row('Time in follow view', r.viewSeconds.follow, 's'),
@@ -175,7 +176,7 @@ export function HomeRight({ store }: { store: HomeStore }) {
         {s.block === 'dark' && (
           <>
             <GroupLabel>Error against the length of the outward path</GroupLabel>
-            <DotPlot points={errorPoints} xLabel="outward path, m" yLabel="error, m" />
+            <DotPlot points={errorPoints} xLabel="outward path, m" yLabel="error, m" legend={[2, 3, 4].map((n) => ({ label: `${n} beetles`, color: BEETLE_COLORS[n] }))} />
           </>
         )}
         {scored && (

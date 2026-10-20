@@ -38,14 +38,15 @@ describe('the trip record and the navigators', () => {
   })
 
   it('every trial records the time spent in each view, and the trip record is complete: every step’s pose and command, every beetle, the light', () => {
-    const plan = planBlock('dark', 5).at(-1)!
+    const plan = planBlock('moved', 5)[0]
     const t = scripted(plan, 5, 'follow')
     expect(t.record.viewSeconds.follow).toBeGreaterThan(5)
     expect(t.record.viewSeconds.eye).toBe(0)
     expect(t.record.beetlesAt.length).toBe(plan.legs.length)
     expect(t.record.steps.length).toBeGreaterThan(100)
-    expect(t.record.steps.some((s) => s.light === 'dark')).toBe(true)
-    expect(t.record.steps.some((s) => s.light === 'moonlight')).toBe(true)
+    expect(t.record.steps.some((s) => s.phase === 'out')).toBe(true)
+    expect(t.record.steps.some((s) => s.phase === 'return')).toBe(true)
+    expect(t.record.steps.every((s) => s.light === 'moonlight')).toBe(true)
     expect(t.record.endpoint).not.toBeNull()
   })
 
@@ -108,8 +109,8 @@ describe('the navigators on the moved landmarks (§7.5, §7.6)', () => {
     expect(median(scores.followingOne.small)).toBeLessThan(0.9)
   })
 
-  it('in the dark, Landmarks only stops where it is, and in moonlight it ends at the nest when a near landmark is in view', () => {
-    const dark = planBlock('dark', 21).at(-1)!
+  it('on the bare range, Landmarks only stops where it is, and in moonlight it ends at the nest when a near landmark is in view', () => {
+    const dark = planBlock('dark', 21)[0]
     const t = scripted(dark, 21)
     const nav = runNavigators(t.record, 21).find((n) => n.id === 'landmarks')!
     const last = t.record.steps.filter((s) => s.phase === 'out').at(-1)!
@@ -118,5 +119,34 @@ describe('the navigators on the moved landmarks (§7.5, §7.6)', () => {
     const m = scripted(moved, 21)
     const lm = runNavigators(m.record, 21).find((n) => n.id === 'landmarks')!
     expect(lm.conflictScore!).toBeGreaterThan(0.8)
+  })
+})
+
+describe('the trips of Step 2 (Jon, 2026-10-20)', () => {
+  it('eight trials, three of two beetles, three of three and two of four, in an order the seed sets; every beetle at least half the path so far from the nest; every return in moonlight', () => {
+    const orders = new Set<string>()
+    for (let seed = 1000; seed < 1020; seed++) {
+      const plans = planBlock('dark', seed)
+      expect(plans.length).toBe(8)
+      const counts = plans.map((p) => p.legs.length)
+      expect(counts.filter((c) => c === 2).length).toBe(3)
+      expect(counts.filter((c) => c === 3).length).toBe(3)
+      expect(counts.filter((c) => c === 4).length).toBe(2)
+      orders.add(counts.join(''))
+      for (const p of plans) {
+        expect(p.bare).toBe(true)
+        expect(p.lightBack).toBe('moonlight')
+        let walked = 0
+        let x = 0
+        let y = 0
+        for (const l of p.legs) {
+          walked += Math.hypot(l.x - x, l.y - y)
+          x = l.x
+          y = l.y
+          expect(Math.hypot(x, y)).toBeGreaterThanOrEqual(0.5 * walked - 1e-9)
+        }
+      }
+    }
+    expect(orders.size).toBeGreaterThan(3)
   })
 })

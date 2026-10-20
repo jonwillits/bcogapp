@@ -70,8 +70,8 @@ describe('Part 1: nothing about the nest before Commit my trials', () => {
   it('after: the overhead inset for every trial, the nest, each endpoint and error, and the four navigators', () => {
     s.commit()
     const after = renderToStaticMarkup(<HomeRight store={s} />)
-    expect((after.match(/data-overhead/g) ?? []).length).toBe(6)
-    expect((after.match(/data-nest/g) ?? []).length).toBe(6)
+    expect((after.match(/data-overhead/g) ?? []).length).toBe(8)
+    expect((after.match(/data-nest/g) ?? []).length).toBe(8)
     expect(after).toMatch(/Error from the nest/)
     expect(after).toMatch(/Running sum only/)
     expect(after).toMatch(/Following one/)
