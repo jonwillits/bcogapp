@@ -14,7 +14,7 @@ import { RangeView, NIGHT_SKY } from './RangeView'
 import { BoxView } from './BoxView'
 import { LabView } from './LabView'
 import { commandOf, useDriveKeys } from './keys'
-import { Btn, Choice, Content, DrivePad, FixedLines, GroupLabel, Note, OrientingPanel, PANEL_STYLE, TabBar, type Tab } from './ui'
+import { Btn, Choice, Content, DrivePad, FixedLines, GroupLabel, Intro, Note, OrientingPanel, PANEL_STYLE, TabBar, type Tab } from './ui'
 import { COMMIT_RULE_LINE, RATS_LINE } from './lines'
 import { HomeStore } from './homeStore'
 import { CellsStore, STEPS } from './cellsStore'
@@ -23,8 +23,8 @@ import { PatchStore } from './patchStore'
 import { WorldStore } from './worldStore'
 import { HomeLeft, HomeRight, INTRO as HOME_INTRO } from './HomeTab'
 import { CellsLeft, CellsRight } from './CellsTab'
-import { RatsLeft, RatsRight } from './RatsTab'
-import { PatchLeft, PatchRight } from './PatchTab'
+import { RatsLeft, RatsRight, RATS_INTRO } from './RatsTab'
+import { PatchLeft, PatchRight, PATCH_INTRO } from './PatchTab'
 import { useStore } from './useStore'
 
 /**
@@ -99,7 +99,9 @@ export default function RatScene() {
   const stores = storesRef.current.stores
   const anim = useMemo(() => makeRng(seed ^ 0xa11ce), [seed])
   const drivingTab = tab === 'world' || tab === 'home' || tab === 'cells'
-  const { held, press } = useDriveKeys(drivingTab)
+  const { held, press } = useDriveKeys(drivingTab, () => {
+    if (tab === 'home') stores.home.here()
+  })
   const clockRef = useRef(0)
   useEffect(() => {
     stores.home.setView(view)
@@ -153,7 +155,7 @@ export default function RatScene() {
 
   const left =
     tab === 'world' ? (
-      <WorldLeft header={header} />
+      <WorldLeft header={header} store={stores.world} />
     ) : tab === 'home' ? (
       <HomeLeft store={stores.home} header={header} />
     ) : tab === 'cells' ? (
@@ -187,7 +189,7 @@ export default function RatScene() {
         drivingTab || tab === 'patches' ? (
           <div style={{ display: 'flex', gap: 14, alignItems: 'center', pointerEvents: 'auto' }}>
             {drivingTab && <DrivePad onKey={press} />}
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{drivingTab ? 'Arrow keys or WASD drive the animal' : 'The forager drives itself tonight'}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{drivingTab ? (tab === 'home' ? 'Arrow keys or WASD drive the animal · Enter is Here is my nest' : 'Arrow keys or WASD drive the animal') : 'The forager drives itself tonight'}</div>
           </div>
         ) : undefined
       }
@@ -200,6 +202,8 @@ function Overlays({ tab, stores }: { tab: Tab; stores: Stores }) {
   const home = useStore(stores.home)
   const cells = useStore(stores.cells)
   const patches = useStore(stores.patches)
+  const world = useStore(stores.world)
+  const rats = useStore(stores.rats)
   const fade = tab === 'home' ? (home.state === 'trials' ? Math.min(1, home.fade / 0.6) : 0) : tab === 'cells' ? Math.min(1, cells.fade / 0.6) : 0
   const badge = tab === 'cells' ? cells.skipBadge : tab === 'patches' ? patches.badge : ''
   const picture = tab === 'home' && home.block === 'picture' && home.state === 'trials' && home.trial
@@ -210,6 +214,9 @@ function Overlays({ tab, stores }: { tab: Tab; stores: Stores }) {
       {fade > 0 && <div style={{ position: 'absolute', inset: 0, background: '#000', opacity: fade, pointerEvents: 'none' }} data-fade />}
       {homeIntro && <OrientingPanel title={BLOCKS.find((b) => b.id === home.block)!.title} lines={homeIntro.lines} content={homeIntro.content} footer={`${homeIntro.time} Press Begin on the left.`} />}
       {cellsSpec && <OrientingPanel title={cellsSpec.title} lines={cellsSpec.what} footer={cells.state === 'intro' ? `About ${cellsSpec.minutes} minutes. Press Begin on the left.` : 'Choose a prediction on the left and press Commit my prediction.'} />}
+      {tab === 'world' && !world.started && <OrientingPanel title={WORLD_INTRO.title} lines={WORLD_INTRO.lines} content={WORLD_INTRO.content} footer={`${WORLD_INTRO.time} Press Begin on the left.`} />}
+      {tab === 'rats' && !rats.started && <OrientingPanel title={RATS_INTRO.title} lines={RATS_INTRO.lines} content={RATS_INTRO.content} footer={`${RATS_INTRO.time} Press Begin on the left.`} />}
+      {tab === 'patches' && !patches.started && <OrientingPanel title={PATCH_INTRO.title} lines={PATCH_INTRO.lines} content={PATCH_INTRO.content} footer={`${PATCH_INTRO.time} Press Begin on the left.`} />}
       {badge && (
         <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', padding: '6px 12px', borderRadius: 999, background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 12, whiteSpace: 'nowrap' }}>{badge}</div>
       )}
@@ -240,23 +247,31 @@ function NestCamera() {
   return null
 }
 
-function WorldLeft({ header }: { header: React.ReactNode }) {
+/** Part 0's orienting text, shown over the view until Begin. */
+const WORLD_INTRO = {
+  title: 'Part 0 — Opening the simulation',
+  lines: [
+    'You are a small mammal on the forest floor at night, a few steps from your nest under its root. This tab is for finding your feet: nothing is scored, and you can come back to it at any time.',
+    'The keys. Up arrow or W walks forward at a steady pace. Left and right arrows, or A and D, turn. Down arrow or S steps back slowly. The buttons under the view do the same on a touch screen. Keys are ignored while a control has focus; click on the view to drive again.',
+    'The two views. Eye view is the animal’s own eyes, low to the ground. Follow view sits behind the animal and a little above it, and shows no more of the world than the eye view does. Switch at any time with the View buttons in the panel on the left.',
+    'Comfort. There is no head bob and the pace is constant. Follow view uses a narrower field; the Narrower view box narrows the eye view too. Low detail halves the draw distance and the ground clutter for a slower machine; it changes nothing the sim does.',
+    'The parts. Home: you find the way home, as the forager and as the subject of an experiment. Rats: you run experiments on a healthy rat and six hidden ones. Cells: you are the rat, and simulated cells fire beside the view. Patches: when to leave a patch of beetles. Each part, and each step, opens with a panel like this one.',
+  ],
+  content: [COMMIT_RULE_LINE],
+  time: 'About 3 minutes.',
+}
+
+function WorldLeft({ header, store }: { header: React.ReactNode; store: WorldStore }) {
+  const s = useStore(store)
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {header}
       <Panel title="Part 0 — Opening the simulation" style={PANEL_STYLE}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <Note>You are a small mammal on the forest floor at night, a few steps from your nest under its root. This tab is for finding your feet: nothing is scored.</Note>
-          <GroupLabel>The keys</GroupLabel>
-          <Note>Up arrow or W walks forward at a steady pace. Left and right arrows, or A and D, turn. Down arrow or S steps back slowly. The buttons under the view do the same on a touch screen. Keys are ignored while a control has focus.</Note>
-          <GroupLabel>The two views</GroupLabel>
-          <Note>Eye view is the animal’s own eyes, low to the ground. Follow view sits behind the animal and a little above it, and shows no more of the world than the eye view does. Switch at any time with the View buttons above.</Note>
-          <GroupLabel>Comfort</GroupLabel>
-          <Note>There is no head bob and the pace is constant. Follow view uses a narrower field; Narrower view narrows the eye view too. Low detail halves the draw distance and the ground clutter for a slower machine; it changes nothing the sim does.</Note>
+          {!s.started && <Intro time={WORLD_INTRO.time} onBegin={() => s.begin()} />}
+          <Note>Drive about, in both views, until the keys feel natural. Nothing is scored.</Note>
           <GroupLabel>The rule of the lab</GroupLabel>
           <Content>{COMMIT_RULE_LINE}</Content>
-          <GroupLabel>The parts</GroupLabel>
-          <Note>Home: you find the way home, as the forager and as the subject of an experiment. Rats: you run experiments on a healthy rat and five hidden ones. Cells: you are the rat, and simulated cells fire beside the view. Patches: when to leave a patch of beetles.</Note>
         </div>
       </Panel>
     </div>

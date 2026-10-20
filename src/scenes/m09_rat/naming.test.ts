@@ -80,7 +80,7 @@ describe('the fifteen lines that are content, each on its panel (§11)', () => {
     expect(file('CellsTab.tsx')).toMatch(/<Content>\{THREE_GROUPS_LINE\}<\/Content>/)
   })
   it('14. comfort, on Part 1’s orienting screen', () => {
-    expect(lines).toMatch(/Anyone who feels unwell can switch to the follow view or narrow the view\./)
+    expect(lines).toMatch(/Anyone who feels unwell can switch to the follow view or tick the Narrower view box\./)
   })
   it('15. the two rings, beside the rings', () => {
     expect(lines).toMatch(/The lower ring stands for the start of the chain, low in the brain, where the heading is kept from turns\. The upper ring stands for the cells recorded further up, where a landmark can correct it\./)

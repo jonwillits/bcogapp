@@ -19,6 +19,8 @@ export class PatchStore {
   skipping = false
   owed = 0
   badge = ''
+  /** Begin pressed: the orienting panel over the view is gone. */
+  started = false
   version = 0
   private listeners = new Set<() => void>()
   private nightsRun = 0
@@ -30,6 +32,12 @@ export class PatchStore {
   subscribe(fn: () => void): () => void {
     this.listeners.add(fn)
     return () => this.listeners.delete(fn)
+  }
+
+  begin(): void {
+    this.started = true
+    this.version++
+    for (const fn of this.listeners) fn()
   }
 
   changed(): void {

@@ -98,7 +98,7 @@ describe('Part 1: nothing about the nest before Commit my trials', () => {
     m.commit()
     const after = renderToStaticMarkup(<HomeRight store={m} />)
     expect((after.match(/aria-label="conflict score line"/g) ?? []).length).toBe(4)
-    expect(after).toMatch(/your score on the line/)
+    expect(after).toMatch(/Score on the line/)
   })
 })
 
@@ -160,14 +160,19 @@ describe('Part 3: no result before Commit my prediction', () => {
     expect(after).toMatch(/Lights: off/)
   })
 
-  it('Step 1 has no prediction and opens straight into driving; later steps cannot be opened before the one before is done', () => {
+  it('Step 1 has no prediction and opens straight into driving; any step can be opened, a finished one reopens to its result, and Redo opens it again', () => {
     const s = new CellsStore(3)
-    expect(s.canOpen(2)).toBe(false)
+    expect(s.canOpen(2)).toBe(true)
     s.begin()
     expect(s.state).toBe('running')
     s.finishStep()
-    expect(s.canOpen(2)).toBe(true)
-    expect(s.canOpen(3)).toBe(false)
+    expect(s.state).toBe('done')
+    s.open(3)
+    expect(s.state).toBe('intro')
+    s.open(1)
+    expect(s.state).toBe('done')
+    s.redo()
+    expect(s.state).toBe('intro')
   })
 })
 

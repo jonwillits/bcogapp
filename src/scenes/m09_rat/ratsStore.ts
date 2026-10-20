@@ -26,6 +26,8 @@ export class RatsStore {
   diagnoses: Partial<Record<RatId, Strategy>> = {}
   committed = false
   readonly revealed = new Set<RatId>()
+  /** Begin pressed: the orienting panel over the view is gone. */
+  started = false
   version = 0
   private listeners = new Set<() => void>()
 
@@ -36,6 +38,12 @@ export class RatsStore {
   subscribe(fn: () => void): () => void {
     this.listeners.add(fn)
     return () => this.listeners.delete(fn)
+  }
+
+  begin(): void {
+    this.started = true
+    this.version++
+    for (const fn of this.listeners) fn()
   }
 
   changed(): void {

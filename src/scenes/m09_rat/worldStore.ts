@@ -9,6 +9,8 @@ import { RANGE, pushOut } from '../../sim/rodent/range'
  */
 export class WorldStore {
   readonly body: Body
+  /** Begin pressed: the orienting panel over the view is gone. */
+  started = false
   version = 0
   private listeners = new Set<() => void>()
 
@@ -19,6 +21,12 @@ export class WorldStore {
   subscribe(fn: () => void): () => void {
     this.listeners.add(fn)
     return () => this.listeners.delete(fn)
+  }
+
+  begin(): void {
+    this.started = true
+    this.version++
+    for (const fn of this.listeners) fn()
   }
 
   step(dt: number, cmd: Command): void {

@@ -57,10 +57,9 @@ export class HomeStore {
     return BLOCKS.find((b) => b.id === this.block)!
   }
 
-  /** Which block the student may open: every finished one, and the next. */
-  canOpen(b: Block): boolean {
-    const i = BLOCKS.findIndex((x) => x.id === b)
-    return i <= this.done.length
+  /** Any block may be opened (Jon, 2026-10-20: students may jump around and redo; the handout cautions against jumping ahead). */
+  canOpen(_b: Block): boolean {
+    return true
   }
 
   open(b: Block): void {
@@ -149,6 +148,21 @@ export class HomeStore {
   get nextBlock(): Block | null {
     const i = BLOCKS.findIndex((x) => x.id === this.block)
     return BLOCKS[i + 1]?.id ?? null
+  }
+
+  get prevBlock(): Block | null {
+    const i = BLOCKS.findIndex((x) => x.id === this.block)
+    return i > 0 ? BLOCKS[i - 1].id : null
+  }
+
+  /** Redo the block: its reveal is dropped and it opens on its orienting screen again. */
+  redo(): void {
+    this.reveals.delete(this.block)
+    this.records = []
+    this.trial = null
+    this.trialIndex = 0
+    this.state = 'intro'
+    this.changed()
   }
 
   goOn(): void {

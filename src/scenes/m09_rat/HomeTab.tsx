@@ -19,20 +19,20 @@ import { useStore } from './useStore'
 export const INTRO: Record<Block, { lines: string[]; content?: string[]; time: string }> = {
   practice: {
     lines: [
-      'You are a small mammal on the forest floor at night, a few steps from your nest, the dark hole under the arched root. A beetle is a small green glint among the leaves. This step is for getting the feel of the keys and the two views; nothing is scored.',
-      'Up arrow or W walks forward; left and right arrows, or A and D, turn; down arrow or S steps back slowly. The buttons under the view do the same.',
-      'Eye view is the animal’s own eyes. Follow view sits behind it and a little above. Switch between them at any time; the trial does not care which you use.',
-      'Walk out to the beetle; it is taken when you reach it. Walk back to the nest and press Here is my nest. Two trials: do one in each view.',
+      'You are a small mammal on the forest floor at night. You are a few steps from your nest, which is the dark hole under the arched root. You are hungry, and there are beetles to go and eat. A beetle is a small green glint among the leaves. In Step 1, your job is just to get the feel of the keys and the two views. Nothing is scored.',
+      'Up arrow or W walks forward. Left and right arrows, or A and D, turn. Down arrow or S steps back slowly. The buttons under the view do the same, if you prefer to click.',
+      'There are two ways to view the world, which you can switch between in the panel on the left. Eye view, the default, shows the world through the animal’s own eyes. Follow view shows the animal from behind and a little above. Switch between them at any time; the trial does not care which you use.',
+      'Walk out to the beetle. It is eaten, and disappears, when you reach it. After you eat the beetle, walk back to the nest and press Here is my nest, or press the Enter key. There are two of these practice trials. Do one in each view, eye view and follow view.',
     ],
     content: [SCREEN_LINE, COMFORT_LINE],
     time: 'About 3 minutes.',
   },
   dark: {
     lines: [
-      'For this step the range is bare: no log, no rocks, no stump, no tree. You start at the nest, a plain spot on the ground that you will not see again, and beetles appear one at a time, each a few meters from the last. Walk to each. After the last one, walk back to where you started and press Here is my nest.',
-      'With nothing on the ground to steer by, the only way back is what the reading calls path integration: a running sum of your own turns and distances, kept as you go, that points to the start from wherever you are. Keep track of your own turns and distances as you go: that is all there will be.',
-      'Six trials. Four in moonlight, with two, three, four and three beetles. Then two more of three beetles each, in which the light goes out at the last beetle and nothing is left but the ground within a step or two.',
-      'Each return ends where you press the button, or after two minutes.',
+      'For this step, the range is bare. There is no log, no rocks, no stump and no tree. You start at the nest, a plain spot on the ground that you will not see again once you leave it. Beetles appear one at a time: each new one appears after you eat the last, a few meters from it. Walk to each. After you eat the last beetle, your job is to walk back to where you started. When you get there, press Here is my nest, or press the Enter key. Remember, you will not see your nest: you are working out where it was.',
+      'With nothing on the ground to steer by, the only way back is what the reading calls path integration: a running sum of your own turns and distances, kept as you go, that points to the start from wherever you are. Keep track of your own turns and distances as you go. That is all there will be.',
+      'There are six trials. Four in moonlight, with two to four beetles on each trial. Then two more trials with three beetles each, in which the light goes out after you eat the last beetle, and nothing is left that you can see but the ground within a step or two.',
+      'Each trial ends where you press Here is my nest, or after two minutes.',
     ],
     time: 'About 6 minutes.',
   },
@@ -62,6 +62,11 @@ export const INTRO: Record<Block, { lines: string[]; content?: string[]; time: s
   },
 }
 
+const shortTitle = (b: Block) => BLOCKS.find((x) => x.id === b)!.title.replace(/ — .*/, '')
+/** The reveal's rows: a label padded to one width, then the number right-aligned so the decimals line up (Jon, 2026-10-20). */
+const ROW = 22
+const row = (label: string, v: number, unit: string) => `${label.padEnd(ROW)}${v.toFixed(1).padStart(5)} ${unit}`
+
 export function HomeLeft({ store, header }: { store: HomeStore; header: React.ReactNode }) {
   const s = useStore(store)
   const spec = s.spec
@@ -73,7 +78,18 @@ export function HomeLeft({ store, header }: { store: HomeStore; header: React.Re
           <GroupLabel>Step</GroupLabel>
           <Choice value={s.block} options={BLOCKS.map((b) => ({ id: b.id, label: b.title.replace(/ — .*/, ''), title: b.title }))} onChange={(b) => s.open(b)} disabledIds={BLOCKS.filter((b) => !s.canOpen(b.id)).map((b) => b.id)} />
           <Note>{spec.title}</Note>
-          {s.state === 'intro' && <Intro time={INTRO[s.block].time} onBegin={() => s.begin()} />}
+          {s.state === 'intro' && (
+            <Intro
+              time={INTRO[s.block].time}
+              onBegin={() => s.begin()}
+              extra={
+                <>
+                  {s.prevBlock && <Btn onClick={() => s.open(s.prevBlock!)}>Go back to {shortTitle(s.prevBlock)}</Btn>}
+                  {s.nextBlock && <Btn onClick={() => s.open(s.nextBlock!)}>Go to {shortTitle(s.nextBlock)}</Btn>}
+                </>
+              }
+            />
+          )}
           {s.state === 'trials' && (
             <>
               <FixedLines lines={s.statusLines()} testId="status" />
@@ -99,11 +115,10 @@ export function HomeLeft({ store, header }: { store: HomeStore; header: React.Re
           {s.state === 'revealed' && (
             <>
               <FixedLines lines={[`Trials committed ${s.records.length} of ${spec.trials}`, s.block === 'practice' ? 'Nothing is scored in practice' : null]} />
-              {s.nextBlock && (
-                <div>
-                  <Btn onClick={() => s.goOn()}>Go on to {BLOCKS.find((b) => b.id === s.nextBlock)!.title.replace(/ — .*/, '')}</Btn>
-                </div>
-              )}
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {s.nextBlock && <Btn onClick={() => s.goOn()}>Go on to {shortTitle(s.nextBlock)}</Btn>}
+                <Btn onClick={() => s.redo()}>Redo {shortTitle(s.block)}</Btn>
+              </div>
             </>
           )}
         </div>
@@ -138,10 +153,13 @@ export function HomeRight({ store }: { store: HomeStore }) {
               <RangeOverhead bare={r.plan.bare} out={out.map((p) => ({ x: p.x, y: p.y }))} back={back.map((p) => ({ x: p.x, y: p.y }))} endpoint={r.endpoint} navigators={scored ? navs.map((n) => ({ label: NAVIGATORS.find((x) => x.id === n.id)!.label, x: n.endpoint.x, y: n.endpoint.y })) : undefined} moved={r.plan.block === 'moved' && r.plan.move !== 0 ? rotateNearLandmarks(r.plan.legs[r.plan.legs.length - 1], r.plan.move) : null} label={`trial ${i + 1} overhead`} />
               <FixedLines
                 lines={[
-                  `Outward path ${m1(r.outwardLength)}${r.plan.block === 'dark' ? (r.plan.lightBack === 'dark' ? '   return in the dark' : '   return in moonlight') : ''}`,
-                  `Error from the nest ${m1(r.error ?? 0)}${r.timedOut ? '  (time ran out)' : ''}`,
-                  `Time in eye view ${r.viewSeconds.eye.toFixed(0).padStart(4)} s, in follow view ${r.viewSeconds.follow.toFixed(0).padStart(4)} s`,
-                  r.plan.block === 'moved' ? (r.plan.move === 0 ? 'Landmarks not moved on this trial' : `Landmarks moved ${Math.round((Math.abs(r.plan.move) * 180) / Math.PI)}°; your score on the line ${(r.conflictScore ?? 0).toFixed(2)}`) : null,
+                  row('Outward path', r.outwardLength, 'm'),
+                  r.plan.block === 'dark' ? `${'Return'.padEnd(ROW)}${r.plan.lightBack === 'dark' ? 'in the dark' : 'in moonlight'}` : null,
+                  `${row('Error from the nest', r.error ?? 0, 'm')}${r.timedOut ? '  (time ran out)' : ''}`,
+                  row('Time in eye view', r.viewSeconds.eye, 's'),
+                  row('Time in follow view', r.viewSeconds.follow, 's'),
+                  r.plan.block === 'moved' ? `${'Landmarks moved'.padEnd(ROW)}${r.plan.move === 0 ? 'not on this trial' : `${Math.round((Math.abs(r.plan.move) * 180) / Math.PI).toString().padStart(5)}°`}` : null,
+                  r.plan.block === 'moved' && r.plan.move !== 0 ? `${'Score on the line'.padEnd(ROW)}${(r.conflictScore ?? 0).toFixed(2).padStart(5)}` : null,
                 ]}
               />
               {r.plan.block === 'moved' && r.plan.move !== 0 && <ConflictLine score={r.conflictScore} others={navs.map((n) => ({ label: NAVIGATORS.find((x) => x.id === n.id)!.label, score: n.conflictScore ?? 0 }))} />}

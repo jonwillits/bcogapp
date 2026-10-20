@@ -34,7 +34,18 @@ export function CellsLeft({ store, header }: { store: CellsStore; header: React.
           <GroupLabel>Step</GroupLabel>
           <Choice value={String(s.step)} options={STEPS.map((st) => ({ id: String(st.step), label: `Step ${st.step}`, title: st.title }))} onChange={(v) => s.open(Number(v) as Step)} disabledIds={STEPS.filter((st) => !s.canOpen(st.step)).map((st) => String(st.step))} />
           <Note>{spec.title}</Note>
-          {s.state === 'intro' && <Intro time={`About ${spec.minutes} minutes. Drive for the first minute, then let the rat explore and skip the rest.`} onBegin={() => s.begin()} />}
+          {s.state === 'intro' && (
+            <Intro
+              time={`About ${spec.minutes} minutes. Drive for the first minute, then let the rat explore and skip the rest.`}
+              onBegin={() => s.begin()}
+              extra={
+                <>
+                  {s.step > 1 && <Btn onClick={() => s.open((s.step - 1) as Step)}>Go back to Step {s.step - 1}</Btn>}
+                  {s.step < 5 && <Btn onClick={() => s.open((s.step + 1) as Step)}>Go to Step {s.step + 1}</Btn>}
+                </>
+              }
+            />
+          )}
           {s.state === 'predict' && spec.question && spec.choices && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-predict>
               <GroupLabel>Predict first</GroupLabel>
@@ -106,9 +117,10 @@ export function CellsLeft({ store, header }: { store: CellsStore; header: React.
                   <Btn onClick={() => s.finishStep()}>Go on</Btn>
                 </div>
               )}
-              {s.state === 'done' && s.step < 5 && (
-                <div>
-                  <Btn onClick={() => s.open((s.step + 1) as Step)}>Go on to Step {s.step + 1}</Btn>
+              {s.state === 'done' && (
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {s.step < 5 && <Btn onClick={() => s.open((s.step + 1) as Step)}>Go on to Step {s.step + 1}</Btn>}
+                  <Btn onClick={() => s.redo()}>Redo Step {s.step}</Btn>
                 </div>
               )}
               <GroupLabel>What the step shows</GroupLabel>

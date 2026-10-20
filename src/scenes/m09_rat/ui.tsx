@@ -74,15 +74,16 @@ export function FixedLines({ lines, mono = true, testId }: { lines: (string | nu
  * step takes and Begin (Jon, 2026-10-20: the explanation belongs in the
  * middle of the screen, the buttons at the side).
  */
-export function Intro({ time, onBegin, disabled }: { time: string; onBegin: () => void; disabled?: boolean }) {
+export function Intro({ time, onBegin, disabled, extra }: { time: string; onBegin: () => void; disabled?: boolean; extra?: ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-intro>
       <Note>What will happen is described over the view.</Note>
       <Content>{time}</Content>
-      <div>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         <Btn primary onClick={onBegin} disabled={disabled}>
           Begin
         </Btn>
+        {extra}
       </div>
     </div>
   )

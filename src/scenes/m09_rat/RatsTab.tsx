@@ -1,7 +1,7 @@
 import { Panel } from '../../components/Panel'
 import { RATS, STRATEGIES, type RatId } from '../../sim/rodent/rats'
 import { PATHS, type Apparatus } from '../../sim/rodent/lab'
-import { Btn, Choice, Content, FixedLines, GroupLabel, Note, PANEL_STYLE, RIGHT_STYLE } from './ui'
+import { Btn, Choice, Content, FixedLines, GroupLabel, Intro, Note, PANEL_STYLE, RIGHT_STYLE } from './ui'
 import { PROGRAMMED_LINE } from './lines'
 import { HIDDEN, type RatsStore } from './ratsStore'
 import { useStore } from './useStore'
@@ -20,6 +20,18 @@ const APPARATUS: { id: Apparatus; label: string }[] = [
   { id: 'paths', label: 'The radiating paths' },
 ]
 
+/** Part 2's orienting text, shown over the view until Begin. */
+export const RATS_INTRO = {
+  title: 'Part 2 — Places or Responses?',
+  lines: [
+    'You are the experimenter now. In the laboratory are a healthy rat, H, and six hidden rats, R1 to R6. H does what a rat does: it uses a map of the room, a route of turns, and a beacon it can head for, each when it serves. Each hidden rat follows one programmed strategy, or has one of two kinds of damage, and your job is to find out which by running experiments on it.',
+    'Three pieces of apparatus. The plus maze: a rat is trained from the south arm to food in the east arm, then started from the north arm. The water maze: a pool of cloudy water with a platform just under the surface, and starts around the rim. The radiating paths: a rat is trained along a roundabout route to a food box, then the route is blocked and a fan of twelve paths is offered. Each can be run in a rich room, with a rack of cages, a window, a door and a poster in view, or in a plain enclosure, and with changes: the room’s cues rotated, the cues removed just before the choice, or darkness.',
+    'Choose a rat, an apparatus, a room and any changes, then press Run the test to watch the trials play out, or Skip ahead to the result. The result lines on the right say what the rat did. When you can say what each hidden rat goes by, choose a diagnosis for every one and press Commit my diagnoses. Only then does Reveal show what each one was.',
+  ],
+  content: [PROGRAMMED_LINE],
+  time: 'About 22 minutes.',
+}
+
 export function RatsLeft({ store, header }: { store: RatsStore; header: React.ReactNode }) {
   const s = useStore(store)
   const t = s.settings
@@ -28,6 +40,7 @@ export function RatsLeft({ store, header }: { store: RatsStore; header: React.Re
       {header}
       <Panel title="Part 2 — Places or Responses?" style={PANEL_STYLE}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {!s.started && <Intro time={RATS_INTRO.time} onBegin={() => s.begin()} />}
           <GroupLabel>Rat</GroupLabel>
           <Choice value={s.rat} options={RATS.map((r) => ({ id: r.id, label: r.id }))} onChange={(id) => s.setRat(id as RatId)} />
           <Note>{s.rat === 'H' ? RATS[0].reveal : 'A hidden rat: it follows one programmed strategy. Run tests until you can say which.'}</Note>

@@ -52,7 +52,7 @@ export const THREE_GROUPS_LINE =
   'This model has three groups of grid cells. The most thoroughly recorded rats have four or five.'
 
 /** 14. Part 1’s orienting screen. */
-export const COMFORT_LINE = 'Anyone who feels unwell can switch to the follow view or narrow the view.'
+export const COMFORT_LINE = 'Anyone who feels unwell can switch to the follow view or tick the Narrower view box.'
 
 /** 15. Part 3, beside the rings. */
 export const TWO_RINGS_LINE =

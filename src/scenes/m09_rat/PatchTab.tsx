@@ -1,6 +1,6 @@
 import { Panel } from '../../components/Panel'
 import { HABITATS, SETTINGS, averageRate, habitatById, type Habitat } from '../../sim/rodent/patch'
-import { Btn, Choice, Content, DotPlot, FixedLines, GroupLabel, Note, PANEL_STYLE, RIGHT_STYLE } from './ui'
+import { Btn, Choice, Content, DotPlot, FixedLines, GroupLabel, Intro, Note, PANEL_STYLE, RIGHT_STYLE } from './ui'
 import { LEAVING_LINE } from './lines'
 import type { PatchStore } from './patchStore'
 import { useStore } from './useStore'
@@ -11,6 +11,18 @@ import { useStore } from './useStore'
  * before the answer is shown.
  */
 
+/** The closer's orienting text, shown over the view until Begin. */
+export const PATCH_INTRO = {
+  title: 'Closer — Stay or Go',
+  lines: [
+    'The forager goes out at night to patches of beetles under logs and leaf piles. In a patch, beetles turn up quickly at first and then more and more slowly, as the patch runs down. Moving to another patch takes time. The question of this closer is when leaving pays best.',
+    'Two habitats. In the rich habitat a fresh patch gives about one beetle every 2 s and the next patch is 12 m away; in the poor habitat, one every 5 s and 30 m away. The forager follows one rule, set by the slider: leave a patch when beetles turn up there more slowly than one every so many seconds.',
+    'Predict first, on the left, in which habitat the best rule leaves sooner, and commit the prediction. Then Run a night in each habitat, or Skip ahead to the end of the night, and press Try every setting to see beetles per minute at each of the ten settings. The answer appears once both habitats have been tried.',
+  ],
+  content: [LEAVING_LINE],
+  time: 'About 8 minutes.',
+}
+
 export function PatchLeft({ store, header }: { store: PatchStore; header: React.ReactNode }) {
   const s = useStore(store)
   return (
@@ -18,7 +30,7 @@ export function PatchLeft({ store, header }: { store: PatchStore; header: React.
       {header}
       <Panel title="Closer — Stay or Go" style={PANEL_STYLE}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <Note>The forager goes out at night to patches of beetles under logs and leaf piles. In a patch, beetles turn up quickly at first and then more and more slowly. Moving to another patch takes time.</Note>
+          {!s.started && <Intro time={PATCH_INTRO.time} onBegin={() => s.begin()} />}
           <GroupLabel>Predict first</GroupLabel>
           <Note>In which habitat does the best rule leave a patch sooner?</Note>
           <Choice value={s.prediction} options={HABITATS.map((h) => ({ id: h.id, label: `the ${h.label}` }))} onChange={(h) => s.predict(h as Habitat)} disabledIds={s.committed ? HABITATS.map((h) => h.id).filter((h) => h !== s.committed) : []} />

@@ -89,8 +89,18 @@ export class CellsStore {
     return STEPS[this.step - 1]
   }
 
-  canOpen(s: Step): boolean {
-    return s <= this.done.length + 1
+  /** Any step may be opened (Jon, 2026-10-20: students may jump around and redo; the handout cautions against jumping ahead). */
+  canOpen(_s: Step): boolean {
+    return true
+  }
+
+  /** Redo the step: it opens on its orienting screen again, and its change is made again on the commit. A rat left in the second room comes back first. */
+  redo(): void {
+    if (this.step === 4 && this.inSecondRoom) this.backToFirstRoom()
+    this.state = 'intro'
+    this.prediction = null
+    this.committed = null
+    this.changed()
   }
 
   open(s: Step): void {
