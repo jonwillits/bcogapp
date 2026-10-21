@@ -88,8 +88,9 @@ function PlusMaze() {
           </mesh>
           {/* side walls, so the arms read as alleys and not as a flat cross (Jon's walk, 2026-10-20) */}
           {[1, -1].map((side) => (
-            <mesh key={side} position={[0, 0.06 + WALL_H / 2, (side * (PLUS.armWidth + 0.012)) / 2]}>
-              <boxGeometry args={[PLUS.armLength, WALL_H, 0.012]} />
+            <mesh key={side} position={[PLUS.armWidth / 4, 0.06 + WALL_H / 2, (side * (PLUS.armWidth + 0.012)) / 2]}>
+              {/* from the edge of the center square to the arm's end, so the junction stays open */}
+              <boxGeometry args={[PLUS.armLength - PLUS.armWidth / 2, WALL_H, 0.012]} />
               <meshStandardMaterial color={MAZE_WALL} roughness={0.9} />
             </mesh>
           ))}
