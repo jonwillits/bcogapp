@@ -106,14 +106,21 @@ function groupBullets(lines: string[]): (string | string[])[] {
 }
 
 /** The description of a step, centered over the view while the step waits to begin: the title, what will happen, the content lines, and what to press. */
-export function OrientingPanel({ title, lines, content, footer }: { title: string; lines: string[]; content?: string[]; footer: string }) {
+export function OrientingPanel({ title, lines, content, footer, onClose }: { title: string; lines: string[]; content?: string[]; footer: string; onClose?: () => void }) {
   return (
     <div
       data-orienting
       style={{ position: 'absolute', left: '50%', top: 24, transform: 'translateX(-50%)', width: 'min(560px, calc(100vw - 780px))', minWidth: 360, maxHeight: 'calc(100vh - 170px)', overflowY: 'auto', padding: '16px 20px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 12.5, lineHeight: 1.55, display: 'flex', flexDirection: 'column', gap: 10 }}
     >
-      <div style={{ fontSize: 14, fontWeight: 600 }}>{title}</div>
-      <GroupLabel>What will happen</GroupLabel>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ fontSize: 14, fontWeight: 600 }}>{title}</div>
+        {onClose && (
+          <button type="button" aria-label="Close" onClick={onClose} style={{ border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text)', borderRadius: 'var(--radius-sm)', width: 26, height: 26, cursor: 'pointer', fontSize: 14 }}>
+            ×
+          </button>
+        )}
+      </div>
+      {!onClose && <GroupLabel>What will happen</GroupLabel>}
       {groupBullets(lines).map((block, i) =>
         typeof block === 'string' ? (
           <p key={i} style={{ margin: 0 }}>

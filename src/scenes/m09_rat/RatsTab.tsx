@@ -37,6 +37,20 @@ export const RATS_INTRO = {
   time: 'About 22 minutes.',
 }
 
+/** Part 2's Controls info panel, opened from the button at the bottom right of the view and closed with its × (Jon's walk, 2026-10-20). */
+export const RATS_CONTROLS = {
+  title: 'Controls — Part 2',
+  lines: [
+    'The view. Drag on it to orbit the camera around the apparatus. Scroll to zoom in and out. W, A, S and D pan across the floor. The arrow keys rotate: left and right turn the camera around the apparatus, up and down tilt it. Keys are ignored while a control has focus; click on the view first.',
+    'Rat. H is the healthy rat, explained in full on the right. R1 to R5 are the hidden rats; each follows one programmed strategy or has one of two kinds of damage.',
+    'Apparatus. The plus maze, the water maze or the radiating paths. Each has a setting of its own: Training trials for the plus maze, Platform for the water maze, The lamp for the radiating paths.',
+    'Room and changes. Rich room or plain enclosure. The changes: rotate the room’s cues 90° between training and test, remove the cues just before the choice, or darkness from the start or after setting off.',
+    'Running a test. “Run the test” plays the trials on the apparatus, the current one in blue and the earlier ones in faint amber, with the result lines filling in when the run is over; “Skip ahead to the result” fills them at once. Tests run counts your tests. Changing any setting clears the last result.',
+    'Diagnosis. A menu for each hidden rat; “Commit my diagnoses” once every rat has one; then “Reveal” beside each rat on the right.',
+  ],
+  footer: 'Close this panel with the × above or the button below the view.',
+}
+
 export function RatsLeft({ store, header }: { store: RatsStore; header: React.ReactNode }) {
   const s = useStore(store)
   const t = s.settings

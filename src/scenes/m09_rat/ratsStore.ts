@@ -46,6 +46,8 @@ export class RatsStore {
   readonly revealed = new Set<RatId>()
   /** Begin pressed: the orienting panel over the view is gone. */
   started = false
+  /** The Controls info panel over the view (Jon's walk, 2026-10-20). */
+  controlsOpen = false
   version = 0
   private listeners = new Set<() => void>()
 
@@ -66,6 +68,12 @@ export class RatsStore {
 
   begin(): void {
     this.started = true
+    this.version++
+    for (const fn of this.listeners) fn()
+  }
+
+  setControlsOpen(v: boolean): void {
+    this.controlsOpen = v
     this.version++
     for (const fn of this.listeners) fn()
   }

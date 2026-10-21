@@ -23,7 +23,7 @@ import { PatchStore } from './patchStore'
 import { WorldStore } from './worldStore'
 import { HomeLeft, HomeRight, INTRO as HOME_INTRO } from './HomeTab'
 import { CellsLeft, CellsRight } from './CellsTab'
-import { RatsLeft, RatsRight, RATS_INTRO } from './RatsTab'
+import { RatsLeft, RatsRight, RATS_CONTROLS, RATS_INTRO } from './RatsTab'
 import { PatchLeft, PatchRight, PATCH_INTRO } from './PatchTab'
 import { useStore } from './useStore'
 
@@ -216,6 +216,14 @@ function Overlays({ tab, stores }: { tab: Tab; stores: Stores }) {
       {cellsSpec && <OrientingPanel title={cellsSpec.title} lines={cellsSpec.what} footer={cells.state === 'intro' ? `About ${cellsSpec.minutes} minutes. Press “Begin” on the left.` : 'Choose a prediction on the left and press “Commit my prediction”.'} />}
       {tab === 'world' && !world.started && <OrientingPanel title={WORLD_INTRO.title} lines={WORLD_INTRO.lines} content={WORLD_INTRO.content} footer={`${WORLD_INTRO.time} Press “Begin” on the left.`} />}
       {tab === 'rats' && !rats.started && <OrientingPanel title={RATS_INTRO.title} lines={RATS_INTRO.lines} content={RATS_INTRO.content} footer={`${RATS_INTRO.time} Press “Begin” on the left.`} />}
+      {tab === 'rats' && rats.started && rats.controlsOpen && <OrientingPanel title={RATS_CONTROLS.title} lines={RATS_CONTROLS.lines} footer={RATS_CONTROLS.footer} onClose={() => rats.setControlsOpen(false)} />}
+      {tab === 'rats' && rats.started && (
+        <div style={{ position: 'absolute', right: 12, bottom: 12 }}>
+          <Btn onClick={() => rats.setControlsOpen(!rats.controlsOpen)} primary={rats.controlsOpen}>
+            Controls info
+          </Btn>
+        </div>
+      )}
       {tab === 'patches' && !patches.started && <OrientingPanel title={PATCH_INTRO.title} lines={PATCH_INTRO.lines} content={PATCH_INTRO.content} footer={`${PATCH_INTRO.time} Press “Begin” on the left.`} />}
       {badge && (
         <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', padding: '6px 12px', borderRadius: 999, background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 12, whiteSpace: 'nowrap' }}>{badge}</div>
