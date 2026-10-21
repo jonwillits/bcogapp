@@ -185,7 +185,7 @@ function Beetle({ at, clock }: { at: { x: number; y: number }; clock: () => numb
   )
 }
 
-/** A beetle read every frame from a getter: the closer's finds, which last less than a panel redraw. */
+/** A beetle read every frame from a getter: the closer's finds, which last less than a panel redraw. Beetle-sized (2 cm), since the rat is beside it; Part 1's beetle is 7 cm so it can be seen from meters away. */
 function LiveBeetle({ at, clock }: { at: () => { x: number; y: number } | null; clock: () => number }) {
   const mesh = useRef<THREE.Mesh>(null)
   const mat = useRef<THREE.MeshStandardMaterial>(null)
@@ -193,12 +193,12 @@ function LiveBeetle({ at, clock }: { at: () => { x: number; y: number } | null; 
     const p = at()
     if (!mesh.current) return
     mesh.current.visible = !!p
-    if (p) mesh.current.position.set(p.x, 0.05, -p.y)
-    if (mat.current) mat.current.emissiveIntensity = 0.6 + 0.6 * Math.abs(Math.sin(clock() * 5))
+    if (p) mesh.current.position.set(p.x, 0.015, -p.y)
+    if (mat.current) mat.current.emissiveIntensity = 0.8 + 0.6 * Math.abs(Math.sin(clock() * 5))
   })
   return (
     <mesh ref={mesh} rotation={[0.3, 0.2, 0]} visible={false}>
-      <octahedronGeometry args={[0.07, 0]} />
+      <octahedronGeometry args={[0.02, 0]} />
       <meshStandardMaterial ref={mat} color="#3c4a2a" emissive="#9fd16a" emissiveIntensity={0.8} metalness={0.5} roughness={0.3} />
     </mesh>
   )
