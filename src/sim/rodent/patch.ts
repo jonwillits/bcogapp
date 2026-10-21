@@ -1,5 +1,6 @@
 import { makeRng, type Rng } from '../random'
 import { RANGE_LOCOMOTION } from './body'
+import { RANGE } from './range'
 
 /**
  * The closer, Stay or Go (spec §10.1): the forager goes out at night to
@@ -93,8 +94,8 @@ export class Night {
   sinceBeetle = 0
   traveling = 0
   /** Where the forager is, for the drawing: the current patch's center, or between two. */
-  patchAt: { x: number; y: number }
-  nextPatch: { x: number; y: number }
+  patchAt!: { x: number; y: number }
+  nextPatch!: { x: number; y: number }
   readonly events: PatchEvent[] = []
   private angle: number
 
@@ -107,10 +108,26 @@ export class Night {
     this.nextPatch = this.placePatch()
   }
 
+  /**
+   * The next patch: one spacing away from the last, in a direction that turns
+   * on by 0.6 to 1.4 rad each time, turned back toward the nest when the range's
+   * edge is near. Two draws, as before (Jon's walk, 2026-10-20: the patches had
+   * been placed about the nest at 0.4 to 0.9 of the spacing, so the drawn
+   * forager covered less than the spacing in the travel time); the beetles do
+   * not depend on where the patches are, only on the travel time.
+   */
   private placePatch(): { x: number; y: number } {
     this.angle += this.rng.range(0.6, 1.4)
-    const r = this.habitat.spacing * this.rng.range(0.4, 0.9)
-    return { x: r * Math.cos(this.angle), y: r * Math.sin(this.angle) }
+    const r = this.habitat.spacing * this.rng.range(0.9, 1.1)
+    const from = this.patchAt ?? { x: 0, y: 0 }
+    let x = from.x + r * Math.cos(this.angle)
+    let y = from.y + r * Math.sin(this.angle)
+    if (Math.hypot(x, y) > RANGE.radius - 4) {
+      this.angle = Math.atan2(-from.y, -from.x) + 0.4
+      x = from.x + r * Math.cos(this.angle)
+      y = from.y + r * Math.sin(this.angle)
+    }
+    return { x, y }
   }
 
   /** The forager's position now. */

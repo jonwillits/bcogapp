@@ -89,7 +89,7 @@ Left panel, beside the step: *Your prediction: …* once committed; **What the s
 | **Predict first**: the rich habitat · the poor habitat, then **Commit my prediction** | | |
 | **Habitat**: rich habitat · poor habitat | | rich |
 | **Leave a patch when beetles turn up there more slowly than one every … s** (slider) | 2 · 3 · 4 · 6 · 8 · 10 · 12 · 15 · 20 · 25 | 8 |
-| **Run a night** · **Skip ahead to the end of the night** · **Try every setting** | | |
+| **Run a night** · **Skip ahead to the end of the night** · **Try every setting** | *Run a night* is disabled while a night is playing (Jon's walk, 2026-10-20: a second press restarted the night and the view jumped) | |
 
 Four fixed lines: *Night: h.hh h of 4* · *Beetles found* · *Patches visited* · *Beetles per minute*. Right panel: the habitat's line, the plot *beetles per minute* against the setting with the habitat's average rate as a dashed mark (*average rate: one every 4.4 s*), two fixed lines (the best setting; the predicted setting), the table of both habitats' best and predicted settings, and after the commit *Your prediction* and the answer.
 
@@ -131,7 +131,7 @@ Headless in `src/sim/rodent/spatial/`. The body (`body.ts`) is the only file tha
 
 **The recording boxes** (`rooms.ts`). Box A: 1 m square, gray walls, dark floor, the white card on the north wall. Box B: round, 1.1 m across, blue walls, pale floor, the black card on the east. For the tests only: Box A stretched to 1.5 × 1 m, shortened to 0.75 × 1 m, and six boxes from the square to a circle. Pace 0.5 m/s, 0.2 back, 120°/s; body radius 4 cm; the card seen within ±100° of the head.
 
-**The patch world** (`patch.ts`). Rich habitat: a fresh patch yields 0.5 beetles a second, falling with a 20 s time constant, patches 12 m apart (8 s of travel). Poor: 0.2 a second, 20 s, 30 m (20 s). A night is 4 hours at 0.1 s steps. The rule leaves when the gap since the last beetle exceeds the setting. The habitat's average rate (the largest value of beetles gained per second of patch time plus travel) is one every 4.4 s in the rich habitat and one every 15.7 s in the poor; the predicted settings are 4 and 15.
+**The patch world** (`patch.ts`). Rich habitat: a fresh patch yields 0.5 beetles a second, falling with a 20 s time constant, patches 12 m apart (8 s of travel). Poor: 0.2 a second, 20 s, 30 m (20 s). **Each next patch is placed one spacing from the last** (0.9 to 1.1 of it), in a direction that turns on by 0.6 to 1.4 rad each time and is turned back toward the nest near the range's edge; at the first build the patches had been placed about the nest at 0.4 to 0.9 of the spacing, so the drawn forager covered less than the spacing in the travel time (Jon's walk, 2026-10-20). The beetles depend only on the travel time, and the twenty-seed numbers in §4.4 are unchanged to the digit. **On screen the forager stands 1.1 m short of a pile's center, on the side it came from**, and walks from that stand point to the next; at the first build it stood at the center, inside the pile, and both cameras showed the pile's inside. A night is 4 hours at 0.1 s steps. The rule leaves when the gap since the last beetle exceeds the setting. The habitat's average rate (the largest value of beetles gained per second of patch time plus travel) is one every 4.4 s in the rich habitat and one every 15.7 s in the poor; the predicted settings are 4 and 15.
 
 ---
 

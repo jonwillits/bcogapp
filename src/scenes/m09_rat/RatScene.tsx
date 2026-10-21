@@ -20,6 +20,9 @@ import { HomeStore, RETURN_LINE } from './homeStore'
 import { CellsStore, STEPS } from './cellsStore'
 import { RatsStore } from './ratsStore'
 import { PatchStore } from './patchStore'
+import { travelTime, type Night } from '../../sim/rodent/patch'
+/** How far short of a leaf pile's center the forager stands, meters. */
+const STAND_OFF = 1.1
 import { WorldStore } from './worldStore'
 import { HomeLeft, HomeRight, INTRO as HOME_INTRO } from './HomeTab'
 import { CellsLeft, CellsRight } from './CellsTab'
@@ -343,10 +346,31 @@ function PatchCanvas({ store, view, fov, lowDetail, anim, clock }: { store: Patc
   const s = useStore(store)
   const headingRef = useRef(0)
   const lastRef = useRef({ x: 0, y: 0 })
+  // Where the forager stands: a step short of the pile, on the side it came from, so neither camera sits inside the pile
+  // (Jon's walk, 2026-10-20: the forager stood at the pile's center and the view showed the inside of the pile). The stand
+  // point of the current patch is held from arrival; the walk goes from it to the next patch's stand point.
+  const standRef = useRef<{ night: Night | null; patches: number; at: { x: number; y: number } }>({ night: null, patches: -1, at: { x: 0, y: 0 } })
+  const standBefore = (pile: { x: number; y: number }, from: { x: number; y: number }) => {
+    const d = Math.hypot(pile.x - from.x, pile.y - from.y) || 1
+    return { x: pile.x - (STAND_OFF * (pile.x - from.x)) / d, y: pile.y - (STAND_OFF * (pile.y - from.y)) / d }
+  }
   const pose = (): Pose => {
     const n = s.night
     if (!n) return { x: 0, y: 0, heading: Math.PI / 2 }
-    const p = n.position()
+    const st = standRef.current
+    if (st.night !== n || st.patches !== n.patches) {
+      // A new night, or an arrival: the stand point is a step short of this pile, on the side the walk came from.
+      const from = st.night === n ? st.at : { x: 0, y: 0 }
+      st.night = n
+      st.patches = n.patches
+      st.at = standBefore(n.patchAt, from)
+    }
+    let p = st.at
+    if (n.phase === 'traveling') {
+      const to = standBefore(n.nextPatch, st.at)
+      const k = 1 - n.traveling / travelTime(n.habitat)
+      p = { x: st.at.x + k * (to.x - st.at.x), y: st.at.y + k * (to.y - st.at.y) }
+    }
     const dx = p.x - lastRef.current.x
     const dy = p.y - lastRef.current.y
     if (Math.hypot(dx, dy) > 1e-4) headingRef.current = Math.atan2(dy, dx)

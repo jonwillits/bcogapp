@@ -1,5 +1,5 @@
 import { Panel } from '../../components/Panel'
-import { HABITATS, SETTINGS, averageRate, habitatById, type Habitat } from '../../sim/rodent/patch'
+import { HABITATS, SETTINGS, averageRate, habitatById, type Habitat, NIGHT } from '../../sim/rodent/patch'
 import { Btn, Choice, Content, DotPlot, FixedLines, GroupLabel, Intro, Note, PANEL_STYLE, RIGHT_STYLE } from './ui'
 import { LEAVING_LINE } from './lines'
 import type { PatchStore } from './patchStore'
@@ -53,7 +53,7 @@ export function PatchLeft({ store, header }: { store: PatchStore; header: React.
             <input type="range" min={0} max={SETTINGS.length - 1} step={1} value={SETTINGS.indexOf(s.setting)} onChange={(e) => s.setSetting(SETTINGS[Number(e.target.value)])} />
           </label>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            <Btn primary onClick={() => s.startNight()} disabled={s.skipping}>
+            <Btn primary onClick={() => s.startNight()} disabled={s.skipping || (s.playing && !!s.night && s.night.time < NIGHT)}>
               Run a night
             </Btn>
             <Btn onClick={() => s.skipNight(() => s.changed())} disabled={!s.night || s.skipping}>
