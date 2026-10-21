@@ -22,7 +22,7 @@ const MAZE = '#8a7a64'
 const WATER_COLOR = '#6f8aa0'
 /** The plus maze's side walls: height above the runway, and their color. */
 const WALL_H = 0.14
-const WALL = '#6a6058'
+const MAZE_WALL = '#6a6058'
 /** Where the rat's feet stand: on the plus maze's and the paths' runways (6 cm high), or in the pool with its back above the water (surface at 0.17 m; the body is about 7 cm tall). */
 const FLOOR_Y: Record<Apparatus, number> = { plus: 0.06, paths: 0.06, water: 0.13 }
 
@@ -90,7 +90,7 @@ function PlusMaze() {
           {[1, -1].map((side) => (
             <mesh key={side} position={[0, 0.06 + WALL_H / 2, (side * (PLUS.armWidth + 0.012)) / 2]}>
               <boxGeometry args={[PLUS.armLength, WALL_H, 0.012]} />
-              <meshStandardMaterial color={WALL} roughness={0.9} />
+              <meshStandardMaterial color={MAZE_WALL} roughness={0.9} />
             </mesh>
           ))}
         </group>
