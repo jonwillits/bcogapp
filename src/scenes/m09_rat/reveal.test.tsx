@@ -116,7 +116,7 @@ describe('Part 2: no rat’s strategy before Commit my diagnoses', () => {
       expect(before).not.toMatch(new RegExp(`data-revealed="${r.id}"`))
     }
     expect(before).toContain(RATS[0].reveal)
-    expect((before.match(/hidden until the commit/g) ?? []).length).toBe(6)
+    expect((before.match(/hidden until the commit/g) ?? []).length).toBe(5)
     expect(left).toContain('Commit my diagnoses')
     expect(left).toMatch(/disabled/)
   })

@@ -24,12 +24,13 @@ const APPARATUS: { id: Apparatus; label: string }[] = [
 export const RATS_INTRO = {
   title: 'Part 2 — Places or Responses?',
   lines: [
-    'You are the experimenter now. In the laboratory is a healthy rat, H. There are also six hidden rats, R1 to R6. H does what a rat does. It uses a map of the room, a route of turns, and a beacon it can head for, each when it is useful. Each hidden rat follows one programmed strategy, or has one of two kinds of damage, and your job is to find out which is which, by running experiments on it.',
+    'You are the experimenter now. In the laboratory is a healthy rat, H. There are also five hidden rats, R1 to R5. H does what a rat does. It uses a map of the room, a route of turns, and a beacon it can head for, each when it is useful. Each hidden rat follows one programmed strategy, or has one of two kinds of damage, and your job is to find out which is which, by running experiments on it.',
     'There are three pieces of apparatus.',
     '- The plus maze: a rat is trained to go from the south arm, to food in the east arm. Then it is started from the north arm.',
     '- The water maze: a pool of cloudy water with a platform just under the surface, and starts around the rim.',
     '- The radiating paths: a rat is trained along a roundabout route to a food box. Then the route is blocked, and a fan of twelve paths is offered.',
     'Each can be run in a rich room, one with many other cues: a rack of cages, a window, a door and a poster in view. They can also be run in a plain enclosure, or with changes, such as the room’s cues rotated, the cues removed just before the choice, or in darkness.',
+    'Drag on the view to orbit it, WASD to pan, the arrow keys to rotate, and the scroll wheel to zoom.',
     'Choose a rat, an apparatus, a room and any changes, then press “Run the test” to watch the trials play out, or “Skip ahead to the result”. The result lines on the right say what the rat did. When you can say what cues each hidden rat uses to find the food, choose a diagnosis for every one and press “Commit my diagnoses”. Only then does “Reveal” show what each one was.',
   ],
   content: [PROGRAMMED_LINE],
@@ -46,7 +47,7 @@ export function RatsLeft({ store, header }: { store: RatsStore; header: React.Re
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {!s.started && <Intro time={RATS_INTRO.time} onBegin={() => s.begin()} />}
           <GroupLabel>Rat</GroupLabel>
-          <Choice value={s.rat} options={RATS.map((r) => ({ id: r.id, label: r.id }))} onChange={(id) => s.setRat(id as RatId)} />
+          <Choice value={s.rat} options={s.order.map((id) => ({ id, label: s.labels[id] }))} onChange={(id) => s.setRat(id as RatId)} />
           <Note>{s.rat === 'H' ? RATS[0].reveal : 'A hidden rat: it follows one programmed strategy. Run tests until you can say which.'}</Note>
           <Content>{PROGRAMMED_LINE}</Content>
           <GroupLabel>Apparatus</GroupLabel>
@@ -94,9 +95,9 @@ export function RatsLeft({ store, header }: { store: RatsStore; header: React.Re
           </div>
           <FixedLines lines={[`Tests run ${String(s.testsRun).padStart(3)}`, `Trials in a run ${String(t.trials).padStart(2)}`]} />
           <GroupLabel>Diagnosis</GroupLabel>
-          {HIDDEN.map((id) => (
+          {s.order.filter((id) => HIDDEN.includes(id)).map((id) => (
             <div key={id} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
-              <span style={{ width: 24, fontFamily: 'var(--font-mono)' }}>{id}</span>
+              <span style={{ width: 24, fontFamily: 'var(--font-mono)' }}>{s.labels[id]}</span>
               <select value={s.diagnoses[id] ?? ''} disabled={s.committed} onChange={(e) => s.diagnose(id, e.target.value as (typeof STRATEGIES)[number]['id'])} style={{ flex: 1, fontSize: 12, padding: 3, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 6 }}>
                 <option value="">— choose —</option>
                 {STRATEGIES.map((st) => (
@@ -127,22 +128,22 @@ export function RatsRight({ store }: { store: RatsStore }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <GroupLabel>This test</GroupLabel>
         {!r && <Note>Run a test. The trials play out on the apparatus; the result lines fill in when the run is over, or after Skip ahead to the result.</Note>}
-        {r && !s.resultReady && <FixedLines lines={[`Rat ${r.rat}`, `Trial ${Math.min(s.trialIndex + 1, r.trials.length)} of ${r.trials.length}${s.showingTraining ? ' (training route)' : ''}`, null, null]} />}
+        {r && !s.resultReady && <FixedLines lines={[`Rat ${s.labels[r.rat]}`, `Trial ${Math.min(s.trialIndex + 1, r.trials.length)} of ${r.trials.length}${s.showingTraining ? ' (training route)' : ''}`, null, null]} />}
         {r && s.resultReady && (
           <>
-            <FixedLines lines={[`Rat ${r.rat}`, ...r.lines]} testId="result-lines" />
+            <FixedLines lines={[`Rat ${s.labels[r.rat]}`, ...r.lines]} testId="result-lines" />
             {r.pathCounts && <PathBars counts={r.pathCounts} />}
             {r.settings.apparatus === 'water' && (
-              <FixedLines lines={r.trials.filter((t) => t.latency !== undefined).map((t, i) => `Trial ${String(i + 1).padStart(2)}: ${t.latency == null ? 'not found in 60 s' : `${t.latency.toFixed(1).padStart(5)} s`}`)} />
+              <FixedLines lines={r.trials.slice(r.trials.length - 1 - r.settings.trials, -1).map((t, i) => `Test trial ${String(i + 1).padStart(2)}: ${t.latency == null ? 'not found in 60 s' : `${(t.latency ?? 0).toFixed(1).padStart(5)} s`}`)} />
             )}
-            {r.settings.apparatus === 'plus' && <FixedLines lines={r.trials.map((t, i) => `Trial ${String(i + 1).padStart(2)}: ${t.arm} arm`)} />}
+            {r.settings.apparatus === 'plus' && <FixedLines lines={r.trials.slice(-r.settings.trials).map((t, i) => `Probe trial ${String(i + 1).padStart(2)}: ${t.arm} arm`)} />}
           </>
         )}
         <GroupLabel>The rats</GroupLabel>
-        {RATS.map((rat) => (
+        {s.order.map((id) => RATS.find((x) => x.id === id)!).map((rat) => (
           <div key={rat.id} style={{ display: 'flex', flexDirection: 'column', gap: 4 }} data-rat={rat.id}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12 }}>
-              <span style={{ fontFamily: 'var(--font-mono)', width: 24 }}>{rat.id}</span>
+              <span style={{ fontFamily: 'var(--font-mono)', width: 24 }}>{s.labels[rat.id]}</span>
               {rat.hidden ? (
                 s.committed ? (
                   <Btn small onClick={() => s.reveal(rat.id)}>

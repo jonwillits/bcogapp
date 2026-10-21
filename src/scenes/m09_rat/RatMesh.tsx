@@ -28,7 +28,7 @@ const FEET: [number, number][] = [
   [-0.06, -0.024],
 ]
 
-export function RatMesh({ pose, anim, moving, visible = true, scale = 1 }: { pose: () => Pose; anim: Rng; moving: () => boolean; visible?: boolean; scale?: number }) {
+export function RatMesh({ pose, anim, moving, visible = true, scale = 1, floorY = 0 }: { pose: () => Pose; anim: Rng; moving: () => boolean; visible?: boolean; scale?: number; floorY?: number }) {
   const group = useRef<THREE.Group>(null)
   const head = useRef<THREE.Group>(null)
   const whiskL = useRef<THREE.Group>(null)
@@ -47,7 +47,7 @@ export function RatMesh({ pose, anim, moving, visible = true, scale = 1 }: { pos
     const st = state.current
     const dt = Math.min(delta, 0.05)
     st.clock += dt
-    g.position.set(p.x, 0, -p.y)
+    g.position.set(p.x, floorY, -p.y)
     g.rotation.set(0, p.heading, 0)
     // Idle events from the animation's own stream: a new head turn, or a rear.
     st.nextEvent -= dt
@@ -68,7 +68,7 @@ export function RatMesh({ pose, anim, moving, visible = true, scale = 1 }: { pos
     g.rotation.x = 0
     // A rear: the nose rises and the body pitches up about the hind feet (+z lifts +x, the nose, in this frame).
     g.rotation.z = 0.9 * st.rear
-    g.position.y = 0.05 * st.rear
+    g.position.y = floorY + 0.05 * st.rear
     // Whisking: both fans sweep forward and back together, in bouts that wax and wane, with a small lag between the sides.
     const bout = 0.04 + 0.08 * (0.5 + 0.5 * Math.sin(st.clock * 0.7))
     const amp = bout * (moving() ? 1.3 : 1)

@@ -41,7 +41,7 @@ While a trial runs, a status box sits over the view and on the panel, three line
 
 | Name on screen | Range | Default |
 |---|---|---|
-| **Rat**: H, R1 … R6 | seven chips | H |
+| **Rat**: H, R1 … R5 | six chips; the labels R1 to R5 are dealt to the five hidden programs by the seed, so the order of the buttons says nothing (Jon's walk, 2026-10-20); R6, damage to the striatum, stays in the sim and its test and is not shown | H |
 | **Apparatus**: The plus maze · The water maze · The radiating paths | | plus maze |
 | **Training trials** (plus maze) | 4 · 16 · 64 | 4 |
 | **Platform** (water maze) | hidden · visible, with a flag | hidden |
@@ -52,11 +52,11 @@ While a trial runs, a status box sits over the view and on the panel, three line
 | **Darkness** | none · from the start · after setting off | none |
 | **Run the test** · **Skip ahead to the result** | | |
 | *Tests run* · *Trials in a run* (fixed lines) | | 0 · 8 |
-| **Diagnosis**: a select per hidden rat | — choose — · beacon · route · snapshot · map (survey knowledge: a cognitive map) · damage to the hippocampus · damage to the striatum | — |
+| **Diagnosis**: a select per hidden rat | — choose — · beacon · route · snapshot · map (survey knowledge: a cognitive map) · damage to the hippocampus · damage to the striatum (six entries for five rats; the striatum is a distractor now that R6 is not shown) | — |
 | **Commit my diagnoses** | disabled until every hidden rat has one | |
 | **Reveal** (per hidden rat, right panel) | after the commit; reads *Revealed* once pressed | |
 
-Right panel: **This test**: *Rat*, then the apparatus's result lines (plus maze: probe trials, ended at the east arm (the place), ended at the west arm (the same turn), ended elsewhere; water maze: test trials, found within 60 s, mean time, the probe's share in the platform's quarter and the rotated quarter, then one line per trial; radiating paths: trials, most taken, path 6, paths 4 and 5, and a bar chart of twelve paths with path 6 in amber). **The rats**: H's line in full; each hidden rat *hidden until the commit*, then **Reveal**, then its strategy, its line, and *You said: …*.
+Right panel: **This test**: *Rat*, then the apparatus's result lines (plus maze: probe trials, ended at the east arm (the place), ended at the west arm (the same turn), ended elsewhere; water maze: test trials, the training trials before them when there were any, found within 60 s, mean time, the probe's share in the platform's quarter and the rotated quarter, then one line per test trial (Jon, 2026-10-20: not the training trials); plus maze: one line per probe trial; radiating paths: trials, most taken, path 6, paths 4 and 5, and a bar chart of twelve paths with path 6 in amber). **The rats**: H's line in full; each hidden rat *hidden until the commit*, then **Reveal**, then its strategy, its line, and *You said: …*.
 
 ### Cells tab (Part 3)
 
@@ -126,7 +126,7 @@ Headless in `src/sim/rodent/spatial/`. The body (`body.ts`) is the only file tha
 
 **The navigators** (`homing.ts`). Turn noise 0.12 rad/s white per step, turn gain 1.01, step noise 6% of speed, variance 0.02 m² per meter run, a landmark fix's standard deviation 0.4 m, and *Following one*'s conflict distance 3.5 m. Each walks home at the range pace by its own sensed heading until its estimate says it is within 0.4 m of the nest; *Landmarks only* goes straight to where the landmarks put the nest when a near landmark is in view at the last beetle and stops where it is otherwise.
 
-**The laboratory** (`lab.ts`). The plus maze: four arms 0.6 m long and 12 cm wide, food in the east arm, training from the south, the probe from the north; from the south the food was a right turn, so the same turn from the north is the west arm. The water maze: a pool of radius 0.8 m, the platform of radius 7 cm at (0.35, 0.35), starts at north, east, south, west in turn (north first), swimming at 0.3 m/s, a 60 s cap, a 30 s probe from the north with the platform removed. The radiating paths: a table of radius 0.25 m, the start path 0.8 m from the south, the roundabout route north 0.5, west 0.3, north 0.5, east 0.8 to the food box, twelve paths of 1.3 m fanning from 142.5° to −22.5° at 15°, path 6 (67.5°) nearest the food box, paths 4 and 5 beside the blocked alley (90°), the lamp 0.15 m east and 0.25 m north of the food box, or moved to (−1.2, 0.9). Rooms: the rich room's rack of cages 2.2 m east, a window north, a door west, a poster south; the plain enclosure has nothing.
+**The laboratory** (`lab.ts`). The plus maze: four arms 0.6 m long and 12 cm wide, food in the east arm, training from the south, the probe from the north; from the south the food was a right turn, so the same turn from the north is the west arm. The water maze: a pool of radius 0.8 m, the platform of radius 7 cm at (0.35, 0.35), starts at north, east, south, west in turn (north first), swimming at 0.3 m/s, a 60 s cap, a 30 s probe from the north with the platform removed. The plus maze's arms have side walls 14 cm high, and the rat stands on the runways (6 cm up) rather than in them; in the pool it swims with its back above the surface (Jon's walk, 2026-10-20). The radiating paths: a table of radius 0.25 m, the start path 0.8 m from the south, the roundabout route north 0.5, west 0.3, north 0.5, east 0.8 to the food box, twelve paths of 1.3 m fanning from 142.5° to −22.5° at 15°, path 6 (67.5°) nearest the food box, paths 4 and 5 beside the blocked alley (90°), the lamp 0.15 m east and 0.25 m north of the food box, or moved to (−1.2, 0.9). Rooms: the rich room's rack of cages 2.2 m east, a window north, a door west, a poster south; the plain enclosure has nothing.
 
 **The recording boxes** (`rooms.ts`). Box A: 1 m square, gray walls, dark floor, the white card on the north wall. Box B: round, 1.1 m across, blue walls, pale floor, the black card on the east. For the tests only: Box A stretched to 1.5 × 1 m, shortened to 0.75 × 1 m, and six boxes from the square to a circle. Pace 0.5 m/s, 0.2 back, 120°/s; body radius 4 cm; the card seen within ±100° of the head.
 
@@ -169,6 +169,8 @@ Errors in meters from the nest. On the bare range the running sum's mean error g
 The student's own errors are the data, and the build has no number for a person at a screen.
 
 ### 4.3 Part 2, the table (majority over twenty seeds; the count is the majority's)
+
+The columns are the programs: R1 beacon, R2 route, R3 snapshot, R4 map, R5 no hippocampus, R6 no striatum, as the sim names them. **On screen the labels R1 to R5 are dealt to the five hidden programs by the seed**, so a handout must name the programs, never the labels; R6 is not shown (§5, item 13).
 
 | Test | H | R1 | R2 | R3 | R4 | R5 | R6 |
 |---|---|---|---|---|---|---|---|
@@ -235,7 +237,7 @@ One sim step of Part 3 is 47 µs headless; a frame's six steps 0.3 ms; a skip sl
 10. **The water-maze criteria** for *finds it*, *learns it* and *most times* are the build's (20 s, 60% and 75%); the reading gives none.
 11. **Beacons pull by their salience**: a cage rack 0.25, the one lamp in a dark room 1.0, a flag on the platform 1.0. That is what makes the beacon rat look exactly like the map rat with the lamp in place and follow the lamp when it is moved, and what lets the turns beat the rack for R5 in the plus maze while the lamp beats the turns on the radiating paths.
 12. **Dark drift** is 3 to 105° after five minutes across six seeds; a seed can sit still for five minutes.
-13. **Cut, in the spec's order**: the reorientation step (§7.8) and the home-base step (§10.2). Square to circle and stretch the box are measured by tests and not offered as steps. R6 was built. Both views are kept everywhere.
+13. **Cut, in the spec's order**: the reorientation step (§7.8) and the home-base step (§10.2). Square to circle and stretch the box are measured by tests and not offered as steps. R6 was built and measured, and **is not shown in the scene** (Jon's walk, 2026-10-20: Part 2 is long enough with five hidden rats); the sim keeps it and its test. Both views are kept everywhere.
 14. **Step 2 runs on the bare range** (Jon's walk, 2026-10-19 and 2026-10-20; spec §7.2 says *in the dark*): see §3. Its orienting panel says what path integration is and what to do: *Keep track of your own turns and distances as you go: that is all there will be.* **For people at a screen** the scene produces no number: the student's errors in the dark, what they do with the picture of home when set down far, and the self-motion a screen gives (the ground moving past and the keys pressed) are the handout's questions, as spec §7.7 says. The screen line and the comfort line are on Part 1's orienting screen.
 
 ## 6. What the handout should not say

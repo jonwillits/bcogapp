@@ -20,6 +20,11 @@ const WALL = '#5b574f'
 const CURTAIN = '#6a6a66'
 const MAZE = '#8a7a64'
 const WATER_COLOR = '#6f8aa0'
+/** The plus maze's side walls: height above the runway, and their color. */
+const WALL_H = 0.14
+const WALL = '#6a6058'
+/** Where the rat's feet stand: on the plus maze's and the paths' runways (6 cm high), or in the pool with its back above the water (surface at 0.17 m; the body is about 7 cm tall). */
+const FLOOR_Y: Record<Apparatus, number> = { plus: 0.06, paths: 0.06, water: 0.13 }
 
 function Room({ kind, dark, rotated }: { kind: RoomKind; dark: boolean; rotated: boolean }) {
   const h = 2.2
@@ -76,10 +81,19 @@ function PlusMaze() {
   return (
     <group>
       {Object.values(PLUS.arms).map((a, i) => (
-        <mesh key={i} position={[(PLUS.armLength / 2) * Math.cos(a), 0.03, -(PLUS.armLength / 2) * Math.sin(a)]} rotation={[0, a, 0]}>
-          <boxGeometry args={[PLUS.armLength, 0.06, PLUS.armWidth]} />
-          <meshStandardMaterial color={MAZE} roughness={0.9} />
-        </mesh>
+        <group key={i} position={[(PLUS.armLength / 2) * Math.cos(a), 0, -(PLUS.armLength / 2) * Math.sin(a)]} rotation={[0, a, 0]}>
+          <mesh position={[0, 0.03, 0]}>
+            <boxGeometry args={[PLUS.armLength, 0.06, PLUS.armWidth]} />
+            <meshStandardMaterial color={MAZE} roughness={0.9} />
+          </mesh>
+          {/* side walls, so the arms read as alleys and not as a flat cross (Jon's walk, 2026-10-20) */}
+          {[1, -1].map((side) => (
+            <mesh key={side} position={[0, 0.06 + WALL_H / 2, (side * (PLUS.armWidth + 0.012)) / 2]}>
+              <boxGeometry args={[PLUS.armLength, WALL_H, 0.012]} />
+              <meshStandardMaterial color={WALL} roughness={0.9} />
+            </mesh>
+          ))}
+        </group>
       ))}
       <mesh position={[0, 0.03, 0]}>
         <boxGeometry args={[PLUS.armWidth, 0.06, PLUS.armWidth]} />
@@ -192,14 +206,14 @@ function RadiatingPaths({ lamp, testing }: { lamp: TestSettings['lamp']; testing
 }
 
 /** A rat moving along a trial's path by the clock. */
-function PathRat({ path, clock, anim }: { path: PathPoint[]; clock: () => number; anim: Rng }) {
+function PathRat({ path, clock, anim, floorY }: { path: PathPoint[]; clock: () => number; anim: Rng; floorY: number }) {
   const pose = useRef({ x: path[0]?.x ?? 0, y: path[0]?.y ?? 0, heading: 0 })
   useFrame(() => {
     const t = clock()
     const p = poseAt(path, t)
     if (p) pose.current = p
   })
-  return <RatMesh pose={() => pose.current} anim={anim} moving={() => true} />
+  return <RatMesh pose={() => pose.current} anim={anim} moving={() => true} floorY={floorY} />
 }
 
 /** Where along a path the rat is at time `t`, facing along it. */
@@ -257,7 +271,7 @@ export function LabView({ settings, apparatus, dark, testing, currentPath, pastP
         <PathLine key={i} path={p} color="#f0a94b" opacity={0.35} />
       ))}
       {currentPath && <PathLine path={currentPath} color="#4f9cff" opacity={0.9} />}
-      {currentPath && <PathRat path={currentPath} clock={clock} anim={anim} />}
+      {currentPath && <PathRat path={currentPath} clock={clock} anim={anim} floorY={FLOOR_Y[apparatus]} />}
       <CameraRig target={[0, 0, 0]} minDistance={1.5} maxDistance={12} panLimit={3} />
     </>
   )

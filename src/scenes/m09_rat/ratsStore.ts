@@ -1,3 +1,4 @@
+import { makeRng } from '../../sim/random'
 import { DEFAULT_TEST, type TestSettings } from '../../sim/rodent/lab'
 import { RATS, runTest, trainingRoutePath, type RatId, type RunResult, type Strategy, type PathPoint } from '../../sim/rodent/rats'
 
@@ -9,10 +10,27 @@ import { RATS, runTest, trainingRoutePath, type RatId, type RunResult, type Stra
  * the commit (`reveal.test.tsx`).
  */
 
-export const HIDDEN: RatId[] = RATS.filter((r) => r.hidden).map((r) => r.id)
+/** The rats the scene shows: H and five hidden ones. R6 (damage to the striatum) stays in the sim and its test and is not shown (Jon's walk, 2026-10-20: Part 2 is long enough with five; spec §13's first cut). */
+export const SHOWN: RatId[] = RATS.filter((r) => r.id !== 'R6').map((r) => r.id)
+export const HIDDEN: RatId[] = RATS.filter((r) => r.hidden && r.id !== 'R6').map((r) => r.id)
+/** The on-screen labels R1 to R5 are dealt to the hidden programs by the seed, so the order of the buttons says nothing (Jon's walk, 2026-10-20). */
+export function labelsFor(seed: number): Record<RatId, string> {
+  const rng = makeRng(seed ^ 0x5a6e1d)
+  const labels = HIDDEN.map((_, i) => `R${i + 1}`)
+  for (let i = labels.length - 1; i > 0; i--) {
+    const j = rng.int(i + 1)
+    ;[labels[i], labels[j]] = [labels[j], labels[i]]
+  }
+  const out = { H: 'H' } as Record<RatId, string>
+  HIDDEN.forEach((id, i) => (out[id] = labels[i]))
+  out.R6 = 'R6'
+  return out
+}
 
 export class RatsStore {
   readonly seed: number
+  /** The label each rat wears on screen this seed. */
+  readonly labels: Record<RatId, string>
   rat: RatId = 'H'
   settings: TestSettings = { ...DEFAULT_TEST }
   testsRun = 0
@@ -33,6 +51,12 @@ export class RatsStore {
 
   constructor(seed: number) {
     this.seed = seed
+    this.labels = labelsFor(seed)
+  }
+
+  /** The rats in the order their labels read, H first. */
+  get order(): RatId[] {
+    return [...SHOWN].sort((a, b) => (a === 'H' ? -1 : b === 'H' ? 1 : this.labels[a].localeCompare(this.labels[b])))
   }
 
   subscribe(fn: () => void): () => void {
