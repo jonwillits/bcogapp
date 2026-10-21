@@ -17,7 +17,10 @@ export const PATCH_INTRO = {
   lines: [
     'The forager goes out at night to patches of beetles under logs and leaf piles. In a patch, beetles turn up quickly at first and then more and more slowly, as the patch runs down. Moving to another patch takes time. The question of this closer is when leaving pays best.',
     'Two habitats. In the rich habitat a fresh patch gives about one beetle every 2 s and the next patch is 12 m away; in the poor habitat, one every 5 s and 30 m away. The forager follows one rule, set by the slider: leave a patch when beetles turn up there more slowly than one every so many seconds.',
-    'Predict first, on the left, in which habitat the best rule leaves sooner, and commit the prediction. Then “Run a night” in each habitat, or “Skip ahead to the end of the night”, and press “Try every setting” to see beetles per minute at each of the ten settings. The answer appears once both habitats have been tried.',
+    'First, make a prediction. The question is on the left: in which habitat does the best rule leave a patch sooner, the rich one or the poor one? Choose one and press “Commit my prediction”.',
+    'Then try the rule. Pick a habitat and a setting on the slider. Press “Run a night” to watch the forager, or “Skip ahead to the end of the night” to see the night’s total at once.',
+    'To find the best setting, press “Try every setting”. It runs one night at each of the ten settings and plots beetles per minute against the setting. Do this for both habitats.',
+    'The answer appears on the right once you have committed a prediction and tried every setting in both habitats.',
   ],
   content: [LEAVING_LINE],
   time: 'About 8 minutes.',

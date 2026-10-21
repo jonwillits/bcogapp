@@ -586,7 +586,7 @@ export const LABS = [
       'The plus maze', 'The water maze', 'The radiating paths', 'rich room', 'plain enclosure', 'Training trials', 'Platform', 'hidden', 'visible, with a flag',
       'The lamp', 'in place', 'switched off', 'moved across the room', 'Rotate the room’s cues 90° between training and test', 'Remove the cues just before the choice', 'Darkness', 'from the start', 'after setting off',
       'Run the test', 'Skip ahead to the result', 'Tests run', 'Commit my diagnoses', 'Reveal', 'beacon', 'route', 'snapshot', 'map (survey knowledge: a cognitive map)', 'damage to the hippocampus', 'damage to the striatum',
-      'Commit my prediction', 'Let it explore by itself', 'Skip ahead 2 minutes', 'Skip ahead 10 minutes', 'Skip ahead 1 day (30 simulated minutes)', 'Pin these maps', 'Clear the maps', 'Browse other place cells', 'Browse other grid cells', 'Move the card', 'Lights on', 'Back to the first room',
+      'Commit my prediction', 'Let it explore by itself', 'Skip ahead 2 minutes', 'Skip ahead 10 minutes', 'Skip ahead 1 day (90 simulated minutes)', 'Pin these maps', 'Clear the maps', 'Browse other place cells', 'Browse other grid cells', 'Move the card', 'Lights on', 'Back to the first room',
       'lower ring', 'upper ring', 'Head-direction cells', 'Grid cells', 'Border cells', 'Overhead', 'Pinned maps',
       'rich habitat', 'poor habitat', 'Leave a patch when beetles turn up there more slowly than one every', 'Run a night', 'Skip ahead to the end of the night', 'Try every setting', 'Beetles per minute',
     ],

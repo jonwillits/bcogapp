@@ -68,7 +68,7 @@ Right panel: **This test**: *Rat*, then the apparatus's result lines (plus maze:
 | the prediction chips and **Commit my prediction** | Steps 2 to 5; the change happens on the commit |
 | **Let it explore by itself** (toggle) | the seeded foraging path |
 | **Skip ahead 2 minutes** · **Skip ahead 10 minutes** | paid five simulated seconds a slice |
-| **Skip ahead 1 day (30 simulated minutes)** | Step 5 only |
+| **Skip ahead 1 day (90 simulated minutes)** | Step 5 only; it was 30 at the first build (Jon's walk, 2026-10-20: make it 90) |
 | **Pin these maps** · **Clear the maps** | the pinned set appears at the foot of the right panel |
 | **Browse other place cells** · **Browse other grid cells** | the next six place cells; the next pair in each grid group |
 | **Lights on** | Step 2: ends the dark |
@@ -200,7 +200,7 @@ The rich habitat's best setting is sooner, and both lie within one step of the p
 
 ### 4.5 Timing of the scene itself
 
-One sim step of Part 3 is 47 µs headless; a frame's six steps 0.3 ms; a skip slice of five simulated seconds about 12 ms; *Skip ahead 2 minutes* about 0.3 s in all, 10 minutes about 1 s, the compressed day about 3 s. The sixteen rate maps cost 0.6 ms together (cached until the record grows). A whole four-leg homing trial, scripted, is 0.6 ms and its four navigators 0.7 ms. A test in Part 2 is under 0.5 ms. A four-hour night is 3 ms; *Try every setting* 9 ms. Nothing on a click path approaches 300 ms.
+One sim step of Part 3 is 47 µs headless; a frame's six steps 0.3 ms; a skip slice of five simulated seconds about 12 ms; *Skip ahead 2 minutes* about 0.3 s in all, 10 minutes about 1 s, the compressed day about 9 s at 90 simulated minutes (3 s when it was 30). The sixteen rate maps cost 0.6 ms together (cached until the record grows). A whole four-leg homing trial, scripted, is 0.6 ms and its four navigators 0.7 ms. A test in Part 2 is under 0.5 ms. A four-hour night is 3 ms; *Try every setting* 9 ms. Nothing on a click path approaches 300 ms.
 
 ### 4.6 Wall-clock minutes per part, the build session's count (nobody has timed a student)
 
@@ -231,7 +231,7 @@ One sim step of Part 3 is 47 µs headless; a frame's six steps 0.3 ms; a skip sl
 3. **Weakening is on** in the Coincidence rule (spec §6.2 names Coincidence; weakening is Lab 5's setting of it). Without it the mapping from view units to upper-ring units smears over every heading the ring drifts through, the card's pull goes broad, and control never settles.
 4. **The one assumption the reading does not state** (spec §6.2 asked for it to be recorded): the turn pathway carries a steady background drive that is part of what holds the lower ring's bump; removing the pathway removes the drive with the turn information, and the ring is then too weakly driven to hold a bump against its own noise. Measured: a bump persists down to a drive of about 0.68 of the intact value and dies below it; the lesion leaves 0.45, and the nudge's ceiling cannot make up the difference. The line beside Step 5 says this is the model's assumption.
 5. **The map frame.** The ring does not know north, so each map stores the room's axis as seen when the map was made and computes everything in that frame (spec §6.5 does not say how a map's coordinates relate to the ring's). A wall contact in a room with corners resets the coordinate across the nearest of the four walls.
-6. **The compressed day**: *Skip ahead 1 day* runs 30 simulated minutes, labeled as such; the tuning is gone within that and stays gone over the following hour (measured).
+6. **The compressed day**: *Skip ahead 1 day* runs 90 simulated minutes, labeled as such (30 at the first build; Jon, 2026-10-20); the tuning is gone within the first thirty and stays gone over the following hour (measured at 30 and 90).
 7. **Stretch the box**: fields move by about 0.68 of the stretch, not 0.4 to 0.6, with the blend at equal weight; the walls as seen in the light also re-place the estimate. Recorded, not retuned, and not a step in the scene.
 8. **The closer's best setting** lies one step after the average-rate mark in the rich habitat and one step before it in the poor, because the rule reads the rate off the gap since the last beetle, a noisy estimate: at a high rate a long gap arrives by chance before the rate has fallen, at a low rate the reverse. Within one step either way.
 9. **The reading's radiating-paths result is hard to repeat** (§9.1.6); the programmed rats' clean preferences (20 of 20) are a property of the programs, and the handout should say so, as the spec asks.
