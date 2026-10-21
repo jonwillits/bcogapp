@@ -91,7 +91,7 @@ Left panel, beside the step: *Your prediction: …* once committed; **What the s
 | **Leave a patch when beetles turn up there more slowly than one every … s** (slider) | 2 · 3 · 4 · 6 · 8 · 10 · 12 · 15 · 20 · 25 | 8 |
 | **Run a night** · **Skip ahead to the end of the night** · **Try every setting** | *Run a night* is disabled while a night is playing (Jon's walk, 2026-10-20: a second press restarted the night and the view jumped) | |
 
-Four fixed lines: *Night: h.hh h of 4* · *Beetles found* · *Patches visited* · *Beetles per minute*. Right panel: the habitat's line, the plot *beetles per minute* against the setting with the habitat's average rate as a dashed mark (*average rate: one every 4.4 s*), two fixed lines (the best setting; the predicted setting), the table of both habitats' best and predicted settings, and after the commit *Your prediction* and the answer.
+Right panel, titled **Results**: first **This night**, four rows (*Night … h of 4* · *Beetles found* · *Patches visited* · *Beetles per minute*) and the leaving line (moved from the foot of the left panel, where they sat below the fold; Jon's walk, 2026-10-20); then **Beetles per minute against the setting**: the habitat's line, the plot *beetles per minute* against the setting with the habitat's average rate as a dashed mark (*average rate: one every 4.4 s*), two fixed lines (the best setting; the predicted setting), the table of both habitats' best and predicted settings, and after the commit *Your prediction* and the answer.
 
 ---
 

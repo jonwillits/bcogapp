@@ -63,8 +63,6 @@ export function PatchLeft({ store, header }: { store: PatchStore; header: React.
               Try every setting
             </Btn>
           </div>
-          <FixedLines lines={s.lines()} testId="night-lines" />
-          <Content>{LEAVING_LINE}</Content>
         </div>
       </Panel>
     </div>
@@ -77,8 +75,12 @@ export function PatchRight({ store }: { store: PatchStore }) {
   const curve = s.curves.get(s.habitat)
   const avg = averageRate(h)
   return (
-    <Panel title="Beetles per minute against the setting" style={RIGHT_STYLE}>
+    <Panel title="Results" style={RIGHT_STYLE}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <GroupLabel>This night</GroupLabel>
+        <FixedLines lines={s.lines()} testId="night-lines" />
+        <Content>{LEAVING_LINE}</Content>
+        <GroupLabel>Beetles per minute against the setting</GroupLabel>
         <Note>{`${h.label}: a fresh patch gives about one beetle every ${(1 / h.rate0).toFixed(0)} s, and the next patch is ${h.spacing} m away.`}</Note>
         {curve ? (
           <>
