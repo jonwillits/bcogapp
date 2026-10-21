@@ -561,7 +561,7 @@ export const LABS = [
     strings: ['src/sim/rodent'],
     handout: 'spatial_cognition/way_home_lab/way_home_lab.md',
     report: 'spatial_cognition/way_home_lab/way_home_lab_report.docx',
-    handoutPending: true,
+    handoutPending: false,
     /**
      * Built 2026-10-18 with no handout; the handout is written after Jon's
      * walk-through, from docs/M09_AS_BUILT_NOTES.md. The claims below are
@@ -589,6 +589,8 @@ export const LABS = [
       'Commit my prediction', 'Let it explore by itself', 'Skip ahead 2 minutes', 'Skip ahead 10 minutes', 'Skip ahead 1 day (90 simulated minutes)', 'Pin these maps', 'Clear the maps', 'Browse other place cells', 'Browse other grid cells', 'Move the card', 'Lights on', 'Back to the first room',
       'lower ring', 'upper ring', 'Head-direction cells', 'Grid cells', 'Border cells', 'Overhead', 'Pinned maps',
       'rich habitat', 'poor habitat', 'Leave a patch when beetles turn up there more slowly than one every', 'Run a night', 'Skip ahead to the end of the night', 'Try every setting', 'Beetles per minute',
+      // added on Jon's walk, 2026-10-20
+      'Restart trial', 'Enter', 'Go back to Step', 'Go to Step', 'Redo Step', 'Go on to Step', 'Controls info', 'Run seed', 'The recording', 'This night', 'What the step shows',
     ],
 
     claims: [

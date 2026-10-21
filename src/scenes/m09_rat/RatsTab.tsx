@@ -91,7 +91,7 @@ export function RatsLeft({ store, header }: { store: RatsStore; header: React.Re
           <Choice value={t.room} options={[{ id: 'rich', label: 'rich room' }, { id: 'plain', label: 'plain enclosure' }]} onChange={(v) => s.set('room', v as 'rich' | 'plain')} />
           <GroupLabel>Changes</GroupLabel>
           <label style={{ fontSize: 12, display: 'flex', gap: 6, alignItems: 'center' }}>
-            <input type="checkbox" checked={t.rotateCues} onChange={(e) => s.set('rotateCues', e.target.checked)} /> Rotate the room’s cues 90° between training and test
+            <input type="checkbox" checked={t.rotateCues} onChange={(e) => s.set('rotateCues', e.target.checked)} /> {'Rotate the room’s cues 90° between training and test'}
           </label>
           <label style={{ fontSize: 12, display: 'flex', gap: 6, alignItems: 'center' }}>
             <input type="checkbox" checked={t.removeCues} onChange={(e) => s.set('removeCues', e.target.checked)} /> Remove the cues just before the choice
