@@ -185,6 +185,25 @@ function Beetle({ at, clock }: { at: { x: number; y: number }; clock: () => numb
   )
 }
 
+/** A beetle read every frame from a getter: the closer's finds, which last less than a panel redraw. */
+function LiveBeetle({ at, clock }: { at: () => { x: number; y: number } | null; clock: () => number }) {
+  const mesh = useRef<THREE.Mesh>(null)
+  const mat = useRef<THREE.MeshStandardMaterial>(null)
+  useFrame(() => {
+    const p = at()
+    if (!mesh.current) return
+    mesh.current.visible = !!p
+    if (p) mesh.current.position.set(p.x, 0.05, -p.y)
+    if (mat.current) mat.current.emissiveIntensity = 0.6 + 0.6 * Math.abs(Math.sin(clock() * 5))
+  })
+  return (
+    <mesh ref={mesh} rotation={[0.3, 0.2, 0]} visible={false}>
+      <octahedronGeometry args={[0.07, 0]} />
+      <meshStandardMaterial ref={mat} color="#3c4a2a" emissive="#9fd16a" emissiveIntensity={0.8} metalness={0.5} roughness={0.3} />
+    </mesh>
+  )
+}
+
 /** A patch of beetles under a leaf pile, for the closer. */
 function LeafPile({ at }: { at: { x: number; y: number } }) {
   return (
@@ -215,11 +234,13 @@ export interface RangeViewProps {
   /** The bare range (Part 1, Step 2): the ground and the sky, no landmarks, no nest, no stream bank. */
   bare?: boolean
   beetle?: { x: number; y: number } | null
+  /** A beetle whose place is read every frame (the closer). */
+  liveBeetle?: () => { x: number; y: number } | null
   patches?: { x: number; y: number }[]
   clock: () => number
 }
 
-export function RangeView({ light, lowDetail, pose, showNest, treeHidden, moved, bare, beetle, patches, clock }: RangeViewProps) {
+export function RangeView({ light, lowDetail, pose, showNest, treeHidden, moved, bare, beetle, liveBeetle, patches, clock }: RangeViewProps) {
   // Fog: exp2, set so the near landmarks fade by about 10 m in moonlight and everything but the ground by 2 m in the dark.
   const density = light === 'dark' ? (lowDetail ? 1.0 : 0.9) : lowDetail ? 0.17 : 0.13
   const fogColor = light === 'dark' ? DARK_FOG : MOON_FOG
@@ -248,6 +269,7 @@ export function RangeView({ light, lowDetail, pose, showNest, treeHidden, moved,
       )}
       {showNest && !bare && <Nest />}
       {beetle && <Beetle at={beetle} clock={clock} />}
+      {liveBeetle && <LiveBeetle at={liveBeetle} clock={clock} />}
       {patches?.map((p, i) => <LeafPile key={i} at={p} />)}
     </>
   )

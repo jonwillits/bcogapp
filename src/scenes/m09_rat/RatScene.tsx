@@ -21,8 +21,10 @@ import { CellsStore, STEPS } from './cellsStore'
 import { RatsStore } from './ratsStore'
 import { PatchStore } from './patchStore'
 import { travelTime, type Night } from '../../sim/rodent/patch'
-/** How far short of a leaf pile's center the forager stands, meters. */
+/** How far short of a leaf pile's center the forager stands, meters; the pace of its circuit of the rim, m/s; how long a found beetle glints, s. */
 const STAND_OFF = 1.1
+const RIM_PACE = 0.35
+const FLASH = 0.7
 import { WorldStore } from './worldStore'
 import { HomeLeft, HomeRight, INTRO as HOME_INTRO } from './HomeTab'
 import { CellsLeft, CellsRight } from './CellsTab'
@@ -349,11 +351,14 @@ function PatchCanvas({ store, view, fov, lowDetail, anim, clock }: { store: Patc
   // Where the forager stands: a step short of the pile, on the side it came from, so neither camera sits inside the pile
   // (Jon's walk, 2026-10-20: the forager stood at the pile's center and the view showed the inside of the pile). The stand
   // point of the current patch is held from arrival; the walk goes from it to the next patch's stand point.
-  const standRef = useRef<{ night: Night | null; patches: number; at: { x: number; y: number } }>({ night: null, patches: -1, at: { x: 0, y: 0 } })
+  const standRef = useRef<{ night: Night | null; patches: number; at: { x: number; y: number }; leftFrom: { x: number; y: number } | null }>({ night: null, patches: -1, at: { x: 0, y: 0 }, leftFrom: null })
   const standBefore = (pile: { x: number; y: number }, from: { x: number; y: number }) => {
     const d = Math.hypot(pile.x - from.x, pile.y - from.y) || 1
     return { x: pile.x - (STAND_OFF * (pile.x - from.x)) / d, y: pile.y - (STAND_OFF * (pile.y - from.y)) / d }
   }
+  // In a patch the forager works the pile's rim, a slow circuit at STAND_OFF from the center starting where it arrived
+  // (Jon, 2026-10-20: it had sat still until it left). A beetle glints at its nose for a moment at each beetle event.
+  const flashRef = useRef<{ t: number; at: { x: number; y: number } } | null>(null)
   const pose = (): Pose => {
     const n = s.night
     if (!n) return { x: 0, y: 0, heading: Math.PI / 2 }
@@ -364,24 +369,43 @@ function PatchCanvas({ store, view, fov, lowDetail, anim, clock }: { store: Patc
       st.night = n
       st.patches = n.patches
       st.at = standBefore(n.patchAt, from)
+      st.leftFrom = null
     }
     let p = st.at
+    let heading = headingRef.current
     if (n.phase === 'traveling') {
-      const to = standBefore(n.nextPatch, st.at)
+      // The walk starts from wherever the circuit had got to when the rule said leave.
+      if (!st.leftFrom) st.leftFrom = lastRef.current
+      const to = standBefore(n.nextPatch, st.leftFrom)
       const k = 1 - n.traveling / travelTime(n.habitat)
-      p = { x: st.at.x + k * (to.x - st.at.x), y: st.at.y + k * (to.y - st.at.y) }
+      p = { x: st.leftFrom.x + k * (to.x - st.leftFrom.x), y: st.leftFrom.y + k * (to.y - st.leftFrom.y) }
+    } else {
+      const a0 = Math.atan2(st.at.y - n.patchAt.y, st.at.x - n.patchAt.x)
+      const a = a0 + (RIM_PACE / STAND_OFF) * n.inPatch
+      p = { x: n.patchAt.x + STAND_OFF * Math.cos(a), y: n.patchAt.y + STAND_OFF * Math.sin(a) }
+      heading = a + Math.PI / 2
+    }
+    const last = n.events[n.events.length - 1]
+    if (last && last.kind === 'beetle' && n.time - last.t < FLASH && (!flashRef.current || flashRef.current.t !== last.t)) {
+      flashRef.current = { t: last.t, at: { x: p.x + 0.25 * Math.cos(heading), y: p.y + 0.25 * Math.sin(heading) } }
     }
     const dx = p.x - lastRef.current.x
     const dy = p.y - lastRef.current.y
-    if (Math.hypot(dx, dy) > 1e-4) headingRef.current = Math.atan2(dy, dx)
+    if (n.phase === 'traveling' && Math.hypot(dx, dy) > 1e-4) heading = Math.atan2(dy, dx)
+    headingRef.current = heading
     lastRef.current = p
-    return { x: p.x, y: p.y, heading: headingRef.current }
+    return { x: p.x, y: p.y, heading }
+  }
+  const beetle = (): { x: number; y: number } | null => {
+    const n = s.night
+    const f = flashRef.current
+    return n && f && n.time - f.t < FLASH ? f.at : null
   }
   const patches = s.night ? [s.night.patchAt, s.night.nextPatch] : []
   return (
     <>
-      <RangeView light="moonlight" lowDetail={lowDetail} pose={pose} showNest patches={patches} clock={clock} />
-      <RatMesh pose={pose} anim={anim} moving={() => !!s.night && s.night.phase === 'traveling'} visible={view === 'follow'} />
+      <RangeView light="moonlight" lowDetail={lowDetail} pose={pose} showNest patches={patches} liveBeetle={beetle} clock={clock} />
+      <RatMesh pose={pose} anim={anim} moving={() => !!s.night && s.playing} visible={view === 'follow'} />
       <AnimalCamera pose={pose} view={view} fov={fov} scale={RANGE_SCALE} />
     </>
   )
