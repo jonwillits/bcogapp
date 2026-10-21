@@ -55,6 +55,7 @@ While a trial runs, a status box sits over the view and on the panel, three line
 | **Diagnosis**: a select per hidden rat | — choose — · beacon · route · snapshot · map (survey knowledge: a cognitive map) · damage to the hippocampus · damage to the striatum (six entries for five rats; the striatum is a distractor now that R6 is not shown) | — |
 | **Commit my diagnoses** | disabled until every hidden rat has one | |
 | **Reveal** (per hidden rat, right panel) | after the commit; reads *Revealed* once pressed | |
+| **Controls info** (bottom right of the view) | opens a closeable panel over the view listing the camera's controls (drag to orbit, scroll to zoom, WASD to pan, arrows to rotate and tilt) and what each of Part 2's controls does; Jon's walk, 2026-10-20 | view |
 
 Right panel: **This test**: *Rat*, then the apparatus's result lines (plus maze: probe trials, ended at the east arm (the place), ended at the west arm (the same turn), ended elsewhere; water maze: test trials, the training trials before them when there were any, found within 60 s, mean time, the probe's share in the platform's quarter and the rotated quarter, then one line per test trial (Jon, 2026-10-20: not the training trials); plus maze: one line per probe trial; radiating paths: trials, most taken, path 6, paths 4 and 5, and a bar chart of twelve paths with path 6 in amber). **The rats**: H's line in full; each hidden rat *hidden until the commit*, then **Reveal**, then its strategy, its line, and *You said: …*.
 
