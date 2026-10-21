@@ -240,6 +240,10 @@ One sim step of Part 3 is 47 µs headless; a frame's six steps 0.3 ms; a skip sl
 13. **Cut, in the spec's order**: the reorientation step (§7.8) and the home-base step (§10.2). Square to circle and stretch the box are measured by tests and not offered as steps. R6 was built and measured, and **is not shown in the scene** (Jon's walk, 2026-10-20: Part 2 is long enough with five hidden rats); the sim keeps it and its test. Both views are kept everywhere.
 14. **Step 2 runs on the bare range** (Jon's walk, 2026-10-19 and 2026-10-20; spec §7.2 says *in the dark*): see §3. Its orienting panel says what path integration is and what to do: *Keep track of your own turns and distances as you go: that is all there will be.* **For people at a screen** the scene produces no number: the student's errors in the dark, what they do with the picture of home when set down far, and the self-motion a screen gives (the ground moving past and the keys pressed) are the handout's questions, as spec §7.7 says. The screen line and the comfort line are on Part 1's orienting screen.
 
+## 5a. What the handout must do for Part 3 (Jon's walk, 2026-10-20)
+
+Jon walked all five steps and found them as built, and likes the part, and expects it to be tough for some students. The handout for Part 3 needs extensive instructions and explanations, step by step, and reminders and references back to the reading at each step (§9.2.4 for the rings, §9.3.1 for the card and the lesion, §9.3.2 to §9.3.5 for the cells and remapping), so that a student can think each change through before committing a prediction and read the panel after it.
+
 ## 6. What the handout should not say
 
 Not *cue card* (it is the white card or the black card). Not *head-direction ring* (two rings, lower and upper). Not that a card the rat has seen move loses control *because the weights spread* (it is the stability rule, §5.1). Not *replay*, *preplay* or *imagine* (Module 10's). Not that grid cells build the place cells here (the place line says the reverse). Not that the navigators are models of the student. Not a frame rate for a Chromebook. And no number from §4 without "about".
