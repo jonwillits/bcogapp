@@ -121,8 +121,10 @@ export default function MemoryScene() {
     return { ...c, dig }
   }
   const fov = view === 'follow' || narrow ? FOV_NARROW : FOV_NORMAL
+  // `?dev=1` opens every part, for the timing script and the walk; students see the locks.
+  const dev = typeof location !== 'undefined' && new URLSearchParams(location.search).has('dev')
   const locked: Partial<Record<Tab, string | null>> = {}
-  for (const t of Object.keys(TAB_PART) as Tab[]) locked[t] = progress.lockReason(TAB_PART[t])
+  for (const t of Object.keys(TAB_PART) as Tab[]) locked[t] = dev ? null : progress.lockReason(TAB_PART[t])
 
   const header = (
     <Panel title="Lab 10: What Happened Last Night" style={{ width: 310 }}>
