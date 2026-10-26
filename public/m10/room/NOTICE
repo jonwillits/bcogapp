@@ -1,0 +1,84 @@
+NOTICE for public/m10/room/
+
+The 3D models in this folder are from Kenney's asset kits (www.kenney.nl), published by Kenney under the Creative Commons Zero licence (CC0 1.0 Universal, https://creativecommons.org/publicdomain/zero/1.0/): "This content is free to use in personal, educational and commercial projects." Each file is the kit's own GLB, copied unchanged; a kit's models share one small color texture (Textures/colormap.png), copied beside them. They furnish Lab 10's dorm room (Part 3), where the student studies a room and is then asked which things were in it. No model shows a person or a face.
+
+Two models are from Poly Haven (https://polyhaven.com), published under the same Creative Commons Zero licence (https://creativecommons.org/publicdomain/zero/1.0/) and credited to their authors below. Each is the 1k glTF with its .bin and 1k JPG textures packed, unchanged, into one GLB file.
+
+These files are NOT covered by the app's GNU General Public License. They are redistributed under CC0 with the credits below. CC0 requires no credit; Kenney asks for one, and it should travel with any copy.
+
+Kits and sources (folder <- kit, source page, licence):
+  kenney-furniture/  <-  Kenney Furniture Kit (2.0). Kenney, www.kenney.nl. https://kenney.nl/assets/furniture-kit  CC0 1.0 Universal, https://creativecommons.org/publicdomain/zero/1.0/
+  kenney-food/  <-  Kenney Food Kit (2.0). Kenney, www.kenney.nl. https://kenney.nl/assets/food-kit  CC0 1.0 Universal, https://creativecommons.org/publicdomain/zero/1.0/
+  kenney-survival/  <-  Kenney Survival Kit (2.0). Kenney, www.kenney.nl. https://kenney.nl/assets/survival-kit  CC0 1.0 Universal, https://creativecommons.org/publicdomain/zero/1.0/
+  kenney-graveyard/  <-  Kenney Graveyard Kit (5.0). Kenney, www.kenney.nl. https://kenney.nl/assets/graveyard-kit  CC0 1.0 Universal, https://creativecommons.org/publicdomain/zero/1.0/
+  kenney-holiday/  <-  Kenney Holiday Kit (2.0). Kenney, www.kenney.nl. https://kenney.nl/assets/holiday-kit  CC0 1.0 Universal, https://creativecommons.org/publicdomain/zero/1.0/
+  kenney-mini-skate/  <-  Kenney Mini Skate (2.0). Kenney, www.kenney.nl. https://kenney.nl/assets/mini-skate  CC0 1.0 Universal, https://creativecommons.org/publicdomain/zero/1.0/
+  kenney-fantasy-town/  <-  Kenney Fantasy Town Kit (2.0). Kenney, www.kenney.nl. https://kenney.nl/assets/fantasy-town-kit  CC0 1.0 Universal, https://creativecommons.org/publicdomain/zero/1.0/
+  polyhaven/  <-  Poly Haven models. https://polyhaven.com/models  CC0 1.0 Universal, https://creativecommons.org/publicdomain/zero/1.0/
+    polyhaven/fire-extinguisher.glb  <-  korean_fire_extinguisher_01 (Korean Fire Extinguisher 01) by UM JOORIN, https://polyhaven.com/a/korean_fire_extinguisher_01
+    polyhaven/garden-trowel.glb  <-  trowel_01 (Trowel 01) by Satyaki Mandal, https://polyhaven.com/a/trowel_01
+
+Files (57 models and 6 textures, 4.52 MB; file <- model name in the kit, what it stands for in the room):
+  kenney-furniture/bed.glb  <-  bedSingle (Kenney Furniture Kit (2.0)): single bed; 18636 bytes
+  kenney-furniture/bed-pillow.glb  <-  pillow (Kenney Furniture Kit (2.0)): pillow on the bed; 5044 bytes
+  kenney-furniture/desk.glb  <-  desk (Kenney Furniture Kit (2.0)): desk; 15048 bytes
+  kenney-furniture/desk-chair.glb  <-  chairDesk (Kenney Furniture Kit (2.0)): desk chair; 39016 bytes
+  kenney-furniture/bookshelf.glb  <-  bookcaseOpen (Kenney Furniture Kit (2.0)): open bookshelf; 18020 bytes
+  kenney-furniture/wardrobe.glb  <-  bookcaseClosedDoors (Kenney Furniture Kit (2.0)): wardrobe (a closed bookcase with doors); 22644 bytes
+  kenney-furniture/window-wall.glb  <-  wallWindow (Kenney Furniture Kit (2.0)): wall with a window; 10744 bytes
+  kenney-furniture/wall.glb  <-  wall (Kenney Furniture Kit (2.0)): plain wall section; 3340 bytes
+  kenney-furniture/door.glb  <-  doorwayFront (Kenney Furniture Kit (2.0)): front doorway with a door; 13016 bytes
+  kenney-furniture/rug.glb  <-  rugRectangle (Kenney Furniture Kit (2.0)): rectangular rug; 3188 bytes
+  kenney-furniture/nightstand.glb  <-  sideTable (Kenney Furniture Kit (2.0)): side table; 8800 bytes
+  kenney-furniture/desk-lamp.glb  <-  lampSquareTable (Kenney Furniture Kit (2.0)): desk lamp; 5624 bytes
+  kenney-furniture/mini-fridge.glb  <-  kitchenFridgeSmall (Kenney Furniture Kit (2.0)): mini fridge; 12988 bytes
+  kenney-food/coffee-mug.glb  <-  mug (Kenney Food Kit (2.0)): coffee mug; 20236 bytes
+  kenney-survival/water-bottle.glb  <-  bottle (Kenney Survival Kit (2.0)): water bottle; 10468 bytes
+  kenney-furniture/textbooks.glb  <-  books (Kenney Furniture Kit (2.0)): stack of books; 6864 bytes
+  kenney-furniture/laptop.glb  <-  laptop (Kenney Furniture Kit (2.0)): laptop; 5540 bytes
+  kenney-furniture/trash-can.glb  <-  trashcan (Kenney Furniture Kit (2.0)): trash can; 6452 bytes
+  kenney-furniture/ceiling-fan.glb  <-  ceilingFan (Kenney Furniture Kit (2.0)): ceiling fan; 15284 bytes
+  kenney-furniture/coat-rack.glb  <-  coatRackStanding (Kenney Furniture Kit (2.0)): standing coat rack; 13288 bytes
+  kenney-furniture/potted-plant.glb  <-  pottedPlant (Kenney Furniture Kit (2.0)): potted plant; 7576 bytes
+  kenney-furniture/speaker.glb  <-  speaker (Kenney Furniture Kit (2.0)): speaker; 15744 bytes
+  kenney-mini-skate/skateboard.glb  <-  skateboard (Kenney Mini Skate (2.0)): skateboard; 38744 bytes
+  kenney-food/pizza-box.glb  <-  pizza-box (Kenney Food Kit (2.0)): pizza box; 8788 bytes
+  kenney-furniture/extra-pillow.glb  <-  pillowBlue (Kenney Furniture Kit (2.0)): extra pillow (blue); 5056 bytes
+  kenney-furniture/radio.glb  <-  radio (Kenney Furniture Kit (2.0)): radio; 25020 bytes
+  kenney-furniture/keyboard.glb  <-  computerKeyboard (Kenney Furniture Kit (2.0)): computer keyboard; 3476 bytes
+  kenney-furniture/monitor.glb  <-  computerScreen (Kenney Furniture Kit (2.0)): computer screen; 6404 bytes
+  kenney-furniture/mouse.glb  <-  computerMouse (Kenney Furniture Kit (2.0)): computer mouse; 5868 bytes
+  kenney-furniture/microwave.glb  <-  kitchenMicrowave (Kenney Furniture Kit (2.0)): microwave; 11248 bytes
+  kenney-furniture/toaster.glb  <-  toaster (Kenney Furniture Kit (2.0)): toaster; 14924 bytes
+  kenney-food/cereal-bowl.glb  <-  bowl-cereal (Kenney Food Kit (2.0)): cereal bowl; 12468 bytes
+  kenney-furniture/cardboard-box.glb  <-  cardboardBoxOpen (Kenney Furniture Kit (2.0)): open cardboard box; 5404 bytes
+  kenney-mini-skate/scooter.glb  <-  scooter (Kenney Mini Skate (2.0)): kick scooter; 37552 bytes
+  kenney-graveyard/shovel.glb  <-  shovel (Kenney Graveyard Kit (5.0)): shovel; 13812 bytes
+  kenney-survival/axe.glb  <-  tool-axe (Kenney Survival Kit (2.0)): axe; 8612 bytes
+  kenney-survival/pickaxe.glb  <-  tool-pickaxe (Kenney Survival Kit (2.0)): pickaxe; 8152 bytes
+  kenney-survival/hoe.glb  <-  tool-hoe (Kenney Survival Kit (2.0)): garden hoe; 6628 bytes
+  kenney-survival/hammer.glb  <-  tool-hammer (Kenney Survival Kit (2.0)): hammer; 6520 bytes
+  kenney-survival/bucket.glb  <-  bucket (Kenney Survival Kit (2.0)): bucket; 7816 bytes
+  kenney-graveyard/candelabra.glb  <-  candle-multiple (Kenney Graveyard Kit (5.0)): candelabra (several candles on one stand); 17304 bytes
+  kenney-graveyard/lantern.glb  <-  lantern-glass (Kenney Graveyard Kit (5.0)): glass lantern; 18596 bytes
+  kenney-graveyard/hay-bale.glb  <-  hay-bale (Kenney Graveyard Kit (5.0)): hay bale; 17828 bytes
+  kenney-food/frying-pan.glb  <-  frying-pan (Kenney Food Kit (2.0)): frying pan; 19216 bytes
+  kenney-survival/anvil.glb  <-  workbench-anvil (Kenney Survival Kit (2.0)): workbench with an anvil; 30084 bytes
+  kenney-survival/barrel.glb  <-  barrel (Kenney Survival Kit (2.0)): wooden barrel; 34256 bytes
+  kenney-survival/campfire.glb  <-  campfire-pit (Kenney Survival Kit (2.0)): campfire pit; 26468 bytes
+  kenney-fantasy-town/cart.glb  <-  cart (Kenney Fantasy Town Kit (2.0)): wooden cart; 52920 bytes
+  kenney-graveyard/fire-basket.glb  <-  fire-basket (Kenney Graveyard Kit (5.0)): iron fire basket; 18740 bytes
+  kenney-survival/tent.glb  <-  tent (Kenney Survival Kit (2.0)): tent; 14020 bytes
+  kenney-graveyard/urn.glb  <-  urn-round (Kenney Graveyard Kit (5.0)): stone urn; 23712 bytes
+  kenney-survival/chest.glb  <-  chest (Kenney Survival Kit (2.0)): wooden chest; 35172 bytes
+  kenney-holiday/sled.glb  <-  sled (Kenney Holiday Kit (2.0)): sled; 23088 bytes
+  kenney-food/stew-pot.glb  <-  pot (Kenney Food Kit (2.0)): cooking pot; 18900 bytes
+  kenney-fantasy-town/cart-wheel.glb  <-  wheel (Kenney Fantasy Town Kit (2.0)): cart wheel; 17184 bytes
+  kenney-food/Textures/colormap.png  <-  Textures/colormap.png (Kenney Food Kit (2.0)); 10715 bytes
+  kenney-survival/Textures/colormap.png  <-  Textures/colormap.png (Kenney Survival Kit (2.0)); 7440 bytes
+  kenney-graveyard/Textures/colormap.png  <-  Textures/colormap.png (Kenney Graveyard Kit (5.0)); 10965 bytes
+  kenney-holiday/Textures/colormap.png  <-  Textures/colormap.png (Kenney Holiday Kit (2.0)); 12777 bytes
+  kenney-mini-skate/Textures/colormap.png  <-  Textures/colormap.png (Kenney Mini Skate (2.0)); 10860 bytes
+  kenney-fantasy-town/Textures/colormap.png  <-  Textures/colormap.png (Kenney Fantasy Town Kit (2.0)); 11143 bytes
+  polyhaven/fire-extinguisher.glb  <-  korean_fire_extinguisher_01 (Poly Haven models): fire extinguisher; 1615648 bytes
+  polyhaven/garden-trowel.glb  <-  trowel_01 (Poly Haven models): garden trowel; 1972404 bytes

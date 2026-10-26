@@ -49,7 +49,15 @@ const ratScene = import.meta.glob('../../../scenes/m09_rat/**/*.{ts,tsx}', {
   eager: true,
 }) as Record<string, string>
 
-const production = Object.entries({ ...sim, ...scenes, ...fish, ...fishScene, ...rodent, ...ratScene }).filter(
+// Module 10's memory layer: the tendency unit, the fast store's fixed stage and the slow learner's hidden layer, with no writer of their own.
+const memory = import.meta.glob('../../memory/**/*.ts', { query: '?raw', import: 'default', eager: true }) as Record<string, string>
+const memoryScene = import.meta.glob('../../../scenes/m10_memory/**/*.{ts,tsx}', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>
+
+const production = Object.entries({ ...sim, ...scenes, ...fish, ...fishScene, ...rodent, ...ratScene, ...memory, ...memoryScene }).filter(
   ([p]) => !p.includes('.test.') && !p.includes('.probe.'),
 )
 
@@ -148,6 +156,22 @@ describe('exactly two code paths write a stored weight', () => {
       expect([...src.matchAll(WEIGHTS_REPLACED)].length, path).toBe(0)
       expect(src, path).not.toMatch(/alwaysOn/)
     }
+  })
+
+  it('Module 10 reaches a weight only through learnWeights: the tendency unit, the slow learner’s two layers, and nothing in the store or the scene', () => {
+    const tendency = production.find(([p]) => p.endsWith('/memory/foragers/tendency.ts'))![1]
+    const slow = production.find(([p]) => p.endsWith('/memory/foragers/slow.ts'))![1]
+    expect(tendency).toMatch(/learnWeights\(this\.unit, /)
+    expect(slow).toMatch(/learnWeights\(this\.outputs\[k\], /)
+    expect(slow).toMatch(/learnWeights\(this\.hidden\[j\], /)
+    for (const [path, src] of production) {
+      if (!path.includes('/memory/') && !path.includes('/m10_memory/')) continue
+      expect([...src.matchAll(WEIGHT_WRITE)].length, path).toBe(0)
+      expect([...src.matchAll(WEIGHTS_REPLACED)].length, path).toBe(0)
+    }
+    // The fast store's separation stage is fixed: nothing in store.ts learns.
+    const store = production.find(([p]) => p.endsWith('/memory/foragers/store.ts'))![1]
+    expect(store).not.toMatch(/learnWeights/)
   })
 
   it('the learner reaches a weight only through that one write', () => {

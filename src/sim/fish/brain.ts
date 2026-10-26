@@ -214,12 +214,38 @@ export function buildNetwork(
   }
 }
 
-function randomUnit(receptors: Receptors, sparse: boolean, rng: Rng): RateUnit {
-  const n = inputCount(receptors)
-  // A random direction: normal draws, scaled to a fixed length.
+/**
+ * A random direction in an input space: normal draws, scaled to a fixed
+ * length. Shared with Module 10's fast store, whose separation stage is
+ * this layer over a night's features (spec m10 §9.3: not a second version).
+ */
+export function randomDirection(n: number, length: number, rng: Rng): number[] {
   const w = Array.from({ length: n }, () => rng.normal())
   const len = Math.hypot(...w) || 1
-  for (let i = 0; i < n; i++) w[i] = (w[i] / len) * RANDOM_WEIGHT_LENGTH
+  for (let i = 0; i < n; i++) w[i] = (w[i] / len) * length
+  return w
+}
+
+/**
+ * *Sparse*: the baseline that leaves a unit active for a share of the
+ * typical inputs handed in, found by sorting the unit's net inputs over
+ * them and cutting at the share. Shared with Module 10's fast store.
+ */
+export function sparseBaseline(w: readonly number[], inputs: readonly (readonly number[])[], share: number): number {
+  const sums: number[] = []
+  for (const x of inputs) {
+    let s = 0
+    for (let i = 0; i < w.length; i++) s += w[i] * x[i]
+    sums.push(s)
+  }
+  sums.sort((p, q) => p - q)
+  const cut = sums[Math.floor(sums.length * (1 - share))]
+  return clamp(-cut, FISH_BASELINE_RANGE.min, FISH_BASELINE_RANGE.max)
+}
+
+function randomUnit(receptors: Receptors, sparse: boolean, rng: Rng): RateUnit {
+  const n = inputCount(receptors)
+  const w = randomDirection(n, RANDOM_WEIGHT_LENGTH, rng)
   const cx = rng.next()
   const cy = rng.next()
   const x: number[] = []
@@ -229,17 +255,9 @@ function randomUnit(receptors: Receptors, sparse: boolean, rng: Rng): RateUnit {
     for (let i = 0; i < n; i++) at += w[i] * x[i]
     return unit(w, clamp(-at, FISH_BASELINE_RANGE.min, FISH_BASELINE_RANGE.max))
   }
-  const sums: number[] = []
-  for (let a = 0; a < GRID; a++)
-    for (let b = 0; b < GRID; b++) {
-      receptorInputs(receptors, a / (GRID - 1), b / (GRID - 1), x)
-      let s = 0
-      for (let i = 0; i < n; i++) s += w[i] * x[i]
-      sums.push(s)
-    }
-  sums.sort((p, q) => p - q)
-  const cut = sums[Math.floor(sums.length * (1 - SPARSE_ACTIVE_SHARE))]
-  return unit(w, clamp(-cut, FISH_BASELINE_RANGE.min, FISH_BASELINE_RANGE.max))
+  const grid: number[][] = []
+  for (let a = 0; a < GRID; a++) for (let b = 0; b < GRID; b++) grid.push(receptorInputs(receptors, a / (GRID - 1), b / (GRID - 1), []))
+  return unit(w, sparseBaseline(w, grid, SPARSE_ACTIVE_SHARE))
 }
 
 /** The output unit's prediction: the sigmoid of the evidence, and of nothing else. The criterion is not in it. */
