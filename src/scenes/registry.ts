@@ -93,6 +93,7 @@ const BrainScene = lazy(() => import('./m06_brain/BrainScene'))
 const FishScene = lazy(() => import('./m07_fish/FishScene'))
 const ObjectsScene = lazy(() => import('./m08_objects/ObjectsScene'))
 const RatScene = lazy(() => import('./m09_rat/RatScene'))
+const MemoryScene = lazy(() => import('./m10_memory/MemoryScene'))
 
 /**
  * Registered, runnable scenes. Order here is the order shown within a module.
@@ -255,6 +256,24 @@ export const scenes: SceneManifest[] = [
       sourceUrl: `${INTRO_BLOB}/spatial_cognition/way_home_lab/way_home_lab.md`,
       notYet:
         'The Lab 9 handout has not been posted yet. When it is, it will appear here without a reload of the app. Until then the scene itself is open to explore.',
+    },
+  },
+  {
+    route: 'm10-memory',
+    module: 10,
+    title: 'What Happened Last Night',
+    blurb:
+      'Lab 10. First you are the subject: lists of words, two ways to study, and a room you will be asked about. Then you are the small mammal of Lab 9, foraging at the same logs over six nights, where what is usually true is not what is true tonight. Then you look inside programs that forage on your own nights: a tendency, a fast store, and a slow learner. The fifth stage of the evolving-creature engine.',
+    mode: 'both',
+    status: 'building',
+    Component: MemoryScene,
+    // The handout is written after the build and Jon's walk-through, from the
+    // as-built notes, so the fetch fails until it lands.
+    lab: {
+      rawUrl: `${INTRO_RAW}/memory_and_generative_models/last_night_lab/last_night_lab.md`,
+      sourceUrl: `${INTRO_BLOB}/memory_and_generative_models/last_night_lab/last_night_lab.md`,
+      notYet:
+        'The Lab 10 handout has not been posted yet. When it is, it will appear here without a reload of the app. Until then the scene itself is open to explore.',
     },
   },
 ]
