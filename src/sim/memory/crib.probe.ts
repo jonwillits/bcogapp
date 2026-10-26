@@ -1,7 +1,7 @@
 import { it } from 'vitest'
 import { mean } from '../bilaterian/measure'
 import { planFor } from './logs/block'
-import { NIGHT_S, DIG_S, EAT_S, NURSE_S, tallies } from './logs/night'
+import { NIGHT_S, DIG_S, EAT_S, NURSE_S } from './logs/night'
 import { makeClearings } from './logs/clearings'
 import { FORAGERS, foragerTable, runForagerBlock, trainedSlowLearner, type ForagerId } from './foragers/foragers'
 import { SEPARATIONS } from './foragers/store'
