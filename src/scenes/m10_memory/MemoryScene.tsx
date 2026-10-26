@@ -154,7 +154,7 @@ export default function MemoryScene() {
     </Panel>
   )
 
-  const ctx: PartContext = { seed, progress, store, view, fov, lowDetail, anim, clock, header }
+  const ctx: PartContext = { seed, progress, store, view, fov, lowDetail, anim, clock, header, openTab: setTab }
   const mod = MODULES[tab]
   const lockedReason = locked[tab]
   const CanvasPart = mod.Canvas

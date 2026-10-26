@@ -45,7 +45,7 @@ export const RESTARTED_LINE = 'This part was interrupted and run again with new 
 export const READING_PRINTS_LINE = 'The reading prints a list of this kind, so some students will have recognized these lists. That is itself a result worth reporting.'
 
 /** The commit-then-reveal rule, on Part 0. */
-export const COMMIT_RULE_LINE = 'Nothing a test would tell you is shown until you commit: not what was on a list, not what was in the room, not how a night went.'
+export const COMMIT_RULE_LINE = 'Nothing a memory test would tell you is shown until you commit your answers: not what was on a list, not what was in the room, not how a night went.'
 
 /** Part 4: the map question follows every night, said once the first has been answered. */
 export const MAP_FOLLOWS_LINE = 'A map question like this follows every night.'

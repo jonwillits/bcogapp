@@ -29,7 +29,7 @@ export const TABS: { id: Tab; title: string; part: string }[] = [
 ]
 
 export const PART_TITLES: Record<Tab, string> = {
-  open: 'Part 0 — Opening the lab',
+  open: 'Part 0 — General Lab Instructions',
   lists: 'Part 1 — Lists of Words',
   study: 'Part 2 — Two Ways to Study',
   room: 'Part 3 — What Was in the Room?',

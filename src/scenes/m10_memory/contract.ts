@@ -3,6 +3,7 @@ import type { Rng } from '../../sim/random'
 import type { Command } from '../../sim/rodent/body'
 import type { ProgressStore } from '../../sim/memory/progress/store'
 import type { View } from '../m09_rat/AnimalCamera'
+import type { Tab } from './ui'
 
 /**
  * What every part of the scene is given, and what every part supplies.
@@ -39,6 +40,8 @@ export interface PartContext<S extends PartStore = PartStore> {
   clock: () => number
   /** The header panel, which the left column renders at its top. */
   header: ReactNode
+  /** Opens another part's tab (Part 0's Begin goes straight to Part 1). */
+  openTab: (tab: Tab) => void
 }
 
 export interface PartModule<S extends PartStore = PartStore> {
