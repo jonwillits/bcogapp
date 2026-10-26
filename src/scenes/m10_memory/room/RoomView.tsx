@@ -25,7 +25,12 @@ export function modelUrl(id: string): string {
   return `${import.meta.env.BASE_URL}m10/room/${modelFile(id)}`
 }
 
-/** One kit model at a place: scaled uniformly so its height is the place's target height, its base at the place's y. */
+/**
+ * One kit model at a place: scaled uniformly so its height is the place's
+ * target height, the middle of its footprint at the place's x and z, and its
+ * base at the place's y. Kenney's furniture has its origin at a corner, not
+ * under its middle, so the model is centered from its own bounding box.
+ */
 function Model({ id, place }: { id: string; place: Place }) {
   const gltf = useGLTF(modelUrl(id))
   const object = useMemo(() => gltf.scene.clone(true), [gltf.scene])
@@ -33,10 +38,12 @@ function Model({ id, place }: { id: string; place: Place }) {
   const h = Math.max(1e-6, box.max.y - box.min.y)
   const k = place.height / h
   // The ceiling fan hangs from its origin; everything else stands on its base.
-  const lift = id === 'ceiling-fan' ? 0 : -box.min.y * k
+  const base = id === 'ceiling-fan' ? 0 : -box.min.y
+  const cx = (box.min.x + box.max.x) / 2
+  const cz = (box.min.z + box.max.z) / 2
   return (
-    <group position={[place.x, place.y + lift, place.z]} rotation={[0, place.turn, 0]} scale={[k, k, k]}>
-      <primitive object={object} />
+    <group position={[place.x, place.y, place.z]} rotation={[0, place.turn, 0]} scale={[k, k, k]}>
+      <primitive object={object} position={[-cx, base, -cz]} />
     </group>
   )
 }
