@@ -45,7 +45,7 @@ describe('Part 2: the order, the screens, and what is hidden before the reveal',
   it('the scrambled list is always first: its screen shows the 24 words and no label; the second set shows the eight labels', () => {
     const ctx = ctxFor(11, memory())
     const s = ctx.store
-    expect(s.unit).toBe('scrambled')
+    expect(s.unit).toBe('first')
     s.begin()
     const first = renderToStaticMarkup(<Stage ctx={ctx} />)
     expect(first).toMatch(/data-grid/)
@@ -55,7 +55,7 @@ describe('Part 2: the order, the screens, and what is hidden before the reveal',
     s.studyDone()
     s.countDone(5, 0)
     s.recallDone(['horse', 'tiger'])
-    expect(s.unit).toBe('organized')
+    expect(s.unit).toBe('second')
     s.begin()
     const second = renderToStaticMarkup(<Stage ctx={ctx} />)
     expect(second).toMatch(/data-tree/)
@@ -109,7 +109,7 @@ describe('Part 2: units and reserve materials (§4.3)', () => {
     ctx.store.begin()
     // The page is closed partway: a fresh load from the same storage.
     const again = ctxFor(14, m)
-    expect(again.progress.status('p2-scrambled')).toBe('not started')
+    expect(again.progress.status('p2-first')).toBe('not started')
     again.store.begin()
     expect(again.store.materials!.set.id).toBe(again.store.plan.reserve.id)
     expect(again.store.materials!.set.id).not.toBe(shown)
@@ -117,7 +117,7 @@ describe('Part 2: units and reserve materials (§4.3)', () => {
     again.store.studyDone()
     again.store.countDone(2, 0)
     again.store.recallDone(['church'])
-    expect(again.store.result('scrambled')!.restarted).toBe(true)
+    expect(again.store.result('first')!.restarted).toBe(true)
     // The second unit uses its own set, and the reveal carries the restarted line.
     again.store.begin()
     expect(again.store.materials!.set.id).toBe(again.store.plan.organized.set.id)
@@ -133,10 +133,10 @@ describe('Part 2: units and reserve materials (§4.3)', () => {
     const ctx = ctxFor(15, m)
     runUnit(ctx.store, ['horse'])
     const again = ctxFor(15, m)
-    expect(again.store.unit).toBe('organized')
-    expect(again.store.result('scrambled')!.typed).toEqual(['horse'])
+    expect(again.store.unit).toBe('second')
+    expect(again.store.result('first')!.typed).toEqual(['horse'])
     again.store.begin()
-    expect(again.progress.status('p2-scrambled')).toBe('complete')
+    expect(again.progress.status('p2-first')).toBe('complete')
   })
 
   it('the same seed gives the same plan and grid; different seeds differ', () => {
@@ -163,11 +163,11 @@ describe('Part 2: the reveal (§6.3)', () => {
     expect(right).toMatch(/Reference pending/)
     expect(right).toMatch(/line-through/)
     expect((right.match(/data-colored-output/g) ?? []).length).toBe(2)
-    const o = scoreUnit(s.result('organized')!)
+    const o = scoreUnit(s.result('second')!)
     expect(o.recalled).toBe(5)
     expect(o.pieces.arc).toBe(1)
     expect(arcLines(o.pieces)[5]).toMatch(/=\s+1\.00$/)
-    const sc = scoreUnit(s.result('scrambled')!)
+    const sc = scoreUnit(s.result('first')!)
     expect(sc.recalled).toBe(4)
     expect(sc.matched[4]).toBeNull()
   })

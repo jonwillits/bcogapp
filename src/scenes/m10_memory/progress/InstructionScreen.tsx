@@ -65,7 +65,7 @@ export function InstructionScreen({ title, willDo, minutes, sitting, ready = REA
   return (
     <div
       data-instruction
-      style={{ ...style, padding: '16px 20px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 12.5, lineHeight: 1.55, display: 'flex', flexDirection: 'column', gap: 10 }}
+      style={{ ...style, padding: '16px 20px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 12.5, lineHeight: 1.55, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'auto' }}
     >
       <div style={{ fontSize: 14, fontWeight: 600 }}>{title}</div>
       <GroupLabel>What you will do</GroupLabel>

@@ -126,7 +126,7 @@ function Right({ ctx }: { ctx: { progress: ProgressStore } }) {
     <Panel title="My results, all parts" style={RIGHT_STYLE}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <Note>Each part’s My results screen is on its own tab once the part is finished. This screen gathers them.</Note>
-        <FixedLines lines={done.length ? done.map((u) => `${u.padEnd(18)}Part ${partOf(u)}  finished`) : ['No part finished yet']} testId="results-all" />
+        <FixedLines lines={([1, 2, 3, 4] as const).map((part) => `${`Part ${part}`.padEnd(8)}${p.partComplete(part) ? 'finished' : `${done.filter((u) => partOf(u) === part).length} of ${UNIT_IDS.filter((u) => partOf(u) === part).length} units done`}`)} testId="results-all" />
         {done.length > 0 && (
           <div>
             <Btn small onClick={() => setShow(!show)}>

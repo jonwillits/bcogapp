@@ -23,7 +23,8 @@ import type { NightSim } from '../../../sim/memory/logs/night'
 
 /** The moon's light level and the fog, by moon and weather. */
 function lighting(f: NightFeatures, dawn: number): { hemi: number; sun: number; fog: number; fogColor: string; sky: string } {
-  const moon = f.moon === 'new moon' ? 0.35 : f.moon === 'half moon' ? 0.7 : 1.0
+  // A new moon is the darkest night, but never so dark that a log cannot be found: the floor is a little under Lab 9's moonlight.
+  const moon = f.moon === 'new moon' ? 0.55 : f.moon === 'half moon' ? 0.8 : 1.05
   const fog = f.weather === 'fog' ? 0.26 : f.weather === 'light rain' ? 0.17 : 0.13
   const fogColor = f.weather === 'fog' ? '#1a2030' : f.weather === 'light rain' ? '#0d1322' : '#0b1020'
   const k = 1 - dawn

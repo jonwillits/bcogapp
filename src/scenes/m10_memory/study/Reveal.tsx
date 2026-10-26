@@ -12,7 +12,7 @@ import { StudyStore, type StudyResult } from './studyStore'
  * the scrambled list and the organized list, and clustering.
  */
 
-export const CONDITION_LABEL: Record<StudyResult['unit'], string> = { scrambled: 'the scrambled list', organized: 'the organized list' }
+export const CONDITION_LABEL: Record<StudyResult['unit'], string> = { first: 'the scrambled list', second: 'the organized list' }
 
 /** Six colors, one per subcategory, in the order the set lists them. */
 export const SUBCATEGORY_COLORS = ['#f0a94b', '#4f9cff', '#34d399', '#f87171', '#b388ff', '#ffd08a']

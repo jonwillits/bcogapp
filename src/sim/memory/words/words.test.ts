@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { ASSOCIATE_LISTS, ASSOCIATES_LENGTH, LONG_LENGTH, NEW_WORDS, SHORT_LENGTH, UNRELATED_LONG, UNRELATED_SHORT } from './lists'
 import { WORD_SETS, wordsOf } from './sets'
 import { EDIT_FROM_LENGTH, editDistance, singular } from './matcher'
+import { ROOM_NAMES } from '../room/items'
 
 /**
  * The materials' exclusions (spec §5.2, §6.2, §14): no word is shared
@@ -10,16 +11,14 @@ import { EDIT_FROM_LENGTH, editDistance, singular } from './matcher'
  */
 
 /**
- * Part 3's item names and the room's furniture, as candidates stand; the
- * room's own test holds the final list to the same rule. Three candidates
- * are barred because a part of their name is on a list of associates:
- * laptop (top, on the mountain list), skateboard (boards, on the rough
- * list) and toothbrush (tooth, on the sweet list).
+ * Part 3's item names and the room's furniture, as shipped; the room's own
+ * test holds the list to the same rule. Candidates barred because a part
+ * of their name is on a list of associates or on a Part 1 list: laptop
+ * (top, on the mountain list), skateboard (boards, on the rough list),
+ * toothbrush (tooth, on the sweet list), barrel and radio and hammer (Part
+ * 1 lists), hay bale (hay) and cardboard box (card, boards).
  */
-export const ROOM_WORDS = [
-  'desk lamp', 'laundry basket', 'phone charger', 'mini fridge', 'backpack', 'headphones', 'alarm clock', 'coffee mug', 'water bottle', 'textbook', 'slippers', 'kettle', 'trash can', 'fan', 'hanger', 'calculator', 'notebook', 'pencil cup', 'plant', 'speaker', 'game controller', 'guitar', 'hair dryer', 'pizza box', 'poster', 'rug', 'pillow', 'bed', 'desk', 'chair', 'shelf', 'window', 'door', 'curtain',
-  'garden trowel', 'fire extinguisher', 'rattle', 'violin bow', 'traffic cone', 'fishing rod', 'watering can', 'hard hat', 'snow shovel', 'bowling ball', 'saddle', 'axe', 'life jacket', 'anvil', 'birdhouse', 'stop sign', 'candelabra', 'tennis racket', 'oar', 'lantern', 'pitchfork', 'bird cage', 'chainsaw', 'bucket', 'wheelbarrow', 'frying pan', 'umbrella', 'helmet',
-]
+export const ROOM_WORDS = ROOM_NAMES
 
 /** Every head noun and part of a compound in the room's names, singular, so "birdhouse" bars "bird" and "house" and "slippers" bars "slipper". */
 export function roomStems(names: string[] = ROOM_WORDS): Set<string> {

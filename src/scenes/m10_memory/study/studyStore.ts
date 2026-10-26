@@ -14,9 +14,9 @@ import type { PartStore } from '../contract'
  * (`Reveal.tsx`).
  */
 
-export type StudyUnit = 'scrambled' | 'organized'
-export const UNITS: StudyUnit[] = ['scrambled', 'organized']
-export const UNIT_ID: Record<StudyUnit, UnitId> = { scrambled: 'p2-scrambled', organized: 'p2-organized' }
+export type StudyUnit = 'first' | 'second'
+export const UNITS: StudyUnit[] = ['first', 'second']
+export const UNIT_ID: Record<StudyUnit, UnitId> = { first: 'p2-first', second: 'p2-second' }
 
 export type StudyPhase = 'intro' | 'study' | 'count' | 'recall' | 'done'
 
@@ -42,7 +42,7 @@ export class StudyStore implements PartStore {
   readonly seed: number
   readonly progress: ProgressStore
   readonly plan: Part2Plan
-  unit: StudyUnit = 'scrambled'
+  unit: StudyUnit = 'first'
   phase: StudyPhase = 'intro'
   materials: StudyMaterials | null = null
   countFrom = 0
@@ -55,7 +55,7 @@ export class StudyStore implements PartStore {
     this.seed = seed
     this.progress = progress
     this.plan = planPart2(seed)
-    this.unit = this.result('scrambled') ? 'organized' : 'scrambled'
+    this.unit = this.result('first') ? 'second' : 'first'
     this.phase = this.bothDone ? 'done' : 'intro'
   }
 
@@ -74,7 +74,7 @@ export class StudyStore implements PartStore {
   }
 
   get bothDone(): boolean {
-    return !!this.result('scrambled') && !!this.result('organized')
+    return !!this.result('first') && !!this.result('second')
   }
 
   /** The materials for a unit now, given the restarts the progress store has recorded. */
@@ -87,7 +87,7 @@ export class StudyStore implements PartStore {
     // Nothing left: the unit's own set again, drawn afresh where it is a grid.
     const own = part2MaterialsFor(this.plan, unit, 0)!
     const rng = makeRng(this.seed ^ 0x2a7d ^ (0x77 * (restarts + 1)))
-    return { set: own.set, grid: unit === 'scrambled' ? scrambledGrid(own.set, rng) : undefined, exhausted: true }
+    return { set: own.set, grid: unit === 'first' ? scrambledGrid(own.set, rng) : undefined, exhausted: true }
   }
 
   /** Begin the current unit: it is in progress until recall ends, and an interrupted one restarts with the reserve. */
@@ -96,7 +96,7 @@ export class StudyStore implements PartStore {
     const id = UNIT_ID[this.unit]
     this.progress.begin(id)
     this.materials = this.materialsFor(this.unit)
-    this.countFrom = makeRng(this.seed ^ 0x2c0 ^ (this.unit === 'scrambled' ? 1 : 2) ^ (this.progress.materialsSlot(id) << 4)).int(800) + 200
+    this.countFrom = makeRng(this.seed ^ 0x2c0 ^ (this.unit === 'first' ? 1 : 2) ^ (this.progress.materialsSlot(id) << 4)).int(800) + 200
     this.countTyped = 0
     this.countWrong = 0
     this.phase = 'study'
@@ -131,8 +131,8 @@ export class StudyStore implements PartStore {
     }
     this.progress.complete(id, result)
     this.materials = null
-    if (this.unit === 'scrambled' && !this.result('organized')) {
-      this.unit = 'organized'
+    if (this.unit === 'first' && !this.result('second')) {
+      this.unit = 'second'
       this.phase = 'intro'
     } else this.phase = 'done'
     this.changed()

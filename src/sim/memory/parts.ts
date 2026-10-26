@@ -18,8 +18,8 @@ export const PART1_LISTS = 11
 export type UnitId =
   | `p1-list-${number}` // each study list and its recall, 0 to 10
   | 'p1-recognition'
-  | 'p2-scrambled'
-  | 'p2-organized'
+  | 'p2-first'
+  | 'p2-second'
   | 'p3-room'
   | 'p4-practice'
   | 'p4-block-1'
@@ -28,8 +28,8 @@ export type UnitId =
 export const UNIT_IDS: UnitId[] = [
   ...Array.from({ length: PART1_LISTS }, (_, i) => `p1-list-${i}` as const),
   'p1-recognition',
-  'p2-scrambled',
-  'p2-organized',
+  'p2-first',
+  'p2-second',
   'p3-room',
   'p4-practice',
   'p4-block-1',

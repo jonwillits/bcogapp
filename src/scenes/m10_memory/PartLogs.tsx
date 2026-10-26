@@ -96,7 +96,7 @@ function Left({ ctx }: { ctx: PartContext<LogsStore> }) {
               </div>
             </>
           )}
-          <GroupLabel>The two rules</GroupLabel>
+          <GroupLabel>The two rules: the usual fact, and the refill rule</GroupLabel>
           <Content>{KIND_RULE}</Content>
           <Content>{REFILL_RULE}</Content>
           <label style={{ fontSize: 12, display: 'flex', gap: 6, alignItems: 'center' }}>

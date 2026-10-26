@@ -143,7 +143,7 @@ export function ListsReveal({ progress }: { progress: ProgressStore }) {
           )
         })}
         <GroupLabel>2. The serial-position curves and list length</GroupLabel>
-        <Note>Each curve is the proportion of lists on which the word at that position was typed. One student’s curves are noisy, so the three bins (the first three positions, the middle, the last three) are the bars behind each curve.</Note>
+        <Note>Each curve is the proportion of lists on which the word at that position was typed. One student’s curves are noisy, so the three bins (the first three positions, the middle, the last three) are the bars behind each curve. The rise at the first positions is primacy and the rise at the last is recency; the reading’s account has a delay filled with counting remove recency, since the last words are no longer in rehearsal, and spare primacy.</Note>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           {curves.map((c) => (
             <div key={c.condition} style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -158,7 +158,7 @@ export function ListsReveal({ progress }: { progress: ProgressStore }) {
         <ReferencePanel reference={referenceById('glanzer1966')} />
         <GroupLabel>3. Words from earlier lists</GroupLabel>
         <FixedLines lines={[row('words typed that were on an earlier list', String(intr.count), 48), ...intr.intrusions.map((x) => row(`  after list ${x.slot + 1}: ${x.typed}`, `from list ${x.fromSlot + 1}`, 48))]} testId="intrusions" />
-        <Note>The reading calls this proactive interference: old learning making new learning harder to recall.</Note>
+        <Note>The reading calls this proactive interference: old learning making new learning harder to recall. A word from an earlier list is a word that was still in reach, and interference is the effect of other learning on recalling something.</Note>
         <GroupLabel>4. Three of the lists were made of associates</GroupLabel>
         <Note>Three lists were made entirely of associates of one word that was never shown, the critical word. Whether you typed it after the list, and whether you later called it old, is the result.</Note>
         <FixedLines lines={crit.map((c) => row(`list ${c.slot + 1}: the critical word was “${c.critical}”`, c.recalled ? 'typed' : 'not typed', 52))} testId="critical" />

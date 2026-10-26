@@ -46,12 +46,12 @@ describe('a saved state round-trips', () => {
   it('a completed unit is never redone: begin and complete are ignored on it', () => {
     const box = memoryStorage()
     const s = new ProgressStore(box, 1)
-    s.begin('p2-scrambled')
-    s.complete('p2-scrambled', { n: 1 })
-    s.begin('p2-scrambled')
-    s.complete('p2-scrambled', { n: 2 })
-    expect(s.result('p2-scrambled')).toEqual({ n: 1 })
-    expect(s.status('p2-scrambled')).toBe('complete')
+    s.begin('p2-first')
+    s.complete('p2-first', { n: 1 })
+    s.begin('p2-first')
+    s.complete('p2-first', { n: 2 })
+    expect(s.result('p2-first')).toEqual({ n: 1 })
+    expect(s.status('p2-first')).toBe('complete')
   })
 })
 
@@ -258,7 +258,7 @@ describe('Export and Load', () => {
     for (const u of unitsOfPart(4)) here.complete(u, {})
     const there = newState(32)
     for (const u of unitsOfPart(1)) there.units[u] = { status: 'complete', materials: 0, restarts: 0, result: {} }
-    there.units['p2-scrambled'] = { status: 'complete', materials: 0, restarts: 0 }
+    there.units['p2-first'] = { status: 'complete', materials: 0, restarts: 0 }
     const lines = describeReplacement(here.state, there)
     expect(lines[0]).toBe('Saved here now: Part 4 finished, with seed 31.')
     expect(lines[1]).toBe('In the file: Part 1, Part 2 (partly) finished, with seed 32.')

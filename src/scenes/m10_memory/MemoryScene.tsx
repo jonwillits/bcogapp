@@ -15,7 +15,7 @@ import { lists } from './PartLists'
 import { study } from './PartStudy'
 import { room } from './PartRoom'
 import { logs } from './PartLogs'
-import { learners } from './PartLearners'
+import { learners, UseSampleButton } from './PartLearners'
 
 /**
  * Module 10's scene: Lab 10, What Happened Last Night. The student is the
@@ -175,7 +175,10 @@ export default function MemoryScene() {
             <>
               {header}
               <Panel title={PART_TITLES[tab]} style={{ width: 310 }}>
-                <Note>{lockedReason}</Note>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <Note>{lockedReason}</Note>
+                  {tab === 'learners' && <UseSampleButton progress={progress} />}
+                </div>
               </Panel>
             </>
           ) : (

@@ -90,6 +90,7 @@ export function LogsReveal({ first, second, prediction, seed }: { first: Part4Bl
     <Panel title="My results — Part 4" style={{ ...RIGHT_STYLE, width: 520 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }} data-reveal="logs">
         <Note>{OVERHEAD_LEGEND}</Note>
+        <Note>Repeat digs at a log already emptied tonight are errors of working memory for one night, in the reading’s second sense of the term: the list of logs already searched. Digs at logs emptied last night are the cost of knowing only the usual fact; full logs passed over that were emptied two nights ago are the cost of misremembering when. The map question asks what, where and when of each log, which is what makes this memory episodic-like.</Note>
         <GroupLabel>Confusions between nights, the two blocks</GroupLabel>
         <FixedLines
           lines={[

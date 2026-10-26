@@ -124,9 +124,13 @@ export function planPart2(seed: number): Part2Plan {
  * the place of whichever set was interrupted, in that condition. A second
  * restart has nothing left and returns null.
  */
-export function part2MaterialsFor(plan: Part2Plan, unit: 'scrambled' | 'organized', restarts: number): { set: WordSet; grid?: string[][] } | null {
-  if (restarts === 0) return unit === 'scrambled' ? plan.scrambled : plan.organized
+/** The two units by their order, which is all the screens name before the reveal: the first set is the scrambled one, the second the organized one. */
+export type Part2Unit = 'first' | 'second'
+
+export function part2MaterialsFor(plan: Part2Plan, unit: Part2Unit | 'scrambled' | 'organized', restarts: number): { set: WordSet; grid?: string[][] } | null {
+  const scrambled = unit === 'first' || unit === 'scrambled'
+  if (restarts === 0) return scrambled ? plan.scrambled : plan.organized
   if (restarts > 1) return null
   const rng = makeRng(plan.seed ^ 0x2a7d ^ 0x51)
-  return unit === 'scrambled' ? { set: plan.reserve, grid: scrambledGrid(plan.reserve, rng) } : { set: plan.reserve }
+  return scrambled ? { set: plan.reserve, grid: scrambledGrid(plan.reserve, rng) } : { set: plan.reserve }
 }

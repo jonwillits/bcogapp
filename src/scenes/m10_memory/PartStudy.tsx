@@ -17,11 +17,11 @@ import { Reveal, resultRows } from './study/Reveal'
 
 type Ctx = PartContext<StudyStore>
 
-export const UNIT_TITLE: Record<StudyUnit, string> = { scrambled: 'Step 1 — The first set', organized: 'Step 2 — The second set' }
+export const UNIT_TITLE: Record<StudyUnit, string> = { first: 'Step 1 — The first set', second: 'Step 2 — The second set' }
 
 /** The instruction screens, one per unit. Neither says what the two sets differ in. */
 export const STUDY_INTRO: Record<StudyUnit, { willDo: string[]; minutes: number; keys: string[] }> = {
-  scrambled: {
+  first: {
     willDo: [
       'You will see a set of 24 words on the screen for one minute. Look at them for the whole minute.',
       'Then a short counting task: count backward by threes from a number, typing each number and pressing “Enter”.',
@@ -32,7 +32,7 @@ export const STUDY_INTRO: Record<StudyUnit, { willDo: string[]; minutes: number;
     minutes: 10,
     keys: ['“Enter” enters a number in the counting task, and a word in the recall box.', '“I’m done” ends recall early.'],
   },
-  organized: {
+  second: {
     willDo: [
       'The second set: 24 words on the screen for one minute, then the counting task, then typing every word you remember, as before.',
       'Look at the words for the whole minute.',
@@ -51,7 +51,7 @@ function Left({ ctx }: { ctx: Ctx }) {
       <Panel title={PART_TITLES.study} style={PANEL_STYLE}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <GroupLabel>Step</GroupLabel>
-          <FixedLines lines={UNITS.map((u) => `${(u === 'scrambled' ? 'The first set' : 'The second set').padEnd(18)}${s.result(u) ? 'finished' : s.unit === u && s.phase !== 'done' ? 'now' : 'not yet'}`)} testId="steps" />
+          <FixedLines lines={UNITS.map((u) => `${(u === 'first' ? 'The first set' : 'The second set').padEnd(18)}${s.result(u) ? 'finished' : s.unit === u && s.phase !== 'done' ? 'now' : 'not yet'}`)} testId="steps" />
           {s.phase === 'intro' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-intro>
               <Note>What will happen is described over the view.</Note>
@@ -157,8 +157,8 @@ function Stage({ ctx }: { ctx: Ctx }) {
 
 function Right({ ctx }: { ctx: Ctx }) {
   const s = useStore(ctx.store)
-  const a = s.result('scrambled')
-  const b = s.result('organized')
+  const a = s.result('first')
+  const b = s.result('second')
   return (
     <Panel title="My results" style={RIGHT_STYLE}>
       {a && b ? <Reveal scrambled={a} organized={b} /> : <Note>The results appear here after both sets are finished. Nothing typed is scored before then.</Note>}
@@ -168,15 +168,15 @@ function Right({ ctx }: { ctx: Ctx }) {
 
 function Results({ ctx }: { ctx: Ctx }) {
   const s = useStore(ctx.store)
-  const a = s.result('scrambled')
-  const b = s.result('organized')
+  const a = s.result('first')
+  const b = s.result('second')
   if (!a || !b) return null
   return <FixedLines lines={resultRows(a, b)} testId="study-results" />
 }
 
 registerResults(2, (progress: ProgressStore) => {
-  const a = progress.isComplete('p2-scrambled') ? (progress.result('p2-scrambled') as Parameters<typeof resultRows>[0]) : null
-  const b = progress.isComplete('p2-organized') ? (progress.result('p2-organized') as Parameters<typeof resultRows>[1]) : null
+  const a = progress.isComplete('p2-first') ? (progress.result('p2-first') as Parameters<typeof resultRows>[0]) : null
+  const b = progress.isComplete('p2-second') ? (progress.result('p2-second') as Parameters<typeof resultRows>[1]) : null
   return a && b ? <FixedLines lines={resultRows(a, b)} testId="study-results" /> : null
 })
 
