@@ -150,7 +150,7 @@ function Stage({ ctx }: { ctx: PartContext<LogsStore> }) {
     return (
       <>
         {fade > 0 && <div style={{ position: 'absolute', inset: 0, background: '#000', opacity: fade }} data-fade />}
-        <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', padding: '6px 12px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 12, width: 320, textAlign: 'center' }}>
+        <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', padding: '6px 12px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 12, width: 320, textAlign: 'center', pointerEvents: 'auto' }}>
           <FixedLines lines={s.statusLines()} testId="night-status-over" />
         </div>
         {s.sim.done && (
