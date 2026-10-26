@@ -19,7 +19,7 @@ export const SITTING_LINES: Record<Sitting, string> = {
   'leave any time': 'You can leave and come back at any time.',
 }
 
-export const READY_DEFAULT = 'Nothing to have ready: you type into the app. The report is filled in from the results screens afterward.'
+export const READY_DEFAULT = 'Nothing to have on hand: you type into the app. The report is filled in from the results screens afterward.'
 
 export function minutesLine(minutes: number): string {
   return minutes === 1 ? 'About 1 minute.' : `About ${minutes} minutes.`
@@ -90,7 +90,7 @@ export function InstructionScreen({ title, willDo, minutes, sitting, ready = REA
       <p style={{ margin: 0 }} data-sitting={sitting}>
         {SITTING_LINES[sitting]}
       </p>
-      <GroupLabel>What to have ready</GroupLabel>
+      <GroupLabel>What to have on hand</GroupLabel>
       <p style={{ margin: 0 }} data-ready>
         {ready}
       </p>
@@ -113,7 +113,7 @@ export function InstructionScreen({ title, willDo, minutes, sitting, ready = REA
         </Btn>
         {extra}
       </div>
-      {disabled && <Note>The button is available once the lab is ready.</Note>}
+      {disabled && <Note>The button is available once the lab has loaded.</Note>}
     </div>
   )
 }
