@@ -12,7 +12,7 @@ import { SLOT_COUNT, type ListsStore } from './listsStore'
  * every one of them to that.
  */
 
-export const LISTS_MINUTES = 19
+export const LISTS_MINUTES = 15
 
 export const LISTS_WILL_DO = [
   `You will see ${SLOT_COUNT} lists of words, one word at a time. The words come at a steady pace, and you cannot slow or stop them.`,

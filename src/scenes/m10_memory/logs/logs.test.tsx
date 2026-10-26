@@ -24,7 +24,7 @@ function memory(): RawStorage & { raw: string | null } {
 }
 
 function ctxFor(store: LogsStore, progress: ProgressStore): PartContext<LogsStore> {
-  return { seed: store.seed, progress, store, view: 'eye', fov: 75, lowDetail: false, anim: makeRng(1), clock: () => 0, header: null }
+  return { seed: store.seed, progress, store, view: 'eye', fov: 75, lowDetail: false, anim: makeRng(1), clock: () => 0, header: null, openTab: () => {} }
 }
 
 /** Drive a night to dawn by digging at the nearest loose-bark log each time, by placing the body (a scripted student). */

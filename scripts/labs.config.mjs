@@ -670,7 +670,7 @@ export const LABS = [
     retired: [
       { term: /\bDRM\b/g, why: 'the scene never says DRM; the lists are lists of associates, and the word never shown is the critical word' },
       { term: /\boffice\b/gi, why: 'the room is a student’s dorm room (Jon, 2026-10-25); Brewer and Treyens’s office is named only on the reference panel', unless: ['Brewer', 'reference'] },
-      { term: /\btwo lists of associates\b|\bten lists\b|\b26 words\b/gi, why: 'eleven lists, three of associates, and a 31-word recognition test (Jon, 2026-10-25)' },
+      { term: /\btwo lists of associates\b|\bten lists\b|\beleven lists\b|\b26 words\b|\bshort lists?\b|\blong lists?\b|\blist length\b/gi, why: 'seven lists of fifteen words, three of associates, no list-length condition, and a 31-word recognition test (Jon, 2026-10-25 and 2026-10-26)' },
       { term: /\bminimap\b|\btrail\b/gi, why: 'no minimap, mark or trail exists in Part 4' },
       { term: /\bhippocampus model\b|model of the dentate/gi, why: 'the store is not a model of the dentate gyrus, and says so' },
       { term: /\bkeeps? (a |the )?(memory|record|information)\b|\bholds? (a |the )?(memory|record|information)\b/gi, why: 'keep and hold are not used for memory or information (Jon, 2026-10-22)' },
@@ -695,7 +695,7 @@ export const LABS = [
       { says: 'Part 1: a delayed list goes to the counting task and an immediate one straight to recall, and the then-screen says which', test: 'a delayed list goes to the counting task' },
       { says: 'Part 1: each typed number in the counting task is checked against the correct next number', test: 'each typed number is checked against the correct next number' },
       { says: 'Part 1: the three lists of associates are never first or last and are separated by an unrelated list, over 100 seeds', test: 'the lists of associates are never first or last' },
-      { says: 'Part 1: an interrupted list restarts with a reserve of the same length and never a list already shown', test: 'each list unit, interrupted and reloaded, restarts with a reserve list' },
+      { says: 'Part 1: an interrupted list restarts with a reserve list and never a list already shown', test: 'each list unit, interrupted and reloaded, restarts with a reserve list' },
       { says: 'Part 1: the recognition test resumes minus the items answered', test: 'the recognition test resumes minus the items answered' },
       { says: 'Part 1: the matcher treats singular and plural alike and allows one edit for words of five letters or more, none for shorter', test: 'one edit for words of five letters or more' },
       { says: 'Part 1: typed words are classified as studied, from an earlier list, critical, or other', test: 'the typed words are classified' },

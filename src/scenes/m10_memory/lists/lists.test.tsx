@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { ProgressStore } from '../../../sim/memory/progress/store'
 import type { RawStorage } from '../../../sim/memory/progress/storage'
-import { ALL_STUDY_LISTS, listById, LONG_LENGTH, SHORT_LENGTH } from '../../../sim/memory/words/lists'
+import { ALL_STUDY_LISTS, listById, UNRELATED_LENGTH } from '../../../sim/memory/words/lists'
 import { BLANK_S, WORD_ON_S } from '../../../sim/memory/words/design'
 import { ListsStore, SLOT_COUNT, THEN_S, unitOfSlot, type ListResult, type Timers } from './listsStore'
 import { ListsLeft, ListsStage, LISTS_WILL_DO, RECOGNITION_WILL_DO } from './screens'
@@ -160,7 +160,7 @@ describe('nothing gives away Part 1 before its reveal (§12, item 2)', () => {
     const s = make(3)
     const intro = text(render(s.store).stage)
     expect(intro).not.toMatch(FORBIDDEN)
-    expect(intro).toContain('About 19 minutes.')
+    expect(intro).toContain('About 15 minutes.')
     expect(intro).toContain('one sitting')
     expect(intro).toContain(`${SLOT_COUNT} lists of words, one word at a time`)
     expect(LISTS_WILL_DO.join(' ')).not.toMatch(/differ|some lists|kind of list|effect|primacy|recency|serial|position/i)
@@ -207,7 +207,7 @@ describe('typed recall cannot be helped by the browser', () => {
 })
 
 describe('units: completed lists are never redone, an interrupted one restarts with reserve materials (§4.3)', () => {
-  it('each list unit, interrupted and reloaded, restarts with a reserve list of the same length and never a list already shown', () => {
+  it('each list unit, interrupted and reloaded, restarts with a reserve list and never a list already shown', () => {
     for (let k = 0; k < SLOT_COUNT; k++) {
       const s = make(100 + k)
       const shown = new Set<string>()
@@ -224,8 +224,8 @@ describe('units: completed lists are never redone, an interrupted one restarts w
       expect(again.progress.interrupted.map((u) => u.unit)).toContain(unitOfSlot(k))
       const m = again.store.materialsForSlot(k)
       expect(m.materials.list.id).not.toBe(beforeId)
-      const wantLength = listById(beforeId).kind === 'associates' ? SHORT_LENGTH : listById(beforeId).words.length
-      expect(m.materials.list.words.length).toBe(wantLength)
+      expect(m.materials.list.kind).toBe('unrelated')
+      expect(m.materials.list.words.length).toBe(UNRELATED_LENGTH)
       for (const w of m.materials.list.words) expect(shown.has(w), `${w} already shown`).toBe(false)
       expect(m.materials.lostAssociates).toBe(listById(beforeId).kind === 'associates')
       for (let j = 0; j < k; j++) expect(again.progress.isComplete(unitOfSlot(j))).toBe(true)
@@ -237,25 +237,22 @@ describe('units: completed lists are never redone, an interrupted one restarts w
     }
   })
 
-  it('reserves are shared across a length’s pool, in order; a third restart reuses the last reserve and says so', () => {
+  it('reserves are shared by the whole part, in order; a third restart reuses the last reserve and says so', () => {
     let s = make(77)
-    const shortSlots = s.store.plan.slots.filter((x) => x.list.kind === 'unrelated' && x.list.words.length === SHORT_LENGTH).map((x) => x.slot)
     const used: string[] = []
-    for (let slot = 0; slot <= Math.max(...shortSlots.slice(0, 3)); slot++) {
-      if (shortSlots.slice(0, 3).includes(slot)) {
-        s.store.beginList()
-        s = make(77, s.mem)
-        const m = s.store.materialsForSlot(slot)
-        used.push(m.materials.list.id)
-        if (used.length === 3) {
-          expect(m.exhausted).toBe(true)
-          expect(m.materials.list.id).toBe(used[1])
-        }
+    for (let slot = 0; slot < 3; slot++) {
+      s.store.beginList()
+      s = make(77, s.mem)
+      const m = s.store.materialsForSlot(slot)
+      used.push(m.materials.list.id)
+      if (used.length === 3) {
+        expect(m.exhausted).toBe(true)
+        expect(m.materials.list.id).toBe(used[1])
       }
       runList(s, ['tent'])
     }
-    expect(used[0]).toBe(s.store.plan.reserves.short[0].id)
-    expect(used[1]).toBe(s.store.plan.reserves.short[1].id)
+    expect(used[0]).toBe(s.store.plan.reserves[0].id)
+    expect(used[1]).toBe(s.store.plan.reserves[1].id)
   })
 
   it('the recognition test resumes minus the items answered, and a reload with every unit complete lands on the reveal', () => {
@@ -298,14 +295,14 @@ describe('the reveal (§5.6)', () => {
     for (const l of s.store.plan.studied) expect(html).toContain(l.critical!)
     expect(html).toMatch(/data-lines="recognition-scores"/)
     expect(html).toMatch(/data-lines="critical"/)
-    expect((html.match(/data-curve=/g) ?? []).length).toBe(4)
+    expect((html.match(/data-curve=/g) ?? []).length).toBe(2)
     for (const id of ['murdock1962', 'glanzer1966', 'roediger1995-recall', 'roediger1995-table2', 'warning']) expect(html).toContain(`data-reference="${id}"`)
     expect(html).toMatch(/data-pending/)
     expect(html).toContain('The reading prints a list of this kind')
     const right = renderToStaticMarkup(<ListsRight progress={s.progress} />)
     expect(right).toMatch(/data-lines="lists-results"/)
     const rows = resultRows(s.store.results(), s.store.recognitionResult!)
-    expect(rows.length).toBeGreaterThan(10)
+    expect(rows.length).toBe(10)
     expect(rows.join('\n')).toMatch(/critical words typed after their list\s+\d of 3/)
   })
 
@@ -381,15 +378,14 @@ describe('determinism and timing', () => {
       if (now === 'count') s.store.countDone(0, 0)
       s.store.recallDone([])
     }
-    expect(sawCount.filter(Boolean).length).toBe(4)
+    expect(sawCount.filter(Boolean).length).toBe(2)
     expect(sawCount.length).toBe(SLOT_COUNT)
   })
 
-  it('the long lists have twenty words and the short ten; a list of associates has fifteen', () => {
+  it('every list has fifteen words, so no list stands out by its length', () => {
     const s = make(34)
     const lengths = s.store.plan.slots.map((x) => x.list.words.length)
-    expect(lengths.filter((l) => l === LONG_LENGTH).length).toBe(4)
-    expect(lengths.filter((l) => l === SHORT_LENGTH).length).toBe(4)
-    expect(lengths.filter((l) => l === 15).length).toBe(3)
+    expect(lengths.filter((l) => l === UNRELATED_LENGTH).length).toBe(SLOT_COUNT)
+    expect(s.store.plan.slots.filter((x) => x.list.kind === 'associates').length).toBe(3)
   })
 })

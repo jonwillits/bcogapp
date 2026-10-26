@@ -1,13 +1,13 @@
 import type { ProgressStore } from '../../../sim/memory/progress/store'
 import type { UnitId } from '../../../sim/memory/parts'
-import { BLANK_S, WORD_ON_S, materialsFor, planPart1, recallSecondsFor, reservePoolOf, type Part1Plan, type Recall, type SlotMaterials } from '../../../sim/memory/words/design'
+import { BLANK_S, SLOTS, WORD_ON_S, materialsFor, planPart1, recallSecondsFor, type Part1Plan, type Recall, type SlotMaterials } from '../../../sim/memory/words/design'
 import { ASSOCIATE_LISTS, listById, type StudyList } from '../../../sim/memory/words/lists'
 import { allRecognitionAnswered, planRecognition, type Judgment, type RecognitionAnswer, type RecognitionItem } from '../../../sim/memory/words/recognition'
 import type { PartStore } from '../contract'
 import type { ShownRecord } from '../ui'
 
 /**
- * Part 1's state (spec §5): eleven study lists in the plan's order, each a
+ * Part 1's state (spec §5): seven study lists in the plan's order, each a
  * unit of work, then the recognition test, then the reveal. Nothing typed
  * is scored or compared with a list, and no list word is shown back,
  * until the recognition test is complete (`'revealed'`): the panels render
@@ -29,7 +29,7 @@ export interface ListResult {
   countTyped: number
   countWrong: number
   lostAssociates: boolean
-  /** The reserves of the slot's length were exhausted and the last one was used again. */
+  /** The reserves were exhausted and the last one was used again. */
   exhausted: boolean
   shown: ShownRecord[]
   restarts: number
@@ -54,7 +54,7 @@ const REAL_TIMERS: Timers = {
 
 /** The fixed screen between a list and its task is shown this long. */
 export const THEN_S = 1.5
-export const SLOT_COUNT = 11
+export const SLOT_COUNT = SLOTS
 export const RECOGNITION_UNIT: UnitId = 'p1-recognition'
 
 export const unitOfSlot = (slot: number): UnitId => `p1-list-${slot}` as UnitId
@@ -138,11 +138,10 @@ export class ListsStore implements PartStore {
     return this.results().map((r) => listById(r.listId))
   }
 
-  /** How many reserves of a slot's length pool were consumed before this slot, plus this slot's own restarts. */
+  /** How many reserves were consumed by restarts before this slot (one pool for the part), plus this slot's own restarts. */
   reservesUsed(slot: number): number {
-    const pool = reservePoolOf(this.plan, slot)
     let used = 0
-    for (let s = 0; s < slot; s++) if (reservePoolOf(this.plan, s) === pool) used += this.progress.materialsSlot(unitOfSlot(s))
+    for (let s = 0; s < slot; s++) used += this.progress.materialsSlot(unitOfSlot(s))
     return used + this.progress.materialsSlot(unitOfSlot(slot))
   }
 

@@ -10,7 +10,12 @@
  * words in a list share a category or an obvious association; no word is
  * repeated across lists; no word is shared with Part 2's sets, Part 3's
  * item names or the lists of associates (`words.test.ts`). Six lists of
- * each length: four for the design and two reserves (§5.3).
+ * fifteen words, the length of a list of associates: four for the design
+ * and two reserves (§5.3). Jon, 2026-10-26: the list-length condition was
+ * cut to shorten the part (eleven lists were too fatiguing), and one
+ * length of fifteen keeps the lists of associates indistinguishable by
+ * length; the six lists are the first fifteen words of the former
+ * twenty-word lists, which had been vetted by hand.
  *
  * **Lists of associates**: six of the twenty-four lists in the appendix of
  * Roediger and McDermott (1995), printed page 814, transcribed word for
@@ -33,24 +38,14 @@ export interface StudyList {
 
 const list = (id: string, words: string[]): StudyList => ({ id, kind: 'unrelated', words })
 
-/** Six short unrelated lists of ten words. */
-export const UNRELATED_SHORT: StudyList[] = [
-  list('s1', ['tent', 'badge', 'harbor', 'piano', 'locker', 'dentist', 'pumpkin', 'ladder', 'cigar', 'canyon']),
-  list('s2', ['fence', 'trophy', 'tunnel', 'temple', 'robe', 'brick', 'pirate', 'kidney', 'rainbow', 'spoon']),
-  list('s3', ['lobby', 'pole', 'parade', 'salt', 'puppet', 'shell', 'mule', 'glove', 'anchor', 'bubble']),
-  list('s4', ['chess', 'flame', 'sack', 'pony', 'coin', 'hallway', 'lung', 'ribbon', 'wax', 'drum']),
-  list('s5', ['medal', 'fog', 'cart', 'tattoo', 'altar', 'blouse', 'nickel', 'hose', 'jar', 'moose']),
-  list('s6', ['receipt', 'crib', 'glue', 'chapel', 'straw', 'razor', 'dove', 'scar', 'wig', 'pier']),
-]
-
-/** Six long unrelated lists of twenty words. */
-export const UNRELATED_LONG: StudyList[] = [
-  list('l1', ['train', 'gold', 'radio', 'bear', 'sword', 'beach', 'button', 'dollar', 'egg', 'tower', 'rope', 'mask', 'flag', 'skull', 'throne', 'sponge', 'balloon', 'ink', 'hay', 'album']),
-  list('l2', ['letter', 'stone', 'camel', 'bridge', 'knife', 'soup', 'bell', 'pocket', 'tongue', 'garage', 'wire', 'doll', 'cloud', 'lipstick', 'barrel', 'passport', 'pill', 'stamp', 'lawn', 'oak']),
-  list('l3', ['ticket', 'moon', 'cat', 'hammer', 'glass', 'army', 'roof', 'cream', 'leather', 'village', 'diamond', 'jewel', 'nest', 'waist', 'pipe', 'canal', 'cocoa', 'limo', 'banner', 'tomb']),
-  list('l4', ['star', 'wall', 'cowboy', 'meat', 'pool', 'bible', 'pigeon', 'tank', 'pot', 'shadow', 'dice', 'iron', 'yard', 'cane', 'clay', 'necklace', 'stage', 'butler', 'sleeve', 'wave']),
-  list('l5', ['card', 'sun', 'dog', 'cabin', 'oil', 'princess', 'horn', 'armor', 'belt', 'wheat', 'dock', 'lighter', 'statue', 'mustard', 'tray', 'jungle', 'organ', 'doorbell', 'bolt', 'copper']),
-  list('l6', ['page', 'mall', 'bull', 'flower', 'cab', 'liver', 'bomb', 'penny', 'storm', 'kitchen', 'rum', 'chip', 'cord', 'trunk', 'puzzle', 'gown', 'portrait', 'gutter', 'meter', 'cargo']),
+/** Six unrelated lists of fifteen words: four for the design and two reserves. */
+export const UNRELATED: StudyList[] = [
+  list('u1', ['train', 'gold', 'radio', 'bear', 'sword', 'beach', 'button', 'dollar', 'egg', 'tower', 'rope', 'mask', 'flag', 'skull', 'throne']),
+  list('u2', ['letter', 'stone', 'camel', 'bridge', 'knife', 'soup', 'bell', 'pocket', 'tongue', 'garage', 'wire', 'doll', 'cloud', 'lipstick', 'barrel']),
+  list('u3', ['ticket', 'moon', 'cat', 'hammer', 'glass', 'army', 'roof', 'cream', 'leather', 'village', 'diamond', 'jewel', 'nest', 'waist', 'pipe']),
+  list('u4', ['star', 'wall', 'cowboy', 'meat', 'pool', 'bible', 'pigeon', 'tank', 'pot', 'shadow', 'dice', 'iron', 'yard', 'cane', 'clay']),
+  list('u5', ['card', 'sun', 'dog', 'cabin', 'oil', 'princess', 'horn', 'armor', 'belt', 'wheat', 'dock', 'lighter', 'statue', 'mustard', 'tray']),
+  list('u6', ['page', 'mall', 'bull', 'flower', 'cab', 'liver', 'bomb', 'penny', 'storm', 'kitchen', 'rum', 'chip', 'cord', 'trunk', 'puzzle']),
 ]
 
 /** Eight new words for the recognition test, of the same kind as the unrelated lists' words and on none of them. */
@@ -70,11 +65,10 @@ export const ASSOCIATE_LISTS: StudyList[] = [
   { id: 'a-spider', kind: 'associates', critical: 'spider', words: ['web', 'insect', 'bug', 'fright', 'fly', 'arachnid', 'crawl', 'tarantula', 'poison', 'bite', 'creepy', 'animal', 'ugly', 'feelers', 'small'] },
 ]
 
-export const SHORT_LENGTH = 10
-export const LONG_LENGTH = 20
+export const UNRELATED_LENGTH = 15
 export const ASSOCIATES_LENGTH = 15
 
-export const ALL_STUDY_LISTS: StudyList[] = [...UNRELATED_SHORT, ...UNRELATED_LONG, ...ASSOCIATE_LISTS]
+export const ALL_STUDY_LISTS: StudyList[] = [...UNRELATED, ...ASSOCIATE_LISTS]
 
 export function listById(id: string): StudyList {
   const l = ALL_STUDY_LISTS.find((x) => x.id === id)

@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { planPart1 } from './design'
-import { criticalRecalled, listLength, orderOfOutput, priorListIntrusions, serialPositionCurves, type RecallRecord } from './scoring'
+import { criticalRecalled, orderOfOutput, priorListIntrusions, serialPositionCurves, type RecallRecord } from './scoring'
 import { planRecognition, scoreRecognition, allRecognitionAnswered, ITEM_TYPES, RECOGNITION_ITEMS, type RecognitionAnswer } from './recognition'
-import { LONG_LENGTH, SHORT_LENGTH } from './lists'
+import { UNRELATED_LENGTH } from './lists'
 
 /** A scripted subject: recalls the first three and the last three of every list, and types the critical word after every list of associates. */
 function scripted(seed: number, extra: (i: number) => string[] = () => []): RecallRecord[] {
@@ -18,13 +18,12 @@ function scripted(seed: number, extra: (i: number) => string[] = () => []): Reca
 }
 
 describe('serial-position curves', () => {
-  it('four conditions, two lists each, with the ends at 1 and the middle at 0 for the scripted subject', () => {
+  it('two conditions, two lists each, with the ends at 1 and the middle at 0 for the scripted subject', () => {
     const curves = serialPositionCurves(scripted(3))
-    expect(curves.map((c) => c.condition)).toEqual(['short-immediate', 'short-delayed', 'long-immediate', 'long-delayed'])
+    expect(curves.map((c) => c.condition)).toEqual(['immediate', 'delayed'])
     for (const c of curves) {
       expect(c.lists).toBe(2)
-      const n = c.condition.startsWith('short') ? SHORT_LENGTH : LONG_LENGTH
-      expect(c.byPosition.length).toBe(n)
+      expect(c.byPosition.length).toBe(UNRELATED_LENGTH)
       expect(c.byPosition.slice(0, 3)).toEqual([1, 1, 1])
       expect(c.byPosition.slice(-3)).toEqual([1, 1, 1])
       expect(c.byPosition.slice(3, -3).every((v) => v === 0)).toBe(true)
@@ -37,12 +36,7 @@ describe('serial-position curves', () => {
   })
 })
 
-describe('list length, intrusions, critical words, order of output', () => {
-  it('list length compares immediate lists only: six words of ten against six of twenty', () => {
-    const ll = listLength(scripted(4))
-    expect(ll.short).toEqual({ lists: 2, proportion: 0.6, count: 6 })
-    expect(ll.long).toEqual({ lists: 2, proportion: 0.3, count: 6 })
-  })
+describe('intrusions, critical words, order of output', () => {
   it('a word from an earlier list is a prior-list intrusion, with its source', () => {
     const records = scripted(5, (i) => (i === 4 ? [scripted(5)[1].list.words[5]] : []))
     const { count, intrusions } = priorListIntrusions(records)
@@ -59,7 +53,7 @@ describe('list length, intrusions, critical words, order of output', () => {
   })
   it('order of output: the scripted subject starts every immediate recall with a last-three word', () => {
     const o = orderOfOutput(scripted(7))
-    expect(o.lists).toBe(4)
+    expect(o.lists).toBe(2)
     expect(o.proportion).toBe(1)
   })
 })
@@ -79,7 +73,7 @@ describe('the recognition test', () => {
     expect(JSON.stringify(planRecognition(p))).toBe(JSON.stringify(items))
     expect(items.map((i) => i.word)).not.toEqual(planRecognition(planPart1(10)).map((i) => i.word))
   })
-  it('the studied associates are positions 1, 8 and 10; the unrelated words come from the middle of four lists, two each', () => {
+  it('the studied associates are positions 1, 8 and 10; the unrelated words come from the middle of the four lists, two each', () => {
     const p = planPart1(11)
     const items = planRecognition(p)
     for (const it of items.filter((i) => i.type === 'associates-studied')) {
@@ -92,8 +86,8 @@ describe('the recognition test', () => {
     for (const it of unrelated) {
       const l = p.slots.find((s) => s.list.id === it.fromList)!.list
       const pos = l.words.indexOf(it.word) + 1
-      if (l.words.length === SHORT_LENGTH) expect(pos).toBeGreaterThanOrEqual(4), expect(pos).toBeLessThanOrEqual(7)
-      else expect(pos).toBeGreaterThanOrEqual(6), expect(pos).toBeLessThanOrEqual(15)
+      expect(pos).toBeGreaterThanOrEqual(4)
+      expect(pos).toBeLessThanOrEqual(UNRELATED_LENGTH - 3)
     }
     expect(items.filter((i) => i.type === 'critical-studied').map((i) => i.word).sort()).toEqual(p.studied.map((l) => l.critical!).sort())
     expect(items.filter((i) => i.type === 'critical-control').map((i) => i.word).sort()).toEqual(p.controls.map((l) => l.critical!).sort())
@@ -101,7 +95,7 @@ describe('the recognition test', () => {
   it('a studied list of associates lost to a restart moves to the controls', () => {
     const p = planPart1(12)
     const lost = p.slots.find((s) => s.list.kind === 'associates')!
-    const studiedLists = p.slots.map((s) => (s.slot === lost.slot ? p.reserves.short[0] : s.list))
+    const studiedLists = p.slots.map((s) => (s.slot === lost.slot ? p.reserves[0] : s.list))
     const items = planRecognition(p, studiedLists)
     expect(items.filter((i) => i.type === 'associates-studied').length).toBe(6)
     expect(items.filter((i) => i.type === 'critical-studied').length).toBe(2)

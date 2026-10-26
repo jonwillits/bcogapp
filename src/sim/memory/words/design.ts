@@ -1,14 +1,17 @@
 import { makeRng, type Rng } from '../../random'
-import { ASSOCIATE_LISTS, LONG_LENGTH, SHORT_LENGTH, UNRELATED_LONG, UNRELATED_SHORT, type StudyList } from './lists'
+import { ASSOCIATE_LISTS, UNRELATED, type StudyList } from './lists'
 
 /**
- * Part 1's design (spec §5.1, with Jon's answer 5 of 2026-10-25): eleven
- * study lists in an order the seed fixes. Eight unrelated lists, four
- * short and four long, and within each length two recalled at once and
- * two after the delay; three lists of associates, all recalled at once,
- * never first or last, and separated from one another by at least one
- * unrelated list. Of the six lists of associates the seed studies three
- * and holds three as controls for the recognition test.
+ * Part 1's design (spec §5.1, with Jon's answer 5 of 2026-10-25 and his
+ * cut of 2026-10-26): seven study lists in an order the seed fixes. Four
+ * unrelated lists of fifteen words, two recalled at once and two after
+ * the delay; three lists of associates, all recalled at once, never first
+ * or last, and separated from one another by at least one unrelated list
+ * (with seven slots that puts them at the second, fourth and sixth). Of
+ * the six lists of associates the seed studies three and holds three as
+ * controls for the recognition test. The list-length condition of the
+ * spec (four short and four long lists) was cut on the walk: eleven lists
+ * were too fatiguing, and list length served the least of the objectives.
  */
 
 export type Recall = 'immediate' | 'delayed'
@@ -18,16 +21,16 @@ export const WORD_ON_S = 1.5
 export const BLANK_S = 0.3
 /** Counting backward by 3s, typed one number at a time, each checked. */
 export const DELAY_S = 30
-export const RECALL_S_SHORT = 45
-export const RECALL_S_LONG = 60
-export const RECALL_S_ASSOCIATES = 60
+/** Every list, unrelated or of associates, gets the same time to type. */
+export const RECALL_S = 60
 
-export const SLOTS = 11
+export const SLOTS = 7
 export const ASSOCIATE_SLOTS = 3
-export const RESERVES_PER_LENGTH = 2
+export const UNRELATED_SLOTS = SLOTS - ASSOCIATE_SLOTS
+export const RESERVES = 2
 
 export interface ListSlot {
-  /** 0 to 10, the order of study. */
+  /** 0 to 6, the order of study. */
   slot: number
   list: StudyList
   recall: Recall
@@ -41,13 +44,12 @@ export interface Part1Plan {
   /** The three lists of associates studied, and the three held back as controls. */
   studied: StudyList[]
   controls: StudyList[]
-  /** The reserve unrelated lists of each length, in the order a restart takes them. */
-  reserves: { short: StudyList[]; long: StudyList[] }
+  /** The reserve unrelated lists, in the order a restart takes them; one pool for the whole part. */
+  reserves: StudyList[]
 }
 
-export function recallSecondsFor(list: StudyList): number {
-  if (list.kind === 'associates') return RECALL_S_ASSOCIATES
-  return list.words.length <= SHORT_LENGTH ? RECALL_S_SHORT : RECALL_S_LONG
+export function recallSecondsFor(_list: StudyList): number {
+  return RECALL_S
 }
 
 function shuffled<T>(items: T[], rng: Rng): T[] {
@@ -59,7 +61,7 @@ function shuffled<T>(items: T[], rng: Rng): T[] {
   return out
 }
 
-/** Three positions of eleven, none first or last, no two adjacent: the slots the lists of associates take. */
+/** Three positions of seven, none first or last, no two adjacent: the slots the lists of associates take. */
 export function associatePositions(rng: Rng): number[] {
   for (;;) {
     const picked = shuffled(Array.from({ length: SLOTS - 2 }, (_, i) => i + 1), rng).slice(0, ASSOCIATE_SLOTS).sort((a, b) => a - b)
@@ -69,17 +71,13 @@ export function associatePositions(rng: Rng): number[] {
 
 export function planPart1(seed: number): Part1Plan {
   const rng = makeRng(seed ^ 0x1a7e)
-  const shorts = shuffled(UNRELATED_SHORT, rng)
-  const longs = shuffled(UNRELATED_LONG, rng)
+  const pool = shuffled(UNRELATED, rng)
   const associates = shuffled(ASSOCIATE_LISTS, rng)
   const studied = associates.slice(0, ASSOCIATE_SLOTS)
   const controls = associates.slice(ASSOCIATE_SLOTS)
-  // Four of each length for the design; within each length two immediate and two delayed, in a seeded order.
+  // Four unrelated lists for the design, two immediate and two delayed, in a seeded order.
   const unrelated: { list: StudyList; recall: Recall }[] = shuffled(
-    [
-      ...shorts.slice(0, 4).map((list, i) => ({ list, recall: (i < 2 ? 'immediate' : 'delayed') as Recall })),
-      ...longs.slice(0, 4).map((list, i) => ({ list, recall: (i < 2 ? 'immediate' : 'delayed') as Recall })),
-    ],
+    pool.slice(0, UNRELATED_SLOTS).map((list, i) => ({ list, recall: (i < UNRELATED_SLOTS / 2 ? 'immediate' : 'delayed') as Recall })),
     rng,
   )
   const positions = associatePositions(rng)
@@ -94,7 +92,7 @@ export function planPart1(seed: number): Part1Plan {
       slots.push({ slot: s, list, recall, countFrom: recall === 'delayed' ? 200 + rng.int(800) : null })
     }
   }
-  return { seed, slots, studied, controls, reserves: { short: shorts.slice(4, 6), long: longs.slice(4, 6) } }
+  return { seed, slots, studied, controls, reserves: pool.slice(UNRELATED_SLOTS, UNRELATED_SLOTS + RESERVES) }
 }
 
 export interface SlotMaterials {
@@ -106,29 +104,21 @@ export interface SlotMaterials {
 }
 
 /**
- * The materials for a slot given how many reserves of that slot's length
- * have already been consumed by restarts, over the whole part (the
- * progress layer counts them): 0 is the slot's own list; 1 and 2 are the
- * reserve lists of its length. A slot holding a list of associates has no
- * reserve of its own kind and takes a short unrelated reserve instead,
- * flagged `lostAssociates`. Beyond the reserves there is nothing left, and
- * the result is null.
+ * The materials for a slot given how many reserves have already been
+ * consumed by restarts, over the whole part (the progress layer counts
+ * them): 0 is the slot's own list; 1 and 2 are the reserve lists. A slot
+ * holding a list of associates has no reserve of its own kind and takes an
+ * unrelated reserve instead, flagged `lostAssociates`. Beyond the reserves
+ * there is nothing left, and the result is null.
  */
 export function materialsFor(plan: Part1Plan, slot: number, reservesUsed: number): SlotMaterials | null {
   const s = plan.slots[slot]
   if (!s) throw new Error(`no slot ${slot}`)
   if (reservesUsed === 0) return { list: s.list, recall: s.recall, countFrom: s.countFrom, lostAssociates: false }
-  if (reservesUsed > RESERVES_PER_LENGTH) return null
-  const long = s.list.kind === 'unrelated' && s.list.words.length === LONG_LENGTH
-  const reserve = (long ? plan.reserves.long : plan.reserves.short)[reservesUsed - 1]
+  if (reservesUsed > RESERVES) return null
+  const reserve = plan.reserves[reservesUsed - 1]
   if (!reserve) return null
   return { list: reserve, recall: s.recall, countFrom: s.countFrom, lostAssociates: s.list.kind === 'associates' }
-}
-
-/** Which reserve pool a slot draws from, for the progress layer's count. */
-export function reservePoolOf(plan: Part1Plan, slot: number): 'short' | 'long' {
-  const s = plan.slots[slot]
-  return s.list.kind === 'unrelated' && s.list.words.length === LONG_LENGTH ? 'long' : 'short'
 }
 
 /** The next number in the counting task, or whether a typed one is right. */

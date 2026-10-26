@@ -29,7 +29,7 @@ const f2 = (v: number) => v.toFixed(2)
 it('crib: what the parts should read', () => {
   // Part 1
   const p1 = planPart1(1000)
-  say(`Part 1: eleven lists in the seed's order; for seed 1000 the lists of associates sit at slots ${p1.slots.map((s, i) => (s.list.kind === 'associates' ? i + 1 : null)).filter(Boolean).join(', ')} (never 1 or 11, never adjacent); studied ${p1.studied.map((l) => l.critical).join(', ')}, controls ${p1.controls.map((l) => l.critical).join(', ')}.`)
+  say(`Part 1: seven lists of fifteen words in the seed's order; for seed 1000 the lists of associates sit at slots ${p1.slots.map((s, i) => (s.list.kind === 'associates' ? i + 1 : null)).filter(Boolean).join(', ')} (never 1 or 7, never adjacent); studied ${p1.studied.map((l) => l.critical).join(', ')}, controls ${p1.controls.map((l) => l.critical).join(', ')}.`)
   say(`Part 1: the recognition test has ${planRecognition(p1).length} words; the six lists of associates are ${ASSOCIATE_LISTS.map((l) => l.critical).join(', ')}.`)
   say(`Part 2: three word sets (${WORD_SETS.map((w) => w.id).join(', ')}), the scrambled one always first.`)
   say(`Part 3: ${ITEMS.length} checklist items, ${FITTING.length} fitting and ${UNFITTING.length} not, each present in one arrangement; every present item in view at least 4 s of 30, by frustum test.`)

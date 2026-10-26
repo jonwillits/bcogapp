@@ -12,11 +12,11 @@
 
 export type Part = 0 | 1 | 2 | 3 | 4 | 5
 
-/** Part 1 has eleven study lists (Jon, 2026-10-25: three lists of associates among eight unrelated lists) and one recognition test. */
-export const PART1_LISTS = 11
+/** Part 1 has seven study lists (Jon, 2026-10-25: three lists of associates; 2026-10-26: among four unrelated lists, the list-length condition cut) and one recognition test. */
+export const PART1_LISTS = 7
 
 export type UnitId =
-  | `p1-list-${number}` // each study list and its recall, 0 to 10
+  | `p1-list-${number}` // each study list and its recall, 0 to 6
   | 'p1-recognition'
   | 'p2-first'
   | 'p2-second'
@@ -55,7 +55,7 @@ export function unitsOfPart(part: Part): UnitId[] {
  * with an unrelated reserve list, which `words/` arranges.
  */
 export function reservesFor(unit: UnitId): number {
-  if (unit.startsWith('p1-list')) return 3 // the list, then two unrelated reserves of its length
+  if (unit.startsWith('p1-list')) return 3 // the list, then two unrelated reserves
   if (unit === 'p1-recognition') return 1 // the same test resumes, minus the items answered
   if (unit.startsWith('p2')) return 2 // the set, then the third set
   if (unit === 'p3-room') return 2 // the arrangement, then the other arrangement

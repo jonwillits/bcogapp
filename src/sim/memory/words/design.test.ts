@@ -1,21 +1,21 @@
 import { describe, it, expect } from 'vitest'
-import { countIsRight, materialsFor, nextCount, planPart1, recallSecondsFor, reservePoolOf, SLOTS, WORD_ON_S, BLANK_S, DELAY_S } from './design'
-import { ASSOCIATE_LISTS, LONG_LENGTH, SHORT_LENGTH } from './lists'
+import { countIsRight, materialsFor, nextCount, planPart1, recallSecondsFor, RECALL_S, SLOTS, WORD_ON_S, BLANK_S, DELAY_S } from './design'
+import { ASSOCIATE_LISTS, UNRELATED_LENGTH } from './lists'
 
 const SEEDS = Array.from({ length: 100 }, (_, i) => 1000 + i)
 
 describe('Part 1’s design over 100 seeds (§14)', () => {
-  it('eleven lists: four short and four long unrelated, two immediate and two delayed of each, and three of associates recalled at once', () => {
+  it('seven lists of fifteen words: four unrelated, two immediate and two delayed, and three of associates recalled at once', () => {
     for (const seed of SEEDS) {
       const p = planPart1(seed)
       expect(p.slots.length).toBe(SLOTS)
+      expect(SLOTS).toBe(7)
       const by = (f: (s: (typeof p.slots)[number]) => boolean) => p.slots.filter(f).length
       expect(by((s) => s.list.kind === 'associates'), `seed ${seed}`).toBe(3)
       expect(by((s) => s.list.kind === 'associates' && s.recall === 'immediate')).toBe(3)
-      expect(by((s) => s.list.kind === 'unrelated' && s.list.words.length === SHORT_LENGTH && s.recall === 'immediate')).toBe(2)
-      expect(by((s) => s.list.kind === 'unrelated' && s.list.words.length === SHORT_LENGTH && s.recall === 'delayed')).toBe(2)
-      expect(by((s) => s.list.kind === 'unrelated' && s.list.words.length === LONG_LENGTH && s.recall === 'immediate')).toBe(2)
-      expect(by((s) => s.list.kind === 'unrelated' && s.list.words.length === LONG_LENGTH && s.recall === 'delayed')).toBe(2)
+      expect(by((s) => s.list.kind === 'unrelated' && s.recall === 'immediate')).toBe(2)
+      expect(by((s) => s.list.kind === 'unrelated' && s.recall === 'delayed')).toBe(2)
+      for (const s of p.slots) expect(s.list.words.length, `seed ${seed}, slot ${s.slot}`).toBe(UNRELATED_LENGTH)
       expect(new Set(p.slots.map((s) => s.list.id)).size).toBe(SLOTS)
     }
   })
@@ -28,16 +28,14 @@ describe('Part 1’s design over 100 seeds (§14)', () => {
       for (let i = 1; i < at.length; i++) expect(at[i] - at[i - 1], `seed ${seed}`).toBeGreaterThanOrEqual(2)
     }
   })
-  it('three studied lists of associates and three controls, all six used, and every position used somewhere over the seeds', () => {
-    const used = new Set<number>()
+  it('three studied lists of associates and three controls, all six used; with seven slots the rules put them at the second, fourth and sixth', () => {
     for (const seed of SEEDS) {
       const p = planPart1(seed)
       expect(p.studied.length).toBe(3)
       expect(p.controls.length).toBe(3)
       expect(new Set([...p.studied, ...p.controls].map((l) => l.id)).size).toBe(6)
-      for (const s of p.slots) if (s.list.kind === 'associates') used.add(s.slot)
+      expect(p.slots.filter((s) => s.list.kind === 'associates').map((s) => s.slot)).toEqual([1, 3, 5])
     }
-    for (let s = 1; s < SLOTS - 1; s++) expect(used.has(s), `slot ${s}`).toBe(true)
     expect(ASSOCIATE_LISTS.length).toBe(6)
   })
   it('a delayed list has a three-digit number to count from; an immediate one has none', () => {
@@ -57,36 +55,33 @@ describe('Part 1’s design over 100 seeds (§14)', () => {
 })
 
 describe('reserve materials (§4.3, §5.3)', () => {
-  it('a restart takes an unrelated reserve of the same length, two per length, and then nothing', () => {
+  it('a restart takes an unrelated reserve, two for the whole part, and then nothing', () => {
     const p = planPart1(1234)
-    const shortSlot = p.slots.find((s) => s.list.kind === 'unrelated' && s.list.words.length === SHORT_LENGTH)!
-    const longSlot = p.slots.find((s) => s.list.kind === 'unrelated' && s.list.words.length === LONG_LENGTH)!
-    const own = materialsFor(p, shortSlot.slot, 0)!
-    expect(own.list.id).toBe(shortSlot.list.id)
+    const slot = p.slots.find((s) => s.list.kind === 'unrelated')!
+    const own = materialsFor(p, slot.slot, 0)!
+    expect(own.list.id).toBe(slot.list.id)
     expect(own.lostAssociates).toBe(false)
-    const r1 = materialsFor(p, shortSlot.slot, 1)!
-    const r2 = materialsFor(p, shortSlot.slot, 2)!
-    expect(r1.list.words.length).toBe(SHORT_LENGTH)
-    expect(r2.list.words.length).toBe(SHORT_LENGTH)
+    const r1 = materialsFor(p, slot.slot, 1)!
+    const r2 = materialsFor(p, slot.slot, 2)!
+    expect(r1.list.words.length).toBe(UNRELATED_LENGTH)
+    expect(r2.list.words.length).toBe(UNRELATED_LENGTH)
     expect(r1.list.id).not.toBe(r2.list.id)
     expect(p.slots.some((s) => s.list.id === r1.list.id)).toBe(false)
-    expect(materialsFor(p, shortSlot.slot, 3)).toBeNull()
-    const l1 = materialsFor(p, longSlot.slot, 1)!
-    expect(l1.list.words.length).toBe(LONG_LENGTH)
-    expect(l1.recall).toBe(longSlot.recall)
-    expect(l1.countFrom).toBe(longSlot.countFrom)
-    expect(reservePoolOf(p, longSlot.slot)).toBe('long')
-    expect(reservePoolOf(p, shortSlot.slot)).toBe('short')
+    expect(p.slots.some((s) => s.list.id === r2.list.id)).toBe(false)
+    expect(r1.recall).toBe(slot.recall)
+    expect(r1.countFrom).toBe(slot.countFrom)
+    expect(materialsFor(p, slot.slot, 3)).toBeNull()
+    expect(p.reserves.length).toBe(2)
   })
-  it('a list of associates has no reserve of its kind: the restart takes a short unrelated list and says the list of associates was lost', () => {
+  it('a list of associates has no reserve of its kind: the restart takes an unrelated list and says the list of associates was lost', () => {
     const p = planPart1(55)
     const a = p.slots.find((s) => s.list.kind === 'associates')!
     const m = materialsFor(p, a.slot, 1)!
     expect(m.list.kind).toBe('unrelated')
-    expect(m.list.words.length).toBe(SHORT_LENGTH)
+    expect(m.list.words.length).toBe(UNRELATED_LENGTH)
     expect(m.lostAssociates).toBe(true)
     expect(m.recall).toBe('immediate')
-    expect(reservePoolOf(p, a.slot)).toBe('short')
+    expect(m.list.id).toBe(p.reserves[0].id)
   })
 })
 
@@ -96,7 +91,8 @@ describe('presentation and the counting task', () => {
     expect(BLANK_S).toBeGreaterThan(0)
     expect(BLANK_S).toBeLessThan(0.5)
     expect(DELAY_S).toBe(30)
-    expect(recallSecondsFor(planPart1(1).slots.find((s) => s.list.kind === 'associates')!.list)).toBe(60)
+    expect(RECALL_S).toBe(60)
+    for (const s of planPart1(1).slots) expect(recallSecondsFor(s.list)).toBe(RECALL_S)
   })
   it('each typed number is checked against the correct next number', () => {
     expect(nextCount(300, 0)).toBe(297)

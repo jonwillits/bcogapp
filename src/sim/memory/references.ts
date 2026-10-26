@@ -31,11 +31,11 @@ export interface Reference {
 export const REFERENCES: Reference[] = [
   {
     id: 'murdock1962',
-    title: 'Serial position and list length',
+    title: 'The serial-position curve',
     source: 'Murdock (1962), The serial position effect of free recall',
-    where: 'the serial-position curves by list length',
+    where: 'the serial-position curves: primacy and recency',
     values: null,
-    differed: 'Lists of 10 to 40 words, read aloud at one or two seconds a word, with written recall, over many lists per person.',
+    differed: 'Lists of 10 to 40 words, read aloud at one or two seconds a word, with written recall, over many lists per person; here, one length of 15.',
   },
   {
     id: 'glanzer1966',

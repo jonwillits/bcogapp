@@ -139,7 +139,7 @@ describe('the order of the parts', () => {
     expect(t.canOpen(5)).toBe(true)
   })
 
-  it('Part 1 is finished only when all eleven lists and the recognition test are complete', () => {
+  it('Part 1 is finished only when all seven lists and the recognition test are complete', () => {
     const s = new ProgressStore(memoryStorage(), 8)
     for (const u of unitsOfPart(1)) if (u !== 'p1-recognition') s.complete(u, {})
     expect(s.partComplete(1)).toBe(false)

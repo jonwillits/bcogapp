@@ -1,5 +1,5 @@
 import { makeRng, type Rng } from '../../random'
-import { LONG_LENGTH, NEW_WORDS, SHORT_LENGTH, type StudyList } from './lists'
+import { NEW_WORDS, type StudyList } from './lists'
 import type { Part1Plan } from './design'
 
 /**
@@ -41,11 +41,9 @@ function shuffled<T>(items: T[], rng: Rng): T[] {
   return out
 }
 
-/** The middle positions a studied unrelated word is taken from: 4 to 7 of a short list, 6 to 15 of a long one (1-based). */
+/** The middle positions a studied unrelated word is taken from: neither the first three nor the last three, so 4 to 12 of a list of fifteen (1-based). */
 export function middlePositions(list: StudyList): number[] {
   const n = list.words.length
-  if (n === SHORT_LENGTH) return [4, 5, 6, 7]
-  if (n === LONG_LENGTH) return Array.from({ length: 10 }, (_, i) => i + 6)
   return Array.from({ length: Math.max(1, n - 6) }, (_, i) => i + 4)
 }
 
@@ -53,8 +51,7 @@ export function middlePositions(list: StudyList): number[] {
  * Build the test from the plan and the lists actually studied (which can
  * differ from the plan where a restart replaced one): 9 words from the
  * studied lists of associates at positions 1, 8 and 10; 8 from the
- * unrelated lists, two from each of four chosen by the seed, from the
- * middle positions; the 3 critical words of the studied lists; the 3 of
+ * unrelated lists, two from each of the four, from the middle positions; the 3 critical words of the studied lists; the 3 of
  * the control lists; 8 new words.
  */
 export function planRecognition(plan: Part1Plan, studiedLists: StudyList[] = plan.slots.map((s) => s.list)): RecognitionItem[] {

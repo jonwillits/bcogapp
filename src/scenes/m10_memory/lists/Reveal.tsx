@@ -1,8 +1,8 @@
 import { Panel } from '../../../components/Panel'
 import type { ProgressStore } from '../../../sim/memory/progress/store'
 import { referenceById } from '../../../sim/memory/references'
-import { listById, SHORT_LENGTH } from '../../../sim/memory/words/lists'
-import { classifyAll, conditionOf, criticalRecalled, listLength, orderOfOutput, priorListIntrusions, serialPositionCurves, type Condition, type RecallRecord } from '../../../sim/memory/words/scoring'
+import { listById, UNRELATED_LENGTH } from '../../../sim/memory/words/lists'
+import { classifyAll, conditionOf, criticalRecalled, orderOfOutput, priorListIntrusions, serialPositionCurves, type Condition, type RecallRecord } from '../../../sim/memory/words/scoring'
 import { ITEM_TYPES, ITEM_TYPE_LABEL, scoreRecognition, type RecognitionAnswer, type RecognitionItem } from '../../../sim/memory/words/recognition'
 import { READING_PRINTS_LINE, RESTARTED_LINE } from '../lines'
 import { Content, FixedLines, GroupLabel, Note, ReferencePanel, RIGHT_STYLE, StagePanel, row, shownSummary, type ShownRecord } from '../ui'
@@ -16,10 +16,8 @@ import { RECOGNITION_UNIT, SLOT_COUNT, unitOfSlot, type ListResult, type Recogni
  */
 
 const CONDITION_LABEL: Record<Condition, string> = {
-  'short-immediate': 'short list, typed at once',
-  'short-delayed': 'short list, after counting',
-  'long-immediate': 'long list, typed at once',
-  'long-delayed': 'long list, after counting',
+  immediate: 'typed at once',
+  delayed: 'after counting',
 }
 
 /** The records as the scorer wants them, from what the units saved. */
@@ -77,17 +75,12 @@ function CurvePlot({ byPosition, bins, label }: { byPosition: number[]; bins: { 
 export function resultRows(results: ListResult[], recognition: RecognitionResult): string[] {
   const records = recordsOf(results)
   const curves = serialPositionCurves(records)
-  const ll = listLength(records)
   const intr = priorListIntrusions(records)
   const crit = criticalRecalled(records)
   const scores = scoreRecognition(recognition.items, recognition.answers)
   const order = orderOfOutput(records)
   const rows: string[] = []
-  for (const c of curves) rows.push(row(`${CONDITION_LABEL[c.condition]}: first three / middle / last three`, `${c.bins.first.toFixed(2)} ${c.bins.middle.toFixed(2)} ${c.bins.last.toFixed(2)}`, 52))
-  rows.push(row('short lists typed at once: proportion recalled', ll.short.proportion, 52))
-  rows.push(row('long lists typed at once: proportion recalled', ll.long.proportion, 52))
-  rows.push(row('short lists typed at once: words recalled', ll.short.count, 52, 1))
-  rows.push(row('long lists typed at once: words recalled', ll.long.count, 52, 1))
+  for (const c of curves) rows.push(row(`lists ${CONDITION_LABEL[c.condition]}: first three / middle / last three`, `${c.bins.first.toFixed(2)} ${c.bins.middle.toFixed(2)} ${c.bins.last.toFixed(2)}`, 52))
   rows.push(row('words from earlier lists (prior-list intrusions)', String(intr.count), 52))
   rows.push(row('critical words typed after their list', `${crit.filter((c) => c.recalled).length} of ${crit.length}`, 52))
   for (const sc of scores) rows.push(row(`${ITEM_TYPE_LABEL[sc.type]}: called old / remember / know`, `${sc.old.toFixed(2)} ${sc.remember.toFixed(2)} ${sc.know.toFixed(2)}`, 52))
@@ -108,7 +101,6 @@ export function ListsReveal({ progress }: { progress: ProgressStore }) {
   const records = recordsOf(results)
   const classified = classifyAll(records)
   const curves = serialPositionCurves(records)
-  const ll = listLength(records)
   const intr = priorListIntrusions(records)
   const crit = criticalRecalled(records)
   const scores = scoreRecognition(recognition.items, recognition.answers)
@@ -142,18 +134,17 @@ export function ListsReveal({ progress }: { progress: ProgressStore }) {
             </div>
           )
         })}
-        <GroupLabel>2. The serial-position curves and list length</GroupLabel>
-        <Note>Each curve is the proportion of lists on which the word at that position was typed. One student’s curves are noisy, so the three bins (the first three positions, the middle, the last three) are the bars behind each curve. The rise at the first positions is primacy and the rise at the last is recency; the reading’s account has a delay filled with counting remove recency, since the last words are no longer in rehearsal, and spare primacy.</Note>
+        <GroupLabel>2. The serial-position curves</GroupLabel>
+        <Note>{`Every list had ${UNRELATED_LENGTH} words. Each curve is the proportion of lists on which the word at that position was typed. One student’s curves are noisy, so the three bins (the first three positions, the middle, the last three) are the bars behind each curve. The rise at the first positions is primacy and the rise at the last is recency; the reading’s account has a delay filled with counting remove recency, since the last words are no longer in rehearsal, and spare primacy.`}</Note>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           {curves.map((c) => (
             <div key={c.condition} style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-              <Note>{`${CONDITION_LABEL[c.condition]} (${c.lists} lists)`}</Note>
+              <Note>{`lists ${CONDITION_LABEL[c.condition]} (${c.lists} lists)`}</Note>
               <CurvePlot byPosition={c.byPosition} bins={c.bins} label={c.condition} />
             </div>
           ))}
         </div>
-        <FixedLines lines={curves.map((c) => row(`${CONDITION_LABEL[c.condition]}: bins`, `${c.bins.first.toFixed(2)} ${c.bins.middle.toFixed(2)} ${c.bins.last.toFixed(2)}`, 40))} testId="bins" />
-        <FixedLines lines={[row(`short lists (${SHORT_LENGTH} words), typed at once: proportion`, ll.short.proportion, 48), row('words recalled, on average', ll.short.count, 48, 1), row('long lists (20 words), typed at once: proportion', ll.long.proportion, 48), row('words recalled, on average', ll.long.count, 48, 1)]} testId="list-length" />
+        <FixedLines lines={curves.map((c) => row(`lists ${CONDITION_LABEL[c.condition]}: bins`, `${c.bins.first.toFixed(2)} ${c.bins.middle.toFixed(2)} ${c.bins.last.toFixed(2)}`, 40))} testId="bins" />
         <ReferencePanel reference={referenceById('murdock1962')} />
         <ReferencePanel reference={referenceById('glanzer1966')} />
         <GroupLabel>3. Words from earlier lists</GroupLabel>

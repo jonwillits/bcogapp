@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { classify, editDistance, matches, normalize, singular } from './matcher'
-import { ASSOCIATE_LISTS, UNRELATED_LONG, UNRELATED_SHORT } from './lists'
+import { ASSOCIATE_LISTS, UNRELATED } from './lists'
 
 describe('matching fixtures (§5.4, §14)', () => {
   it('lower case and trimmed', () => {
@@ -40,13 +40,14 @@ describe('matching fixtures (§5.4, §14)', () => {
 })
 
 describe('classification', () => {
-  const list = UNRELATED_SHORT[0]
-  const earlier = [UNRELATED_SHORT[1], UNRELATED_LONG[0]]
+  // u1 begins train, gold, …; u2 begins letter, stone, …; u3 begins ticket, moon, …
+  const list = UNRELATED[0]
+  const earlier = [UNRELATED[1], UNRELATED[2]]
   it('a studied word of this list, with its position', () => {
-    const [e] = classify(['Badge'], list, earlier)
+    const [e] = classify(['Gold'], list, earlier)
     expect(e.kind).toBe('studied')
     expect(e.position).toBe(2)
-    expect(e.word).toBe('badge')
+    expect(e.word).toBe('gold')
   })
   it('the critical word of a list of associates', () => {
     const a = ASSOCIATE_LISTS[0]
@@ -57,18 +58,18 @@ describe('classification', () => {
     expect(f.kind).toBe('other')
   })
   it('a word from an earlier list, the most recent earlier list winning a tie', () => {
-    const [e] = classify(['trophy'], list, earlier)
+    const [e] = classify(['stone'], list, earlier)
     expect(e.kind).toBe('earlier')
     expect(e.fromEarlier).toBe(0)
-    const [g] = classify(['gold'], list, earlier)
+    const [g] = classify(['moon'], list, earlier)
     expect(g.fromEarlier).toBe(1)
-    const both = { ...UNRELATED_SHORT[2], words: [...UNRELATED_SHORT[2].words, 'gold'] }
-    const [h] = classify(['gold'], list, [UNRELATED_LONG[0], both])
+    const both = { ...UNRELATED[3], words: [...UNRELATED[3].words, 'moon'] }
+    const [h] = classify(['moon'], list, [UNRELATED[2], both])
     expect(h.fromEarlier).toBe(1)
   })
   it('this list takes precedence over earlier lists and the critical word', () => {
-    const l = { ...ASSOCIATE_LISTS[0], words: [...ASSOCIATE_LISTS[0].words.slice(0, 14), 'badge'] }
-    const [e] = classify(['badge'], l, [list])
+    const l = { ...ASSOCIATE_LISTS[0], words: [...ASSOCIATE_LISTS[0].words.slice(0, 14), 'gold'] }
+    const [e] = classify(['gold'], l, [list])
     expect(e.kind).toBe('studied')
   })
   it('an exact match outranks a one-edit match: rough after the rough list is the critical word, not tough', () => {
@@ -79,12 +80,12 @@ describe('classification', () => {
     expect(f.kind).toBe('studied')
     expect(f.word).toBe('tough')
     // And an exact earlier-list word outranks a one-edit neighbor on this list.
-    const withBrain = { ...list, words: [...list.words.slice(0, 9), 'brain'] }
-    const [g] = classify(['drain'], withBrain, [{ ...UNRELATED_SHORT[1], words: [...UNRELATED_SHORT[1].words.slice(0, 9), 'drain'] }])
+    const withBrain = { ...list, words: [...list.words.slice(0, 14), 'brain'] }
+    const [g] = classify(['drain'], withBrain, [{ ...UNRELATED[1], words: [...UNRELATED[1].words.slice(0, 14), 'drain'] }])
     expect(g.kind).toBe('earlier')
   })
   it('other for anything else, and a word typed twice counts once', () => {
-    const out = classify(['zebra', 'badge', 'badges', 'zebra'], list, earlier)
+    const out = classify(['zebra', 'gold', 'golds', 'zebra'], list, earlier)
     expect(out.map((e) => e.kind)).toEqual(['other', 'studied', 'studied', 'other'])
     expect(out.map((e) => e.duplicate)).toEqual([false, false, true, true])
   })

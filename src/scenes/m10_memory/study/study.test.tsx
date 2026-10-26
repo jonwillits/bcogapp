@@ -24,7 +24,7 @@ function memory(): RawStorage & { text: string | null } {
 function ctxFor(seed: number, storage: RawStorage): PartContext<StudyStore> & { store: StudyStore } {
   const progress = new ProgressStore(storage, seed)
   const store = study.createStore(seed, progress)
-  return { seed, progress, store, view: 'eye', fov: 75, lowDetail: false, anim: makeRng(1), clock: () => 0, header: null }
+  return { seed, progress, store, view: 'eye', fov: 75, lowDetail: false, anim: makeRng(1), clock: () => 0, header: null, openTab: () => {} }
 }
 
 const Left = study.Left

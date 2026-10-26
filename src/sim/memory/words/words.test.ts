@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { ASSOCIATE_LISTS, ASSOCIATES_LENGTH, LONG_LENGTH, NEW_WORDS, SHORT_LENGTH, UNRELATED_LONG, UNRELATED_SHORT } from './lists'
+import { ASSOCIATE_LISTS, ASSOCIATES_LENGTH, NEW_WORDS, UNRELATED, UNRELATED_LENGTH } from './lists'
 import { WORD_SETS, wordsOf } from './sets'
 import { EDIT_FROM_LENGTH, editDistance, singular } from './matcher'
 import { ROOM_NAMES } from '../room/items'
@@ -42,7 +42,7 @@ export function roomStems(names: string[] = ROOM_WORDS): Set<string> {
   return out
 }
 
-const part1Unrelated = [...UNRELATED_SHORT, ...UNRELATED_LONG].flatMap((l) => l.words)
+const part1Unrelated = UNRELATED.flatMap((l) => l.words)
 const associates = ASSOCIATE_LISTS.flatMap((l) => l.words)
 const criticals = ASSOCIATE_LISTS.map((l) => l.critical!)
 const part2 = WORD_SETS.flatMap(wordsOf)
@@ -54,11 +54,10 @@ const overlap = (a: string[], b: Iterable<string>) => {
 }
 
 describe('the lists as chosen', () => {
-  it('six unrelated lists of ten and six of twenty, no word repeated across them', () => {
-    expect(UNRELATED_SHORT.length).toBe(6)
-    expect(UNRELATED_LONG.length).toBe(6)
-    for (const l of UNRELATED_SHORT) expect(l.words.length, l.id).toBe(SHORT_LENGTH)
-    for (const l of UNRELATED_LONG) expect(l.words.length, l.id).toBe(LONG_LENGTH)
+  it('six unrelated lists of fifteen, the length of a list of associates, no word repeated across them', () => {
+    expect(UNRELATED.length).toBe(6)
+    expect(UNRELATED_LENGTH).toBe(ASSOCIATES_LENGTH)
+    for (const l of UNRELATED) expect(l.words.length, l.id).toBe(UNRELATED_LENGTH)
     expect(new Set(part1Unrelated.map(singular)).size).toBe(part1Unrelated.length)
     expect(NEW_WORDS.length).toBe(8)
     expect(new Set(NEW_WORDS).size).toBe(8)
@@ -126,7 +125,7 @@ describe('no word is shared between the parts (§14)', () => {
       ['dollar', 'penny', 'nickel', 'coin', 'dime'],
       ['sword', 'knife', 'cannon', 'bomb', 'gun', 'pistol'],
     ]
-    for (const l of [...UNRELATED_SHORT, ...UNRELATED_LONG]) {
+    for (const l of UNRELATED) {
       for (const g of groups) expect(l.words.filter((w) => g.includes(w)).length, `${l.id}: ${g[0]}…`).toBeLessThanOrEqual(1)
       expect(new Set(l.words.map(singular)).size, l.id).toBe(l.words.length)
     }
