@@ -6,7 +6,7 @@ import { InstructionScreen } from './progress/InstructionScreen'
 import { registerResults } from './Part0'
 import type { PartContext, PartModule } from './contract'
 import { StudyStore, UNITS, type StudyUnit } from './study/studyStore'
-import { Reveal, resultRows } from './study/Reveal'
+import { FinishedExplanation, Reveal, resultRows } from './study/Reveal'
 
 /**
  * Part 2, Two Ways to Study (spec §6): two sets of words, each studied for
@@ -24,19 +24,19 @@ export const STUDY_INTRO: Record<StudyUnit, { willDo: string[]; minutes: number;
   first: {
     willDo: [
       'You will see a set of 24 words on the screen for one minute. Look at them for the whole minute.',
-      'Then a short counting task: for 30 seconds, count backward by threes from a number by clicking the number that comes next.',
-      'Then type every word you remember from the set, one at a time, pressing “Enter” after each. You have 90 seconds, and “I’m done” ends it early.',
-      'There are two sets. This is the first. After it, the second set follows the same three steps.',
-      'Each set is done in one sitting: a set you leave partway starts again with a new set of words, and a set you have finished is never redone.',
+      'Then you will see a short counting task for 30 seconds. Count backward by threes from a number by clicking the number that comes next.',
+      'Then, type every word you remember from the set, one at a time, pressing “Enter” after each. You have 90 seconds to do as many as you can. If you cannot remember any more, click “I’m done” to end early.',
+      'You will do this with two sets of words. This is the first. After it, the second set follows the same three steps.',
+      'Each set is done in one sitting: a set you leave partway starts again with a new set of words, and a set you have finished does not have to be redone, even if you quit and come back.',
     ],
     minutes: 10,
     keys: ['“Enter” enters a word in the recall box. The counting task is answered by clicking.', '“I’m done” ends recall early.'],
   },
   second: {
     willDo: [
-      'The second set: 24 words on the screen for one minute, then the counting task, then typing every word you remember, as before.',
+      'The second set of 24 words will be on the screen for one minute. Then do the counting task again, then type every word you remember, as before.',
       'Look at the words for the whole minute.',
-      'This set is done in one sitting too: leave partway and it starts again with a new set of words.',
+      'This set is done in one sitting too. If you leave partway, it starts again with a new set of words.',
     ],
     minutes: 5,
     keys: ['“Enter” enters a word in the recall box. The counting task is answered by clicking.', '“I’m done” ends recall early.'],
@@ -149,10 +149,18 @@ function Stage({ ctx }: { ctx: Ctx }) {
         <RecallBox key={`${s.unit}-recall`} seconds={PART2_RECALL_S} onDone={(typed) => s.recallDone(typed)} prompt="Type every word you remember from the set, one at a time, and press “Enter” after each." />
       </StagePanel>
     )
+  const a = s.result('first')
+  const b = s.result('second')
   return (
-    <StagePanel testId="done">
-      <div style={{ fontSize: 14, fontWeight: 600 }}>Both sets are finished</div>
-      <Note>My results are on the right: the words recalled from each set and a score for the order you typed them in.</Note>
+    <StagePanel wide testId="done">
+      {a && b ? (
+        <FinishedExplanation scrambled={a} organized={b} />
+      ) : (
+        <>
+          <div style={{ fontSize: 14, fontWeight: 600 }}>Both sets are finished</div>
+          <Note>My results are on the right: the words recalled from each set and a score for the order you typed them in.</Note>
+        </>
+      )}
     </StagePanel>
   )
 }

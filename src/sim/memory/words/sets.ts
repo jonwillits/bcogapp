@@ -8,7 +8,14 @@ import { makeRng } from '../../random'
  * the organized condition, and holds the third in reserve. No word is
  * shared with Part 1's lists, the lists of associates or Part 3's items
  * (`words.test.ts`). Chosen by hand against the norms in `training/m10/`;
- * Jon reviews the sets on the walk.
+ * Jon reviews the sets on the walk. On it (2026-10-27) set-c's places and
+ * people by their work went: their subcategories were less distinct than
+ * the other sets' and sat near Part 1's words (the mountain list, cop on
+ * the thief list, Part 1's tower, bridge, village, cabin, cowboy, army),
+ * so clothing and musical instruments took their place. The instruments
+ * are the lab's lowest-frequency words (1 to 16 per million) but are known
+ * to every student and are as distinct from one another and from the rest
+ * of the lab as any category left.
  */
 
 export interface Subcategory {
@@ -46,8 +53,8 @@ export const WORD_SETS: WordSet[] = [
   {
     id: 'set-c',
     categories: [
-      { label: 'places', subcategories: [sub('buildings', ['church', 'castle', 'hotel', 'museum']), sub('water', ['lake', 'ocean', 'pond', 'creek']), sub('land', ['desert', 'island', 'forest', 'cave'])] },
-      { label: 'people by their work', subcategories: [sub('entertainers', ['actor', 'singer', 'dancer', 'clown']), sub('in uniform', ['soldier', 'sailor', 'pilot', 'sergeant']), sub('trades', ['farmer', 'butcher', 'barber', 'waiter'])] },
+      { label: 'clothing', subcategories: [sub('on the feet', ['shoe', 'boot', 'sock', 'slipper']), sub('on the head', ['hat', 'cap', 'helmet', 'crown']), sub('on the body', ['shirt', 'jacket', 'coat', 'sweater'])] },
+      { label: 'musical instruments', subcategories: [sub('strings', ['guitar', 'violin', 'banjo', 'harp']), sub('wind', ['flute', 'trumpet', 'clarinet', 'saxophone']), sub('percussion', ['drum', 'cymbal', 'tambourine', 'bongo'])] },
     ],
   },
 ]

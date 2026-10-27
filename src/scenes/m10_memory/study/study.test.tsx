@@ -6,7 +6,7 @@ import type { RawStorage } from '../../../sim/memory/progress/storage'
 import { planPart2, wordsOf, SET_SIZE } from '../../../sim/memory/words/sets'
 import { study, STUDY_INTRO } from '../PartStudy'
 import { StudyStore } from './studyStore'
-import { arcLines, scoreUnit } from './Reveal'
+import { arcLines, ARC_LINE_WIDTH, scoreUnit } from './Reveal'
 import type { PartContext } from '../contract'
 
 /**
@@ -171,10 +171,16 @@ describe('Part 2: the reveal (§6.3)', () => {
     const o = scoreUnit(s.result('second')!)
     expect(o.recalled).toBe(5)
     expect(o.pieces.arc).toBe(1)
-    expect(arcLines(o.pieces)[5]).toMatch(/=\s+1\.00$/)
+    expect(arcLines(o.pieces)[6]).toMatch(/=\s+1\.00$/)
     const sc = scoreUnit(s.result('first')!)
     expect(sc.recalled).toBe(4)
     expect(sc.matched[4]).toBeNull()
+    for (const l of [...arcLines(o.pieces), ...arcLines(sc.pieces)]) expect(l.length).toBeLessThanOrEqual(ARC_LINE_WIDTH)
+    expect((right.match(/data-missed/g) ?? []).length).toBe(2)
+    const center = renderToStaticMarkup(<Stage ctx={ctx} />)
+    expect(center).toMatch(/data-finished-explanation/)
+    expect(center).toMatch(/data-lines="arc-terms"/)
+    expect(center).toContain('you typed 5 of its words (N)')
   })
 
   it('My results, all parts, gets four rows', () => {
