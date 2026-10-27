@@ -54,6 +54,7 @@ The instruction screen (Jon's answer 6; **Begin** is disabled until the models h
 | **Begin** (the part's screen) | to the practice night's screen |
 | **Begin** (the practice night) | the practice night, in the clearing around Lab 9's nest; may be redone (**Redo the practice night**) |
 | **Go on to the first block** | after the practice night |
+| **Redo the practice night** | after the practice night, and on the first block's screen (so a student back after the practice can still redo it) |
 | **Begin** (a block) | the block's three nights, in its clearing (or the reserve after a restart) |
 | Up arrow or W, left and right arrows or A and D, down arrow or S; the drive pad | walk and turn, as in Lab 9 |
 | **Enter**, the space bar, or **Dig** under the view | dig at the log in reach |
@@ -141,7 +142,7 @@ Study 60 s, delay 30 s, recall 90 s. ARC (`arc.ts`): R the adjacent same-subcate
 
 ### 2.4 Part 4's clearings and nights (`src/sim/memory/logs/`)
 
-Four clearings in Lab 9's range: the **practice clearing** around Lab 9's nest at (0, 0) with Lab 9's landmarks (its logs placed clear of their footprints); **A** at (24, 10), **B** at (−24, 10), the **reserve** at (0, −26), all more than two moonlit view distances apart, sharing one geometry turned by a third of a turn each and mirrored for B. Each: ten logs, seven loose-bark and three smooth, 4 to 11 m from the nest, at least 3 m apart; three or four landmarks of its own (rock, stump, tree, fern bank) 3 to 8 m out; the forager kept within 15 m of the nest; a log dug from within 1.1 m; the nest reached within 0.5 m, the rim of its hole (0.8 m until 2026-10-27, when Jon found the nursing beginning with the animal still outside the hole); the root arched over the nest is solid, its footprint the segment between its feet (`nestFootprint`), so the nest is entered from the sides of the arch. A loose-bark log is dark and broken with flakes standing off it; a smooth log is pale and even; nothing drawn reads whether a log is full (`logs.test.tsx` scans `LogsView.tsx`).
+Four clearings in Lab 9's range: the **practice clearing** around Lab 9's nest at (0, 0) with Lab 9's landmarks (its logs placed clear of their footprints); **A** at (24, 10), **B** at (−24, 10), the **reserve** at (0, −26), all more than two moonlit view distances apart, sharing one geometry turned by a third of a turn each and mirrored for B. Each: ten logs, seven loose-bark and three smooth, 4 to 11 m from the nest, at least 3 m apart; three or four landmarks of its own (rock, stump, tree, fern bank) 3 to 8 m out; the forager kept within 15 m of the nest; a log dug from within 1.1 m; the nest reached within 0.5 m, the rim of its hole (0.8 m until 2026-10-27, when Jon found the nursing beginning with the animal still outside the hole); the two feet of the root arched over the nest are solid (`nestFootprints`, each 0.1 m) and the arch is open underneath, where it stands well above the animal (a first fix the same day made the whole span solid, which stopped the animal under open air and made the nest hard to leave); the fallen branch, on a night that has one, lies 2.7 m from the nest and has a footprint (`branchFootprint`); the other things on the ground have none. **A drawn log lies on its footprint's line**: until 2026-10-27 the view turned each log by the negative of its angle, the mirror image of the line the footprint and the overhead use, so the body was stopped by a log that was not there and could not reach the one it saw (Jon: *blocked quite far from objects*; *couldn't get very close to any logs*). A loose-bark log is dark and broken with flakes standing off it; a smooth log is pale and even; nothing drawn reads whether a log is full (`logs.test.tsx` scans `LogsView.tsx`).
 
 **A night**: 55 s (`NIGHT_S`; §8), and the practice night 120 s (`PRACTICE_S`; Jon, 2026-10-27: 55 s left time to learn the keys and eat about one beetle), with the young calling halfway in either; a dig 3 s, a meal 3 s more, nursing 8 s; when the time is up the forager walks home by itself (turning toward the nest at the turn rate, then walking at the range pace, round whatever is in the way), and is set down at the nest if the walk has not brought it there within the straight walk's time plus 6 s; the night's record ends there, its `seconds` the night's length and its path holding the walk home; the energy bar drains 0.7 of its length over the night and rises 0.2 a meal and never ends the night; the path sampled every 0.25 s for the replay. **Features**: moon (new, half, full), weather (clear, light rain, fog), the thing on the ground (nothing, a fallen branch across the path, a ring of mushrooms, scattered fresh leaves), sound (crickets, frogs, wind with an owl's hoot), all synthesized in the browser (`logs/sound.ts`; no recordings); the look-alike block's three nights are identical, the distinct block's three differ from one another on every feature and each shares at most one value with the look-alike nights, never the ground (there are only three moons, weathers and sounds, so three distinct nights cannot all avoid the look-alike value on those; §8). The seed assigns which block comes first and which of A and B goes with which; the reserve is the restart clearing for either. **The refill rule** runs exactly as stated: per log, the night it was last emptied; full on night n unless emptied on n − 1.
 
@@ -210,24 +211,24 @@ A general property is shared by at least four things, a specific one by at most 
 
 | night, s | perfect empties, nights 1 / 2 / 3 | Usual-only digs | Usual-only digs at logs emptied last night, nights 2 / 3 |
 |---|---|---|---|
-| 45 | 2.9 / 2.6 / 2.9 | 2.5 / 2.4 / 2.5 | 0.9 / 0.5 |
-| **55** | **3.8 / 3.0 / 3.9** | 3.1 / 3.3 / 3.2 | **1.7 / 0.9** |
-| 60 | 4.3 / 2.7 / 4.3 | 3.4 / 3.8 / 3.5 | 2.0 / 0.9 |
-| 80 | 5.9 / 1.1 / 5.9 | 5.2 / 5.8 / 5.0 | 4.3 / 1.0 |
-| 120 | 6.9 / 0.1 / 6.9 | 7.0 / 7.0 / 6.3 | 7.0 / 0.0 |
+| 45 | 2.8 / 2.5 / 2.8 | 2.5 / 2.3 / 2.5 | 0.9 / 0.4 |
+| **55** | **3.7 / 2.9 / 3.8** | 3.1 / 3.3 / 3.2 | **1.5 / 0.9** |
+| 60 | 4.2 / 2.5 / 4.2 | 3.4 / 3.6 / 3.4 | 1.9 / 0.8 |
+| 80 | 5.7 / 1.1 / 5.7 | 5.0 / 5.4 / 5.1 | 3.9 / 1.1 |
+| 120 | 6.7 / 0.2 / 6.7 | 6.9 / 6.7 / 6.1 | 6.6 / 0.0 |
 
-Walking is cheap beside the six seconds a full dig takes, so a slower scripted pace changes little (0.75 m/s at 100 s: 5.3 / 1.8 / 5.3). The night is 55 s. (Re-measured 2026-10-27 after the nest's reach went from 0.8 to 0.5 m and its root became solid: every scripted forager now walks about a meter more a night, to the hole's rim and back, and the means fell by 0.1 to 0.2; before, 4.0 / 2.9 / 4.0 and 1.9 / 1.1 at 55 s.) Night 2 has only what night 1 left: a perfect forager that empties four of seven finds three full on night 2. The Usual-only target holds on night 2 (about two) and comes out about one on night 3, because that forager empties fewer logs on night 2. See §8.
+Walking is cheap beside the six seconds a full dig takes, so a slower scripted pace changes little (0.75 m/s at 100 s: 5.1 / 1.8 / 5.0). The night is 55 s. (Re-measured 2026-10-27, twice: after the nest's reach went from 0.8 to 0.5 m, so that every scripted forager walks to the hole's rim and back, and again after the fallen branch got a footprint and the root's span became open with only its feet solid; the means fell by 0.1 to 0.3 in all. Before the day, 4.0 / 2.9 / 4.0 and 1.9 / 1.1 at 55 s.) Night 2 has only what night 1 left: a perfect forager that empties four of seven finds three full on night 2. The Usual-only target holds on night 2 (about two) and comes out about one on night 3, because that forager empties fewer logs on night 2. See §8.
 
 ### 4.2 The four foragers on synthetic nights (twenty seeds, both blocks; `measure.probe.ts`, `foragers.test.ts`)
 
 | Forager | digs at logs emptied last night, nights 1 / 2 / 3 | beetles, nights 1 / 2 / 3 | digs at smooth logs | full logs passed over on night 3 | confusions share, look-alike / distinct |
 |---|---|---|---|---|---|
-| Usual only | 0.0 / 1.6 / 1.2 | 3.2 / 1.9 / 2.1 | 0 | 2.1 | 0 / 0 |
-| Tendency only | 0.0 / 2.1 / 1.1 | 2.1 / 1.1 / 1.9 | 1.2 / 0.5 / 0.5 | 2.1 | 0 / 0 |
-| Tonight too | 0.0 / 0.0 / 0.1 | 3.1 / 3.2 / 2.9 | 0 | 0.7 | 0.04 / 0.00 |
-| Tonight too, nights blurred | 0.0 / 0.0 / 0.4 | 3.0 / 3.0 / 2.6 | 0 | 1.2 | 0.11 / 0.05 |
+| Usual only | 0.0 / 1.5 / 1.2 | 3.1 / 1.9 / 2.1 | 0 | 2.0 | 0 / 0 |
+| Tendency only | 0.0 / 1.9 / 1.0 | 2.0 / 1.0 / 1.9 | 1.2 / 0.5 / 0.5 | 1.9 | 0 / 0 |
+| Tonight too | 0.0 / 0.0 / 0.1 | 3.1 / 3.0 / 2.9 | 0 | 0.7 | 0.04 / 0.00 |
+| Tonight too, nights blurred | 0.0 / 0.0 / 0.5 | 3.0 / 3.0 / 2.6 | 0 | 1.1 | 0.10 / 0.05 |
 
-(Re-measured 2026-10-27 with the nest's reach at 0.5 m, as §4.1; the shifts are 0.1 or 0.2 in the beetles and the passed-over counts, none in the confusion shares.)
+(Re-measured 2026-10-27 after the day's footprint changes, as §4.1; the shifts from the build's numbers are 0.1 or 0.2 in the digs, the beetles and the passed-over counts, and 0.01 in one confusion share.)
 
 Usual only and Tendency only have no store, so their map answers are what their list for tonight gives (tonight's digs) and *not emptied* otherwise: no confusion between nights is possible for them, and their tables show none. *Full logs passed over* counts refilled logs not dug tonight, so a forager that runs out of time passes some over too.
 
@@ -235,11 +236,11 @@ Usual only and Tendency only have no store, so their map answers are what their 
 
 | Separation | confusions share, look-alike | distinct | digs at logs emptied last night over nights 2 and 3 | full logs passed over on night 3 |
 |---|---|---|---|---|
-| weak (8 units, half active) | 0.13 | 0.06 | 0.88 | 1.32 |
-| medium (60, one in seven) | 0.09 | 0.01 | 0.40 | 0.90 |
-| strong (480, one in thirty) | 0.04 | 0.00 | 0.13 | 0.70 |
+| weak (8 units, half active) | 0.13 | 0.08 | 0.82 | 1.25 |
+| medium (60, one in seven) | 0.08 | 0.01 | 0.30 | 0.72 |
+| strong (480, one in thirty) | 0.04 | 0.00 | 0.13 | 0.68 |
 
-(Re-measured 2026-10-27, as §4.1; before, 0.12 / 0.07 / 0.90 / 1.32, 0.08 / 0.01 / 0.40 / 0.82 and 0.04 / 0.00 / 0.13 / 0.63.)
+(Re-measured 2026-10-27 after the day's footprint changes, as §4.1; the build's numbers were 0.12 / 0.07 / 0.90 / 1.32, 0.08 / 0.01 / 0.40 / 0.82 and 0.04 / 0.00 / 0.13 / 0.63.)
 
 Codes: the similarity of one night's code to the night before, look-alike / distinct, is 0.92 / 0.52 at weak, 0.90 / 0.20 at medium, 0.73 / 0.01 at strong (the context cosine 0.6). The sweep that chose the context's weight and drift is in `measure.probe.ts` (skipped by default).
 
@@ -248,7 +249,7 @@ Codes: the similarity of one night's code to the night before, look-alike / dist
 - **The youth**: every property of the old world right after 600 passes (1.00). Hidden-space distance across the top split (stays put against moves) / the middle splits (wood against plants, air against ground) / within pairs, at passes 5, 10, 20, 40, 80, 160, 320, 600: 0.70 0.47 0.35 | 1.11 0.59 0.31 | 1.35 0.90 0.35 | 1.46 1.11 0.46 | 1.52 1.20 0.54 | 1.55 1.24 0.53 | 1.57 1.27 0.51 | 1.59 1.29 0.50. The order top > middle > pairs holds at every snapshot of the first 40 passes in at least 15 seeds of 20 (by test; 20 of 20 at the 0.25 criterion).
 - **The new season** (six seeds, 8 hidden, 1,000 passes of the new things): replay off, the old things' specific properties still said yes 0.43, general 0.99, the new things right 1.00; replay on, old right 1.00, new right 1.00. The sweep over 4, 6 and 8 hidden units and 300, 1,000 and 3,000 passes: specific kept 0.22 to 0.61 with replay off, old right 0.98 to 1.00 with replay on, in every cell.
 - **Damage**, properties the things have still said yes at noise 0 / 0.25 / 0.5 / 0.75 / 1 / 1.5: general 1.00 / 1.00 / 0.75 / 0.26 / 0.09 / 0.02; middle 1.00 / 0.98 / 0.30 / 0.04 / 0.01 / 0.00; specific 1.00 / 0.97 / 0.16 / 0.02 / 0.00 / 0.00. The smooth log's *has beetles under it*: 0.01 / 0.07 / 0.10 / 0.10 / 0.09 / 0.09 (twenty draws; a single read crosses 0.5 often enough for the forager to dig smooth logs). The hawk *hunts at night* (the owl's): 0.00 / 0.12 / 0.16 / 0.16 / 0.16 / 0.13; the hawk *has wings* 0.99 / 0.75 / 0.48 / 0.27 / 0.22 / 0.16.
-- **The two kinds of damage on Tonight too** (twenty seeds, over nights 2 and 3 and over the block): intact, digs at logs emptied last night 0.13, digs at smooth logs 0.00, beetles 9.2; no store, 2.17 / 0.00 / 7.8 (Usual only: 2.73); slow learner noise 0.5, 0.05 / 1.57 / 8.2; noise 1, 0.03 / 2.50 / 7.6; noise 1.5, 0.13 / 2.88 / 6.9. (Re-measured 2026-10-27, as §4.1; before, 9.4, 2.25 / 0.00 / 8.0 with Usual only 2.90, 0.05 / 1.80 / 8.1, 0.05 / 2.67 / 7.5 and 0.05 / 3.15 / 7.2.)
+- **The two kinds of damage on Tonight too** (twenty seeds, over nights 2 and 3 and over the block): intact, digs at logs emptied last night 0.13, digs at smooth logs 0.00, beetles 9.1; no store, 1.95 / 0.00 / 7.7 (Usual only: 2.70); slow learner noise 0.5, 0.05 / 1.57 / 7.8; noise 1, 0.03 / 2.50 / 7.4; noise 1.5, 0.07 / 3.00 / 6.8. (Re-measured 2026-10-27 after the day's footprint changes, as §4.1; the build's numbers were 9.4, 2.25 / 0.00 / 8.0 with Usual only 2.90, 0.05 / 1.80 / 8.1, 0.05 / 2.67 / 7.5 and 0.05 / 3.15 / 7.2.)
 
 ### 4.5 Timing of the scene itself (`timing.probe.ts`, headless)
 
@@ -296,7 +297,7 @@ A pending panel prints *Reference pending: the source is not yet in the course l
 ## 7. Where the build departed from the spec, or where its targets turned out wrong
 
 1. **The night is 55 s, not about 2 minutes** (§8.3). At the range pace with 3 s digs and 3 s meals, a 2-minute night lets a scripted perfect rememberer empty all seven loose-bark logs; the "about four of seven" target holds at 55 s. A slower scripted pace barely changes it (§4.1). If a student at the keys empties only two logs in 55 s on the walk, the constants to move are `NIGHT_S`, `DIG_S`, `EAT_S` (`logs/night.ts`) and `SCRIPT_PACE` (`logs/scripted.ts`), and §4.1 is the sweep to re-run.
-2. **The Usual-only target holds on night 2 and not on night 3** (§14: "about two logs emptied the night before on nights 2 and 3"): 1.7 on night 2, 0.9 on night 3 (1.9 and 1.1 before the nest's reach was tightened on 2026-10-27), because a forager that digs at random empties about two logs on night 2, so only about two are "emptied last night" on night 3. Both targets cannot hold together at any length (§4.1); reported, not retuned.
+2. **The Usual-only target holds on night 2 and not on night 3** (§14: "about two logs emptied the night before on nights 2 and 3"): 1.5 on night 2, 0.9 on night 3 (1.9 and 1.1 before the footprint changes of 2026-10-27), because a forager that digs at random empties about two logs on night 2, so only about two are "emptied last night" on night 3. Both targets cannot hold together at any length (§4.1); reported, not retuned.
 3. **The distinct nights share at most one feature value with the look-alike nights, never the ground** (§8.4, §14: "none matches the look-alike nights"). With three moons, three weathers and three sounds, three nights that differ on every feature cannot all avoid the look-alike value on each.
 4. **The forager acts on the retrieved strength** (§9.3 says the panel shows "the logs the forager will treat as emptied last night"). With the forager's cue being what last night was like, the stored night of last night always has the larger share, so a threshold at 0.5 never errs and the store showed no confusion at any setting; and with a cue of tonight's input, confusions came from code noise and were no lower on the distinct block. Treating a log as emptied as often as the store's answer says is the overlap doing the work, with no rate written in; `structure.test.ts` holds that no threshold on the blend exists. The map answers follow the same rule.
 5. **The forager holds what last night was like**, its features and context, as one register overwritten at each dawn, and cues the store with it. Nothing else the forager has tonight says which stored night was last night; the register is a fixed-size state, not a record of what was emptied, which stays the store's.

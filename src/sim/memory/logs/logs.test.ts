@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import { makeRng } from '../../random'
-import { CLEARING, CLEARING_NESTS, NEST_ARCH, makeClearings, nestFootprint, type Clearing } from './clearings'
+import { CLEARING, CLEARING_NESTS, NEST_ARCH, branchFootprint, makeClearings, nestFootprints, type Clearing } from './clearings'
 import { afterNight, freshBlock, fullOnNight, isFull, truthOf, KIND_RULE, REFILL_RULE } from './refill'
 import { planPart4, sameFeatures, sharedFeatures, featureVector, FEATURE_DIMS, GROUNDS } from './features'
 import { NIGHT_S, DIG_S, EAT_S, NURSE_S, PRACTICE_S, RETURN_GRACE_S, tallies } from './night'
 import { nearest, runScripted, type Policy } from './scripted'
 import { answersForNight, confusionTable, truths } from './mapQuestion'
-import { planFor, runBlockScripted, startNight, newBlockRun, finishNight } from './block'
+import { planFor, runBlockScripted, startNight, newBlockRun, finishNight, nightRng } from './block'
+import { NightSim } from './night'
 import { NEAR_LANDMARKS, footprint } from '../../rodent/range'
 import { mean } from '../../bilaterian/measure'
 
@@ -191,18 +192,16 @@ describe('a night (§8.3)', () => {
     expect(s.nursed).toBe(true)
     expect(s.phase).toBe('foraging')
   })
-  it('the root over the nest is solid: walked at from its broad side the body stops a body’s width short of it, and from its end short of its foot; the nest is reached at the rim of its hole', () => {
+  it('the root’s feet are solid and the arch is open underneath: walked at from its broad side the body passes under it to the hole, and walked at from its end it is held off the foot; the nest is reached at the rim of its hole', () => {
     const { sim: s } = sim(7)
     const nest = s.clearing.nest
-    const f = nestFootprint(nest)
-    const along = Math.atan2(f.by - f.ay, f.bx - f.ax)
+    const [a, b] = nestFootprints(nest)
+    const along = Math.atan2(b.ay - a.ay, b.ax - a.ax)
     const across = along + Math.PI / 2
-    // From the broad side: 1 m out, facing the nest, walking in.
+    // From the broad side: 1 m out, facing the nest, walking in 1 m: it reaches the center of the hole.
     s.place(nest.x + Math.cos(across), nest.y + Math.sin(across), across + Math.PI)
-    for (let k = 0; k < 40; k++) s.step(0.05, { forward: 1, turn: 0 })
-    const dSide = Math.hypot(s.body.x - nest.x, s.body.y - nest.y)
-    expect(dSide).toBeGreaterThan(NEST_ARCH.thickness + s.body.loco.radius - 0.01)
-    expect(dSide).toBeLessThan(0.3)
+    for (let k = 0; k < 13; k++) s.step(0.05, { forward: 1, turn: 0 })
+    expect(Math.hypot(s.body.x - nest.x, s.body.y - nest.y)).toBeLessThan(0.1)
     expect(s.atNest).toBe(true)
     // From the end: it is held off the foot, beyond the nest's reach, and must come round.
     s.place(nest.x + 1.2 * Math.cos(along), nest.y + 1.2 * Math.sin(along), along + Math.PI)
@@ -211,6 +210,21 @@ describe('a night (§8.3)', () => {
     expect(dEnd).toBeGreaterThan(NEST_ARCH.radius + NEST_ARCH.thickness + s.body.loco.radius - 0.02)
     expect(s.atNest).toBe(false)
     expect(CLEARING.nestReach).toBe(0.5)
+  })
+  it('the fallen branch, on a night that has one, stops the body where it lies; on other nights nothing does there', () => {
+    const { plan, clearings } = planFor(11)
+    const c = clearings.practice
+    const run = (ground: typeof plan.practice.ground) => new NightSim(c, c.logs.map(() => null), 1, { ...plan.practice, ground }, nightRng(11, 'practice', 'practice', 1))
+    const f = branchFootprint(c.nest)
+    const mid = { x: (f.ax + f.bx) / 2, y: (f.ay + f.by) / 2 }
+    const across = Math.atan2(f.by - f.ay, f.bx - f.ax) + Math.PI / 2
+    const walkAt = (s: NightSim) => {
+      s.place(mid.x + Math.cos(across), mid.y + Math.sin(across), across + Math.PI)
+      for (let k = 0; k < 30; k++) s.step(0.05, { forward: 1, turn: 0 })
+      return Math.hypot(s.body.x - mid.x, s.body.y - mid.y)
+    }
+    expect(walkAt(run('a fallen branch across the path'))).toBeGreaterThan(f.r + 0.1 - 0.01)
+    expect(walkAt(run('nothing on the ground'))).toBeGreaterThan(1.1)
   })
   it('when the night’s time is up the forager walks home by itself with no key held, the walk is in the path, and the night ends at the nest; a forager that cannot get home in time is set down there', () => {
     const { sim: s } = sim(9)

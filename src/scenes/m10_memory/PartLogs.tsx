@@ -131,6 +131,11 @@ function Left({ ctx }: { ctx: PartContext<LogsStore> }) {
             </>
           )}
           {restartedHere && s.state === 'block-intro' && <Note>This block was interrupted, so it runs again in another clearing.</Note>}
+          {s.state === 'block-intro' && s.blockIndex === 0 && s.practice && (
+            <div>
+              <Btn onClick={() => s.openPractice()}>Redo the practice night</Btn>
+            </div>
+          )}
         </div>
       </Panel>
     </>

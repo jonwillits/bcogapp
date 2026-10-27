@@ -65,15 +65,39 @@ export const CLEARING = {
 /**
  * The root arched over the nest, as the view draws it: a half torus of
  * this radius and thickness, turned this far about the vertical, its feet
- * either side of the hole. It is solid (Jon, 2026-10-27: the animal walked
- * through it): its footprint is the segment between its feet.
+ * either side of the hole. Its feet are solid (Jon, 2026-10-27: the animal
+ * walked through the root; a first fix made the whole span solid, which
+ * stopped the animal under open air and made the nest hard to leave): the
+ * footprints are the two feet, and the arch is open underneath, where it
+ * stands well above the animal.
  */
 export const NEST_ARCH = { radius: 0.45, thickness: 0.1, turn: 0.4 } as const
 
-export function nestFootprint(nest: { x: number; y: number }): Footprint {
+export function nestFootprints(nest: { x: number; y: number }): Footprint[] {
   const hx = NEST_ARCH.radius * Math.cos(NEST_ARCH.turn)
   const hy = NEST_ARCH.radius * Math.sin(NEST_ARCH.turn)
-  return { ax: nest.x - hx, ay: nest.y - hy, bx: nest.x + hx, by: nest.y + hy, r: NEST_ARCH.thickness }
+  return [
+    { ax: nest.x - hx, ay: nest.y - hy, bx: nest.x - hx, by: nest.y - hy, r: NEST_ARCH.thickness },
+    { ax: nest.x + hx, ay: nest.y + hy, bx: nest.x + hx, by: nest.y + hy, r: NEST_ARCH.thickness },
+  ]
+}
+
+/**
+ * The thing on the ground some nights (`features.ts`) lies this far from
+ * the nest; the fallen branch is this long, lies turned this far from the
+ * x axis, and is this thick. The view draws it from these; the branch is
+ * the one thing on the ground with a footprint (Jon, 2026-10-27: he walked
+ * through it, when it also stood on end by a drawing slip).
+ */
+export const GROUND_THING_OFFSET = { x: 2.2, y: -1.6 } as const
+export const BRANCH = { length: 2.6, turn: 0.9, radius: 0.08 } as const
+
+export function branchFootprint(nest: { x: number; y: number }): Footprint {
+  const cx = nest.x + GROUND_THING_OFFSET.x
+  const cy = nest.y + GROUND_THING_OFFSET.y
+  const hx = (BRANCH.length / 2) * Math.cos(BRANCH.turn)
+  const hy = (BRANCH.length / 2) * Math.sin(BRANCH.turn)
+  return { ax: cx - hx, ay: cy - hy, bx: cx + hx, by: cy + hy, r: BRANCH.radius }
 }
 
 /** Where the four clearings sit in the range: the practice clearing at Lab 9's nest; the others 24 m out, more than two moonlit view distances apart. */
@@ -206,9 +230,9 @@ export function makeClearings(seed: number): Record<ClearingId, Clearing> {
   }
 }
 
-/** The footprints that stop the body in a clearing: its logs, its landmarks and the root over its nest (the practice clearing adds Lab 9's landmarks). */
+/** The footprints that stop the body in a clearing: its logs, its landmarks and the feet of the root over its nest (the practice clearing adds Lab 9's landmarks). The night adds the fallen branch when it has one. */
 export function clearingFootprints(c: Clearing): Footprint[] {
-  const out: Footprint[] = [...c.logs.map(logFootprint), ...c.landmarks.map(landmarkFootprint), nestFootprint(c.nest)]
+  const out: Footprint[] = [...c.logs.map(logFootprint), ...c.landmarks.map(landmarkFootprint), ...nestFootprints(c.nest)]
   if (c.id === 'practice') for (const l of NEAR_LANDMARKS) out.push(footprint(l))
   return out
 }

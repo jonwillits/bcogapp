@@ -1,6 +1,6 @@
 import type { Rng } from '../../random'
 import { Body, RANGE_LOCOMOTION, type Command, type Pose } from '../../rodent/body'
-import { CLEARING, clearingFootprints, logInReach, pushOutOf, type Clearing, type Log } from './clearings'
+import { CLEARING, branchFootprint, clearingFootprints, logInReach, pushOutOf, type Clearing, type Log } from './clearings'
 import { fullOnNight, type LastEmptied } from './refill'
 import type { NightFeatures } from './features'
 import type { Footprint } from '../../rodent/range'
@@ -123,6 +123,7 @@ export class NightSim {
     this.dugTonight = clearing.logs.map(() => 0)
     this.body = new Body(rng, RANGE_LOCOMOTION, { x: clearing.nest.x, y: clearing.nest.y, heading: rng.range(0, 2 * Math.PI) })
     this.prints = clearingFootprints(clearing)
+    if (features.ground === 'a fallen branch across the path') this.prints.push(branchFootprint(clearing.nest))
     this.record = {
       night,
       clearing: clearing.id,

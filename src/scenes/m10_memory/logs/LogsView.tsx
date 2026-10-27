@@ -6,7 +6,7 @@ import type { Pose } from '../../../sim/rodent/body'
 import { RangeView } from '../../m09_rat/RangeView'
 import { RatMesh, type RatAction } from '../../m09_rat/RatMesh'
 import { AnimalCamera, RANGE_SCALE, type View } from '../../m09_rat/AnimalCamera'
-import { CLEARING, NEST_ARCH, type Clearing, type ClearingLandmark, type Log } from '../../../sim/memory/logs/clearings'
+import { BRANCH, CLEARING, GROUND_THING_OFFSET, NEST_ARCH, type Clearing, type ClearingLandmark, type Log } from '../../../sim/memory/logs/clearings'
 import type { NightFeatures } from '../../../sim/memory/logs/features'
 import type { NightSim } from '../../../sim/memory/logs/night'
 
@@ -41,8 +41,10 @@ function LogMesh({ l, origin }: { l: Log; origin: { x: number; y: number } }) {
     const rng = makeRng(1000 + l.id * 13 + Math.round(l.x * 10))
     return Array.from({ length: 14 }, () => ({ t: rng.range(-0.55, 0.55), a: rng.range(0, Math.PI * 2), s: rng.range(0.06, 0.13), tilt: rng.range(0.2, 0.7) }))
   }, [loose, l.id, l.x])
+  // The world's (x, y) is three's (x, −z), so a log lying at `angle` in the world is turned by +angle about three's y: the same line `logFootprint` uses.
+  // (Until 2026-10-27 the sign was wrong and the drawn log was the footprint's mirror image, so the body was stopped by a log that was not there and could not reach the one it saw.)
   return (
-    <group position={[x, 0, z]} rotation={[0, -l.angle, 0]} data-log={l.id}>
+    <group position={[x, 0, z]} rotation={[0, l.angle, 0]} data-log={l.id}>
       <mesh position={[0, CLEARING.logRadius - 0.03, 0]} rotation={[0, 0, Math.PI / 2]}>
         <cylinderGeometry args={[CLEARING.logRadius, CLEARING.logRadius * 1.1, CLEARING.logLength, loose ? 9 : 14]} />
         <meshStandardMaterial color={loose ? '#3e2f20' : '#8a7f6a'} roughness={loose ? 1 : 0.55} flatShading={loose} />
@@ -153,14 +155,14 @@ function NestYoung({ at, nursing, clock }: { at: { x: number; y: number }; nursi
   )
 }
 
-/** The thing on the ground tonight, a few meters from the nest, placed by the night's features and nothing else. */
+/** The thing on the ground tonight, a few meters from the nest, placed by the night's features and nothing else; the branch lies along `branchFootprint`. */
 function GroundThing({ f, nest }: { f: NightFeatures; nest: { x: number; y: number } }) {
-  const x = nest.x + 2.2
-  const z = -(nest.y - 1.6)
+  const x = nest.x + GROUND_THING_OFFSET.x
+  const z = -(nest.y + GROUND_THING_OFFSET.y)
   if (f.ground === 'a fallen branch across the path')
     return (
-      <mesh position={[x, 0.06, z]} rotation={[0, 0.9, 0]}>
-        <cylinderGeometry args={[0.05, 0.08, 2.6, 6]} />
+      <mesh position={[x, BRANCH.radius * 0.8, z]} rotation={[0, BRANCH.turn, Math.PI / 2]}>
+        <cylinderGeometry args={[BRANCH.radius * 0.7, BRANCH.radius, BRANCH.length, 6]} />
         <meshStandardMaterial color="#3a2d1e" roughness={1} />
       </mesh>
     )
