@@ -20,8 +20,17 @@ export interface Policy {
 }
 
 export const SCRIPT_DT = 0.05
-/** The pace a scripted forager walks at, m/s. The range pace is 1.5; a forager that sniffs its way between logs moves slower, and the night's length is tuned against this pace (`tune.probe.ts`). */
-export let SCRIPT_PACE = RANGE_LOCOMOTION.speed
+/**
+ * The pace a scripted forager walks at, m/s. The keys drive the student at
+ * the range pace, 1.5 m/s, and the scripted foragers walked at that until
+ * 2026-10-27, when the night went from 55 to 90 s for the student's sake
+ * (`NIGHT_S`). At 1.5 m/s a 90 s night let every scripted forager dig all
+ * seven logs, so memory stopped paying (Usual only ate as many beetles as
+ * Tonight too). Half the range pace stands for the sniffing, turning and
+ * searching a student at the keys does between logs, and brings the
+ * scripted foragers back to about four of seven (`tune.probe.ts`, notes §4.1).
+ */
+export let SCRIPT_PACE = RANGE_LOCOMOTION.speed / 2
 export function setScriptPace(v: number): void {
   SCRIPT_PACE = v
 }

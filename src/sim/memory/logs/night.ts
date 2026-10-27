@@ -19,8 +19,16 @@ import type { Footprint } from '../../rodent/range'
  * nights: the same clearing, starting state, features, length and call.
  */
 
-/** A night's length at 1×, seconds. Tuned: see `tune.probe.ts` and the as-built notes. */
-export const NIGHT_S = 55
+/**
+ * A night's length at 1×, seconds. 55 s was tuned so that a scripted
+ * perfect rememberer empties about four of the seven loose-bark logs
+ * (`tune.probe.ts`); Jon, playing it (2026-10-27), found the call at the
+ * half, the walk back and the nursing left no time to reach a log again,
+ * so the night is 90 s, with the time taken from the shortened memory
+ * experiments. A scripted perfect forager now empties about six of seven
+ * on nights 1 and 3 and finds little on night 2; a student empties fewer.
+ */
+export const NIGHT_S = 90
 /** The practice night is longer, for learning the keys (Jon, 2026-10-27: 55 s left time for about one beetle while learning). Nothing is scored on it. */
 export const PRACTICE_S = 120
 /** The walk home at dawn is given this long beyond the straight walk before the forager is set down at the nest. */

@@ -33,7 +33,7 @@ export const LOGS_INTRO = {
     '- ' + KIND_RULE,
     '- ' + REFILL_RULE,
   ],
-  minutes: 22,
+  minutes: 27,
   keys: ['Up arrow or W walks forward; left and right arrows, or A and D, turn; down arrow or S steps back. The buttons under the view do the same.', '“Enter” or the space bar digs at the log you are standing by; so does the “Dig” button under the view.', 'An energy bar drains over the night and rises with each meal. It never ends the night; the score is beetles eaten.'],
   content: [RATS_LINE, COMFORT_LINE],
 }
@@ -53,7 +53,7 @@ export function blockIntro(kind: 'look-alike' | 'distinct', mapSeen: boolean, re
       ...(mapSeen ? [MAP_FOLLOWS_LINE] : []),
       ...(restartedHere ? ['This block was interrupted, so it runs again in another clearing.'] : []),
     ],
-    minutes: 5,
+    minutes: 7,
   }
 }
 

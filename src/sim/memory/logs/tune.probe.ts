@@ -48,7 +48,7 @@ function usualOnly(seed: number): Policy {
 }
 
 it('tune: the night’s length', () => {
-  for (const [pace, seconds] of [[1.5, 45], [1.5, 55], [1.5, 60], [1.5, 80], [1.5, 120], [0.75, 100], [0.75, 120]] as const) {
+  for (const [pace, seconds] of [[1.5, 45], [1.5, 55], [1.5, 60], [1.5, 80], [1.5, 90], [1.5, 100], [1.5, 120], [1.0, 90], [0.75, 80], [0.75, 90], [0.75, 100], [0.75, 120]] as const) {
     setScriptPace(pace)
     const perfEmptied: number[][] = [[], [], []]
     const usualEmptiedLast: number[][] = [[], [], []]
