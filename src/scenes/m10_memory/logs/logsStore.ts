@@ -1,7 +1,7 @@
 import type { ProgressStore } from '../../../sim/memory/progress/store'
 import { makeClearings, type Clearing, type ClearingId } from '../../../sim/memory/logs/clearings'
 import { planPart4, type BlockPlan, type Part4Plan } from '../../../sim/memory/logs/features'
-import { NightSim, type NightRecord } from '../../../sim/memory/logs/night'
+import { NightSim, PRACTICE_S, type NightRecord } from '../../../sim/memory/logs/night'
 import { answerMap, finishNight, newBlockRun, nightRng, startNight, type BlockRun } from '../../../sim/memory/logs/block'
 import { answersForNight, type MapAnswers } from '../../../sim/memory/logs/mapQuestion'
 import type { Truth } from '../../../sim/memory/logs/refill'
@@ -21,9 +21,10 @@ import type { NightCommand, PartStore } from '../contract'
 
 export type LogsState = 'intro' | 'practice-intro' | 'night' | 'night-over' | 'map' | 'block-intro' | 'predict' | 'revealed'
 
-/** The fade through black at the start of a night and the light's rise at dawn, seconds. */
+/** The fade through black at the start of a night, seconds; the light's rise at dawn, which begins as the forager turns for home; and the pause at the nest once home, before the next screen. */
 export const FADE_S = 1.2
-export const DAWN_S = 2.0
+export const DAWN_S = 4.0
+export const HOME_S = 2.5
 
 export const BLOCK_UNITS: UnitId[] = ['p4-block-1', 'p4-block-2']
 
@@ -50,6 +51,8 @@ export class LogsStore implements PartStore {
   results: (Part4BlockResult | null)[] = [null, null]
   fade = 0
   dawn = 0
+  /** Seconds since the forager came home at dawn. */
+  home = 0
   muted = false
   /** What was restarted, for the results' line. */
   restarted: boolean[] = [false, false]
@@ -132,8 +135,10 @@ export class LogsStore implements PartStore {
     this.progress.begin('p4-practice')
     this.practiceAttempt++
     const c = this.clearings.practice
-    this.sim = new NightSim(c, c.logs.map(() => null), 1, this.plan.practice, nightRng(this.seed, 'practice', 'practice', 1, this.practiceAttempt))
+    this.sim = new NightSim(c, c.logs.map(() => null), 1, this.plan.practice, nightRng(this.seed, 'practice', 'practice', 1, this.practiceAttempt), { seconds: PRACTICE_S })
     this.fade = FADE_S
+    this.dawn = 0
+    this.home = 0
     this.state = 'night'
     this.changed()
   }
@@ -157,6 +162,7 @@ export class LogsStore implements PartStore {
     this.sim = startNight(this.run, this.seed, attempt)
     this.fade = FADE_S
     this.dawn = 0
+    this.home = 0
     this.state = 'night'
   }
 
@@ -167,9 +173,11 @@ export class LogsStore implements PartStore {
       this.fade = Math.max(0, this.fade - dt)
       if (this.fade > 0) return
     }
+    // The light rises from the moment the night's time is up, over the walk home; once home, a pause, then the next screen.
+    if (this.sim.dawning) this.dawn = Math.min(DAWN_S, this.dawn + dt)
     if (this.sim.done) {
-      this.dawn = Math.min(DAWN_S, this.dawn + dt)
-      if (this.dawn >= DAWN_S) this.nightOver()
+      this.home += dt
+      if (this.home >= HOME_S && this.dawn >= DAWN_S) this.nightOver()
       return
     }
     this.sim.step(dt, cmd)
@@ -273,12 +281,14 @@ export class LogsStore implements PartStore {
     const n = this.blockIndex < 0 ? 'Practice night' : `Night ${s.night} of 3`
     const phase = s.done
       ? 'Dawn: the night is over'
-      : s.phase === 'digging'
+      : s.phase === 'returning'
+        ? 'Dawn: walking home'
+        : s.phase === 'digging'
         ? 'Digging'
         : s.phase === 'eating'
           ? 'Eating beetles'
           : s.phase === 'called'
-            ? 'The young are calling: go back to the nest'
+            ? 'The young are calling: back to the nest'
             : s.phase === 'nursing'
               ? 'Nursing'
               : s.canDigAt
@@ -286,5 +296,16 @@ export class LogsStore implements PartStore {
                 : 'Foraging'
     const found = s.lastOutcome === 'beetles' ? 'Last dig: beetles' : s.lastOutcome === 'empty' ? 'Last dig: nothing, the log was empty' : s.lastOutcome === 'smooth' ? 'Last dig: nothing, a smooth log' : 'Last dig: none yet'
     return [n, `Beetles eaten ${s.record.beetles}`, phase, found]
+  }
+
+  /** The large line over the view when the night asks something of the student or is ending, or null while foraging. */
+  banner(): { text: string; tone: 'call' | 'nurse' | 'dawn' } | null {
+    const s = this.sim
+    if (!s) return null
+    if (s.done) return { text: 'The night is over. You are home.', tone: 'dawn' }
+    if (s.phase === 'returning') return { text: 'Dawn: the night is over', tone: 'dawn' }
+    if (s.phase === 'nursing') return { text: 'Nursing the young', tone: 'nurse' }
+    if (s.phase === 'called') return { text: 'The young are calling: go back to the nest', tone: 'call' }
+    return null
   }
 }

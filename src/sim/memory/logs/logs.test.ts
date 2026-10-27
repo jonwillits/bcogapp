@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import { makeRng } from '../../random'
-import { CLEARING, CLEARING_NESTS, makeClearings, type Clearing } from './clearings'
+import { CLEARING, CLEARING_NESTS, NEST_ARCH, makeClearings, nestFootprint, type Clearing } from './clearings'
 import { afterNight, freshBlock, fullOnNight, isFull, truthOf, KIND_RULE, REFILL_RULE } from './refill'
 import { planPart4, sameFeatures, sharedFeatures, featureVector, FEATURE_DIMS, GROUNDS } from './features'
-import { NIGHT_S, DIG_S, EAT_S, NURSE_S, tallies } from './night'
+import { NIGHT_S, DIG_S, EAT_S, NURSE_S, PRACTICE_S, RETURN_GRACE_S, tallies } from './night'
 import { nearest, runScripted, type Policy } from './scripted'
 import { answersForNight, confusionTable, truths } from './mapQuestion'
 import { planFor, runBlockScripted, startNight, newBlockRun, finishNight } from './block'
@@ -190,6 +190,54 @@ describe('a night (§8.3)', () => {
     expect(s.time - t0).toBeCloseTo(NURSE_S, 1)
     expect(s.nursed).toBe(true)
     expect(s.phase).toBe('foraging')
+  })
+  it('the root over the nest is solid: walked at from its broad side the body stops a body’s width short of it, and from its end short of its foot; the nest is reached at the rim of its hole', () => {
+    const { sim: s } = sim(7)
+    const nest = s.clearing.nest
+    const f = nestFootprint(nest)
+    const along = Math.atan2(f.by - f.ay, f.bx - f.ax)
+    const across = along + Math.PI / 2
+    // From the broad side: 1 m out, facing the nest, walking in.
+    s.place(nest.x + Math.cos(across), nest.y + Math.sin(across), across + Math.PI)
+    for (let k = 0; k < 40; k++) s.step(0.05, { forward: 1, turn: 0 })
+    const dSide = Math.hypot(s.body.x - nest.x, s.body.y - nest.y)
+    expect(dSide).toBeGreaterThan(NEST_ARCH.thickness + s.body.loco.radius - 0.01)
+    expect(dSide).toBeLessThan(0.3)
+    expect(s.atNest).toBe(true)
+    // From the end: it is held off the foot, beyond the nest's reach, and must come round.
+    s.place(nest.x + 1.2 * Math.cos(along), nest.y + 1.2 * Math.sin(along), along + Math.PI)
+    for (let k = 0; k < 40; k++) s.step(0.05, { forward: 1, turn: 0 })
+    const dEnd = Math.hypot(s.body.x - nest.x, s.body.y - nest.y)
+    expect(dEnd).toBeGreaterThan(NEST_ARCH.radius + NEST_ARCH.thickness + s.body.loco.radius - 0.02)
+    expect(s.atNest).toBe(false)
+    expect(CLEARING.nestReach).toBe(0.5)
+  })
+  it('when the night’s time is up the forager walks home by itself with no key held, the walk is in the path, and the night ends at the nest; a forager that cannot get home in time is set down there', () => {
+    const { sim: s } = sim(9)
+    const far = s.clearing.logs.reduce((a, l) => (Math.hypot(l.x - s.clearing.nest.x, l.y - s.clearing.nest.y) > Math.hypot(a.x - s.clearing.nest.x, a.y - s.clearing.nest.y) ? l : a))
+    while (s.time < s.seconds - 0.5) s.step(0.05, { forward: 0, turn: 0 })
+    s.place(far.x + 1, far.y, 0)
+    const d0 = Math.hypot(s.body.x - s.clearing.nest.x, s.body.y - s.clearing.nest.y)
+    expect(d0).toBeGreaterThan(5)
+    while (s.time < s.seconds + 0.5) s.step(0.05, { forward: 0, turn: 0 })
+    expect(s.phase).toBe('returning')
+    expect(s.dawning).toBe(true)
+    expect(s.canDigAt).toBeNull()
+    const samples = s.record.path.length
+    while (s.phase === 'returning' && s.time < s.seconds + 60) s.step(0.05, { forward: 0, turn: 0 })
+    expect(s.done).toBe(true)
+    expect(s.atNest).toBe(true)
+    // It walked: the time taken is about the straight distance at the range pace, well inside the grace, and the path has the walk.
+    expect(s.time - s.seconds).toBeGreaterThan(d0 / s.body.loco.speed - 0.5)
+    expect(s.time - s.seconds).toBeLessThan(d0 / s.body.loco.speed + RETURN_GRACE_S)
+    expect(s.record.path.length).toBeGreaterThan(samples + 10)
+    expect(s.record.seconds).toBe(s.seconds)
+    // A night with a longer length: the practice night's, with the call halfway.
+    const { plan, clearings } = planFor(9)
+    const run = newBlockRun(plan.blocks[0], clearings[plan.blocks[0].clearing])
+    const p = startNight(run, 9, 0, { seconds: PRACTICE_S })
+    expect(p.seconds).toBe(PRACTICE_S)
+    expect(p.callAt).toBe(PRACTICE_S / 2)
   })
   it('the same seed and the same commands reproduce a night exactly, and nothing in the directory reaches for Math.random', async () => {
     const run = () => {

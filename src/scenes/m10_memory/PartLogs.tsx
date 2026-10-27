@@ -2,14 +2,14 @@ import { useEffect, useMemo, useRef } from 'react'
 import { Panel } from '../../components/Panel'
 import { BLOCK_LABEL, describeFeatures } from '../../sim/memory/logs/features'
 import { ANSWER_LABEL } from '../../sim/memory/logs/mapQuestion'
-import { DIG_S, EAT_S, NIGHT_S, NURSE_S } from '../../sim/memory/logs/night'
+import { DIG_S, EAT_S, NIGHT_S, NURSE_S, PRACTICE_S } from '../../sim/memory/logs/night'
 import { SECOND_BLOCK_PREDICTIONS, type Part4BlockResult, type SecondBlockPrediction } from '../../sim/memory/logs/results'
 import type { ProgressStore } from '../../sim/memory/progress/store'
 import { InstructionScreen } from './progress/InstructionScreen'
-import { Btn, Choice, Content, FixedLines, GroupLabel, Note, PANEL_STYLE, PART_TITLES, StagePanel, useStore } from './ui'
+import { Btn, Choice, Content, Countdown, FixedLines, GroupLabel, Note, PANEL_STYLE, PART_TITLES, StagePanel, useStore } from './ui'
 import { COMFORT_LINE, KIND_RULE, MAP_FOLLOWS_LINE, RATS_LINE, REFILL_RULE } from './lines'
 import type { PartContext, PartModule } from './contract'
-import { LogsStore } from './logs/logsStore'
+import { DAWN_S, LogsStore } from './logs/logsStore'
 import { LogsView } from './logs/LogsView'
 import { ClearingOverhead } from './logs/Overhead'
 import { LogsReveal } from './logs/Reveal'
@@ -27,9 +27,9 @@ export const LOGS_INTRO = {
   title: PART_TITLES.logs,
   willDo: [
     'You are the small mammal of Lab 9, back in its range at night. Out from your nest lie ten logs: seven with loose bark and three that are smooth. You will walk to a log, dig to see what is under it, and eat what you find.',
-    `A dig takes about ${DIG_S} seconds and shows whether beetles are there; eating them takes about ${EAT_S} more. A night lasts about ${NIGHT_S} seconds. At dawn you are returned to the nest.`,
+    `A dig takes about ${DIG_S} seconds and shows whether beetles are there; eating them takes about ${EAT_S} more. A night lasts about ${NIGHT_S} seconds; a timer over the view counts it down. At dawn the animal walks back to the nest by itself.`,
     `Partway through each night the young in the nest call. Digging stops until you have gone back to the nest and nursed them, which takes about ${NURSE_S} seconds and happens by itself once you are there. Then the night goes on.`,
-    'First a practice night around your own nest, which you may redo. Then two blocks of three nights each, in two other clearings of the range, each with its own nest, logs and landmarks. A fixed line beside the view repeats the two rules below.',
+    `First a practice night around your own nest, which you may redo; it is longer, about ${PRACTICE_S} seconds, for learning the keys. Then two blocks of three nights each, in two other clearings of the range, each with its own nest, logs and landmarks. A fixed line beside the view repeats the two rules below.`,
     '- ' + KIND_RULE,
     '- ' + REFILL_RULE,
   ],
@@ -40,8 +40,8 @@ export const LOGS_INTRO = {
 
 export const PRACTICE_INTRO = {
   title: 'The practice night',
-  willDo: ['One night in the clearing around your own nest, with the logs as they are tonight. Nothing is scored. Use it to learn the keys, the dig, the young’s call and the dawn.', 'You may redo the practice night as often as you like.'],
-  minutes: 2,
+  willDo: [`One night in the clearing around your own nest, with the logs as they are tonight. Nothing is scored. Use it to learn the keys, the dig, the young’s call and the dawn. This night is longer than the others, about ${PRACTICE_S} seconds; the scored nights are about ${NIGHT_S}.`, 'You may redo the practice night as often as you like.'],
+  minutes: 3,
 }
 
 export function blockIntro(kind: 'look-alike' | 'distinct', mapSeen: boolean, restartedHere: boolean) {
@@ -91,6 +91,7 @@ function Left({ ctx }: { ctx: PartContext<LogsStore> }) {
               <GroupLabel>Tonight</GroupLabel>
               <FixedLines lines={s.statusLines()} testId="night-status" />
               <Note>Tonight: {describeFeatures(s.sim.features)}.</Note>
+              <Note>Energy, which rises with each meal:</Note>
               <div style={{ height: 8, background: 'var(--bg)', borderRadius: 4, border: '1px solid var(--border)' }} aria-label="energy">
                 <div style={{ height: '100%', width: `${Math.round(s.sim.energy * 100)}%`, background: 'var(--actuator)', borderRadius: 4 }} />
               </div>
@@ -147,18 +148,17 @@ function Stage({ ctx }: { ctx: PartContext<LogsStore> }) {
   }
   if (s.state === 'night' && s.sim) {
     const fade = s.fade > 0 ? Math.min(1, s.fade / 0.6) : 0
+    const banner = s.banner()
     return (
       <>
         {fade > 0 && <div style={{ position: 'absolute', inset: 0, background: '#000', opacity: fade }} data-fade />}
-        <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', padding: '6px 12px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 12, width: 320, textAlign: 'center', pointerEvents: 'auto' }}>
-          <FixedLines lines={s.statusLines()} testId="night-status-over" />
+        <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, pointerEvents: 'auto' }}>
+          <div style={{ padding: '8px 12px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 12, width: 320, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+            <Countdown left={s.sim.seconds - s.sim.time} total={s.sim.seconds} big />
+            <FixedLines lines={s.statusLines()} testId="night-status-over" />
+          </div>
+          {banner && <NightBanner text={banner.text} tone={banner.tone} />}
         </div>
-        {s.sim.done && (
-          <StagePanel testId="dawn">
-            <div style={{ fontSize: 14, fontWeight: 600 }}>The night is over</div>
-            <Note>The light is rising. You are back at the nest.</Note>
-          </StagePanel>
-        )}
       </>
     )
   }
@@ -180,6 +180,16 @@ function Stage({ ctx }: { ctx: PartContext<LogsStore> }) {
     )
   }
   return null
+}
+
+/** The large colored line over the view: the young's call in amber, the nursing in green, the dawn in the morning's light. Its color changes; its size does not. */
+const BANNER_COLOR = { call: 'var(--sensor)', nurse: 'var(--actuator)', dawn: '#cfe0ff' } as const
+function NightBanner({ text, tone }: { text: string; tone: keyof typeof BANNER_COLOR }) {
+  return (
+    <div style={{ padding: '10px 16px', borderRadius: 12, background: 'rgba(14, 20, 32, 0.82)', border: `2px solid ${BANNER_COLOR[tone]}`, color: BANNER_COLOR[tone], fontSize: 24, fontWeight: 700, lineHeight: 1.2, textAlign: 'center', width: 320, boxSizing: 'border-box', userSelect: 'text' }} data-night-banner={tone}>
+      {text}
+    </div>
+  )
 }
 
 /** The map question after each night (spec §8.6): the overhead of the clearing, and one mark per loose-bark log. */
@@ -229,7 +239,7 @@ function Right({ ctx }: { ctx: PartContext<LogsStore> }) {
 function CanvasPart({ ctx }: { ctx: PartContext<LogsStore> }) {
   const s = useStore(ctx.store)
   const features = s.sim?.features ?? s.plan.practice
-  return <LogsView clearing={s.clearing} features={features} sim={() => s.sim} dawn={() => (s.sim?.done ? s.dawn / 2 : 0)} view={ctx.view} fov={ctx.fov} lowDetail={ctx.lowDetail} anim={ctx.anim} clock={ctx.clock} />
+  return <LogsView clearing={s.clearing} features={features} sim={() => s.sim} dawn={() => s.dawn / DAWN_S} view={ctx.view} fov={ctx.fov} lowDetail={ctx.lowDetail} anim={ctx.anim} clock={ctx.clock} />
 }
 
 registerResults(4, (progress: ProgressStore) => {

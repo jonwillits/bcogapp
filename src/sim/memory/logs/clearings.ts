@@ -53,14 +53,28 @@ export const CLEARING = {
   bound: 15,
   /** A log is dug from within this distance of its center. */
   reach: 1.1,
-  /** The nest is reached within this distance. */
-  nestReach: 0.8,
+  /** The nest is reached within this distance: the rim of the hole, which is 0.35 m across (Jon, 2026-10-27: at 0.8 m the nursing began with the animal still outside it). */
+  nestReach: 0.5,
   /** A log's length and the radius of its footprint, meters. */
   logLength: 1.3,
   logRadius: 0.22,
   loose: 7,
   smooth: 3,
 } as const
+
+/**
+ * The root arched over the nest, as the view draws it: a half torus of
+ * this radius and thickness, turned this far about the vertical, its feet
+ * either side of the hole. It is solid (Jon, 2026-10-27: the animal walked
+ * through it): its footprint is the segment between its feet.
+ */
+export const NEST_ARCH = { radius: 0.45, thickness: 0.1, turn: 0.4 } as const
+
+export function nestFootprint(nest: { x: number; y: number }): Footprint {
+  const hx = NEST_ARCH.radius * Math.cos(NEST_ARCH.turn)
+  const hy = NEST_ARCH.radius * Math.sin(NEST_ARCH.turn)
+  return { ax: nest.x - hx, ay: nest.y - hy, bx: nest.x + hx, by: nest.y + hy, r: NEST_ARCH.thickness }
+}
 
 /** Where the four clearings sit in the range: the practice clearing at Lab 9's nest; the others 24 m out, more than two moonlit view distances apart. */
 export const CLEARING_NESTS: Record<ClearingId, { x: number; y: number }> = {
@@ -192,9 +206,9 @@ export function makeClearings(seed: number): Record<ClearingId, Clearing> {
   }
 }
 
-/** The footprints that stop the body in a clearing: its logs and its landmarks (the practice clearing adds Lab 9's). */
+/** The footprints that stop the body in a clearing: its logs, its landmarks and the root over its nest (the practice clearing adds Lab 9's landmarks). */
 export function clearingFootprints(c: Clearing): Footprint[] {
-  const out: Footprint[] = [...c.logs.map(logFootprint), ...c.landmarks.map(landmarkFootprint)]
+  const out: Footprint[] = [...c.logs.map(logFootprint), ...c.landmarks.map(landmarkFootprint), nestFootprint(c.nest)]
   if (c.id === 'practice') for (const l of NEAR_LANDMARKS) out.push(footprint(l))
   return out
 }

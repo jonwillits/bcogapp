@@ -8,7 +8,7 @@ import type { Footprint } from '../../rodent/range'
 /**
  * One night at the logs (spec §8.3): the forager starts in the nest, walks
  * out, digs at logs, eats what it finds, is called back to nurse partway
- * through, and is returned to the nest at dawn. A log never shows whether
+ * through, and at dawn walks back to the nest by itself. A log never shows whether
  * it has beetles until it is dug (§12, item 4): `full` is read by nothing
  * in the scene but the dig's outcome. The night's length is a measurement
  * (`NIGHT_S`, tuned in `tune.probe.ts` so that a scripted forager that
@@ -21,6 +21,10 @@ import type { Footprint } from '../../rodent/range'
 
 /** A night's length at 1×, seconds. Tuned: see `tune.probe.ts` and the as-built notes. */
 export const NIGHT_S = 55
+/** The practice night is longer, for learning the keys (Jon, 2026-10-27: 55 s left time for about one beetle while learning). Nothing is scored on it. */
+export const PRACTICE_S = 120
+/** The walk home at dawn is given this long beyond the straight walk before the forager is set down at the nest. */
+export const RETURN_GRACE_S = 6
 /** The young call at this point in the night. */
 export const CALL_AT_S = NIGHT_S / 2
 export const DIG_S = 3
@@ -65,7 +69,7 @@ export interface NightRecord {
   seconds: number
 }
 
-export type NightPhase = 'foraging' | 'digging' | 'eating' | 'called' | 'nursing' | 'dawn'
+export type NightPhase = 'foraging' | 'digging' | 'eating' | 'called' | 'nursing' | 'returning' | 'dawn'
 
 export interface NightCommand extends Command {
   dig?: boolean
@@ -99,6 +103,8 @@ export class NightSim {
   energy = 1
   called = false
   nursed = false
+  /** Seconds the walk home may still take before the forager is set down at the nest. */
+  private returnLeft = 0
   private readonly prints: Footprint[]
   private lastSample = -Infinity
 
@@ -136,6 +142,11 @@ export class NightSim {
 
   get done(): boolean {
     return this.phase === 'dawn'
+  }
+
+  /** Dawn has come: the night's time is up and the forager is walking home, or is home. */
+  get dawning(): boolean {
+    return this.phase === 'returning' || this.phase === 'dawn'
   }
 
   get pose(): Pose {
@@ -203,9 +214,37 @@ export class NightSim {
         }
         break
       }
+      case 'returning': {
+        this.walkHome(dt)
+        this.returnLeft -= dt
+        if (this.atNest || this.returnLeft <= 0) this.dawn()
+        break
+      }
     }
-    if (this.time >= this.seconds) this.dawn()
+    if (this.time >= this.seconds && !this.dawning) this.startReturn()
     this.sample()
+  }
+
+  /** The night's time is up: whatever was in hand stops, and the forager walks home by itself. */
+  private startReturn(): void {
+    this.phase = 'returning'
+    this.at = null
+    const d = Math.hypot(this.body.x - this.clearing.nest.x, this.body.y - this.clearing.nest.y)
+    this.returnLeft = d / this.body.loco.speed + RETURN_GRACE_S
+  }
+
+  /** One step of the walk home: turn toward the nest at the turn rate (the last few degrees in one go), and walk once nearly facing it. */
+  private walkHome(dt: number): void {
+    const want = Math.atan2(this.clearing.nest.y - this.body.y, this.clearing.nest.x - this.body.x)
+    let diff = want - this.body.heading
+    while (diff > Math.PI) diff -= 2 * Math.PI
+    while (diff < -Math.PI) diff += 2 * Math.PI
+    let turn: -1 | 0 | 1 = diff > 0 ? 1 : -1
+    if (Math.abs(diff) <= this.body.loco.turnRate * dt) {
+      this.body.place({ x: this.body.x, y: this.body.y, heading: want })
+      turn = 0
+    }
+    this.move(dt, { forward: Math.abs(diff) < 0.6 ? 1 : 0, turn })
   }
 
   private move(dt: number, cmd: Command): void {
@@ -267,6 +306,7 @@ export class NightSim {
     return true
   }
 
+  /** Home: the night is over. A forager the walk home did not bring to the nest in time is set down there. */
   private dawn(): void {
     this.phase = 'dawn'
     this.at = null
@@ -276,7 +316,7 @@ export class NightSim {
       if (this.lastEmptied[l.id] === this.night - 2 && this.record.fullAtStart[l.id] && this.dugTonight[l.id] === 0) passed++
     }
     this.record.passedOverRefilled = passed
-    this.body.place({ x: this.clearing.nest.x, y: this.clearing.nest.y, heading: this.body.heading })
+    if (!this.atNest) this.body.place({ x: this.clearing.nest.x, y: this.clearing.nest.y, heading: this.body.heading })
   }
 
   /** Run to dawn with no keys held (the student left the keys alone; a test's convenience). */

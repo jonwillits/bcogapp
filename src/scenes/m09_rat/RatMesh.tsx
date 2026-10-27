@@ -13,7 +13,15 @@ import type { Rng } from '../../sim/random'
  * a run, and none of it reaches the spatial system.
  *
  * About 20 cm long. Hidden in the eye view, where the camera is its eye.
+ *
+ * `action` (Lab 10's nights; Lab 9 passes none) names what the body is
+ * doing when it is not walking, and the mesh acts it out: a dig is the
+ * nose down with the forefeet scrabbling and the body bobbing; a meal is
+ * the head nodding over the ground; nursing is the body settled low on
+ * its side. Drawing only: the action is read, never written.
  */
+
+export type RatAction = 'dig' | 'eat' | 'nurse'
 
 const FUR = '#8a7560'
 const BELLY = '#c9b9a2'
@@ -28,13 +36,13 @@ const FEET: [number, number][] = [
   [-0.06, -0.024],
 ]
 
-export function RatMesh({ pose, anim, moving, visible = true, scale = 1, floorY = 0 }: { pose: () => Pose; anim: Rng; moving: () => boolean; visible?: boolean; scale?: number; floorY?: number }) {
+export function RatMesh({ pose, anim, moving, action, visible = true, scale = 1, floorY = 0 }: { pose: () => Pose; anim: Rng; moving: () => boolean; action?: () => RatAction | null; visible?: boolean; scale?: number; floorY?: number }) {
   const group = useRef<THREE.Group>(null)
   const head = useRef<THREE.Group>(null)
   const whiskL = useRef<THREE.Group>(null)
   const whiskR = useRef<THREE.Group>(null)
   const feet = useRef<(THREE.Mesh | null)[]>([null, null, null, null])
-  const state = useRef({ clock: 0, yaw: 0, yawTarget: 0, rear: 0, rearing: 0, nextEvent: 2, lastX: NaN, lastY: NaN, stride: 0, gait: 0 })
+  const state = useRef({ clock: 0, yaw: 0, yawTarget: 0, rear: 0, rearing: 0, nextEvent: 2, lastX: NaN, lastY: NaN, stride: 0, gait: 0, dig: 0, eat: 0, nurse: 0 })
   const tail = useMemo(() => {
     const curve = new THREE.QuadraticBezierCurve3(new THREE.Vector3(-0.09, 0.025, 0), new THREE.Vector3(-0.17, 0.05, 0.02), new THREE.Vector3(-0.23, 0.015, 0.05))
     return new THREE.TubeGeometry(curve, 12, 0.006, 6, false)
@@ -49,12 +57,19 @@ export function RatMesh({ pose, anim, moving, visible = true, scale = 1, floorY 
     st.clock += dt
     g.position.set(p.x, floorY, -p.y)
     g.rotation.set(0, p.heading, 0)
+    // The action in hand, eased in and out so that nothing snaps.
+    const act = action?.() ?? null
+    const ease = Math.min(1, dt * 6)
+    st.dig += ((act === 'dig' ? 1 : 0) - st.dig) * ease
+    st.eat += ((act === 'eat' ? 1 : 0) - st.eat) * ease
+    st.nurse += ((act === 'nurse' ? 1 : 0) - st.nurse) * ease
+    if (act) st.rearing = 0
     // Idle events from the animation's own stream: a new head turn, or a rear.
     st.nextEvent -= dt
     if (st.nextEvent <= 0) {
       st.nextEvent = anim.range(1.2, 3.5)
       const r = anim.next()
-      if (!moving() && r < 0.25) st.rearing = 1.4
+      if (!moving() && !act && r < 0.25) st.rearing = 1.4
       else st.yawTarget = anim.range(-0.35, 0.35)
     }
     if (moving()) st.yawTarget *= 0.9
@@ -63,15 +78,17 @@ export function RatMesh({ pose, anim, moving, visible = true, scale = 1, floorY 
       st.rearing -= dt
       st.rear += (1 - st.rear) * Math.min(1, dt * 5)
     } else st.rear += (0 - st.rear) * Math.min(1, dt * 5)
-    if (head.current) head.current.rotation.set(0, st.yaw, 0)
-    g.rotation.z = 0
-    g.rotation.x = 0
+    // The dig: nose down, the body bobbing at the scrabble's rate, the head swinging a little. The meal: the head nods over the ground. Nursing: settled low, rolled onto one side.
+    const scrabble = Math.sin(st.clock * 2 * Math.PI * 7)
+    const nod = Math.sin(st.clock * 2 * Math.PI * 2.5)
+    if (head.current) head.current.rotation.set(0, st.yaw + 0.2 * st.dig * Math.sin(st.clock * 2 * Math.PI * 1.5), -0.35 * st.eat - 0.15 * st.eat * nod - 0.25 * st.dig)
     // A rear: the nose rises and the body pitches up about the hind feet (+z lifts +x, the nose, in this frame).
-    g.rotation.z = 0.9 * st.rear
-    g.position.y = floorY + 0.05 * st.rear
+    g.rotation.z = 0.9 * st.rear - 0.3 * st.dig + 0.06 * st.dig * scrabble
+    g.rotation.x = 0.55 * st.nurse
+    g.position.y = floorY + 0.05 * st.rear + 0.01 * st.dig * Math.abs(scrabble) - 0.012 * st.nurse
     // Whisking: both fans sweep forward and back together, in bouts that wax and wane, with a small lag between the sides.
     const bout = 0.04 + 0.08 * (0.5 + 0.5 * Math.sin(st.clock * 0.7))
-    const amp = bout * (moving() ? 1.3 : 1)
+    const amp = bout * (moving() ? 1.3 : 1) * (1 + st.eat)
     if (whiskL.current) whiskL.current.rotation.y = amp * Math.sin(st.clock * 44)
     if (whiskR.current) whiskR.current.rotation.y = -amp * Math.sin(st.clock * 44 + 0.4)
     // The feet: a trot, diagonal pairs together, at a stride rate that rises with the speed the pose is changing at.
@@ -84,8 +101,10 @@ export function RatMesh({ pose, anim, moving, visible = true, scale = 1, floorY 
     feet.current.forEach((f, i) => {
       if (!f) return
       const phase = st.stride + (i === 1 || i === 2 ? Math.PI : 0)
-      f.position.x = FEET[i][0] + 0.014 * Math.cos(phase) * st.gait
-      f.position.y = 0.006 + 0.012 * Math.max(0, Math.sin(phase)) * st.gait
+      // The forefeet scrabble at the ground during a dig: a fast alternating stroke, each foot a half cycle from the other.
+      const fore = i < 2 ? st.dig * Math.sin(st.clock * 2 * Math.PI * 7 + (i === 1 ? Math.PI : 0)) : 0
+      f.position.x = FEET[i][0] + 0.014 * Math.cos(phase) * st.gait + 0.02 * fore
+      f.position.y = 0.006 + 0.012 * Math.max(0, Math.sin(phase)) * st.gait + 0.008 * Math.max(0, fore)
     })
   })
 

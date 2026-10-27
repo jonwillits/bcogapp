@@ -67,7 +67,8 @@ function Stepper({ store, held, onTick }: { store: PartStore; held: () => { forw
 
 export default function MemoryScene() {
   const [tab, setTab] = useState<Tab>('open')
-  const [view, setView] = useState<View>('eye')
+  // The follow view by default (Jon, 2026-10-27): the animal's digging, eating and nursing are seen from behind it.
+  const [view, setView] = useState<View>('follow')
   const [narrow, setNarrow] = useState(false)
   const [lowDetail, setLowDetail] = useState(false)
   const [, bump] = useReducer((x: number) => x + 1, 0)

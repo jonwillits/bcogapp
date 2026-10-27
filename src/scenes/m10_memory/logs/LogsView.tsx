@@ -4,9 +4,9 @@ import * as THREE from 'three'
 import { makeRng, type Rng } from '../../../sim/random'
 import type { Pose } from '../../../sim/rodent/body'
 import { RangeView } from '../../m09_rat/RangeView'
-import { RatMesh } from '../../m09_rat/RatMesh'
+import { RatMesh, type RatAction } from '../../m09_rat/RatMesh'
 import { AnimalCamera, RANGE_SCALE, type View } from '../../m09_rat/AnimalCamera'
-import { CLEARING, type Clearing, type ClearingLandmark, type Log } from '../../../sim/memory/logs/clearings'
+import { CLEARING, NEST_ARCH, type Clearing, type ClearingLandmark, type Log } from '../../../sim/memory/logs/clearings'
 import type { NightFeatures } from '../../../sim/memory/logs/features'
 import type { NightSim } from '../../../sim/memory/logs/night'
 
@@ -105,7 +105,7 @@ function ClearingLandmarkMesh({ l }: { l: ClearingLandmark }) {
   )
 }
 
-/** The nest of a clearing other than Lab 9's: a root arched over a hole, as Lab 9 draws it, at the clearing's nest. */
+/** The nest of a clearing other than Lab 9's: a root arched over a hole, as Lab 9 draws it, at the clearing's nest; the root's footprint is `nestFootprint`. */
 function ClearingNest({ at }: { at: { x: number; y: number } }) {
   return (
     <group position={[at.x, 0, -at.y]}>
@@ -113,10 +113,42 @@ function ClearingNest({ at }: { at: { x: number; y: number } }) {
         <circleGeometry args={[0.35, 16]} />
         <meshStandardMaterial color="#060504" />
       </mesh>
-      <mesh position={[0, -0.03, 0]} rotation={[0, 0.4, 0]}>
-        <torusGeometry args={[0.45, 0.1, 8, 14, Math.PI]} />
+      <mesh position={[0, -0.03, 0]} rotation={[0, NEST_ARCH.turn, 0]}>
+        <torusGeometry args={[NEST_ARCH.radius, NEST_ARCH.thickness, 8, 14, Math.PI]} />
         <meshStandardMaterial color="#3d2f22" roughness={1} />
       </mesh>
+    </group>
+  )
+}
+
+/** The young in the nest: three pups huddled in the hole, breathing; they squirm while they are nursed. Reads the phase and nothing else. */
+function NestYoung({ at, nursing, clock }: { at: { x: number; y: number }; nursing: () => boolean; clock: () => number }) {
+  const pups = useRef<(THREE.Group | null)[]>([null, null, null])
+  const places = useMemo(() => [0, 1, 2].map((k) => ({ x: Math.cos(k * 2.1 + 0.5) * 0.09, z: Math.sin(k * 2.1 + 0.5) * 0.09, a: k * 2.1 + 1.2 })), [])
+  useFrame(() => {
+    const t = clock()
+    const busy = nursing()
+    pups.current.forEach((g, k) => {
+      if (!g) return
+      const breath = 1 + 0.06 * Math.sin(t * (busy ? 6 : 1.6) + k * 2)
+      g.scale.set(1, breath, 1)
+      g.rotation.y = places[k].a + (busy ? 0.25 * Math.sin(t * 4 + k) : 0.04 * Math.sin(t * 0.8 + k))
+    })
+  })
+  return (
+    <group position={[at.x, 0, -at.y]} data-nest-young>
+      {places.map((p, k) => (
+        <group key={k} ref={(g) => void (pups.current[k] = g)} position={[p.x, 0.012, p.z]} rotation={[0, p.a, 0]}>
+          <mesh rotation={[0, 0, Math.PI / 2]}>
+            <capsuleGeometry args={[0.016, 0.035, 3, 8]} />
+            <meshStandardMaterial color="#d9b3a6" roughness={0.9} />
+          </mesh>
+          <mesh position={[0.03, 0.004, 0]} rotation={[0, 0, -Math.PI / 2]}>
+            <coneGeometry args={[0.012, 0.028, 8]} />
+            <meshStandardMaterial color="#d9b3a6" roughness={0.9} />
+          </mesh>
+        </group>
+      ))}
     </group>
   )
 }
@@ -213,23 +245,32 @@ function Moon({ f }: { f: NightFeatures }) {
   )
 }
 
-/** The dig: a small spray of litter at the log being dug, while the sim says a dig is on. Reads the phase and the log, never the outcome. */
+/** The dig: a spray of litter thrown up from where the forager stands, while the sim says a dig is on. Reads the phase and the pose, never the outcome. */
 function DigSpray({ at, clock }: { at: () => { x: number; y: number } | null; clock: () => number }) {
   const ref = useRef<THREE.Group>(null)
+  const bits = useRef<(THREE.Mesh | null)[]>([])
   useFrame(() => {
     const p = at()
     if (!ref.current) return
     ref.current.visible = !!p
-    if (p) {
-      ref.current.position.set(p.x, 0.1, -p.y)
-      ref.current.rotation.y = clock() * 9
-    }
+    if (!p) return
+    ref.current.position.set(p.x, 0, -p.y)
+    const t = clock()
+    // Each bit flies up and out on its own short arc, over and over, out of step with the others.
+    bits.current.forEach((m, k) => {
+      if (!m) return
+      const u = (t * 2.2 + k * 0.37) % 1
+      const a = k * 1.9
+      const r = 0.05 + 0.3 * u
+      m.position.set(Math.cos(a) * r, 0.03 + 0.7 * u * (1 - u), Math.sin(a) * r)
+      m.rotation.set(t * 5 + k, t * 3, 0)
+    })
   })
   return (
     <group ref={ref} visible={false}>
-      {[0, 1, 2, 3].map((k) => (
-        <mesh key={k} position={[Math.cos(k * 1.6) * 0.18, 0.1 + 0.08 * k, Math.sin(k * 1.6) * 0.18]}>
-          <boxGeometry args={[0.05, 0.02, 0.05]} />
+      {Array.from({ length: 8 }, (_, k) => (
+        <mesh key={k} ref={(m) => void (bits.current[k] = m)}>
+          <boxGeometry args={[0.04, 0.015, 0.04]} />
           <meshStandardMaterial color="#5a4a2e" />
         </mesh>
       ))}
@@ -269,7 +310,14 @@ export function LogsView({ clearing, features, sim, dawn, view, fov, lowDetail, 
   useEffect(() => void 0, [])
   const digging = (): { x: number; y: number } | null => {
     const s = sim()
-    return s && (s.phase === 'digging' || s.phase === 'eating') && s.at ? { x: s.at.x, y: s.at.y } : null
+    if (!s || s.phase !== 'digging') return null
+    // The spray rises at the forager's forefeet.
+    const p = s.pose
+    return { x: p.x + 0.12 * Math.cos(p.heading), y: p.y + 0.12 * Math.sin(p.heading) }
+  }
+  const action = (): RatAction | null => {
+    const s = sim()
+    return s?.phase === 'digging' ? 'dig' : s?.phase === 'eating' ? 'eat' : s?.phase === 'nursing' ? 'nurse' : null
   }
   const beetle = (): { x: number; y: number } | null => {
     const s = sim()
@@ -283,6 +331,7 @@ export function LogsView({ clearing, features, sim, dawn, view, fov, lowDetail, 
       <directionalLight ref={sun} position={[20, 40, -10]} intensity={init.sun} color="#b9c6ff" />
       <RangeView light="moonlight" lowDetail={lowDetail} pose={pose} showNest={clearing.id === 'practice'} liveBeetle={beetle} clock={clock} />
       {clearing.id !== 'practice' && <ClearingNest at={clearing.nest} />}
+      <NestYoung at={clearing.nest} nursing={() => sim()?.phase === 'nursing'} clock={clock} />
       {clearing.logs.map((l) => (
         <LogMesh key={l.id} l={l} origin={clearing.nest} />
       ))}
@@ -293,7 +342,7 @@ export function LogsView({ clearing, features, sim, dawn, view, fov, lowDetail, 
       <Moon f={features} />
       <Rain pose={pose} on={features.weather === 'light rain'} />
       <DigSpray at={digging} clock={clock} />
-      <RatMesh pose={pose} anim={anim} moving={() => { const s = sim(); return !!s && (s.body.lastStep !== 0 || s.body.lastTurn !== 0) && s.phase !== 'digging' && s.phase !== 'nursing' }} visible={view === 'follow'} />
+      <RatMesh pose={pose} anim={anim} moving={() => { const s = sim(); return !!s && (s.body.lastStep !== 0 || s.body.lastTurn !== 0) && s.phase !== 'digging' && s.phase !== 'nursing' }} action={action} visible={view === 'follow'} />
       <AnimalCamera pose={pose} view={view} fov={fov} scale={RANGE_SCALE} />
     </>
   )

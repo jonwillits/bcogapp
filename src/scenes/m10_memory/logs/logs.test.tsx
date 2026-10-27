@@ -4,7 +4,7 @@ import { ProgressStore } from '../../../sim/memory/progress/store'
 import type { RawStorage } from '../../../sim/memory/progress/storage'
 import { makeRng } from '../../../sim/random'
 import { CLEARING } from '../../../sim/memory/logs/clearings'
-import { NIGHT_S } from '../../../sim/memory/logs/night'
+import { NIGHT_S, PRACTICE_S } from '../../../sim/memory/logs/night'
 import { LogsStore } from './logsStore'
 import { logs, LOGS_INTRO, PRACTICE_INTRO, blockIntro } from '../PartLogs'
 import type { PartContext } from '../contract'
@@ -88,6 +88,9 @@ describe('Part 4: commit, then reveal', () => {
     s.beginPractice()
     expect(s.state).toBe('night')
     expect(progress.status('p4-practice')).toBe('in progress')
+    // The practice night is the long one, and says so.
+    expect(s.sim!.seconds).toBe(PRACTICE_S)
+    expect(PRACTICE_INTRO.willDo.join(' ')).toContain(`${PRACTICE_S} seconds`)
     playNight(s, nearestFirst)
     expect(s.state).toBe('night-over')
     expect(progress.isComplete('p4-practice')).toBe(true)
@@ -108,7 +111,28 @@ describe('Part 4: commit, then reveal', () => {
     const m = render()
     expect(m).toMatch(/data-lines="night-status"/)
     expect(m).toContain('Night 1 of 3')
+    expect(m).toMatch(/data-countdown="big"/)
+    expect(m).not.toMatch(/data-night-banner/)
     expect(m).not.toMatch(/data-clearing-overhead|Digs at logs emptied|data-confusion-table|data-reveal/)
+    expect(s.sim!.seconds).toBe(NIGHT_S)
+  })
+
+  it('the large line over the view: the call in amber, the nursing in green, and the dawn, each only while it holds', () => {
+    const sim = s.sim!
+    while (!sim.called) s.tick(0.05, { forward: 0, turn: 0, dig: false })
+    expect(render()).toMatch(/data-night-banner="call"[^>]*>The young are calling: go back to the nest</)
+    sim.place(sim.clearing.nest.x, sim.clearing.nest.y, 0)
+    s.tick(0.05, { forward: 0, turn: 0, dig: false })
+    expect(sim.phase).toBe('nursing')
+    expect(render()).toMatch(/data-night-banner="nurse"[^>]*>Nursing the young</)
+    while (sim.phase === 'nursing') s.tick(0.05, { forward: 0, turn: 0, dig: false })
+    expect(render()).not.toMatch(/data-night-banner/)
+    while (!sim.dawning) s.tick(0.05, { forward: 0, turn: 0, dig: false })
+    expect(render()).toMatch(/data-night-banner="dawn"/)
+    expect(render()).toContain('Dawn: the night is over')
+    while (!sim.done) s.tick(0.05, { forward: 0, turn: 0, dig: false })
+    expect(render()).toContain('The night is over. You are home.')
+    expect(s.state).toBe('night')
   })
 
   it('the first map question comes after the first night with no string before it that mentioned it, and offers only tonight and not emptied', () => {
