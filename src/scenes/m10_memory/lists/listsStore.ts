@@ -26,7 +26,8 @@ export interface ListResult {
   recall: Recall
   typed: string[]
   countFrom: number | null
-  countTyped: number
+  /** The counting task's right and wrong clicks (`countTyped` in records saved before 2026-10-27, when the task was typed). */
+  countRight: number
   countWrong: number
   lostAssociates: boolean
   /** The reserves were exhausted and the last one was used again. */
@@ -215,12 +216,12 @@ export class ListsStore implements PartStore {
     return this.materials ? recallSecondsFor(this.materials.list) : 0
   }
 
-  private countTyped = 0
+  private countRight = 0
   private countWrong = 0
 
-  countDone(typed: number, wrong: number): void {
+  countDone(right: number, wrong: number): void {
     if (this.state !== 'count') return
-    this.countTyped = typed
+    this.countRight = right
     this.countWrong = wrong
     this.state = 'recall'
     this.changed()
@@ -236,14 +237,14 @@ export class ListsStore implements PartStore {
       recall: this.materials.recall,
       typed: [...typed],
       countFrom: this.materials.recall === 'delayed' ? this.materials.countFrom : null,
-      countTyped: this.countTyped,
+      countRight: this.countRight,
       countWrong: this.countWrong,
       lostAssociates: this.materials.lostAssociates,
       exhausted: this.exhausted,
       shown: [...this.shown],
       restarts: this.progress.restarts(unit),
     }
-    this.countTyped = 0
+    this.countRight = 0
     this.countWrong = 0
     this.progress.complete(unit, result)
     this.materials = null

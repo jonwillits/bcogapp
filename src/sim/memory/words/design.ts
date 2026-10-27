@@ -121,12 +121,24 @@ export function materialsFor(plan: Part1Plan, slot: number, reservesUsed: number
   return { list: reserve, recall: s.recall, countFrom: s.countFrom, lostAssociates: s.list.kind === 'associates' }
 }
 
-/** The next number in the counting task, or whether a typed one is right. */
-export function nextCount(from: number, typedSoFar: number): number {
-  return from - 3 * (typedSoFar + 1)
+/** The next number in the counting task: `from` minus three for each right answer so far. */
+export function nextCount(from: number, rightSoFar: number): number {
+  return from - 3 * (rightSoFar + 1)
 }
 
-export function countIsRight(from: number, typedSoFar: number, typed: string): boolean {
-  const n = Number.parseInt(typed.trim(), 10)
-  return Number.isFinite(n) && n === nextCount(from, typedSoFar)
+/** How far the wrong option stands from the right one: a slip of one or two, or of the tens digit. */
+export const WRONG_OFFSETS = [-2, -1, 1, 2, -10, 10] as const
+
+/**
+ * One step of the counting task (Jon, 2026-10-27: two buttons instead of a
+ * typed number, since typos made typing harder than the task should be):
+ * the right next number and a wrong one near it, in a seeded left-right
+ * order. `attempt` redraws the wrong option after a wrong click, so the
+ * other button is not simply the right one.
+ */
+export function countChoice(from: number, rightSoFar: number, attempt: number): { right: number; options: [number, number] } {
+  const right = nextCount(from, rightSoFar)
+  const rng = makeRng((from * 1_000_003 + rightSoFar * 7919 + attempt * 104_729) >>> 0)
+  const wrong = right + WRONG_OFFSETS[rng.int(WRONG_OFFSETS.length)]
+  return { right, options: rng.int(2) === 0 ? [right, wrong] : [wrong, right] }
 }

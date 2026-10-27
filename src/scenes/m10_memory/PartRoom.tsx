@@ -28,11 +28,11 @@ export const ROOM_INTRO = {
   title: PART_TITLES.room,
   willDo: [
     'You will see a room for 30 seconds while the view moves slowly around it. Look at the room; the view moves by itself.',
-    'Then a short counting task: counting backward by threes from a number, typing each number as you go.',
+    'Then a short counting task: for 30 seconds, counting backward by threes from a number by clicking the number that comes next.',
     'Then some questions, one at a time, each answered with a button.',
   ],
   minutes: 10,
-  keys: ['Nothing to press while the room is shown. The counting task and the questions are answered by typing and clicking.'],
+  keys: ['Nothing to press while the room is shown. The counting task and the questions are answered by clicking.'],
 }
 
 /** The checklist's own instruction screen, which explains the checklist fully. */

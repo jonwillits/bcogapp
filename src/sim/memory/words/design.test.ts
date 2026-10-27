@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { countIsRight, materialsFor, nextCount, planPart1, recallSecondsFor, RECALL_S, SLOTS, WORD_ON_S, BLANK_S, DELAY_S } from './design'
+import { countChoice, materialsFor, nextCount, WRONG_OFFSETS, planPart1, recallSecondsFor, RECALL_S, SLOTS, WORD_ON_S, BLANK_S, DELAY_S } from './design'
 import { ASSOCIATE_LISTS, UNRELATED_LENGTH } from './lists'
 
 const SEEDS = Array.from({ length: 100 }, (_, i) => 1000 + i)
@@ -94,13 +94,26 @@ describe('presentation and the counting task', () => {
     expect(RECALL_S).toBe(60)
     for (const s of planPart1(1).slots) expect(recallSecondsFor(s.list)).toBe(RECALL_S)
   })
-  it('each typed number is checked against the correct next number', () => {
+  it('each step offers the right next number and one wrong number near it, on either side, redrawn after a wrong click', () => {
     expect(nextCount(300, 0)).toBe(297)
     expect(nextCount(300, 3)).toBe(288)
-    expect(countIsRight(300, 0, '297')).toBe(true)
-    expect(countIsRight(300, 0, ' 297 ')).toBe(true)
-    expect(countIsRight(300, 0, '298')).toBe(false)
-    expect(countIsRight(300, 1, '294')).toBe(true)
-    expect(countIsRight(300, 1, 'abc')).toBe(false)
+    const sides = new Set<number>()
+    const offsets = new Set<number>()
+    for (const from of [200, 347, 999]) {
+      for (let step = 0; step < 12; step++) {
+        const c = countChoice(from, step, 0)
+        expect(c.right).toBe(nextCount(from, step))
+        expect(c.options).toContain(c.right)
+        const wrong = c.options.find((o) => o !== c.right)!
+        expect(WRONG_OFFSETS).toContain(wrong - c.right)
+        sides.add(c.options.indexOf(c.right))
+        offsets.add(wrong - c.right)
+        expect(JSON.stringify(countChoice(from, step, 0))).toBe(JSON.stringify(c))
+      }
+    }
+    expect(sides.size).toBe(2)
+    expect(offsets.size).toBeGreaterThan(3)
+    const redrawn = Array.from({ length: 12 }, (_, a) => JSON.stringify(countChoice(500, 0, a)))
+    expect(new Set(redrawn).size).toBeGreaterThan(1)
   })
 })

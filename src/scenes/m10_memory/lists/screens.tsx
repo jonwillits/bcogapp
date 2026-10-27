@@ -16,12 +16,12 @@ export const LISTS_MINUTES = 15
 
 export const LISTS_WILL_DO = [
   `You will see ${SLOT_COUNT} lists of words, one word at a time. The words come at a steady pace, and you cannot slow or stop them.`,
-  'After each list, one of two things happens. Either you type every word you remember right away, or you first do a short counting task and then type every word you remember. A screen tells you which, when the list ends.',
+  'After each list, one of two things happens. Either you type every word you remember right away, or you first do a short counting task (30 seconds, answered by clicking) and then type every word you remember. A screen tells you which, when the list ends.',
   'When you type, each word goes in with the “Enter” key and joins a list below the box. A countdown runs. “I’m done” ends the typing early.',
   'After the last list there is one more test. It is described when you get to it.',
 ]
 
-export const LISTS_KEYS = ['“Enter” adds the word you have typed, or the number you have typed in the counting task.', '“I’m done” ends the typing for a list early.']
+export const LISTS_KEYS = ['“Enter” adds the word you have typed.', 'In the counting task, click the number that comes next.', '“I’m done” ends the typing for a list early.']
 
 export const RECOGNITION_WILL_DO = [
   'One last test. You will see 31 words, one at a time. For each, say whether it was on one of the lists you saw (“Old”) or not (“New”).',

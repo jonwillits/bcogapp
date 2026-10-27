@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Btn, Note, GroupLabel, Choice } from '../m06_brain/ui'
 import { Content, FixedLines, OrientingPanel, DrivePad, DotPlot, statusStyle } from '../m09_rat/ui'
-import { countIsRight, nextCount } from '../../sim/memory/words/design'
+import { countChoice } from '../../sim/memory/words/design'
 import { PENDING_LINE, type Reference } from '../../sim/memory/references'
 import { REFERENCE_LINE } from './lines'
 
@@ -97,11 +97,26 @@ export function BigWord({ word }: { word: string | null }) {
   )
 }
 
-/** A countdown that reads *n s left*, fixed width. */
-export function Countdown({ left, total }: { left: number; total: number }) {
+/**
+ * A countdown that reads *n s left*, fixed width. The `big` form, for the
+ * counting task, is large and dark with a bar that empties, so that a
+ * student sees the task ends on its own and is not a count to zero (Jon,
+ * 2026-10-27).
+ */
+export function Countdown({ left, total, big }: { left: number; total: number; big?: boolean }) {
+  const n = Math.max(0, Math.ceil(left))
+  if (!big)
+    return (
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, whiteSpace: 'pre', color: 'var(--text-muted)' }} data-countdown>
+        {`${String(n).padStart(3)} s left of ${total}`}
+      </div>
+    )
   return (
-    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, whiteSpace: 'pre', color: 'var(--text-muted)' }} data-countdown>
-      {`${String(Math.max(0, Math.ceil(left))).padStart(3)} s left of ${total}`}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: 280 }} data-countdown="big">
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 26, fontWeight: 600, whiteSpace: 'pre', color: 'var(--text)', lineHeight: 1 }}>{`${String(n).padStart(2)} s left of ${total}`}</div>
+      <div style={{ height: 8, borderRadius: 4, background: 'var(--surface-2)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: `${(100 * Math.max(0, left)) / total}%`, background: 'var(--accent)' }} />
+      </div>
     </div>
   )
 }
@@ -131,69 +146,69 @@ export function useCountdown(running: boolean, seconds: number, onDone: () => vo
 }
 
 /**
- * The counting task (spec §5.1): count backward by threes from a number,
- * typing one number at a time; each entry is checked against the correct
- * next number, so that rehearsing instead is not possible. The task runs
- * for `seconds`; a wrong entry is marked and the right one asked for again.
+ * The counting task (spec §5.1, with Jon's change of 2026-10-27): count
+ * backward by threes from a number for `seconds`. The current number is
+ * shown large; under it two buttons offer the right next number and a
+ * wrong one near it (`countChoice`), and the student clicks the right one,
+ * so that rehearsing instead is not possible and no typing is needed. A
+ * right click advances the number; a wrong one is counted, flashes, and
+ * redraws the options. The timer is the large form, since a student who
+ * misses it may think the count runs to zero.
  */
-export function CountingTask({ from, seconds, onDone, testId }: { from: number; seconds: number; onDone: (typed: number, wrong: number) => void; testId?: string }) {
-  const [typedSoFar, setTyped] = useState(0)
+export function CountingTask({ from, seconds, onDone, testId }: { from: number; seconds: number; onDone: (right: number, wrong: number) => void; testId?: string }) {
+  const [right, setRight] = useState(0)
   const [wrong, setWrong] = useState(0)
-  const [value, setValue] = useState('')
+  const [attempt, setAttempt] = useState(0)
   const [flash, setFlash] = useState<'right' | 'wrong' | null>(null)
-  const counts = useRef({ typed: 0, wrong: 0 })
-  const left = useCountdown(true, seconds, () => onDone(counts.current.typed, counts.current.wrong))
-  const input = useRef<HTMLInputElement>(null)
+  const counts = useRef({ right: 0, wrong: 0 })
+  const left = useCountdown(true, seconds, () => onDone(counts.current.right, counts.current.wrong))
   useEffect(() => {
-    input.current?.focus()
-  }, [])
-  const submit = () => {
-    if (!value.trim()) return
-    if (countIsRight(from, typedSoFar, value)) {
-      counts.current.typed++
-      setTyped((n) => n + 1)
+    if (!flash) return
+    const id = setTimeout(() => setFlash(null), 350)
+    return () => clearTimeout(id)
+  }, [flash, right, wrong])
+  const current = from - 3 * right
+  const choice = countChoice(from, right, attempt)
+  const pick = (n: number) => {
+    if (n === choice.right) {
+      counts.current.right++
+      setRight((k) => k + 1)
+      setAttempt(0)
       setFlash('right')
     } else {
       counts.current.wrong++
-      setWrong((n) => n + 1)
+      setWrong((k) => k + 1)
+      setAttempt((a) => a + 1)
       setFlash('wrong')
     }
-    setValue('')
   }
+  const numberColor = flash === 'wrong' ? 'var(--avoid)' : flash === 'right' ? 'var(--actuator)' : 'var(--text)'
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-counting={testId ?? true}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }} data-counting={testId ?? true}>
       <GroupLabel>Count backward</GroupLabel>
-      <Note>Count backward by threes from {from}, typing each number and pressing “Enter”. Keep going until the time is up.</Note>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, whiteSpace: 'pre' }}>{`next number  ${String(nextCount(from, typedSoFar)).padStart(4)}   typed ${String(typedSoFar).padStart(3)}   wrong ${String(wrong).padStart(3)}`}</div>
-      <input
-        ref={input}
-        type="text"
-        inputMode="numeric"
-        autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="off"
-        spellCheck={false}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') submit()
-        }}
-        aria-label="the next number"
-        style={{ fontSize: 22, fontFamily: 'var(--font-mono)', padding: '6px 10px', width: 140, background: 'var(--bg)', color: 'var(--text)', border: `2px solid ${flash === 'wrong' ? 'var(--avoid)' : flash === 'right' ? 'var(--actuator)' : 'var(--border)'}`, borderRadius: 'var(--radius-sm)' }}
-      />
-      <Countdown left={left} total={seconds} />
+      <Note>{`Count backward by threes from ${from}, for ${seconds} seconds only. Click the number that comes next. The task ends by itself when the time is up.`}</Note>
+      <Countdown left={left} total={seconds} big />
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 48, fontWeight: 600, lineHeight: 1, color: numberColor, whiteSpace: 'pre', marginTop: 6 }} data-count-number>
+        {String(current).padStart(3)}
+      </div>
+      <div style={{ display: 'flex', gap: 16 }} data-count-options>
+        {choice.options.map((n, i) => (
+          <button
+            key={`${right}-${attempt}-${i}`}
+            type="button"
+            onClick={() => pick(n)}
+            aria-label={`the next number is ${n}`}
+            style={{ width: 120, padding: '10px 0', fontSize: 26, fontFamily: 'var(--font-mono)', fontWeight: 600, background: 'var(--surface-2)', color: 'var(--text)', border: '2px solid var(--border)', borderRadius: 'var(--radius-sm)', cursor: 'pointer' }}
+          >
+            {n}
+          </button>
+        ))}
+      </div>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, whiteSpace: 'pre', color: 'var(--text-muted)' }}>{`right ${String(right).padStart(3)}   wrong ${String(wrong).padStart(3)}`}</div>
     </div>
   )
 }
 
-/**
- * The typed recall box (spec §5.1): each word is entered with the Enter
- * key and joins a visible list below the box, in the order typed; a
- * countdown runs; *I’m done* ends recall early. The browser is given no
- * way to help: autocomplete, autocorrect, autocapitalize and spellcheck
- * are all off. Nothing typed is scored or compared with anything on this
- * screen.
- */
 export function RecallBox({ seconds, onDone, prompt = 'Type every word you remember, one at a time, and press “Enter” after each.', testId }: { seconds: number; onDone: (typed: string[]) => void; prompt?: string; testId?: string }) {
   const [typed, setTyped] = useState<string[]>([])
   const [value, setValue] = useState('')

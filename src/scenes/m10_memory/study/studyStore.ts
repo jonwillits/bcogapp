@@ -27,7 +27,8 @@ export interface StudyResult {
   grid?: string[][]
   typed: string[]
   restarted: boolean
-  countTyped: number
+  /** The counting task's right and wrong clicks (`countTyped` in records saved before 2026-10-27, when the task was typed). */
+  countRight: number
   countWrong: number
 }
 
@@ -46,7 +47,7 @@ export class StudyStore implements PartStore {
   phase: StudyPhase = 'intro'
   materials: StudyMaterials | null = null
   countFrom = 0
-  countTyped = 0
+  countRight = 0
   countWrong = 0
   version = 0
   private listeners = new Set<() => void>()
@@ -97,7 +98,7 @@ export class StudyStore implements PartStore {
     this.progress.begin(id)
     this.materials = this.materialsFor(this.unit)
     this.countFrom = makeRng(this.seed ^ 0x2c0 ^ (this.unit === 'first' ? 1 : 2) ^ (this.progress.materialsSlot(id) << 4)).int(800) + 200
-    this.countTyped = 0
+    this.countRight = 0
     this.countWrong = 0
     this.phase = 'study'
     this.changed()
@@ -109,9 +110,9 @@ export class StudyStore implements PartStore {
     this.changed()
   }
 
-  countDone(typed: number, wrong: number): void {
+  countDone(right: number, wrong: number): void {
     if (this.phase !== 'count') return
-    this.countTyped = typed
+    this.countRight = right
     this.countWrong = wrong
     this.phase = 'recall'
     this.changed()
@@ -126,7 +127,7 @@ export class StudyStore implements PartStore {
       grid: this.materials.grid,
       typed: [...typed],
       restarted: this.progress.restarts(id) > 0,
-      countTyped: this.countTyped,
+      countRight: this.countRight,
       countWrong: this.countWrong,
     }
     this.progress.complete(id, result)

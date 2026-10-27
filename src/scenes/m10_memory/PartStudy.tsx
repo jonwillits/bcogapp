@@ -24,13 +24,13 @@ export const STUDY_INTRO: Record<StudyUnit, { willDo: string[]; minutes: number;
   first: {
     willDo: [
       'You will see a set of 24 words on the screen for one minute. Look at them for the whole minute.',
-      'Then a short counting task: count backward by threes from a number, typing each number and pressing “Enter”.',
+      'Then a short counting task: for 30 seconds, count backward by threes from a number by clicking the number that comes next.',
       'Then type every word you remember from the set, one at a time, pressing “Enter” after each. You have 90 seconds, and “I’m done” ends it early.',
       'There are two sets. This is the first. After it, the second set follows the same three steps.',
       'Each set is done in one sitting: a set you leave partway starts again with a new set of words, and a set you have finished is never redone.',
     ],
     minutes: 10,
-    keys: ['“Enter” enters a number in the counting task, and a word in the recall box.', '“I’m done” ends recall early.'],
+    keys: ['“Enter” enters a word in the recall box. The counting task is answered by clicking.', '“I’m done” ends recall early.'],
   },
   second: {
     willDo: [
@@ -39,7 +39,7 @@ export const STUDY_INTRO: Record<StudyUnit, { willDo: string[]; minutes: number;
       'This set is done in one sitting too: leave partway and it starts again with a new set of words.',
     ],
     minutes: 5,
-    keys: ['“Enter” enters a number in the counting task, and a word in the recall box.', '“I’m done” ends recall early.'],
+    keys: ['“Enter” enters a word in the recall box. The counting task is answered by clicking.', '“I’m done” ends recall early.'],
   },
 }
 
