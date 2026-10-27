@@ -98,10 +98,11 @@ export function BigWord({ word }: { word: string | null }) {
 }
 
 /**
- * A countdown that reads *n s left*, fixed width. The `big` form, for the
- * counting task, is large and dark with a bar that empties, so that a
- * student sees the task ends on its own and is not a count to zero (Jon,
- * 2026-10-27).
+ * A countdown that reads *n s left*, fixed width. The `big` form, on every
+ * timed screen (the counting task, the study screen, the recall boxes), is
+ * large and dark with a bar that empties, so that a student sees how long
+ * the screen lasts and that it ends on its own (Jon, 2026-10-27, after the
+ * counting task's timer was easy to miss).
  */
 export function Countdown({ left, total, big }: { left: number; total: number; big?: boolean }) {
   const n = Math.max(0, Math.ceil(left))
@@ -252,8 +253,8 @@ export function RecallBox({ seconds, onDone, prompt = 'Type every word you remem
           </span>
         ))}
       </div>
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-        <Countdown left={left} total={seconds} />
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+        <Countdown left={left} total={seconds} big />
         <Btn small onClick={() => onDone(list.current)}>
           I’m done
         </Btn>

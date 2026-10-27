@@ -123,7 +123,9 @@ function StudyScreen({ store, seconds = STUDY_S }: { store: StudyStore; seconds?
     <StagePanel wide testId="study">
       <GroupLabel>Look at the words</GroupLabel>
       {m.grid ? <Grid grid={m.grid} /> : <Tree set={m.set} />}
-      <Countdown left={left} total={seconds} />
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <Countdown left={left} total={seconds} big />
+      </div>
     </StagePanel>
   )
 }
