@@ -59,7 +59,7 @@ export const ITEM_PLACES: Record<string, Place> = {
   monitor: { x: 0.8, y: 0.75, z: -1.6, turn: 0, height: 0.45 },
   toaster: { x: 1.25, y: 0.75, z: -1.4, turn: 0.2, height: 0.2 },
   // unfitting, arrangement A
-  'fire-extinguisher': { x: -1.5, y: MATTRESS_TOP, z: -0.3, turn: 0.6, height: 0.5 },
+  'hay-bale': { x: -1.5, y: MATTRESS_TOP, z: -0.3, turn: 0.6, height: 0.4 },
   'garden-trowel': { x: 0.5, y: 0.02, z: 0.5, turn: 0.8, height: 0.08 },
   axe: { x: -1.1, y: 0, z: 1.45, turn: 0.2, height: 0.7 },
   candelabra: { x: 1.5, y: 0.85, z: 1.42, turn: -0.2, height: 0.3 },

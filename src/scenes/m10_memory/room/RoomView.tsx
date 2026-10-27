@@ -4,7 +4,7 @@ import { Html, useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { CameraRig } from '../../../components/CameraRig'
 import { FURNITURE, type RoomItem } from '../../../sim/memory/room/items'
-import { presentIn, typeOf, ITEM_TYPE_LABEL, type Arrangement } from '../../../sim/memory/room/arrangements'
+import { presentIn, type Arrangement } from '../../../sim/memory/room/arrangements'
 import { FURNITURE_PLACES, ITEM_PLACES, ROOM, type Place } from '../../../sim/memory/room/layout'
 import { PATH_FOV, poseCamera } from '../../../sim/memory/room/path'
 import { modelFile } from '../../../sim/memory/room/models'
@@ -15,7 +15,9 @@ import { modelFile } from '../../../sim/memory/room/models'
  * box. Three uses: hidden while the models load behind the instruction
  * screen; on the fixed 30-second path, with the camera posed each frame
  * from the store's clock and no student control; and after the reveal,
- * free to orbit, with each listed item labeled by what it was.
+ * free to orbit, with each item in it labeled by its name alone (Jon,
+ * 2026-10-27: a label that also said what it was made the view busy; that
+ * is in the results).
  *
  * Nothing on a model marks its kind. The room is lit warmly; the page
  * around it stays the dark theme.
@@ -183,7 +185,7 @@ export function RoomView({ arrangement, mode, pathT, onLoaded }: RoomViewProps) 
             return (
               <Html key={`label-${it.id}`} position={[p.x, p.y + p.height + 0.12, p.z]} center style={{ pointerEvents: 'none' }} zIndexRange={[5, 0]}>
                 <div style={{ fontSize: 10, padding: '2px 6px', borderRadius: 999, background: 'rgba(14,20,32,0.85)', color: '#e7ecf3', border: '1px solid #2a3446', whiteSpace: 'nowrap' }}>
-                  {it.name.replace(/^an? /, '')} · {ITEM_TYPE_LABEL[typeOf(arrangement, it.id)]}
+                  {it.name.replace(/^an? /, '')}
                 </div>
               </Html>
             )

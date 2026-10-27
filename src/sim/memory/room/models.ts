@@ -28,7 +28,7 @@ export const MODEL_FILES: Record<string, string> = {
   'microwave': 'kenney-furniture/microwave.glb',
   'monitor': 'kenney-furniture/monitor.glb',
   'toaster': 'kenney-furniture/toaster.glb',
-  'fire-extinguisher': 'polyhaven/fire-extinguisher.glb',
+  'hay-bale': 'kenney-graveyard/hay-bale.glb',
   'garden-trowel': 'polyhaven/garden-trowel.glb',
   'axe': 'kenney-survival/axe.glb',
   'candelabra': 'kenney-graveyard/candelabra.glb',

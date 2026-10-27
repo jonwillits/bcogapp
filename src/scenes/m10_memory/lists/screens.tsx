@@ -33,8 +33,8 @@ export const RECOGNITION_WILL_DO = [
 
 export const RECOGNITION_MINUTES = 3
 
-/** The shared screen's default says "have ready"; *ready* is a word on one of the lists, so this part supplies its own line. */
-export const READY_LINE = 'Nothing to have on hand: you type into the app. The report is filled in from the results screen afterward.'
+/** This part's own line: the lists' screens avoid *ready*, a word on one of the lists. */
+export const READY_LINE = 'Nothing is needed. You will type your answers into the app. The report is filled in from the results screen afterward.'
 
 export function ListsLeft({ ctx }: { ctx: PartContext<ListsStore> }) {
   const s = useStore(ctx.store)

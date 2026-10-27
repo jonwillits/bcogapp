@@ -7,7 +7,10 @@
  * credited in `public/m10/room/NOTICE`. No person, face or photograph of a
  * person anywhere in the room (no poster).
  *
- * Jon reviews the item list on the walk.
+ * Jon reviewed the item list on the walk (2026-10-27): *a stack of
+ * textbooks* became *textbooks*, since the model's books stand on their
+ * sides and a stack says a pile; and the fire extinguisher, which some
+ * dorm rooms do have, became a hay bale.
  */
 
 export type ItemKind = 'fitting' | 'unfitting'
@@ -26,7 +29,7 @@ export const FITTING: RoomItem[] = [
   { id: 'mini-fridge', name: 'a mini fridge', kind: 'fitting' },
   { id: 'coffee-mug', name: 'a coffee mug', kind: 'fitting' },
   { id: 'water-bottle', name: 'a water bottle', kind: 'fitting' },
-  { id: 'textbooks', name: 'a stack of textbooks', kind: 'fitting' },
+  { id: 'textbooks', name: 'textbooks', kind: 'fitting' },
   { id: 'trash-can', name: 'a trash can', kind: 'fitting' },
   { id: 'potted-plant', name: 'a potted plant', kind: 'fitting' },
   { id: 'speaker', name: 'a speaker', kind: 'fitting' },
@@ -38,7 +41,7 @@ export const FITTING: RoomItem[] = [
 
 /** The unfitting items, split the same way. */
 export const UNFITTING: RoomItem[] = [
-  { id: 'fire-extinguisher', name: 'a fire extinguisher', kind: 'unfitting' },
+  { id: 'hay-bale', name: 'a hay bale', kind: 'unfitting' },
   { id: 'garden-trowel', name: 'a garden trowel', kind: 'unfitting' },
   { id: 'axe', name: 'an axe', kind: 'unfitting' },
   { id: 'candelabra', name: 'a candelabra', kind: 'unfitting' },

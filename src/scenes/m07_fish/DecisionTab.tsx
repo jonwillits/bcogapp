@@ -61,8 +61,9 @@ export function FourCounts({ world, counts }: { world: FishWorld; counts: Counts
  * where the criterion sits. A calculator, not an instrument on the fish — it
  * reads nothing from the fish, so it stays available when a fish is hidden.
  */
-export function ByHandBox() {
-  const [c, setC] = useState<Counts>({ hits: 42, misses: 8, falseAlarms: 8, correctRejections: 42 })
+/** Lab 7's box. `initial` and `note` let another lab open it empty, with its own line (Lab 10's room opens on zeros, since the reading's numbers there looked like the student's own). */
+export function ByHandBox({ initial = { hits: 42, misses: 8, falseAlarms: 8, correctRejections: 42 }, note }: { initial?: Counts; note?: string } = {}) {
+  const [c, setC] = useState<Counts>(initial)
   const r = byHand(c)
   const set = (k: keyof Counts) => (v: number) => setC((was) => ({ ...was, [k]: Math.max(0, Math.round(v)) }))
   const ok = c.hits + c.misses > 0 && c.falseAlarms + c.correctRejections > 0
@@ -78,7 +79,7 @@ export function ByHandBox() {
       <Row label="criterion: 0 neutral, below liberal, above conservative" value={ok ? `${fmt(r.criterion)} (${describeCriterion(r.criterion)})` : '—'} />
       <Row label="percent correct" value={ok ? `${r.percentCorrect.toFixed(1)}%` : '—'} />
       <Note>
-        z(·) is how many spreads from the middle of a bell curve a rate lies. The box opens on the reading’s first face-memory tester, 42 and 8 out of 50; the second is 49 hits, 1 miss, 25 false alarms, 25 correct rejections. A rate of exactly 0 or 1 has no z, so it is counted as half a response short of the end.
+        {note ?? 'z(·) is how many spreads from the middle of a bell curve a rate lies. The box opens on the reading’s first face-memory tester, 42 and 8 out of 50; the second is 49 hits, 1 miss, 25 false alarms, 25 correct rejections. A rate of exactly 0 or 1 has no z, so it is counted as half a response short of the end.'}
       </Note>
     </div>
   )

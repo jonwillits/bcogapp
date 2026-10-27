@@ -25,7 +25,7 @@ describe('the instruction screen', () => {
     const second = at('After each list, type every word you remember.')
     const minutes = at('About 19 minutes.')
     const sitting = at(SITTING_LINES['one sitting'].slice(0, 40))
-    const ready = at('Nothing to have on hand')
+    const ready = at('Nothing is needed')
     const keys = at('Enter adds the word you typed.')
     expect(what).toBeLessThan(second)
     expect(second).toBeLessThan(minutes)

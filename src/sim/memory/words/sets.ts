@@ -15,7 +15,9 @@ import { makeRng } from '../../random'
  * so clothing and musical instruments took their place. The instruments
  * are the lab's lowest-frequency words (1 to 16 per million) but are known
  * to every student and are as distinct from one another and from the rest
- * of the lab as any category left.
+ * of the lab as any category left. set-a's *sea animals* (shark, whale,
+ * salmon, lobster) became *fish* (shark, salmon, trout, tuna) the same
+ * day: a whale is a mammal, and mammals is the subcategory beside it.
  */
 
 export interface Subcategory {
@@ -39,7 +41,7 @@ export const WORD_SETS: WordSet[] = [
   {
     id: 'set-a',
     categories: [
-      { label: 'animals', subcategories: [sub('mammals', ['horse', 'tiger', 'rabbit', 'wolf']), sub('birds', ['eagle', 'duck', 'goose', 'owl']), sub('sea animals', ['shark', 'whale', 'salmon', 'lobster'])] },
+      { label: 'animals', subcategories: [sub('mammals', ['horse', 'tiger', 'rabbit', 'wolf']), sub('birds', ['eagle', 'duck', 'goose', 'owl']), sub('fish', ['shark', 'salmon', 'trout', 'tuna'])] },
       { label: 'vehicles', subcategories: [sub('on land', ['truck', 'bus', 'taxi', 'wagon']), sub('on water', ['ship', 'boat', 'yacht', 'ferry']), sub('in the air', ['plane', 'jet', 'rocket', 'helicopter'])] },
     ],
   },

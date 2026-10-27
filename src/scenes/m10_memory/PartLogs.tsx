@@ -139,11 +139,11 @@ function Left({ ctx }: { ctx: PartContext<LogsStore> }) {
 function Stage({ ctx }: { ctx: PartContext<LogsStore> }) {
   const s = useStore(ctx.store)
   if (s.state === 'intro') return <InstructionScreen {...LOGS_INTRO} sitting="one sitting" onBegin={() => s.begin()} />
-  if (s.state === 'practice-intro') return <InstructionScreen {...PRACTICE_INTRO} sitting="leave any time" onBegin={() => s.beginPractice()} ready="Nothing to have on hand." />
+  if (s.state === 'practice-intro') return <InstructionScreen {...PRACTICE_INTRO} sitting="leave any time" onBegin={() => s.beginPractice()} ready="Nothing is needed." />
   if (s.state === 'block-intro' && s.block) {
     const i = s.blockIndex as 0 | 1
     const restartedHere = s.progress.materialsSlot(i === 0 ? 'p4-block-1' : 'p4-block-2') > 0
-    return <InstructionScreen {...blockIntro(s.block.kind, s.mapSeen, restartedHere)} sitting="one sitting" onBegin={() => s.beginBlock()} ready="Nothing to have on hand." />
+    return <InstructionScreen {...blockIntro(s.block.kind, s.mapSeen, restartedHere)} sitting="one sitting" onBegin={() => s.beginBlock()} ready="Nothing is needed." />
   }
   if (s.state === 'night' && s.sim) {
     const fade = s.fade > 0 ? Math.min(1, s.fade / 0.6) : 0

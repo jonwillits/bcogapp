@@ -66,7 +66,7 @@ const render = (store: ListsStore) => ({ stage: renderToStaticMarkup(<ListsStage
 
 /** Every word that could be shown back: every word of every study list. */
 const EVERY_WORD = new Set(ALL_STUDY_LISTS.flatMap((l) => [...l.words, ...(l.critical ? [l.critical] : [])]))
-// No shared heading uses a list word (the instruction screen says *What to have on hand*, since *ready* is on the rough list).
+// No shared heading uses a list word (the instruction screen says *What you need*, since *ready* is on the rough list).
 const SHARED_HEADING = new Set<string>()
 const listWordsIn = (html: string, except: string | null = null): string[] => {
   const words = text(html).toLowerCase().match(/[a-z']+/g) ?? []

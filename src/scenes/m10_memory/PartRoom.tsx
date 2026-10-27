@@ -32,7 +32,7 @@ export const ROOM_INTRO = {
     'Then some questions, one at a time, each answered with a button.',
   ],
   minutes: 10,
-  keys: ['Nothing to press while the room is shown. The counting task and the questions are answered by clicking.'],
+  keys: ['There is nothing to press while the room is shown. The counting task and the questions are answered by clicking.'],
 }
 
 /** The checklist's own instruction screen, which explains the checklist fully. */
