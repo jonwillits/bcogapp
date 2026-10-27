@@ -302,7 +302,9 @@ describe('the reveal (§5.6)', () => {
     const right = renderToStaticMarkup(<ListsRight progress={s.progress} />)
     expect(right).toMatch(/data-lines="lists-results"/)
     const rows = resultRows(s.store.results(), s.store.recognitionResult!)
-    expect(rows.length).toBe(10)
+    expect(rows.length).toBe(11)
+    for (const r of rows) expect(r.length, r).toBeLessThanOrEqual(58)
+    expect(rows.find((r) => /remember\s+know$/.test(r))).toBeTruthy()
     expect(rows.join('\n')).toMatch(/critical words typed after their list\s+\d of 3/)
   })
 

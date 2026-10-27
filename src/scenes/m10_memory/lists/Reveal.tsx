@@ -3,7 +3,7 @@ import type { ProgressStore } from '../../../sim/memory/progress/store'
 import { referenceById } from '../../../sim/memory/references'
 import { listById, UNRELATED_LENGTH } from '../../../sim/memory/words/lists'
 import { classifyAll, conditionOf, criticalRecalled, orderOfOutput, priorListIntrusions, serialPositionCurves, type Condition, type RecallRecord } from '../../../sim/memory/words/scoring'
-import { ITEM_TYPES, ITEM_TYPE_LABEL, scoreRecognition, type RecognitionAnswer, type RecognitionItem } from '../../../sim/memory/words/recognition'
+import { ITEM_TYPES, ITEM_TYPE_LABEL, scoreRecognition, type ItemType, type RecognitionAnswer, type RecognitionItem, type TypeScore } from '../../../sim/memory/words/recognition'
 import { READING_PRINTS_LINE, RESTARTED_LINE } from '../lines'
 import { Content, FixedLines, GroupLabel, Note, ReferencePanel, RIGHT_STYLE, StagePanel, row, shownSummary, type ShownRecord } from '../ui'
 import { RECOGNITION_UNIT, SLOT_COUNT, unitOfSlot, type ListResult, type RecognitionResult } from './listsStore'
@@ -18,6 +18,25 @@ import { RECOGNITION_UNIT, SLOT_COUNT, unitOfSlot, type ListResult, type Recogni
 const CONDITION_LABEL: Record<Condition, string> = {
   immediate: 'typed at once',
   delayed: 'after counting',
+}
+
+/** Short names of the item types for the report rows, where the right panel has about 58 characters of monospace; the full names are in the note beneath. */
+const SHORT_TYPE_LABEL: Record<ItemType, string> = {
+  'associates-studied': 'studied, lists of associates',
+  'unrelated-studied': 'studied, unrelated lists',
+  'critical-studied': 'critical, studied lists',
+  'critical-control': 'critical, control lists',
+  new: 'new words',
+}
+
+/**
+ * The recognition proportions as three aligned columns under a header line
+ * (Jon, 2026-10-26: a gap after the label, the columns named above, no R
+ * and K). The label is padded to `width`; the columns are 6, 10 and 6.
+ */
+export function recognitionLines(scores: TypeScore[], labelOf: (t: ItemType) => string, width: number): string[] {
+  const head = `${''.padEnd(width)}${'old'.padStart(6)}${'remember'.padStart(10)}${'know'.padStart(6)}`
+  return [head, ...scores.map((sc) => `${`${labelOf(sc.type)} (${sc.n})`.padEnd(width)}${sc.old.toFixed(2).padStart(6)}${sc.remember.toFixed(2).padStart(10)}${sc.know.toFixed(2).padStart(6)}`)]
 }
 
 /** The records as the scorer wants them, from what the units saved. */
@@ -79,12 +98,14 @@ export function resultRows(results: ListResult[], recognition: RecognitionResult
   const crit = criticalRecalled(records)
   const scores = scoreRecognition(recognition.items, recognition.answers)
   const order = orderOfOutput(records)
+  // The right panel holds about 58 monospace characters: labels to 37, values after a gap; the recognition table's labels to 35.
+  const W = 38
   const rows: string[] = []
-  for (const c of curves) rows.push(row(`lists ${CONDITION_LABEL[c.condition]}: first three / middle / last three`, `${c.bins.first.toFixed(2)} ${c.bins.middle.toFixed(2)} ${c.bins.last.toFixed(2)}`, 52))
-  rows.push(row('words from earlier lists (prior-list intrusions)', String(intr.count), 52))
-  rows.push(row('critical words typed after their list', `${crit.filter((c) => c.recalled).length} of ${crit.length}`, 52))
-  for (const sc of scores) rows.push(row(`${ITEM_TYPE_LABEL[sc.type]}: called old / remember / know`, `${sc.old.toFixed(2)} ${sc.remember.toFixed(2)} ${sc.know.toFixed(2)}`, 52))
-  rows.push(row('lists whose first word typed was among the last three', `${order.proportion.toFixed(2)} of ${order.lists}`, 52))
+  for (const c of curves) rows.push(row(`${CONDITION_LABEL[c.condition]}: first/middle/last`, `${c.bins.first.toFixed(2)} ${c.bins.middle.toFixed(2)} ${c.bins.last.toFixed(2)}`, W))
+  rows.push(row('words from earlier lists', String(intr.count), W))
+  rows.push(row('critical words typed after their list', `${crit.filter((c) => c.recalled).length} of ${crit.length}`, W))
+  rows.push(row('first typed word from the last three', `${order.proportion.toFixed(2)} of ${order.lists}`, W))
+  rows.push(...recognitionLines(scores, (t) => SHORT_TYPE_LABEL[t], 36))
   return rows
 }
 
@@ -155,7 +176,7 @@ export function ListsReveal({ progress }: { progress: ProgressStore }) {
         <FixedLines lines={crit.map((c) => row(`list ${c.slot + 1}: the critical word was “${c.critical}”`, c.recalled ? 'typed' : 'not typed', 52))} testId="critical" />
         {lost.length > 0 && <Content>{`${lost.length === 1 ? 'One list of associates was' : `${lost.length} lists of associates were`} lost to a restart and replaced by an unrelated list, so this part has ${crit.length} of 3.`}</Content>}
         <Note>The recognition test: the proportion of each kind of word you called old, split by remember and know.</Note>
-        <FixedLines lines={scores.map((sc) => row(`${ITEM_TYPE_LABEL[sc.type]} (${sc.n})`, `${sc.old.toFixed(2)}  R ${sc.remember.toFixed(2)}  K ${sc.know.toFixed(2)}`, 46))} testId="recognition-scores" />
+        <FixedLines lines={recognitionLines(scores, (t) => ITEM_TYPE_LABEL[t], 50)} testId="recognition-scores" />
         <Note>The researchers’ own definitions, from the source: “A remember experience is defined as one in which the subject can mentally relive the experience (perhaps by recalling its neighbors, what it made them think of, what they were doing when they heard the word, or physical characteristics associated with its presentation). A know judgment is made when subjects are confident that the item occurred on the list but are unable to reexperience (i.e., remember) its occurrence.”</Note>
         <ReferencePanel reference={referenceById('roediger1995-recall')} />
         <ReferencePanel reference={referenceById('roediger1995-table2')} />
