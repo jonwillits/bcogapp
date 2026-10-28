@@ -334,10 +334,12 @@ function Step1Stage({ s, nights }: { s: LearnersStore; nights: StudentNights }) 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-step1-reveal>
       <GroupLabel>Over the week</GroupLabel>
+      <Note>Each row is one count summed over your six nights; each column is one forager, with you first. Beetles eaten is the score. Digs at full logs found beetles. Digs at logs emptied last night found a log the forager had emptied the night before, still empty tonight. Refilled logs passed close by are full logs, emptied two nights ago, that the forager came within 2 m of and never dug, on nights 3 to 6. Repeat digs are a second dig at a log already dug tonight, before and after the young’s call. Digs at smooth logs found no beetles because there are never any. Beetles per minute is the mean over the nights.</Note>
       <FixedLines lines={tableLines(columns)} testId="week-totals" />
       <GroupLabel>The share of when-errors, after look-alike pairs and after different pairs</GroupLabel>
+      <Note>Scored as your Part 4 results were: on each of nights 3 to 6, a when-decision is a visit to a log emptied last night or two nights ago, and a when-error is a dig at the former or a pass of the latter. Each cell is errors of decisions, pooled over that kind’s two nights, with the share in parentheses.</Note>
       <FixedLines lines={sharesLines(shareRows)} testId="week-shares" />
-      <Note>The foragers have no practice effect, so their contrast between the two kinds of night is the effect of look-alike nights alone. Yours has practice in it too; the two kinds of night came at the same average point in your week.</Note>
+      <Note>The foragers have no practice effect, so their contrast between the two kinds of night is the effect of look-alike nights alone. Yours has practice in it too; the two kinds of night came at the same average point in your week. A forager that stores no night has no way to tell the two kinds apart, so any difference in its two cells comes from which logs happened to be full on each night.</Note>
       <Section title="Night by night">
         {Array.from({ length: WEEK_NIGHTS }, (_, n) => (
           <div key={n} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -346,13 +348,13 @@ function Step1Stage({ s, nights }: { s: LearnersStore; nights: StudentNights }) 
           </div>
         ))}
       </Section>
-      <Note>Columns: you, then {FORAGERS.map((f) => `${COLUMN_SHORT[f.id]} = ${f.label}`).join(', ')}. Beetles per minute is the mean over the nights.</Note>
+      <Note>Columns: you, then {FORAGERS.map((f) => `${COLUMN_SHORT[f.id]} = ${f.label}`).join(', ')}. The night-by-night tables carry the same rows for one night each; a dash is a count that does not apply to that night.</Note>
       <GroupLabel>Replay: {who === 'you' ? 'your night' : `${foragerById(who).label}, beside yours`}</GroupLabel>
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
         <ClearingOverhead clearing={clearing} record={yours} label={`you, night ${s.replay.night}`} />
         {theirs && <ClearingOverhead clearing={clearing} record={theirs} label={`${foragerById(who as ForagerId).label}, night ${s.replay.night}`} />}
       </div>
-      <Note>{OVERHEAD_LEGEND}</Note>
+      <Note>{OVERHEAD_LEGEND} The forager’s path is straight from log to log because it walks perfectly; yours is wherever you went. The two overheads are the same clearing on the same night, so a log that was empty for you was empty for the forager.</Note>
       <GroupLabel>The foragers</GroupLabel>
       {FORAGERS.map((f) => (
         <Note key={f.id}>
@@ -376,15 +378,18 @@ function Step2Stage({ s, nights }: { s: LearnersStore; nights: StudentNights }) 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-step2-reveal>
       <GroupLabel>{`The stored nights, separation ${s.separation}`}</GroupLabel>
+      <Note>One grid per night of your week, in order. Each square is one unit of the store; a bright square is a unit active for that night, a dark one is not. Under each grid: how many of the units are active, and which logs were emptied that night, which is what the store holds with the code. Change the setting on the left to see the same six nights stored with more or fewer units.</Note>
       {store && <StoredNights nights={store.nights} />}
       <GroupLabel>Similarity between the stored nights’ codes</GroupLabel>
+      <Note>Each cell is how alike two stored codes are, from 0 (nothing in common) to 1 (the same code), and is shaded to match. The diagonal is each night against itself. Your week’s order is {nights.week.plan.order}: two nights with the same letter had the same moon, weather, ground and sound, and two with different letters differed in all of them. Find those pairs in the matrix at each setting.</Note>
       {store && <SimilarityMatrix matrix={store.similarity()} labels={store.nights.map((n) => n.label)} />}
-      <Note>Nights with the same letter in your week’s order ({nights.week.plan.order}) are alike at weak separation.</Note>
       <Content>{SEPARATION_LINE}</Content>
       <GroupLabel>{`Retrieval on night ${s.cue}: what was emptied last night?`}</GroupLabel>
+      <Note>The forager is standing in night {s.cue} and cues the store with what night {s.cue - 1} was like. The first chart is each stored night’s share of the answer, which follows how similar its code is to the cue. The second is the answer itself: for each log, the strength with which it comes back as emptied last night, blended from the contributing nights. A red bar is a log the forager treated as emptied on this night, an amber bar one it did not; the dashed line is 0.5. Choose another night from “The cue” on the left.</Note>
       {retrieval && retrieval.retrieval.contributions.length > 0 ? <RetrievalBars retrieval={retrieval.retrieval} labels={store!.nights.slice(0, retrieval.retrieval.contributions.length).map((n) => n.label)} logLabels={logLabels} treated={retrieval.treatedEmptied} /> : <Note>Nothing was stored before this night.</Note>}
       <Content>{STRENGTH_LINE}</Content>
       <GroupLabel>The share of when-errors: the store beside you</GroupLabel>
+      <Note>One row per setting the store has run at, with you first. The cells are counted as in Step 1: errors of decisions on the nights after a look-alike pair and on the nights after a different pair, with the share in parentheses. The store is the only part that changes between the rows.</Note>
       <FixedLines lines={sharesLines(rows)} testId="store-shares" />
     </div>
   )
@@ -400,13 +405,20 @@ function Step3Stage({ s }: { s: LearnersStore }) {
       <Note>{TABLE_LEGEND}</Note>
       <Content>{PASS_BACK_LINE}</Content>
       <GroupLabel>The hidden-activity space through the youth</GroupLabel>
-      {s.snapshots.length ? <HiddenSnapshots snapshots={s.snapshots} /> : <Note>Press “Skip ahead through the youth” on the left. Snapshots at passes {YOUTH_SNAPSHOTS.join(', ')} appear here, side by side.</Note>}
+      {s.snapshots.length ? (
+        <>
+          <Note>Each square is the network at one point in the youth, after the number of passes printed in its corner. A dot is one of the eight things, placed by the activity of the eight hidden units when that thing is the input, projected onto the two directions along which the final snapshot’s eight things differ most, so that all four squares share one pair of axes. Two things close together are represented alike; two far apart, differently. Under the squares, three distances from the final snapshot: between the things that stay put and the things that move, between wood and plants and between air and ground, and within each pair.</Note>
+          <HiddenSnapshots snapshots={s.snapshots} />
+        </>
+      ) : (
+        <Note>Press “Skip ahead through the youth” on the left. Snapshots at passes {YOUTH_SNAPSHOTS.join(', ')} appear here, side by side.</Note>
+      )}
       {d && <FixedLines lines={[`${'Distance across stays-put against moves'.padEnd(44)}${d.top.toFixed(2).padStart(6)}`, `${'Distance across wood/plants and air/ground'.padEnd(44)}${d.middle.toFixed(2).padStart(6)}`, `${'Distance within the pairs'.padEnd(44)}${d.pairs.toFixed(2).padStart(6)}`]} testId="differentiation" />}
       <Note>The youth is long: many nights, each night’s encounters replayed interleaved with the others’, before the network represents what the things have in common (§10.1.2).</Note>
       <GroupLabel>A new season</GroupLabel>
       {s.season.off.length > 1 || s.season.on.length > 1 ? (
         <>
-          <Note>Of the old things’ properties, the share still said yes to, against presentations of the new season.</Note>
+          <Note>Both plots run left to right through the presentations of the new season. The height is the share of the old eight things’ properties the network still says yes to, out of the properties they have: 1.0 is every old property still right, 0 is none. The red line is the run with replay off and the green line the run with replay on; a line is drawn once its run has been made. The left plot counts the specific properties only; the right averages the general, middle and specific levels. The two lines under the plots are each run’s final value for the specific properties.</Note>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             <div>
               <Note>The specific properties</Note>
@@ -444,8 +456,7 @@ function Step4Stage({ s, nights }: { s: LearnersStore; nights: StudentNights }) 
       {s.noStoreRuns && s.intactRuns && s.usualRuns ? (
         <>
           <FixedLines lines={tableLines([{ label: 'you', values: youValues }, { label: 'intact', values: totals(s.intactRuns) }, { label: 'no store', values: totals(s.noStoreRuns) }, { label: 'usual', values: totals(s.usualRuns) }])} testId="no-store-table" />
-          <Note>Over the week. Columns: you; Tonight too intact; Tonight too without its store; Usual only.</Note>
-          <Note>Without the store, digs at logs emptied last night rise to Usual only’s level, and digs at smooth logs stay near zero, because the slow learner’s knowledge of kinds is intact. The tendency weights still learn. New things in a new season are learned only slowly, by direct experience over many nights, with no replay to interleave. H.M. and K.C. (§10.3.1, §10.3.2): learning new occasions impaired, old general knowledge spared, new facts learned slowly.</Note>
+          <Note>Over the week. Columns: you; Tonight too intact; Tonight too without its store; Usual only, which never had one. The rows are the counts of Step 1. Read each error’s row across the three foragers, and read the Usual only column as what a forager with no store of any night does on your week. The reading’s patients are H.M. and K.C. (§10.3.1, §10.3.2); which of their losses this row resembles is for you to say.</Note>
         </>
       ) : (
         <Note>Press “Remove the fast store” on the left.</Note>
@@ -453,7 +464,7 @@ function Step4Stage({ s, nights }: { s: LearnersStore; nights: StudentNights }) 
       <GroupLabel>Damage the slow learner</GroupLabel>
       {reading ? (
         <>
-          <Note>How the damaged network answers, at noise {s.noise.toFixed(2)} on its hidden units, averaged over twenty draws.</Note>
+          <Note>How the damaged network answers, at noise {s.noise.toFixed(2)} on its hidden units, averaged over twenty draws of the noise. Each cell is the network’s output for that property and thing, from 0 (no) to 1 (yes), shaded to match; a cell in red is an answer on the wrong side of 0.5, a property the thing has that the network now denies, or one it does not have that the network now grants. The three lines under the table are, for each level, the share of the properties the things have that the network still says yes to. Move the slider to see the table at another noise.</Note>
           <PropertyTable outputs={reading.table} />
           <Note>{TABLE_LEGEND}</Note>
           <FixedLines lines={[`${'General properties still said yes'.padEnd(40)}${reading.kept.general.toFixed(2).padStart(6)}`, `${'Middle properties still said yes'.padEnd(40)}${reading.kept.middle.toFixed(2).padStart(6)}`, `${'Specific properties still said yes'.padEnd(40)}${reading.kept.specific.toFixed(2).padStart(6)}`]} testId="kept-lines" />
@@ -464,7 +475,7 @@ function Step4Stage({ s, nights }: { s: LearnersStore; nights: StudentNights }) 
       {s.noisyRuns && s.intactRuns && (
         <>
           <FixedLines lines={tableLines([{ label: 'you', values: youValues }, { label: 'intact', values: totals(s.intactRuns) }, { label: 'damaged', values: totals(s.noisyRuns.week) }])} testId="damaged-table" />
-          <Note>Over the week, with the slow learner at noise {s.noisyRuns.noise.toFixed(2)}. The forager starts digging at smooth logs, because has beetles and has no beetles are specific properties of two kinds of wood; its digs at logs emptied last night stay low, because the fast store is intact. Semantic dementia (§10.3.3): old knowledge of kinds lost first at the specific end, memory for recent occasions spared.</Note>
+          <Note>Over the week, with the slow learner at noise {s.noisyRuns.noise.toFixed(2)} and the fast store intact. Columns: you; Tonight too intact; Tonight too with the damaged network. The forager asks the damaged network, before each dig, whether the log in front of it has beetles under it, and acts on the answer. The reading’s patient here is the one with semantic dementia (§10.3.3); whether this row resembles that loss is for you to say.</Note>
         </>
       )}
       <Content>{DAMAGE_LINE}</Content>
@@ -479,7 +490,7 @@ function Step4Stage({ s, nights }: { s: LearnersStore; nights: StudentNights }) 
             ]}
             testId="measured-table"
           />
-          <Note>Totals over the week; digs at logs emptied last night count nights 2 to 6. An error rises when the damaged forager’s total is at least one more than the intact forager’s. The two patterns are opposite: each kind of damage raises one error and not the other. That is a double dissociation (§10.3.1).</Note>
+          <Note>Totals over the week, with the intact forager’s totals in the first row; digs at logs emptied last night count nights 2 to 6. Beside each damaged total is the verdict the stage gives it: an error rises when the damaged forager’s total is at least one more than the intact forager’s, and stays low otherwise. Your own table is on the left for comparison. The reading calls two opposite patterns of loss, each kind of damage raising one error and sparing the other, a double dissociation (§10.3.1); whether these two rows make one is the question to answer.</Note>
         </>
       ) : s.tableCommitted ? (
         <Note>Run both kinds of damage to see the measured table beside yours.</Note>

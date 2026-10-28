@@ -659,7 +659,7 @@ export const LABS = [
     strings: ['src/sim/memory'],
     handout: 'memory_and_generative_models/last_night_lab/last_night_lab.md',
     report: 'memory_and_generative_models/last_night_lab/last_night_lab_report.docx',
-    handoutPending: true,
+    handoutPending: false,
     /**
      * Built 2026-10-25 with no handout; the handout is written after Jon's
      * walk-through, from docs/M10_AS_BUILT_NOTES.md. The claims below are
@@ -669,7 +669,7 @@ export const LABS = [
 
     retired: [
       { term: /\bDRM\b/g, why: 'the scene never says DRM; the lists are lists of associates, and the word never shown is the critical word' },
-      { term: /\boffice\b/gi, why: 'the room is a student’s dorm room (Jon, 2026-10-25); Brewer and Treyens’s office is named only on the reference panel', unless: ['Brewer', 'reference'] },
+      { term: /\boffice\b/gi, why: 'the room is a student’s dorm room (Jon, 2026-10-25); Brewer and Treyens’s office is named only on the reference panel', unless: ['brewer', 'reference'] },
       { term: /\btwo lists of associates\b|\bten lists\b|\beleven lists\b|\b26 words\b|\bshort lists?\b|\blong lists?\b|\blist length\b/gi, why: 'seven lists of fifteen words, three of associates, no list-length condition, and a 31-word recognition test (Jon, 2026-10-25 and 2026-10-26)' },
       { term: /\btyping each number\b|\bnumber you have typed\b|\btyped each number\b|\btyping and clicking\b/gi, why: 'the counting task is two buttons under the number, not typing (Jon, 2026-10-27)' },
       { term: /\bminimap\b|\btrail\b/gi, why: 'no minimap, mark or trail exists in Part 4' },
@@ -681,7 +681,7 @@ export const LABS = [
       'Open', 'Lists', 'Study', 'Room', 'Logs', 'Learners', 'Begin', 'Export my results', 'Load my results', 'Clear my saved results', 'Erase and start over', 'Keep my results',
       'Replace my saved results', 'Keep what I have', 'Eye view', 'Follow view', 'Narrower view', 'Low detail', 'Mute', 'Dig',
       'I’m done', 'Old', 'New', 'Remember', 'Know', 'In the room', 'Not in the room',
-      'Commit the map', 'Commit my prediction', 'Go on to the first block', 'Redo the practice night', 'Emptied tonight', 'Emptied last night', 'Emptied two nights ago', 'Not emptied',
+      'Commit my predictions', 'Commit my answers', 'Commit my prediction', 'Go on', 'Pause', 'Redo the practice night', 'Go on to Step', 'Redo Step', 'Run Tonight too with the damaged slow learner', 'Emptied tonight', 'Emptied last night', 'Emptied two nights ago', 'Not emptied',
       'Use a sample set of nights', 'Run the foragers', 'Run the store at every setting', 'Skip ahead through the youth', 'Train on the new season, replay off', 'Train on the new season, replay on',
       'Remove the fast store', 'Noise on the hidden units', 'Commit my table', 'How separate the codes are',
       'Usual only', 'Tendency only', 'Tonight too', 'Tonight too, nights blurred', 'the list for tonight', 'the fast store', 'the slow learner', 'the usual fact', 'the refill rule',
