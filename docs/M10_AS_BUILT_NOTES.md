@@ -279,6 +279,32 @@ Measured 2026-10-25 on the development Mac. **Words**: headless Chromium showed 
 
 **About 69 minutes with reading and writing** after the cut, against the 82-minute target (76 with the eleven lists, when Part 1 ran about three minutes over its 19).
 
+
+### 4.8 The design simulation for the week of six nights (`design.probe.ts`, 2026-10-27, run before the week was built; spec §14, Part 4, revised)
+
+Decision-level, not a walking body. **The store over a week** (sixty seeds; a forager that digs up to four logs a night among those the store does not treat as emptied last night, the context drifting as in `foragers.ts`; the four letters' features drawn so that neighbors differ on every feature and any two letters on at least two): the share of when-errors on nights 3 / 4 / 5 / 6, every log at stake counted once.
+
+| setting | AABCCD, nights 3 / 4 / 5 / 6 | after look-alike pair (3, 6) / after different pair (4, 5) | ABBBCD, nights 3 / 4 / 5 / 6 | after look-alike pair (4, 5) / after different pair (3, 6) |
+|---|---|---|---|---|
+| weak | 0.34 / 0.09 / 0.23 / 0.37 | 0.36 / 0.16 | 0.14 / 0.25 / 0.30 / 0.22 | 0.27 / 0.18 |
+| medium | 0.23 / 0.01 / 0.06 / 0.21 | 0.22 / 0.03 | 0.02 / 0.16 / 0.16 / 0.03 | 0.16 / 0.02 |
+| strong | 0.11 / 0.00 / 0.00 / 0.12 | 0.11 / 0.00 | 0.00 / 0.09 / 0.09 / 0.00 | 0.09 / 0.00 |
+| no store (digs at random) | 0.15 / 0.38 / 0.22 / 0.32 | 0.24 / 0.30 | the same nights | 0.30 / 0.24 |
+
+Logs at stake per night about 7 / 6 / 6 / 6; the share over visited logs only (dug, or skipped as emptied last night) is within 0.02 of the share over all logs at stake for every store, and 0.08 to 0.11 higher for the forager with no store. Three things to read off it. **The effect of a look-alike pair in the week is large**: a contrast of 0.09 to 0.20 at weak separation, against the 0.10 / 0.06 confusion shares of the block design (§4.3), because the when-error measure asks exactly the question the pair confounds. **The two orders are not the same condition**: with the pair at nights 4 and 5, night 4 itself looks like both nights being told apart, and the contrast is about half that of the other order at weak separation (0.09 against 0.20) and about the same at strong. **The refill chain gives the share a night-position component of its own**: a forager with no memory for nights shows 0.24 after look-alike pairs against 0.30 after different pairs in one order and the reverse in the other, so a student with no memory for nights would show a difference of about 0.06 in a direction the order sets; the two orders cancel it across the class, not within a student.
+
+**Synthetic students** (2,000 per cell; four to six decisions a night; a per-decision error probability that falls linearly over the six nights, plus an effect added on nights after a look-alike pair): how often one student's share after look-alike pairs exceeds the share after different pairs.
+
+| practice curve | effect | week AABCCD, predicted / reversed | week ABBBCD | blocks, look-alike first | blocks, distinct first |
+|---|---|---|---|---|---|
+| steep, 0.60 to 0.25 | 0 | 47% / 47% | 47% / 48% | 84% / 14% | 14% / 83% |
+| steep | 0.10 | 64% / 31% | 65% / 31% | 92% / 6% | 29% / 66% |
+| steep | 0.20 | 80% / 16% | 81% / 15% | 97% / 2% | 44% / 51% |
+| mild, 0.50 to 0.40 | 0 | 48% / 46% | 46% / 48% | 57% / 37% | 37% / 58% |
+| mild | 0.10 | 64% / 31% | 64% / 30% | 76% / 21% | 54% / 40% |
+| flat, 0.45 | 0.10 | 66% / 30% | 66% / 29% | 65% / 31% | 65% / 30% |
+
+The rest of the grid (effect 0.04, and 0.20 under the mild and flat curves) is in the probe's output. With no effect the week gives 47% either way under every curve, where the blocks gave 84% to one half of the class and 14% to the other under a steep curve: the week removes the practice bias. It does not remove the noise: at an effect of 0.10, about two students in three see the predicted direction; at 0.20, four in five. The class is the experiment (spec §16, item 8).
 ---
 
 ## 5. Every result the scene produces that the reading does not report (spec §10)
