@@ -502,7 +502,7 @@ function Right({ ctx }: { ctx: Ctx }) {
         {nights && (
           <>
             <GroupLabel>Your week</GroupLabel>
-            <FixedLines lines={[`order ${nights.week.plan.order}, the ${nights.week.clearing} clearing`, ...nights.week.records.map((r, i) => `${`night ${i + 1}`.padEnd(10)}beetles ${String(tallies(r).beetles).padStart(2)}   per minute ${perMinute(r).toFixed(2)}`)]} />
+            <FixedLines lines={[`order ${nights.week.plan.order}`, ...nights.week.records.map((r, i) => `${`night ${i + 1}`.padEnd(10)}beetles ${String(tallies(r).beetles).padStart(2)}   per minute ${perMinute(r).toFixed(2)}`)]} />
             {(nights.predictions.pairs || nights.predictions.trend) && <FixedLines lines={[`Your Part 4 predictions: ${nights.predictions.pairs ?? '—'}; over the week, ${nights.predictions.trend ?? '—'}`]} mono={false} />}
           </>
         )}

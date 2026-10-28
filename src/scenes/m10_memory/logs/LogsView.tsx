@@ -329,14 +329,15 @@ export interface LogsViewProps {
   lowDetail: boolean
   anim: Rng
   clock: () => number
+  /** The practice night, or the screens before the week: the clearing in its brightest, clearest light. */
+  practice: boolean
 }
 
-export function LogsView({ clearing, features, sim, dawn, view, fov, lowDetail, anim, clock }: LogsViewProps) {
+export function LogsView({ clearing, features, sim, dawn, view, fov, lowDetail, anim, clock, practice }: LogsViewProps) {
   const pose = (): Pose => sim()?.pose ?? { x: clearing.nest.x, y: clearing.nest.y, heading: Math.PI / 2 }
   const hemi = useRef<THREE.HemisphereLight>(null)
   const sun = useRef<THREE.DirectionalLight>(null)
   const fogRef = useRef<THREE.FogExp2>(null)
-  const practice = clearing.id === 'practice'
   const init = lighting(features, 0, practice)
   useFrame(({ scene }) => {
     const l = lighting(features, dawn(), practice)
@@ -373,8 +374,8 @@ export function LogsView({ clearing, features, sim, dawn, view, fov, lowDetail, 
       <fogExp2 ref={fogRef} attach="fog" args={[init.fogColor, init.fog]} />
       <hemisphereLight ref={hemi} args={['#2c3a6a', '#0a0806', init.hemi]} />
       <directionalLight ref={sun} position={[20, 40, -10]} intensity={init.sun} color="#b9c6ff" />
-      <RangeView light="moonlight" lowDetail={lowDetail} pose={pose} showNest={clearing.id === 'practice'} liveBeetle={beetle} clock={clock} />
-      {clearing.id !== 'practice' && <ClearingNest at={clearing.nest} />}
+      <RangeView light="moonlight" lowDetail={lowDetail} pose={pose} showNest={false} liveBeetle={beetle} clock={clock} />
+      <ClearingNest at={clearing.nest} />
       <NestYoung at={clearing.nest} nursing={() => sim()?.phase === 'nursing'} clock={clock} />
       {clearing.logs.map((l) => (
         <LogMesh key={l.id} l={l} />

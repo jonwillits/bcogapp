@@ -68,7 +68,6 @@ export interface DigEvent {
 
 export interface NightRecord {
   night: number
-  clearing: Clearing['id']
   features: NightFeatures
   digs: DigEvent[]
   path: { t: number; x: number; y: number; heading: number }[]
@@ -148,7 +147,6 @@ export class NightSim {
     if (features.ground === 'a fallen branch across the path') this.prints.push(branchFootprint(clearing.nest))
     this.record = {
       night,
-      clearing: clearing.id,
       features,
       digs: [],
       path: [],

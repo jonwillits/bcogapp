@@ -1,19 +1,21 @@
 import { makeRng, type Rng } from '../../random'
-import { NEAR_LANDMARKS, footprint, type Footprint } from '../../rodent/range'
+import type { Footprint } from '../../rodent/range'
 
 /**
- * The clearings of Part 4 (spec §8.2, revised 2026-10-27): three compact
- * areas of Lab 9's range, each around its own nest and out of sight of the
- * others, each with ten logs, seven with loose bark and three smooth, and
- * three or four landmarks of its own. The **week's clearing** and the
- * **reserve** (where an interrupted week restarts) share one geometry,
- * turned and mirrored; the **practice clearing** is Lab 9's nest with Lab
- * 9's landmarks and logs of its own. **Each log looks different from every
- * other** in its clearing, in ways easy to see and hard to name: its
- * length, thickness, the number and angle of its branch stubs, how much
- * moss covers it, and the shade of its bark within its kind (`LogLook`).
- * No object sits on a log. A look is fixed for the week and carries nothing
- * about beetles beyond the kind of bark. Geometry only; the scene draws it.
+ * The clearing of Part 4 (spec §8.2, revised 2026-10-27; one clearing since
+ * 2026-10-28): a compact area of Lab 9's range around its own nest, with
+ * ten logs, seven with loose bark and three smooth, and three or four
+ * landmarks of its own. The practice night and the week's six nights all
+ * run here, so that what a student learns of where the logs lie on the
+ * practice night is stable knowledge through the week, and an interrupted
+ * week restarts here with every loose-bark log full (Jon, 2026-10-28; the
+ * build until then had a practice clearing at Lab 9's nest and a reserve
+ * clearing for restarts). **Each log looks different from every other**,
+ * in ways easy to see and hard to name: its length, thickness, the number
+ * and angle of its branch stubs, how much moss covers it, and the shade of
+ * its bark within its kind (`LogLook`). No object sits on a log. A look is
+ * fixed for the week and carries nothing about beetles beyond the kind of
+ * bark. Geometry only; the scene draws it.
  */
 
 export type LogKind = 'loose' | 'smooth'
@@ -98,10 +100,7 @@ export interface ClearingLandmark {
   size: number
 }
 
-export type ClearingId = 'practice' | 'week' | 'reserve'
-
 export interface Clearing {
-  id: ClearingId
   /** The nest, in the range's coordinates. */
   nest: { x: number; y: number }
   logs: Log[]
@@ -164,18 +163,8 @@ export function branchFootprint(nest: { x: number; y: number }): Footprint {
   return { ax: cx - hx, ay: cy - hy, bx: cx + hx, by: cy + hy, r: BRANCH.radius }
 }
 
-/** Where the three clearings sit in the range: the practice clearing at Lab 9's nest; the others 24 m or more out, more than two moonlit view distances apart. */
-export const CLEARING_NESTS: Record<ClearingId, { x: number; y: number }> = {
-  practice: { x: 0, y: 0 },
-  week: { x: 24, y: 10 },
-  reserve: { x: 0, y: -26 },
-}
-
-/** The two matched clearings: the one geometry, the reserve turned by a third of a turn and mirrored. */
-const PLACEMENT: Record<Exclude<ClearingId, 'practice'>, { turn: number; mirror: boolean }> = {
-  week: { turn: 0, mirror: false },
-  reserve: { turn: (2 * Math.PI) / 3, mirror: true },
-}
+/** Where the clearing sits in the range: 24 m or so from Lab 9's nest at the origin, more than two moonlit view distances, so Lab 9's landmarks are out of sight. */
+export const CLEARING_NEST = { x: 24, y: 10 } as const
 
 interface LocalGeometry {
   logs: { x: number; y: number; kind: LogKind; angle: number; look: LogLook }[]
@@ -263,40 +252,25 @@ function drawGeometry(rng: Rng, fixedLandmarks: ClearingLandmark[] = [], obstacl
   return { logs, landmarks }
 }
 
-function place(id: ClearingId, g: LocalGeometry, nest: { x: number; y: number }, turn: number, mirror: boolean): Clearing {
-  const c = Math.cos(turn)
-  const s = Math.sin(turn)
-  const map = (x: number, y: number) => {
-    const mx = mirror ? -x : x
-    return { x: nest.x + c * mx - s * y, y: nest.y + s * mx + c * y }
-  }
+function place(g: LocalGeometry, nest: { x: number; y: number }): Clearing {
   return {
-    id,
     nest,
-    logs: g.logs.map((l, i) => ({ id: i, ...map(l.x, l.y), kind: l.kind, angle: (mirror ? Math.PI - l.angle : l.angle) + turn, look: l.look })),
-    landmarks: g.landmarks.map((l, i) => ({ id: `${id}-${l.kind}-${i}`, kind: l.kind, ...map(l.x, l.y), size: l.size })),
+    logs: g.logs.map((l, i) => ({ id: i, x: nest.x + l.x, y: nest.y + l.y, kind: l.kind, angle: l.angle, look: l.look })),
+    landmarks: g.landmarks.map((l, i) => ({ id: `${l.kind}-${i}`, kind: l.kind, x: nest.x + l.x, y: nest.y + l.y, size: l.size })),
   }
 }
 
-/** All three clearings from the seed. */
-export function makeClearings(seed: number): Record<ClearingId, Clearing> {
+/** The clearing from the seed. */
+export function makeClearing(seed: number): Clearing {
   const rng = makeRng(seed ^ 0x10c5)
-  // The practice clearing keeps Lab 9's near landmarks (as drawn by RangeView) and places its logs clear of their footprints.
-  const nine = NEAR_LANDMARKS.map((l) => footprint(l))
-  const practice = drawGeometry(rng.fork(), [], nine)
-  const shared = drawGeometry(rng.fork())
-  return {
-    practice: place('practice', practice, CLEARING_NESTS.practice, 0, false),
-    week: place('week', shared, CLEARING_NESTS.week, PLACEMENT.week.turn, PLACEMENT.week.mirror),
-    reserve: place('reserve', shared, CLEARING_NESTS.reserve, PLACEMENT.reserve.turn, PLACEMENT.reserve.mirror),
-  }
+  // The first fork drew the practice clearing until 2026-10-28; it is still taken so that every seed's clearing, and every number measured in it, is as it was.
+  rng.fork()
+  return place(drawGeometry(rng.fork()), CLEARING_NEST)
 }
 
-/** The footprints that stop the body in a clearing: its logs, its landmarks and the feet of the root over its nest (the practice clearing adds Lab 9's landmarks). The night adds the fallen branch when it has one. */
+/** The footprints that stop the body in the clearing: its logs, its landmarks and the feet of the root over its nest. The night adds the fallen branch when it has one. */
 export function clearingFootprints(c: Clearing): Footprint[] {
-  const out: Footprint[] = [...c.logs.map(logFootprint), ...c.landmarks.map(landmarkFootprint), ...nestFootprints(c.nest)]
-  if (c.id === 'practice') for (const l of NEAR_LANDMARKS) out.push(footprint(l))
-  return out
+  return [...c.logs.map(logFootprint), ...c.landmarks.map(landmarkFootprint), ...nestFootprints(c.nest)]
 }
 
 /** Push a point of the given radius out of every footprint. */

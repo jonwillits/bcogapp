@@ -3,7 +3,7 @@ import { mean } from '../bilaterian/measure'
 import { planFor } from './logs/week'
 import { nightsOfKind } from './logs/features'
 import { NIGHT_S, DIG_S, EAT_S, NURSE_S } from './logs/night'
-import { makeClearings } from './logs/clearings'
+import { makeClearing } from './logs/clearings'
 import { FORAGERS, foragerShares, runForagerWeek, trainedSlowLearner, type ForagerId } from './foragers/foragers'
 import { SEPARATIONS } from './foragers/store'
 import { THINGS } from './foragers/world'
@@ -36,18 +36,18 @@ it('crib: what the parts should read', () => {
   say(`Part 3: ${ITEMS.length} checklist items, ${FITTING.length} fitting and ${UNFITTING.length} not, each present in one arrangement; every present item in view at least 4 s of 30, by frustum test.`)
   // Part 4
   say(`Part 4: a night lasts ${NIGHT_S} s; a dig ${DIG_S} s and a meal ${EAT_S} s more; the young call at ${NIGHT_S / 2} s and nursing takes ${NURSE_S} s.`)
-  const c = makeClearings(1000)
+  const c = makeClearing(1000)
   const w1000 = planFor(1000).plan
-  say(`Part 4: seed 1000's week runs in the order ${w1000.order} (nights ${nightsOfKind(w1000.order, 'after a look-alike pair').join(' and ')} follow a look-alike pair); the week's clearing has its nest at (${c.week.nest.x}, ${c.week.nest.y}) with ${c.week.logs.length} logs, each with its own look, and ${c.week.landmarks.length} landmarks.`)
+  say(`Part 4: seed 1000's week runs in the order ${w1000.order} (nights ${nightsOfKind(w1000.order, 'after a look-alike pair').join(' and ')} follow a look-alike pair); the clearing, the practice night's and the week's, has its nest at (${c.nest.x}, ${c.nest.y}) with ${c.logs.length} logs, each with its own look, and ${c.landmarks.length} landmarks.`)
   // Part 5
   const rows: Record<ForagerId, { e2: number[]; eLater: number[]; beetles: number[]; smooth: number[]; alike: number[]; differ: number[] }> = {} as never
   for (const f of FORAGERS) rows[f.id] = { e2: [], eLater: [], beetles: [], smooth: [], alike: [], differ: [] }
   const store: Record<string, { alike: number[]; differ: number[] }> = {}
   for (const sep of SEPARATIONS) store[sep] = { alike: [], differ: [] }
   for (const seed of SEEDS) {
-    const { plan, clearings } = planFor(seed)
+    const { plan, clearing } = planFor(seed)
     for (const f of FORAGERS) {
-      const w = runForagerWeek(f.id, seed, plan, clearings.week)
+      const w = runForagerWeek(f.id, seed, plan, clearing)
       rows[f.id].e2.push(w.tallies[1].digsAtEmptiedLastNight)
       rows[f.id].eLater.push(mean(w.tallies.slice(2).map((t) => t.digsAtEmptiedLastNight)))
       rows[f.id].beetles.push(w.tallies.reduce((a, t) => a + t.beetles, 0))
@@ -57,7 +57,7 @@ it('crib: what the parts should read', () => {
       if (sh['after a different pair'].share !== null) rows[f.id].differ.push(sh['after a different pair'].share!)
     }
     for (const sep of SEPARATIONS) {
-      const sh = foragerShares(runForagerWeek('tonight', seed, plan, clearings.week, {}, sep))
+      const sh = foragerShares(runForagerWeek('tonight', seed, plan, clearing, {}, sep))
       if (sh['after a look-alike pair'].share !== null) store[sep].alike.push(sh['after a look-alike pair'].share!)
       if (sh['after a different pair'].share !== null) store[sep].differ.push(sh['after a different pair'].share!)
     }

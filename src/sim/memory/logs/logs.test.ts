@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { makeRng } from '../../random'
-import { CLEARING, CLEARING_NESTS, LOOK, LOOK_MIN_DISTANCE, NEST_ARCH, branchFootprint, logFootprint, lookDistance, makeClearings, nestFootprints, type Clearing } from './clearings'
+import { CLEARING, CLEARING_NEST, LOOK, LOOK_MIN_DISTANCE, NEST_ARCH, branchFootprint, logFootprint, lookDistance, makeClearing, nestFootprints, type Clearing } from './clearings'
 import { afterNight, freshWeek, fullOnNight, isFull, truthOf, KIND_RULE, REFILL_RULE } from './refill'
 import { LETTERS, TEST_NIGHTS, WEEK_NIGHTS, WEEK_ORDERS, differingFeatures, featureVector, FEATURE_DIMS, GROUNDS, letterOf, nightsOfKind, pairKind, planWeek, sameFeatures } from './features'
 import { NIGHT_S, DIG_S, EAT_S, NURSE_S, PASS_CLOSE_M, PRACTICE_S, RETURN_GRACE_S, tallies, type NightRecord } from './night'
@@ -49,74 +49,60 @@ describe('the refill rule (§8.1, §8.3), over every sequence of empties across 
   })
 })
 
-describe('the clearings and the logs (§8.2)', () => {
+describe('the clearing and the logs (§8.2; one clearing since 2026-10-28)', () => {
   const pairwise = (c: Clearing) => {
     const out: number[] = []
     for (let i = 0; i < c.logs.length; i++) for (let j = i + 1; j < c.logs.length; j++) out.push(Math.hypot(c.logs[i].x - c.logs[j].x, c.logs[i].y - c.logs[j].y))
     return out
   }
-  it('three clearings, each with ten logs, seven loose and three smooth, a few meters from its nest and at least 3 m apart, with three or four landmarks', () => {
+  it('one clearing with ten logs, seven loose and three smooth, a few meters from its nest and at least 3 m apart, with three or four landmarks', () => {
     for (const seed of SEEDS20) {
-      const cs = makeClearings(seed)
-      expect(Object.keys(cs).sort()).toEqual(['practice', 'reserve', 'week'])
-      for (const c of Object.values(cs)) {
-        expect(c.logs.length).toBe(10)
-        expect(c.logs.filter((l) => l.kind === 'loose').length).toBe(7)
-        for (const l of c.logs) {
-          const r = Math.hypot(l.x - c.nest.x, l.y - c.nest.y)
-          expect(r).toBeGreaterThanOrEqual(CLEARING.minRadius - 1e-9)
-          expect(r).toBeLessThanOrEqual(CLEARING.maxRadius + 1e-9)
-        }
-        for (const d of pairwise(c)) expect(d).toBeGreaterThanOrEqual(CLEARING.logSpacing - 1e-9)
-        if (c.id !== 'practice') expect(c.landmarks.length).toBeGreaterThanOrEqual(3)
+      const c = makeClearing(seed)
+      expect(c.logs.length).toBe(10)
+      expect(c.logs.filter((l) => l.kind === 'loose').length).toBe(7)
+      for (const l of c.logs) {
+        const r = Math.hypot(l.x - c.nest.x, l.y - c.nest.y)
+        expect(r).toBeGreaterThanOrEqual(CLEARING.minRadius - 1e-9)
+        expect(r).toBeLessThanOrEqual(CLEARING.maxRadius + 1e-9)
+      }
+      for (const d of pairwise(c)) expect(d).toBeGreaterThanOrEqual(CLEARING.logSpacing - 1e-9)
+      expect(c.landmarks.length).toBeGreaterThanOrEqual(3)
+      expect(c.landmarks.length).toBeLessThanOrEqual(4)
+      expect(c.nest).toEqual(CLEARING_NEST)
+    }
+  })
+  it('every log’s look differs from every other log’s by at least the minimum distance, within the ranges, and nothing sits on a log; the footprint is the look’s length', () => {
+    for (const seed of SEEDS20) {
+      const c = makeClearing(seed)
+      for (let i = 0; i < c.logs.length; i++) {
+        const k = c.logs[i].look
+        expect(k.length).toBeGreaterThanOrEqual(LOOK.length[0])
+        expect(k.length).toBeLessThanOrEqual(LOOK.length[1])
+        expect(k.radius).toBeGreaterThanOrEqual(LOOK.radius[0])
+        expect(k.radius).toBeLessThanOrEqual(LOOK.radius[1])
+        expect(k.stubs.length).toBeLessThanOrEqual(LOOK.maxStubs)
+        expect(k.moss).toBeGreaterThanOrEqual(0)
+        expect(k.moss).toBeLessThanOrEqual(1)
+        expect(Math.abs(k.tint)).toBeLessThanOrEqual(1)
+        expect(Object.keys(k).sort()).toEqual(['length', 'moss', 'radius', 'stubs', 'tint'])
+        for (let j = i + 1; j < c.logs.length; j++) expect(lookDistance(k, c.logs[j].look), `seed ${seed} logs ${i} ${j}`).toBeGreaterThanOrEqual(LOOK_MIN_DISTANCE - 1e-9)
+        const f = logFootprint(c.logs[i])
+        expect(Math.hypot(f.bx - f.ax, f.by - f.ay)).toBeCloseTo(k.length, 9)
       }
     }
   })
-  it('every log’s look differs from every other log’s in the same clearing by at least the minimum distance, within the ranges, and nothing sits on a log; the footprint is the look’s length', () => {
-    for (const seed of SEEDS20) {
-      for (const c of Object.values(makeClearings(seed))) {
-        for (let i = 0; i < c.logs.length; i++) {
-          const k = c.logs[i].look
-          expect(k.length).toBeGreaterThanOrEqual(LOOK.length[0])
-          expect(k.length).toBeLessThanOrEqual(LOOK.length[1])
-          expect(k.radius).toBeGreaterThanOrEqual(LOOK.radius[0])
-          expect(k.radius).toBeLessThanOrEqual(LOOK.radius[1])
-          expect(k.stubs.length).toBeLessThanOrEqual(LOOK.maxStubs)
-          expect(k.moss).toBeGreaterThanOrEqual(0)
-          expect(k.moss).toBeLessThanOrEqual(1)
-          expect(Math.abs(k.tint)).toBeLessThanOrEqual(1)
-          expect(Object.keys(k).sort()).toEqual(['length', 'moss', 'radius', 'stubs', 'tint'])
-          for (let j = i + 1; j < c.logs.length; j++) expect(lookDistance(k, c.logs[j].look), `seed ${seed} ${c.id} logs ${i} ${j}`).toBeGreaterThanOrEqual(LOOK_MIN_DISTANCE - 1e-9)
-          const f = logFootprint(c.logs[i])
-          expect(Math.hypot(f.bx - f.ax, f.by - f.ay)).toBeCloseTo(k.length, 9)
-        }
-      }
-    }
-  })
-  it('the week’s clearing and the reserve share one geometry, turned and mirrored: the same distances between logs, the same kinds and the same looks', () => {
-    const cs = makeClearings(7)
-    const a = pairwise(cs.week)
-    const o = pairwise(cs.reserve)
-    for (let i = 0; i < a.length; i++) expect(o[i]).toBeCloseTo(a[i], 6)
-    expect(cs.reserve.logs.map((l) => l.kind)).toEqual(cs.week.logs.map((l) => l.kind))
-    expect(JSON.stringify(cs.reserve.logs.map((l) => l.look))).toBe(JSON.stringify(cs.week.logs.map((l) => l.look)))
-  })
-  it('the clearings are out of sight of one another: nests more than 20 m apart', () => {
-    const ids = Object.keys(CLEARING_NESTS) as (keyof typeof CLEARING_NESTS)[]
-    for (const a of ids) for (const b of ids) if (a !== b) expect(Math.hypot(CLEARING_NESTS[a].x - CLEARING_NESTS[b].x, CLEARING_NESTS[a].y - CLEARING_NESTS[b].y)).toBeGreaterThan(20)
-  })
-  it('the practice clearing’s logs keep clear of Lab 9’s landmarks', () => {
+  it('the clearing is out of sight of Lab 9’s nest and landmarks: more than 20 m from the origin, and no log within 20 m of a Lab 9 landmark', () => {
+    expect(Math.hypot(CLEARING_NEST.x, CLEARING_NEST.y)).toBeGreaterThan(20)
     for (const seed of SEEDS20.slice(0, 5)) {
-      const p = makeClearings(seed).practice
-      for (const l of p.logs) for (const lm of NEAR_LANDMARKS) {
+      for (const l of makeClearing(seed).logs) for (const lm of NEAR_LANDMARKS) {
         const f = footprint(lm)
-        expect(Math.hypot(l.x - f.ax, l.y - f.ay)).toBeGreaterThan(f.r + 0.9)
+        expect(Math.hypot(l.x - f.ax, l.y - f.ay)).toBeGreaterThan(20 - CLEARING.maxRadius)
       }
     }
   })
-  it('the same seed gives the same clearings', () => {
-    expect(JSON.stringify(makeClearings(42))).toBe(JSON.stringify(makeClearings(42)))
-    expect(JSON.stringify(makeClearings(42))).not.toBe(JSON.stringify(makeClearings(43)))
+  it('the same seed gives the same clearing', () => {
+    expect(JSON.stringify(makeClearing(42))).toBe(JSON.stringify(makeClearing(42)))
+    expect(JSON.stringify(makeClearing(42))).not.toBe(JSON.stringify(makeClearing(43)))
   })
 })
 
@@ -171,8 +157,8 @@ describe('the week’s order of night features (§8.4, §8.5)', () => {
 
 describe('a night (§8.3)', () => {
   const sim = (seed = 1) => {
-    const { plan, clearings } = planFor(seed)
-    const run = newWeekRun(plan, clearings.week)
+    const { plan, clearing } = planFor(seed)
+    const run = newWeekRun(plan, clearing)
     return { run, sim: startNight(run, seed) }
   }
   it('starts in the nest with every loose-bark log full, lasts NIGHT_S, calls the young halfway, and returns the forager to the nest at dawn', () => {
@@ -256,9 +242,9 @@ describe('a night (§8.3)', () => {
     expect(CLEARING.nestReach).toBe(0.5)
   })
   it('the fallen branch, on a night that has one, stops the body where it lies; on other nights nothing does there', () => {
-    const { plan, clearings } = planFor(11)
-    const c = clearings.practice
-    const run = (ground: typeof plan.practice.ground) => new NightSim(c, c.logs.map(() => null), 1, { ...plan.practice, ground }, nightRng(11, 'practice', 1))
+    const { plan, clearing } = planFor(11)
+    const c = clearing
+    const run = (ground: typeof plan.practice.ground) => new NightSim(c, c.logs.map(() => null), 1, { ...plan.practice, ground }, nightRng(11, 0))
     const f = branchFootprint(c.nest)
     const mid = { x: (f.ax + f.bx) / 2, y: (f.ay + f.by) / 2 }
     const across = Math.atan2(f.by - f.ay, f.bx - f.ax) + Math.PI / 2
@@ -302,8 +288,8 @@ describe('a night (§8.3)', () => {
     expect(s.time - s.seconds).toBeLessThan(d0 / s.body.loco.speed + RETURN_GRACE_S)
     expect(s.record.path.length).toBeGreaterThan(samples + 10)
     expect(s.record.seconds).toBe(s.seconds)
-    const { plan, clearings } = planFor(9)
-    const run = newWeekRun(plan, clearings.week)
+    const { plan, clearing } = planFor(9)
+    const run = newWeekRun(plan, clearing)
     const p = startNight(run, 9, 0, { seconds: PRACTICE_S })
     expect(p.seconds).toBe(PRACTICE_S)
     expect(p.callAt).toBe(PRACTICE_S / 2)
@@ -374,8 +360,8 @@ describe('the scripted foragers and the night’s length (§14, targets), over t
   it('a scripted perfect rememberer empties about four or five of seven loose-bark logs on night 1, when all are full, and on the other odd nights, and what is left on the even nights, over 20 seeds', () => {
     const per: number[][] = Array.from({ length: WEEK_NIGHTS }, () => [])
     for (const seed of SEEDS20) {
-      const { plan, clearings } = planFor(seed)
-      runWeekScripted(plan, clearings.week, seed, perfect()).records.forEach((r, i) => per[i].push(tallies(r).digsAtFull))
+      const { plan, clearing } = planFor(seed)
+      runWeekScripted(plan, clearing, seed, perfect()).records.forEach((r, i) => per[i].push(tallies(r).digsAtFull))
     }
     for (const n of [1, 3, 5]) {
       expect(mean(per[n - 1]), `night ${n}`).toBeGreaterThan(PERFECT_ODD[0])
@@ -389,8 +375,8 @@ describe('the scripted foragers and the night’s length (§14, targets), over t
   it('a scripted forager that knows only the usual fact digs at about two logs emptied the night before on night 2, over 20 seeds, and at some on every later night', () => {
     const per: number[][] = Array.from({ length: WEEK_NIGHTS }, () => [])
     for (const seed of SEEDS20) {
-      const { plan, clearings } = planFor(seed)
-      runWeekScripted(plan, clearings.week, seed, usualOnly(seed)).records.forEach((r, i) => per[i].push(tallies(r).digsAtEmptiedLastNight))
+      const { plan, clearing } = planFor(seed)
+      runWeekScripted(plan, clearing, seed, usualOnly(seed)).records.forEach((r, i) => per[i].push(tallies(r).digsAtEmptiedLastNight))
     }
     expect(mean(per[0])).toBe(0)
     expect(mean(per[1])).toBeGreaterThan(USUAL_NIGHT2[0])
@@ -398,8 +384,8 @@ describe('the scripted foragers and the night’s length (§14, targets), over t
     for (let n = 3; n <= WEEK_NIGHTS; n++) expect(mean(per[n - 1]), `night ${n}`).toBeGreaterThan(0.5)
   })
   it('a scripted forager that is called returns, nurses and goes on; its path is recorded; the week runs six nights and carries the state through', () => {
-    const { plan, clearings } = planFor(2)
-    const run = runWeekScripted(plan, clearings.week, 2, perfect())
+    const { plan, clearing } = planFor(2)
+    const run = runWeekScripted(plan, clearing, 2, perfect())
     expect(run.records.length).toBe(WEEK_NIGHTS)
     expect(weekDone(run)).toBe(true)
     for (const r of run.records) {
@@ -410,7 +396,7 @@ describe('the scripted foragers and the night’s length (§14, targets), over t
     expect(run.states.length).toBe(WEEK_NIGHTS + 1)
     // Every log full on night 1; on a later night a log emptied the night before is empty.
     expect(run.records[0].fullAtStart.filter(Boolean).length).toBe(7)
-    for (let n = 2; n <= WEEK_NIGHTS; n++) for (const l of clearings.week.logs) if (run.states[n - 1][l.id] === n - 1) expect(run.records[n - 1].fullAtStart[l.id]).toBe(false)
+    for (let n = 2; n <= WEEK_NIGHTS; n++) for (const l of clearing.logs) if (run.states[n - 1][l.id] === n - 1) expect(run.records[n - 1].fullAtStart[l.id]).toBe(false)
     expect(() => startNight(run, 2)).toThrow()
   })
 })
@@ -418,7 +404,6 @@ describe('the scripted foragers and the night’s length (§14, targets), over t
 describe('the scoring of when-decisions and when-errors (§8.7)', () => {
   const record = (night: number, digs: number[], passed: number[], logs: number): NightRecord => ({
     night,
-    clearing: 'week',
     features: planWeek(1).nights[0],
     digs: digs.map((log, i) => ({ t: i, log, outcome: 'empty', afterCall: false, repeat: false, emptiedLastNight: false })),
     path: [],
@@ -432,7 +417,7 @@ describe('the scoring of when-decisions and when-errors (§8.7)', () => {
     seconds: 90,
     pauses: { count: 0, seconds: 0 },
   })
-  const clearing = makeClearings(1).week
+  const clearing = makeClearing(1)
   const loose = clearing.logs.filter((l) => l.kind === 'loose').map((l) => l.id)
   it('fixtures: a dig at a log emptied last night is an error; a log emptied two nights ago passed close by and never dug is an error; one passed and dug later is not; a log both passed and dug counts once; a log neither passed nor dug is no decision', () => {
     const [a, b, c, d, e] = loose
@@ -476,7 +461,7 @@ describe('the scoring of when-decisions and when-errors (§8.7)', () => {
       records.push(r)
       states.push(afterNight(states[i], r.emptiedTonight, i + 1))
     })
-    const result: Part4WeekResult = { plan, clearing: 'week', records, states, answers: {}, restarted: false }
+    const result: Part4WeekResult = { plan, records, states, answers: {}, restarted: false }
     const s = weekSummary(result, clearing)
     expect(s.nights.length).toBe(6)
     // Night 3: at stake a, b, c (night 1) and d, e (night 2); decisions a, b, d; errors d (dug, emptied last night) and b (passed, two nights ago, not dug).
@@ -500,8 +485,8 @@ describe('the scoring of when-decisions and when-errors (§8.7)', () => {
 
 describe('the end-of-week question (§8.6, §8.7)', () => {
   it('the confusion table counts marks against truths after night 6, and confusions between nights are the off-diagonal night cells', () => {
-    const { plan, clearings } = planFor(4)
-    const c = clearings.week
+    const { plan, clearing } = planFor(4)
+    const c = clearing
     const run = runWeekScripted(plan, c, 4, { next: (s) => nearest(s, s.clearing.logs.filter((l) => l.kind === 'loose' && s.dugTonight[l.id] === 0)) })
     const t = truths(c, run.states[WEEK_NIGHTS])
     const loose = c.logs.filter((l) => l.kind === 'loose')
@@ -522,8 +507,7 @@ describe('the end-of-week question (§8.6, §8.7)', () => {
 
 describe('the tallies (§8.7)', () => {
   it('count beetles, digs at full logs, digs at logs emptied last night, repeats before and after the call, digs at smooth logs, and full logs passed close by that were emptied two nights ago', () => {
-    const { plan, clearings } = planFor(6)
-    const c = clearings.week
+    const { plan, clearing: c } = planFor(6)
     const run = newWeekRun(plan, c)
     const nearestLoose: Policy = { next: (s) => nearest(s, s.clearing.logs.filter((l) => l.kind === 'loose' && s.dugTonight[l.id] === 0)) }
     const s1 = startNight(run, 6)
@@ -543,7 +527,7 @@ describe('the tallies (§8.7)', () => {
     const s3 = startNight(run, 6)
     s3.runStill()
     expect(tallies(s3.record).passedOverRefilled).toBe(0)
-    const s3b = new NightSim(c, run.states[2], 3, plan.nights[2], nightRng(6, 'week', 3, 1))
+    const s3b = new NightSim(c, run.states[2], 3, plan.nights[2], nightRng(6, 3, 1))
     for (const l of c.logs) s3b.place(l.x + 0.5, l.y, 0)
     s3b.runStill()
     const refilled = c.logs.filter((l) => l.kind === 'loose' && run.states[2][l.id] === 1).length

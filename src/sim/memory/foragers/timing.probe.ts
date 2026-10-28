@@ -21,12 +21,12 @@ const ms = (f: () => void, reps = 1) => {
 }
 
 it('timing: Part 5', () => {
-  const { plan, clearings } = planFor(1000)
+  const { plan, clearing } = planFor(1000)
   say(`the slow learner’s youth, ${YOUTH_PASSES} passes of 24 patterns: ${ms(() => { const rng = makeRng(1); const n = new SlowLearner(rng.fork()); trainInterleaved(n, oldPatterns(), YOUTH_PASSES, rng.fork()) }).toFixed(0)} ms; one pass ${ms(() => { const n = trainedSlowLearner(1000); trainInterleaved(n, oldPatterns(), 1, makeRng(2)) }, 20).toFixed(2)} ms`)
   say(`the new season, ${SEASON_PASSES} passes of 6 patterns: ${ms(() => { const n = new SlowLearner(makeRng(1)); n.copyFrom(trainedSlowLearner(1000)); trainInterleaved(n, newPatterns(), SEASON_PASSES, makeRng(3)) }).toFixed(0)} ms`)
   const net = trainedSlowLearner(1000)
   say(`the property table with damage, 20 draws: ${ms(() => { net.damage = { noise: 0.5 }; net.table(THINGS, 20); net.damage = { noise: 0 } }, 5).toFixed(1)} ms`)
-  for (const f of FORAGERS) say(`${f.label}, the week of six nights: ${ms(() => runForagerWeek(f.id, 1000, plan, clearings.week), 3).toFixed(1)} ms`)
+  for (const f of FORAGERS) say(`${f.label}, the week of six nights: ${ms(() => runForagerWeek(f.id, 1000, plan, clearing), 3).toFixed(1)} ms`)
   const stage = new SeparationStage('strong', makeRng(4))
   const store = new FastStore(stage)
   const x = nightInput(new Array(13).fill(0), new Array(12).fill(0.3))

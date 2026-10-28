@@ -18,7 +18,7 @@ import type { PartContext } from '../contract'
  * committed; nothing about how a night went between nights; both
  * predictions committed before night 1; the end-of-week question preceded
  * by no string that mentions it; an interrupted week restarts in the
- * reserve clearing; and a log's drawing reads nothing of whether it is
+ * same clearing; and a log's drawing reads nothing of whether it is
  * full.
  */
 
@@ -258,7 +258,24 @@ describe('Part 4: commit, then reveal', () => {
 })
 
 describe('Part 4: units and reserve materials (§4.3)', () => {
-  it('a week interrupted partway restarts in the reserve clearing with every loose-bark log full and the same order, and the results say so', () => {
+  it('the practice night runs in the week’s clearing, and the week begins with every loose-bark log full whatever the practice emptied', () => {
+    const s = new LogsStore(8, new ProgressStore(memory(), 8))
+    s.begin()
+    s.beginPractice()
+    expect(s.sim!.clearing).toBe(s.clearing)
+    playNight(s, nearestFirst)
+    expect(s.practice!.emptiedTonight.some(Boolean)).toBe(true)
+    s.goOnFromPractice()
+    s.choosePairs('about as many')
+    s.chooseTrend('about the same')
+    s.commitPredictions()
+    s.beginWeek()
+    s.beginNight()
+    expect(s.sim!.clearing).toBe(s.clearing)
+    expect(s.sim!.record.fullAtStart.filter(Boolean).length).toBe(7)
+  })
+
+  it('a week interrupted partway restarts in the same clearing from night 1 with every loose-bark log full and the same order, as a fresh night, and the results say so', () => {
     const mem = memory()
     let progress = new ProgressStore(mem, 5)
     let s = new LogsStore(5, progress)
@@ -269,9 +286,11 @@ describe('Part 4: units and reserve materials (§4.3)', () => {
     s.choosePairs('about as many')
     s.chooseTrend('about the same')
     s.commitPredictions()
-    expect(s.clearingForWeek()).toBe('week')
     s.beginWeek()
     const order = s.plan.order
+    const clearing = s.clearing
+    s.beginNight()
+    const firstHeading = s.sim!.pose.heading
     playNight(s, nearestFirst)
     playNight(s, nearestFirst)
     s.beginNight()
@@ -282,13 +301,14 @@ describe('Part 4: units and reserve materials (§4.3)', () => {
     s = new LogsStore(5, progress)
     s.begin()
     expect(s.state).toBe('week-intro')
-    expect(s.clearingForWeek()).toBe('reserve')
     s.beginWeek()
-    expect(s.clearingId).toBe('reserve')
+    expect(JSON.stringify(s.clearing)).toBe(JSON.stringify(clearing))
     expect(s.plan.order).toBe(order)
     expect(s.restarted).toBe(true)
+    expect(s.nextNight).toBe(1)
     s.beginNight()
     expect(s.sim!.record.fullAtStart.filter(Boolean).length).toBe(7)
+    expect(s.sim!.pose.heading).not.toBe(firstHeading)
   })
 
   it('the practice night interrupted restarts as the practice night again', () => {

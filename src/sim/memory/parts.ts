@@ -58,5 +58,5 @@ export function reservesFor(unit: UnitId): number {
   if (unit.startsWith('p2')) return 2 // the set, then the third set
   if (unit === 'p3-room') return 2 // the arrangement, then the other arrangement
   if (unit === 'p4-practice') return 1 // the practice night again
-  return 2 // the week's clearing, then the reserve clearing
+  return 1 // the week again in the same clearing, from night 1 with every log full (2026-10-28)
 }

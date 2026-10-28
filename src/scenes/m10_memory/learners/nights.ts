@@ -1,6 +1,6 @@
 import { makeRng } from '../../../sim/random'
 import type { ProgressStore } from '../../../sim/memory/progress/store'
-import { makeClearings, type Clearing } from '../../../sim/memory/logs/clearings'
+import { makeClearing, type Clearing } from '../../../sim/memory/logs/clearings'
 import { planFor, runWeekScripted } from '../../../sim/memory/logs/week'
 import { tallies, type NightRecord, type NightTallies } from '../../../sim/memory/logs/night'
 import { truthOf, type Truth } from '../../../sim/memory/logs/refill'
@@ -32,8 +32,7 @@ export function studentNights(progress: ProgressStore, seed: number): StudentNig
  */
 export function sampleNights(): StudentNights {
   const seed = SAMPLE_SEED
-  const { plan, clearings } = planFor(seed)
-  const clearing = clearings.week
+  const { plan, clearing } = planFor(seed)
   const order = makeRng(seed ^ 0x5a3)
   const memory = makeRng(seed ^ 0x6b4)
   const marks = makeRng(seed ^ 0x7c1)
@@ -56,13 +55,13 @@ export function sampleNights(): StudentNights {
     if (t !== 'never' && marks.next() >= 0.7) a = t === 'tonight' ? 'last night' : t === 'last night' ? 'two nights ago' : 'last night'
     answers[l.id] = a
   }
-  const week: Part4WeekResult = { plan, clearing: 'week', records: run.records, states: run.states, answers, restarted: false }
+  const week: Part4WeekResult = { plan, records: run.records, states: run.states, answers, restarted: false }
   return { seed, week, predictions: { pairs: null, trend: null }, sample: true }
 }
 
-/** The clearing a saved week ran in. */
+/** The clearing a saved week ran in: the seed's. */
 export function clearingOf(nights: StudentNights): Clearing {
-  return makeClearings(nights.seed)[nights.week.clearing]
+  return makeClearing(nights.seed)
 }
 
 export function studentTallies(nights: StudentNights): NightTallies[] {

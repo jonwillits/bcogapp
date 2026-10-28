@@ -1,5 +1,5 @@
 import type { ProgressStore } from '../../../sim/memory/progress/store'
-import { makeClearings, type Clearing, type ClearingId } from '../../../sim/memory/logs/clearings'
+import { makeClearing, type Clearing } from '../../../sim/memory/logs/clearings'
 import { WEEK_NIGHTS, describeFeatures, planWeek, type WeekPlan } from '../../../sim/memory/logs/features'
 import { NightSim, PRACTICE_S, type DigOutcome, type NightRecord } from '../../../sim/memory/logs/night'
 import { finishNight, newWeekRun, nightRng, startNight, weekDone, type WeekRun } from '../../../sim/memory/logs/week'
@@ -15,9 +15,13 @@ import type { NightCommand, PartStore } from '../contract'
  * unannounced question at the end of the week, and the reveal only after
  * it is committed. The week is one unit (§4.3): begun through the progress
  * store, completed with its records and the question's answers, and, if
- * the page was left partway, run again in the reserve clearing with the
- * same order of night features. Nothing about errors, shares or replays is
- * computed for display before the reveal (`logs.test.tsx`).
+ * the page was left partway, run again from night 1 in the same clearing
+ * with every loose-bark log full and the same order of night features. The
+ * practice night runs in the week's clearing too (Jon, 2026-10-28: the
+ * week asks what changes night to night, which presumes stable knowledge
+ * of what does not, and the logs' places are learned only by practice).
+ * Nothing about errors, shares or replays is computed for display before
+ * the reveal (`logs.test.tsx`).
  *
  * The space bar pauses a night (Jon, 2026-10-27); the pauses are recorded
  * in the night's record and printed on the reveal, since a pause is time
@@ -41,13 +45,12 @@ export class LogsStore implements PartStore {
   readonly seed: number
   readonly progress: ProgressStore
   readonly plan: WeekPlan
-  readonly clearings: Record<ClearingId, Clearing>
+  /** The one clearing: the practice night's and the week's. */
+  readonly clearing: Clearing
   state: LogsState = 'intro'
-  /** Whether the running night is the practice night. */
-  practicing = false
+  /** Whether the running night is the practice night; true until the week begins, so the view shows the practice light before it. */
+  practicing = true
   run: WeekRun | null = null
-  /** The clearing the week runs in (its own, or the reserve after a restart). */
-  clearingId: ClearingId = 'practice'
   sim: NightSim | null = null
   practice: NightRecord | null = null
   /** The end-of-week question's answers so far, by log. */
@@ -66,7 +69,7 @@ export class LogsStore implements PartStore {
   private noticeOutcome: DigOutcome | null = null
   private digsSeen = 0
   muted = false
-  /** The week was restarted in the reserve clearing. */
+  /** The week was interrupted and restarted from night 1. */
   restarted = false
   version = 0
   private listeners = new Set<() => void>()
@@ -76,7 +79,7 @@ export class LogsStore implements PartStore {
     this.seed = seed
     this.progress = progress
     this.plan = planWeek(seed)
-    this.clearings = makeClearings(seed)
+    this.clearing = makeClearing(seed)
     const p = progress.result('p4-practice') as Part4PracticeResult | undefined
     if (p?.record) this.practice = p.record
     const r = progress.result(WEEK_UNIT) as Part4WeekResult | undefined
@@ -103,15 +106,6 @@ export class LogsStore implements PartStore {
     return this.committed.pairs !== null && this.committed.trend !== null
   }
 
-  /** The clearing the week runs in now: its own, or the reserve after a restart. */
-  clearingForWeek(): ClearingId {
-    return this.progress.materialsSlot(WEEK_UNIT) === 0 ? 'week' : 'reserve'
-  }
-
-  get clearing(): Clearing {
-    return this.clearings[this.clearingId]
-  }
-
   /** The screen after the practice night, or after Begin once the practice is done: the predictions, the week, or the reveal. */
   private afterPractice(): LogsState {
     if (this.result) return 'revealed'
@@ -134,11 +128,10 @@ export class LogsStore implements PartStore {
   beginPractice(): void {
     if (this.state !== 'practice-intro') return
     this.practicing = true
-    this.clearingId = 'practice'
     this.progress.begin('p4-practice')
     this.practiceAttempt++
-    const c = this.clearings.practice
-    this.sim = new NightSim(c, c.logs.map(() => null), 1, this.plan.practice, nightRng(this.seed, 'practice', 1, this.practiceAttempt), { seconds: PRACTICE_S })
+    const c = this.clearing
+    this.sim = new NightSim(c, c.logs.map(() => null), 1, this.plan.practice, nightRng(this.seed, 0, this.practiceAttempt), { seconds: PRACTICE_S })
     this.openNight()
   }
 
@@ -188,11 +181,10 @@ export class LogsStore implements PartStore {
     this.changed()
   }
 
-  /** The week's Begin: the unit begins, in its clearing or the reserve; the first between-nights screen follows. */
+  /** The week's Begin: the unit begins, from night 1 with every loose-bark log full, whatever the practice night or an interrupted week emptied; the first between-nights screen follows. */
   beginWeek(): void {
     if (this.state !== 'week-intro' || !this.predictionsCommitted) return
-    this.restarted = this.progress.materialsSlot(WEEK_UNIT) > 0
-    this.clearingId = this.clearingForWeek()
+    this.restarted = this.progress.restarts(WEEK_UNIT) > 0
     this.progress.begin(WEEK_UNIT)
     this.run = newWeekRun(this.plan, this.clearing)
     this.practicing = false
@@ -213,7 +205,7 @@ export class LogsStore implements PartStore {
   /** Begin the next night of the week. */
   beginNight(): void {
     if (this.state !== 'between' || !this.run || weekDone(this.run)) return
-    const attempt = this.progress.materialsSlot(WEEK_UNIT)
+    const attempt = this.progress.restarts(WEEK_UNIT)
     this.sim = startNight(this.run, this.seed, attempt)
     this.openNight()
   }
@@ -290,7 +282,7 @@ export class LogsStore implements PartStore {
   /** Commit the question: the week is complete and saved, and the reveal opens. */
   commitQuestion(): void {
     if (this.state !== 'question' || !this.run || !this.questionComplete) return
-    const result: Part4WeekResult = { plan: this.run.plan, clearing: this.clearingId, records: this.run.records, states: this.run.states, answers: this.draft, restarted: this.restarted }
+    const result: Part4WeekResult = { plan: this.run.plan, records: this.run.records, states: this.run.states, answers: this.draft, restarted: this.restarted }
     this.result = result
     this.progress.complete(WEEK_UNIT, result)
     this.sim = null

@@ -58,9 +58,9 @@ it('measure: the four foragers on synthetic weeks (§9.2)', () => {
   const rows: Record<ForagerId, { emptiedLast: number[][]; beetles: number[][]; smooth: number[]; passed: number[][]; alike: number[]; differ: number[]; alikeDig: number[]; differDig: number[] }> = {} as never
   for (const f of FORAGERS) rows[f.id] = { emptiedLast: Array.from({ length: 6 }, () => []), beetles: Array.from({ length: 6 }, () => []), smooth: [], passed: Array.from({ length: 6 }, () => []), alike: [], differ: [], alikeDig: [], differDig: [] }
   for (const seed of SEEDS) {
-    const { plan, clearings } = planFor(seed)
+    const { plan, clearing } = planFor(seed)
     for (const f of FORAGERS) {
-      const w = runForagerWeek(f.id, seed, plan, clearings.week)
+      const w = runForagerWeek(f.id, seed, plan, clearing)
       w.tallies.forEach((t, i) => {
         rows[f.id].emptiedLast[i].push(t.digsAtEmptiedLastNight)
         rows[f.id].beetles[i].push(t.beetles)
@@ -87,8 +87,8 @@ it('measure: the store at three settings over the week (§9.3)', () => {
     const by: Record<string, number[]> = { alike: [], differ: [], alikeDig: [], differDig: [], emptiedLast: [], passed: [], beetles: [] }
     const byNight: number[][] = Array.from({ length: 6 }, () => [])
     for (const seed of SEEDS) {
-      const { plan, clearings } = planFor(seed)
-      const w = runForagerWeek('tonight', seed, plan, clearings.week, {}, sep)
+      const { plan, clearing } = planFor(seed)
+      const w = runForagerWeek('tonight', seed, plan, clearing, {}, sep)
       const sh = foragerShares(w)
       const a = sh['after a look-alike pair']
       const d = sh['after a different pair']
@@ -209,14 +209,14 @@ it('measure: the two kinds of damage on Tonight too (§9.5)', () => {
   for (const [label] of settings) rows[label] = { emptiedLast: [], smooth: [], beetles: [] }
   const usual = { emptiedLast: [] as number[] }
   for (const seed of SEEDS) {
-    const { plan, clearings } = planFor(seed)
+    const { plan, clearing } = planFor(seed)
     for (const [label, damage] of settings) {
-      const w = runForagerWeek('tonight', seed, plan, clearings.week, damage)
+      const w = runForagerWeek('tonight', seed, plan, clearing, damage)
       rows[label].emptiedLast.push(w.tallies.slice(1).reduce((a, t) => a + t.digsAtEmptiedLastNight, 0))
       rows[label].smooth.push(w.tallies.reduce((a, t) => a + t.digsAtSmooth, 0))
       rows[label].beetles.push(w.tallies.reduce((a, t) => a + t.beetles, 0))
     }
-    const u = runForagerWeek('usual', seed, plan, clearings.week)
+    const u = runForagerWeek('usual', seed, plan, clearing)
     usual.emptiedLast.push(u.tallies.slice(1).reduce((a, t) => a + t.digsAtEmptiedLastNight, 0))
   }
   for (const [label] of settings) say(`Tonight too, ${label}: digs at logs emptied last night over nights 2 to 6 ${f2(mean(rows[label].emptiedLast))}; digs at smooth logs over the week ${f2(mean(rows[label].smooth))}; beetles over the week ${f1(mean(rows[label].beetles))}`)

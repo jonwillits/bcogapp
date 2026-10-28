@@ -1,5 +1,5 @@
 import { Panel } from '../../../components/Panel'
-import { makeClearings, type Clearing } from '../../../sim/memory/logs/clearings'
+import { makeClearing, type Clearing } from '../../../sim/memory/logs/clearings'
 import { PAIR_KINDS, TEST_NIGHTS, describeFeatures, pairKind } from '../../../sim/memory/logs/features'
 import { ANSWERS, ANSWER_LABEL, confusionTable, truths, type ConfusionTable } from '../../../sim/memory/logs/question'
 import { tallies, tallyLines } from '../../../sim/memory/logs/night'
@@ -102,7 +102,7 @@ function NightReveal({ result, clearing, s, night }: { result: Part4WeekResult; 
 }
 
 export function LogsReveal({ result, predictions, seed }: { result: Part4WeekResult; predictions: Part4Predictions; seed: number }) {
-  const clearing = makeClearings(seed)[result.clearing]
+  const clearing = makeClearing(seed)
   const s = weekSummary(result, clearing)
   const table = confusionTable(truths(clearing, result.states[result.records.length]), result.answers)
   const night6 = s.nights[5]

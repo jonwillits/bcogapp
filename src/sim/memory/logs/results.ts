@@ -1,4 +1,4 @@
-import type { Clearing, ClearingId } from './clearings'
+import type { Clearing } from './clearings'
 import { PAIR_KINDS, TEST_NIGHTS, nightsOfKind, pairKind, type PairKind, type WeekPlan } from './features'
 import type { NightRecord } from './night'
 import type { WeekAnswers } from './question'
@@ -29,8 +29,6 @@ export interface Part4PracticeResult {
 
 export interface Part4WeekResult {
   plan: WeekPlan
-  /** The clearing the week ran in: the week's, or the reserve after a restart. */
-  clearing: ClearingId
   records: NightRecord[]
   /** The state after each night; index 0 is the fresh week. */
   states: LastEmptied[]

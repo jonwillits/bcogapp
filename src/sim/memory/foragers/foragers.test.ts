@@ -23,9 +23,9 @@ function sums() {
   const out: Record<ForagerId, { emptiedLast2: number[]; emptiedLater: number[]; beetles: number[]; smooth: number[]; alike: number[]; differ: number[] }> = {} as never
   for (const f of FORAGERS) out[f.id] = { emptiedLast2: [], emptiedLater: [], beetles: [], smooth: [], alike: [], differ: [] }
   for (const seed of SEEDS) {
-    const { plan, clearings } = planFor(seed)
+    const { plan, clearing } = planFor(seed)
     for (const f of FORAGERS) {
-      const w = runForagerWeek(f.id, seed, plan, clearings.week)
+      const w = runForagerWeek(f.id, seed, plan, clearing)
       out[f.id].emptiedLast2.push(w.tallies[1].digsAtEmptiedLastNight)
       out[f.id].emptiedLater.push(mean(w.tallies.slice(2).map((t) => t.digsAtEmptiedLastNight)))
       out[f.id].beetles.push(w.tallies.reduce((a, t) => a + t.beetles, 0))
@@ -68,9 +68,9 @@ describe('the four foragers on synthetic weeks (§9.2), twenty seeds', () => {
     for (const id of ['usual', 'tonight', 'blurred'] as ForagerId[]) expect(mean(r[id].smooth)).toBe(0)
   })
   it('the same seed reproduces every forager’s week exactly', () => {
-    const { plan, clearings } = planFor(1003)
-    const once = JSON.stringify(runForagerWeek('blurred', 1003, plan, clearings.week).run.records)
-    expect(JSON.stringify(runForagerWeek('blurred', 1003, plan, clearings.week).run.records)).toBe(once)
+    const { plan, clearing } = planFor(1003)
+    const once = JSON.stringify(runForagerWeek('blurred', 1003, plan, clearing).run.records)
+    expect(JSON.stringify(runForagerWeek('blurred', 1003, plan, clearing).run.records)).toBe(once)
   })
 })
 
@@ -79,8 +79,8 @@ describe('the store at three settings over the week (§9.3), twenty seeds', () =
   for (const sep of SEPARATIONS) {
     share[sep] = { alike: [], differ: [], emptiedLast: [] }
     for (const seed of SEEDS) {
-      const { plan, clearings } = planFor(seed)
-      const w = runForagerWeek('tonight', seed, plan, clearings.week, {}, sep)
+      const { plan, clearing } = planFor(seed)
+      const w = runForagerWeek('tonight', seed, plan, clearing, {}, sep)
       const sh = foragerShares(w)
       if (sh['after a look-alike pair'].share !== null) share[sep].alike.push(sh['after a look-alike pair'].share!)
       if (sh['after a different pair'].share !== null) share[sep].differ.push(sh['after a different pair'].share!)
@@ -241,8 +241,8 @@ describe('damage to the slow learner (§9.5), six seeds', () => {
 describe('the two kinds of damage on Tonight too (§9.5), twenty seeds', () => {
   const rows: Record<string, { emptiedLast: number[]; smooth: number[] }> = { intact: { emptiedLast: [], smooth: [] }, noStore: { emptiedLast: [], smooth: [] }, noisy: { emptiedLast: [], smooth: [] }, usual: { emptiedLast: [], smooth: [] } }
   for (const seed of SEEDS) {
-    const { plan, clearings } = planFor(seed)
-    const c = clearings.week
+    const { plan, clearing } = planFor(seed)
+    const c = clearing
     const add = (k: string, w: ReturnType<typeof runForagerWeek>) => {
       rows[k].emptiedLast.push(w.tallies.slice(1).reduce((a, t) => a + t.digsAtEmptiedLastNight, 0))
       rows[k].smooth.push(w.tallies.reduce((a, t) => a + t.digsAtSmooth, 0))

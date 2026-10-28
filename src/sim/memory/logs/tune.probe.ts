@@ -60,8 +60,7 @@ it('tune: the night’s length over the week', () => {
     const usualDigShare: number[][] = Array.from({ length: 6 }, () => [])
     const perfectPassed: number[][] = Array.from({ length: 6 }, () => [])
     for (const seed of SEEDS) {
-      const { plan, clearings } = planFor(seed)
-      const clearing = clearings.week
+      const { plan, clearing } = planFor(seed)
       const p = runWeekScripted(plan, clearing, seed, perfect(), { seconds })
       p.records.forEach((r, i) => {
         perfEmptied[i].push(tallies(r).digsAtFull)

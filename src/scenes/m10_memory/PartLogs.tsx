@@ -30,7 +30,7 @@ export const LOGS_INTRO = {
     'You are the small mammal of Lab 9, back in its range at night. Out from your nest lie ten logs: seven with loose bark and three that are smooth. Each log looks different from every other: longer or shorter, thicker or thinner, with branch stubs or without, mossy or bare, darker or paler. You will walk to a log, dig to see what is under it, and eat what you find.',
     `A dig takes about ${DIG_S} seconds and shows whether beetles are there; eating them takes about ${EAT_S} more. A night lasts ${NIGHT_S} seconds; a timer over the view counts it down. At dawn the animal walks back to the nest by itself.`,
     `Partway through each night the young in the nest call. Digging stops until you have gone back to the nest and nursed them, which takes about ${NURSE_S} seconds and happens by itself once you are there. Then the night goes on.`,
-    `First a practice night around your own nest, which you may redo; it is longer, about ${PRACTICE_S} seconds, for learning the keys. Then one week of six nights in another clearing of the range, with its own nest, logs and landmarks. Some nights will look just like the night before, and some will not. A fixed line beside the view repeats the two rules below.`,
+    `First a practice night in the clearing, which you may redo; it is longer, about ${PRACTICE_S} seconds, for learning the keys and where the logs lie. Then one week of six nights in the same clearing, with every loose-bark log full again on night 1. Some nights will look just like the night before, and some will not. A fixed line beside the view repeats the two rules below.`,
     '- ' + KIND_RULE,
     '- ' + REFILL_RULE,
   ],
@@ -46,7 +46,7 @@ export const LOGS_INTRO = {
 
 export const PRACTICE_INTRO = {
   title: 'The practice night',
-  willDo: [`One night in the clearing around your own nest, with the logs as they are tonight. Nothing is scored. Use it to learn the keys, the dig, the young’s call and the dawn. This night is longer than the others, about ${PRACTICE_S} seconds; the scored nights are ${NIGHT_S}.`, 'You may redo the practice night as often as you like.'],
+  willDo: [`One night in the clearing where the week will run: the same nest, logs and landmarks. Nothing is scored, and this night does not count toward the week: every loose-bark log is full again on night 1 whatever you empty now. Use it to learn the keys, the dig, the young’s call, the dawn, and where the logs lie. This night is longer than the others, about ${PRACTICE_S} seconds; the scored nights are ${NIGHT_S}.`, 'You may redo the practice night as often as you like.'],
   minutes: 3,
 }
 
@@ -54,9 +54,9 @@ export function weekIntro(restartedHere: boolean) {
   return {
     title: `The week: ${WEEK_NIGHTS} nights`,
     willDo: [
-      `${WEEK_NIGHTS} nights in the same clearing, one after another, about ${NIGHT_S} seconds each. Every loose-bark log is full on night 1, and the two rules hold through all ${WEEK_NIGHTS} nights. Beetles eaten is the score.`,
+      `${WEEK_NIGHTS} nights in the same clearing, one after another, about ${NIGHT_S} seconds each. Every loose-bark log is full on night 1, whatever the practice night emptied, and the two rules hold through all ${WEEK_NIGHTS} nights. Beetles eaten is the score.`,
       'Some nights will look just like the night before, and some will not. Before each night a short screen names the night and what it will look like.',
-      ...(restartedHere ? ['The week was interrupted, so it runs again in another clearing.'] : []),
+      ...(restartedHere ? ['The week was interrupted, so it runs again from night 1 in the same clearing, with every loose-bark log full.'] : []),
     ],
     minutes: 12,
   }
@@ -119,7 +119,7 @@ function Left({ ctx }: { ctx: PartContext<LogsStore> }) {
               <Btn onClick={() => s.openPractice()}>Redo the practice night</Btn>
             </>
           )}
-          {restartedHere && s.state === 'week-intro' && <Note>The week was interrupted, so it runs again in another clearing.</Note>}
+          {restartedHere && s.state === 'week-intro' && <Note>The week was interrupted, so it runs again from night 1 in the same clearing, with every loose-bark log full.</Note>}
           {(s.state === 'week-intro' || s.state === 'predict') && s.practice && (
             <div>
               <Btn onClick={() => s.openPractice()}>Redo the practice night</Btn>
@@ -264,7 +264,7 @@ function Right({ ctx }: { ctx: PartContext<LogsStore> }) {
 function CanvasPart({ ctx }: { ctx: PartContext<LogsStore> }) {
   const s = useStore(ctx.store)
   const features = s.sim?.features ?? (s.state === 'between' && s.run ? s.plan.nights[Math.min(WEEK_NIGHTS, s.nextNight) - 1] : s.plan.practice)
-  return <LogsView clearing={s.clearing} features={features} sim={() => s.sim} dawn={() => s.dawn / DAWN_S} view={ctx.view} fov={ctx.fov} lowDetail={ctx.lowDetail} anim={ctx.anim} clock={ctx.clock} />
+  return <LogsView clearing={s.clearing} features={features} sim={() => s.sim} dawn={() => s.dawn / DAWN_S} view={ctx.view} fov={ctx.fov} lowDetail={ctx.lowDetail} anim={ctx.anim} clock={ctx.clock} practice={s.practicing} />
 }
 
 registerResults(4, (progress: ProgressStore) => {
