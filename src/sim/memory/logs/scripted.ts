@@ -29,8 +29,17 @@ export const SCRIPT_DT = 0.05
  * Tonight too). Half the range pace stands for the sniffing, turning and
  * searching a student at the keys does between logs, and brings the
  * scripted foragers back to about four of seven (`tune.probe.ts`, notes §4.1).
+ * Two thirds of the range pace since 2026-10-28, when the logs were spread
+ * from 4 to 11 m out to 6 to 16 m (`CLEARING`): Jon, with every log in view,
+ * had walked his week at about the key pace and dug all seven loose-bark
+ * logs in a night, so the half pace no longer stood for a student; at two
+ * thirds on the spread clearing the scripted foragers are back where the
+ * half pace had them on the old one (perfect about four of seven, Usual
+ * only about two digs at logs emptied last night on night 2), while a
+ * student at the key pace can no longer dig every log in a night. Spec
+ * §8.3 still says half the key pace; Jon's call to keep or revise.
  */
-export let SCRIPT_PACE = RANGE_LOCOMOTION.speed / 2
+export let SCRIPT_PACE = (RANGE_LOCOMOTION.speed * 2) / 3
 export function setScriptPace(v: number): void {
   SCRIPT_PACE = v
 }

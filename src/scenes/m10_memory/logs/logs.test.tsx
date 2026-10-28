@@ -344,6 +344,7 @@ describe('Part 4: units and reserve materials (§4.3)', () => {
     const src = (import.meta.glob('./LogsView.tsx', { query: '?raw', import: 'default', eager: true }) as Record<string, string>)['./LogsView.tsx']
     expect(src).toMatch(/<RangeView[^>]*\sbare\s[^>]*atmosphere=\{false\}/)
     expect(src).toMatch(/ClearingEdge/)
+    expect(src).toMatch(/BEACONS\.map/)
   })
 
   it('the night’s length on screen is the sim’s', () => {

@@ -12,10 +12,12 @@ import type { Footprint } from '../../rodent/range'
  * build until then had a practice clearing at Lab 9's nest and a reserve
  * clearing for restarts). **Each log looks different from every other**,
  * in ways easy to see and hard to name: its length, thickness, the number
- * and angle of its branch stubs, how much moss covers it, and the shade of
- * its bark within its kind (`LogLook`). No object sits on a log. A look is
- * fixed for the week and carries nothing about beetles beyond the kind of
- * bark. Geometry only; the scene draws it.
+ * and angle of its branch stubs and how much moss covers it (`LogLook`); a
+ * kind has one color. No object sits on a log. A look is fixed for the week
+ * and carries nothing about beetles beyond the kind of bark. The logs lie
+ * 6 to 16 m from the nest since 2026-10-28 (`CLEARING`), and five beacons
+ * stand in the edge ring as a compass (`BEACONS`). Geometry only; the
+ * scene draws it.
  */
 
 export type LogKind = 'loose' | 'smooth'
@@ -106,13 +108,20 @@ export interface Clearing {
 }
 
 export const CLEARING = {
-  /** Logs lie between these distances from the nest, meters. */
-  minRadius: 4,
-  maxRadius: 11,
-  /** No two logs closer than this, meters. */
-  logSpacing: 3,
-  /** The forager is kept within this distance of the clearing's nest. */
-  bound: 15,
+  /**
+   * Logs lie between these distances from the nest, meters. 4 to 11 until
+   * 2026-10-28, when Jon, with every log in view, dug all seven loose-bark
+   * logs inside the night and his when-decisions matched a forager with no
+   * memory for nights: the walk to a log is what a wrong visit costs, so the
+   * logs are spread (his call: *make them further apart while maintaining
+   * visibility*), and the fog is thinned with them (`FOG_DENSITY`).
+   */
+  minRadius: 6,
+  maxRadius: 16,
+  /** No two logs closer than this, meters (3 before the spread). */
+  logSpacing: 4,
+  /** The forager is kept within this distance of the clearing's nest (15 before the spread). */
+  bound: 20,
   /** A log is dug from within this distance of its center. */
   reach: 1.1,
   /** The nest is reached within this distance: the rim of the hole, which is 0.35 m across (Jon, 2026-10-27: at 0.8 m the nursing began with the animal still outside it). */
@@ -133,6 +142,23 @@ export const CLEARING = {
  * stands well above the animal.
  */
 export const NEST_ARCH = { radius: 0.45, thickness: 0.1, turn: 0.4 } as const
+
+/**
+ * The beacons (Jon, 2026-10-28, after his first week: *some cues to location
+ * that do remain consistent*): pale dead trunks standing in the edge ring,
+ * the same for every seed and every student, so the clearing has a compass
+ * the seeded landmarks do not give. Three tall ones to the north (+y) and
+ * two shorter ones to the east (+x), just beyond the bound. In the nest's
+ * frame, meters; the scene draws them and the overhead marks them. They
+ * say where north is, never which log was emptied when.
+ */
+export const BEACONS: readonly { x: number; y: number; height: number }[] = [
+  { x: -3.0, y: CLEARING.bound + 2.5, height: 7.5 },
+  { x: 0.4, y: CLEARING.bound + 3.0, height: 9 },
+  { x: 3.2, y: CLEARING.bound + 2.4, height: 8 },
+  { x: CLEARING.bound + 2.6, y: -1.6, height: 4.5 },
+  { x: CLEARING.bound + 2.8, y: 1.8, height: 5 },
+]
 
 export function nestFootprints(nest: { x: number; y: number }): Footprint[] {
   const hx = NEST_ARCH.radius * Math.cos(NEST_ARCH.turn)
@@ -196,7 +222,7 @@ function distToFootprint(f: Footprint, x: number, y: number): number {
 
 /**
  * Draw one clearing's geometry about a nest at the origin: the landmarks
- * first (three or four, 3 to 8 m out, at least 4 m apart), then the logs,
+ * first (three or four, 4 to 12 m out, at least 5 m apart), then the logs,
  * each a few meters from the nest, at least `logSpacing` apart, and clear of
  * the landmarks and of any footprints handed in (the practice clearing
  * keeps clear of Lab 9's landmarks).
@@ -212,11 +238,11 @@ function drawGeometry(rng: Rng, fixedLandmarks: ClearingLandmark[] = [], obstacl
     }
     for (let k = 0; k < n; k++) {
       for (let tries = 0; tries < 60; tries++) {
-        const r = rng.range(3, 8)
+        const r = rng.range(4, 12)
         const a = rng.range(0, 2 * Math.PI)
         const x = r * Math.cos(a)
         const y = r * Math.sin(a)
-        if (landmarks.every((l) => Math.hypot(l.x - x, l.y - y) >= 4)) {
+        if (landmarks.every((l) => Math.hypot(l.x - x, l.y - y) >= 5)) {
           landmarks.push({ kind: kinds[k], x, y, size: LANDMARK_SIZE[kinds[k]] })
           break
         }

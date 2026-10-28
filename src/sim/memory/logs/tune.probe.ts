@@ -9,7 +9,7 @@ import { mean } from '../../bilaterian/measure'
 
 /**
  * How long a night is (spec §8.3, §14): set so that a scripted forager that
- * remembers perfectly, walking at half the key pace, empties about four of
+ * remembers perfectly, walking at two thirds of the key pace (half until 2026-10-28), empties about four of
  * the seven loose-bark logs on a night when all are full, and a scripted
  * forager that knows only the usual fact digs at about two logs emptied the
  * night before. Twenty seeds, the week of six nights, a sweep of paces and
@@ -51,7 +51,7 @@ export function usualOnly(seed: number): Policy {
 }
 
 it('tune: the night’s length over the week', () => {
-  for (const [pace, seconds] of [[1.5, 90], [1.0, 90], [0.75, 80], [0.75, 90], [0.75, 100], [0.75, 120]] as const) {
+  for (const [pace, seconds] of [[1.5, 90], [1.0, 80], [1.0, 90], [1.0, 100], [0.75, 90], [0.75, 120]] as const) {
     setScriptPace(pace)
     const perfEmptied: number[][] = Array.from({ length: 6 }, () => [])
     const usualEmptiedLast: number[][] = Array.from({ length: 6 }, () => [])
@@ -79,5 +79,5 @@ it('tune: the night’s length over the week', () => {
     say(`pace ${pace} m/s, night ${seconds} s: perfect empties ${perfEmptied.map((v) => f1(mean(v))).join(' / ')} (nights 1 to 6); its when-decisions nights 3 to 6 ${perfectPassed.slice(2).map((v) => f1(mean(v))).join(' / ')}`)
     say(`   usual-only digs ${usualDigs.map((v) => f1(mean(v))).join(' / ')}; at logs emptied last night ${usualEmptiedLast.map((v) => f1(mean(v))).join(' / ')}; share of when-errors nights 3 to 6 ${usualShare.slice(2).map((v) => f2(mean(v))).join(' / ')} (over digs alone ${usualDigShare.slice(2).map((v) => f2(mean(v))).join(' / ')})`)
   }
-  setScriptPace(0.75)
+  setScriptPace(1.0)
 }, 600_000)

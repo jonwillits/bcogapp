@@ -13,7 +13,7 @@ import { TendencyUnit } from './tendency'
  * The targets of spec §9.2 to §9.5, over twenty seeds on synthetic weeks
  * (each forager running the plan's six nights for the seed, in the week's
  * clearing). The bands are the measured values of `measure.probe.ts`
- * (2026-10-27, the week), recorded in the as-built notes §4.2 and §4.3;
+ * (2026-10-27, the week; last re-measured 2026-10-28 on the spread clearing at a scripted pace of 1.0 m/s), recorded in the as-built notes §4.2 and §4.3;
  * where a target came out different from the spec, the test holds what is
  * true and the notes say so.
  */
@@ -49,16 +49,16 @@ describe('the four foragers on synthetic weeks (§9.2), twenty seeds', () => {
       expect(mean(r.tonight.emptiedLast2) + mean(r.tonight.emptiedLater)).toBeLessThan(mean(r[id].emptiedLast2) + mean(r[id].emptiedLater))
       expect(mean(r.tonight.beetles)).toBeGreaterThanOrEqual(mean(r[id].beetles))
     }
-    // Measured: Tonight too 18.9 beetles a week, blurred 17.1, Usual only 15.4, Tendency only 11.0.
+    // Measured 2026-10-28, the spread clearing: Tonight too 18.2 beetles a week, blurred 16.1, Usual only 13.9, Tendency only 9.3.
     expect(mean(r.tonight.beetles)).toBeGreaterThan(17)
   })
   it('Tonight too, nights blurred has a larger share of when-errors after a look-alike pair than after a different pair, and a larger one than Tonight too', () => {
-    // Measured 0.35 against 0.26; Tonight too 0.11 against 0.06.
+    // Measured 2026-10-28, the spread clearing: 0.41 against 0.27; Tonight too 0.15 against 0.04.
     expect(mean(r.blurred.alike)).toBeGreaterThan(mean(r.blurred.differ) + 0.04)
     expect(mean(r.blurred.alike)).toBeGreaterThan(mean(r.tonight.alike) + 0.1)
   })
   it('the foragers with no store sit near the no-memory share after both kinds of pair, and Tendency only, pulled back to what paid off, is worst of all', () => {
-    // Measured: Usual only 0.50 / 0.45; Tendency only 0.90 / 0.83.
+    // Measured 2026-10-28, the spread clearing: Usual only 0.46 / 0.47; Tendency only 0.92 / 0.91.
     expect(Math.abs(mean(r.usual.alike) - mean(r.usual.differ))).toBeLessThan(0.12)
     expect(mean(r.tendency.alike)).toBeGreaterThan(mean(r.usual.alike))
     expect(mean(r.tendency.differ)).toBeGreaterThan(mean(r.usual.differ))
@@ -87,7 +87,7 @@ describe('the store at three settings over the week (§9.3), twenty seeds', () =
       share[sep].emptiedLast.push(w.tallies.slice(1).reduce((a, t) => a + t.digsAtEmptiedLastNight, 0))
     }
   }
-  it('the share of when-errors falls as separation rises, after both kinds of pair (measured 0.33 / 0.27 / 0.11 after look-alike pairs, 0.24 / 0.07 / 0.06 after different pairs)', () => {
+  it('the share of when-errors falls as separation rises, after both kinds of pair (measured 0.31 / 0.28 / 0.15 after look-alike pairs, 0.26 / 0.09 / 0.04 after different pairs, on the spread clearing)', () => {
     expect(mean(share.weak.alike)).toBeGreaterThan(mean(share.medium.alike))
     expect(mean(share.medium.alike)).toBeGreaterThan(mean(share.strong.alike))
     expect(mean(share.weak.differ)).toBeGreaterThan(mean(share.medium.differ))
@@ -252,12 +252,12 @@ describe('the two kinds of damage on Tonight too (§9.5), twenty seeds', () => {
     add('noisy', runForagerWeek('tonight', seed, plan, c, { slowNoise: 1 }))
     add('usual', runForagerWeek('usual', seed, plan, c))
   }
-  it('remove the fast store: digs at logs emptied last night over the week rise to Usual only’s level (measured 7.0 against 6.3), and digs at smooth logs stay at zero', () => {
+  it('remove the fast store: digs at logs emptied last night over the week rise to Usual only’s level (measured 5.2 against 5.5 on the spread clearing), and digs at smooth logs stay at zero', () => {
     expect(mean(rows.noStore.emptiedLast)).toBeGreaterThan(4)
     expect(Math.abs(mean(rows.noStore.emptiedLast) - mean(rows.usual.emptiedLast))).toBeLessThan(1.5)
     expect(mean(rows.noStore.smooth)).toBe(0)
   })
-  it('damage the slow learner: the forager starts digging at smooth logs (measured 5.7 a week at noise 1), and its digs at logs emptied last night stay low (0.1)', () => {
+  it('damage the slow learner: the forager starts digging at smooth logs (measured 5.0 a week at noise 1 on the spread clearing), and its digs at logs emptied last night stay low (0.2)', () => {
     expect(mean(rows.noisy.smooth)).toBeGreaterThan(3)
     expect(mean(rows.noisy.emptiedLast)).toBeLessThan(0.8)
     expect(mean(rows.intact.smooth)).toBe(0)

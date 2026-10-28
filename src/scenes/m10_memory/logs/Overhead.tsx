@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { CLEARING, type Clearing, type Log } from '../../../sim/memory/logs/clearings'
+import { BEACONS, CLEARING, type Clearing, type Log } from '../../../sim/memory/logs/clearings'
 import type { NightRecord } from '../../../sim/memory/logs/night'
 
 /**
@@ -58,7 +58,7 @@ export interface OverheadProps {
 }
 
 export function ClearingOverhead({ clearing, record, size = 300, children, label, numbered = true }: OverheadProps) {
-  const r = CLEARING.bound + 1
+  const r = CLEARING.bound + 3.5
   const S = (v: number) => (v / r) * (size / 2 - 8)
   const X = (x: number) => size / 2 + S(x - clearing.nest.x)
   const Y = (y: number) => size / 2 - S(y - clearing.nest.y)
@@ -68,6 +68,9 @@ export function ClearingOverhead({ clearing, record, size = 300, children, label
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ display: 'block', background: 'var(--bg)', borderRadius: 8 }} role="img" aria-label={label ?? 'overhead of the clearing'} data-clearing-overhead>
       {clearing.landmarks.map((l) => (
         <circle key={l.id} cx={X(l.x)} cy={Y(l.y)} r={Math.max(3, S(l.kind === 'tree' ? 0.6 : l.size / 2))} fill="none" stroke="var(--text-muted)" strokeWidth={1} />
+      ))}
+      {BEACONS.map((b, i) => (
+        <rect key={`b${i}`} x={X(clearing.nest.x + b.x) - 2} y={Y(clearing.nest.y + b.y) - 2} width={4} height={4} fill="var(--text-muted)" data-beacon />
       ))}
       {clearing.logs.map((l) => (
         <g key={l.id}>
@@ -99,7 +102,7 @@ export function ClearingOverhead({ clearing, record, size = 300, children, label
         )
       })}
       <text x={6} y={size - 6} fontSize={9} fill="var(--text-muted)">
-        {`${(2 * r).toFixed(0)} m across · dark logs have loose bark, pale logs are smooth · each log drawn by its look`}
+        {`${(2 * r).toFixed(0)} m across · dark logs have loose bark, pale logs are smooth · each log drawn by its look · the squares at the edge are the beacons, three north and two east`}
       </text>
       {children}
     </svg>

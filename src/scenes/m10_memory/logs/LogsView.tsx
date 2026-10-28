@@ -6,7 +6,7 @@ import type { Pose } from '../../../sim/rodent/body'
 import { RangeView } from '../../m09_rat/RangeView'
 import { RatMesh, type RatAction } from '../../m09_rat/RatMesh'
 import { AnimalCamera, RANGE_SCALE, type View } from '../../m09_rat/AnimalCamera'
-import { BRANCH, CLEARING, GROUND_THING_OFFSET, NEST_ARCH, type Clearing, type ClearingLandmark, type Log } from '../../../sim/memory/logs/clearings'
+import { BEACONS, BRANCH, CLEARING, GROUND_THING_OFFSET, NEST_ARCH, type Clearing, type ClearingLandmark, type Log } from '../../../sim/memory/logs/clearings'
 import { MOONS, type NightFeatures } from '../../../sim/memory/logs/features'
 import type { NightSim } from '../../../sim/memory/logs/night'
 
@@ -37,9 +37,9 @@ import type { NightSim } from '../../../sim/memory/logs/night'
  * range's own moonlight fog of 0.13 was in force under them (RangeView
  * attached its fog after this view's), so the eased values never showed.
  */
-export const FOG_DENSITY = { fog: 0.08, 'light rain': 0.06, clear: 0.04 } as const
+export const FOG_DENSITY = { fog: 0.055, 'light rain': 0.042, clear: 0.028 } as const
 /** The practice night's fog: lighter than any scored night's. */
-export const PRACTICE_FOG_DENSITY = 0.03
+export const PRACTICE_FOG_DENSITY = 0.02
 /** The moon's share of the light, in MOONS' order (new, half, and the brightest moon). A new moon is dark to the eye beside a full moon, but every log is still plain. */
 export const MOON_LIGHT = [0.85, 1.0, 1.15] as const
 /** The practice night's share of the light, above the brightest moon's (Jon, 2026-10-28). */
@@ -54,12 +54,22 @@ function lighting(f: NightFeatures, dawn: number, practice = false): { hemi: num
   return { hemi: (0.75 + 0.6 * moon) * k + 1.8 * dawn, sun: (0.55 + 0.5 * moon) * k + 1.5 * dawn, fog: fog * k + 0.03 * dawn, fogColor: dawn > 0.5 ? '#6a7a9a' : fogColor, sky: dawn > 0.5 ? '#6a7a9a' : fogColor }
 }
 
-/** The clearing's edge: a ring of low undergrowth just beyond where the forager can go (`CLEARING.bound`), so the bound is seen and never felt as an unseen wall (Jon, 2026-10-28). Drawing only; the sim's bound is the clamp. */
+/**
+ * The clearing's edge: a ring of low undergrowth just beyond where the forager can go (`CLEARING.bound`), so the bound is seen and never felt as an unseen wall (Jon, 2026-10-28),
+ * and the beacons standing in it (`BEACONS`): pale dead trunks, three tall to the north and two shorter to the east, the same for every seed, so the clearing has a compass.
+ * They are pale and a little self-lit so they stand against the fog-colored sky from across the clearing on a foggy night. Drawing only; the sim's bound is the clamp.
+ */
 function ClearingEdge({ nest, lowDetail }: { nest: { x: number; y: number }; lowDetail: boolean }) {
   const n = lowDetail ? 40 : 64
   const r = CLEARING.bound + 0.8
   return (
     <group position={[nest.x, 0, -nest.y]}>
+      {BEACONS.map((b, i) => (
+        <mesh key={`b${i}`} position={[b.x, b.height / 2, -b.y]} rotation={[0, i * 1.1, 0.02 * (i % 2 ? 1 : -1)]}>
+          <cylinderGeometry args={[0.16, 0.34, b.height, 7]} />
+          <meshStandardMaterial color="#d9d2bf" emissive="#6b6657" emissiveIntensity={0.35} roughness={0.9} />
+        </mesh>
+      ))}
       {Array.from({ length: n }, (_, i) => {
         const a = (i / n) * Math.PI * 2
         const h = 0.9 + 0.5 * Math.abs(Math.sin(i * 2.3))

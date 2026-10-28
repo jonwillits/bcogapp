@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { makeRng } from '../../random'
-import { CLEARING, CLEARING_NEST, LOOK, LOOK_MIN_DISTANCE, NEST_ARCH, branchFootprint, logFootprint, lookDistance, makeClearing, nestFootprints, type Clearing } from './clearings'
+import { BEACONS, CLEARING, CLEARING_NEST, LOOK, LOOK_MIN_DISTANCE, NEST_ARCH, branchFootprint, logFootprint, lookDistance, makeClearing, nestFootprints, type Clearing } from './clearings'
 import { afterNight, freshWeek, fullOnNight, isFull, truthOf, KIND_RULE, REFILL_RULE } from './refill'
 import { LETTERS, TEST_NIGHTS, WEEK_NIGHTS, WEEK_ORDERS, differingFeatures, featureVector, FEATURE_DIMS, GROUNDS, letterOf, nightsOfKind, pairKind, planWeek, sameFeatures } from './features'
 import { NIGHT_S, DIG_S, EAT_S, NURSE_S, PASS_CLOSE_M, PRACTICE_S, RETURN_GRACE_S, tallies, type NightRecord } from './night'
@@ -54,7 +54,7 @@ describe('the clearing and the logs (§8.2; one clearing since 2026-10-28)', () 
     for (let i = 0; i < c.logs.length; i++) for (let j = i + 1; j < c.logs.length; j++) out.push(Math.hypot(c.logs[i].x - c.logs[j].x, c.logs[i].y - c.logs[j].y))
     return out
   }
-  it('one clearing with ten logs, seven loose and three smooth, a few meters from its nest and at least 3 m apart, with three or four landmarks', () => {
+  it('one clearing with ten logs, seven loose and three smooth, 6 to 16 m from its nest and at least 4 m apart, with three or four landmarks', () => {
     for (const seed of SEEDS20) {
       const c = makeClearing(seed)
       expect(c.logs.length).toBe(10)
@@ -92,6 +92,28 @@ describe('the clearing and the logs (§8.2; one clearing since 2026-10-28)', () 
   it('the clearing sits at the middle of the range’s ground, and the forager’s bound is beyond the farthest log', () => {
     expect(CLEARING_NEST).toEqual({ x: 0, y: 0 })
     expect(CLEARING.bound).toBeGreaterThan(CLEARING.maxRadius + LOOK.length[1])
+  })
+  it('the beacons stand beyond the bound, the same for every seed: three tall to the north and two shorter to the east', () => {
+    expect(BEACONS).toHaveLength(5)
+    const north = BEACONS.filter((b) => b.y > CLEARING.bound)
+    const east = BEACONS.filter((b) => b.x > CLEARING.bound)
+    expect(north).toHaveLength(3)
+    expect(east).toHaveLength(2)
+    for (const b of BEACONS) expect(Math.hypot(b.x, b.y)).toBeGreaterThan(CLEARING.bound + 1)
+    expect(Math.min(...north.map((b) => b.height))).toBeGreaterThan(Math.max(...east.map((b) => b.height)))
+    for (const b of north) expect(Math.abs(b.x)).toBeLessThan(5)
+    for (const b of east) expect(Math.abs(b.y)).toBeLessThan(5)
+  })
+  it('the landmarks lie 4 to 12 m from the nest and at least 5 m apart', () => {
+    for (let seed = 1; seed <= 20; seed++) {
+      const c = makeClearing(seed)
+      for (const l of c.landmarks) {
+        const r = Math.hypot(l.x - c.nest.x, l.y - c.nest.y)
+        expect(r).toBeGreaterThanOrEqual(4 - 1e-9)
+        expect(r).toBeLessThanOrEqual(12 + 1e-9)
+      }
+      for (let i = 0; i < c.landmarks.length; i++) for (let j = i + 1; j < c.landmarks.length; j++) expect(Math.hypot(c.landmarks[i].x - c.landmarks[j].x, c.landmarks[i].y - c.landmarks[j].y)).toBeGreaterThanOrEqual(5 - 1e-9)
+    }
   })
   it('the same seed gives the same clearing', () => {
     expect(JSON.stringify(makeClearing(42))).toBe(JSON.stringify(makeClearing(42)))
@@ -344,9 +366,10 @@ describe('the scripted foragers and the night’s length (§14, targets), over t
       },
     }
   }
-  // Measured 2026-10-27 over the week at 90 s and the scripted pace at half the key pace (tune.probe.ts; notes §4.1): the perfect
-  // rememberer empties 4.8 / 2.1 / 4.8 / 2.1 / 4.3 / 2.5 on nights 1 to 6, a see-saw, since what it empties on one night is what
-  // is missing the next; Usual only digs at 1.6 logs emptied last night on night 2 and 1.2 to 1.5 on later nights.
+  // Measured 2026-10-28 over the week at 90 s on the spread clearing (6 to 16 m) at the scripted pace of two thirds of the key
+  // pace (tune.probe.ts; notes §4.1): the perfect rememberer empties 4.2 / 2.6 / 4.3 / 2.6 / 4.2 / 2.8 on nights 1 to 6, a
+  // see-saw, since what it empties on one night is what is missing the next; Usual only digs at 1.8 logs emptied last night
+  // on night 2 and 0.8 to 1.2 on later nights. The bands are those set 2026-10-27 at half the key pace on the 4 to 11 m clearing.
   const PERFECT_ODD = [3.6, 5.6]
   const PERFECT_EVEN = [1.4, 3.2]
   const USUAL_NIGHT2 = [1.1, 2.3]
