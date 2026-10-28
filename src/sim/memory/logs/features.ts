@@ -1,14 +1,19 @@
 import { makeRng, type Rng } from '../../random'
-import type { ClearingId } from './clearings'
 
 /**
  * A night's features (spec §8.4): four things that are visible and, with
- * audio on, audible. The look-alike block's three nights are identical in
- * all four; the distinct block's three nights differ from one another on
- * every feature, and each shares at most one feature value with the
- * look-alike nights, never the thing on the ground (there are only three
- * moons, three weathers and three sounds, so three distinct nights cannot
- * all avoid the look-alike night's value on those; recorded in the notes).
+ * audio on, audible. **The week** (§8.5, revised 2026-10-27): six nights in
+ * one clearing, each night's features written as a letter. Two nights with
+ * the same letter are identical in every feature; two neighboring nights
+ * with different letters differ in every feature; any two letters differ
+ * on at least two features (the build's rule, so that no later night looks
+ * like an earlier one it is not next to). The seed picks one of two orders,
+ * `AABCCD` or `ABBBCD`. On night n, from night 3 on, foraging well depends
+ * on telling night n − 1 from night n − 2; night n *follows a look-alike
+ * pair* when those two nights had the same features. In both orders two
+ * nights follow a look-alike pair and two follow a different pair, at the
+ * same average position in the week (4.5), so practice helps both kinds
+ * equally within one student.
  */
 
 export const MOONS = ['new moon', 'half moon', 'full moon'] as const
@@ -28,66 +33,39 @@ export interface NightFeatures {
   sound: Sound
 }
 
-export type BlockKind = 'look-alike' | 'distinct'
+export type Letter = 'A' | 'B' | 'C' | 'D'
+export const LETTERS: Letter[] = ['A', 'B', 'C', 'D']
 
-export const BLOCK_LABEL: Record<BlockKind, string> = { 'look-alike': 'look-alike nights', distinct: 'distinct nights' }
+export type WeekOrder = 'AABCCD' | 'ABBBCD'
+export const WEEK_ORDERS: WeekOrder[] = ['AABCCD', 'ABBBCD']
+export const WEEK_NIGHTS = 6
+/** The nights on which telling last night from the night before matters: 3 to 6. */
+export const TEST_NIGHTS = [3, 4, 5, 6] as const
 
-export interface BlockPlan {
-  kind: BlockKind
-  /** The clearing this block runs in, and the one a restart runs in. */
-  clearing: ClearingId
-  reserve: ClearingId
-  nights: [NightFeatures, NightFeatures, NightFeatures]
+export type PairKind = 'after a look-alike pair' | 'after a different pair'
+export const PAIR_KINDS: PairKind[] = ['after a look-alike pair', 'after a different pair']
+
+/** The letter of night n (1 to 6) in an order. */
+export function letterOf(order: WeekOrder, night: number): Letter {
+  return order[night - 1] as Letter
 }
 
-export interface Part4Plan {
+/** Night n (3 to 6) follows a look-alike pair when nights n − 2 and n − 1 share a letter; null for nights 1 and 2. */
+export function pairKind(order: WeekOrder, night: number): PairKind | null {
+  if (night < 3 || night > WEEK_NIGHTS) return null
+  return letterOf(order, night - 1) === letterOf(order, night - 2) ? 'after a look-alike pair' : 'after a different pair'
+}
+
+export function nightsOfKind(order: WeekOrder, kind: PairKind): number[] {
+  return TEST_NIGHTS.filter((n) => pairKind(order, n) === kind)
+}
+
+export interface WeekPlan {
+  order: WeekOrder
+  letters: Record<Letter, NightFeatures>
+  /** The six nights' features, night 1 first. */
+  nights: NightFeatures[]
   practice: NightFeatures
-  /** The two blocks in the order they are run. */
-  blocks: [BlockPlan, BlockPlan]
-}
-
-function shuffled<T>(xs: readonly T[], rng: Rng): T[] {
-  const out = [...xs]
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = rng.int(i + 1)
-    ;[out[i], out[j]] = [out[j], out[i]]
-  }
-  return out
-}
-
-/** The look-alike night's features, and three distinct nights built against them. */
-export function planFeatures(rng: Rng): { alike: NightFeatures; distinct: [NightFeatures, NightFeatures, NightFeatures] } {
-  const alike: NightFeatures = { moon: MOONS[rng.int(3)], weather: WEATHERS[rng.int(3)], ground: GROUNDS[rng.int(4)], sound: SOUNDS[rng.int(3)] }
-  // Each three-valued feature: a permutation of all three values over the three nights; the night that gets the
-  // look-alike's value is a different night for each feature, so no distinct night shares more than one value.
-  const which = shuffled([0, 1, 2], rng) // which night takes the shared moon, weather, sound
-  const assign = <T,>(values: readonly T[], shared: T, nightOfShared: number): T[] => {
-    const others = shuffled(values.filter((v) => v !== shared), rng)
-    const out: T[] = []
-    let k = 0
-    for (let n = 0; n < 3; n++) out.push(n === nightOfShared ? shared : others[k++])
-    return out
-  }
-  const moons = assign(MOONS, alike.moon, which[0])
-  const weathers = assign(WEATHERS, alike.weather, which[1])
-  const sounds = assign(SOUNDS, alike.sound, which[2])
-  const grounds = shuffled(GROUNDS.filter((g) => g !== alike.ground), rng)
-  const distinct = [0, 1, 2].map((n) => ({ moon: moons[n], weather: weathers[n], ground: grounds[n], sound: sounds[n] })) as [NightFeatures, NightFeatures, NightFeatures]
-  return { alike, distinct }
-}
-
-/** Part 4's plan from the seed: which block comes first, which clearing each runs in, and every night's features. */
-export function planPart4(seed: number): Part4Plan {
-  const rng = makeRng(seed ^ 0x4f0a)
-  const { alike, distinct } = planFeatures(rng)
-  const practice: NightFeatures = { moon: MOONS[rng.int(3)], weather: WEATHERS[rng.int(3)], ground: GROUNDS[rng.int(4)], sound: SOUNDS[rng.int(3)] }
-  const alikeFirst = rng.next() < 0.5
-  const aFirst = rng.next() < 0.5
-  const first: ClearingId = aFirst ? 'A' : 'B'
-  const second: ClearingId = aFirst ? 'B' : 'A'
-  const look: BlockPlan = { kind: 'look-alike', clearing: alikeFirst ? first : second, reserve: 'reserve', nights: [alike, { ...alike }, { ...alike }] }
-  const dist: BlockPlan = { kind: 'distinct', clearing: alikeFirst ? second : first, reserve: 'reserve', nights: distinct }
-  return { practice, blocks: alikeFirst ? [look, dist] : [dist, look] }
 }
 
 export function sameFeatures(a: NightFeatures, b: NightFeatures): boolean {
@@ -96,6 +74,40 @@ export function sameFeatures(a: NightFeatures, b: NightFeatures): boolean {
 
 export function sharedFeatures(a: NightFeatures, b: NightFeatures): number {
   return (a.moon === b.moon ? 1 : 0) + (a.weather === b.weather ? 1 : 0) + (a.ground === b.ground ? 1 : 0) + (a.sound === b.sound ? 1 : 0)
+}
+
+export const differingFeatures = (a: NightFeatures, b: NightFeatures): number => 4 - sharedFeatures(a, b)
+
+export function anyFeatures(rng: Rng): NightFeatures {
+  return { moon: MOONS[rng.int(3)], weather: WEATHERS[rng.int(3)], ground: GROUNDS[rng.int(4)], sound: SOUNDS[rng.int(3)] }
+}
+
+/** The neighbors in both orders: A–B, B–C and C–D. */
+const NEIGHBORS: [Letter, Letter][] = [
+  ['A', 'B'],
+  ['B', 'C'],
+  ['C', 'D'],
+]
+
+/** The four letters' features: neighbors differ on every feature, any two letters on at least two. Drawn until the rule holds (about one draw in a hundred does). */
+export function letterFeatures(rng: Rng): Record<Letter, NightFeatures> {
+  for (;;) {
+    const f: Record<Letter, NightFeatures> = { A: anyFeatures(rng), B: anyFeatures(rng), C: anyFeatures(rng), D: anyFeatures(rng) }
+    if (!NEIGHBORS.every(([a, b]) => differingFeatures(f[a], f[b]) === 4)) continue
+    let ok = true
+    for (let i = 0; i < LETTERS.length && ok; i++) for (let j = i + 1; j < LETTERS.length; j++) if (differingFeatures(f[LETTERS[i]], f[LETTERS[j]]) < 2) ok = false
+    if (ok) return f
+  }
+}
+
+/** Part 4's plan from the seed: the order, the letters' features, the six nights and the practice night. */
+export function planWeek(seed: number): WeekPlan {
+  const rng = makeRng(seed ^ 0x4f0a)
+  const order: WeekOrder = rng.next() < 0.5 ? 'AABCCD' : 'ABBBCD'
+  const letters = letterFeatures(rng)
+  const practice = anyFeatures(rng)
+  const nights = Array.from({ length: WEEK_NIGHTS }, (_, i) => ({ ...letters[letterOf(order, i + 1)] }))
+  return { order, letters, nights, practice }
 }
 
 /** The features as a one-hot vector, for the fast store: 3 + 3 + 4 + 3 = 13 dimensions. */
@@ -110,7 +122,7 @@ export function featureVector(f: NightFeatures): number[] {
 
 export const FEATURE_DIMS = 13
 
-/** The features in one line, as the fixed line beside the view prints them. */
+/** The features in one line, as the features line prints them (§8.4). */
 export function describeFeatures(f: NightFeatures): string {
   return `${f.moon}, ${f.weather}, ${f.ground}, ${f.sound}`
 }

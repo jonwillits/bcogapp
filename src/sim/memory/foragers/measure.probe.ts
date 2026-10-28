@@ -1,17 +1,19 @@
 import { it } from 'vitest'
 import { makeRng } from '../../random'
-import { planFor } from '../logs/block'
+import { planFor } from '../logs/week'
+import { PAIR_KINDS } from '../logs/features'
 import { featureVector } from '../logs/features'
 import { mean } from '../../bilaterian/measure'
-import { FORAGERS, foragerTable, runForagerBlock, type ForagerId } from './foragers'
+import { FORAGERS, foragerShares, runForagerWeek, type ForagerId } from './foragers'
 import { SEPARATIONS, SeparationStage, cosine, driftContext, freshContext, nightInput } from './store'
 import { SlowLearner, YOUTH_PASSES, differentiation, newPatterns, oldPatterns, trainInterleaved } from './slow'
 import { THINGS, ALL_THINGS, PROPERTIES } from './world'
 
 /**
- * Every target of spec §9, measured over twenty seeds on synthetic nights
- * before any panel was drawn. These are the measurements that can come
- * back different from the spec and change the design rather than the code.
+ * Every target of spec §9, measured over twenty seeds on synthetic weeks
+ * before any panel was drawn (re-measured 2026-10-27 for the week of six
+ * nights). These are the measurements that can come back different from
+ * the spec and change the design rather than the code.
  *
  *   PROBE=1 PROBE_DIR=src/sim/memory/foragers npx vitest run --disable-console-intercept -t "measure:"
  */
@@ -33,14 +35,12 @@ it.skip('measure: the separation stage, a sweep of the context’s weight and dr
           const rng = makeRng(seed)
           const stage = new SeparationStage('weak', rng.fork(), cfg)
           const { plan } = planFor(seed)
-          const look = plan.blocks.find((b) => b.kind === 'look-alike')!
-          const dist = plan.blocks.find((b) => b.kind === 'distinct')!
           const c = freshContext(rng)
           const c2 = driftContext(c, rng, drift)
-          const a1 = stage.encode(nightInput(featureVector(look.nights[0]), c, scale))
-          const a2 = stage.encode(nightInput(featureVector(look.nights[1]), c2, scale))
-          const d1 = stage.encode(nightInput(featureVector(dist.nights[0]), c, scale))
-          const d2 = stage.encode(nightInput(featureVector(dist.nights[1]), c2, scale))
+          const a1 = stage.encode(nightInput(featureVector(plan.letters.A), c, scale))
+          const a2 = stage.encode(nightInput(featureVector(plan.letters.A), c2, scale))
+          const d1 = stage.encode(nightInput(featureVector(plan.letters.A), c, scale))
+          const d2 = stage.encode(nightInput(featureVector(plan.letters.B), c2, scale))
           alike2.push(cosine(a2, a1))
           distinct2.push(cosine(d2, d1))
           ctx.push(cosine(c, c2))
@@ -54,52 +54,58 @@ it.skip('measure: the separation stage, a sweep of the context’s weight and dr
   }
 }, 600_000)
 
-it('measure: the four foragers on synthetic nights (§9.2)', () => {
-  const rows: Record<ForagerId, { emptiedLast: number[][]; beetles: number[][]; smooth: number[][]; passed: number[]; confusionsAlike: number[]; confusionsDistinct: number[] }> = {} as never
-  for (const f of FORAGERS) rows[f.id] = { emptiedLast: [[], [], []], beetles: [[], [], []], smooth: [[], [], []], passed: [], confusionsAlike: [], confusionsDistinct: [] }
+it('measure: the four foragers on synthetic weeks (§9.2)', () => {
+  const rows: Record<ForagerId, { emptiedLast: number[][]; beetles: number[][]; smooth: number[]; passed: number[][]; alike: number[]; differ: number[]; alikeDig: number[]; differDig: number[] }> = {} as never
+  for (const f of FORAGERS) rows[f.id] = { emptiedLast: Array.from({ length: 6 }, () => []), beetles: Array.from({ length: 6 }, () => []), smooth: [], passed: Array.from({ length: 6 }, () => []), alike: [], differ: [], alikeDig: [], differDig: [] }
   for (const seed of SEEDS) {
     const { plan, clearings } = planFor(seed)
     for (const f of FORAGERS) {
-      for (const block of plan.blocks) {
-        const b = runForagerBlock(f.id, seed, block, clearings[block.clearing])
-        b.tallies.forEach((t, i) => {
-          rows[f.id].emptiedLast[i].push(t.digsAtEmptiedLastNight)
-          rows[f.id].beetles[i].push(t.beetles)
-          rows[f.id].smooth[i].push(t.digsAtSmooth)
-          if (t.passedOverRefilled !== null) rows[f.id].passed.push(t.passedOverRefilled)
-        })
-        const table = foragerTable(b)
-        const share = table.couldBeConfused ? table.confusions / table.couldBeConfused : 0
-        if (block.kind === 'look-alike') rows[f.id].confusionsAlike.push(share)
-        else rows[f.id].confusionsDistinct.push(share)
-      }
+      const w = runForagerWeek(f.id, seed, plan, clearings.week)
+      w.tallies.forEach((t, i) => {
+        rows[f.id].emptiedLast[i].push(t.digsAtEmptiedLastNight)
+        rows[f.id].beetles[i].push(t.beetles)
+        if (t.passedOverRefilled !== null) rows[f.id].passed[i].push(t.passedOverRefilled)
+      })
+      rows[f.id].smooth.push(w.tallies.reduce((a, t) => a + t.digsAtSmooth, 0))
+      const sh = foragerShares(w)
+      const a = sh['after a look-alike pair']
+      const d = sh['after a different pair']
+      if (a.share !== null) rows[f.id].alike.push(a.share)
+      if (d.share !== null) rows[f.id].differ.push(d.share)
+      if (a.digShare !== null) rows[f.id].alikeDig.push(a.digShare)
+      if (d.digShare !== null) rows[f.id].differDig.push(d.digShare)
     }
   }
   for (const f of FORAGERS) {
     const r = rows[f.id]
-    say(`${f.label}: digs at logs emptied last night ${r.emptiedLast.map((v) => f1(mean(v))).join(' / ')} (nights 1 / 2 / 3); beetles ${r.beetles.map((v) => f1(mean(v))).join(' / ')}; digs at smooth logs ${r.smooth.map((v) => f1(mean(v))).join(' / ')}; full logs passed over on night 3 ${f1(mean(r.passed))}; confusions share look-alike ${f2(mean(r.confusionsAlike))} distinct ${f2(mean(r.confusionsDistinct))}`)
+    say(`${f.label}: digs at logs emptied last night ${r.emptiedLast.map((v) => f1(mean(v))).join(' / ')} (nights 1 to 6); beetles ${r.beetles.map((v) => f1(mean(v))).join(' / ')} (week ${f1(mean(r.beetles.map((v) => mean(v))) * 6)}); digs at smooth logs over the week ${f1(mean(r.smooth))}; full logs passed close by, emptied two nights ago, nights 3 to 6 ${r.passed.slice(2).map((v) => f1(mean(v))).join(' / ')}; share of when-errors after look-alike pairs ${f2(mean(r.alike))} after different pairs ${f2(mean(r.differ))} (over digs alone ${f2(mean(r.alikeDig))} / ${f2(mean(r.differDig))})`)
   }
 }, 600_000)
 
-it('measure: the store at three settings on both blocks (§9.3)', () => {
+it('measure: the store at three settings over the week (§9.3)', () => {
   for (const sep of SEPARATIONS) {
-    const alike: number[] = []
-    const distinct: number[] = []
-    const emptiedLast: number[] = []
-    const passed: number[] = []
+    const by: Record<string, number[]> = { alike: [], differ: [], alikeDig: [], differDig: [], emptiedLast: [], passed: [], beetles: [] }
+    const byNight: number[][] = Array.from({ length: 6 }, () => [])
     for (const seed of SEEDS) {
       const { plan, clearings } = planFor(seed)
-      for (const block of plan.blocks) {
-        const b = runForagerBlock('tonight', seed, block, clearings[block.clearing], {}, sep)
-        const t = foragerTable(b)
-        const share = t.couldBeConfused ? t.confusions / t.couldBeConfused : 0
-        ;(block.kind === 'look-alike' ? alike : distinct).push(share)
-        emptiedLast.push(b.tallies[1].digsAtEmptiedLastNight + b.tallies[2].digsAtEmptiedLastNight)
-        passed.push(b.tallies[2].passedOverRefilled ?? 0)
-      }
+      const w = runForagerWeek('tonight', seed, plan, clearings.week, {}, sep)
+      const sh = foragerShares(w)
+      const a = sh['after a look-alike pair']
+      const d = sh['after a different pair']
+      if (a.share !== null) by.alike.push(a.share)
+      if (d.share !== null) by.differ.push(d.share)
+      if (a.digShare !== null) by.alikeDig.push(a.digShare)
+      if (d.digShare !== null) by.differDig.push(d.digShare)
+      by.emptiedLast.push(w.tallies.slice(1).reduce((x, t) => x + t.digsAtEmptiedLastNight, 0))
+      by.passed.push(w.tallies.slice(2).reduce((x, t) => x + (t.passedOverRefilled ?? 0), 0))
+      by.beetles.push(w.tallies.reduce((x, t) => x + t.beetles, 0))
+      w.when.forEach((s, i) => {
+        if (s.decisions) byNight[i].push(s.errors / s.decisions)
+      })
     }
-    say(`store, ${sep}: confusions share look-alike ${f2(mean(alike))}, distinct ${f2(mean(distinct))}; digs at logs emptied last night over nights 2 and 3 ${f2(mean(emptiedLast))}; full logs passed over on night 3 ${f2(mean(passed))}`)
+    say(`store, ${sep}: share of when-errors after look-alike pairs ${f2(mean(by.alike))}, after different pairs ${f2(mean(by.differ))} (over digs alone ${f2(mean(by.alikeDig))} / ${f2(mean(by.differDig))}); by night 3 to 6 ${byNight.slice(2).map((v) => f2(mean(v))).join(' / ')}; digs at logs emptied last night over nights 2 to 6 ${f2(mean(by.emptiedLast))}; full logs passed close by, emptied two nights ago, over nights 3 to 6 ${f2(mean(by.passed))}; beetles over the week ${f1(mean(by.beetles))}`)
   }
+  void PAIR_KINDS
 }, 600_000)
 
 it('measure: the slow learner’s youth, the new season, and damage (§9.4, §9.5)', () => {
@@ -204,17 +210,15 @@ it('measure: the two kinds of damage on Tonight too (§9.5)', () => {
   const usual = { emptiedLast: [] as number[] }
   for (const seed of SEEDS) {
     const { plan, clearings } = planFor(seed)
-    for (const block of plan.blocks) {
-      for (const [label, damage] of settings) {
-        const b = runForagerBlock('tonight', seed, block, clearings[block.clearing], damage)
-        rows[label].emptiedLast.push(b.tallies[1].digsAtEmptiedLastNight + b.tallies[2].digsAtEmptiedLastNight)
-        rows[label].smooth.push(b.tallies.reduce((a, t) => a + t.digsAtSmooth, 0))
-        rows[label].beetles.push(b.tallies.reduce((a, t) => a + t.beetles, 0))
-      }
-      const u = runForagerBlock('usual', seed, block, clearings[block.clearing])
-      usual.emptiedLast.push(u.tallies[1].digsAtEmptiedLastNight + u.tallies[2].digsAtEmptiedLastNight)
+    for (const [label, damage] of settings) {
+      const w = runForagerWeek('tonight', seed, plan, clearings.week, damage)
+      rows[label].emptiedLast.push(w.tallies.slice(1).reduce((a, t) => a + t.digsAtEmptiedLastNight, 0))
+      rows[label].smooth.push(w.tallies.reduce((a, t) => a + t.digsAtSmooth, 0))
+      rows[label].beetles.push(w.tallies.reduce((a, t) => a + t.beetles, 0))
     }
+    const u = runForagerWeek('usual', seed, plan, clearings.week)
+    usual.emptiedLast.push(u.tallies.slice(1).reduce((a, t) => a + t.digsAtEmptiedLastNight, 0))
   }
-  for (const [label] of settings) say(`Tonight too, ${label}: digs at logs emptied last night over nights 2 and 3 ${f2(mean(rows[label].emptiedLast))}; digs at smooth logs over the block ${f2(mean(rows[label].smooth))}; beetles over the block ${f1(mean(rows[label].beetles))}`)
-  say(`Usual only: digs at logs emptied last night over nights 2 and 3 ${f2(mean(usual.emptiedLast))}`)
+  for (const [label] of settings) say(`Tonight too, ${label}: digs at logs emptied last night over nights 2 to 6 ${f2(mean(rows[label].emptiedLast))}; digs at smooth logs over the week ${f2(mean(rows[label].smooth))}; beetles over the week ${f1(mean(rows[label].beetles))}`)
+  say(`Usual only: digs at logs emptied last night over nights 2 to 6 ${f2(mean(usual.emptiedLast))}`)
 }, 600_000)

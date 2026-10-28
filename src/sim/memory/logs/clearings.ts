@@ -2,16 +2,80 @@ import { makeRng, type Rng } from '../../random'
 import { NEAR_LANDMARKS, footprint, type Footprint } from '../../rodent/range'
 
 /**
- * The clearings of Part 4 (spec §8.2): four compact areas of Lab 9's range,
- * each around its own nest and out of sight of the others, each with ten
- * logs, seven with loose bark and three smooth, and three or four landmarks
- * of its own so that the clearings do not look alike. Clearings A, B and
- * the reserve share one geometry, turned and mirrored, so that blocks are
- * matched in difficulty; the practice clearing is Lab 9's nest with Lab
- * 9's landmarks and logs of its own. Geometry only; the scene draws it.
+ * The clearings of Part 4 (spec §8.2, revised 2026-10-27): three compact
+ * areas of Lab 9's range, each around its own nest and out of sight of the
+ * others, each with ten logs, seven with loose bark and three smooth, and
+ * three or four landmarks of its own. The **week's clearing** and the
+ * **reserve** (where an interrupted week restarts) share one geometry,
+ * turned and mirrored; the **practice clearing** is Lab 9's nest with Lab
+ * 9's landmarks and logs of its own. **Each log looks different from every
+ * other** in its clearing, in ways easy to see and hard to name: its
+ * length, thickness, the number and angle of its branch stubs, how much
+ * moss covers it, and the shade of its bark within its kind (`LogLook`).
+ * No object sits on a log. A look is fixed for the week and carries nothing
+ * about beetles beyond the kind of bark. Geometry only; the scene draws it.
  */
 
 export type LogKind = 'loose' | 'smooth'
+
+/**
+ * How a log looks, apart from its kind and its place: five things a student
+ * can see from a few meters and would be slow to put into words. Each is
+ * drawn by the seed; `lookDistance` keeps every pair in a clearing at least
+ * `LOOK_MIN_DISTANCE` apart. The length also sets the footprint.
+ */
+export interface LogLook {
+  /** Meters, within LOOK.length. */
+  length: number
+  /** Meters, within LOOK.radius. */
+  radius: number
+  /** Branch stubs: where along the log (−0.5 to 0.5 of its length), which way round (radians), how long (meters). */
+  stubs: { along: number; around: number; length: number }[]
+  /** Moss cover, 0 (none) to 1 (most of the upper side). */
+  moss: number
+  /** The bark's shade within its kind, −1 (darkest) to 1 (palest). */
+  tint: number
+}
+
+export const LOOK = {
+  length: [1.0, 1.7] as const,
+  radius: [0.16, 0.28] as const,
+  maxStubs: 3,
+  stubLength: [0.18, 0.4] as const,
+} as const
+
+/** The smallest distance between two looks' descriptors in one clearing (each descriptor a unit square's edge; see `lookDescriptor`). */
+export const LOOK_MIN_DISTANCE = 0.75
+
+/** A look as five numbers in 0 to 1: length, thickness, stubs, moss, shade. */
+export function lookDescriptor(k: LogLook): number[] {
+  const u = (v: number, [a, b]: readonly [number, number]) => (v - a) / (b - a)
+  return [u(k.length, LOOK.length), u(k.radius, LOOK.radius), k.stubs.length / LOOK.maxStubs, k.moss, (k.tint + 1) / 2]
+}
+
+export function lookDistance(a: LogLook, b: LogLook): number {
+  const da = lookDescriptor(a)
+  const db = lookDescriptor(b)
+  return Math.sqrt(da.reduce((acc, v, i) => acc + (v - db[i]) ** 2, 0))
+}
+
+function drawLook(rng: Rng): LogLook {
+  const n = rng.int(LOOK.maxStubs + 1)
+  const stubs = Array.from({ length: n }, () => ({ along: rng.range(-0.42, 0.42), around: rng.range(0.4, Math.PI - 0.4), length: rng.range(LOOK.stubLength[0], LOOK.stubLength[1]) }))
+  return { length: rng.range(LOOK.length[0], LOOK.length[1]), radius: rng.range(LOOK.radius[0], LOOK.radius[1]), stubs, moss: rng.next() < 0.3 ? 0 : rng.range(0.15, 1), tint: rng.range(-1, 1) }
+}
+
+/** Ten looks, every pair at least LOOK_MIN_DISTANCE apart: each new look is drawn until it clears the ones before it. */
+export function drawLooks(rng: Rng, n: number): LogLook[] {
+  const out: LogLook[] = []
+  while (out.length < n) {
+    let k = drawLook(rng)
+    for (let tries = 0; tries < 400 && out.some((o) => lookDistance(o, k) < LOOK_MIN_DISTANCE); tries++) k = drawLook(rng)
+    if (out.some((o) => lookDistance(o, k) < LOOK_MIN_DISTANCE)) throw new Error('could not draw a distinct look')
+    out.push(k)
+  }
+  return out
+}
 
 export interface Log {
   /** 0 to 9 within its clearing. */
@@ -21,6 +85,7 @@ export interface Log {
   kind: LogKind
   /** The direction the log lies in, radians, for the drawing and the footprint. */
   angle: number
+  look: LogLook
 }
 
 export type ClearingLandmarkKind = 'rock' | 'stump' | 'tree' | 'fern bank'
@@ -33,7 +98,7 @@ export interface ClearingLandmark {
   size: number
 }
 
-export type ClearingId = 'practice' | 'A' | 'B' | 'reserve'
+export type ClearingId = 'practice' | 'week' | 'reserve'
 
 export interface Clearing {
   id: ClearingId
@@ -55,8 +120,7 @@ export const CLEARING = {
   reach: 1.1,
   /** The nest is reached within this distance: the rim of the hole, which is 0.35 m across (Jon, 2026-10-27: at 0.8 m the nursing began with the animal still outside it). */
   nestReach: 0.5,
-  /** A log's length and the radius of its footprint, meters. */
-  logLength: 1.3,
+  /** The radius a log's footprint is kept at whatever its drawn thickness, meters; its length is its look's. */
   logRadius: 0.22,
   loose: 7,
   smooth: 3,
@@ -100,23 +164,21 @@ export function branchFootprint(nest: { x: number; y: number }): Footprint {
   return { ax: cx - hx, ay: cy - hy, bx: cx + hx, by: cy + hy, r: BRANCH.radius }
 }
 
-/** Where the four clearings sit in the range: the practice clearing at Lab 9's nest; the others 24 m out, more than two moonlit view distances apart. */
+/** Where the three clearings sit in the range: the practice clearing at Lab 9's nest; the others 24 m or more out, more than two moonlit view distances apart. */
 export const CLEARING_NESTS: Record<ClearingId, { x: number; y: number }> = {
   practice: { x: 0, y: 0 },
-  A: { x: 24, y: 10 },
-  B: { x: -24, y: 10 },
+  week: { x: 24, y: 10 },
   reserve: { x: 0, y: -26 },
 }
 
-/** The three matched clearings: the one geometry turned by a third of a turn each, with B mirrored. */
+/** The two matched clearings: the one geometry, the reserve turned by a third of a turn and mirrored. */
 const PLACEMENT: Record<Exclude<ClearingId, 'practice'>, { turn: number; mirror: boolean }> = {
-  A: { turn: 0, mirror: false },
-  B: { turn: (2 * Math.PI) / 3, mirror: true },
-  reserve: { turn: (4 * Math.PI) / 3, mirror: false },
+  week: { turn: 0, mirror: false },
+  reserve: { turn: (2 * Math.PI) / 3, mirror: true },
 }
 
 interface LocalGeometry {
-  logs: { x: number; y: number; kind: LogKind; angle: number }[]
+  logs: { x: number; y: number; kind: LogKind; angle: number; look: LogLook }[]
   landmarks: { kind: ClearingLandmarkKind; x: number; y: number; size: number }[]
 }
 
@@ -129,9 +191,9 @@ export function landmarkFootprint(l: { kind: ClearingLandmarkKind; x: number; y:
   return { ax: l.x, ay: l.y, bx: l.x, by: l.y, r }
 }
 
-export function logFootprint(l: { x: number; y: number; angle: number }): Footprint {
-  const hx = (CLEARING.logLength / 2) * Math.cos(l.angle)
-  const hy = (CLEARING.logLength / 2) * Math.sin(l.angle)
+export function logFootprint(l: { x: number; y: number; angle: number; look: LogLook }): Footprint {
+  const hx = (l.look.length / 2) * Math.cos(l.angle)
+  const hy = (l.look.length / 2) * Math.sin(l.angle)
   return { ax: l.x - hx, ay: l.y - hy, bx: l.x + hx, by: l.y + hy, r: CLEARING.logRadius }
 }
 
@@ -181,6 +243,7 @@ function drawGeometry(rng: Rng, fixedLandmarks: ClearingLandmark[] = [], obstacl
     const j = rng.int(i + 1)
     ;[kinds[i], kinds[j]] = [kinds[j], kinds[i]]
   }
+  const looks = drawLooks(rng, kinds.length)
   for (let k = 0; k < kinds.length; k++) {
     let placed = false
     for (let tries = 0; tries < 400 && !placed; tries++) {
@@ -190,9 +253,9 @@ function drawGeometry(rng: Rng, fixedLandmarks: ClearingLandmark[] = [], obstacl
       const y = r * Math.sin(a)
       const angle = rng.range(0, Math.PI)
       if (logs.some((l) => Math.hypot(l.x - x, l.y - y) < CLEARING.logSpacing)) continue
-      const f = logFootprint({ x, y, angle })
+      const f = logFootprint({ x, y, angle, look: looks[k] })
       if (blockers.some((b) => distToFootprint(b, x, y) < 1.2 || distToFootprint(b, f.ax, f.ay) < 0.8 || distToFootprint(b, f.bx, f.by) < 0.8)) continue
-      logs.push({ x, y, kind: kinds[k], angle })
+      logs.push({ x, y, kind: kinds[k], angle, look: looks[k] })
       placed = true
     }
     if (!placed) throw new Error('could not place a log')
@@ -210,12 +273,12 @@ function place(id: ClearingId, g: LocalGeometry, nest: { x: number; y: number },
   return {
     id,
     nest,
-    logs: g.logs.map((l, i) => ({ id: i, ...map(l.x, l.y), kind: l.kind, angle: (mirror ? Math.PI - l.angle : l.angle) + turn })),
+    logs: g.logs.map((l, i) => ({ id: i, ...map(l.x, l.y), kind: l.kind, angle: (mirror ? Math.PI - l.angle : l.angle) + turn, look: l.look })),
     landmarks: g.landmarks.map((l, i) => ({ id: `${id}-${l.kind}-${i}`, kind: l.kind, ...map(l.x, l.y), size: l.size })),
   }
 }
 
-/** All four clearings from the seed. */
+/** All three clearings from the seed. */
 export function makeClearings(seed: number): Record<ClearingId, Clearing> {
   const rng = makeRng(seed ^ 0x10c5)
   // The practice clearing keeps Lab 9's near landmarks (as drawn by RangeView) and places its logs clear of their footprints.
@@ -224,8 +287,7 @@ export function makeClearings(seed: number): Record<ClearingId, Clearing> {
   const shared = drawGeometry(rng.fork())
   return {
     practice: place('practice', practice, CLEARING_NESTS.practice, 0, false),
-    A: place('A', shared, CLEARING_NESTS.A, PLACEMENT.A.turn, PLACEMENT.A.mirror),
-    B: place('B', shared, CLEARING_NESTS.B, PLACEMENT.B.turn, PLACEMENT.B.mirror),
+    week: place('week', shared, CLEARING_NESTS.week, PLACEMENT.week.turn, PLACEMENT.week.mirror),
     reserve: place('reserve', shared, CLEARING_NESTS.reserve, PLACEMENT.reserve.turn, PLACEMENT.reserve.mirror),
   }
 }

@@ -1,9 +1,10 @@
 import { it } from 'vitest'
 import { mean } from '../bilaterian/measure'
-import { planFor } from './logs/block'
+import { planFor } from './logs/week'
+import { nightsOfKind } from './logs/features'
 import { NIGHT_S, DIG_S, EAT_S, NURSE_S } from './logs/night'
 import { makeClearings } from './logs/clearings'
-import { FORAGERS, foragerTable, runForagerBlock, trainedSlowLearner, type ForagerId } from './foragers/foragers'
+import { FORAGERS, foragerShares, runForagerWeek, trainedSlowLearner, type ForagerId } from './foragers/foragers'
 import { SEPARATIONS } from './foragers/store'
 import { THINGS } from './foragers/world'
 import { planPart1 } from './words/design'
@@ -36,35 +37,36 @@ it('crib: what the parts should read', () => {
   // Part 4
   say(`Part 4: a night lasts ${NIGHT_S} s; a dig ${DIG_S} s and a meal ${EAT_S} s more; the young call at ${NIGHT_S / 2} s and nursing takes ${NURSE_S} s.`)
   const c = makeClearings(1000)
-  say(`Part 4: seed 1000's first block is ${planFor(1000).plan.blocks[0].kind} in clearing ${planFor(1000).plan.blocks[0].clearing}; clearing A's nest at (${c.A.nest.x}, ${c.A.nest.y}) with ${c.A.logs.length} logs and ${c.A.landmarks.length} landmarks.`)
+  const w1000 = planFor(1000).plan
+  say(`Part 4: seed 1000's week runs in the order ${w1000.order} (nights ${nightsOfKind(w1000.order, 'after a look-alike pair').join(' and ')} follow a look-alike pair); the week's clearing has its nest at (${c.week.nest.x}, ${c.week.nest.y}) with ${c.week.logs.length} logs, each with its own look, and ${c.week.landmarks.length} landmarks.`)
   // Part 5
-  const rows: Record<ForagerId, { e2: number[]; e3: number[]; beetles: number[]; smooth: number[]; alike: number[]; distinct: number[] }> = {} as never
-  for (const f of FORAGERS) rows[f.id] = { e2: [], e3: [], beetles: [], smooth: [], alike: [], distinct: [] }
-  const store: Record<string, { alike: number[]; distinct: number[] }> = {}
-  for (const sep of SEPARATIONS) store[sep] = { alike: [], distinct: [] }
+  const rows: Record<ForagerId, { e2: number[]; eLater: number[]; beetles: number[]; smooth: number[]; alike: number[]; differ: number[] }> = {} as never
+  for (const f of FORAGERS) rows[f.id] = { e2: [], eLater: [], beetles: [], smooth: [], alike: [], differ: [] }
+  const store: Record<string, { alike: number[]; differ: number[] }> = {}
+  for (const sep of SEPARATIONS) store[sep] = { alike: [], differ: [] }
   for (const seed of SEEDS) {
     const { plan, clearings } = planFor(seed)
-    for (const block of plan.blocks) {
-      for (const f of FORAGERS) {
-        const b = runForagerBlock(f.id, seed, block, clearings[block.clearing])
-        rows[f.id].e2.push(b.tallies[1].digsAtEmptiedLastNight)
-        rows[f.id].e3.push(b.tallies[2].digsAtEmptiedLastNight)
-        rows[f.id].beetles.push(b.tallies.reduce((a, t) => a + t.beetles, 0))
-        rows[f.id].smooth.push(b.tallies.reduce((a, t) => a + t.digsAtSmooth, 0))
-        const t = foragerTable(b)
-        ;(block.kind === 'look-alike' ? rows[f.id].alike : rows[f.id].distinct).push(t.couldBeConfused ? t.confusions / t.couldBeConfused : 0)
-      }
-      for (const sep of SEPARATIONS) {
-        const t = foragerTable(runForagerBlock('tonight', seed, block, clearings[block.clearing], {}, sep))
-        ;(block.kind === 'look-alike' ? store[sep].alike : store[sep].distinct).push(t.couldBeConfused ? t.confusions / t.couldBeConfused : 0)
-      }
+    for (const f of FORAGERS) {
+      const w = runForagerWeek(f.id, seed, plan, clearings.week)
+      rows[f.id].e2.push(w.tallies[1].digsAtEmptiedLastNight)
+      rows[f.id].eLater.push(mean(w.tallies.slice(2).map((t) => t.digsAtEmptiedLastNight)))
+      rows[f.id].beetles.push(w.tallies.reduce((a, t) => a + t.beetles, 0))
+      rows[f.id].smooth.push(w.tallies.reduce((a, t) => a + t.digsAtSmooth, 0))
+      const sh = foragerShares(w)
+      if (sh['after a look-alike pair'].share !== null) rows[f.id].alike.push(sh['after a look-alike pair'].share!)
+      if (sh['after a different pair'].share !== null) rows[f.id].differ.push(sh['after a different pair'].share!)
+    }
+    for (const sep of SEPARATIONS) {
+      const sh = foragerShares(runForagerWeek('tonight', seed, plan, clearings.week, {}, sep))
+      if (sh['after a look-alike pair'].share !== null) store[sep].alike.push(sh['after a look-alike pair'].share!)
+      if (sh['after a different pair'].share !== null) store[sep].differ.push(sh['after a different pair'].share!)
     }
   }
   for (const f of FORAGERS) {
     const r = rows[f.id]
-    say(`Part 5, ${f.label}: digs at logs emptied last night ${f1(mean(r.e2))} on night 2 and ${f1(mean(r.e3))} on night 3; beetles over a block ${f1(mean(r.beetles))}; digs at smooth logs over a block ${f1(mean(r.smooth))}; confusions share look-alike ${f2(mean(r.alike))}, distinct ${f2(mean(r.distinct))}.`)
+    say(`Part 5, ${f.label}: digs at logs emptied last night ${f1(mean(r.e2))} on night 2 and ${f1(mean(r.eLater))} a night on nights 3 to 6; beetles over the week ${f1(mean(r.beetles))}; digs at smooth logs over the week ${f1(mean(r.smooth))}; share of when-errors after look-alike pairs ${f2(mean(r.alike))}, after different pairs ${f2(mean(r.differ))}.`)
   }
-  for (const sep of SEPARATIONS) say(`Part 5, the store at ${sep} separation: confusions share look-alike ${f2(mean(store[sep].alike))}, distinct ${f2(mean(store[sep].distinct))}.`)
+  for (const sep of SEPARATIONS) say(`Part 5, the store at ${sep} separation: share of when-errors after look-alike pairs ${f2(mean(store[sep].alike))}, after different pairs ${f2(mean(store[sep].differ))}.`)
   const net = trainedSlowLearner(1000)
   net.damage = { noise: 0.5 }
   say(`Part 5, the slow learner at noise 0.5 (seed 1000, 20 draws): properties the things have still said yes, general ${f2(net.kept(THINGS, 'general', 20))}, middle ${f2(net.kept(THINGS, 'middle', 20))}, specific ${f2(net.kept(THINGS, 'specific', 20))}.`)

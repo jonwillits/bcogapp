@@ -101,14 +101,14 @@ describe('an interrupted unit restarts with reserve materials', () => {
   it('a completed unit is untouched by a reload, and the restart count is kept', () => {
     const box = memoryStorage()
     const a = new ProgressStore(box, 3)
-    a.begin('p4-block-1')
+    a.begin('p4-week')
     const b = new ProgressStore(box)
-    b.begin('p4-block-1')
-    b.complete('p4-block-1', { nights: 3 })
+    b.begin('p4-week')
+    b.complete('p4-week', { nights: 3 })
     const c = new ProgressStore(box)
-    expect(c.isComplete('p4-block-1')).toBe(true)
-    expect(c.restarts('p4-block-1')).toBe(1)
-    expect(c.materialsSlot('p4-block-1')).toBe(1)
+    expect(c.isComplete('p4-week')).toBe(true)
+    expect(c.restarts('p4-week')).toBe(1)
+    expect(c.materialsSlot('p4-week')).toBe(1)
   })
 })
 
@@ -155,8 +155,8 @@ describe('with storage blocked', () => {
     s.begin('p1-list-0')
     s.complete('p1-list-0', { ok: true })
     expect(s.isComplete('p1-list-0')).toBe(true)
-    s.commitPrediction('p4-block-2', 'more often')
-    expect(s.prediction('p4-block-2')).toBe('more often')
+    s.commitPrediction('p4-pairs', 'more often')
+    expect(s.prediction('p4-pairs')).toBe('more often')
   })
 
   it('a write that starts failing partway turns the storage off and the state stays in memory', () => {
@@ -206,7 +206,7 @@ describe('Export and Load', () => {
   it('exportText round-trips through parseImport', () => {
     const s = new ProgressStore(memoryStorage(), 21)
     s.complete('p1-list-3', { typed: ['lamp'] })
-    s.commitPrediction('p4-block-2', 'less often')
+    s.commitPrediction('p4-pairs', 'less often')
     const r = parseImport(exportText(s.state))
     expect(r.ok).toBe(true)
     if (r.ok) expect(r.state).toEqual(s.state)

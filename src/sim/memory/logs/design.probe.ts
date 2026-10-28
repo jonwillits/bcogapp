@@ -1,7 +1,7 @@
 import { it } from 'vitest'
 import { makeRng, type Rng } from '../../random'
 import { FastStore, SeparationStage, driftContext, freshContext, nightInput, SEPARATIONS, type Separation } from '../foragers/store'
-import { featureVector, GROUNDS, MOONS, SOUNDS, WEATHERS, type NightFeatures } from './features'
+import { featureVector, letterFeatures, letterOf, pairKind, type WeekOrder } from './features'
 
 /**
  * A simulation of Part 4's design (spec §14, Part 4, revised 2026-10-27),
@@ -28,31 +28,13 @@ const say = (s: string) => console.log(`m10 design · ${s}`)
 const f2 = (x: number) => x.toFixed(2)
 const pct = (x: number) => `${Math.round(100 * x)}%`
 
-type Order = 'AABCCD' | 'ABBBCD'
+type Order = WeekOrder
 const ORDERS: Order[] = ['AABCCD', 'ABBBCD']
 const LOOSE = 7
 const DIGS_PER_NIGHT = 4
 
-/** Night n (3 to 6) follows a look-alike pair when nights n − 2 and n − 1 share a letter. */
-function followsAlike(order: Order, night: number): boolean {
-  return order[night - 2] === order[night - 3]
-}
-
-function differs(a: NightFeatures, b: NightFeatures): number {
-  return (a.moon !== b.moon ? 1 : 0) + (a.weather !== b.weather ? 1 : 0) + (a.ground !== b.ground ? 1 : 0) + (a.sound !== b.sound ? 1 : 0)
-}
-
-/** The build's rule for the four letters: neighbors differ on every feature; any two letters differ on at least two. */
-function letterFeatures(rng: Rng): Record<string, NightFeatures> {
-  const draw = (): NightFeatures => ({ moon: MOONS[rng.int(3)], weather: WEATHERS[rng.int(3)], ground: GROUNDS[rng.int(4)], sound: SOUNDS[rng.int(3)] })
-  for (;;) {
-    const A = draw()
-    const B = draw()
-    const C = draw()
-    const D = draw()
-    if (differs(A, B) === 4 && differs(B, C) === 4 && differs(C, D) === 4 && differs(A, C) >= 2 && differs(A, D) >= 2 && differs(B, D) >= 2) return { A, B, C, D }
-  }
-}
+/** Night n (3 to 6) follows a look-alike pair when nights n − 2 and n − 1 share a letter (`pairKind`). */
+const followsAlike = (order: Order, night: number): boolean => pairKind(order, night) === 'after a look-alike pair'
 
 function shuffled<T>(xs: readonly T[], rng: Rng): T[] {
   const out = [...xs]
@@ -90,7 +72,7 @@ function runStoreWeek(order: Order, sep: Separation | null, seed: number): Store
   const out: StoreWeek = { shareAll: [], shareVisited: [], atStake: [], beetles: 0 }
   for (let n = 1; n <= 6; n++) {
     if (n > 1) context = driftContext(context, contextRng)
-    const input = nightInput(featureVector(letters[order[n - 1]]), context)
+    const input = nightInput(featureVector(letters[letterOf(order, n)]), context)
     let treated: boolean[] = new Array(LOOSE).fill(false)
     if (store && n > 1 && lastInput) {
       const r = store.retrieve(lastInput)

@@ -1,24 +1,25 @@
 import { describe, it, expect } from 'vitest'
 import { makeRng } from '../../random'
-import { CLEARING, CLEARING_NESTS, NEST_ARCH, branchFootprint, makeClearings, nestFootprints, type Clearing } from './clearings'
-import { afterNight, freshBlock, fullOnNight, isFull, truthOf, KIND_RULE, REFILL_RULE } from './refill'
-import { planPart4, sameFeatures, sharedFeatures, featureVector, FEATURE_DIMS, GROUNDS } from './features'
-import { NIGHT_S, DIG_S, EAT_S, NURSE_S, PRACTICE_S, RETURN_GRACE_S, tallies } from './night'
+import { CLEARING, CLEARING_NESTS, LOOK, LOOK_MIN_DISTANCE, NEST_ARCH, branchFootprint, logFootprint, lookDistance, makeClearings, nestFootprints, type Clearing } from './clearings'
+import { afterNight, freshWeek, fullOnNight, isFull, truthOf, KIND_RULE, REFILL_RULE } from './refill'
+import { LETTERS, TEST_NIGHTS, WEEK_NIGHTS, WEEK_ORDERS, differingFeatures, featureVector, FEATURE_DIMS, GROUNDS, letterOf, nightsOfKind, pairKind, planWeek, sameFeatures } from './features'
+import { NIGHT_S, DIG_S, EAT_S, NURSE_S, PASS_CLOSE_M, PRACTICE_S, RETURN_GRACE_S, tallies, type NightRecord } from './night'
 import { nearest, runScripted, type Policy } from './scripted'
-import { answersForNight, confusionTable, truths } from './mapQuestion'
-import { planFor, runBlockScripted, startNight, newBlockRun, finishNight, nightRng } from './block'
+import { ANSWERS, ANSWER_LABEL, confusionTable, truths } from './question'
+import { planFor, runWeekScripted, startNight, newWeekRun, finishNight, nightRng, weekDone } from './week'
+import { resultLine, weekSummary, whenScore, type Part4WeekResult } from './results'
 import { NightSim } from './night'
 import { NEAR_LANDMARKS, footprint } from '../../rodent/range'
 import { mean } from '../../bilaterian/measure'
 
 const SEEDS20 = Array.from({ length: 20 }, (_, i) => 1000 + i)
 
-describe('the refill rule (§8.1, §8.3), over every sequence of empties across three nights', () => {
+describe('the refill rule (§8.1, §8.3), over every sequence of empties across six nights', () => {
   it('a log emptied on night n is empty on n + 1 and full on n + 2; never emptied, it is full; smooth logs never have beetles', () => {
-    for (let pattern = 0; pattern < 8; pattern++) {
-      let last = freshBlock(2)
+    for (let pattern = 0; pattern < 64; pattern++) {
+      let last = freshWeek(2)
       const kinds = ['loose', 'smooth'] as const
-      for (let night = 1; night <= 3; night++) {
+      for (let night = 1; night <= WEEK_NIGHTS; night++) {
         const full = fullOnNight(kinds, last, night)
         expect(full[1]).toBe(false)
         // The loose log is full unless emptied on the night before.
@@ -28,19 +29,19 @@ describe('the refill rule (§8.1, §8.3), over every sequence of empties across 
         last = afterNight(last, emptied, night)
       }
     }
-    expect(isFull('loose', null, 3)).toBe(true)
-    expect(isFull('loose', 1, 2)).toBe(false)
-    expect(isFull('loose', 1, 3)).toBe(true)
+    expect(isFull('loose', null, 6)).toBe(true)
+    expect(isFull('loose', 4, 5)).toBe(false)
+    expect(isFull('loose', 4, 6)).toBe(true)
     expect(isFull('smooth', null, 1)).toBe(false)
   })
-  it('the truths for the map question follow the state', () => {
-    expect(truthOf(null, 2)).toBe('never')
-    expect(truthOf(2, 2)).toBe('tonight')
-    expect(truthOf(1, 2)).toBe('last night')
-    expect(truthOf(1, 3)).toBe('two nights ago')
-    expect(answersForNight(1)).toEqual(['tonight', 'never'])
-    expect(answersForNight(2)).toEqual(['tonight', 'last night', 'never'])
-    expect(answersForNight(3)).toEqual(['tonight', 'last night', 'two nights ago', 'never'])
+  it('the truths for the end-of-week question follow the state, and the answers are the four the spec names', () => {
+    expect(truthOf(null, 6)).toBe('never')
+    expect(truthOf(6, 6)).toBe('tonight')
+    expect(truthOf(5, 6)).toBe('last night')
+    expect(truthOf(4, 6)).toBe('two nights ago')
+    expect(truthOf(3, 6)).toBe('never')
+    expect(ANSWERS).toEqual(['tonight', 'last night', 'two nights ago', 'never'])
+    expect(ANSWER_LABEL.never).toBe('Not emptied in the last three nights')
   })
   it('the two rules are stated in the words the spec gives', () => {
     expect(KIND_RULE).toMatch(/loose bark have beetles/)
@@ -48,15 +49,16 @@ describe('the refill rule (§8.1, §8.3), over every sequence of empties across 
   })
 })
 
-describe('the clearings (§8.2)', () => {
+describe('the clearings and the logs (§8.2)', () => {
   const pairwise = (c: Clearing) => {
     const out: number[] = []
     for (let i = 0; i < c.logs.length; i++) for (let j = i + 1; j < c.logs.length; j++) out.push(Math.hypot(c.logs[i].x - c.logs[j].x, c.logs[i].y - c.logs[j].y))
     return out
   }
-  it('each has ten logs, seven loose and three smooth, a few meters from its nest and at least 3 m apart, with three or four landmarks', () => {
+  it('three clearings, each with ten logs, seven loose and three smooth, a few meters from its nest and at least 3 m apart, with three or four landmarks', () => {
     for (const seed of SEEDS20) {
       const cs = makeClearings(seed)
+      expect(Object.keys(cs).sort()).toEqual(['practice', 'reserve', 'week'])
       for (const c of Object.values(cs)) {
         expect(c.logs.length).toBe(10)
         expect(c.logs.filter((l) => l.kind === 'loose').length).toBe(7)
@@ -70,14 +72,34 @@ describe('the clearings (§8.2)', () => {
       }
     }
   })
-  it('A, B and the reserve share one geometry, turned or mirrored: the same distances between logs and the same kinds', () => {
-    const cs = makeClearings(7)
-    const a = pairwise(cs.A)
-    for (const other of [cs.B, cs.reserve]) {
-      const o = pairwise(other)
-      for (let i = 0; i < a.length; i++) expect(o[i]).toBeCloseTo(a[i], 6)
-      expect(other.logs.map((l) => l.kind)).toEqual(cs.A.logs.map((l) => l.kind))
+  it('every log’s look differs from every other log’s in the same clearing by at least the minimum distance, within the ranges, and nothing sits on a log; the footprint is the look’s length', () => {
+    for (const seed of SEEDS20) {
+      for (const c of Object.values(makeClearings(seed))) {
+        for (let i = 0; i < c.logs.length; i++) {
+          const k = c.logs[i].look
+          expect(k.length).toBeGreaterThanOrEqual(LOOK.length[0])
+          expect(k.length).toBeLessThanOrEqual(LOOK.length[1])
+          expect(k.radius).toBeGreaterThanOrEqual(LOOK.radius[0])
+          expect(k.radius).toBeLessThanOrEqual(LOOK.radius[1])
+          expect(k.stubs.length).toBeLessThanOrEqual(LOOK.maxStubs)
+          expect(k.moss).toBeGreaterThanOrEqual(0)
+          expect(k.moss).toBeLessThanOrEqual(1)
+          expect(Math.abs(k.tint)).toBeLessThanOrEqual(1)
+          expect(Object.keys(k).sort()).toEqual(['length', 'moss', 'radius', 'stubs', 'tint'])
+          for (let j = i + 1; j < c.logs.length; j++) expect(lookDistance(k, c.logs[j].look), `seed ${seed} ${c.id} logs ${i} ${j}`).toBeGreaterThanOrEqual(LOOK_MIN_DISTANCE - 1e-9)
+          const f = logFootprint(c.logs[i])
+          expect(Math.hypot(f.bx - f.ax, f.by - f.ay)).toBeCloseTo(k.length, 9)
+        }
+      }
     }
+  })
+  it('the week’s clearing and the reserve share one geometry, turned and mirrored: the same distances between logs, the same kinds and the same looks', () => {
+    const cs = makeClearings(7)
+    const a = pairwise(cs.week)
+    const o = pairwise(cs.reserve)
+    for (let i = 0; i < a.length; i++) expect(o[i]).toBeCloseTo(a[i], 6)
+    expect(cs.reserve.logs.map((l) => l.kind)).toEqual(cs.week.logs.map((l) => l.kind))
+    expect(JSON.stringify(cs.reserve.logs.map((l) => l.look))).toBe(JSON.stringify(cs.week.logs.map((l) => l.look)))
   })
   it('the clearings are out of sight of one another: nests more than 20 m apart', () => {
     const ids = Object.keys(CLEARING_NESTS) as (keyof typeof CLEARING_NESTS)[]
@@ -98,27 +120,38 @@ describe('the clearings (§8.2)', () => {
   })
 })
 
-describe('the night features (§8.4, §8.5)', () => {
-  it('the look-alike block’s three nights are identical; the distinct block’s differ from one another on every feature, and each shares at most one value with the look-alike nights, never the thing on the ground; over 100 seeds', () => {
+describe('the week’s order of night features (§8.4, §8.5)', () => {
+  it('over 100 seeds: nights with the same letter are identical in every feature, neighboring nights with different letters differ in every feature, and any two letters differ on at least two', () => {
     for (let seed = 1; seed <= 100; seed++) {
-      const plan = planPart4(seed)
-      const look = plan.blocks.find((b) => b.kind === 'look-alike')!
-      const dist = plan.blocks.find((b) => b.kind === 'distinct')!
-      expect(sameFeatures(look.nights[0], look.nights[1])).toBe(true)
-      expect(sameFeatures(look.nights[1], look.nights[2])).toBe(true)
-      for (let i = 0; i < 3; i++) {
-        for (let j = i + 1; j < 3; j++) expect(sharedFeatures(dist.nights[i], dist.nights[j])).toBe(0)
-        expect(sharedFeatures(dist.nights[i], look.nights[0])).toBeLessThanOrEqual(1)
-        expect(dist.nights[i].ground).not.toBe(look.nights[0].ground)
+      const plan = planWeek(seed)
+      expect(WEEK_ORDERS).toContain(plan.order)
+      expect(plan.nights.length).toBe(WEEK_NIGHTS)
+      for (let n = 1; n <= WEEK_NIGHTS; n++) expect(sameFeatures(plan.nights[n - 1], plan.letters[letterOf(plan.order, n)])).toBe(true)
+      for (let n = 2; n <= WEEK_NIGHTS; n++) {
+        const same = letterOf(plan.order, n) === letterOf(plan.order, n - 1)
+        if (same) expect(sameFeatures(plan.nights[n - 1], plan.nights[n - 2])).toBe(true)
+        else expect(differingFeatures(plan.nights[n - 1], plan.nights[n - 2])).toBe(4)
       }
-      expect(look.clearing).not.toBe(dist.clearing)
-      expect(['A', 'B']).toContain(look.clearing)
-      expect(['A', 'B']).toContain(dist.clearing)
+      for (let i = 0; i < LETTERS.length; i++) for (let j = i + 1; j < LETTERS.length; j++) expect(differingFeatures(plan.letters[LETTERS[i]], plan.letters[LETTERS[j]])).toBeGreaterThanOrEqual(2)
     }
   })
-  it('which block comes first is the seed’s: both orders occur', () => {
-    const firsts = new Set(Array.from({ length: 40 }, (_, i) => planPart4(i).blocks[0].kind))
-    expect(firsts.size).toBe(2)
+  it('the seed picks the order, and both occur', () => {
+    const orders = new Set(Array.from({ length: 40 }, (_, i) => planWeek(i).order))
+    expect(orders.size).toBe(2)
+  })
+  it('in both orders two nights follow a look-alike pair and two follow a different pair, at the same average position in the week', () => {
+    expect(nightsOfKind('AABCCD', 'after a look-alike pair')).toEqual([3, 6])
+    expect(nightsOfKind('AABCCD', 'after a different pair')).toEqual([4, 5])
+    expect(nightsOfKind('ABBBCD', 'after a look-alike pair')).toEqual([4, 5])
+    expect(nightsOfKind('ABBBCD', 'after a different pair')).toEqual([3, 6])
+    for (const order of WEEK_ORDERS) {
+      const a = nightsOfKind(order, 'after a look-alike pair')
+      const d = nightsOfKind(order, 'after a different pair')
+      expect(mean(a)).toBeCloseTo(mean(d), 9)
+      expect([...a, ...d].sort()).toEqual([...TEST_NIGHTS])
+    }
+    expect(pairKind('AABCCD', 1)).toBeNull()
+    expect(pairKind('AABCCD', 2)).toBeNull()
   })
   it('the feature vector is one-hot in four groups', () => {
     const v = featureVector({ moon: 'half moon', weather: 'fog', ground: GROUNDS[3], sound: 'frogs' })
@@ -130,7 +163,7 @@ describe('the night features (§8.4, §8.5)', () => {
 describe('a night (§8.3)', () => {
   const sim = (seed = 1) => {
     const { plan, clearings } = planFor(seed)
-    const run = newBlockRun(plan.blocks[0], clearings[plan.blocks[0].clearing])
+    const run = newWeekRun(plan, clearings.week)
     return { run, sim: startNight(run, seed) }
   }
   it('starts in the nest with every loose-bark log full, lasts NIGHT_S, calls the young halfway, and returns the forager to the nest at dawn', () => {
@@ -143,9 +176,9 @@ describe('a night (§8.3)', () => {
     expect(s.called).toBe(true)
     expect(s.record.calledAt).toBeCloseTo(NIGHT_S / 2, 6)
     expect(s.atNest).toBe(true)
-    // Standing in the nest when the call comes, it nursed.
     expect(s.nursed).toBe(true)
     expect(s.record.digs.length).toBe(0)
+    expect(s.record.pauses).toEqual({ count: 0, seconds: 0 })
   })
   it('a dig takes DIG_S, a meal EAT_S more, and the outcome is beetles at a full loose-bark log, nothing at an empty or smooth one', () => {
     const { sim: s } = sim(3)
@@ -173,8 +206,11 @@ describe('a night (§8.3)', () => {
     expect(t.digsAtFull).toBe(1)
     expect(t.repeatsBeforeCall).toBe(1)
     expect(t.digsAtSmooth).toBe(1)
+    // Both logs were passed close by.
+    expect(s.record.passedClose[loose.id]).toBe(true)
+    expect(s.record.passedClose[smooth.id]).toBe(true)
   })
-  it('after the call, digging is disabled until the forager has returned and nursed, which takes NURSE_S', () => {
+  it('after the call, digging is disabled until the forager has returned and nursed, which takes NURSE_S; arriving at the rim, it is set in the middle of the young', () => {
     const { sim: s } = sim(5)
     const loose = s.clearing.logs.find((l) => l.kind === 'loose')!
     s.place(loose.x + 0.6, loose.y, 0)
@@ -183,9 +219,10 @@ describe('a night (§8.3)', () => {
     expect(s.canDigAt).toBeNull()
     s.step(0.05, { forward: 0, turn: 0, dig: true })
     expect(s.record.digs.length).toBe(0)
-    s.place(s.clearing.nest.x, s.clearing.nest.y, 0)
+    s.place(s.clearing.nest.x + CLEARING.nestReach - 0.05, s.clearing.nest.y, 0)
     s.step(0.05, { forward: 0, turn: 0 })
     expect(s.phase).toBe('nursing')
+    expect(Math.hypot(s.body.x - s.clearing.nest.x, s.body.y - s.clearing.nest.y)).toBeLessThan(0.01)
     const t0 = s.time
     while (s.phase === 'nursing') s.step(0.05, { forward: 0, turn: 0 })
     expect(s.time - t0).toBeCloseTo(NURSE_S, 1)
@@ -198,12 +235,10 @@ describe('a night (§8.3)', () => {
     const [a, b] = nestFootprints(nest)
     const along = Math.atan2(b.ay - a.ay, b.ax - a.ax)
     const across = along + Math.PI / 2
-    // From the broad side: 1 m out, facing the nest, walking in 1 m: it reaches the center of the hole.
     s.place(nest.x + Math.cos(across), nest.y + Math.sin(across), across + Math.PI)
     for (let k = 0; k < 13; k++) s.step(0.05, { forward: 1, turn: 0 })
     expect(Math.hypot(s.body.x - nest.x, s.body.y - nest.y)).toBeLessThan(0.1)
     expect(s.atNest).toBe(true)
-    // From the end: it is held off the foot, beyond the nest's reach, and must come round.
     s.place(nest.x + 1.2 * Math.cos(along), nest.y + 1.2 * Math.sin(along), along + Math.PI)
     for (let k = 0; k < 40; k++) s.step(0.05, { forward: 1, turn: 0 })
     const dEnd = Math.hypot(s.body.x - nest.x, s.body.y - nest.y)
@@ -214,7 +249,7 @@ describe('a night (§8.3)', () => {
   it('the fallen branch, on a night that has one, stops the body where it lies; on other nights nothing does there', () => {
     const { plan, clearings } = planFor(11)
     const c = clearings.practice
-    const run = (ground: typeof plan.practice.ground) => new NightSim(c, c.logs.map(() => null), 1, { ...plan.practice, ground }, nightRng(11, 'practice', 'practice', 1))
+    const run = (ground: typeof plan.practice.ground) => new NightSim(c, c.logs.map(() => null), 1, { ...plan.practice, ground }, nightRng(11, 'practice', 1))
     const f = branchFootprint(c.nest)
     const mid = { x: (f.ax + f.bx) / 2, y: (f.ay + f.by) / 2 }
     const across = Math.atan2(f.by - f.ay, f.bx - f.ax) + Math.PI / 2
@@ -225,6 +260,19 @@ describe('a night (§8.3)', () => {
     }
     expect(walkAt(run('a fallen branch across the path'))).toBeGreaterThan(f.r + 0.1 - 0.01)
     expect(walkAt(run('nothing on the ground'))).toBeGreaterThan(1.1)
+  })
+  it('a log is passed close by when the body comes within PASS_CLOSE_M of it, and not otherwise', () => {
+    const { sim: s } = sim(13)
+    const l = s.clearing.logs[0]
+    expect(s.record.passedClose[l.id]).toBe(false)
+    s.place(l.x + PASS_CLOSE_M + 0.3, l.y, 0)
+    expect(s.record.passedClose[l.id]).toBe(false)
+    s.place(l.x + PASS_CLOSE_M - 0.1, l.y, 0)
+    expect(s.record.passedClose[l.id]).toBe(true)
+    expect(PASS_CLOSE_M).toBe(2)
+    s.recordPause(3.5, true)
+    s.recordPause(1.5, false)
+    expect(s.record.pauses).toEqual({ count: 1, seconds: 5 })
   })
   it('when the night’s time is up the forager walks home by itself with no key held, the walk is in the path, and the night ends at the nest; a forager that cannot get home in time is set down there', () => {
     const { sim: s } = sim(9)
@@ -241,17 +289,39 @@ describe('a night (§8.3)', () => {
     while (s.phase === 'returning' && s.time < s.seconds + 60) s.step(0.05, { forward: 0, turn: 0 })
     expect(s.done).toBe(true)
     expect(s.atNest).toBe(true)
-    // It walked: the time taken is about the straight distance at the range pace, well inside the grace, and the path has the walk.
     expect(s.time - s.seconds).toBeGreaterThan(d0 / s.body.loco.speed - 0.5)
     expect(s.time - s.seconds).toBeLessThan(d0 / s.body.loco.speed + RETURN_GRACE_S)
     expect(s.record.path.length).toBeGreaterThan(samples + 10)
     expect(s.record.seconds).toBe(s.seconds)
-    // A night with a longer length: the practice night's, with the call halfway.
     const { plan, clearings } = planFor(9)
-    const run = newBlockRun(plan.blocks[0], clearings[plan.blocks[0].clearing])
+    const run = newWeekRun(plan, clearings.week)
     const p = startNight(run, 9, 0, { seconds: PRACTICE_S })
     expect(p.seconds).toBe(PRACTICE_S)
     expect(p.callAt).toBe(PRACTICE_S / 2)
+  })
+  it('a forager behind a log when the walk home begins goes round it and reaches the nest on foot, in all but a rare case with several things in the way', () => {
+    let cases = 0
+    let setDown = 0
+    for (const seed of [9, 10, 11, 12]) {
+      const { sim: s } = sim(seed)
+      // Stand just behind each log in turn, the log between the body and the nest, facing away, as the night ends.
+      for (const l of s.clearing.logs) {
+        const { sim: t } = sim(seed)
+        while (t.time < t.seconds - 0.2) t.step(0.05, { forward: 0, turn: 0 })
+        const dx = l.x - t.clearing.nest.x
+        const dy = l.y - t.clearing.nest.y
+        const d = Math.hypot(dx, dy)
+        const across = Math.atan2(dy, dx) + Math.PI / 2
+        t.place(l.x + (dx / d) * 0.45 + Math.cos(across) * 0.15, l.y + (dy / d) * 0.45 + Math.sin(across) * 0.15, Math.atan2(dy, dx))
+        while (!t.done && t.time < t.seconds + 60) t.step(0.05, { forward: 0, turn: 0 })
+        expect(t.done, `seed ${seed} log ${l.id}`).toBe(true)
+        cases++
+        // Set down at the nest only when the walk ran out of grace (a 180° turn, then two or three things to go round).
+        if (t.time - t.seconds >= d / t.body.loco.speed + RETURN_GRACE_S - 0.1) setDown++
+      }
+    }
+    expect(cases).toBe(40)
+    expect(setDown).toBeLessThanOrEqual(2)
   })
   it('the same seed and the same commands reproduce a night exactly, and nothing in the directory reaches for Math.random', async () => {
     const run = () => {
@@ -265,7 +335,7 @@ describe('a night (§8.3)', () => {
   })
 })
 
-describe('the scripted foragers and the night’s length (§14, targets)', () => {
+describe('the scripted foragers and the night’s length (§14, targets), over the week', () => {
   function perfect(): Policy {
     const known = new Map<number, number | null>()
     return {
@@ -286,93 +356,188 @@ describe('the scripted foragers and the night’s length (§14, targets)', () =>
       },
     }
   }
-  it('a scripted perfect rememberer empties about four of the seven loose-bark logs on nights 1 and 3 (and what is left on night 2), over 20 seeds', () => {
-    const per: number[][] = [[], [], []]
+  // Measured 2026-10-27 over the week at 90 s and the scripted pace at half the key pace (tune.probe.ts; notes §4.1): the perfect
+  // rememberer empties 4.8 / 2.1 / 4.8 / 2.1 / 4.3 / 2.5 on nights 1 to 6, a see-saw, since what it empties on one night is what
+  // is missing the next; Usual only digs at 1.6 logs emptied last night on night 2 and 1.2 to 1.5 on later nights.
+  const PERFECT_ODD = [3.6, 5.6]
+  const PERFECT_EVEN = [1.4, 3.2]
+  const USUAL_NIGHT2 = [1.1, 2.3]
+  it('a scripted perfect rememberer empties about four or five of seven loose-bark logs on night 1, when all are full, and on the other odd nights, and what is left on the even nights, over 20 seeds', () => {
+    const per: number[][] = Array.from({ length: WEEK_NIGHTS }, () => [])
     for (const seed of SEEDS20) {
       const { plan, clearings } = planFor(seed)
-      for (const b of plan.blocks) runBlockScripted(b, clearings[b.clearing], seed, perfect()).records.forEach((r, i) => per[i].push(tallies(r).digsAtFull))
+      runWeekScripted(plan, clearings.week, seed, perfect()).records.forEach((r, i) => per[i].push(tallies(r).digsAtFull))
     }
-    // Measured 4.6 / 2.2 / 4.6 at 90 s with the scripted pace at half the key pace (2026-10-27; 3.7 / 2.9 / 3.8 at 55 s and the key pace before).
-    expect(mean(per[0])).toBeGreaterThan(3.5)
-    expect(mean(per[0])).toBeLessThan(5.2)
-    expect(mean(per[2])).toBeGreaterThan(3.5)
-    expect(mean(per[2])).toBeLessThan(5.2)
-    // Night 2 has only what night 1 left: 7 minus about four or five.
-    expect(mean(per[1])).toBeGreaterThan(1.5)
-    expect(mean(per[1])).toBeLessThan(3.5)
+    for (const n of [1, 3, 5]) {
+      expect(mean(per[n - 1]), `night ${n}`).toBeGreaterThan(PERFECT_ODD[0])
+      expect(mean(per[n - 1]), `night ${n}`).toBeLessThan(PERFECT_ODD[1])
+    }
+    for (const n of [2, 4, 6]) {
+      expect(mean(per[n - 1]), `night ${n}`).toBeGreaterThan(PERFECT_EVEN[0])
+      expect(mean(per[n - 1]), `night ${n}`).toBeLessThan(PERFECT_EVEN[1])
+    }
   })
-  it('a scripted forager that knows only the usual fact digs at about two logs emptied the night before on night 2, and about one on night 3, over 20 seeds', () => {
-    const per: number[][] = [[], [], []]
+  it('a scripted forager that knows only the usual fact digs at about two logs emptied the night before on night 2, over 20 seeds, and at some on every later night', () => {
+    const per: number[][] = Array.from({ length: WEEK_NIGHTS }, () => [])
     for (const seed of SEEDS20) {
       const { plan, clearings } = planFor(seed)
-      for (const b of plan.blocks) runBlockScripted(b, clearings[b.clearing], seed, usualOnly(seed)).records.forEach((r, i) => per[i].push(tallies(r).digsAtEmptiedLastNight))
+      runWeekScripted(plan, clearings.week, seed, usualOnly(seed)).records.forEach((r, i) => per[i].push(tallies(r).digsAtEmptiedLastNight))
     }
     expect(mean(per[0])).toBe(0)
-    expect(mean(per[1])).toBeGreaterThan(1.5)
-    expect(mean(per[1])).toBeLessThan(2.5)
-    // Measured, not the spec's target (about two): the night-3 count is about one, because this forager empties fewer logs on night 2.
-    expect(mean(per[2])).toBeGreaterThan(0.6)
-    expect(mean(per[2])).toBeLessThan(1.6)
+    expect(mean(per[1])).toBeGreaterThan(USUAL_NIGHT2[0])
+    expect(mean(per[1])).toBeLessThan(USUAL_NIGHT2[1])
+    for (let n = 3; n <= WEEK_NIGHTS; n++) expect(mean(per[n - 1]), `night ${n}`).toBeGreaterThan(0.5)
   })
-  it('a scripted forager that is called returns, nurses and goes on; its path is recorded', () => {
+  it('a scripted forager that is called returns, nurses and goes on; its path is recorded; the week runs six nights and carries the state through', () => {
     const { plan, clearings } = planFor(2)
-    const run = runBlockScripted(plan.blocks[0], clearings[plan.blocks[0].clearing], 2, perfect())
+    const run = runWeekScripted(plan, clearings.week, 2, perfect())
+    expect(run.records.length).toBe(WEEK_NIGHTS)
+    expect(weekDone(run)).toBe(true)
     for (const r of run.records) {
       expect(r.nursedAt).not.toBeNull()
       expect(r.path.length).toBeGreaterThan(100)
     }
-    // It goes on digging after the nursing on the nights that have logs left (night 2 may not, after a good night 1).
-    expect(run.records.filter((r) => r.digs.some((d) => d.afterCall)).length).toBeGreaterThanOrEqual(2)
-    expect(run.states.length).toBe(4)
+    expect(run.records.filter((r) => r.digs.some((d) => d.afterCall)).length).toBeGreaterThanOrEqual(3)
+    expect(run.states.length).toBe(WEEK_NIGHTS + 1)
+    // Every log full on night 1; on a later night a log emptied the night before is empty.
+    expect(run.records[0].fullAtStart.filter(Boolean).length).toBe(7)
+    for (let n = 2; n <= WEEK_NIGHTS; n++) for (const l of clearings.week.logs) if (run.states[n - 1][l.id] === n - 1) expect(run.records[n - 1].fullAtStart[l.id]).toBe(false)
+    expect(() => startNight(run, 2)).toThrow()
   })
 })
 
-describe('the map question (§8.6, §8.7)', () => {
-  it('the confusion table counts marks against truths, and confusions between nights are the off-diagonal night cells', () => {
+describe('the scoring of when-decisions and when-errors (§8.7)', () => {
+  const record = (night: number, digs: number[], passed: number[], logs: number): NightRecord => ({
+    night,
+    clearing: 'week',
+    features: planWeek(1).nights[0],
+    digs: digs.map((log, i) => ({ t: i, log, outcome: 'empty', afterCall: false, repeat: false, emptiedLastNight: false })),
+    path: [],
+    beetles: 0,
+    fullAtStart: new Array(logs).fill(true),
+    emptiedTonight: new Array(logs).fill(false),
+    passedClose: Array.from({ length: logs }, (_, i) => passed.includes(i) || digs.includes(i)),
+    passedOverRefilled: 0,
+    calledAt: 45,
+    nursedAt: null,
+    seconds: 90,
+    pauses: { count: 0, seconds: 0 },
+  })
+  const clearing = makeClearings(1).week
+  const loose = clearing.logs.filter((l) => l.kind === 'loose').map((l) => l.id)
+  it('fixtures: a dig at a log emptied last night is an error; a log emptied two nights ago passed close by and never dug is an error; one passed and dug later is not; a log both passed and dug counts once; a log neither passed nor dug is no decision', () => {
+    const [a, b, c, d, e] = loose
+    const last = freshWeek(clearing.logs.length)
+    last[a] = 2 // emptied last night (night 3 is tonight)
+    last[b] = 1 // two nights ago, passed and dug: a correct decision, once
+    last[c] = 1 // two nights ago, passed and never dug: an error
+    last[d] = 1 // two nights ago, neither passed nor dug: no decision
+    last[e] = 2 // last night, passed and not dug: a correct decision
+    const w = whenScore(record(3, [a, b], [b, c, e], clearing.logs.length), last, clearing)
+    expect(w.atStake).toBe(5)
+    expect(w.emptiedLastNight).toBe(2)
+    expect(w.emptiedTwoAgo).toBe(3)
+    expect(w.decisions).toBe(4)
+    expect(w.errors).toBe(2)
+    expect(w.digDecisions).toBe(2)
+    expect(w.digErrors).toBe(1)
+    expect(w.logs.find((l) => l.log === b)).toMatchObject({ dug: true, passed: true, decision: true, error: false })
+    expect(w.logs.find((l) => l.log === d)).toMatchObject({ decision: false, error: false })
+    // Nights 1 and 2 score nothing.
+    expect(whenScore(record(2, [a], [a], clearing.logs.length), last, clearing).decisions).toBe(0)
+  })
+  it('the week’s summary pools each kind’s nights, gives the share over digs alone too, and the no-memory baseline; the result line names the order and the shares', () => {
+    const plan = planWeek(1)
+    const states = [freshWeek(clearing.logs.length)]
+    const records: NightRecord[] = []
+    const [a, b, c, d, e, f, g] = loose
+    // Night 1 empties a, b, c; night 2 empties d, e; night 3 digs a (refilled, right) and d (emptied last night, error), passes b; ...
+    const plan6: { digs: number[]; passed: number[]; emptied: number[] }[] = [
+      { digs: [a, b, c], passed: [], emptied: [a, b, c] },
+      { digs: [d, e], passed: [], emptied: [d, e] },
+      { digs: [a, d], passed: [b], emptied: [a] },
+      { digs: [f, g], passed: [d], emptied: [f, g] },
+      { digs: [b, c], passed: [], emptied: [b, c] },
+      { digs: [a, f], passed: [c], emptied: [a] },
+    ]
+    plan6.forEach((p, i) => {
+      const r = record(i + 1, p.digs, p.passed, clearing.logs.length)
+      for (const l of p.emptied) r.emptiedTonight[l] = true
+      r.beetles = p.emptied.length
+      records.push(r)
+      states.push(afterNight(states[i], r.emptiedTonight, i + 1))
+    })
+    const result: Part4WeekResult = { plan, clearing: 'week', records, states, answers: {}, restarted: false }
+    const s = weekSummary(result, clearing)
+    expect(s.nights.length).toBe(6)
+    // Night 3: at stake a, b, c (night 1) and d, e (night 2); decisions a, b, d; errors d (dug, emptied last night) and b (passed, two nights ago, not dug).
+    expect(s.nights[2]).toMatchObject({ atStake: 5, decisions: 3, errors: 2, digDecisions: 2, digErrors: 1 })
+    const kinds = Object.values(s.byKind)
+    expect(kinds.map((k) => k.nights).flat().sort()).toEqual([3, 4, 5, 6])
+    for (const k of kinds) {
+      const nights = k.nights.map((n) => s.nights[n - 1])
+      expect(k.decisions).toBe(nights.reduce((x, y) => x + y.decisions, 0))
+      expect(k.errors).toBe(nights.reduce((x, y) => x + y.errors, 0))
+      expect(k.share).toBe(k.decisions ? k.errors / k.decisions : null)
+      expect(k.digShare).toBe(k.digDecisions ? k.digErrors / k.digDecisions : null)
+      expect(k.baseline).toBe(nights.reduce((x, y) => x + y.emptiedLastNight, 0) / nights.reduce((x, y) => x + y.atStake, 0))
+    }
+    expect(s.beetles).toEqual([3, 2, 1, 2, 2, 1])
+    const line = resultLine(s)
+    expect(line.startsWith(plan.order)).toBe(true)
+    expect(line).toMatch(/after look-alike pairs \d+% · after different pairs \d+% · nights 3 to 6: /)
+  })
+})
+
+describe('the end-of-week question (§8.6, §8.7)', () => {
+  it('the confusion table counts marks against truths after night 6, and confusions between nights are the off-diagonal night cells', () => {
     const { plan, clearings } = planFor(4)
-    const c = clearings[plan.blocks[0].clearing]
-    const run = newBlockRun(plan.blocks[0], c)
-    const s1 = startNight(run, 4)
-    runScripted(s1, { next: (s) => nearest(s, s.clearing.logs.filter((l) => l.kind === 'loose' && s.dugTonight[l.id] === 0)) })
-    finishNight(run, s1)
-    const s2 = startNight(run, 4)
-    runScripted(s2, { next: (s) => nearest(s, s.clearing.logs.filter((l) => l.kind === 'loose' && s.dugTonight[l.id] === 0 && !s.record.fullAtStart[l.id] === false)) })
-    finishNight(run, s2)
-    const t = truths(c, run.states[2], 2)
+    const c = clearings.week
+    const run = runWeekScripted(plan, c, 4, { next: (s) => nearest(s, s.clearing.logs.filter((l) => l.kind === 'loose' && s.dugTonight[l.id] === 0)) })
+    const t = truths(c, run.states[WEEK_NIGHTS])
     const loose = c.logs.filter((l) => l.kind === 'loose')
     expect(Object.keys(t).length).toBe(loose.length)
-    // Mark every log "last night": right for those emptied last night, a confusion for those emptied tonight, and wrong but not a confusion for the never-emptied.
     const answers: Record<number, 'last night'> = {}
     for (const l of loose) answers[l.id] = 'last night'
     const table = confusionTable(t, answers)
     const tonight = loose.filter((l) => t[l.id] === 'tonight').length
     const last = loose.filter((l) => t[l.id] === 'last night').length
+    const two = loose.filter((l) => t[l.id] === 'two nights ago').length
     expect(table.cells['tonight']['last night']).toBe(tonight)
     expect(table.cells['last night']['last night']).toBe(last)
-    expect(table.confusions).toBe(tonight)
-    expect(table.couldBeConfused).toBe(tonight + last)
+    expect(table.confusions).toBe(tonight + two)
+    expect(table.couldBeConfused).toBe(tonight + last + two)
     expect(table.right).toBe(last)
   })
 })
 
 describe('the tallies (§8.7)', () => {
-  it('count beetles, digs at full logs, digs at logs emptied last night, repeats before and after the call, and digs at smooth logs', () => {
+  it('count beetles, digs at full logs, digs at logs emptied last night, repeats before and after the call, digs at smooth logs, and full logs passed close by that were emptied two nights ago', () => {
     const { plan, clearings } = planFor(6)
-    const c = clearings[plan.blocks[0].clearing]
-    const run = newBlockRun(plan.blocks[0], c)
+    const c = clearings.week
+    const run = newWeekRun(plan, c)
+    const nearestLoose: Policy = { next: (s) => nearest(s, s.clearing.logs.filter((l) => l.kind === 'loose' && s.dugTonight[l.id] === 0)) }
     const s1 = startNight(run, 6)
-    runScripted(s1, { next: (s) => nearest(s, s.clearing.logs.filter((l) => l.kind === 'loose' && s.dugTonight[l.id] === 0)) })
+    runScripted(s1, nearestLoose)
     finishNight(run, s1)
     const t1 = tallies(s1.record)
     expect(t1.beetles).toBe(t1.digsAtFull)
     expect(t1.digsAtEmptiedLastNight).toBe(0)
     expect(t1.passedOverRefilled).toBeNull()
-    // Night 2: dig every loose-bark log once, nearest first: the ones emptied last night are counted.
     const s2 = startNight(run, 6)
-    runScripted(s2, { next: (s) => nearest(s, s.clearing.logs.filter((l) => l.kind === 'loose' && s.dugTonight[l.id] === 0)) })
+    runScripted(s2, nearestLoose)
     finishNight(run, s2)
     const t2 = tallies(s2.record)
     expect(t2.digsAtEmptiedLastNight).toBe(s2.record.digs.filter((d) => d.outcome === 'empty').length)
     expect(t2.digsAtEmptiedLastNight + t2.digsAtFull).toBe(t2.digs)
+    // Night 3: a forager that digs nothing and stands still passes nothing, so passes over no refilled log; one placed by every log passes them all.
+    const s3 = startNight(run, 6)
+    s3.runStill()
+    expect(tallies(s3.record).passedOverRefilled).toBe(0)
+    const s3b = new NightSim(c, run.states[2], 3, plan.nights[2], nightRng(6, 'week', 3, 1))
+    for (const l of c.logs) s3b.place(l.x + 0.5, l.y, 0)
+    s3b.runStill()
+    const refilled = c.logs.filter((l) => l.kind === 'loose' && run.states[2][l.id] === 1).length
+    expect(tallies(s3b.record).passedOverRefilled).toBe(refilled)
   })
 })

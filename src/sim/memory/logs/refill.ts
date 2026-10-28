@@ -1,21 +1,22 @@
 /**
  * The refill rule (spec §8.1, §8.3), stated to the student and run exactly
- * as stated: *After you empty a log, it is still empty the next night. The
- * night after that, it has beetles again.* A loose-bark log never emptied
- * is full. Smooth logs never have beetles. There is no other source of
- * change: no rival, no randomness. Every error the forager makes is an
- * error of memory.
+ * as stated across all six nights of the week: *After you empty a log, it
+ * is still empty the next night. The night after that, it has beetles
+ * again.* A loose-bark log not emptied in the last two nights is full.
+ * Smooth logs never have beetles. There is no other source of change: no
+ * rival, no randomness. Every error the forager makes is an error of memory
+ * or of finding a log.
  *
- * A block's state is, per log, the night it was last emptied (1-based
- * within the block) or null. A loose-bark log is full on night n unless it
- * was emptied on night n − 1.
+ * The week's state is, per log, the night it was last emptied (1 to 6) or
+ * null. A loose-bark log is full on night n unless it was emptied on night
+ * n − 1.
  */
 
 import type { LogKind } from './clearings'
 
 export type LastEmptied = (number | null)[]
 
-export function freshBlock(n: number): LastEmptied {
+export function freshWeek(n: number): LastEmptied {
   return new Array<number | null>(n).fill(null)
 }
 
@@ -34,7 +35,7 @@ export function afterNight(last: LastEmptied, emptiedTonight: readonly boolean[]
   return last.map((l, i) => (emptiedTonight[i] ? night : l))
 }
 
-/** What was true of a loose-bark log on night `night`, for the map question: when it was last emptied, as the question's words. */
+/** What was true of a loose-bark log on night `night`, for the end-of-week question: when it was last emptied, as the question's words ('never' is *not emptied in the last three nights*). */
 export type Truth = 'tonight' | 'last night' | 'two nights ago' | 'never'
 
 export function truthOf(lastEmptied: number | null, night: number): Truth {

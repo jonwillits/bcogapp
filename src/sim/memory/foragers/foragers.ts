@@ -1,13 +1,11 @@
 import { makeRng, type Rng } from '../../random'
 import type { Clearing, Log } from '../logs/clearings'
-import { featureVector, type BlockPlan } from '../logs/features'
-import { runBlockScripted, type BlockRun } from '../logs/block'
-import { answerMap, blockTable } from '../logs/block'
+import { PAIR_KINDS, featureVector, nightsOfKind, type PairKind, type WeekPlan } from '../logs/features'
+import { runWeekScripted, type WeekRun } from '../logs/week'
 import { tallies, type NightTallies } from '../logs/night'
 import type { Policy } from '../logs/scripted'
 import type { NightSim } from '../logs/night'
-import type { MapAnswers } from '../logs/mapQuestion'
-import type { Truth } from '../logs/refill'
+import { shareOf, whenScore, type WhenScore } from '../logs/results'
 import { FastStore, SeparationStage, driftContext, freshContext, nightInput, type Retrieval, type Separation } from './store'
 import { SlowLearner, YOUTH_PASSES, oldPatterns, trainInterleaved } from './slow'
 import { TendencyUnit } from './tendency'
@@ -15,9 +13,12 @@ import { PROPERTIES } from './world'
 
 /**
  * The programmed foragers of Part 5 (spec §9.2): four programs that each
- * run the student's own six nights, the same clearings, starting states,
- * features, night length and nursing call. They walk perfectly, so the
- * comparison is of digs, not of navigation. Each has a list for tonight,
+ * run the student's own week, the same clearing, starting state, order of
+ * night features, night length and nursing call. They walk perfectly, so
+ * the comparison is of digs, not of navigation. Their share of when-errors
+ * after look-alike and after different pairs (§8.7) is scored from their
+ * behavior exactly as the student's is; they have no practice effect, so
+ * their contrast is the effect of look-alike nights alone. Each has a list for tonight,
  * the logs already dug tonight, cleared at dawn (working memory in the
  * second sense of §10.2.3; no forager is scored on it).
  *
@@ -89,16 +90,18 @@ export interface NightRetrieval {
   treatedEmptied: boolean[]
 }
 
-export interface ForagerBlock {
-  run: BlockRun
+export interface ForagerWeek {
+  run: WeekRun
   tallies: NightTallies[]
+  /** The when-decisions and when-errors of each night (nights 1 and 2 carry zeros). */
+  when: WhenScore[]
   retrievals: NightRetrieval[]
-  /** The store's contents at the end of the block, for the panels. */
+  /** The store's contents at the end of the week, for the panels. */
   store: FastStore | null
 }
 
-/** Build one forager's policy for one block; the forager's own stream is drawn from the seed and the forager. */
-export function makeForager(id: ForagerId, seed: number, clearing: Clearing, slow: SlowLearner, damage: Damage = {}, separation?: Separation): { policy: Policy; retrievals: NightRetrieval[]; store: FastStore | null; mapAnswers: (sim: NightSim) => MapAnswers } {
+/** Build one forager's policy for one week; the forager's own stream is drawn from the seed and the forager. */
+export function makeForager(id: ForagerId, seed: number, clearing: Clearing, slow: SlowLearner, damage: Damage = {}, separation?: Separation): { policy: Policy; retrievals: NightRetrieval[]; store: FastStore | null; endNight: (sim: NightSim) => void } {
   const spec = foragerById(id)
   const rng = makeRng((seed ^ 0xf0a) + { usual: 1, tendency: 2, tonight: 3, blurred: 4 }[id] * 7919)
   const sep = separation ?? spec.separation
@@ -163,49 +166,52 @@ export function makeForager(id: ForagerId, seed: number, clearing: Clearing, slo
     },
   }
 
-  /**
-   * At dawn: answer the map question as the forager would, then store the
-   * night. *Tonight* is its own list. For a log it has emptied on some
-   * stored night, the store's answer to "emptied last night?" has the
-   * strength the blend gives it, and the forager marks *last night* that
-   * often, and otherwise *two nights ago* (or *not emptied*, on night 2,
-   * when there is no night before last). A store whose codes for two
-   * nights overlap therefore marks the wrong night as often as the overlap
-   * says. Then the night is stored once, with the logs emptied tonight.
-   */
-  const mapAnswers = (sim: NightSim): MapAnswers => {
+  /** At dawn: the night is stored once, with the logs emptied tonight, and what tonight was like becomes the register for last night. */
+  const endNight = (sim: NightSim): void => {
     if (sim.night !== night) startNight(sim)
-    const answers: MapAnswers = {}
     const emptied = sim.record.emptiedTonight
-    const blended = lastRetrieval?.blended ?? []
-    const ever = clearing.logs.map((l) => (store ? store.nights.some((n) => n.content[l.id] >= 0.5) : false))
-    for (const l of clearing.logs) {
-      if (l.kind !== 'loose') continue
-      let a: Truth = 'never'
-      if (emptied[l.id]) a = 'tonight'
-      else if (ever[l.id]) a = decideRng.next() < (blended[l.id] ?? 0) ? 'last night' : night >= 3 ? 'two nights ago' : 'never'
-      answers[l.id] = a
-    }
     const tonight = nightInput(featureVector(sim.features), context)
     if (store) store.store(tonight, emptied.map((e) => (e ? 1 : 0)), `night ${night}`)
     lastNightWasLike = tonight
-    return answers
+    void lastRetrieval
   }
-  return { policy, retrievals, store, mapAnswers }
+  return { policy, retrievals, store, endNight }
 }
 
-/** Run one forager over one block of the student's nights (the same plan and clearing; its own digs), with its map answers. */
-export function runForagerBlock(id: ForagerId, seed: number, plan: BlockPlan, clearing: Clearing, damage: Damage = {}, separation?: Separation): ForagerBlock {
+/** Run one forager over the student's week (the same plan and clearing; its own digs). */
+export function runForagerWeek(id: ForagerId, seed: number, plan: WeekPlan, clearing: Clearing, damage: Damage = {}, separation?: Separation): ForagerWeek {
   const slow = trainedSlowLearner(seed)
   const f = makeForager(id, seed, clearing, slow, damage, separation)
-  const run = runBlockScripted(plan, clearing, seed, f.policy, {}, (r, sim) => answerMap(r, f.mapAnswers(sim)))
+  const run = runWeekScripted(plan, clearing, seed, f.policy, {}, (_r, sim) => f.endNight(sim))
   slow.damage = { noise: 0 }
-  return { run, tallies: run.records.map(tallies), retrievals: f.retrievals, store: f.store }
+  return { run, tallies: run.records.map(tallies), when: run.records.map((r, i) => whenScore(r, run.states[i], clearing)), retrievals: f.retrievals, store: f.store }
 }
 
-/** The forager's confusion table over a block, from its own map answers. */
-export function foragerTable(b: ForagerBlock) {
-  return blockTable(b.run)
+export interface KindShare {
+  kind: PairKind
+  nights: number[]
+  decisions: number
+  errors: number
+  share: number | null
+  digDecisions: number
+  digErrors: number
+  digShare: number | null
+}
+
+/** A forager's share of when-errors after look-alike pairs and after different pairs, pooled over each kind's two nights (§8.7, §9.2). */
+export function foragerShares(w: ForagerWeek): Record<PairKind, KindShare> {
+  const out = {} as Record<PairKind, KindShare>
+  for (const kind of PAIR_KINDS) {
+    const nights = nightsOfKind(w.run.plan.order, kind)
+    const scores = nights.map((n) => w.when[n - 1]).filter(Boolean)
+    const sum = (f: (s: WhenScore) => number) => scores.reduce((a, s) => a + f(s), 0)
+    const decisions = sum((s) => s.decisions)
+    const errors = sum((s) => s.errors)
+    const digDecisions = sum((s) => s.digDecisions)
+    const digErrors = sum((s) => s.digErrors)
+    out[kind] = { kind, nights, decisions, errors, share: shareOf(errors, decisions), digDecisions, digErrors, digShare: shareOf(digErrors, digDecisions) }
+  }
+  return out
 }
 
 export type { Rng }

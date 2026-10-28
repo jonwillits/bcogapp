@@ -10,7 +10,9 @@ import type { Footprint } from '../../rodent/range'
  * out, digs at logs, eats what it finds, is called back to nurse partway
  * through, and at dawn walks back to the nest by itself. A log never shows whether
  * it has beetles until it is dug (§12, item 4): `full` is read by nothing
- * in the scene but the dig's outcome. The night's length is a measurement
+ * in the scene but the dig's outcome. The record notes which logs the body
+ * passed close by (`PASS_CLOSE_M`), which the scoring of when-decisions
+ * reads (`results.ts`), and the pauses the student took. The night's length is a measurement
  * (`NIGHT_S`, tuned in `tune.probe.ts` so that a scripted forager that
  * remembers perfectly empties about four of the seven loose-bark logs).
  *
@@ -31,8 +33,8 @@ import type { Footprint } from '../../rodent/range'
 export const NIGHT_S = 90
 /** The practice night is longer, for learning the keys (Jon, 2026-10-27: 55 s left time for about one beetle while learning). Nothing is scored on it. */
 export const PRACTICE_S = 120
-/** The walk home at dawn is given this long beyond the straight walk before the forager is set down at the nest. */
-export const RETURN_GRACE_S = 6
+/** The walk home at dawn is given this long beyond the straight walk, for the turn and for going round whatever is in the way, before the forager is set down at the nest. */
+export const RETURN_GRACE_S = 8
 /** The young call at this point in the night. */
 export const CALL_AT_S = NIGHT_S / 2
 export const DIG_S = 3
@@ -40,6 +42,12 @@ export const EAT_S = 3
 export const NURSE_S = 8
 /** The path is sampled this often for the replay, seconds. */
 export const PATH_SAMPLE_S = 0.25
+/** A log is *passed close by* when the body comes within this distance of its center at any time in the night (spec §8.7: about 2 m). */
+export const PASS_CLOSE_M = 2.0
+/** On the walk home, a body held by something in the way walks to the nearer end of it, this far past the end, before turning for the nest again. */
+export const DETOUR_MARGIN_M = 0.5
+/** The walk home ends when the body is this close to the nest: at the root's feet, from which it is set down in the hole (the feet would otherwise hold it just outside the rim). */
+export const HOME_REACH_M = 0.8
 /** The energy bar: drains over the night, rises with each meal; never ends the night. */
 export const ENERGY_DRAIN_PER_S = 0.7 / NIGHT_S
 export const ENERGY_PER_MEAL = 0.2
@@ -69,8 +77,12 @@ export interface NightRecord {
   fullAtStart: boolean[]
   /** Logs emptied tonight. */
   emptiedTonight: boolean[]
-  /** Logs full tonight that were emptied two nights ago and were not dug tonight: the error of misremembering when. */
+  /** Logs the body came within PASS_CLOSE_M of at some time in the night. */
+  passedClose: boolean[]
+  /** Full logs emptied two nights ago, passed close by and never dug tonight: the error of misremembering when (§8.7). */
   passedOverRefilled: number
+  /** The pauses the student took in this night: how many, and how long in all, seconds (the scene records them; the sim does not run while paused). */
+  pauses: { count: number; seconds: number }
   /** When the young called and when nursing ended. */
   calledAt: number
   nursedAt: number | null
@@ -113,6 +125,8 @@ export class NightSim {
   nursed = false
   /** Seconds the walk home may still take before the forager is set down at the nest. */
   private returnLeft = 0
+  /** On the walk home: the point past the end of whatever is in the way that the body is walking to, and how long it has left to get there. */
+  private detour: { x: number; y: number; left: number } | null = null
   private readonly prints: Footprint[]
   private lastSample = -Infinity
 
@@ -141,12 +155,25 @@ export class NightSim {
       beetles: 0,
       fullAtStart: [...this.full],
       emptiedTonight: clearing.logs.map(() => false),
+      passedClose: clearing.logs.map(() => false),
       passedOverRefilled: 0,
+      pauses: { count: 0, seconds: 0 },
       calledAt: this.callAt,
       nursedAt: null,
       seconds: this.seconds,
     }
     this.sample()
+    this.notePassing()
+  }
+
+  /** The scene records a pause: the sim did not run for `seconds`. */
+  recordPause(seconds: number, newPause: boolean): void {
+    if (newPause) this.record.pauses.count++
+    this.record.pauses.seconds += seconds
+  }
+
+  private notePassing(): void {
+    for (const l of this.clearing.logs) if (!this.record.passedClose[l.id] && Math.hypot(this.body.x - l.x, this.body.y - l.y) <= PASS_CLOSE_M) this.record.passedClose[l.id] = true
   }
 
   get done(): boolean {
@@ -168,8 +195,12 @@ export class NightSim {
     return logInReach(this.clearing, this.body.x, this.body.y)
   }
 
+  get homeDistance(): number {
+    return Math.hypot(this.body.x - this.clearing.nest.x, this.body.y - this.clearing.nest.y)
+  }
+
   get atNest(): boolean {
-    return Math.hypot(this.body.x - this.clearing.nest.x, this.body.y - this.clearing.nest.y) <= CLEARING.nestReach
+    return this.homeDistance <= CLEARING.nestReach
   }
 
   private sample(): void {
@@ -193,6 +224,8 @@ export class NightSim {
       case 'called': {
         this.move(dt, cmd)
         if (this.phase === 'called' && this.atNest) {
+          // Home to nurse: the body is set in the middle of the young (Jon, 2026-10-27: nursing with the animal at the rim looked wrong).
+          this.body.place({ x: this.clearing.nest.x, y: this.clearing.nest.y, heading: this.body.heading })
           this.phase = 'nursing'
           this.timer = NURSE_S
         } else if (this.phase === 'foraging' && cmd.dig) {
@@ -226,7 +259,7 @@ export class NightSim {
       case 'returning': {
         this.walkHome(dt)
         this.returnLeft -= dt
-        if (this.atNest || this.returnLeft <= 0) this.dawn()
+        if (this.atNest || this.homeDistance <= HOME_REACH_M || this.returnLeft <= 0) this.dawn()
         break
       }
     }
@@ -242,9 +275,21 @@ export class NightSim {
     this.returnLeft = d / this.body.loco.speed + RETURN_GRACE_S
   }
 
-  /** One step of the walk home: turn toward the nest at the turn rate (the last few degrees in one go), and walk once nearly facing it. */
+  /**
+   * One step of the walk home: turn toward the nest at the turn rate (the
+   * last few degrees in one go), and walk once nearly facing it. A body
+   * held by something in the way (a log between it and the nest; Jon,
+   * 2026-10-27: *if I happen to be behind the big log when the auto-go-home
+   * begins, I can get stuck*) walks to the nearer end of the nearest
+   * footprint, a little past it, then turns for the nest again.
+   */
   private walkHome(dt: number): void {
-    const want = Math.atan2(this.clearing.nest.y - this.body.y, this.clearing.nest.x - this.body.x)
+    let want = Math.atan2(this.clearing.nest.y - this.body.y, this.clearing.nest.x - this.body.x)
+    if (this.detour) {
+      this.detour.left -= dt
+      if (this.detour.left <= 0 || Math.hypot(this.detour.x - this.body.x, this.detour.y - this.body.y) < 0.15) this.detour = null
+      else want = Math.atan2(this.detour.y - this.body.y, this.detour.x - this.body.x)
+    }
     let diff = want - this.body.heading
     while (diff > Math.PI) diff -= 2 * Math.PI
     while (diff < -Math.PI) diff += 2 * Math.PI
@@ -253,7 +298,46 @@ export class NightSim {
       this.body.place({ x: this.body.x, y: this.body.y, heading: want })
       turn = 0
     }
-    this.move(dt, { forward: Math.abs(diff) < 0.6 ? 1 : 0, turn })
+    const forward = Math.abs(diff) < 0.6 ? 1 : 0
+    const home0 = Math.hypot(this.clearing.nest.x - this.body.x, this.clearing.nest.y - this.body.y)
+    this.move(dt, { forward, turn })
+    const home1 = Math.hypot(this.clearing.nest.x - this.body.x, this.clearing.nest.y - this.body.y)
+    // Held, or sliding along something without getting nearer home: go round it.
+    if (forward && !this.detour && home0 - home1 < 0.3 * this.body.loco.speed * dt) this.detour = this.wayRound()
+  }
+
+  /** The point to walk to round the nearest footprint: past its nearer end, DETOUR_MARGIN_M beyond the end's reach. */
+  private wayRound(): { x: number; y: number; left: number } | null {
+    let best: Footprint | null = null
+    let bestD = Infinity
+    for (const f of this.prints) {
+      const d = segmentDistance(f, this.body.x, this.body.y)
+      if (d < bestD) {
+        bestD = d
+        best = f
+      }
+    }
+    if (!best) return null
+    const vx = best.bx - best.ax
+    const vy = best.by - best.ay
+    const L = Math.hypot(vx, vy)
+    const reach = best.r + this.body.loco.radius + DETOUR_MARGIN_M
+    let x: number
+    let y: number
+    if (L < 1e-6) {
+      // A round footprint: step to its side, square to the line home.
+      const home = Math.atan2(this.clearing.nest.y - this.body.y, this.clearing.nest.x - this.body.x)
+      x = best.ax + Math.cos(home + Math.PI / 2) * reach
+      y = best.ay + Math.sin(home + Math.PI / 2) * reach
+    } else {
+      const t = ((this.body.x - best.ax) * vx + (this.body.y - best.ay) * vy) / (L * L)
+      const sign = t < 0.5 ? -1 : 1
+      const ex = sign < 0 ? best.ax : best.bx
+      const ey = sign < 0 ? best.ay : best.by
+      x = ex + (sign * vx * reach) / L
+      y = ey + (sign * vy * reach) / L
+    }
+    return { x, y, left: Math.hypot(x - this.body.x, y - this.body.y) / this.body.loco.speed + 1.5 }
   }
 
   private move(dt: number, cmd: Command): void {
@@ -268,6 +352,7 @@ export class NightSim {
       this.body.x = this.clearing.nest.x + (dx * CLEARING.bound) / r
       this.body.y = this.clearing.nest.y + (dy * CLEARING.bound) / r
     }
+    this.notePassing()
   }
 
   private startDig(l: Log): void {
@@ -306,6 +391,7 @@ export class NightSim {
   /** Place the body (the scripted foragers walk perfectly; the frame loop never calls this). */
   place(x: number, y: number, heading: number): void {
     this.body.place({ x, y, heading })
+    this.notePassing()
   }
 
   /** Start a dig at a log the scripted forager stands at. */
@@ -322,7 +408,7 @@ export class NightSim {
     let passed = 0
     for (const l of this.clearing.logs) {
       if (l.kind !== 'loose') continue
-      if (this.lastEmptied[l.id] === this.night - 2 && this.record.fullAtStart[l.id] && this.dugTonight[l.id] === 0) passed++
+      if (this.lastEmptied[l.id] === this.night - 2 && this.record.fullAtStart[l.id] && this.dugTonight[l.id] === 0 && this.record.passedClose[l.id]) passed++
     }
     this.record.passedOverRefilled = passed
     if (!this.atNest) this.body.place({ x: this.clearing.nest.x, y: this.clearing.nest.y, heading: this.body.heading })
@@ -378,7 +464,7 @@ export const TALLY_LABELS = {
   beetles: 'Beetles eaten',
   digsAtFull: 'Digs at full logs',
   digsAtEmptiedLastNight: 'Digs at logs emptied last night',
-  passedOverRefilled: 'Full logs passed over, emptied two nights ago',
+  passedOverRefilled: 'Full logs passed close by, emptied two nights ago',
   repeatsBeforeCall: 'Repeat digs tonight, before the call',
   repeatsAfterCall: 'Repeat digs tonight, after the call',
   digsAtSmooth: 'Digs at smooth logs',
@@ -395,4 +481,13 @@ export function tallyLines(t: NightTallies, width = 46): string[] {
     row(TALLY_LABELS.repeatsAfterCall, t.repeatsAfterCall),
     row(TALLY_LABELS.digsAtSmooth, t.digsAtSmooth),
   ]
+}
+
+/** The distance from a point to a footprint's segment, less its radius. */
+function segmentDistance(f: Footprint, x: number, y: number): number {
+  const vx = f.bx - f.ax
+  const vy = f.by - f.ay
+  const L2 = vx * vx + vy * vy
+  const t = L2 > 0 ? Math.max(0, Math.min(1, ((x - f.ax) * vx + (y - f.ay) * vy) / L2)) : 0
+  return Math.hypot(x - (f.ax + t * vx), y - (f.ay + t * vy)) - f.r
 }

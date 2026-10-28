@@ -1,99 +1,108 @@
 import { describe, it, expect } from 'vitest'
 import { makeRng } from '../../random'
-import { planFor } from '../logs/block'
+import { planFor } from '../logs/week'
 import { featureVector } from '../logs/features'
 import { mean } from '../../bilaterian/measure'
-import { FORAGERS, HAS_BEETLES, foragerTable, runForagerBlock, trainedSlowLearner, type ForagerId } from './foragers'
+import { FORAGERS, HAS_BEETLES, foragerShares, runForagerWeek, trainedSlowLearner, type ForagerId } from './foragers'
 import { SEPARATIONS, SeparationStage, FastStore, cosine, driftContext, freshContext, nightInput, CONTEXT_DIMS } from './store'
 import { SlowLearner, SEASON_PASSES, differentiation, newPatterns, oldPatterns, trainInterleaved } from './slow'
 import { THINGS, ALL_THINGS, PROPERTIES, RELATIONS, targetsFor, GROUPS } from './world'
 import { TendencyUnit } from './tendency'
 
 /**
- * The targets of spec §9.2 to §9.5, over twenty seeds on synthetic nights
- * (each forager running the plan's six nights for the seed). The bands are
- * the measured values of `measure.probe.ts`, recorded in the as-built
- * notes; where a target came out different from the spec, the test holds
- * what is true and the notes say so.
+ * The targets of spec §9.2 to §9.5, over twenty seeds on synthetic weeks
+ * (each forager running the plan's six nights for the seed, in the week's
+ * clearing). The bands are the measured values of `measure.probe.ts`
+ * (2026-10-27, the week), recorded in the as-built notes §4.2 and §4.3;
+ * where a target came out different from the spec, the test holds what is
+ * true and the notes say so.
  */
 const SEEDS = Array.from({ length: 20 }, (_, i) => 1000 + i)
 
 function sums() {
-  const out: Record<ForagerId, { emptiedLast2: number[]; emptiedLast3: number[]; beetles: number[]; smooth: number[]; alike: number[]; distinct: number[] }> = {} as never
-  for (const f of FORAGERS) out[f.id] = { emptiedLast2: [], emptiedLast3: [], beetles: [], smooth: [], alike: [], distinct: [] }
+  const out: Record<ForagerId, { emptiedLast2: number[]; emptiedLater: number[]; beetles: number[]; smooth: number[]; alike: number[]; differ: number[] }> = {} as never
+  for (const f of FORAGERS) out[f.id] = { emptiedLast2: [], emptiedLater: [], beetles: [], smooth: [], alike: [], differ: [] }
   for (const seed of SEEDS) {
     const { plan, clearings } = planFor(seed)
-    for (const f of FORAGERS)
-      for (const block of plan.blocks) {
-        const b = runForagerBlock(f.id, seed, block, clearings[block.clearing])
-        out[f.id].emptiedLast2.push(b.tallies[1].digsAtEmptiedLastNight)
-        out[f.id].emptiedLast3.push(b.tallies[2].digsAtEmptiedLastNight)
-        out[f.id].beetles.push(b.tallies.reduce((a, t) => a + t.beetles, 0))
-        out[f.id].smooth.push(b.tallies.reduce((a, t) => a + t.digsAtSmooth, 0))
-        const t = foragerTable(b)
-        ;(block.kind === 'look-alike' ? out[f.id].alike : out[f.id].distinct).push(t.couldBeConfused ? t.confusions / t.couldBeConfused : 0)
-      }
+    for (const f of FORAGERS) {
+      const w = runForagerWeek(f.id, seed, plan, clearings.week)
+      out[f.id].emptiedLast2.push(w.tallies[1].digsAtEmptiedLastNight)
+      out[f.id].emptiedLater.push(mean(w.tallies.slice(2).map((t) => t.digsAtEmptiedLastNight)))
+      out[f.id].beetles.push(w.tallies.reduce((a, t) => a + t.beetles, 0))
+      out[f.id].smooth.push(w.tallies.reduce((a, t) => a + t.digsAtSmooth, 0))
+      const sh = foragerShares(w)
+      if (sh['after a look-alike pair'].share !== null) out[f.id].alike.push(sh['after a look-alike pair'].share!)
+      if (sh['after a different pair'].share !== null) out[f.id].differ.push(sh['after a different pair'].share!)
+    }
   }
   return out
 }
 
-describe('the four foragers on synthetic nights (§9.2), twenty seeds', () => {
+describe('the four foragers on synthetic weeks (§9.2), twenty seeds', () => {
   const r = sums()
-  it('Tendency only digs at logs emptied last night more than Usual only does on night 2, because the logs that just paid off pull it back; on night 3 the two are about level (measured, not the spec’s target)', () => {
+  it('Tendency only digs at logs emptied last night more than Usual only does, on night 2 and on the later nights, because the logs that just paid off pull it back', () => {
     expect(mean(r.tendency.emptiedLast2)).toBeGreaterThan(mean(r.usual.emptiedLast2))
-    expect(Math.abs(mean(r.tendency.emptiedLast3) - mean(r.usual.emptiedLast3))).toBeLessThan(0.5)
+    expect(mean(r.tendency.emptiedLater)).toBeGreaterThan(mean(r.usual.emptiedLater))
   })
-  it('Tonight too digs at them least, and takes the most beetles', () => {
+  it('Tonight too digs at them least, and takes the most beetles over the week', () => {
     for (const id of ['usual', 'tendency', 'blurred'] as ForagerId[]) {
-      expect(mean(r.tonight.emptiedLast2) + mean(r.tonight.emptiedLast3)).toBeLessThan(mean(r[id].emptiedLast2) + mean(r[id].emptiedLast3))
+      expect(mean(r.tonight.emptiedLast2) + mean(r.tonight.emptiedLater)).toBeLessThan(mean(r[id].emptiedLast2) + mean(r[id].emptiedLater))
       expect(mean(r.tonight.beetles)).toBeGreaterThanOrEqual(mean(r[id].beetles))
     }
+    // Measured: Tonight too 18.9 beetles a week, blurred 17.1, Usual only 15.4, Tendency only 11.0.
+    expect(mean(r.tonight.beetles)).toBeGreaterThan(17)
   })
-  it('Tonight too, nights blurred is worse on the look-alike block than on the distinct block', () => {
-    expect(mean(r.blurred.alike)).toBeGreaterThan(mean(r.blurred.distinct))
-    expect(mean(r.blurred.alike)).toBeGreaterThan(mean(r.tonight.alike))
+  it('Tonight too, nights blurred has a larger share of when-errors after a look-alike pair than after a different pair, and a larger one than Tonight too', () => {
+    // Measured 0.35 against 0.26; Tonight too 0.11 against 0.06.
+    expect(mean(r.blurred.alike)).toBeGreaterThan(mean(r.blurred.differ) + 0.04)
+    expect(mean(r.blurred.alike)).toBeGreaterThan(mean(r.tonight.alike) + 0.1)
+  })
+  it('the foragers with no store sit near the no-memory share after both kinds of pair, and Tendency only, pulled back to what paid off, is worst of all', () => {
+    // Measured: Usual only 0.50 / 0.45; Tendency only 0.90 / 0.83.
+    expect(Math.abs(mean(r.usual.alike) - mean(r.usual.differ))).toBeLessThan(0.12)
+    expect(mean(r.tendency.alike)).toBeGreaterThan(mean(r.usual.alike))
+    expect(mean(r.tendency.differ)).toBeGreaterThan(mean(r.usual.differ))
   })
   it('Tendency only digs at smooth logs, since nothing tells it the kinds; the others, with the slow learner intact, never do', () => {
     expect(mean(r.tendency.smooth)).toBeGreaterThan(1)
     for (const id of ['usual', 'tonight', 'blurred'] as ForagerId[]) expect(mean(r[id].smooth)).toBe(0)
   })
-  it('the same seed reproduces every forager’s nights exactly', () => {
+  it('the same seed reproduces every forager’s week exactly', () => {
     const { plan, clearings } = planFor(1003)
-    const once = JSON.stringify(runForagerBlock('blurred', 1003, plan.blocks[0], clearings[plan.blocks[0].clearing]).run.records)
-    expect(JSON.stringify(runForagerBlock('blurred', 1003, plan.blocks[0], clearings[plan.blocks[0].clearing]).run.records)).toBe(once)
+    const once = JSON.stringify(runForagerWeek('blurred', 1003, plan, clearings.week).run.records)
+    expect(JSON.stringify(runForagerWeek('blurred', 1003, plan, clearings.week).run.records)).toBe(once)
   })
 })
 
-describe('the store at three settings (§9.3), twenty seeds', () => {
-  const share: Record<string, { alike: number[]; distinct: number[]; emptiedLast: number[] }> = {}
+describe('the store at three settings over the week (§9.3), twenty seeds', () => {
+  const share: Record<string, { alike: number[]; differ: number[]; emptiedLast: number[] }> = {}
   for (const sep of SEPARATIONS) {
-    share[sep] = { alike: [], distinct: [], emptiedLast: [] }
+    share[sep] = { alike: [], differ: [], emptiedLast: [] }
     for (const seed of SEEDS) {
       const { plan, clearings } = planFor(seed)
-      for (const block of plan.blocks) {
-        const b = runForagerBlock('tonight', seed, block, clearings[block.clearing], {}, sep)
-        const t = foragerTable(b)
-        ;(block.kind === 'look-alike' ? share[sep].alike : share[sep].distinct).push(t.couldBeConfused ? t.confusions / t.couldBeConfused : 0)
-        share[sep].emptiedLast.push(b.tallies[1].digsAtEmptiedLastNight + b.tallies[2].digsAtEmptiedLastNight)
-      }
+      const w = runForagerWeek('tonight', seed, plan, clearings.week, {}, sep)
+      const sh = foragerShares(w)
+      if (sh['after a look-alike pair'].share !== null) share[sep].alike.push(sh['after a look-alike pair'].share!)
+      if (sh['after a different pair'].share !== null) share[sep].differ.push(sh['after a different pair'].share!)
+      share[sep].emptiedLast.push(w.tallies.slice(1).reduce((a, t) => a + t.digsAtEmptiedLastNight, 0))
     }
   }
-  it('confusions fall as separation rises, on both blocks', () => {
+  it('the share of when-errors falls as separation rises, after both kinds of pair (measured 0.33 / 0.27 / 0.11 after look-alike pairs, 0.24 / 0.07 / 0.06 after different pairs)', () => {
     expect(mean(share.weak.alike)).toBeGreaterThan(mean(share.medium.alike))
     expect(mean(share.medium.alike)).toBeGreaterThan(mean(share.strong.alike))
-    expect(mean(share.weak.distinct)).toBeGreaterThan(mean(share.medium.distinct))
-    expect(mean(share.medium.distinct)).toBeGreaterThanOrEqual(mean(share.strong.distinct))
+    expect(mean(share.weak.differ)).toBeGreaterThan(mean(share.medium.differ))
+    expect(mean(share.medium.differ)).toBeGreaterThanOrEqual(mean(share.strong.differ) - 0.02)
   })
-  it('and fall faster on the distinct block: by the medium setting the distinct block is nearly clean while the look-alike block is not', () => {
-    expect(mean(share.medium.distinct)).toBeLessThan(0.03)
-    expect(mean(share.medium.alike)).toBeGreaterThan(0.04)
-    expect(mean(share.weak.alike)).toBeGreaterThan(mean(share.weak.distinct))
+  it('and is lower after different pairs at every setting; by the medium setting the nights after different pairs are nearly clean while those after look-alike pairs are not', () => {
+    for (const sep of SEPARATIONS) expect(mean(share[sep].alike), sep).toBeGreaterThan(mean(share[sep].differ))
+    expect(mean(share.medium.differ)).toBeLessThan(0.12)
+    expect(mean(share.medium.alike)).toBeGreaterThan(0.15)
   })
   it('digs at logs emptied last night fall with separation too', () => {
     expect(mean(share.weak.emptiedLast)).toBeGreaterThan(mean(share.medium.emptiedLast))
     expect(mean(share.medium.emptiedLast)).toBeGreaterThan(mean(share.strong.emptiedLast))
   })
-  it('the codes: the stronger the separation, the less a night’s code resembles the night before it, and distinct nights resemble each other less than look-alike nights at every setting', () => {
+  it('the codes: the stronger the separation, the less a night’s code resembles the night before it, and two nights with different letters resemble each other less than two with the same letter at every setting', () => {
     const sims: Record<string, { alike: number[]; distinct: number[] }> = {}
     for (const sep of SEPARATIONS) {
       sims[sep] = { alike: [], distinct: [] }
@@ -101,12 +110,10 @@ describe('the store at three settings (§9.3), twenty seeds', () => {
         const rng = makeRng(seed)
         const stage = new SeparationStage(sep, rng.fork())
         const { plan } = planFor(seed)
-        const look = plan.blocks.find((b) => b.kind === 'look-alike')!
-        const dist = plan.blocks.find((b) => b.kind === 'distinct')!
         const c = freshContext(rng)
         const c2 = driftContext(c, rng)
-        sims[sep].alike.push(cosine(stage.encode(nightInput(featureVector(look.nights[0]), c)), stage.encode(nightInput(featureVector(look.nights[1]), c2))))
-        sims[sep].distinct.push(cosine(stage.encode(nightInput(featureVector(dist.nights[0]), c)), stage.encode(nightInput(featureVector(dist.nights[1]), c2))))
+        sims[sep].alike.push(cosine(stage.encode(nightInput(featureVector(plan.letters.A), c)), stage.encode(nightInput(featureVector(plan.letters.A), c2))))
+        sims[sep].distinct.push(cosine(stage.encode(nightInput(featureVector(plan.letters.A), c)), stage.encode(nightInput(featureVector(plan.letters.B), c2))))
       }
       expect(mean(sims[sep].alike)).toBeGreaterThan(mean(sims[sep].distinct))
     }
@@ -121,8 +128,8 @@ describe('the store at three settings (§9.3), twenty seeds', () => {
     expect(Math.hypot(...c2)).toBeCloseTo(1, 9)
     expect(c2.length).toBe(CONTEXT_DIMS)
     const { plan } = planFor(5)
-    const x1 = nightInput(featureVector(plan.blocks[0].nights[0]), c1)
-    const x2 = nightInput(featureVector(plan.blocks[0].nights[1]), c2)
+    const x1 = nightInput(featureVector(plan.nights[0]), c1)
+    const x2 = nightInput(featureVector(plan.nights[1]), c2)
     store.store(x1, [1, 0, 0], 'night 1')
     store.store(x2, [0, 1, 0], 'night 2')
     const r = store.retrieve(x2)
@@ -235,31 +242,29 @@ describe('the two kinds of damage on Tonight too (§9.5), twenty seeds', () => {
   const rows: Record<string, { emptiedLast: number[]; smooth: number[] }> = { intact: { emptiedLast: [], smooth: [] }, noStore: { emptiedLast: [], smooth: [] }, noisy: { emptiedLast: [], smooth: [] }, usual: { emptiedLast: [], smooth: [] } }
   for (const seed of SEEDS) {
     const { plan, clearings } = planFor(seed)
-    for (const block of plan.blocks) {
-      const c = clearings[block.clearing]
-      const add = (k: string, b: ReturnType<typeof runForagerBlock>) => {
-        rows[k].emptiedLast.push(b.tallies[1].digsAtEmptiedLastNight + b.tallies[2].digsAtEmptiedLastNight)
-        rows[k].smooth.push(b.tallies.reduce((a, t) => a + t.digsAtSmooth, 0))
-      }
-      add('intact', runForagerBlock('tonight', seed, block, c))
-      add('noStore', runForagerBlock('tonight', seed, block, c, { noStore: true }))
-      add('noisy', runForagerBlock('tonight', seed, block, c, { slowNoise: 1 }))
-      add('usual', runForagerBlock('usual', seed, block, c))
+    const c = clearings.week
+    const add = (k: string, w: ReturnType<typeof runForagerWeek>) => {
+      rows[k].emptiedLast.push(w.tallies.slice(1).reduce((a, t) => a + t.digsAtEmptiedLastNight, 0))
+      rows[k].smooth.push(w.tallies.reduce((a, t) => a + t.digsAtSmooth, 0))
     }
+    add('intact', runForagerWeek('tonight', seed, plan, c))
+    add('noStore', runForagerWeek('tonight', seed, plan, c, { noStore: true }))
+    add('noisy', runForagerWeek('tonight', seed, plan, c, { slowNoise: 1 }))
+    add('usual', runForagerWeek('usual', seed, plan, c))
   }
-  it('remove the fast store: digs at logs emptied last night rise to Usual only’s level, and digs at smooth logs stay at zero', () => {
-    expect(mean(rows.noStore.emptiedLast)).toBeGreaterThan(1.5)
-    expect(Math.abs(mean(rows.noStore.emptiedLast) - mean(rows.usual.emptiedLast))).toBeLessThan(1)
+  it('remove the fast store: digs at logs emptied last night over the week rise to Usual only’s level (measured 7.0 against 6.3), and digs at smooth logs stay at zero', () => {
+    expect(mean(rows.noStore.emptiedLast)).toBeGreaterThan(4)
+    expect(Math.abs(mean(rows.noStore.emptiedLast) - mean(rows.usual.emptiedLast))).toBeLessThan(1.5)
     expect(mean(rows.noStore.smooth)).toBe(0)
   })
-  it('damage the slow learner: the forager starts digging at smooth logs, and its digs at logs emptied last night stay low', () => {
-    expect(mean(rows.noisy.smooth)).toBeGreaterThan(1.5)
-    expect(mean(rows.noisy.emptiedLast)).toBeLessThan(0.5)
+  it('damage the slow learner: the forager starts digging at smooth logs (measured 5.7 a week at noise 1), and its digs at logs emptied last night stay low (0.1)', () => {
+    expect(mean(rows.noisy.smooth)).toBeGreaterThan(3)
+    expect(mean(rows.noisy.emptiedLast)).toBeLessThan(0.8)
     expect(mean(rows.intact.smooth)).toBe(0)
   })
   it('each lesion raises one error and not the other: a double dissociation', () => {
-    expect(mean(rows.noStore.emptiedLast)).toBeGreaterThan(mean(rows.noisy.emptiedLast) + 1)
-    expect(mean(rows.noisy.smooth)).toBeGreaterThan(mean(rows.noStore.smooth) + 1)
+    expect(mean(rows.noStore.emptiedLast)).toBeGreaterThan(mean(rows.noisy.emptiedLast) + 3)
+    expect(mean(rows.noisy.smooth)).toBeGreaterThan(mean(rows.noStore.smooth) + 3)
   })
 })
 

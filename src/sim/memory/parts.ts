@@ -22,8 +22,7 @@ export type UnitId =
   | 'p2-second'
   | 'p3-room'
   | 'p4-practice'
-  | 'p4-block-1'
-  | 'p4-block-2'
+  | 'p4-week'
 
 export const UNIT_IDS: UnitId[] = [
   ...Array.from({ length: PART1_LISTS }, (_, i) => `p1-list-${i}` as const),
@@ -32,8 +31,7 @@ export const UNIT_IDS: UnitId[] = [
   'p2-second',
   'p3-room',
   'p4-practice',
-  'p4-block-1',
-  'p4-block-2',
+  'p4-week',
 ]
 
 export function partOf(unit: UnitId): Part {
@@ -60,5 +58,5 @@ export function reservesFor(unit: UnitId): number {
   if (unit.startsWith('p2')) return 2 // the set, then the third set
   if (unit === 'p3-room') return 2 // the arrangement, then the other arrangement
   if (unit === 'p4-practice') return 1 // the practice night again
-  return 2 // the block's clearing, then the reserve clearing
+  return 2 // the week's clearing, then the reserve clearing
 }
