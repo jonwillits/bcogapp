@@ -9,7 +9,6 @@ import { ANSWERS, ANSWER_LABEL, confusionTable, truths } from './question'
 import { planFor, runWeekScripted, startNight, newWeekRun, finishNight, nightRng, weekDone } from './week'
 import { resultLine, weekSummary, whenScore, type Part4WeekResult } from './results'
 import { NightSim } from './night'
-import { NEAR_LANDMARKS, footprint } from '../../rodent/range'
 import { mean } from '../../bilaterian/measure'
 
 const SEEDS20 = Array.from({ length: 20 }, (_, i) => 1000 + i)
@@ -83,22 +82,16 @@ describe('the clearing and the logs (§8.2; one clearing since 2026-10-28)', () 
         expect(k.stubs.length).toBeLessThanOrEqual(LOOK.maxStubs)
         expect(k.moss).toBeGreaterThanOrEqual(0)
         expect(k.moss).toBeLessThanOrEqual(1)
-        expect(Math.abs(k.tint)).toBeLessThanOrEqual(1)
-        expect(Object.keys(k).sort()).toEqual(['length', 'moss', 'radius', 'stubs', 'tint'])
+        expect(Object.keys(k).sort()).toEqual(['length', 'moss', 'radius', 'stubs'])
         for (let j = i + 1; j < c.logs.length; j++) expect(lookDistance(k, c.logs[j].look), `seed ${seed} logs ${i} ${j}`).toBeGreaterThanOrEqual(LOOK_MIN_DISTANCE - 1e-9)
         const f = logFootprint(c.logs[i])
         expect(Math.hypot(f.bx - f.ax, f.by - f.ay)).toBeCloseTo(k.length, 9)
       }
     }
   })
-  it('the clearing is out of sight of Lab 9’s nest and landmarks: more than 20 m from the origin, and no log within 20 m of a Lab 9 landmark', () => {
-    expect(Math.hypot(CLEARING_NEST.x, CLEARING_NEST.y)).toBeGreaterThan(20)
-    for (const seed of SEEDS20.slice(0, 5)) {
-      for (const l of makeClearing(seed).logs) for (const lm of NEAR_LANDMARKS) {
-        const f = footprint(lm)
-        expect(Math.hypot(l.x - f.ax, l.y - f.ay)).toBeGreaterThan(20 - CLEARING.maxRadius)
-      }
-    }
+  it('the clearing sits at the middle of the range’s ground, and the forager’s bound is beyond the farthest log', () => {
+    expect(CLEARING_NEST).toEqual({ x: 0, y: 0 })
+    expect(CLEARING.bound).toBeGreaterThan(CLEARING.maxRadius + LOOK.length[1])
   })
   it('the same seed gives the same clearing', () => {
     expect(JSON.stringify(makeClearing(42))).toBe(JSON.stringify(makeClearing(42)))

@@ -12,10 +12,11 @@ import { Content } from '../../m09_rat/ui'
  * lines carry that discipline (and `naming.test.ts` the string tests).
  */
 
-export type Sitting = 'one sitting' | 'leave any time'
+export type Sitting = 'one sitting' | 'one sitting, the week again' | 'leave any time'
 
 export const SITTING_LINES: Record<Sitting, string> = {
   'one sitting': 'Once you press “Begin”, finish this part in one sitting. If you leave partway, you will start this part again with new materials.',
+  'one sitting, the week again': 'Once you press “Begin”, finish this part in one sitting. If you leave partway, the week starts again from night 1 with every loose-bark log full.',
   'leave any time': 'You can leave and come back at any time.',
 }
 

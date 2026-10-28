@@ -6,7 +6,7 @@ import type { Pose } from '../../../sim/rodent/body'
 import { RangeView } from '../../m09_rat/RangeView'
 import { RatMesh, type RatAction } from '../../m09_rat/RatMesh'
 import { AnimalCamera, RANGE_SCALE, type View } from '../../m09_rat/AnimalCamera'
-import { BRANCH, GROUND_THING_OFFSET, NEST_ARCH, type Clearing, type ClearingLandmark, type Log } from '../../../sim/memory/logs/clearings'
+import { BRANCH, CLEARING, GROUND_THING_OFFSET, NEST_ARCH, type Clearing, type ClearingLandmark, type Log } from '../../../sim/memory/logs/clearings'
 import { MOONS, type NightFeatures } from '../../../sim/memory/logs/features'
 import type { NightSim } from '../../../sim/memory/logs/night'
 
@@ -23,32 +23,55 @@ import type { NightSim } from '../../../sim/memory/logs/night'
  * stubs, moss and shade, fixed for the week, nameable by nothing.
  */
 
-/** A base color shaded by a look's tint: −1 a quarter darker, +1 a quarter lighter. */
-function shaded(base: string, tint: number): string {
-  const c = new THREE.Color(base)
-  const k = tint * 0.25
-  if (k >= 0) c.lerp(new THREE.Color('#ffffff'), k)
-  else c.multiplyScalar(1 + k)
-  return `#${c.getHexString()}`
-}
-
-/** The fog's density (exp² fog, per meter) by weather. Eased on 2026-10-28 (fog 0.26, rain 0.17, clear 0.13 before): a student who sees nothing in the distance wanders until a log comes into view, so a log 8 m off shows faintly even in fog and plainly on a clear night. */
-export const FOG_DENSITY = { fog: 0.18, 'light rain': 0.14, clear: 0.11 } as const
-/** The practice night's fog: lighter than any scored night's, so the layout can be learned. */
-export const PRACTICE_FOG_DENSITY = 0.08
-/** The moon's share of the light, in MOONS' order (new, half, and the brightest moon). */
-export const MOON_LIGHT = [0.55, 0.8, 1.05] as const
+/**
+ * The fog's density (exp² fog, per meter) by weather, and the light. Jon,
+ * 2026-10-28, after his first week: *students need to be able to see all
+ * the objects in the deep distance; the goal should be remembering which
+ * ones they've been to before, not remembering where they are in the first
+ * place.* So every log in the clearing (11 m out at most) is in view from
+ * the nest on every night: through the thickest fog a log 11 m off keeps
+ * about half its own color, and on a clear night most of it; the weather
+ * and the moon still differ to the eye (the fog's glow and color, the
+ * moon in the sky, the light level), but never hide a log. Until then the
+ * densities were 0.26, 0.17 and 0.13 (0.18, 0.14, 0.11 for a day), and the
+ * range's own moonlight fog of 0.13 was in force under them (RangeView
+ * attached its fog after this view's), so the eased values never showed.
+ */
+export const FOG_DENSITY = { fog: 0.08, 'light rain': 0.06, clear: 0.04 } as const
+/** The practice night's fog: lighter than any scored night's. */
+export const PRACTICE_FOG_DENSITY = 0.03
+/** The moon's share of the light, in MOONS' order (new, half, and the brightest moon). A new moon is dark to the eye beside a full moon, but every log is still plain. */
+export const MOON_LIGHT = [0.85, 1.0, 1.15] as const
 /** The practice night's share of the light, above the brightest moon's (Jon, 2026-10-28). */
 export const PRACTICE_MOON_LIGHT = 1.3
 
-/** The moon's light level and the fog, by moon and weather; the practice night brighter and clearer than any scored night. */
+/** The light and the fog, by moon and weather; the practice night brighter and clearer than any scored night. The view supplies the whole atmosphere (RangeView's own lights and fog are off here). */
 function lighting(f: NightFeatures, dawn: number, practice = false): { hemi: number; sun: number; fog: number; fogColor: string; sky: string } {
-  // A new moon is the darkest night, but never so dark that a log cannot be found: the floor is a little under Lab 9's moonlight.
   const moon = practice ? PRACTICE_MOON_LIGHT : MOON_LIGHT[MOONS.indexOf(f.moon)]
   const fog = practice ? PRACTICE_FOG_DENSITY : FOG_DENSITY[f.weather]
-  const fogColor = f.weather === 'fog' ? '#1a2030' : f.weather === 'light rain' ? '#0d1322' : '#0b1020'
+  const fogColor = f.weather === 'fog' ? '#232a3a' : f.weather === 'light rain' ? '#111827' : '#0b1020'
   const k = 1 - dawn
-  return { hemi: (0.3 + 0.35 * moon) * k + 1.2 * dawn, sun: (0.15 + 0.4 * moon) * k + 1.0 * dawn, fog: fog * k + 0.05 * dawn, fogColor: dawn > 0.5 ? '#6a7a9a' : fogColor, sky: dawn > 0.5 ? '#6a7a9a' : fogColor }
+  return { hemi: (0.75 + 0.6 * moon) * k + 1.8 * dawn, sun: (0.55 + 0.5 * moon) * k + 1.5 * dawn, fog: fog * k + 0.03 * dawn, fogColor: dawn > 0.5 ? '#6a7a9a' : fogColor, sky: dawn > 0.5 ? '#6a7a9a' : fogColor }
+}
+
+/** The clearing's edge: a ring of low undergrowth just beyond where the forager can go (`CLEARING.bound`), so the bound is seen and never felt as an unseen wall (Jon, 2026-10-28). Drawing only; the sim's bound is the clamp. */
+function ClearingEdge({ nest, lowDetail }: { nest: { x: number; y: number }; lowDetail: boolean }) {
+  const n = lowDetail ? 40 : 64
+  const r = CLEARING.bound + 0.8
+  return (
+    <group position={[nest.x, 0, -nest.y]}>
+      {Array.from({ length: n }, (_, i) => {
+        const a = (i / n) * Math.PI * 2
+        const h = 0.9 + 0.5 * Math.abs(Math.sin(i * 2.3))
+        return (
+          <mesh key={i} position={[Math.cos(a) * r, h / 2, Math.sin(a) * r]} rotation={[0, i * 0.7, 0]}>
+            <coneGeometry args={[1.1, h, 5]} />
+            <meshStandardMaterial color="#13201a" roughness={1} />
+          </mesh>
+        )
+      })}
+    </group>
+  )
 }
 
 function LogMesh({ l }: { l: Log }) {
@@ -63,7 +86,8 @@ function LogMesh({ l }: { l: Log }) {
     const rng = makeRng(1000 + l.id * 13 + Math.round(l.x * 10))
     return Array.from({ length: Math.round(10 * k.length) }, () => ({ t: rng.range(-0.45, 0.45) * k.length, a: rng.range(0, Math.PI * 2), s: rng.range(0.06, 0.13), tilt: rng.range(0.2, 0.7) }))
   }, [loose, l.id, l.x, k.length])
-  const bark = shaded(loose ? '#3e2f20' : '#8a7f6a', k.tint)
+  // One color a kind (Jon, 2026-10-28: a shade within the kind made the kinds hard to tell apart): dark for loose bark, pale for smooth.
+  const bark = loose ? '#3e2f20' : '#8a7f6a'
   // The world's (x, y) is three's (x, −z), so a log lying at `angle` in the world is turned by +angle about three's y: the same line `logFootprint` uses.
   // (Until 2026-10-27 the sign was wrong and the drawn log was the footprint's mirror image, so the body was stopped by a log that was not there and could not reach the one it saw.)
   return (
@@ -75,7 +99,7 @@ function LogMesh({ l }: { l: Log }) {
       {flakes.map((f, i) => (
         <mesh key={i} position={[f.t, cy + Math.sin(f.a) * r * 0.9, Math.cos(f.a) * r * 0.9]} rotation={[f.a, 0, f.tilt]}>
           <boxGeometry args={[f.s, 0.012, f.s * 0.7]} />
-          <meshStandardMaterial color={shaded('#2a1d12', k.tint)} roughness={1} />
+          <meshStandardMaterial color="#2a1d12" roughness={1} />
         </mesh>
       ))}
       {k.stubs.map((st, i) => (
@@ -96,7 +120,7 @@ function LogMesh({ l }: { l: Log }) {
       {!loose && (
         <mesh position={[k.length / 2, cy, 0]} rotation={[0, 0, Math.PI / 2]}>
           <circleGeometry args={[r * 0.98, 14]} />
-          <meshStandardMaterial color={shaded('#b9ad90', k.tint)} roughness={0.5} />
+          <meshStandardMaterial color="#b9ad90" roughness={0.5} />
         </mesh>
       )}
     </group>
@@ -374,7 +398,9 @@ export function LogsView({ clearing, features, sim, dawn, view, fov, lowDetail, 
       <fogExp2 ref={fogRef} attach="fog" args={[init.fogColor, init.fog]} />
       <hemisphereLight ref={hemi} args={['#2c3a6a', '#0a0806', init.hemi]} />
       <directionalLight ref={sun} position={[20, 40, -10]} intensity={init.sun} color="#b9c6ff" />
-      <RangeView light="moonlight" lowDetail={lowDetail} pose={pose} showNest={false} liveBeetle={beetle} clock={clock} />
+      {/* The range bare: its ground and clutter, none of Lab 9's landmarks or its stream bank (a log of Lab 9's was seen from the clearing and could not be reached, Jon, 2026-10-28), and none of its lights or fog. */}
+      <RangeView light="moonlight" lowDetail={lowDetail} pose={pose} showNest={false} bare atmosphere={false} liveBeetle={beetle} clock={clock} />
+      <ClearingEdge nest={clearing.nest} lowDetail={lowDetail} />
       <ClearingNest at={clearing.nest} />
       <NestYoung at={clearing.nest} nursing={() => sim()?.phase === 'nursing'} clock={clock} />
       {clearing.logs.map((l) => (

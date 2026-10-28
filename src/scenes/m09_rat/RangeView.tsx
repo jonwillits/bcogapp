@@ -233,6 +233,8 @@ export interface RangeViewProps {
   moved?: Map<string, { x: number; y: number }> | null
   /** The bare range (Part 1, Step 2): the ground and the sky, no landmarks, no nest, no stream bank. */
   bare?: boolean
+  /** The sky, the fog and the range's lights (default on). Off when the caller supplies its own, as Part 4's view does. */
+  atmosphere?: boolean
   beetle?: { x: number; y: number } | null
   /** A beetle whose place is read every frame (the closer). */
   liveBeetle?: () => { x: number; y: number } | null
@@ -240,16 +242,20 @@ export interface RangeViewProps {
   clock: () => number
 }
 
-export function RangeView({ light, lowDetail, pose, showNest, treeHidden, moved, bare, beetle, liveBeetle, patches, clock }: RangeViewProps) {
+export function RangeView({ light, lowDetail, pose, showNest, treeHidden, moved, bare, atmosphere = true, beetle, liveBeetle, patches, clock }: RangeViewProps) {
   // Fog: exp2, set so the near landmarks fade by about 10 m in moonlight and everything but the ground by 2 m in the dark.
   const density = light === 'dark' ? (lowDetail ? 1.0 : 0.9) : lowDetail ? 0.17 : 0.13
   const fogColor = light === 'dark' ? DARK_FOG : MOON_FOG
   return (
     <>
-      <color attach="background" args={[fogColor]} />
-      <fogExp2 attach="fog" args={[fogColor, density]} />
-      <hemisphereLight args={['#2c3a6a', '#0a0806', light === 'dark' ? 0.08 : 0.55]} />
-      <directionalLight position={[20, 40, -10]} intensity={light === 'dark' ? 0.02 : 0.45} color="#b9c6ff" />
+      {atmosphere && (
+        <>
+          <color attach="background" args={[fogColor]} />
+          <fogExp2 attach="fog" args={[fogColor, density]} />
+          <hemisphereLight args={['#2c3a6a', '#0a0806', light === 'dark' ? 0.08 : 0.55]} />
+          <directionalLight position={[20, 40, -10]} intensity={light === 'dark' ? 0.02 : 0.45} color="#b9c6ff" />
+        </>
+      )}
       <NearLight pose={pose} light={light} />
       <Ground lowDetail={lowDetail} />
       <Clutter lowDetail={lowDetail} />

@@ -35,8 +35,6 @@ export interface LogLook {
   stubs: { along: number; around: number; length: number }[]
   /** Moss cover, 0 (none) to 1 (most of the upper side). */
   moss: number
-  /** The bark's shade within its kind, −1 (darkest) to 1 (palest). */
-  tint: number
 }
 
 export const LOOK = {
@@ -46,13 +44,13 @@ export const LOOK = {
   stubLength: [0.18, 0.4] as const,
 } as const
 
-/** The smallest distance between two looks' descriptors in one clearing (each descriptor a unit square's edge; see `lookDescriptor`). */
-export const LOOK_MIN_DISTANCE = 0.75
+/** The smallest distance between two looks' descriptors (each descriptor a unit cube's edge; see `lookDescriptor`): 0.6 over four descriptors since 2026-10-28 (0.75 over five before; at 0.75 over four, ten looks could not be drawn for three seeds in ten, at 0.6 for none in three thousand). */
+export const LOOK_MIN_DISTANCE = 0.6
 
-/** A look as five numbers in 0 to 1: length, thickness, stubs, moss, shade. */
+/** A look as four numbers in 0 to 1: length, thickness, stubs, moss. The bark's shade was a fifth until 2026-10-28, when Jon found it made the kinds hard to tell apart: a kind's color is now one color. */
 export function lookDescriptor(k: LogLook): number[] {
   const u = (v: number, [a, b]: readonly [number, number]) => (v - a) / (b - a)
-  return [u(k.length, LOOK.length), u(k.radius, LOOK.radius), k.stubs.length / LOOK.maxStubs, k.moss, (k.tint + 1) / 2]
+  return [u(k.length, LOOK.length), u(k.radius, LOOK.radius), k.stubs.length / LOOK.maxStubs, k.moss]
 }
 
 export function lookDistance(a: LogLook, b: LogLook): number {
@@ -64,16 +62,16 @@ export function lookDistance(a: LogLook, b: LogLook): number {
 function drawLook(rng: Rng): LogLook {
   const n = rng.int(LOOK.maxStubs + 1)
   const stubs = Array.from({ length: n }, () => ({ along: rng.range(-0.42, 0.42), around: rng.range(0.4, Math.PI - 0.4), length: rng.range(LOOK.stubLength[0], LOOK.stubLength[1]) }))
-  return { length: rng.range(LOOK.length[0], LOOK.length[1]), radius: rng.range(LOOK.radius[0], LOOK.radius[1]), stubs, moss: rng.next() < 0.3 ? 0 : rng.range(0.15, 1), tint: rng.range(-1, 1) }
+  return { length: rng.range(LOOK.length[0], LOOK.length[1]), radius: rng.range(LOOK.radius[0], LOOK.radius[1]), stubs, moss: rng.next() < 0.3 ? 0 : rng.range(0.15, 1) }
 }
 
 /** Ten looks, every pair at least LOOK_MIN_DISTANCE apart: each new look is drawn until it clears the ones before it. */
-export function drawLooks(rng: Rng, n: number): LogLook[] {
+export function drawLooks(rng: Rng, n: number, minDistance = LOOK_MIN_DISTANCE): LogLook[] {
   const out: LogLook[] = []
   while (out.length < n) {
     let k = drawLook(rng)
-    for (let tries = 0; tries < 400 && out.some((o) => lookDistance(o, k) < LOOK_MIN_DISTANCE); tries++) k = drawLook(rng)
-    if (out.some((o) => lookDistance(o, k) < LOOK_MIN_DISTANCE)) throw new Error('could not draw a distinct look')
+    for (let tries = 0; tries < 400 && out.some((o) => lookDistance(o, k) < minDistance); tries++) k = drawLook(rng)
+    if (out.some((o) => lookDistance(o, k) < minDistance)) throw new Error('could not draw a distinct look')
     out.push(k)
   }
   return out
@@ -163,8 +161,8 @@ export function branchFootprint(nest: { x: number; y: number }): Footprint {
   return { ax: cx - hx, ay: cy - hy, bx: cx + hx, by: cy + hy, r: BRANCH.radius }
 }
 
-/** Where the clearing sits in the range: 24 m or so from Lab 9's nest at the origin, more than two moonlit view distances, so Lab 9's landmarks are out of sight. */
-export const CLEARING_NEST = { x: 24, y: 10 } as const
+/** Where the clearing sits: at the middle of the range's ground, since 2026-10-28 (at (24, 10) before, clear of Lab 9's landmarks, which Part 4 no longer draws; the view's fog is now thin enough that the ground's edge would show from there). */
+export const CLEARING_NEST = { x: 0, y: 0 } as const
 
 interface LocalGeometry {
   logs: { x: number; y: number; kind: LogKind; angle: number; look: LogLook }[]
@@ -262,10 +260,8 @@ function place(g: LocalGeometry, nest: { x: number; y: number }): Clearing {
 
 /** The clearing from the seed. */
 export function makeClearing(seed: number): Clearing {
-  const rng = makeRng(seed ^ 0x10c5)
-  // The first fork drew the practice clearing until 2026-10-28; it is still taken so that every seed's clearing, and every number measured in it, is as it was.
-  rng.fork()
-  return place(drawGeometry(rng.fork()), CLEARING_NEST)
+  // Every seed's geometry changed on 2026-10-28 with the looks (the shade left the look, so the draws that keep looks apart fall differently); the probes were rerun (notes §4).
+  return place(drawGeometry(makeRng(seed ^ 0x10c5).fork()), CLEARING_NEST)
 }
 
 /** The footprints that stop the body in the clearing: its logs, its landmarks and the feet of the root over its nest. The night adds the fallen branch when it has one. */

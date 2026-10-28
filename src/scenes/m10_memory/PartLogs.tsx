@@ -26,11 +26,12 @@ import { registerResults } from './Part0'
 
 export const LOGS_INTRO = {
   title: PART_TITLES.logs,
+  // Jon's wording, 2026-10-28 (his feedback on the first walk of the week); the two rules keep the spec's words.
   willDo: [
-    'You are the small mammal of Lab 9, back in its range at night. Out from your nest lie ten logs: seven with loose bark and three that are smooth. Each log looks different from every other: longer or shorter, thicker or thinner, with branch stubs or without, mossy or bare, darker or paler. You will walk to a log, dig to see what is under it, and eat what you find.',
-    `A dig takes about ${DIG_S} seconds and shows whether beetles are there; eating them takes about ${EAT_S} more. A night lasts ${NIGHT_S} seconds; a timer over the view counts it down. At dawn the animal walks back to the nest by itself.`,
-    `Partway through each night the young in the nest call. Digging stops until you have gone back to the nest and nursed them, which takes about ${NURSE_S} seconds and happens by itself once you are there. Then the night goes on.`,
-    `First a practice night in the clearing, which you may redo; it is longer, about ${PRACTICE_S} seconds, for learning the keys and where the logs lie. Then one week of six nights in the same clearing, with every loose-bark log full again on night 1. Some nights will look just like the night before, and some will not. A fixed line beside the view repeats the two rules below.`,
+    'You are the small mammal of Lab 9, back in its range at night. Out from your nest there are ten logs. Seven with loose bark, and three that are smooth. Each log looks different from every other: some are longer or shorter, thicker or thinner, with branch stubs or without, mossy or bare. You will walk to a log, dig to see what is under it, and eat what you find.',
+    `A dig takes about ${DIG_S} seconds, and shows whether beetles are there. Eating them takes about ${EAT_S} seconds more. A night lasts ${NIGHT_S} seconds. A timer over the view counts it down. At dawn, the animal automatically walks back to the nest by itself.`,
+    `Partway through each night, your young in the nest will call. You will be unable to dig, and you must go back to the nest and nurse them. This takes about ${NURSE_S} seconds, and happens by itself once you are there. Then you can go back out to find more food.`,
+    `First, you have a practice night in the clearing, which you may redo. It is longer, about ${PRACTICE_S} seconds. You can use it to learn the keys, where the logs are, and how they are different. Then you will experience six nights in the same clearing. Every loose-bark log starts full of beetles on night 1. Some nights will look just like the night before in terms of things like weather, moonlight, and sounds. Some will be different. A fixed line beside the view repeats the two rules about the logs and food, so you can remember:`,
     '- ' + KIND_RULE,
     '- ' + REFILL_RULE,
   ],
@@ -46,7 +47,10 @@ export const LOGS_INTRO = {
 
 export const PRACTICE_INTRO = {
   title: 'The practice night',
-  willDo: [`One night in the clearing where the week will run: the same nest, logs and landmarks. Nothing is scored, and this night does not count toward the week: every loose-bark log is full again on night 1 whatever you empty now. Use it to learn the keys, the dig, the young’s call, the dawn, and where the logs lie. This night is longer than the others, about ${PRACTICE_S} seconds; the scored nights are ${NIGHT_S}.`, 'You may redo the practice night as often as you like.'],
+  willDo: [
+    `You will have one night to practice in the same clearing where you will be tested later. The same nest, logs and landmarks. Nothing is scored, and this night does not count toward the week. Every loose-bark log is full again on night 1 whatever you eat now. Use it to learn the keys, the dig, the young’s call, the dawn, and where the logs lie. This night is longer than the others, about ${PRACTICE_S} seconds; the scored nights are ${NIGHT_S}.`,
+    'You may redo the practice night as often as you like until you are ready to begin.',
+  ],
   minutes: 3,
 }
 
@@ -81,7 +85,7 @@ function Left({ ctx }: { ctx: PartContext<LogsStore> }) {
     }
     if (!s.sim.called) calledRef.current = false
   }
-  const restartedHere = s.progress.materialsSlot(WEEK_UNIT) > 0
+  const restartedHere = s.progress.restarts(WEEK_UNIT) > 0
   return (
     <>
       {ctx.header}
@@ -133,10 +137,10 @@ function Left({ ctx }: { ctx: PartContext<LogsStore> }) {
 
 function Stage({ ctx }: { ctx: PartContext<LogsStore> }) {
   const s = useStore(ctx.store)
-  if (s.state === 'intro') return <InstructionScreen {...LOGS_INTRO} sitting="one sitting" onBegin={() => s.begin()} />
+  if (s.state === 'intro') return <InstructionScreen {...LOGS_INTRO} sitting="one sitting, the week again" onBegin={() => s.begin()} />
   if (s.state === 'practice-intro') return <InstructionScreen {...PRACTICE_INTRO} sitting="leave any time" onBegin={() => s.beginPractice()} ready="Nothing is needed." />
   if (s.state === 'predict') return <Predictions s={s} />
-  if (s.state === 'week-intro') return <InstructionScreen {...weekIntro(s.progress.materialsSlot(WEEK_UNIT) > 0)} sitting="one sitting" onBegin={() => s.beginWeek()} ready="Nothing is needed." />
+  if (s.state === 'week-intro') return <InstructionScreen {...weekIntro(s.progress.restarts(WEEK_UNIT) > 0)} sitting="one sitting, the week again" onBegin={() => s.beginWeek()} ready="Nothing is needed." />
   if (s.state === 'between') {
     return (
       <StagePanel testId="between">
@@ -191,7 +195,7 @@ function Predictions({ s }: { s: LogsStore }) {
   return (
     <StagePanel testId="predict">
       <div style={{ fontSize: 14, fontWeight: 600 }}>Before the week: two predictions</div>
-      <Note>Some of the six nights will look just like the night before, and some will not. On night 3 and after, foraging well depends on telling last night from the night before it: a log you emptied last night is empty, and a log you emptied two nights ago is full again.</Note>
+      <Note>Some of the six nights will be just like the night before, and some will not, in terms of weather, brightness, fog, sounds. On night 3 and after, foraging well will depend on telling last night from the night before it. A log where you ate all the beetles the last night will be empty, and a log you emptied two nights ago will be full again.</Note>
       <GroupLabel>1. Nights that follow two look-alike nights</GroupLabel>
       <Note>{PAIR_QUESTION}</Note>
       <Choice value={s.chosen.pairs} options={PAIR_PREDICTIONS.map((p) => ({ id: p, label: p }))} onChange={(p) => s.choosePairs(p as PairPrediction)} disabledIds={s.committed.pairs ? PAIR_PREDICTIONS.filter((p) => p !== s.committed.pairs) : []} />

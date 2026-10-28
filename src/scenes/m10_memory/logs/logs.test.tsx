@@ -5,7 +5,7 @@ import type { RawStorage } from '../../../sim/memory/progress/storage'
 import { makeRng } from '../../../sim/random'
 import { CLEARING } from '../../../sim/memory/logs/clearings'
 import { WEEK_NIGHTS } from '../../../sim/memory/logs/features'
-import { NIGHT_S, PRACTICE_S } from '../../../sim/memory/logs/night'
+import { NIGHT_S, PRACTICE_S, type NightSim } from '../../../sim/memory/logs/night'
 import { LogsStore, NOTICE_S } from './logsStore'
 import { FOG_DENSITY, MOON_LIGHT, PRACTICE_FOG_DENSITY, PRACTICE_MOON_LIGHT } from './LogsView'
 import { logs, LOGS_INTRO, PRACTICE_INTRO, weekIntro } from '../PartLogs'
@@ -29,6 +29,12 @@ function memory(): RawStorage & { raw: string | null } {
 
 function ctxFor(store: LogsStore, progress: ProgressStore): PartContext<LogsStore> {
   return { seed: store.seed, progress, store, view: 'eye', fov: 75, lowDetail: false, anim: makeRng(1), clock: () => 0, header: null, openTab: () => {} }
+}
+
+/** Stand the body beside a log, off its side (never on its footprint), within digging reach. */
+function standBy(sim: NightSim, l: { x: number; y: number; angle: number }) {
+  const off = CLEARING.reach - 0.3
+  sim.place(l.x + off * Math.cos(l.angle + Math.PI / 2), l.y + off * Math.sin(l.angle + Math.PI / 2), 0)
 }
 
 /** Drive a night to dawn by digging at the chosen loose-bark log each time, by placing the body (a scripted student). */
@@ -55,8 +61,7 @@ function playNight(s: LogsStore, digger: (ids: number[]) => number | null) {
       s.tick(0.05, { forward: 0, turn: 0, dig: false })
       continue
     }
-    const l = sim.clearing.logs[want]
-    sim.place(l.x + CLEARING.reach - 0.3, l.y, 0)
+    standBy(sim, sim.clearing.logs[want])
     s.tick(0.05, { forward: 0, turn: 0, dig: true })
   }
 }
@@ -141,7 +146,8 @@ describe('Part 4: commit, then reveal', () => {
     expect(m).toMatch(/Tonight: .*moon/)
     s.beginNight()
     expect(s.state).toBe('night')
-    for (let k = 0; k < 100; k++) s.tick(0.05, { forward: 1, turn: 0, dig: false })
+    // The fade and a moment of walking: still well short of any log, so the large line is the plain *Foraging*.
+    for (let k = 0; k < 30; k++) s.tick(0.05, { forward: 1, turn: 0, dig: false })
     m = render()
     expect(m).toMatch(/data-lines="night-status"/)
     expect(m).toMatch(/data-night-label[^>]*>Night 1 of 6</)
@@ -172,7 +178,7 @@ describe('Part 4: commit, then reveal', () => {
     const sim = s.sim!
     const phase = () => sim.phase as string
     const loose = sim.clearing.logs.find((l) => l.kind === 'loose')!
-    sim.place(loose.x + CLEARING.reach - 0.3, loose.y, 0)
+    standBy(sim, loose)
     expect(render()).toMatch(/data-night-banner="act"[^>]*>At a log/)
     s.tick(0.05, { forward: 0, turn: 0, dig: true })
     expect(render()).toMatch(/data-night-banner="act"[^>]*>Digging</)
@@ -325,13 +331,19 @@ describe('Part 4: units and reserve materials (§4.3)', () => {
     expect(s.state).toBe('practice-intro')
   })
 
-  it('the practice clearing is lit and cleared above any scored night: its fog thinner than a clear night’s, its light above a full moon’s; fog is thicker than rain, rain than clear', () => {
+  it('every log is in view on every night: the farthest log keeps at least two fifths of its own color through the thickest fog; the practice night is lit and cleared above any scored night; fog is thicker than rain, rain than clear', () => {
     expect(PRACTICE_FOG_DENSITY).toBeLessThan(FOG_DENSITY.clear)
     expect(FOG_DENSITY.clear).toBeLessThan(FOG_DENSITY['light rain'])
     expect(FOG_DENSITY['light rain']).toBeLessThan(FOG_DENSITY.fog)
     expect(PRACTICE_MOON_LIGHT).toBeGreaterThan(Math.max(...MOON_LIGHT))
-    // A log 8 m off keeps at least a tenth of its own color through the thickest fog (exp² fog: exp(−(d·density)²)).
-    expect(Math.exp(-((8 * FOG_DENSITY.fog) ** 2))).toBeGreaterThan(0.1)
+    // exp² fog: a thing d meters off keeps exp(−(d·density)²) of its own color.
+    expect(Math.exp(-((CLEARING.maxRadius * FOG_DENSITY.fog) ** 2))).toBeGreaterThan(0.4)
+  })
+
+  it('the view draws the range bare, with none of Lab 9’s landmarks and none of the range’s own lights or fog, so nothing is seen that cannot be reached and the night’s fog is the one set here', () => {
+    const src = (import.meta.glob('./LogsView.tsx', { query: '?raw', import: 'default', eager: true }) as Record<string, string>)['./LogsView.tsx']
+    expect(src).toMatch(/<RangeView[^>]*\sbare\s[^>]*atmosphere=\{false\}/)
+    expect(src).toMatch(/ClearingEdge/)
   })
 
   it('the night’s length on screen is the sim’s', () => {

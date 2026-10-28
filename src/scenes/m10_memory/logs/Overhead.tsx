@@ -20,7 +20,7 @@ function shade(base: [number, number, number], tint: number): string {
 }
 
 export function logColor(l: Log): string {
-  return l.kind === 'loose' ? shade([138, 106, 62], l.look.tint) : shade([201, 191, 166], l.look.tint)
+  return l.kind === 'loose' ? shade([138, 106, 62], 0) : shade([201, 191, 166], 0)
 }
 
 /** One log by its look, in map units: a thick line, stubs off its side, moss along its top. */

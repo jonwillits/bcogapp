@@ -76,29 +76,33 @@ export class NightSound {
     return src
   }
 
-  /** Crickets: a 4.2 kHz tone chopped at about 30 Hz, in chirps of a third of a second, several a second. */
+  /**
+   * One cricket: a 2.6 kHz tone in chirps of three short pulses (each
+   * about 40 ms, 25 Hz within the chirp), two chirps a second, soft. Jon,
+   * 2026-10-28: the first build's 4.2 kHz chop at several chirps a second
+   * was *a painful high pitch constant*; this is lower, quieter, and
+   * pulses the way a single cricket does.
+   */
   private crickets(ctx: Ctx): void {
     const osc = ctx.createOscillator()
     osc.type = 'sine'
-    osc.frequency.value = 4200
-    const chop = ctx.createOscillator()
-    chop.frequency.value = 30
-    const chopGain = ctx.createGain()
-    chopGain.gain.value = 0.5
+    osc.frequency.value = 2600
     const env = ctx.createGain()
     env.gain.value = 0
-    chop.connect(chopGain)
-    chopGain.connect(env.gain)
     osc.connect(env)
     env.connect(this.master!)
     osc.start()
-    chop.start()
-    this.nodes.push(osc, chop, chopGain, env)
+    this.nodes.push(osc, env)
+    const PULSES = 3
+    const PULSE_S = 0.04
     const chirp = () => {
       const t = ctx.currentTime
-      env.gain.setTargetAtTime(0.5, t, 0.02)
-      env.gain.setTargetAtTime(0, t + 0.3, 0.03)
-      this.timers.push(setTimeout(chirp, 420 + Math.sin(t * 3) * 80))
+      for (let k = 0; k < PULSES; k++) {
+        const on = t + k * PULSE_S * 2
+        env.gain.setTargetAtTime(0.12, on, 0.006)
+        env.gain.setTargetAtTime(0, on + PULSE_S, 0.01)
+      }
+      this.timers.push(setTimeout(chirp, 480 + Math.sin(t * 1.7) * 60))
     }
     chirp()
   }
