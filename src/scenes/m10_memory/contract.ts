@@ -19,6 +19,8 @@ export interface PartStore {
   version: number
   /** Called from the frame loop with the keys held, DT at a time, while this part's tab shows. */
   tick?(dt: number, cmd: NightCommand): void
+  /** The space bar, or the Pause button: pauses or resumes what is running, where the part has something to pause. */
+  pause?(): void
   /** The frame loop's clock, for drawing. */
   clock?(): number
 }

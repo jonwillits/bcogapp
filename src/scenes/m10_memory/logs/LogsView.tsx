@@ -6,7 +6,7 @@ import type { Pose } from '../../../sim/rodent/body'
 import { RangeView } from '../../m09_rat/RangeView'
 import { RatMesh, type RatAction } from '../../m09_rat/RatMesh'
 import { AnimalCamera, RANGE_SCALE, type View } from '../../m09_rat/AnimalCamera'
-import { BRANCH, CLEARING, GROUND_THING_OFFSET, NEST_ARCH, type Clearing, type ClearingLandmark, type Log } from '../../../sim/memory/logs/clearings'
+import { BRANCH, GROUND_THING_OFFSET, NEST_ARCH, type Clearing, type ClearingLandmark, type Log } from '../../../sim/memory/logs/clearings'
 import type { NightFeatures } from '../../../sim/memory/logs/features'
 import type { NightSim } from '../../../sim/memory/logs/night'
 
@@ -15,11 +15,22 @@ import type { NightSim } from '../../../sim/memory/logs/night'
  * landmarks, the night's features (the moon, the weather, the thing on the
  * ground; the sound is `sound.ts`), the rat, and Lab 9's cameras. **A log
  * never shows whether it has beetles**: a log's mesh is a function of its
- * kind, place and angle and nothing else (`reveal.test.tsx` scans this
+ * kind, place, angle and look and nothing else (`logs.test.tsx` scans this
  * file for any read of the sim's outcome), and no minimap, mark or trail
  * is drawn. The kind of log is visible when near: loose bark is dark and
- * broken, with flakes standing off it; a smooth log is pale and even.
+ * broken, with flakes standing off it; a smooth log is pale and even. Each
+ * log also has its own look (spec §8.2): its length, thickness, branch
+ * stubs, moss and shade, fixed for the week, nameable by nothing.
  */
+
+/** A base color shaded by a look's tint: −1 a quarter darker, +1 a quarter lighter. */
+function shaded(base: string, tint: number): string {
+  const c = new THREE.Color(base)
+  const k = tint * 0.25
+  if (k >= 0) c.lerp(new THREE.Color('#ffffff'), k)
+  else c.multiplyScalar(1 + k)
+  return `#${c.getHexString()}`
+}
 
 /** The moon's light level and the fog, by moon and weather. */
 function lighting(f: NightFeatures, dawn: number): { hemi: number; sun: number; fog: number; fogColor: string; sky: string } {
@@ -31,34 +42,52 @@ function lighting(f: NightFeatures, dawn: number): { hemi: number; sun: number; 
   return { hemi: (0.3 + 0.35 * moon) * k + 1.2 * dawn, sun: (0.15 + 0.4 * moon) * k + 1.0 * dawn, fog: fog * k + 0.05 * dawn, fogColor: dawn > 0.5 ? '#6a7a9a' : fogColor, sky: dawn > 0.5 ? '#6a7a9a' : fogColor }
 }
 
-function LogMesh({ l, origin }: { l: Log; origin: { x: number; y: number } }) {
+function LogMesh({ l }: { l: Log }) {
   const x = l.x
   const z = -l.y
-  void origin
   const loose = l.kind === 'loose'
+  const k = l.look
+  const r = k.radius
+  const cy = r - 0.03
   const flakes = useMemo(() => {
     if (!loose) return []
     const rng = makeRng(1000 + l.id * 13 + Math.round(l.x * 10))
-    return Array.from({ length: 14 }, () => ({ t: rng.range(-0.55, 0.55), a: rng.range(0, Math.PI * 2), s: rng.range(0.06, 0.13), tilt: rng.range(0.2, 0.7) }))
-  }, [loose, l.id, l.x])
+    return Array.from({ length: Math.round(10 * k.length) }, () => ({ t: rng.range(-0.45, 0.45) * k.length, a: rng.range(0, Math.PI * 2), s: rng.range(0.06, 0.13), tilt: rng.range(0.2, 0.7) }))
+  }, [loose, l.id, l.x, k.length])
+  const bark = shaded(loose ? '#3e2f20' : '#8a7f6a', k.tint)
   // The world's (x, y) is three's (x, −z), so a log lying at `angle` in the world is turned by +angle about three's y: the same line `logFootprint` uses.
   // (Until 2026-10-27 the sign was wrong and the drawn log was the footprint's mirror image, so the body was stopped by a log that was not there and could not reach the one it saw.)
   return (
     <group position={[x, 0, z]} rotation={[0, l.angle, 0]} data-log={l.id}>
-      <mesh position={[0, CLEARING.logRadius - 0.03, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[CLEARING.logRadius, CLEARING.logRadius * 1.1, CLEARING.logLength, loose ? 9 : 14]} />
-        <meshStandardMaterial color={loose ? '#3e2f20' : '#8a7f6a'} roughness={loose ? 1 : 0.55} flatShading={loose} />
+      <mesh position={[0, cy, 0]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[r, r * 1.1, k.length, loose ? 9 : 14]} />
+        <meshStandardMaterial color={bark} roughness={loose ? 1 : 0.55} flatShading={loose} />
       </mesh>
       {flakes.map((f, i) => (
-        <mesh key={i} position={[f.t, CLEARING.logRadius - 0.03 + Math.sin(f.a) * CLEARING.logRadius * 0.9, Math.cos(f.a) * CLEARING.logRadius * 0.9]} rotation={[f.a, 0, f.tilt]}>
+        <mesh key={i} position={[f.t, cy + Math.sin(f.a) * r * 0.9, Math.cos(f.a) * r * 0.9]} rotation={[f.a, 0, f.tilt]}>
           <boxGeometry args={[f.s, 0.012, f.s * 0.7]} />
-          <meshStandardMaterial color="#2a1d12" roughness={1} />
+          <meshStandardMaterial color={shaded('#2a1d12', k.tint)} roughness={1} />
         </mesh>
       ))}
+      {k.stubs.map((st, i) => (
+        // A branch stub: out of the log's side, tilted from upright by its `around`, never below the ground.
+        <group key={`s${i}`} position={[st.along * k.length, cy, 0]} rotation={[st.around - Math.PI / 2, 0, 0]}>
+          <mesh position={[0, r * 0.6 + st.length / 2, 0]}>
+            <cylinderGeometry args={[r * 0.22, r * 0.34, st.length, 6]} />
+            <meshStandardMaterial color={bark} roughness={1} />
+          </mesh>
+        </group>
+      ))}
+      {k.moss > 0 && (
+        <mesh position={[0, cy + r * 0.92, 0]}>
+          <boxGeometry args={[k.length * 0.85 * k.moss, 0.03, r * 1.3]} />
+          <meshStandardMaterial color="#3f7a3a" roughness={1} />
+        </mesh>
+      )}
       {!loose && (
-        <mesh position={[CLEARING.logLength / 2, CLEARING.logRadius - 0.03, 0]} rotation={[0, 0, Math.PI / 2]}>
-          <circleGeometry args={[CLEARING.logRadius * 0.98, 14]} />
-          <meshStandardMaterial color="#b9ad90" roughness={0.5} />
+        <mesh position={[k.length / 2, cy, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <circleGeometry args={[r * 0.98, 14]} />
+          <meshStandardMaterial color={shaded('#b9ad90', k.tint)} roughness={0.5} />
         </mesh>
       )}
     </group>
@@ -321,9 +350,12 @@ export function LogsView({ clearing, features, sim, dawn, view, fov, lowDetail, 
     const s = sim()
     return s?.phase === 'digging' ? 'dig' : s?.phase === 'eating' ? 'eat' : s?.phase === 'nursing' ? 'nurse' : null
   }
+  // The beetles being eaten are drawn just in front of the snout (Jon, 2026-10-27: drawn at the log they were often inside it).
   const beetle = (): { x: number; y: number } | null => {
     const s = sim()
-    return s && s.phase === 'eating' && s.at ? { x: s.at.x + 0.2, y: s.at.y } : null
+    if (!s || s.phase !== 'eating') return null
+    const p = s.pose
+    return { x: p.x + 0.22 * Math.cos(p.heading), y: p.y + 0.22 * Math.sin(p.heading) }
   }
   return (
     <>
@@ -335,7 +367,7 @@ export function LogsView({ clearing, features, sim, dawn, view, fov, lowDetail, 
       {clearing.id !== 'practice' && <ClearingNest at={clearing.nest} />}
       <NestYoung at={clearing.nest} nursing={() => sim()?.phase === 'nursing'} clock={clock} />
       {clearing.logs.map((l) => (
-        <LogMesh key={l.id} l={l} origin={clearing.nest} />
+        <LogMesh key={l.id} l={l} />
       ))}
       {clearing.landmarks.map((l) => (
         <ClearingLandmarkMesh key={l.id} l={l} />

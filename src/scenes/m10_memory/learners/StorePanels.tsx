@@ -1,13 +1,11 @@
 import type { StoredNight, Retrieval } from '../../../sim/memory/foragers/store'
-import { ANSWERS, type ConfusionTable } from '../../../sim/memory/logs/mapQuestion'
-import type { Truth } from '../../../sim/memory/logs/refill'
-import { FixedLines, GroupLabel, Note } from '../ui'
+import { GroupLabel, Note } from '../ui'
 
 /**
  * The store's panels (spec §9.3): each stored night as its sparse code, a
  * small grid of dots, with the logs emptied that night; the similarity
- * matrix between the stored nights, shaded; the retrieval bar chart for a
- * cue; and the confusion table, which Part 4's reveal also draws.
+ * matrix between the stored nights, shaded; and the retrieval bar chart for
+ * a cue.
  */
 
 /** A code as a grid of dots: bright where the unit is active (at or above half), dark where not. */
@@ -117,21 +115,6 @@ export function RetrievalBars({ retrieval, labels, logLabels, treated }: { retri
         <line x1={X(0.5)} y1={2} x2={X(0.5)} y2={h2 - 2} stroke="var(--border)" strokeDasharray="3 3" />
       </svg>
       <Note>A red bar is a log the forager treated as emptied last night on this night; an amber bar one it did not. The dashed line is 0.5.</Note>
-    </div>
-  )
-}
-
-const TRUTH_SHORT: Record<Truth, string> = { tonight: 'tonight', 'last night': 'last night', 'two nights ago': 'two ago', never: 'never' }
-
-/** The confusion table (spec §8.7): rows are what was true, columns what was marked; the confusions between nights are the night cells off the diagonal. */
-export function ConfusionTableView({ table, title }: { table: ConfusionTable; title: string }) {
-  const head = `${'true \\ marked'.padEnd(16)}${ANSWERS.map((a) => TRUTH_SHORT[a].padStart(10)).join('')}`
-  const lines = [head, ...ANSWERS.map((r) => `${TRUTH_SHORT[r].padEnd(16)}${ANSWERS.map((c) => String(table.cells[r][c]).padStart(10)).join('')}`)]
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }} data-confusion-table={title}>
-      <GroupLabel>{title}</GroupLabel>
-      <FixedLines lines={lines} />
-      <FixedLines lines={[`${'Confusions between nights'.padEnd(30)}${String(table.confusions).padStart(3)} of ${String(table.couldBeConfused).padStart(3)}`, `${'Marks right'.padEnd(30)}${String(table.right).padStart(3)} of ${String(table.logs).padStart(3)}`]} />
     </div>
   )
 }

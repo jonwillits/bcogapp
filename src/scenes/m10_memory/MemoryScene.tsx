@@ -98,14 +98,15 @@ export default function MemoryScene() {
       if (!drivingTab) return
       const el = e.target as HTMLElement | null
       if (el && ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName)) return
+      // The space bar pauses the night (Jon, 2026-10-27); Enter digs (`useDriveKeys`).
       if (e.code === 'Space') {
-        digRef.current = true
+        store.pause?.()
         e.preventDefault()
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [drivingTab])
+  }, [drivingTab, store])
   const lastPanel = useRef(0)
   const onTick = () => {
     clockRef.current = (performance.now() - t0.current) / 1000
@@ -190,22 +191,22 @@ export default function MemoryScene() {
         </div>
       }
       right={lockedReason ? null : <mod.Right ctx={ctx} />}
-      bottom={!lockedReason && Bottom ? <Bottom ctx={ctx} /> : drivingTab ? <DriveBar press={press} /> : undefined}
+      bottom={!lockedReason && Bottom ? <Bottom ctx={ctx} /> : drivingTab ? <DriveBar press={press} onPause={() => store.pause?.()} /> : undefined}
     />
   )
 }
 
-/** The drive pad for Part 4, with a Dig button beside it. */
-function DriveBar({ press }: { press: (k: 'forward' | 'back' | 'left' | 'right', down: boolean) => void }) {
+/** The drive pad for Part 4, with Dig and Pause beside it. */
+function DriveBar({ press, onPause }: { press: (k: 'forward' | 'back' | 'left' | 'right', down: boolean) => void; onPause: () => void }) {
   return (
     <div style={{ display: 'flex', gap: 14, alignItems: 'center', pointerEvents: 'auto' }}>
-      <DrivePadWithDig press={press} />
-      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Arrow keys or WASD drive the animal · “Enter” or the space bar digs</div>
+      <DrivePadWithDig press={press} onPause={onPause} />
+      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Arrow keys or WASD drive the animal · “Enter” digs · the space bar pauses</div>
     </div>
   )
 }
 
-function DrivePadWithDig({ press }: { press: (k: 'forward' | 'back' | 'left' | 'right', down: boolean) => void }) {
+function DrivePadWithDig({ press, onPause }: { press: (k: 'forward' | 'back' | 'left' | 'right', down: boolean) => void; onPause: () => void }) {
   const key = (k: 'forward' | 'back' | 'left' | 'right', label: string) => (
     <button
       type="button"
@@ -240,6 +241,7 @@ function DrivePadWithDig({ press }: { press: (k: 'forward' | 'back' | 'left' | '
       >
         Dig
       </Btn>
+      <Btn onClick={onPause}>Pause</Btn>
     </div>
   )
 }

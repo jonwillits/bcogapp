@@ -41,19 +41,16 @@ function commitAll(store: LearnersStore, step: Step) {
 }
 
 describe('the sample nights', () => {
-  it('are deterministic, flagged as someone else’s, and six nights in two blocks with map answers', () => {
+  it('are deterministic, flagged as someone else’s, and one week of six nights with the end-of-week answers', () => {
     const a = sampleNights()
     const b = sampleNights()
     expect(JSON.stringify(a)).toBe(JSON.stringify(b))
     expect(a.sample).toBe(true)
-    expect(a.blocks.length).toBe(2)
-    for (const block of a.blocks) {
-      expect(block.records.length).toBe(3)
-      expect(block.answers.length).toBe(3)
-      expect(block.states.length).toBe(4)
-      expect(block.restarted).toBe(false)
-    }
-    expect(a.blocks[0].plan.kind).not.toBe(a.blocks[1].plan.kind)
+    expect(a.week.records.length).toBe(6)
+    expect(a.week.states.length).toBe(7)
+    expect(Object.keys(a.week.answers).length).toBe(7)
+    expect(a.week.restarted).toBe(false)
+    expect(['AABCCD', 'ABBBCD']).toContain(a.week.plan.order)
   })
   it('the lock screen’s button offers the sample only while Part 4 is unfinished and no sample is in use', () => {
     const progress = new ProgressStore(memoryStorage(), 1)
@@ -109,19 +106,20 @@ describe('every step opens on an instruction screen, and asks its predictions be
 })
 
 describe('Step 1: no result before the commit; the four foragers reproduce their results', () => {
-  it('before the run the stage holds no table; after Run the foragers (paid in slices) it holds the totals for both blocks and the replay', () => {
+  it('before the run the stage holds no table; after Run the foragers (paid in slices) it holds the totals over the week, the shares after each kind of pair, and the replay', () => {
     const { store, ctx } = fresh()
     store.begin()
     commitAll(store, 1)
     const before = stage(ctx)
-    expect(before).not.toMatch(/data-lines="block-0-totals"/)
+    expect(before).not.toMatch(/data-lines="week-totals"/)
     store.runForagers()
     expect(store.running).toBe(true)
     store.payAll()
     expect(store.foragerRuns).not.toBeNull()
     const after = stage(ctx)
-    expect(after).toMatch(/data-lines="block-0-totals"/)
-    expect(after).toMatch(/data-lines="block-1-totals"/)
+    expect(after).toMatch(/data-lines="week-totals"/)
+    expect(after).toMatch(/data-lines="week-shares"/)
+    expect(after).toContain('after look-alike pair')
     expect(after).toMatch(/data-clearing-overhead/)
     expect(after).toContain(PROGRAMS_LINE)
     expect(after).toContain('Digs at logs emptied last night')
@@ -138,25 +136,25 @@ describe('Step 1: no result before the commit; the four foragers reproduce their
     commitAll(b.store, 1)
     b.store.runForagers()
     b.store.payAll()
-    for (const f of FORAGERS) expect(JSON.stringify(a.store.foragerRuns![f.id].map((x) => x.run.records))).toBe(JSON.stringify(b.store.foragerRuns![f.id].map((x) => x.run.records)))
+    for (const f of FORAGERS) expect(JSON.stringify(a.store.foragerRuns![f.id].run.records)).toBe(JSON.stringify(b.store.foragerRuns![f.id].run.records))
   })
 })
 
-describe('Step 2: the store’s panels and tables only after the commit and the run', () => {
-  it('the stage shows no confusion table before the run, and all three settings beside the student after', () => {
+describe('Step 2: the store’s panels and shares only after the commit and the run', () => {
+  it('the stage shows no share before the run, and all three settings beside the student after', () => {
     const { store, ctx } = fresh()
     store.open(2)
     store.begin()
-    expect(stage(ctx)).not.toMatch(/data-confusion-table/)
+    expect(stage(ctx)).not.toMatch(/data-lines="store-shares"/)
     commitAll(store, 2)
-    expect(stage(ctx)).not.toMatch(/data-confusion-table/)
+    expect(stage(ctx)).not.toMatch(/data-lines="store-shares"/)
     store.runStore()
     store.payAll()
     const m = stage(ctx)
-    expect(m).toMatch(/data-confusion-table="you"/)
-    expect(m).toMatch(/data-confusion-table="the store, weak"/)
-    expect(m).toMatch(/data-confusion-table="the store, strong"/)
-    expect(m).toMatch(/data-stored-nights="3"/)
+    expect(m).toMatch(/data-lines="store-shares"/)
+    expect(m).toContain('the store, weak')
+    expect(m).toContain('the store, strong')
+    expect(m).toMatch(/data-stored-nights="6"/)
     expect(m).toMatch(/data-similarity/)
     expect(m).toMatch(/data-retrieval/)
     expect(m).toContain(SEPARATION_LINE)

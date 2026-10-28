@@ -4,18 +4,21 @@ import { ProgressStore } from '../../../sim/memory/progress/store'
 import type { RawStorage } from '../../../sim/memory/progress/storage'
 import { makeRng } from '../../../sim/random'
 import { CLEARING } from '../../../sim/memory/logs/clearings'
+import { WEEK_NIGHTS } from '../../../sim/memory/logs/features'
 import { NIGHT_S, PRACTICE_S } from '../../../sim/memory/logs/night'
-import { LogsStore } from './logsStore'
-import { logs, LOGS_INTRO, PRACTICE_INTRO, blockIntro } from '../PartLogs'
+import { LogsStore, NOTICE_S } from './logsStore'
+import { logs, LOGS_INTRO, PRACTICE_INTRO, weekIntro } from '../PartLogs'
+import { AS_A_PERSON_LINE, COUNTERBALANCE_LINE, NO_NOTES_LINE } from '../lines'
 import type { PartContext } from '../contract'
 
 /**
- * Part 4 on rendered markup (spec §12, items 1 and 4; §14): nothing about
- * errors, map answers or replays before both blocks are finished; no
- * first-block result before the second block's prediction is committed;
- * the first map question is preceded by no string that mentions it; an
- * interrupted block restarts in the reserve clearing; and a log's drawing
- * reads nothing of whether it is full.
+ * Part 4 on rendered markup (spec §12, items 1, 4 and 12; §14): nothing
+ * about errors, shares or replays before the end-of-week question is
+ * committed; nothing about how a night went between nights; both
+ * predictions committed before night 1; the end-of-week question preceded
+ * by no string that mentions it; an interrupted week restarts in the
+ * reserve clearing; and a log's drawing reads nothing of whether it is
+ * full.
  */
 
 function memory(): RawStorage & { raw: string | null } {
@@ -27,8 +30,9 @@ function ctxFor(store: LogsStore, progress: ProgressStore): PartContext<LogsStor
   return { seed: store.seed, progress, store, view: 'eye', fov: 75, lowDetail: false, anim: makeRng(1), clock: () => 0, header: null, openTab: () => {} }
 }
 
-/** Drive a night to dawn by digging at the nearest loose-bark log each time, by placing the body (a scripted student). */
+/** Drive a night to dawn by digging at the chosen loose-bark log each time, by placing the body (a scripted student). */
 function playNight(s: LogsStore, digger: (ids: number[]) => number | null) {
+  if (s.state === 'between') s.beginNight()
   const sim = s.sim!
   let guard = 0
   while (s.state === 'night' && guard++ < 100000) {
@@ -62,6 +66,8 @@ function markAll(s: LogsStore, answer: 'tonight' | 'never' = 'never') {
   for (const l of s.clearing.logs) if (l.kind === 'loose') s.mark(l.id, answer)
 }
 
+const MENTIONS_QUESTION = /question|mark which|marked|answer as a person|end of the week/i
+
 describe('Part 4: commit, then reveal', () => {
   const mem = memory()
   const progress = new ProgressStore(mem, 77)
@@ -69,28 +75,27 @@ describe('Part 4: commit, then reveal', () => {
   const ctx = ctxFor(s, progress)
   const render = () => renderToStaticMarkup(<logs.Stage ctx={ctx} />) + renderToStaticMarkup(<logs.Left ctx={ctx} />) + renderToStaticMarkup(<logs.Right ctx={ctx} />)
 
-  it('opens on an instruction screen, with the two rules, and nothing of a map question', () => {
+  it('opens on an instruction screen, with the two rules, the no-notes line, the keys, and nothing of the end-of-week question', () => {
     const m = render()
     expect(m).toMatch(/data-instruction/)
     expect(m).toContain('Logs with loose bark have beetles')
     expect(m).toContain('After you empty a log, it is still empty the next night')
-    expect(m).not.toMatch(/map question|the map/i)
-    expect(LOGS_INTRO.willDo.join(' ')).not.toMatch(/map/i)
-    expect(PRACTICE_INTRO.willDo.join(' ')).not.toMatch(/map/i)
-    expect(blockIntro('look-alike', false, false).willDo.join(' ')).not.toMatch(/map/i)
-    expect(blockIntro('look-alike', false, false).willDo[0]).toBe('These three nights will look alike.')
-    expect(blockIntro('distinct', false, false).willDo[0]).toBe('Each of these three nights will look different.')
+    expect(m).toContain(NO_NOTES_LINE)
+    expect(m).toContain('Some nights will look just like the night before')
+    expect(m).toContain('The space bar pauses the night')
+    expect(m).not.toMatch(MENTIONS_QUESTION)
+    for (const text of [LOGS_INTRO.willDo.join(' '), LOGS_INTRO.keys.join(' '), PRACTICE_INTRO.willDo.join(' '), weekIntro(false).willDo.join(' '), weekIntro(true).willDo.join(' ')]) expect(text).not.toMatch(MENTIONS_QUESTION)
   })
 
-  it('the practice night runs, is saved, and may be redone; the first block then opens on its screen', () => {
+  it('the practice night runs, is saved, and may be redone; then the two predictions', () => {
     s.begin()
     expect(s.state).toBe('practice-intro')
     s.beginPractice()
     expect(s.state).toBe('night')
     expect(progress.status('p4-practice')).toBe('in progress')
-    // The practice night is the long one, and says so.
     expect(s.sim!.seconds).toBe(PRACTICE_S)
     expect(PRACTICE_INTRO.willDo.join(' ')).toContain(`${PRACTICE_S} seconds`)
+    expect(render()).toContain('Practice night')
     playNight(s, nearestFirst)
     expect(s.state).toBe('night-over')
     expect(progress.isComplete('p4-practice')).toBe(true)
@@ -100,25 +105,85 @@ describe('Part 4: commit, then reveal', () => {
     s.beginPractice()
     playNight(s, nearestFirst)
     s.goOnFromPractice()
-    expect(s.state).toBe('block-intro')
-    expect(s.blockIndex).toBe(0)
+    expect(s.state).toBe('predict')
   })
 
-  it('during a night, the view shows status lines and no tally of errors, no overhead and no map', () => {
-    s.beginBlock()
-    expect(progress.status('p4-block-1')).toBe('in progress')
-    for (let k = 0; k < 100; k++) s.tick(0.05, { forward: 1, turn: 0, dig: false })
+  it('both predictions are chosen and committed together before night 1, written once; the week’s screen follows', () => {
     const m = render()
+    expect(m).toMatch(/data-stage="predict"/)
+    expect(m).toContain('Commit my predictions')
+    expect(m).not.toMatch(MENTIONS_QUESTION)
+    expect(m).not.toMatch(/data-reveal|data-confusion-table|Digs at logs emptied|data-path/)
+    s.commitPredictions()
+    expect(s.state).toBe('predict')
+    s.choosePairs('more mistakes')
+    expect(s.canCommitPredictions).toBe(false)
+    s.chooseTrend('fewer')
+    s.commitPredictions()
+    expect(s.state).toBe('week-intro')
+    expect(progress.prediction('p4-pairs')).toBe('more mistakes')
+    expect(progress.prediction('p4-trend')).toBe('fewer')
+    s.choosePairs('fewer mistakes')
+    expect(s.committed.pairs).toBe('more mistakes')
+    expect(render()).toMatch(/data-instruction/)
+    expect(render()).not.toMatch(MENTIONS_QUESTION)
+  })
+
+  it('the week begins on the between-nights screen for night 1, with its features line; a night shows the night label, the countdown, the energy bar and the large line, and no tally, overhead or map', () => {
+    s.beginWeek()
+    expect(s.state).toBe('between')
+    expect(progress.status('p4-week')).toBe('in progress')
+    expect(s.nextNight).toBe(1)
+    let m = render()
+    expect(m).toMatch(/data-stage="between"/)
+    expect(m).toContain(`Night 1 of ${WEEK_NIGHTS}`)
+    expect(m).toMatch(/Tonight: .*moon/)
+    s.beginNight()
+    expect(s.state).toBe('night')
+    for (let k = 0; k < 100; k++) s.tick(0.05, { forward: 1, turn: 0, dig: false })
+    m = render()
     expect(m).toMatch(/data-lines="night-status"/)
-    expect(m).toContain('Night 1 of 3')
+    expect(m).toMatch(/data-night-label[^>]*>Night 1 of 6</)
     expect(m).toMatch(/data-countdown="big"/)
-    expect(m).not.toMatch(/data-night-banner/)
+    expect(m).toMatch(/data-energy/)
+    expect(m).toMatch(/data-night-banner="plain"[^>]*>Foraging</)
     expect(m).not.toMatch(/data-clearing-overhead|Digs at logs emptied|data-confusion-table|data-reveal/)
+    expect(m).not.toMatch(MENTIONS_QUESTION)
     expect(s.sim!.seconds).toBe(NIGHT_S)
   })
 
-  it('the large line over the view: the call in amber, the nursing in green, and the dawn, each only while it holds', () => {
+  it('the space bar pauses the night: the clock stops, the pause is counted, and the large line says so', () => {
     const sim = s.sim!
+    const t = sim.time
+    s.pause()
+    expect(s.paused).toBe(true)
+    for (let k = 0; k < 40; k++) s.tick(0.05, { forward: 1, turn: 0, dig: false })
+    expect(sim.time).toBe(t)
+    expect(render()).toMatch(/data-night-banner="pause"/)
+    expect(s.statusLines()[2]).toBe('Paused')
+    s.pause()
+    expect(s.paused).toBe(false)
+    expect(sim.record.pauses.count).toBe(1)
+    expect(sim.record.pauses.seconds).toBeCloseTo(2, 5)
+  })
+
+  it('the large line: a dig, the beetles found, an empty log for a moment, the call in amber, the nursing in green, and the dawn', () => {
+    const sim = s.sim!
+    const phase = () => sim.phase as string
+    const loose = sim.clearing.logs.find((l) => l.kind === 'loose')!
+    sim.place(loose.x + CLEARING.reach - 0.3, loose.y, 0)
+    expect(render()).toMatch(/data-night-banner="act"[^>]*>At a log/)
+    s.tick(0.05, { forward: 0, turn: 0, dig: true })
+    expect(render()).toMatch(/data-night-banner="act"[^>]*>Digging</)
+    while (phase() === 'digging') s.tick(0.05, { forward: 0, turn: 0, dig: false })
+    expect(render()).toMatch(/data-night-banner="found"[^>]*>Beetles found/)
+    while (phase() === 'eating') s.tick(0.05, { forward: 0, turn: 0, dig: false })
+    // The same log again: empty.
+    s.tick(0.05, { forward: 0, turn: 0, dig: true })
+    while (phase() === 'digging') s.tick(0.05, { forward: 0, turn: 0, dig: false })
+    expect(render()).toMatch(/data-night-banner="none"[^>]*>Nothing here: the log was empty</)
+    for (let k = 0; k < Math.round(NOTICE_S / 0.05) + 2; k++) s.tick(0.05, { forward: 0, turn: 0, dig: false })
+    expect(render()).not.toMatch(/data-night-banner="none"/)
     while (!sim.called) s.tick(0.05, { forward: 0, turn: 0, dig: false })
     expect(render()).toMatch(/data-night-banner="call"[^>]*>The young are calling: go back to the nest</)
     sim.place(sim.clearing.nest.x, sim.clearing.nest.y, 0)
@@ -126,86 +191,65 @@ describe('Part 4: commit, then reveal', () => {
     expect(sim.phase).toBe('nursing')
     expect(render()).toMatch(/data-night-banner="nurse"[^>]*>Nursing the young</)
     while (sim.phase === 'nursing') s.tick(0.05, { forward: 0, turn: 0, dig: false })
-    expect(render()).not.toMatch(/data-night-banner/)
     while (!sim.dawning) s.tick(0.05, { forward: 0, turn: 0, dig: false })
     expect(render()).toMatch(/data-night-banner="dawn"/)
-    expect(render()).toContain('Dawn: the night is over')
     while (!sim.done) s.tick(0.05, { forward: 0, turn: 0, dig: false })
     expect(render()).toContain('The night is over. You are home.')
     expect(s.state).toBe('night')
   })
 
-  it('the first map question comes after the first night with no string before it that mentioned it, and offers only tonight and not emptied', () => {
+  it('between nights: a short screen names the next night and its features, and nothing of how the last night went; no question until night 6', () => {
     playNight(s, nearestFirst)
-    expect(s.state).toBe('map')
-    expect(s.mapNight).toBe(1)
-    expect(s.mapAnswers()).toEqual(['tonight', 'never'])
+    expect(s.state).toBe('between')
+    expect(s.nextNight).toBe(2)
     const m = render()
-    expect(m).toMatch(/data-stage="map"/)
-    expect(m).toMatch(/data-clearing-overhead/)
-    expect(m).not.toMatch(/data-path|data-dig=/)
-    expect(m).not.toContain('A map question like this follows every night')
-    expect(m).not.toMatch(/Emptied last night|Emptied two nights ago/)
-    expect(m).not.toMatch(/data-confusion-table|Confusions between nights|data-reveal/)
-  })
-
-  it('the map must be marked for every loose-bark log before it commits; after the first, the line says a map follows every night; night 2 offers last night', () => {
-    expect(s.mapComplete).toBe(false)
-    s.commitMap()
-    expect(s.state).toBe('map')
-    markAll(s, 'tonight')
-    expect(s.mapComplete).toBe(true)
-    s.commitMap()
-    expect(s.state).toBe('night')
-    playNight(s, nearestFirst)
-    expect(s.mapNight).toBe(2)
-    expect(s.mapAnswers()).toEqual(['tonight', 'last night', 'never'])
-    expect(render()).toContain('A map question like this follows every night')
-    markAll(s, 'never')
-    s.commitMap()
-    playNight(s, nearestFirst)
-    expect(s.mapAnswers()).toEqual(['tonight', 'last night', 'two nights ago', 'never'])
-    markAll(s, 'never')
-    s.commitMap()
-  })
-
-  it('after the first block: the prediction screen, with no first-block result anywhere until it is committed', () => {
-    expect(s.state).toBe('predict')
-    expect(progress.isComplete('p4-block-1')).toBe(true)
-    const m = render()
-    expect(m).toContain('Commit my prediction')
-    expect(m).not.toMatch(/data-reveal|data-confusion-table|Digs at logs emptied|data-path|Beetles over the block/)
-    s.commitPrediction()
-    expect(s.state).toBe('predict')
-    s.predict('less often')
-    s.commitPrediction()
-    expect(s.state).toBe('block-intro')
-    expect(progress.prediction('p4-second-block')).toBe('less often')
-    // Still nothing of the first block.
-    expect(render()).not.toMatch(/data-reveal|data-confusion-table|Digs at logs emptied/)
-  })
-
-  it('the second block runs; the reveal opens only after it, with both blocks side by side, the tallies, the tables, the replays and the prediction', () => {
-    s.beginBlock()
-    for (let n = 0; n < 3; n++) {
+    expect(m).toMatch(/data-stage="between"/)
+    expect(m).toContain(`Night 2 of ${WEEK_NIGHTS}`)
+    expect(m).not.toMatch(/Beetles eaten|Digs at logs emptied|data-clearing-overhead|data-reveal|data-path|when-error/i)
+    expect(m).not.toMatch(MENTIONS_QUESTION)
+    for (let n = 2; n <= WEEK_NIGHTS; n++) {
+      expect(s.state).toBe('between')
+      expect(s.nextNight).toBe(n)
       playNight(s, nearestFirst)
-      expect(s.state).toBe('map')
-      markAll(s, 'tonight')
-      s.commitMap()
     }
+    expect(s.state).toBe('question')
+  })
+
+  it('the question at the end of the week comes with no warning, as a person, with the overhead of the clearing and nothing of what happened; it must be marked for every loose-bark log', () => {
+    const m = render()
+    expect(m).toMatch(/data-stage="question"/)
+    expect(m).toContain(AS_A_PERSON_LINE)
+    expect(m).toMatch(/data-clearing-overhead/)
+    expect(m).not.toMatch(/data-path|data-dig=|data-passed/)
+    expect(m).toContain('Not emptied in the last three nights')
+    expect(m).not.toMatch(/data-confusion-table|data-reveal|Beetles eaten/)
+    expect(s.questionComplete).toBe(false)
+    s.commitQuestion()
+    expect(s.state).toBe('question')
+    markAll(s, 'tonight')
+    expect(s.questionComplete).toBe(true)
+    s.commitQuestion()
     expect(s.state).toBe('revealed')
-    expect(progress.isComplete('p4-block-2')).toBe(true)
+    expect(progress.isComplete('p4-week')).toBe(true)
+  })
+
+  it('the reveal: the comparison with the first prediction, the trend with the second and the counterbalancing line, six nights with replays, the question’s table, and the result line', () => {
     const m = render()
     expect(m).toMatch(/data-reveal="logs"/)
-    expect((m.match(/data-block-reveal=/g) ?? []).length).toBe(2)
-    expect((m.match(/data-night-reveal=/g) ?? []).length).toBe(6)
-    expect((m.match(/data-path/g) ?? []).length).toBe(6)
+    expect(m).toMatch(/data-lines="comparison"/)
+    expect(m).toContain('Your prediction: more mistakes')
+    expect(m).toMatch(/data-lines="trend"/)
+    expect(m).toContain('your mistakes would become fewer')
+    expect(m).toContain(COUNTERBALANCE_LINE)
+    expect((m.match(/data-night-reveal=/g) ?? []).length).toBe(WEEK_NIGHTS)
+    expect((m.match(/data-path/g) ?? []).length).toBe(WEEK_NIGHTS)
     expect(m).toContain('Digs at logs emptied last night')
-    expect(m).toContain('Your prediction: in the second block you would confuse nights less often')
-    expect(m).toMatch(/data-confusion-table="The whole block"/)
+    expect(m).toMatch(/data-confusion-table="Your marks"/)
+    expect(m).toMatch(/data-lines="result-line"/)
+    expect(m).toMatch(/A{2}BC{2}D|AB{3}CD/)
   })
 
-  it('a reload after both blocks shows the reveal again with identical results', () => {
+  it('a reload after the week shows the reveal again with identical results', () => {
     const again = new LogsStore(77, new ProgressStore(mem, 77))
     expect(again.state).toBe('revealed')
     expect(JSON.stringify(again.revealed())).toBe(JSON.stringify(s.revealed()))
@@ -213,7 +257,7 @@ describe('Part 4: commit, then reveal', () => {
 })
 
 describe('Part 4: units and reserve materials (§4.3)', () => {
-  it('a block interrupted partway restarts in the reserve clearing with every loose-bark log full, and the results say so', () => {
+  it('a week interrupted partway restarts in the reserve clearing with every loose-bark log full and the same order, and the results say so', () => {
     const mem = memory()
     let progress = new ProgressStore(mem, 5)
     let s = new LogsStore(5, progress)
@@ -221,25 +265,29 @@ describe('Part 4: units and reserve materials (§4.3)', () => {
     s.beginPractice()
     playNight(s, nearestFirst)
     s.goOnFromPractice()
-    const own = s.clearingFor(0)
-    s.beginBlock()
+    s.choosePairs('about as many')
+    s.chooseTrend('about the same')
+    s.commitPredictions()
+    expect(s.clearingForWeek()).toBe('week')
+    s.beginWeek()
+    const order = s.plan.order
     playNight(s, nearestFirst)
-    markAll(s, 'tonight')
-    s.commitMap()
-    // Night 2 begun; the page is left.
+    playNight(s, nearestFirst)
+    s.beginNight()
+    // Night 3 begun; the page is left.
     expect(s.state).toBe('night')
     progress = new ProgressStore(mem, 5)
-    expect(progress.interrupted.map((i) => i.unit)).toEqual(['p4-block-1'])
+    expect(progress.interrupted.map((i) => i.unit)).toEqual(['p4-week'])
     s = new LogsStore(5, progress)
     s.begin()
-    expect(s.state).toBe('block-intro')
-    expect(s.blockIndex).toBe(0)
-    expect(s.clearingFor(0)).toBe('reserve')
-    expect(s.clearingFor(0)).not.toBe(own)
-    s.beginBlock()
+    expect(s.state).toBe('week-intro')
+    expect(s.clearingForWeek()).toBe('reserve')
+    s.beginWeek()
     expect(s.clearingId).toBe('reserve')
+    expect(s.plan.order).toBe(order)
+    expect(s.restarted).toBe(true)
+    s.beginNight()
     expect(s.sim!.record.fullAtStart.filter(Boolean).length).toBe(7)
-    expect(s.restarted[0]).toBe(true)
   })
 
   it('the practice night interrupted restarts as the practice night again', () => {
@@ -265,12 +313,12 @@ describe('Part 4: a log never shows whether it has beetles (§12, item 4)', () =
   const files = import.meta.glob('./*.tsx', { query: '?raw', import: 'default', eager: true }) as Record<string, string>
   const strip = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
   const view = strip(Object.entries(files).find(([p]) => p.endsWith('LogsView.tsx'))![1])
-  it('the view reads nothing of a log’s state: no full, fullAtStart, emptiedTonight, lastEmptied or outcome', () => {
+  it('the view reads nothing of a log’s state: no full, fullAtStart, emptiedTonight, lastEmptied or outcome; a log’s mesh is its kind, place, angle and look', () => {
     expect(view).not.toMatch(/\bfull\b|fullAtStart|emptiedTonight|lastEmptied|outcome|\.digs\b|record\./)
   })
-  it('no minimap, mark or trail is drawn while a night runs: the overhead is rendered only on the map question and the reveal', () => {
+  it('no minimap, mark or trail is drawn while a night runs: the overhead is rendered only on the question and the reveal', () => {
     const part = (import.meta.glob('../PartLogs.tsx', { query: '?raw', import: 'default', eager: true }) as Record<string, string>)['../PartLogs.tsx']
-    const stage = part.slice(part.indexOf('function Stage('), part.indexOf('function MapQuestion('))
+    const stage = part.slice(part.indexOf('function Stage('), part.indexOf('function Predictions('))
     expect(stage).not.toMatch(/ClearingOverhead/)
     expect(view).not.toMatch(/Overhead|trail|minimap/i)
   })

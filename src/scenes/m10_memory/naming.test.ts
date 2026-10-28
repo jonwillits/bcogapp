@@ -62,7 +62,7 @@ describe('nothing gives away Part 1 before its reveal (§12, item 2)', () => {
   })
 })
 
-describe('the fourteen lines that are content, each on its panel (§11)', () => {
+describe('the seventeen lines that are content, each on its panel (§11)', () => {
   it('1. rats stand in for the early mammal, on Parts 4 and 5', () => {
     expect(lines).toMatch(/Rats stand in for the early mammal of the reading\./)
     expect(file('PartLogs.tsx')).toMatch(/<Content>\{RATS_LINE\}<\/Content>/)
@@ -100,7 +100,21 @@ describe('the fourteen lines that are content, each on its panel (§11)', () => 
   })
   it('11. comfort, on Part 4’s instruction screen', () => {
     expect(lines).toMatch(/Anyone who feels unwell can switch to the follow view or tick the Narrower view box\./)
-    expect(file('PartLogs.tsx')).toMatch(/content: \[RATS_LINE, COMFORT_LINE\]/)
+    expect(file('PartLogs.tsx')).toMatch(/content: \[RATS_LINE, COMFORT_LINE, NO_NOTES_LINE\]/)
+  })
+  it('15. no notes, on Part 4’s instruction screen', () => {
+    expect(lines).toMatch(/Do not write anything down or draw a map during the nights\. This part asks what you can do from memory alone\./)
+    expect(file('PartLogs.tsx')).toMatch(/NO_NOTES_LINE/)
+  })
+  it('16. counterbalancing, on Part 4’s reveal', () => {
+    expect(lines).toMatch(/The two kinds of night came at the same average point in the week, so getting better with practice helped both equally\./)
+    expect(file('logs/Reveal.tsx')).toMatch(/<Content>\{COUNTERBALANCE_LINE\}<\/Content>/)
+  })
+  it('17. as a person, on the end-of-week question, and nowhere before it in Part 4', () => {
+    expect(lines).toMatch(/Now answer as a person, not as the animal\. An animal can show what it remembers only by what it does\./)
+    expect(file('PartLogs.tsx')).toMatch(/<Content>\{AS_A_PERSON_LINE\}<\/Content>/)
+    const part = file('PartLogs.tsx')
+    expect(part.indexOf('AS_A_PERSON_LINE')).toBeGreaterThan(0)
   })
   it('12. a restarted unit, on the results screens', () => {
     expect(lines).toMatch(/This part was interrupted and run again with new materials\./)
@@ -134,11 +148,11 @@ describe('words that must not be on screen (§12)', () => {
 
 describe('the chapter’s words are where the instruments use them (§14)', () => {
   it('the vocabulary', () => {
-    for (const w of ['serial position', 'primacy', 'recency', 'rehearsal', 'interference', 'remember', 'know', 'clustering', 'schema', 'hit', 'false alarm', 'd′', 'criterion', 'working memory', 'disposition', 'accessible content', 'pattern separation', 'pattern completion', 'complementary learning systems', 'replay', 'catastrophic interference', 'double dissociation', 'semantic dementia', 'the usual fact', 'the refill rule', 'look-alike nights', 'distinct nights', 'the fast store', 'the slow learner', 'the list for tonight', 'episodic-like'])
+    for (const w of ['serial position', 'primacy', 'recency', 'rehearsal', 'interference', 'remember', 'know', 'clustering', 'schema', 'hit', 'false alarm', 'd′', 'criterion', 'working memory', 'disposition', 'accessible content', 'pattern separation', 'pattern completion', 'complementary learning systems', 'replay', 'catastrophic interference', 'double dissociation', 'semantic dementia', 'the usual fact', 'the refill rule', 'look-alike pair', 'different pair', 'when-error', 'as a person', 'the fast store', 'the slow learner', 'the list for tonight', 'episodic-like'])
       expect(screen.toLowerCase(), w).toContain(w.toLowerCase())
   })
   it('the controls carry the names the spec gives them', () => {
-    for (const w of ['Begin', 'Commit my prediction', 'Commit the map', 'Export my results', 'Load my results', 'Clear my saved results', 'Use a sample set of nights', 'Old', 'New', 'Remember', 'Know', 'In the room', 'Not in the room', 'I’m done', 'Mute', 'Narrower view', 'Low detail', 'Skip ahead through the youth', 'Emptied tonight', 'Emptied last night', 'Emptied two nights ago', 'Not emptied'])
+    for (const w of ['Begin', 'Commit my prediction', 'Commit my predictions', 'Commit my answers', 'Begin night', 'Pause', 'Export my results', 'Load my results', 'Clear my saved results', 'Use a sample set of nights', 'Old', 'New', 'Remember', 'Know', 'In the room', 'Not in the room', 'I’m done', 'Mute', 'Narrower view', 'Low detail', 'Skip ahead through the youth', 'Emptied tonight', 'Emptied last night', 'Emptied two nights ago', 'Not emptied in the last three nights'])
       expect(screen, w).toContain(w)
   })
   it('a selected tab changes color and nothing else', () => {

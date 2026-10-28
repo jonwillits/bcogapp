@@ -47,8 +47,14 @@ export const READING_PRINTS_LINE = 'The reading prints a list of this kind, so s
 /** The commit-then-reveal rule, on Part 0. */
 export const COMMIT_RULE_LINE = 'Nothing a memory test would tell you is shown until you commit your answers: not what was on a list, not what was in the room, not how a night went.'
 
-/** Part 4: the map question follows every night, said once the first has been answered. */
-export const MAP_FOLLOWS_LINE = 'A map question like this follows every night.'
+/** 15. Part 4’s instruction screen: no notes. */
+export const NO_NOTES_LINE = 'Do not write anything down or draw a map during the nights. This part asks what you can do from memory alone.'
+
+/** 16. Part 4’s reveal: the counterbalancing. */
+export const COUNTERBALANCE_LINE = 'The two kinds of night came at the same average point in the week, so getting better with practice helped both equally.'
+
+/** 17. The end-of-week question. */
+export const AS_A_PERSON_LINE = 'Now answer as a person, not as the animal. An animal can show what it remembers only by what it does.'
 
 /** Part 5: how the foragers with a store decide, beside the store. */
 export const STRENGTH_LINE = 'A forager treats a log as emptied last night as often as the store’s answer says: a log the store puts at 0.5 is treated as emptied half the time.'

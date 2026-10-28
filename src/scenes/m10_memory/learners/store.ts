@@ -1,7 +1,7 @@
 import { makeRng, type Rng } from '../../../sim/random'
 import type { ProgressStore } from '../../../sim/memory/progress/store'
 import type { StudentNights } from '../../../sim/memory/logs/results'
-import { FORAGERS, runForagerBlock, trainedSlowLearner, type ForagerBlock, type ForagerId } from '../../../sim/memory/foragers/foragers'
+import { FORAGERS, runForagerWeek, trainedSlowLearner, type ForagerWeek, type ForagerId } from '../../../sim/memory/foragers/foragers'
 import { SEPARATIONS, type Separation } from '../../../sim/memory/foragers/store'
 import { SEASON_PASSES, SlowLearner, YOUTH_PASSES, newPatterns, oldPatterns, trainInterleaved } from '../../../sim/memory/foragers/slow'
 import { THINGS, type Thing } from '../../../sim/memory/foragers/world'
@@ -13,7 +13,7 @@ import { STEPS, TABLE_COLUMNS, TABLE_KEY, TABLE_ROWS, stepSpec, type Step, type 
  * Part 5's state (spec §9): four steps, one at a time, each opening on an
  * instruction screen, each asking its predictions before the change is
  * made, with Lab 9's Go to, Go back and Redo. Every run is paid in slices
- * on a timer, one forager block or a few passes of training at a time,
+ * on a timer, one forager's week or a few passes of training at a time,
  * with a badge, so that nothing synchronous over about 300 ms sits on a
  * click path. No result is computed for display before the commit.
  */
@@ -43,8 +43,7 @@ export interface SeasonPoint {
 
 export interface Replay {
   who: 'you' | ForagerId
-  block: 0 | 1
-  night: 1 | 2 | 3
+  night: number
 }
 
 interface Job {
@@ -64,23 +63,24 @@ export class LearnersStore implements PartStore {
   badge = ''
   version = 0
   // Step 1
-  foragerRuns: Record<ForagerId, ForagerBlock[]> | null = null
-  replay: Replay = { who: 'tonight', block: 0, night: 1 }
+  foragerRuns: Record<ForagerId, ForagerWeek> | null = null
+  replay: Replay = { who: 'tonight', night: 1 }
   // Step 2
   separation: Separation = 'weak'
-  storeRuns: Partial<Record<Separation, ForagerBlock[]>> = {}
-  cue: { block: 0 | 1; night: 2 | 3 } = { block: 0, night: 2 }
+  storeRuns: Partial<Record<Separation, ForagerWeek>> = {}
+  /** The night (2 to 6) whose retrieval of last night the panels show. */
+  cue = 2
   // Step 3
   youthNet: SlowLearner | null = null
   youthPass = 0
   snapshots: Snapshot[] = []
   season: { off: SeasonPoint[]; on: SeasonPoint[] } = { off: [], on: [] }
   // Step 4
-  noStoreRuns: ForagerBlock[] | null = null
-  usualRuns: ForagerBlock[] | null = null
-  intactRuns: ForagerBlock[] | null = null
+  noStoreRuns: ForagerWeek | null = null
+  usualRuns: ForagerWeek | null = null
+  intactRuns: ForagerWeek | null = null
   noise = 0
-  noisyRuns: { noise: number; blocks: ForagerBlock[] } | null = null
+  noisyRuns: { noise: number; week: ForagerWeek } | null = null
   readonly tableDraft: Record<string, string> = {}
   private youthOrder: Rng | null = null
   private readonly queue: Job[] = []
@@ -218,27 +218,27 @@ export class LearnersStore implements PartStore {
 
   // ---------------------------------------------------------------- Step 1
 
-  private blockRuns(id: ForagerId, damage: { noStore?: boolean; slowNoise?: number } = {}, separation?: Separation): { tasks: (() => void)[]; out: ForagerBlock[] } {
+  /** One forager's week, as a task for the queue; `out.week` is filled when the task has run. */
+  private weekRun(id: ForagerId, damage: { noStore?: boolean; slowNoise?: number } = {}, separation?: Separation): { task: () => void; out: { week: ForagerWeek | null } } {
     const nights = this.nights()
-    const out: ForagerBlock[] = []
-    if (!nights) return { tasks: [], out }
-    const tasks = ([0, 1] as const).map((i) => () => {
-      out[i] = runForagerBlock(id, nights.seed, nights.blocks[i].plan, clearingOf(nights, i), damage, separation)
-    })
-    return { tasks, out }
+    const out: { week: ForagerWeek | null } = { week: null }
+    if (!nights) return { task: () => {}, out }
+    return { task: () => void (out.week = runForagerWeek(id, nights.seed, nights.week.plan, clearingOf(nights), damage, separation)), out }
   }
 
-  /** Run the four foragers on the student's nights, one forager block per tick. */
+  /** Run the four foragers on the student's week, one forager per tick. */
   runForagers(): void {
     if (this.state !== 'running' || !this.nights()) return
-    const runs = {} as Record<ForagerId, ForagerBlock[]>
+    const outs = {} as Record<ForagerId, { week: ForagerWeek | null }>
     const tasks: (() => void)[] = []
     for (const f of FORAGERS) {
-      const r = this.blockRuns(f.id)
-      runs[f.id] = r.out
-      tasks.push(...r.tasks)
+      const r = this.weekRun(f.id)
+      outs[f.id] = r.out
+      tasks.push(r.task)
     }
     this.enqueue('Running the foragers', tasks, () => {
+      const runs = {} as Record<ForagerId, ForagerWeek>
+      for (const f of FORAGERS) runs[f.id] = outs[f.id].week!
       this.foragerRuns = runs
       this.intactRuns = runs.tonight
       this.usualRuns = runs.usual
@@ -257,23 +257,25 @@ export class LearnersStore implements PartStore {
     this.changed()
   }
 
-  setCue(c: Partial<{ block: 0 | 1; night: 2 | 3 }>): void {
-    this.cue = { ...this.cue, ...c }
+  setCue(night: number): void {
+    this.cue = night
     this.changed()
   }
 
-  /** Run the store on both blocks at the three settings. */
+  /** Run the store on the week at the three settings. */
   runStore(): void {
     if (this.state !== 'running' || !this.nights()) return
     const tasks: (() => void)[] = []
-    const outs: Partial<Record<Separation, ForagerBlock[]>> = {}
+    const outs: Partial<Record<Separation, { week: ForagerWeek | null }>> = {}
     for (const sep of SEPARATIONS) {
-      const r = this.blockRuns('tonight', {}, sep)
+      const r = this.weekRun('tonight', {}, sep)
       outs[sep] = r.out
-      tasks.push(...r.tasks)
+      tasks.push(r.task)
     }
     this.enqueue('Running the store at every setting', tasks, () => {
-      this.storeRuns = outs
+      const runs: Partial<Record<Separation, ForagerWeek>> = {}
+      for (const sep of SEPARATIONS) runs[sep] = outs[sep]!.week!
+      this.storeRuns = runs
     })
   }
 
@@ -354,24 +356,16 @@ export class LearnersStore implements PartStore {
   removeStore(): void {
     if (this.state !== 'running' || !this.nights()) return
     const tasks: (() => void)[] = []
-    const no = this.blockRuns('tonight', { noStore: true })
-    tasks.push(...no.tasks)
-    let intact = this.intactRuns
-    let usual = this.usualRuns
-    if (!intact) {
-      const r = this.blockRuns('tonight')
-      intact = r.out
-      tasks.push(...r.tasks)
-    }
-    if (!usual) {
-      const r = this.blockRuns('usual')
-      usual = r.out
-      tasks.push(...r.tasks)
-    }
+    const no = this.weekRun('tonight', { noStore: true })
+    tasks.push(no.task)
+    const intact = this.intactRuns ? null : this.weekRun('tonight')
+    const usual = this.usualRuns ? null : this.weekRun('usual')
+    if (intact) tasks.push(intact.task)
+    if (usual) tasks.push(usual.task)
     this.enqueue('Running Tonight too without its store', tasks, () => {
-      this.noStoreRuns = no.out
-      this.intactRuns = intact
-      this.usualRuns = usual
+      this.noStoreRuns = no.out.week
+      if (intact) this.intactRuns = intact.out.week
+      if (usual) this.usualRuns = usual.out.week
     })
   }
 
@@ -394,17 +388,13 @@ export class LearnersStore implements PartStore {
   runDamaged(): void {
     if (this.state !== 'running' || !this.nights()) return
     const noise = this.noise
-    const r = this.blockRuns('tonight', { slowNoise: noise })
-    const tasks = [...r.tasks]
-    let intact = this.intactRuns
-    if (!intact) {
-      const i = this.blockRuns('tonight')
-      intact = i.out
-      tasks.push(...i.tasks)
-    }
+    const r = this.weekRun('tonight', { slowNoise: noise })
+    const tasks = [r.task]
+    const intact = this.intactRuns ? null : this.weekRun('tonight')
+    if (intact) tasks.push(intact.task)
     this.enqueue('Running Tonight too with the slow learner damaged', tasks, () => {
-      this.noisyRuns = { noise, blocks: r.out }
-      this.intactRuns = intact
+      this.noisyRuns = { noise, week: r.out.week! }
+      if (intact) this.intactRuns = intact.out.week
     })
   }
 
@@ -427,18 +417,18 @@ export class LearnersStore implements PartStore {
     this.changed()
   }
 
-  /** The measured two-by-two table: each lesion's totals over both blocks against the intact forager's. */
+  /** The measured two-by-two table: each lesion's totals over the week against the intact forager's. */
   measuredTable(): { rows: { damage: string; emptiedLast: number; smooth: number; verdict: [string, string] }[]; intact: { emptiedLast: number; smooth: number } } | null {
     if (!this.intactRuns || !this.noStoreRuns || !this.noisyRuns) return null
-    const sum = (runs: ForagerBlock[]) => ({
-      emptiedLast: runs.reduce((a, b) => a + b.tallies.slice(1).reduce((x, t) => x + t.digsAtEmptiedLastNight, 0), 0),
-      smooth: runs.reduce((a, b) => a + b.tallies.reduce((x, t) => x + t.digsAtSmooth, 0), 0),
+    const sum = (w: ForagerWeek) => ({
+      emptiedLast: w.tallies.slice(1).reduce((x, t) => x + t.digsAtEmptiedLastNight, 0),
+      smooth: w.tallies.reduce((x, t) => x + t.digsAtSmooth, 0),
     })
     const intact = sum(this.intactRuns)
     const verdict = (v: number, base: number) => (v >= base + 1 ? 'rises' : 'stays low')
     const rows = [
       { damage: TABLE_ROWS[0], ...sum(this.noStoreRuns) },
-      { damage: TABLE_ROWS[1], ...sum(this.noisyRuns.blocks) },
+      { damage: TABLE_ROWS[1], ...sum(this.noisyRuns.week) },
     ].map((r) => ({ ...r, verdict: [verdict(r.emptiedLast, intact.emptiedLast), verdict(r.smooth, intact.smooth)] as [string, string] }))
     return { rows, intact }
   }

@@ -1,6 +1,6 @@
 # Lab 10, Part 4 (Nights at the Logs): what changed on the walk, and what is still wrong with it
 
-Written 2026-10-27 by the build session, for the session that wrote `m10_memory_SCENE_SPEC.md`, so that the design can be revisited with what the walk found. The lab lives on branch `m10-memory` of `~/Documents/Projects/bcogapp`; the as-built notes are `docs/M10_AS_BUILT_NOTES.md` (§2.4 the clearings and nights, §4.1 to §4.4 every measured number, §7 every departure from the spec); the walk-through, with Jon's comments and answers, is `LAB_10_WALKTHROUGH.md` beside the spec. Nothing below is in the handout yet; the handout is not started.
+**Answered the same evening:** the design session revised the spec's §8 to one week of six nights (orders `AABCCD` or `ABBBCD`), confusions scored from behavior, logs that each look different, and one question at the end of the week; the build followed (the as-built notes' §7, item 23, §2.4 and §4.8). This file stays as the record of what the walk found. Written 2026-10-27 by the build session, for the session that wrote `m10_memory_SCENE_SPEC.md`, so that the design can be revisited with what the walk found. The lab lives on branch `m10-memory` of `~/Documents/Projects/bcogapp`; the as-built notes are `docs/M10_AS_BUILT_NOTES.md` (§2.4 the clearings and nights, §4.1 to §4.4 every measured number, §7 every departure from the spec); the walk-through, with Jon's comments and answers, is `LAB_10_WALKTHROUGH.md` beside the spec. Nothing below is in the handout yet; the handout is not started.
 
 ## 1. The part as it stands
 
