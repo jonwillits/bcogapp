@@ -7,7 +7,7 @@ import { RangeView } from '../../m09_rat/RangeView'
 import { RatMesh, type RatAction } from '../../m09_rat/RatMesh'
 import { AnimalCamera, RANGE_SCALE, type View } from '../../m09_rat/AnimalCamera'
 import { BRANCH, GROUND_THING_OFFSET, NEST_ARCH, type Clearing, type ClearingLandmark, type Log } from '../../../sim/memory/logs/clearings'
-import type { NightFeatures } from '../../../sim/memory/logs/features'
+import { MOONS, type NightFeatures } from '../../../sim/memory/logs/features'
 import type { NightSim } from '../../../sim/memory/logs/night'
 
 /**
@@ -32,11 +32,20 @@ function shaded(base: string, tint: number): string {
   return `#${c.getHexString()}`
 }
 
-/** The moon's light level and the fog, by moon and weather. */
-function lighting(f: NightFeatures, dawn: number): { hemi: number; sun: number; fog: number; fogColor: string; sky: string } {
+/** The fog's density (exp² fog, per meter) by weather. Eased on 2026-10-28 (fog 0.26, rain 0.17, clear 0.13 before): a student who sees nothing in the distance wanders until a log comes into view, so a log 8 m off shows faintly even in fog and plainly on a clear night. */
+export const FOG_DENSITY = { fog: 0.18, 'light rain': 0.14, clear: 0.11 } as const
+/** The practice night's fog: lighter than any scored night's, so the layout can be learned. */
+export const PRACTICE_FOG_DENSITY = 0.08
+/** The moon's share of the light, in MOONS' order (new, half, and the brightest moon). */
+export const MOON_LIGHT = [0.55, 0.8, 1.05] as const
+/** The practice night's share of the light, above the brightest moon's (Jon, 2026-10-28). */
+export const PRACTICE_MOON_LIGHT = 1.3
+
+/** The moon's light level and the fog, by moon and weather; the practice night brighter and clearer than any scored night. */
+function lighting(f: NightFeatures, dawn: number, practice = false): { hemi: number; sun: number; fog: number; fogColor: string; sky: string } {
   // A new moon is the darkest night, but never so dark that a log cannot be found: the floor is a little under Lab 9's moonlight.
-  const moon = f.moon === 'new moon' ? 0.55 : f.moon === 'half moon' ? 0.8 : 1.05
-  const fog = f.weather === 'fog' ? 0.26 : f.weather === 'light rain' ? 0.17 : 0.13
+  const moon = practice ? PRACTICE_MOON_LIGHT : MOON_LIGHT[MOONS.indexOf(f.moon)]
+  const fog = practice ? PRACTICE_FOG_DENSITY : FOG_DENSITY[f.weather]
   const fogColor = f.weather === 'fog' ? '#1a2030' : f.weather === 'light rain' ? '#0d1322' : '#0b1020'
   const k = 1 - dawn
   return { hemi: (0.3 + 0.35 * moon) * k + 1.2 * dawn, sun: (0.15 + 0.4 * moon) * k + 1.0 * dawn, fog: fog * k + 0.05 * dawn, fogColor: dawn > 0.5 ? '#6a7a9a' : fogColor, sky: dawn > 0.5 ? '#6a7a9a' : fogColor }
@@ -327,9 +336,10 @@ export function LogsView({ clearing, features, sim, dawn, view, fov, lowDetail, 
   const hemi = useRef<THREE.HemisphereLight>(null)
   const sun = useRef<THREE.DirectionalLight>(null)
   const fogRef = useRef<THREE.FogExp2>(null)
-  const init = lighting(features, 0)
+  const practice = clearing.id === 'practice'
+  const init = lighting(features, 0, practice)
   useFrame(({ scene }) => {
-    const l = lighting(features, dawn())
+    const l = lighting(features, dawn(), practice)
     if (hemi.current) hemi.current.intensity = l.hemi
     if (sun.current) sun.current.intensity = l.sun
     if (fogRef.current) {

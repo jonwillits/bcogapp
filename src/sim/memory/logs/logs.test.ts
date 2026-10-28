@@ -135,6 +135,15 @@ describe('the week’s order of night features (§8.4, §8.5)', () => {
       for (let i = 0; i < LETTERS.length; i++) for (let j = i + 1; j < LETTERS.length; j++) expect(differingFeatures(plan.letters[LETTERS[i]], plan.letters[LETTERS[j]])).toBeGreaterThanOrEqual(2)
     }
   })
+  it('the practice night is a clear full moon whatever the seed; the week’s nights are not all so', () => {
+    for (let seed = 0; seed < 40; seed++) {
+      const p = planWeek(seed).practice
+      expect(p.moon).toBe('full moon')
+      expect(p.weather).toBe('clear')
+    }
+    expect(Array.from({ length: 40 }, (_, i) => planWeek(i).nights.some((n) => n.weather === 'fog' || n.moon === 'new moon')).filter(Boolean).length).toBeGreaterThan(20)
+  })
+
   it('the seed picks the order, and both occur', () => {
     const orders = new Set(Array.from({ length: 40 }, (_, i) => planWeek(i).order))
     expect(orders.size).toBe(2)

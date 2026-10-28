@@ -7,6 +7,7 @@ import { CLEARING } from '../../../sim/memory/logs/clearings'
 import { WEEK_NIGHTS } from '../../../sim/memory/logs/features'
 import { NIGHT_S, PRACTICE_S } from '../../../sim/memory/logs/night'
 import { LogsStore, NOTICE_S } from './logsStore'
+import { FOG_DENSITY, MOON_LIGHT, PRACTICE_FOG_DENSITY, PRACTICE_MOON_LIGHT } from './LogsView'
 import { logs, LOGS_INTRO, PRACTICE_INTRO, weekIntro } from '../PartLogs'
 import { AS_A_PERSON_LINE, COUNTERBALANCE_LINE, NO_NOTES_LINE } from '../lines'
 import type { PartContext } from '../contract'
@@ -302,6 +303,15 @@ describe('Part 4: units and reserve materials (§4.3)', () => {
     s = new LogsStore(6, progress)
     s.begin()
     expect(s.state).toBe('practice-intro')
+  })
+
+  it('the practice clearing is lit and cleared above any scored night: its fog thinner than a clear night’s, its light above a full moon’s; fog is thicker than rain, rain than clear', () => {
+    expect(PRACTICE_FOG_DENSITY).toBeLessThan(FOG_DENSITY.clear)
+    expect(FOG_DENSITY.clear).toBeLessThan(FOG_DENSITY['light rain'])
+    expect(FOG_DENSITY['light rain']).toBeLessThan(FOG_DENSITY.fog)
+    expect(PRACTICE_MOON_LIGHT).toBeGreaterThan(Math.max(...MOON_LIGHT))
+    // A log 8 m off keeps at least a tenth of its own color through the thickest fog (exp² fog: exp(−(d·density)²)).
+    expect(Math.exp(-((8 * FOG_DENSITY.fog) ** 2))).toBeGreaterThan(0.1)
   })
 
   it('the night’s length on screen is the sim’s', () => {

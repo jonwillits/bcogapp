@@ -100,12 +100,12 @@ export function letterFeatures(rng: Rng): Record<Letter, NightFeatures> {
   }
 }
 
-/** Part 4's plan from the seed: the order, the letters' features, the six nights and the practice night. */
+/** Part 4's plan from the seed: the order, the letters' features, the six nights and the practice night. The practice night is a clear full moon whatever the seed (Jon, 2026-10-28: the practice is for learning the keys and the layout, so it is as easy to see on as a night gets); its ground and sound are the seed's. */
 export function planWeek(seed: number): WeekPlan {
   const rng = makeRng(seed ^ 0x4f0a)
   const order: WeekOrder = rng.next() < 0.5 ? 'AABCCD' : 'ABBBCD'
   const letters = letterFeatures(rng)
-  const practice = anyFeatures(rng)
+  const practice: NightFeatures = { ...anyFeatures(rng), moon: 'full moon', weather: 'clear' }
   const nights = Array.from({ length: WEEK_NIGHTS }, (_, i) => ({ ...letters[letterOf(order, i + 1)] }))
   return { order, letters, nights, practice }
 }
