@@ -5,8 +5,8 @@ import type { RawStorage } from '../../../sim/social/progress/storage'
 import { FILMS } from '../../../sim/social/shapes/films'
 import { pathById } from '../../../sim/social/paths/pool'
 import { ShapesStore, planOrder, FILMS_UNIT, PATHS_UNIT } from './shapesStore'
-import { ShapesLeft, ShapesStage, FILMS_WILL_DO, PATHS_WILL_DO, MODELS_INTRO } from './screens'
-import { ShapesReveal, revealData } from './Reveal'
+import { ShapesLeft, ShapesStage, FILMS_WILL_DO, PATHS_WILL_DO } from './screens'
+import { ShapesReveal, revealData, MODELS_INTRO } from './Reveal'
 
 /**
  * Part 3 (spec §13 items 1 and 2, §16): no rating, check or 1944 result

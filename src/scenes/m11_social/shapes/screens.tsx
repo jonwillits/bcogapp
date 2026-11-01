@@ -1,12 +1,12 @@
 import { Panel } from '../../../components/Panel'
 import { FILMS, filmById, CHECKLIST, DESCRIPTION_PROMPT, MIN_DESCRIPTION_CHARS, RATING_QUESTION, type CheckId } from '../../../sim/social/shapes/films'
 import { GOALS } from '../../../sim/social/paths/maze'
-import { INVERSE_PLANNING, HEURISTIC } from '../../../sim/social/paths/models'
 import { InstructionScreen } from '../../m10_memory/progress/InstructionScreen'
 import { Btn, Choice, Content, FixedLines, GroupLabel, Note, PANEL_STYLE, PART_TITLES, StagePanel, useStore } from '../ui'
 import type { PartContext } from '../contract'
 import { FilmPlayer, FilmFrame } from './FilmPlayer'
 import { MazeView } from './MazeView'
+import { ModelsIntroScreen } from './Reveal'
 import { MAX_DESCRIPTION_CHARS, type ShapesStore } from './shapesStore'
 
 /**
@@ -14,6 +14,8 @@ import { MAX_DESCRIPTION_CHARS, type ShapesStore } from './shapesStore'
  * tests before all three films are described (the rating question and
  * the checklist come only then), and none shows a model's output before
  * the prediction; `shapes.test.tsx` and `naming.test.ts` hold them to that.
+ * The two procedures' description, which names goals, lives in
+ * `Reveal.tsx` and is shown only after both units are complete.
  */
 
 export const FILMS_MINUTES = 7
@@ -36,14 +38,6 @@ export const PATHS_WILL_DO = [
 
 export const PATHS_KEYS = ['The three sliders set the points for A, B and C.', '“Commit” records your answer at a pause; the dot goes on by itself.']
 export const PATHS_SITTING_LINE = 'You can leave and come back: the answers you have committed are kept, and the path you were on is replaced by another of the same kind.'
-
-export const MODELS_INTRO = [
-  'Two procedures now judge the same paths you judged, at the same pauses. Each gives a split of 100 across A, B and C, as you did.',
-  `- ${INVERSE_PLANNING.label}: it assumes the dot moves efficiently toward its goal, by the shortest paths around walls with some noise, and asks which goal would make the path seen so far an efficient one, allowing the goal to change along the way. Its settings are the ones its authors fitted to adults.`,
-  `- ${HEURISTIC.label}: it takes the goal to be whatever the dot last moved toward, and looks at nothing before the last step.`,
-  'On most pauses the two agree. On some they do not: where the dot’s last steps fit two goals equally and only the whole path tells them apart.',
-  'Before any comparison is shown, predict which procedure your judgments matched better overall, and which on the pauses where the two disagree. Then press “Commit my prediction”.',
-]
 
 export function ShapesLeft({ ctx }: { ctx: PartContext<ShapesStore> }) {
   const s = useStore(ctx.store)
@@ -192,22 +186,7 @@ export function ShapesStage({ ctx }: { ctx: PartContext<ShapesStore> }) {
       )
     }
     case 'models-intro':
-      return (
-        <StagePanel testId="models-intro">
-          <div style={{ fontSize: 14, fontWeight: 600 }}>The two procedures</div>
-          {MODELS_INTRO.map((l) => (l.startsWith('- ') ? <Note key={l} style={{ color: 'var(--text)', paddingLeft: 12 }}>• {l.slice(2)}</Note> : <Note key={l} style={{ color: 'var(--text)' }}>{l}</Note>))}
-          <GroupLabel>Predict first</GroupLabel>
-          <Note>Overall, which procedure did your judgments match better?</Note>
-          <Choice value={s.draftOverall} options={[INVERSE_PLANNING, HEURISTIC].map((m) => ({ id: m.id, label: m.label }))} onChange={(v) => s.chooseOverall(v)} />
-          <Note>On the pauses where the two disagree, which did you match better?</Note>
-          <Choice value={s.draftDisagree} options={[INVERSE_PLANNING, HEURISTIC].map((m) => ({ id: m.id, label: m.label }))} onChange={(v) => s.chooseDisagree(v)} />
-          <div>
-            <Btn primary onClick={() => s.commitModels()} disabled={!s.canCommitModels}>
-              Commit my prediction
-            </Btn>
-          </div>
-        </StagePanel>
-      )
+      return <ModelsIntroScreen s={s} />
     case 'revealed':
       return null
   }

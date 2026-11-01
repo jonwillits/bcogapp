@@ -7,7 +7,8 @@ import { HEURISTIC, INVERSE_PLANNING, SUBSTANTIAL, correlation, disagreement, ty
 import { pathById, KIND_LABEL } from '../../../sim/social/paths/pool'
 import { referenceById } from '../../../sim/social/references'
 import { GOALS_NOT_BELIEFS_LINE, ONE_VIEWER_LINE, RESTARTED_LINE } from '../lines'
-import { Btn, Content, DotPlot, FixedLines, GroupLabel, Note, ReferencePanel, RIGHT_STYLE, StagePanel, row } from '../ui'
+import { Btn, Choice, Content, DotPlot, FixedLines, GroupLabel, Note, ReferencePanel, RIGHT_STYLE, StagePanel, row, useStore } from '../ui'
+import type { ShapesStore } from './shapesStore'
 import { ClassPanel } from '../ClassPanel'
 import { MazeView } from './MazeView'
 import { FILMS_UNIT, PATHS_UNIT, MODELS_PREDICTION, MODELS_PREDICTION_DISAGREE, type FilmsResult, type PathsResult, type PathJudgment } from './shapesStore'
@@ -72,6 +73,35 @@ export function revealData(progress: ProgressStore): RevealData | null {
     predictedOverall,
     predictedDisagree,
   }
+}
+
+/** The two procedures in plain words, shown after both units are done and before any comparison (§7.2); here rather than in `screens.tsx` because it names goals, which Step 1 must not before its films are described. */
+export const MODELS_INTRO = [
+  'Two procedures now judge the same paths you judged, at the same pauses. Each gives a split of 100 across A, B and C, as you did.',
+  `- ${INVERSE_PLANNING.label}: it assumes the dot moves efficiently toward its goal, by the shortest paths around walls with some noise, and asks which goal would make the path seen so far an efficient one, allowing the goal to change along the way. Its settings are the ones its authors fitted to adults.`,
+  `- ${HEURISTIC.label}: it takes the goal to be whatever the dot last moved toward, and looks at nothing before the last step.`,
+  'On most pauses the two agree. On some they do not: where the dot’s last steps fit two goals equally and only the whole path tells them apart.',
+  'Before any comparison is shown, predict which procedure your judgments matched better overall, and which on the pauses where the two disagree. Then press “Commit my prediction”.',
+]
+
+export function ModelsIntroScreen({ s: store }: { s: ShapesStore }) {
+  const s = useStore(store)
+  return (
+    <StagePanel testId="models-intro">
+      <div style={{ fontSize: 14, fontWeight: 600 }}>The two procedures</div>
+      {MODELS_INTRO.map((l) => (l.startsWith('- ') ? <Note key={l} style={{ color: 'var(--text)', paddingLeft: 12 }}>• {l.slice(2)}</Note> : <Note key={l} style={{ color: 'var(--text)' }}>{l}</Note>))}
+      <GroupLabel>Predict first</GroupLabel>
+      <Note>Overall, which procedure did your judgments match better?</Note>
+      <Choice value={s.draftOverall} options={[INVERSE_PLANNING, HEURISTIC].map((m) => ({ id: m.id, label: m.label }))} onChange={(v) => s.chooseOverall(v)} />
+      <Note>On the pauses where the two disagree, which did you match better?</Note>
+      <Choice value={s.draftDisagree} options={[INVERSE_PLANNING, HEURISTIC].map((m) => ({ id: m.id, label: m.label }))} onChange={(v) => s.chooseDisagree(v)} />
+      <div>
+        <Btn primary onClick={() => s.commitModels()} disabled={!s.canCommitModels}>
+          Commit my prediction
+        </Btn>
+      </div>
+    </StagePanel>
+  )
 }
 
 const f2 = (x: number) => (Number.isFinite(x) ? x.toFixed(2) : '   —')

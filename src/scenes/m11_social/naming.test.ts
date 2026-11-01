@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { SAVED_HERE_LINE, STORAGE_UNAVAILABLE_LINE } from './lines'
 
 /**
  * The string tests of the Module 11 spec's §12, §13 and §16, over every
@@ -111,8 +112,8 @@ describe('words that must not be on screen (§13, items 6 and 7)', () => {
       expect(t, path).not.toMatch(/\bpays off\b/i)
     }
   })
-  it('no British spellings', () => {
-    for (const [path, src] of all) expect(textOf(path, src), path).not.toMatch(/\bcolour|\bbehaviour|\bfavour|\bcentre\b|\banalyse|\bgrey\b|\bmetres?\b|\bneighbour|\brecognis|\borganis(e|ed|es|ing|ation)\b|\bmemoris|\blicence\b|\bjudgement\b/i)
+  it('no British spellings (a published title is quoted as published)', () => {
+    for (const [path, src] of all) expect(path.endsWith('references.ts') ? textOf(path, src).replace(/Classification and quantitative judgement/g, '') : textOf(path, src), path).not.toMatch(/\bcolour|\bbehaviour|\bfavour|\bcentre\b|\banalyse|\bgrey\b|\bmetres?\b|\bneighbour|\brecognis|\borganis(e|ed|es|ing|ation)\b|\bmemoris|\blicence\b|\bjudgement\b/i)
   })
   it('no browser dialog: no alert, confirm or prompt', () => {
     for (const [path, src] of production(scene)) expect(src, path).not.toMatch(/\balert\(|window\.confirm|\bconfirm\(|window\.prompt|\bprompt\(/)
@@ -149,8 +150,8 @@ describe('the lines that are content, each on its panel (§12)', () => {
       expect(src, `${where} for ${name}`).toBeDefined()
       expect(src![1], `${name} in ${where}`).toMatch(new RegExp(name))
     }
-    expect(screen).toMatch(/Results are saved in this browser on this computer only/)
-    expect(screen).toMatch(/results will be lost if this page is closed/)
+    expect(SAVED_HERE_LINE).toMatch(/Results are saved in this browser on this computer only/)
+    expect(STORAGE_UNAVAILABLE_LINE).toMatch(/results will be lost if this page is closed/)
     expect(file('SocialScene.tsx')).toMatch(/<StorageLine available=\{progress\.storageAvailable\} \/>/)
   })
 })

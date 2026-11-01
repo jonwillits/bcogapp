@@ -37,7 +37,7 @@ export const STEPS: StepSpec[] = [
     title: 'Step 1 — Two Rules',
     reread: 'Reread §11.1.7, §11.1.8 and §11.2.1 of the reading: the payoff matrix, repeated encounters, and tit-for-tat.',
     willDo: [
-      'Only two rules play in this step, with no mistakes: Always defect, which defects on every round, and Tit-for-tat, which cooperates on round 1 and then plays its partner’s move from the previous round. Four short runs, each computed by the engine from the rules’ moves and the payoff matrix.',
+      'Repeated encounters change the game: help given now and returned later is what the reading calls reciprocal altruism (§11.1.8), and this step asks when repetition favors it. Only two rules play in this step, with no mistakes: Always defect, which defects on every round, and Tit-for-tat, which cooperates on round 1 and then plays its partner’s move from the previous round. Four short runs, each computed by the engine from the rules’ moves and the payoff matrix.',
       '- Run 1, one round: Always defect against Tit-for-tat, once.',
       '- Run 2, a match: the same two, head to head, for R rounds. A slider sets R at 1, 2, 3, 10 or 200.',
       '- Run 3, a round-robin of the two: each rule plays the other and a copy of itself, for R rounds a match. Each rule’s total is the sum of its two matches.',
@@ -89,7 +89,7 @@ export const STEPS: StepSpec[] = [
   {
     step: 4,
     title: 'Step 4 — A Rule That Predicts',
-    reread: 'Reread §11.2.1 and §11.2.3 of the reading: tit-for-tat makes no prediction about what a partner thinks or wants, and many animals predict one another in richer ways.',
+    reread: 'Reread §11.2.1 and §11.2.3 of the reading: tit-for-tat responds only to what the partner did, and many animals predict one another in richer ways.',
     willDo: [
       'Every entry so far is a fixed table of moves. This step adds one that predicts its partner: Predictor. For each partner it stores counts of the partner’s first move and of the partner’s move after each of the four outcomes of the previous round, each count starting at one cooperation and one defection, and from the counts it computes the probability that the partner cooperates next. On round 1 it cooperates. On every later round it computes, under its estimates, the expected points of every sequence of its own moves over the next 3 rounds (8 sequences) and plays the first move of the best; with probability 5% it plays the other move instead, a probe. It carries nothing from one partner to the next, and it has no partner’s rule, only counts.',
       'It is the student of Part 1 as a program: it predicts each round and chooses each round. Its matches are played, not computed, so its results are means over 50 seeds, with the spread.',

@@ -61,7 +61,7 @@ export const STEPS: StepSpec[] = [
     title: 'Step 3 — A new layout',
     reread: 'Reread §11.2.7 of the reading: five accounts, and the one further possibility, a learner trained on enough examples.',
     willDo: [
-      'Every animal’s rule is now shown beside your diagnosis, and the full matrix from the build’s own runs, twenty seeds of 10 trials, beside your table.',
+      'Every animal’s rule is now shown beside your diagnosis, and the full matrix from the build’s own runs, twenty seeds of 10 trials, beside your table. The reading’s question is whether what the chimpanzees track is seeing, a step toward a theory of mind, or categories of behavior, which is the behavior-reading account; the last animal is a learner of the second kind.',
       'Then T8, held back until now: the dominant enters by a door on the top wall it has never used, with barriers at new positions. Predict first whether every animal takes the piece outside the dominant’s line of sight, then press “Run T8 for all five”.',
       'Then the learner’s experience, a setting on the left: the usual room (a history of 300 contests across T1 to T7’s layouts, the dominant always entering by its usual door) or many rooms (the same number of contests across many layouts and doors, but never T8’s exact layout). Predict first what the learner does on T8 after many rooms, then set it and press “Run T8 for all five” again.',
     ],
