@@ -57,7 +57,15 @@ const memoryScene = import.meta.glob('../../../scenes/m10_memory/**/*.{ts,tsx}',
   eager: true,
 }) as Record<string, string>
 
-const production = Object.entries({ ...sim, ...scenes, ...fish, ...fishScene, ...rodent, ...ratScene, ...memory, ...memoryScene }).filter(
+// Module 11's learners: Part 4's contest learner and Part 6's two cells, and again no writer of their own.
+const social = import.meta.glob('../../social/**/*.ts', { query: '?raw', import: 'default', eager: true }) as Record<string, string>
+const socialScene = import.meta.glob('../../../scenes/m11_social/**/*.{ts,tsx}', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>
+
+const production = Object.entries({ ...sim, ...scenes, ...fish, ...fishScene, ...rodent, ...ratScene, ...memory, ...memoryScene, ...social, ...socialScene }).filter(
   ([p]) => !p.includes('.test.') && !p.includes('.probe.'),
 )
 
@@ -172,6 +180,22 @@ describe('exactly two code paths write a stored weight', () => {
     // The fast store's separation stage is fixed: nothing in store.ts learns.
     const store = production.find(([p]) => p.endsWith('/memory/foragers/store.ts'))![1]
     expect(store).not.toMatch(/learnWeights/)
+  })
+
+  it('Module 11 reaches a weight only through learnWeights: Part 4’s learner and Part 6’s cells, and nothing in the game, the arena or the scene', () => {
+    const learner = production.find(([p]) => p.endsWith('/social/arena/learner.ts'))![1]
+    const cells = production.find(([p]) => p.endsWith('/social/mirror/cells.ts'))![1]
+    expect(learner).toMatch(/learnWeights\(this\.output, /)
+    expect(learner).toMatch(/learnWeights\(this\.hidden\[j\], /)
+    expect(cells).toMatch(/learnWeights\(this\.unit, /)
+    expect(cells).toMatch(/thirdFactor\('prediction'/)
+    for (const [path, src] of production) {
+      if (!path.includes('/social/') && !path.includes('/m11_social/')) continue
+      expect([...src.matchAll(WEIGHT_WRITE)].length, path).toBe(0)
+      expect([...src.matchAll(WEIGHTS_REPLACED)].length, path).toBe(0)
+    }
+    // The game's rules are tables of moves, not weights, and learn nothing.
+    for (const [path, src] of production) if (path.includes('/social/game/')) expect(src, path).not.toMatch(/learnWeights|thirdFactor/)
   })
 
   it('the learner reaches a weight only through that one write', () => {

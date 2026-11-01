@@ -11,10 +11,11 @@ import { measureCycle, median, SHIPPED_GRID, type GridSettings } from './grid'
  * A narrower sweep: CYCLE_SEEDS=3 CYCLE_QUICK=1.
  */
 
-const seeds = Number(process.env.CYCLE_SEEDS ?? 5)
+const SEEDS = Number(process.env.CYCLE_SEEDS ?? 5)
 const quick = !!process.env.CYCLE_QUICK
 
 function describeOutcome(s: GridSettings, r: ReturnType<typeof measureCycle>): string {
+  const seeds = r.seeds
   const count = (v: (number | null)[]) => v.filter((x) => x !== null).length
   const m = (v: (number | null)[]) => {
     const x = median(v)
@@ -44,10 +45,10 @@ describe('cycle:', () => {
           for (const noise of noises)
             for (const mutation of mutations)
               for (const [width, height] of sizes) settings.push({ width, height, neighbors, update, rounds, noise, mutation, payoff: 'exact', keep: 0.5 })
-    console.log(`\n== Cycle search: ${settings.length} settings × ${seeds} seeds, 1,000 generations each run`)
+    console.log(`\n== Cycle search: ${settings.length} settings × ${SEEDS} seeds, 1,000 generations each run`)
     const t0 = Date.now()
     for (const s of settings) {
-      const r = measureCycle(s, seeds)
+      const r = measureCycle(s, SEEDS)
       console.log(describeOutcome(s, r))
     }
     console.log(`  (${((Date.now() - t0) / 60000).toFixed(1)} min)`)
