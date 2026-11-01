@@ -195,9 +195,9 @@ export const RATING_QUESTION = 'How much did the shapes seem to act on purpose?'
 export const DESCRIPTION_PROMPT = 'Describe what happened in this film, in two or three sentences.'
 export const MIN_DESCRIPTION_CHARS = 40
 export const CHECKLIST = [
-  { id: 'goal', label: 'gave a shape a goal (for example, trying to get somewhere or get something)' },
-  { id: 'feeling', label: 'gave a shape a feeling' },
-  { id: 'relationship', label: 'described a relationship between shapes' },
-  { id: 'none', label: 'none of these' },
+  { id: 'c1', label: 'gave a shape a goal (for example, trying to get somewhere or get something)' },
+  { id: 'c2', label: 'gave a shape a feeling' },
+  { id: 'c3', label: 'described a relationship between shapes' },
+  { id: 'c4', label: 'none of these' },
 ] as const
 export type CheckId = (typeof CHECKLIST)[number]['id']

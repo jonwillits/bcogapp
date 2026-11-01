@@ -39,6 +39,8 @@ export type SavedState<U extends string, F extends string> = {
   seed: number
   units: Record<U, UnitRecord>
   predictions: Record<string, string>
+  /** Rewritable string settings (Lab 11's rule from chips); absent until one is written, so a Lab 10 state is unchanged. */
+  settings?: Record<string, string>
 } & Record<F, boolean>
 
 /** The largest text a lab will parse as a saved state, bytes. A full run is a few tens of kilobytes. */
@@ -117,7 +119,11 @@ export function isSavedState<U extends string, F extends string>(x: unknown, sch
   if (!isPlainObject(x.predictions)) return false
   for (const v of Object.values(x.predictions)) if (typeof v !== 'string') return false
   for (const f of schema.flags) if (typeof x[f] !== 'boolean') return false
-  const allowed = new Set<string>(['version', 'seed', 'units', 'predictions', ...schema.flags])
+  if ('settings' in x) {
+    if (!isPlainObject(x.settings)) return false
+    for (const v of Object.values(x.settings)) if (typeof v !== 'string') return false
+  }
+  const allowed = new Set<string>(['version', 'seed', 'units', 'predictions', 'settings', ...schema.flags])
   for (const k of Object.keys(x)) if (!allowed.has(k)) return false
   if (!valuesAreSafe(x)) return false
   let text: string

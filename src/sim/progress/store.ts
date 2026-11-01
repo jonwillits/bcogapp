@@ -180,6 +180,18 @@ export class ProgressStore<U extends string, P extends number, F extends string>
     return this.state.predictions[key] ?? null
   }
 
+  /** A rewritable setting, saved like everything else: a thing the student may change at any time, such as a rule built from chips. */
+  setSetting(key: string, value: string): void {
+    if (!this.state.settings) this.state.settings = {}
+    this.state.settings[key] = value
+    this.save()
+    this.changed()
+  }
+
+  setting(key: string): string | null {
+    return this.state.settings?.[key] ?? null
+  }
+
   canOpen(part: P): boolean {
     return this.spec.canOpen(part, this.state)
   }

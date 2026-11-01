@@ -196,3 +196,18 @@ describe('Export and Load', () => {
     expect(lines[1]).toBe('In the file: Part 1, Part 3 (partly) finished, with seed 32.')
   })
 })
+
+describe('settings', () => {
+  it('a setting is rewritable, saved, and round-trips; a state without one is unchanged', () => {
+    const box = memoryStorage()
+    const s = new ProgressStore(box, 51)
+    expect(s.setting('p2-rule')).toBeNull()
+    expect('settings' in s.state).toBe(false)
+    s.setSetting('p2-rule', 'C,C,D,C,D,0')
+    s.setSetting('p2-rule', 'D,C,D,C,D,0')
+    expect(s.setting('p2-rule')).toBe('D,C,D,C,D,0')
+    expect(new ProgressStore(box).setting('p2-rule')).toBe('D,C,D,C,D,0')
+    expect(parseImport(exportText(s.state)).ok).toBe(true)
+    expect(isSavedState({ ...newState(1), settings: { a: 1 } })).toBe(false)
+  })
+})
