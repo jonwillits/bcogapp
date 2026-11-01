@@ -34,7 +34,7 @@ describe('one storage key, named once', () => {
       for (const k of keys) expect(k, path).toBe('bcogapp.m11.v1')
       if (path !== './storage.ts') expect(keys, path).toEqual([])
     }
-    const storage = production(sim).find(([p]) => /(^|/)storage\.ts$/.test(p) && p.includes('.'))![1]
+    const storage = production(sim).find(([p]) => p === './storage.ts')![1]
     expect(storage).toMatch(/STORAGE_KEY = 'bcogapp\.m11\.v1'/)
     expect(storage).toMatch(/browserStorage\(STORAGE_KEY\)/)
   })
