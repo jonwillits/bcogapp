@@ -1,5 +1,5 @@
 import { makeRng, type Rng } from '../../random'
-import { DOORS, POSITIONS, inLineOfSight } from './geometry'
+import { DOORS, POSITIONS, inLineOfSight, type Point } from './geometry'
 import type { ContestLearner } from './learner'
 import { stageTrial, TRIALS_PER_RUN, type TestSpec, type View } from './trial'
 
@@ -74,6 +74,8 @@ export function choose(id: AnimalId, view: View, learner: ContestLearner | null,
 export interface Trial {
   subordinate: 0 | 1
   dominant: 0 | 1 | -1
+  /** Where the dominant went: a piece's place, or the empty place of a piece it missed being moved. */
+  dominantTarget: Point
   got: boolean
   view: View
 }
@@ -93,7 +95,7 @@ export function runTest(id: AnimalId, test: TestSpec, learner: ContestLearner | 
   for (let t = 0; t < trials; t++) {
     const staged = stageTrial(test, rng)
     const sub = choose(id, staged.view, learner, rng)
-    out.push({ subordinate: sub, dominant: staged.dominant, got: staged.dominant !== sub, view: staged.view })
+    out.push({ subordinate: sub, dominant: staged.dominant, dominantTarget: staged.dominantTarget, got: staged.dominant !== sub, view: staged.view })
   }
   return { animal: id, test: test.id, trials: out, share: out.filter((t) => t.subordinate === test.scoredPiece).length / out.length }
 }
