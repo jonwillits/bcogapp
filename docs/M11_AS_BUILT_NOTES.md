@@ -233,7 +233,7 @@ A cell at rest reads 0.08; driven by its own grasp, 0.92. The design constants w
 
 ### 4.9 Timing of the scene (`scripts/m11-timing.mjs`, headed Chromium on the development Mac, 2026-11-01)
 
-The grid runs 20.0 generations a second at "fast" (the setting asks 20; the engine pays about 1,000 a second when skipping ahead); Skip ahead through 1,000 generations produced no main-thread task over 50 ms (the long-task observer saw none). Part 6 holds 75 frames a second with and without the 4× CPU throttle, in both views (the display's rate). Film 1 ran 30.0 s on a real screen. Nobody has timed a student; the build session's wall-clock count per part, reading and writing included, is in §7.
+The grid runs 20.0 generations a second at "fast" (the setting asks 20); Skip ahead paid 1,000 generations in 1.1 s with no main-thread task over 50 ms (the long-task observer saw none). Part 6 holds 95 frames a second over the shoulder and 120 in the side view, and 75 and 76 under the 4× CPU throttle. Film 1 ran 29.9 to 30.0 s on a real screen over two runs. Nobody has timed a student; the build session's wall-clock count per part, reading and writing included, is in §7.
 
 ## 5. Every result the scene produces that the reading does not report (spec §11)
 
