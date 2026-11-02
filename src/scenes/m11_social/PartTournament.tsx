@@ -69,7 +69,16 @@ function Left({ ctx }: { ctx: Ctx }) {
               <StepControls s={s} />
               {s.badge && <Note data-badge>{s.badge}</Note>}
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {s.state === 'running' && <Btn onClick={() => s.finish()}>{s.step < 7 ? `Go on to Step ${s.step + 1}` : 'Finish Part 2'}</Btn>}
+                {s.state === 'running' && (
+                  <Btn
+                    onClick={() => {
+                      s.finish()
+                      if (s.step < 7) s.open((s.step + 1) as Step)
+                    }}
+                  >
+                    {s.step < 7 ? `Go on to Step ${s.step + 1}` : 'Finish Part 2'}
+                  </Btn>
+                )}
                 {s.state === 'done' && s.step < 7 && <Btn onClick={() => s.open((s.step + 1) as Step)}>Go on to Step {s.step + 1}</Btn>}
                 {s.state === 'done' && <Btn onClick={() => s.redo()}>Redo Step {s.step}</Btn>}
               </div>
@@ -84,7 +93,7 @@ function Left({ ctx }: { ctx: Ctx }) {
 function StepControls({ s }: { s: TournamentStore }) {
   switch (s.step) {
     case 1:
-      return <Note>The four runs are on the stage, with the sliders for R and x.</Note>
+      return <Note>The four runs are on the stage, with the chips for R and the slider for x.</Note>
     case 2:
       return <Note>Set the chips on the stage. The rule is saved as you set it.</Note>
     case 3:

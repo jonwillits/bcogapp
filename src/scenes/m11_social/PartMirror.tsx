@@ -105,7 +105,16 @@ function Left({ ctx }: { ctx: Ctx }) {
                 <input type="checkbox" checked={s.sideView} onChange={(e) => s.setSideView(e.target.checked)} /> Side view
               </label>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {s.state === 'running' && <Btn onClick={() => s.finish()}>{s.step < 4 ? `Go on to Step ${s.step + 1}` : 'Finish Part 6'}</Btn>}
+                {s.state === 'running' && (
+                  <Btn
+                    onClick={() => {
+                      s.finish()
+                      if (s.step < 4) s.open((s.step + 1) as Step)
+                    }}
+                  >
+                    {s.step < 4 ? `Go on to Step ${s.step + 1}` : 'Finish Part 6'}
+                  </Btn>
+                )}
                 {s.state === 'done' && s.step < 4 && <Btn onClick={() => s.open((s.step + 1) as Step)}>Go on to Step {s.step + 1}</Btn>}
                 {s.state === 'done' && <Btn onClick={() => s.redo()}>Redo Step {s.step}</Btn>}
               </div>

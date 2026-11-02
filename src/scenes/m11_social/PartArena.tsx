@@ -71,7 +71,16 @@ function Left({ ctx }: { ctx: Ctx }) {
               <StepControls s={s} />
               {s.badge && <Note data-badge>{s.badge}</Note>}
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {s.state === 'running' && <Btn onClick={() => s.finish()}>{s.step < 3 ? `Go on to Step ${s.step + 1}` : 'Finish Part 4'}</Btn>}
+                {s.state === 'running' && (
+                  <Btn
+                    onClick={() => {
+                      s.finish()
+                      if (s.step < 3) s.open((s.step + 1) as Step)
+                    }}
+                  >
+                    {s.step < 3 ? `Go on to Step ${s.step + 1}` : 'Finish Part 4'}
+                  </Btn>
+                )}
                 {s.state === 'done' && s.step < 3 && <Btn onClick={() => s.open((s.step + 1) as Step)}>Go on to Step {s.step + 1}</Btn>}
                 {s.state === 'done' && <Btn onClick={() => s.redo()}>Redo Step {s.step}</Btn>}
               </div>

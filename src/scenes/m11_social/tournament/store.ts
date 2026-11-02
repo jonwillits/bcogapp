@@ -1,6 +1,6 @@
 import type { ProgressStore } from '../../../sim/social/progress/store'
 import { unitOfMatch } from '../../../sim/social/parts'
-import { planPart1 } from '../../../sim/social/game/plan'
+import { planPart1, ABOUT_ROUNDS } from '../../../sim/social/game/plan'
 import { RULES, buildRule, matchesPartner, DEFAULT_CHIPS, GENEROSITY, RULE_NAMES, type Chips, type Generosity, type MemoryOneRule, type Move } from '../../../sim/social/game/rules'
 import { headToHead, twoRuleRoundRobin, populationCurve, populationThreshold, TWO_RULES_ROUNDS, type HeadToHead, type TwoRuleRoundRobin, type PopulationPoint } from '../../../sim/social/game/tworules'
 import { roundRobin, predictorVersus, type Entry, type RoundRobin, type PredictorVersus } from '../../../sim/social/game/tournament'
@@ -292,7 +292,7 @@ export class TournamentStore implements PartStore {
     const played = this.progress.partComplete(1)
     const plan = played ? planPart1(this.seed) : null
     for (const rule of RULES) {
-      let rounds = 20
+      let rounds = ABOUT_ROUNDS
       let student: StudentVersus['student'] = null
       if (plan) {
         const idx = plan.rules.indexOf(rule.id)
