@@ -1,11 +1,13 @@
 import type { ProgressStore } from '../../../sim/social/progress/store'
 import { unitOfMatch } from '../../../sim/social/parts'
 import { planPart1, ABOUT_ROUNDS } from '../../../sim/social/game/plan'
+import { makeRng } from '../../../sim/random'
 import { RULES, buildRule, matchesPartner, DEFAULT_CHIPS, GENEROSITY, RULE_NAMES, type Chips, type Generosity, type MemoryOneRule, type Move } from '../../../sim/social/game/rules'
 import { headToHead, twoRuleRoundRobin, populationCurve, populationThreshold, TWO_RULES_ROUNDS, type HeadToHead, type TwoRuleRoundRobin, type PopulationPoint } from '../../../sim/social/game/tworules'
-import { roundRobin, predictorVersus, type Entry, type RoundRobin, type PredictorVersus } from '../../../sim/social/game/tournament'
-import { runGenerations, costAtWhichPredictorStops, PREDICTOR_COSTS, type GenerationsRun } from '../../../sim/social/game/generations'
-import { Grid, SHIPPED_GRID, MUTATIONS, encounterTable, type StartWorld, type GridRule } from '../../../sim/social/game/grid'
+import { roundRobin, predictorVersus, entryId, entryLabel, type Entry, type RoundRobin, type PredictorVersus } from '../../../sim/social/game/tournament'
+import { playMatch, rulePlayer, type Round } from '../../../sim/social/game/match'
+import { runGenerations, costAtWhichEntryStops, costsFor, MEMORY_COSTS, type GenerationsRun } from '../../../sim/social/game/generations'
+import { Grid, SHIPPED_GRID, MUTATIONS, startWorldsFor, type StartWorld, type GridRule, type GridBoundary } from '../../../sim/social/game/grid'
 import type { PartStore } from '../contract'
 import { STEPS, stepSpec, type Step, type StepSpec } from './steps'
 import type { MatchResult } from '../partners/partnersStore'
@@ -18,17 +20,28 @@ import type { MatchResult } from '../partners/partnersStore'
  * over about 300 ms sits on a click path; the grid runs on its own timer,
  * and Skip ahead pays 1,000 generations in slices. No result is computed
  * for display before the commit.
+ *
+ * Jon's Part 2 pass (2026-11-02): Steps 4 and 5 can be run again, each
+ * run on new seeds; Step 3 shows any entry's record round by round; Step 6
+ * charges every entry for its memory; Step 7 runs any set of the entries
+ * on a wrapping or a bounded grid, with a box for what the student sees.
  */
 
 export type StepState = 'intro' | 'predict' | 'running' | 'done'
 export const NOISES = [0, 0.01, 0.05, 0.1] as const
 export const RULE_SETTING = 'p2-rule'
+export const GRID_NOTES_SETTING = 'p2-grid-notes'
+export const GRID_NOTES_CAP = 1500
 export const GRID_SPEEDS = { slow: 2, normal: 10, fast: 20 } as const
 export type GridSpeed = keyof typeof GRID_SPEEDS
 export const SKIP_GENERATIONS = 1000
 /** Generations paid per timer tick while skipping ahead: about 10 ms at 40 × 40. */
 export const SKIP_SLICE = 50
 export const HISTORY_CAP = 2000
+/** The entries the grid starts with: the spec's three. */
+export const DEFAULT_GRID_IDS = ['allc', 'alld', 'tft']
+/** Every entry the grid can hold, in the order of the key. */
+export const GRID_ENTRY_IDS = [...RULES.map((r) => r.id), 'mine', 'predictor'] as const
 
 interface Job {
   label: string
@@ -41,6 +54,16 @@ export interface StudentVersus {
   rounds: number
   student: { points: number; share: number; correct: number; shareOfBest: number } | null
   predictor: { points: number; share: number; correct: number; shareOfBest: number }
+}
+
+/** One entry's match against another in the round-robin, round by round (Step 3). */
+export interface EntryRecord {
+  against: string
+  rounds: Round[]
+  mine: number
+  theirs: number
+  /** Points per round from the table, the exact value the match realizes in expectation. */
+  tableMean: number
 }
 
 export function serializeChips(c: Chips): string {
@@ -73,26 +96,34 @@ export class TournamentStore implements PartStore {
   ruleName: (typeof RULE_NAMES)[number] = 'My rule'
   // Step 3
   rr3: RoundRobin | null = null
+  recordEntry: number | null = null
   // Step 4
   rr4: RoundRobin | null = null
   versus: PredictorVersus[] = []
   studentVersus: StudentVersus[] = []
   estimatesFor = 0
+  /** How many times Step 4 has been run: each run plays on new seeds. */
+  runs4 = 0
   // Step 5
   noise: (typeof NOISES)[number] = 0.05
   rr5: RoundRobin | null = null
+  runs5 = 0
   // Step 6
   gen: { clean: GenerationsRun; noisy: GenerationsRun; cleanRR: RoundRobin; noisyRR: RoundRobin } | null = null
-  cost: (typeof PREDICTOR_COSTS)[number] = 0
-  costStop: { clean: number | null; noisy: number | null } | null = null
+  /** The cost per stored number per round. */
+  cost: (typeof MEMORY_COSTS)[number] = 0
+  costStop: { predictor: { clean: number | null; noisy: number | null }; tft: { clean: number | null; noisy: number | null } } | null = null
   // Step 7
   grid: Grid | null = null
+  gridIds: string[] = [...DEFAULT_GRID_IDS]
   world: StartWorld = 'tft'
   mutation: (typeof MUTATIONS)[number] = 0.002
+  boundary: GridBoundary = SHIPPED_GRID.boundary
   speed: GridSpeed = 'normal'
   running = false
   skipping = 0
-  history: [number, number, number][] = []
+  history: number[][] = []
+  gridNotes = ''
   private gridTimer: ReturnType<typeof setInterval> | null = null
   private carry = 0
   private readonly queue: Job[] = []
@@ -105,6 +136,7 @@ export class TournamentStore implements PartStore {
     this.chips = parseChips(progress.setting(RULE_SETTING))
     const name = progress.setting('p2-rule-name')
     if (name === 'My rule 2') this.ruleName = 'My rule 2'
+    this.gridNotes = (progress.setting(GRID_NOTES_SETTING) ?? '').slice(0, GRID_NOTES_CAP)
   }
 
   subscribe(fn: () => void): () => void {
@@ -251,11 +283,15 @@ export class TournamentStore implements PartStore {
   /** A rebuilt rule changes every later step's field, so their results are dropped until run again. */
   private invalidateRuns(): void {
     this.rr3 = null
+    this.recordEntry = null
     this.rr4 = null
     this.rr5 = null
     this.versus = []
     this.gen = null
     this.costStop = null
+    this.stopGrid()
+    this.grid = null
+    this.history = []
   }
 
   // --------------------------------------------------------------- Steps 3 to 6
@@ -268,26 +304,55 @@ export class TournamentStore implements PartStore {
 
   runRoundRobin(): void {
     this.rr3 = roundRobin(this.entries(false), 0)
+    this.recordEntry = null
     this.changed()
+  }
+
+  setRecordEntry(i: number | null): void {
+    this.recordEntry = i
+    this.changed()
+  }
+
+  /**
+   * Step 3's record for one entry: its match against every entry, round by
+   * round, with the running points. Two deterministic rules play the one
+   * match the table's exact value describes; a rule with generosity draws
+   * its moves, so its record is one realized match of the many the exact
+   * value averages, played on the run seed.
+   */
+  recordsFor(i: number): EntryRecord[] {
+    const rr = this.rr3
+    if (!rr) return []
+    const a = rr.entries[i]
+    if (a.kind !== 'rule') return []
+    return rr.entries.map((b, j) => {
+      if (b.kind !== 'rule') throw new Error('Step 3 has rules only')
+      const m = playMatch(rulePlayer(a.rule), rulePlayer(b.rule), rr.rounds, rr.noise, makeRng(this.seed * 31 + i * 7 + j))
+      return { against: entryLabel(b), rounds: m.rounds, mine: m.totalA, theirs: m.totalB, tableMean: rr.table[i][j].mean }
+    })
   }
 
   runWithPredictor(): void {
     if (this.working) return
+    const run = this.runs4++
+    const seedBase = 5000 + run * 1013
     const tasks: (() => void)[] = []
     tasks.push(() => {
-      this.rr4 = roundRobin(this.entries(true), 0)
+      this.rr4 = roundRobin(this.entries(true), 0, undefined, undefined, seedBase)
     })
     const versus: PredictorVersus[] = []
-    for (const rule of RULES) tasks.push(() => versus.push(predictorVersus(rule, 200)))
+    for (const rule of RULES) tasks.push(() => versus.push(predictorVersus(rule, 200, 0, undefined, {}, 9000 + run * 1013)))
     tasks.push(() => {
       this.versus = versus
-      this.studentVersus = this.compareWithStudent()
+      this.studentVersus = this.compareWithStudent(12000 + run * 1013)
+      this.gen = null
+      this.costStop = null
     })
     this.enqueue('Playing Predictor’s matches', tasks)
   }
 
   /** The student's Part 1 results beside Predictor's over matches of the same lengths (§6.4). */
-  private compareWithStudent(): StudentVersus[] {
+  private compareWithStudent(seedBase: number): StudentVersus[] {
     const out: StudentVersus[] = []
     const played = this.progress.partComplete(1)
     const plan = played ? planPart1(this.seed) : null
@@ -300,11 +365,11 @@ export class TournamentStore implements PartStore {
         rounds = m.rounds.length
         const pts = m.rounds.reduce((a, r) => a + r.studentPoints, 0)
         const correct = m.rounds.filter((r) => r.predicted === r.partner).length
-        const v = predictorVersus(rule, rounds, 0, 50, {}, 12000)
+        const v = predictorVersus(rule, rounds, 0, 50, {}, seedBase)
         student = { points: pts, share: correct / rounds, correct, shareOfBest: pts / v.best }
         out.push({ partner: rule.label, rounds, student, predictor: { points: v.points.mean, share: v.predictionsShare, correct: v.predictionsCorrect.mean, shareOfBest: v.shareOfBest } })
       } else {
-        const v = predictorVersus(rule, rounds, 0, 50, {}, 12000)
+        const v = predictorVersus(rule, rounds, 0, 50, {}, seedBase)
         out.push({ partner: rule.label, rounds, student: null, predictor: { points: v.points.mean, share: v.predictionsShare, correct: v.predictionsCorrect.mean, shareOfBest: v.shareOfBest } })
       }
     }
@@ -321,15 +386,20 @@ export class TournamentStore implements PartStore {
     this.rr5 = null
     this.gen = null
     this.costStop = null
-    if (this.grid) this.stopGrid()
+    this.stopGrid()
+    this.grid = null
+    this.history = []
     this.changed()
   }
 
   runWithNoise(): void {
     if (this.working) return
+    const run = this.runs5++
     this.enqueue('Playing the matches with mistakes', [
       () => {
-        this.rr5 = roundRobin(this.entries(true), this.noise)
+        this.rr5 = roundRobin(this.entries(true), this.noise, undefined, undefined, 5000 + run * 1013)
+        this.gen = null
+        this.costStop = null
       },
     ])
   }
@@ -342,21 +412,21 @@ export class TournamentStore implements PartStore {
         const noisyRR = this.rr5 && this.rr5.noise === this.noise ? this.rr5 : roundRobin(this.entries(true), this.noise)
         this.rr4 = cleanRR
         this.rr5 = noisyRR
-        this.gen = { cleanRR, noisyRR, clean: runGenerations(cleanRR, this.costs(cleanRR)), noisy: runGenerations(noisyRR, this.costs(noisyRR)) }
-        const pi = cleanRR.entries.length - 1
-        this.costStop = { clean: costAtWhichPredictorStops(cleanRR, pi).cost, noisy: costAtWhichPredictorStops(noisyRR, pi).cost }
+        this.gen = { cleanRR, noisyRR, clean: runGenerations(cleanRR, costsFor(cleanRR, this.cost)), noisy: runGenerations(noisyRR, costsFor(noisyRR, this.cost)) }
+        const pi = cleanRR.entries.findIndex((e) => e.kind === 'predictor')
+        const ti = cleanRR.entries.findIndex((e) => entryId(e) === 'tft')
+        this.costStop = {
+          predictor: { clean: costAtWhichEntryStops(cleanRR, pi).cost, noisy: costAtWhichEntryStops(noisyRR, pi).cost },
+          tft: { clean: costAtWhichEntryStops(cleanRR, ti).cost, noisy: costAtWhichEntryStops(noisyRR, ti).cost },
+        }
       },
     ])
   }
 
-  private costs(rr: RoundRobin): number[] {
-    return rr.entries.map((e) => (e.kind === 'predictor' ? this.cost : 0))
-  }
-
-  setCost(c: (typeof PREDICTOR_COSTS)[number]): void {
+  setCost(c: (typeof MEMORY_COSTS)[number]): void {
     this.cost = c
     if (this.gen) {
-      this.gen = { ...this.gen, clean: runGenerations(this.gen.cleanRR, this.costs(this.gen.cleanRR)), noisy: runGenerations(this.gen.noisyRR, this.costs(this.gen.noisyRR)) }
+      this.gen = { ...this.gen, clean: runGenerations(this.gen.cleanRR, costsFor(this.gen.cleanRR, c)), noisy: runGenerations(this.gen.noisyRR, costsFor(this.gen.noisyRR, c)) }
     }
     this.changed()
   }
@@ -364,23 +434,50 @@ export class TournamentStore implements PartStore {
   // --------------------------------------------------------------- Step 7
 
   gridSettings() {
-    return { ...SHIPPED_GRID, noise: this.noise, mutation: this.mutation }
+    return { ...SHIPPED_GRID, noise: this.noise, mutation: this.mutation, boundary: this.boundary }
+  }
+
+  /** The entries the grid holds, in the key's order. */
+  gridEntries(): Entry[] {
+    return this.entries(true).filter((e) => this.gridIds.includes(entryId(e)))
+  }
+
+  /** The start worlds for the current entries: all of each, then mixed. */
+  worlds(): { id: StartWorld; label: string }[] {
+    return startWorldsFor(this.gridEntries())
+  }
+
+  /** Check or uncheck an entry; at least two stay checked. A change drops the grid. */
+  toggleGridId(id: string): void {
+    if (!(GRID_ENTRY_IDS as readonly string[]).includes(id)) return
+    if (this.gridIds.includes(id)) {
+      if (this.gridIds.length <= 2) return
+      this.gridIds = this.gridIds.filter((x) => x !== id)
+    } else this.gridIds = [...this.gridIds, id]
+    if (this.world !== 'mixed' && !this.gridIds.includes(this.world)) this.world = 'mixed'
+    this.resetGrid()
+  }
+
+  private resetGrid(): void {
+    this.stopGrid()
+    this.grid = null
+    this.history = []
+    this.changed()
   }
 
   setWorld(w: StartWorld): void {
     this.world = w
-    this.stopGrid()
-    this.grid = null
-    this.history = []
-    this.changed()
+    this.resetGrid()
   }
 
   setMutation(m: (typeof MUTATIONS)[number]): void {
     this.mutation = m
-    this.stopGrid()
-    this.grid = null
-    this.history = []
-    this.changed()
+    this.resetGrid()
+  }
+
+  setBoundary(b: GridBoundary): void {
+    this.boundary = b
+    this.resetGrid()
   }
 
   setSpeed(s: GridSpeed): void {
@@ -388,8 +485,14 @@ export class TournamentStore implements PartStore {
     this.changed()
   }
 
+  setGridNotes(t: string): void {
+    this.gridNotes = t.slice(0, GRID_NOTES_CAP)
+    this.progress.setSetting(GRID_NOTES_SETTING, this.gridNotes)
+    this.changed()
+  }
+
   startGrid(): void {
-    const g = new Grid(this.gridSettings(), this.seed ^ (this.world.length * 977) ^ Math.round(this.mutation * 1e5))
+    const g = new Grid(this.gridSettings(), this.seed ^ (this.world.length * 977) ^ Math.round(this.mutation * 1e5) ^ (this.boundary === 'bounded' ? 4099 : 0), this.gridEntries())
     g.start(this.world)
     this.grid = g
     this.history = [g.shares()]
@@ -454,15 +557,27 @@ export class TournamentStore implements PartStore {
     this.changed()
   }
 
+  /** Tit-for-tat is in the grid, so a block of it can be dropped. */
+  canDropBlock(): boolean {
+    return this.gridIds.includes('tft')
+  }
+
   dropBlock(side: 2 | 3): void {
+    if (!this.canDropBlock()) return
     if (!this.grid) this.startGrid()
     this.grid!.dropBlock(side)
     this.history.push(this.grid!.shares())
     this.changed()
   }
 
+  private tableCache: { key: string; table: number[][] } | null = null
+
+  /** The encounter table for the current entries and noise: the grid's own once it exists, else computed once for the panel. */
   encounterTable(): number[][] {
-    return encounterTable(SHIPPED_GRID.rounds, this.noise)
+    if (this.grid) return this.grid.table
+    const key = `${this.noise}|${this.gridIds.join()}|${serializeChips(this.chips)}`
+    if (!this.tableCache || this.tableCache.key !== key) this.tableCache = { key, table: new Grid(this.gridSettings(), 0, this.gridEntries()).table }
+    return this.tableCache.table
   }
 
   changes() {

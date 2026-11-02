@@ -23,7 +23,7 @@ describe('texts:', () => {
     const out: string[] = []
     out.push(`**Part 0.** ${para(OPEN_INTRO.lines)} + *${OPEN_INTRO.content[0]}* ${OPEN_INTRO.time} Footer: *${OPEN_INTRO.footer}*\n`)
     out.push(`**Part 1 — Six Partners.** ${para(PARTNERS_WILL_DO)} About ${PARTNERS_MINUTES} minutes. Pausing: *${MATCH_SITTING_LINE}* Keys: ${para(PARTNERS_KEYS)} Content: *${L.LENGTH_LINE}* **The diagnosis.** ${para(DIAGNOSIS_WILL_DO)} About 3 minutes; one sitting, the same list unanswered.\n`)
-    for (const s of P2) out.push(`**Part 2, ${s.title}.** *${s.reread}* ${para(s.willDo)} About ${s.minutes} minutes; leave any time.${s.content.length ? ' Content: ' + s.content.map((c) => `*${c}*`).join(' ') : ''} Predictions: ${s.predictions.map((p) => `*${p.question}* [${p.choices.join(' / ')}]`).join('; ')}\n`)
+    for (const s of P2) out.push(`**Part 2, ${s.title}.** ${s.reread ? `*${s.reread}* ` : ''}${para(s.willDo)} About ${s.minutes} minutes; leave any time.${s.content.length ? ' Content: ' + s.content.map((c) => `*${c}*`).join(' ') : ''} Predictions: ${s.predictions.map((p) => `*${p.question}* [${p.choices.join(' / ')}]`).join('; ')}\n`)
     out.push(`**Part 3, Step 1 — Three films.** ${para(FILMS_WILL_DO)} About ${FILMS_MINUTES} minutes. Pausing: *${FILMS_SITTING_LINE}* Keys: ${para(FILMS_KEYS)}\n`)
     out.push(`**Part 3, Step 2 — Where is it going?** ${para(PATHS_WILL_DO)} About ${PATHS_MINUTES} minutes. Pausing: *${PATHS_SITTING_LINE}* Keys: ${para(PATHS_KEYS)}\n`)
     out.push(`**Part 3, the two procedures (after both units).** ${para(MODELS_INTRO)}\n`)

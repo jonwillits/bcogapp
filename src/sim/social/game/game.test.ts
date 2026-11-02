@@ -7,7 +7,7 @@ import { bestTotal, bruteForceBest, informativeRounds, totalFor } from './best'
 import { headToHead, populationThreshold, populationPayoffs, twoRuleRoundRobin, TWO_RULES_ROUNDS } from './tworules'
 import { estimates, expectedPointsOfSequence, freshCounts, predictorPlayer, PROBE_RATE, HORIZON, bestFirstMove } from './predictor'
 import { roundRobin, predictorVersus, type Entry } from './tournament'
-import { runGenerations } from './generations'
+import { runGenerations, costsFor, memoryUnits, ruleUnits } from './generations'
 import { Grid, SHIPPED_GRID, encounterTable, measureCycle, median } from './grid'
 
 /**
@@ -297,13 +297,17 @@ describe('the round-robin and the generations (§6.3, §6.6)', () => {
     expect(rr.totals[2]).toBeCloseTo(rr.table[2].reduce((a, c) => a + c.mean, 0) / 6, 9)
     expect(rr.ranking[0]).toBe(2) // tit-for-tat wins this field with no noise (§6.3)
   })
-  it('the cost changes only Predictor’s points, and only where it is passed', () => {
+  it('the memory cost is charged per stored number: none for the two fixed rules, one for a memory-one rule, eleven for Predictor; at no cost nothing changes', () => {
     const withP: Entry[] = [...entries, { kind: 'predictor' }]
+    expect(withP.map(memoryUnits)).toEqual([0, 0, 1, 1, 1, 1, 11])
+    expect(ruleUnits({ id: 'x', label: 'x', first: 1, after: { CC: 1, CD: 1, DC: 1, DD: 1 } })).toBe(0)
+    expect(ruleUnits({ id: 'x', label: 'x', first: 0, after: { CC: 1, CD: 1, DC: 1, DD: 1 } })).toBe(1)
     const rr = roundRobin(withP, 0, 200, 4)
     const a = runGenerations(rr, [], 50)
-    const b = runGenerations(rr, withP.map((e) => (e.kind === 'predictor' ? 0.5 : 0)), 50)
+    const b = runGenerations(rr, costsFor(rr, 0.05), 50)
+    expect(costsFor(rr, 0.05).map((c) => Number(c.toFixed(3)))).toEqual([0, 0, 0.05, 0.05, 0.05, 0.05, 0.55])
     expect(b.shares[50][6]).toBeLessThan(a.shares[50][6])
-    const c = runGenerations(rr, withP.map(() => 0), 50)
+    const c = runGenerations(rr, costsFor(rr, 0), 50)
     expect(c.shares[50]).toEqual(a.shares[50])
   })
 })
@@ -320,10 +324,38 @@ describe('the grid (§6.7)', () => {
     g.start('allc')
     g.cells[g.index(0, 0)] = 1 // one defector among cooperators
     g.step()
-    // The defector scored 8 × 50 and every neighbor copies it, including the wrapped ones.
+    // The defector scored 50 an encounter and every neighbor copies it, including the wrapped ones.
     expect(g.cells[g.index(5, 5)]).toBe(1)
     expect(g.cells[g.index(1, 1)]).toBe(1)
     expect(g.cells[g.index(3, 3)]).toBe(0)
+  })
+  it('on a bounded grid the edges stop: a corner has three neighbors, an edge five, and a score is the average per encounter, so a corner cell is compared fairly', () => {
+    const g = new Grid({ ...SHIPPED_GRID, width: 6, height: 6, mutation: 0, noise: 0, boundary: 'bounded' }, 1)
+    expect(g.neighborCount(g.index(0, 0))).toBe(3)
+    expect(g.neighborCount(g.index(3, 0))).toBe(5)
+    expect(g.neighborCount(g.index(3, 3))).toBe(8)
+    g.start('allc')
+    g.cells[g.index(0, 0)] = 1
+    g.step()
+    // The corner defector averaged 50 an encounter over its three neighbors and all three copy it; nothing wrapped to the far corner.
+    expect(g.cells[g.index(1, 1)]).toBe(1)
+    expect(g.cells[g.index(1, 0)]).toBe(1)
+    expect(g.cells[g.index(5, 5)]).toBe(0)
+    expect(g.cells[g.index(2, 2)]).toBe(0)
+  })
+  it('the grid holds any set of the entries, Predictor included, with its table played for Predictor’s pairs and exact for the rest', () => {
+    const entriesG: Entry[] = [{ kind: 'rule', rule: ruleById('tft') }, { kind: 'rule', rule: ruleById('alld') }, { kind: 'predictor' }]
+    const g = new Grid({ ...SHIPPED_GRID, width: 8, height: 8, noise: 0 }, 3, entriesG)
+    expect(g.table[0][0]).toBeCloseTo(30, 9)
+    expect(g.table[1][0]).toBeCloseTo(14, 9) // always-defect against tit-for-tat over 10 rounds: 5 + 9
+    expect(g.table[2][0]).toBeGreaterThan(15) // Predictor against tit-for-tat: mostly mutual cooperation
+    expect(g.table[2][0]).toBeLessThanOrEqual(30)
+    g.start('predictor')
+    expect(g.shares()[2]).toBe(1)
+    g.start('mixed')
+    g.run(5)
+    expect(g.shares().reduce((a, b) => a + b, 0)).toBeCloseTo(1, 9)
+    expect(() => g.start('allc')).toThrow()
   })
   it('the shipped setting meets the targets over twenty seeds: each start world is taken over by the next rule in the cycle, single mutants do not take an all-defect world in 1,000 generations, a dropped block does in most seeds, and a mixed start changes its most common rule at least twice in most seeds, mostly in the cycle’s order', () => {
     const r = measureCycle(SHIPPED_GRID, 20)

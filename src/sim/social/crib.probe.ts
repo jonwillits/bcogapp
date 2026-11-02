@@ -2,7 +2,7 @@ import { describe, it } from 'vitest'
 import { RULES, ruleById } from './game/rules'
 import { headToHead, twoRuleRoundRobin, populationThreshold, TWO_RULES_ROUNDS } from './game/tworules'
 import { roundRobin, predictorVersus, entryLabel, type Entry } from './game/tournament'
-import { runGenerations, costAtWhichPredictorStops } from './game/generations'
+import { runGenerations, costAtWhichEntryStops } from './game/generations'
 import { measureCycle, SHIPPED_GRID, median } from './game/grid'
 import { animalsByTests } from './arena/matrix'
 import { ANIMAL_IDS, animalById } from './arena/animals'
@@ -38,7 +38,7 @@ describe('crib:', () => {
       console.log(`   with Predictor (50 seeds): ${withP.ranking.map((i) => `${entryLabel(withP.entries[i])} ${f2(withP.totals[i])}`).join(' | ')}`)
       const run = runGenerations(withP)
       const last = run.shares[300]
-      console.log(`   generations at 300 with Predictor: ${withP.entries.map((e, i) => `${entryLabel(e)} ${(100 * last[i]).toFixed(0)}%`).join(' | ')}; Predictor stops spreading at cost ${costAtWhichPredictorStops(withP, withP.entries.length - 1).cost ?? 'none of the five'}`)
+      console.log(`   generations at 300 with Predictor: ${withP.entries.map((e, i) => `${entryLabel(e)} ${(100 * last[i]).toFixed(0)}%`).join(' | ')}; Predictor stops spreading at a cost per stored number of ${costAtWhichEntryStops(withP, withP.entries.length - 1).cost ?? 'none of the five'}`)
     }
     console.log('\n== Part 2, Step 4 — Predictor against each partner, 200 rounds, 50 seeds')
     for (const r of RULES) {

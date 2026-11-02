@@ -27,7 +27,7 @@ function describeOutcome(s: GridSettings, r: ReturnType<typeof measureCycle>): s
   const twoPlus = r.mixedChanges.filter((c) => c.changes >= 2).length
   const cycle = count(r.tftToAllc) > seeds / 2 && count(r.allcToAlld) > seeds / 2 && count(r.alldToTftMutants) <= seeds / 2 && count(r.alldToTftBlock) > seeds / 2 && twoPlus > seeds / 2 && inOrder / Math.max(1, all) > 0.5
   const ship = s === SHIPPED_GRID ? ' <= shipped' : ''
-  return `${s.neighbors}n ${s.update.padEnd(6)} R=${String(s.rounds).padStart(2)} noise ${String(s.noise).padEnd(4)} mut ${String(s.mutation).padEnd(5)} ${s.width}x${s.height} ${s.payoff.padEnd(6)} | tft>allc ${count(r.tftToAllc)}/${seeds} med ${m(r.tftToAllc)} | allc>alld ${count(r.allcToAlld)}/${seeds} med ${m(r.allcToAlld)} | mutants ${count(r.alldToTftMutants)}/${seeds} | block ${count(r.alldToTftBlock)}/${seeds} med ${m(r.alldToTftBlock)} | mixed changes med ${median(changes)} (2+: ${twoPlus}/${seeds}) in order ${all ? ((100 * inOrder) / all).toFixed(0) : '-'}% | ${cycle ? 'CYCLE' : '-'}${ship}`
+  return `${s.neighbors}n ${s.update.padEnd(6)} ${s.boundary.padEnd(7)} R=${String(s.rounds).padStart(2)} noise ${String(s.noise).padEnd(4)} mut ${String(s.mutation).padEnd(5)} ${s.width}x${s.height} ${s.payoff.padEnd(6)} | tft>allc ${count(r.tftToAllc)}/${seeds} med ${m(r.tftToAllc)} | allc>alld ${count(r.allcToAlld)}/${seeds} med ${m(r.allcToAlld)} | mutants ${count(r.alldToTftMutants)}/${seeds} | block ${count(r.alldToTftBlock)}/${seeds} med ${m(r.alldToTftBlock)} | mixed changes med ${median(changes)} (2+: ${twoPlus}/${seeds}) in order ${all ? ((100 * inOrder) / all).toFixed(0) : '-'}% | ${cycle ? 'CYCLE' : '-'}${ship}`
 }
 
 describe('cycle:', () => {
@@ -44,7 +44,7 @@ describe('cycle:', () => {
         for (const rounds of roundsList)
           for (const noise of noises)
             for (const mutation of mutations)
-              for (const [width, height] of sizes) settings.push({ width, height, neighbors, update, rounds, noise, mutation, payoff: 'exact', keep: 0.5 })
+              for (const [width, height] of sizes) settings.push({ width, height, neighbors, update, rounds, noise, mutation, payoff: 'exact', boundary: 'wrap', keep: 0.5 })
     console.log(`\n== Cycle search: ${settings.length} settings × ${SEEDS} seeds, 1,000 generations each run`)
     const t0 = Date.now()
     for (const s of settings) {
@@ -61,5 +61,14 @@ describe('cycle:', () => {
     console.log(describeOutcome(played, measureCycle(played, 20)))
     console.log('\n== Shipped setting with a 3 × 3 block')
     console.log(describeOutcome(SHIPPED_GRID, measureCycle(SHIPPED_GRID, 20, 1000, 1000, 3)))
+  }, 3_600_000)
+
+  it('the boundary: the shipped setting wrapping and bounded, twenty seeds each (Jon, 2026-11-02)', () => {
+    console.log('\n== Boundary comparison, 20 seeds, exact payoffs, scores as the average per encounter')
+    for (const boundary of ['wrap', 'bounded'] as const) {
+      const s = { ...SHIPPED_GRID, boundary }
+      console.log(describeOutcome(s, measureCycle(s, 20)))
+      console.log(describeOutcome(s, measureCycle(s, 20, 1000, 1000, 3)) + '  (3 × 3 block)')
+    }
   }, 3_600_000)
 })

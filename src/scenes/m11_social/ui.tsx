@@ -132,56 +132,85 @@ export function ReferencePanel({ reference }: { reference: Reference }) {
   )
 }
 
-/** A line plot of several series over a shared x, as a small SVG with a legend. */
-export function LinePlot({ series, width = 420, height = 180, yMax = 1, xLabel, yLabel, marks }: { series: { label: string; color: string; data: number[] }[]; width?: number; height?: number; yMax?: number; xLabel: string; yLabel: string; marks?: { x: number; label: string }[] }) {
+/**
+ * A line plot of several series over a shared x, as a small SVG, with the
+ * legend under it as wrapped text so that it never sits over the curves
+ * or the axis (Jon, 2026-11-02). A mark is a dashed vertical line with a
+ * label at the top or the bottom.
+ */
+export function LinePlot({ series, width = 420, height = 180, yMax = 1, xLabel, yLabel, marks }: { series: { label: string; color: string; data: number[] }[]; width?: number; height?: number; yMax?: number; xLabel: string; yLabel: string; marks?: { x: number; label: string; color?: string; at?: 'top' | 'bottom' }[] }) {
   const pad = { l: 36, r: 10, t: 10, b: 26 }
   const n = Math.max(2, ...series.map((s) => s.data.length))
   const X = (i: number) => pad.l + (i / (n - 1)) * (width - pad.l - pad.r)
   const Y = (v: number) => height - pad.b - (Math.min(yMax, Math.max(0, v)) / yMax) * (height - pad.t - pad.b)
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block', background: 'var(--bg)', borderRadius: 8, maxWidth: '100%' }} role="img" aria-label={`${yLabel} against ${xLabel}`} data-lineplot>
-      <line x1={pad.l} y1={Y(0)} x2={width - pad.r} y2={Y(0)} stroke="var(--border)" />
-      <line x1={pad.l} y1={pad.t} x2={pad.l} y2={Y(0)} stroke="var(--border)" />
-      {marks?.map((m) => (
-        <g key={m.label}>
-          <line x1={X(m.x)} y1={pad.t} x2={X(m.x)} y2={Y(0)} stroke="var(--sensor)" strokeDasharray="3 3" />
-          <text x={X(m.x) + 3} y={pad.t + 10} fontSize={9} fill="var(--sensor)">
-            {m.label}
-          </text>
-        </g>
-      ))}
-      {series.map((s) => (
-        <path key={s.label} d={s.data.map((v, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ')} fill="none" stroke={s.color} strokeWidth={1.6} data-series={s.label} />
-      ))}
-      {series.map((s, i) => (
-        <g key={`l-${s.label}`}>
-          <rect x={pad.l + 6} y={pad.t + 2 + i * 12} width={10} height={3} fill={s.color} />
-          <text x={pad.l + 20} y={pad.t + 6 + i * 12} fontSize={9} fill="var(--text-muted)">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxWidth: '100%' }} data-lineplot>
+      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block', background: 'var(--bg)', borderRadius: 8, maxWidth: '100%' }} role="img" aria-label={`${yLabel} against ${xLabel}`}>
+        <line x1={pad.l} y1={Y(0)} x2={width - pad.r} y2={Y(0)} stroke="var(--border)" />
+        <line x1={pad.l} y1={pad.t} x2={pad.l} y2={Y(0)} stroke="var(--border)" />
+        {marks?.map((m) => (
+          <g key={m.label} data-mark={m.label}>
+            <line x1={X(m.x)} y1={pad.t} x2={X(m.x)} y2={Y(0)} stroke={m.color ?? 'var(--sensor)'} strokeDasharray="3 3" />
+            <text x={X(m.x) + 3} y={m.at === 'bottom' ? Y(0) - 4 : pad.t + 10} fontSize={9} fill={m.color ?? 'var(--sensor)'}>
+              {m.label}
+            </text>
+          </g>
+        ))}
+        {series.map((s) => (
+          <path key={s.label} d={s.data.map((v, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ')} fill="none" stroke={s.color} strokeWidth={1.6} data-series={s.label} />
+        ))}
+        <text x={(pad.l + width - pad.r) / 2} y={height - 8} fontSize={10} textAnchor="middle" fill="var(--text-muted)">
+          {xLabel}
+        </text>
+        <text x={10} y={(pad.t + height - pad.b) / 2} fontSize={10} textAnchor="middle" fill="var(--text-muted)" transform={`rotate(-90 10 ${(pad.t + height - pad.b) / 2})`}>
+          {yLabel}
+        </text>
+        <text x={pad.l - 4} y={pad.t + 3} fontSize={9} textAnchor="end" fill="var(--text-muted)">
+          {yMax}
+        </text>
+        <text x={pad.l - 4} y={Y(0) + 3} fontSize={9} textAnchor="end" fill="var(--text-muted)">
+          0
+        </text>
+        <text x={width - pad.r} y={Y(0) + 12} fontSize={9} textAnchor="end" fill="var(--text-muted)">
+          {n - 1}
+        </text>
+      </svg>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 12px', fontSize: 10.5, color: 'var(--text-muted)', maxWidth: width }} data-legend>
+        {series.map((s) => (
+          <span key={s.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <span style={{ width: 10, height: 3, background: s.color, display: 'inline-block', borderRadius: 1 }} />
             {s.label}
-          </text>
-        </g>
-      ))}
-      <text x={(pad.l + width - pad.r) / 2} y={height - 8} fontSize={10} textAnchor="middle" fill="var(--text-muted)">
-        {xLabel}
-      </text>
-      <text x={10} y={(pad.t + height - pad.b) / 2} fontSize={10} textAnchor="middle" fill="var(--text-muted)" transform={`rotate(-90 10 ${(pad.t + height - pad.b) / 2})`}>
-        {yLabel}
-      </text>
-      <text x={pad.l - 4} y={pad.t + 3} fontSize={9} textAnchor="end" fill="var(--text-muted)">
-        {yMax}
-      </text>
-      <text x={pad.l - 4} y={Y(0) + 3} fontSize={9} textAnchor="end" fill="var(--text-muted)">
-        0
-      </text>
-      <text x={width - pad.r} y={Y(0) + 12} fontSize={9} textAnchor="end" fill="var(--text-muted)">
-        {n - 1}
-      </text>
-    </svg>
+          </span>
+        ))}
+      </div>
+    </div>
   )
 }
 
-/** The six entries' colors, one a rule, and Predictor's. */
-export const ENTRY_COLORS: Record<string, string> = { allc: '#34d399', alld: '#f87171', tft: '#4f9cff', grim: '#c084fc', wsls: '#f0a94b', stft: '#67e8f9', predictor: '#e7ecf3', mine: '#fb7185' }
+/** Several choices at once, as toggles: a checked one changes color and nothing else. */
+export function MultiChoice<T extends string>({ values, options, onToggle, testId }: { values: T[]; options: { id: T; label: string; title?: string }[]; onToggle: (v: T) => void; testId?: string }) {
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }} data-multi={testId}>
+      {options.map((o) => {
+        const on = values.includes(o.id)
+        return (
+          <button key={o.id} type="button" title={o.title} aria-pressed={on} onClick={() => onToggle(o.id)} style={{ padding: '4px 9px', fontSize: 11.5, borderRadius: 999, border: '1px solid var(--border)', cursor: 'pointer', background: on ? 'var(--accent)' : 'var(--surface-2)', color: on ? '#0b111c' : 'var(--text)', fontWeight: 500 }}>
+            {o.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+/** A hex color as its three channels, for a canvas. */
+export function rgbOf(hex: string): [number, number, number] {
+  const h = hex.replace('#', '')
+  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]
+}
+
+/** The six entries' colors, one a rule, the student's (yellow, apart from Always defect's red on the grid; Jon's walk 2026-11-02), and Predictor's. */
+export const ENTRY_COLORS: Record<string, string> = { allc: '#34d399', alld: '#f87171', tft: '#4f9cff', grim: '#c084fc', wsls: '#f0a94b', stft: '#67e8f9', predictor: '#e7ecf3', mine: '#fde047' }
 
 /** A move as a short word. */
 export const moveWord = (m: 'C' | 'D'): string => (m === 'C' ? 'Cooperate' : 'Defect')

@@ -1,18 +1,19 @@
 import { Panel } from '../../components/Panel'
 import type { ProgressStore } from '../../sim/social/progress/store'
 import { RULES, OUTCOMES, cooperates } from '../../sim/social/game/rules'
-import { MUTATIONS, START_WORLDS, type StartWorld } from '../../sim/social/game/grid'
-import { Btn, Choice, Content, FixedLines, GroupLabel, Note, PANEL_STYLE, PART_TITLES, RIGHT_STYLE, StagePanel, useStore, moveWord } from './ui'
+import { MUTATIONS, type StartWorld, type GridBoundary } from '../../sim/social/game/grid'
+import { entryId, entryLabel } from '../../sim/social/game/tournament'
+import { Btn, Choice, Content, FixedLines, GroupLabel, MultiChoice, Note, PANEL_STYLE, PART_TITLES, RIGHT_STYLE, StagePanel, useStore } from './ui'
 import { InstructionScreen } from '../m10_memory/progress/InstructionScreen'
 import { NO_BRAIN_LINE } from './lines'
 import type { PartModule } from './contract'
 import { TournamentStore, NOISES, GRID_SPEEDS, type GridSpeed } from './tournament/store'
 import { STEPS, type Step } from './tournament/steps'
-import { GenerationsPanel, GridPanel, PredictorPanel, ReferenceForStep3, ReferenceForStep4, ReferenceForStep7, RoundRobinTable, RuleBuilder, TwoRulesPanel } from './tournament/panels'
+import { EntryRecords, GenerationsPanel, GridPanel, PredictorPanel, ReferenceForStep3, ReferenceForStep4, ReferenceForStep7, RoundRobinTable, RuleBuilder, TwoRulesPanel } from './tournament/panels'
 
 /**
- * Part 2's screens (spec §6): the left column runs the step (the chips,
- * the instruction screen's Begin with Go back and Go to, the predictions
+ * Part 2's screens (spec §6): the left column runs the step (the step
+ * buttons, the instruction screen's Begin with Go back and Go to, the predictions
  * and Commit my prediction, the step's controls, Go on and Redo); the
  * stage carries the step's panels once its predictions are committed; the
  * right column carries the six rules as tables, the student's rule, and
@@ -93,9 +94,9 @@ function Left({ ctx }: { ctx: Ctx }) {
 function StepControls({ s }: { s: TournamentStore }) {
   switch (s.step) {
     case 1:
-      return <Note>The four runs are on the stage, with the chips for R and the slider for x.</Note>
+      return <Note>The four runs are on the stage, with the buttons for R and the slider for x.</Note>
     case 2:
-      return <Note>Set the chips on the stage. The rule is saved as you set it.</Note>
+      return <Note>Set the rule on the stage. It is saved as you set it.</Note>
     case 3:
       return (
         <div>
@@ -106,10 +107,13 @@ function StepControls({ s }: { s: TournamentStore }) {
       )
     case 4:
       return (
-        <div>
-          <Btn primary onClick={() => s.runWithPredictor()} disabled={s.working || !!s.rr4}>
-            Run with Predictor
-          </Btn>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div>
+            <Btn primary onClick={() => s.runWithPredictor()} disabled={s.working}>
+              {s.rr4 ? 'Run again with Predictor' : 'Run with Predictor'}
+            </Btn>
+          </div>
+          {s.rr4 && <Note>Each run plays Predictor’s matches on new seeds, so its numbers move within their spread.</Note>}
         </div>
       )
     case 5:
@@ -118,8 +122,8 @@ function StepControls({ s }: { s: TournamentStore }) {
           <GroupLabel>Noise: each move flipped with this probability</GroupLabel>
           <Choice value={String(s.noise)} options={NOISES.map((n) => ({ id: String(n), label: `${Math.round(n * 100)}%` }))} onChange={(v) => s.setNoise(Number(v) as (typeof NOISES)[number])} />
           <div>
-            <Btn primary onClick={() => s.runWithNoise()} disabled={s.working || !!s.rr5}>
-              Run with mistakes
+            <Btn primary onClick={() => s.runWithNoise()} disabled={s.working}>
+              {s.rr5 ? 'Run again with mistakes' : 'Run with mistakes'}
             </Btn>
           </div>
         </div>
@@ -130,16 +134,20 @@ function StepControls({ s }: { s: TournamentStore }) {
           <Btn primary onClick={() => s.runGenerationsNow()} disabled={s.working || !!s.gen}>
             Run the generations
           </Btn>
-          <Note>The cost slider is on the stage once the generations have run. The noise is Step 5’s: {Math.round(s.noise * 100)}%.</Note>
+          <Note>The memory cost is set on the stage once the generations have run. The noise is Step 5’s: {Math.round(s.noise * 100)}%.</Note>
         </div>
       )
     case 7:
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-grid-controls>
+          <GroupLabel>Rules in the grid (at least two)</GroupLabel>
+          <MultiChoice values={s.gridIds} options={s.entries(true).map((e) => ({ id: entryId(e), label: entryLabel(e) }))} onToggle={(id) => s.toggleGridId(id)} testId="grid-entries" />
           <GroupLabel>Start world</GroupLabel>
-          <Choice value={s.world} options={START_WORLDS.map((w) => ({ id: w.id, label: w.label }))} onChange={(v) => s.setWorld(v as StartWorld)} />
+          <Choice value={s.world} options={s.worlds()} onChange={(v) => s.setWorld(v as StartWorld)} />
           <GroupLabel>Mutation per cell per generation</GroupLabel>
           <Choice value={String(s.mutation)} options={MUTATIONS.map((m) => ({ id: String(m), label: `${(m * 100).toFixed(1)}%` }))} onChange={(v) => s.setMutation(Number(v) as (typeof MUTATIONS)[number])} />
+          <GroupLabel>The edges</GroupLabel>
+          <Choice value={s.boundary} options={[{ id: 'wrap', label: 'wrap around' }, { id: 'bounded', label: 'stop' }]} onChange={(v) => s.setBoundary(v as GridBoundary)} />
           <GroupLabel>Speed, generations a second</GroupLabel>
           <Choice value={s.speed} options={(Object.keys(GRID_SPEEDS) as GridSpeed[]).map((k) => ({ id: k, label: `${k} (${GRID_SPEEDS[k]})` }))} onChange={(v) => s.setSpeed(v as GridSpeed)} />
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -155,11 +163,16 @@ function StepControls({ s }: { s: TournamentStore }) {
           </div>
           {s.world === 'alld' && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <Btn onClick={() => s.dropBlock(2)}>Drop a 2 × 2 block of tit-for-tat</Btn>
-              <Btn onClick={() => s.dropBlock(3)}>Drop a 3 × 3 block of tit-for-tat</Btn>
+              <Btn onClick={() => s.dropBlock(2)} disabled={!s.canDropBlock()}>
+                Drop a 2 × 2 block of tit-for-tat
+              </Btn>
+              <Btn onClick={() => s.dropBlock(3)} disabled={!s.canDropBlock()}>
+                Drop a 3 × 3 block of tit-for-tat
+              </Btn>
             </div>
           )}
-          <Note>The noise is Step 5’s: {Math.round(s.noise * 100)}%. Eight neighbors, 10 rounds an encounter, 40 × 40 cells.</Note>
+          {s.world === 'alld' && !s.canDropBlock() && <Note>Check Tit-for-tat to drop a block of it.</Note>}
+          <Note>The noise is Step 5’s: {Math.round(s.noise * 100)}%. Eight neighbors, 10 rounds an encounter, 40 × 40 cells. Changing the rules, the world, the mutation, or the edges starts a new grid.</Note>
         </div>
       )
   }
@@ -168,7 +181,7 @@ function StepControls({ s }: { s: TournamentStore }) {
 function Stage({ ctx }: { ctx: Ctx }) {
   const s = useStore(ctx.store)
   const spec = s.spec
-  if (s.state === 'intro') return <InstructionScreen title={spec.title} willDo={[spec.reread, ...spec.willDo]} minutes={spec.minutes} sitting="leave any time" content={spec.content} onBegin={() => s.begin()} />
+  if (s.state === 'intro') return <InstructionScreen title={spec.title} willDo={spec.reread ? [spec.reread, ...spec.willDo] : spec.willDo} minutes={spec.minutes} sitting="leave any time" content={spec.content} onBegin={() => s.begin()} />
   if (s.state === 'predict')
     return (
       <StagePanel testId="predict">
@@ -182,6 +195,7 @@ function Stage({ ctx }: { ctx: Ctx }) {
       {s.step === 1 && <TwoRulesPanel s={s} />}
       {s.step === 2 && <RuleBuilder s={s} />}
       {s.step === 3 && (s.rr3 ? <RoundRobinTable rr={s.rr3} testId="rr3" /> : <Note>Press “Run the round-robin” on the left.</Note>)}
+      {s.step === 3 && s.rr3 && <EntryRecords s={s} />}
       {s.step === 3 && <ReferenceForStep3 />}
       {s.step === 4 && (s.rr4 && s.versus.length ? <PredictorPanel s={s} /> : <Note>{s.working ? s.badge : 'Press “Run with Predictor” on the left.'}</Note>)}
       {s.step === 4 && <ReferenceForStep4 />}
@@ -196,12 +210,13 @@ function Stage({ ctx }: { ctx: Ctx }) {
 function Right({ ctx }: { ctx: Ctx }) {
   const s = useStore(ctx.store)
   const mine = s.myRule()
-  const tableOf = (r: { first: number; after: Record<string, number> }) => `${moveWord(r.first === 1 ? 'C' : 'D').slice(0, 1)}  ${OUTCOMES.map((o) => (cooperates(r as never, o) === 1 ? 'C' : cooperates(r as never, o) === 0 ? 'D' : cooperates(r as never, o).toFixed(2))).join('  ')}`
+  const cell = (p: number) => (p === 1 ? 'C' : p === 0 ? 'D' : p.toFixed(2)).padStart(6)
+  const tableOf = (r: { first: number; after: Record<string, number> }) => `${cell(r.first)}${OUTCOMES.map((o) => cell(cooperates(r as never, o))).join('')}`
   return (
     <Panel title="The rules" style={RIGHT_STYLE}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <Note>Every entry is a table of moves: a first move, then a move after each outcome of the previous round, from its own side (its move, then the partner’s). C is cooperate, D defect; a fraction is how often it cooperates.</Note>
-        <FixedLines lines={[`${''.padEnd(36)}${'first'.padEnd(4)}${'CC'.padEnd(3)}${'CD'.padEnd(3)}${'DC'.padEnd(3)}${'DD'}`, ...RULES.map((r) => `${r.label.padEnd(36)}${tableOf(r)}`), `${mine.label.padEnd(36)}${tableOf(mine)}`]} testId="rules-table" />
+        <FixedLines lines={[`${''.padEnd(36)}${['first', 'CC', 'CD', 'DC', 'DD'].map((h) => h.padStart(6)).join('')}`, ...RULES.map((r) => `${r.label.padEnd(36)}${tableOf(r)}`), `${mine.label.padEnd(36)}${tableOf(mine)}`]} testId="rules-table" />
         <FixedLines lines={RULES.map((r) => `${r.label}: ${r.description}`)} mono={false} />
         <Note>Predictor is not a table: it estimates and searches (Step 4).</Note>
       </div>

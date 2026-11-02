@@ -82,7 +82,7 @@ Then by area: the spec §6 numbers `PROBE_DIR=src/sim/social/game -t "measure:"`
 10. Part 5's creature (stilt and bulb) and the set names Ostra, Velin, Marl, Tesk.
 11. The macaque from simple shapes; camera height and distance.
 12. The arena drawing on the dark theme: facing stroke, amber sight shading, white and dashed-blue barriers.
-13. Noise as chips (0, 1, 5, 10%) and grid speed as chips (2, 10, 20 a second), not sliders.
+13. Noise as buttons (0, 1, 5, 10%) and grid speed as buttons (2, 10, 20 a second), not sliders.
 
 Also for his review (§12): every simulated class is "pending" (all four entries of `classes.ts` lack a source) and four references in `references.ts` await their sources.
 

@@ -2,12 +2,12 @@ import { useEffect, useRef } from 'react'
 import { RULES, GENEROSITY, GENEROSITY_LABELS, RULE_NAMES, type Chips, type Move, type Outcome, OUTCOMES, cooperates, ruleById, type Generosity } from '../../../sim/social/game/rules'
 import { TWO_RULES_ROUNDS } from '../../../sim/social/game/tworules'
 import { entryId, entryLabel, type RoundRobin, type PredictorVersus } from '../../../sim/social/game/tournament'
-import { PREDICTOR_COSTS, type GenerationsRun } from '../../../sim/social/game/generations'
-import { GRID_RULE_LABELS, type Grid, type GridRule, type Change } from '../../../sim/social/game/grid'
+import { MEMORY_COSTS, memoryUnits, type GenerationsRun } from '../../../sim/social/game/generations'
+import { type Grid, type GridRule, type Change } from '../../../sim/social/game/grid'
 import { estimates, freshCounts, firstEstimate } from '../../../sim/social/game/predictor'
 import { outcomeOf } from '../../../sim/social/game/rules'
 import { referenceById } from '../../../sim/social/references'
-import { Choice, Content, ENTRY_COLORS, FixedLines, GroupLabel, LinePlot, Note, ReferencePanel, moveWord } from '../ui'
+import { Choice, Content, ENTRY_COLORS, FixedLines, GroupLabel, LinePlot, Note, ReferencePanel, moveWord, rgbOf } from '../ui'
 import { ENOUGH_COOPERATORS_LINE, FINDING_OUT_LINE, NEVER_AHEAD_LINE, PREDICTING_LINE, STAND_IN_COST_LINE, THE_FIELD_LINE, THE_GRID_LINE } from '../lines'
 import type { StudentVersus, TournamentStore } from './store'
 
@@ -18,12 +18,16 @@ import type { StudentVersus, TournamentStore } from './store'
  */
 
 const f2 = (x: number) => x.toFixed(2)
+/** An entry's label cut to the table's column. */
+const shortLabel = (label: string) => label.replace('Defect forever after one defection', 'Defect forever').replace('Suspicious tit-for-tat', 'Susp. tit-for-tat').replace('Win-stay, lose-shift', 'Win-stay').slice(0, 18)
 
 // --------------------------------------------------------------- Step 1
 
 export function TwoRulesPanel({ s }: { s: TournamentStore }) {
   const t = s.twoRules()
   const R = s.rounds
+  const marks: { x: number; label: string; color?: string; at?: 'top' | 'bottom' }[] = [{ x: s.share * 50, label: `x = ${s.share.toFixed(2)}`, color: 'var(--accent)', at: 'bottom' }]
+  if (t.threshold !== null) marks.push({ x: t.threshold * 50, label: `Tit-for-tat does better from ${t.threshold.toFixed(3)}` })
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-panel="two-rules">
       <GroupLabel>Run 1 — one round</GroupLabel>
@@ -44,7 +48,8 @@ export function TwoRulesPanel({ s }: { s: TournamentStore }) {
         <input type="range" min={0} max={1} step={0.01} value={s.share} onChange={(e) => s.setShare(Number(e.target.value))} aria-label="share of tit-for-tat in the population" style={{ width: 200 }} />
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>{s.share.toFixed(2)}</span>
       </div>
-      <LinePlot series={[{ label: 'Tit-for-tat', color: ENTRY_COLORS.tft, data: t.curve.map((p) => p.tft) }, { label: 'Always defect', color: ENTRY_COLORS.alld, data: t.curve.map((p) => p.alld) }]} yMax={Math.max(1, ...t.curve.map((p) => Math.max(p.tft, p.alld))) * 1.05} xLabel="share of the population playing tit-for-tat, 0 to 1 (50 steps)" yLabel="average points per encounter" width={420} height={170} marks={t.threshold !== null ? [{ x: t.threshold * 50, label: `x = ${t.threshold.toFixed(3)}` }] : undefined} />
+      <LinePlot series={[{ label: 'Tit-for-tat', color: ENTRY_COLORS.tft, data: t.curve.map((p) => p.tft) }, { label: 'Always defect', color: ENTRY_COLORS.alld, data: t.curve.map((p) => p.alld) }]} yMax={Math.max(1, ...t.curve.map((p) => Math.max(p.tft, p.alld))) * 1.05} xLabel="share of the population playing tit-for-tat, 0 to 1 (50 steps)" yLabel="average points per encounter" width={420} height={190} marks={marks} />
+      <Note>The blue dashed line is the slider’s x; the orange one, where there is one, is the share above which Tit-for-tat’s average passes Always defect’s.</Note>
       <FixedLines lines={[`${`At x = ${s.share.toFixed(2)}, R = ${R}:`.padEnd(24)}${'Tit-for-tat'.padEnd(16)}${f2(t.at.tft).padStart(8)}`, `${''.padEnd(24)}${'Always defect'.padEnd(16)}${f2(t.at.alld).padStart(8)}`, `${'Tit-for-tat does better once x >'.padEnd(34)}${t.threshold === null ? 'never, at this R' : t.threshold.toFixed(4)}`]} testId="run4" />
       <Content>{ENOUGH_COOPERATORS_LINE}</Content>
     </div>
@@ -88,10 +93,9 @@ export function RuleBuilder({ s }: { s: TournamentStore }) {
 // --------------------------------------------------------------- Steps 3 and 5
 
 export function RoundRobinTable({ rr, against, testId }: { rr: RoundRobin; against?: RoundRobin | null; testId: string }) {
-  const n = rr.entries.length
-  const short = (i: number) => entryLabel(rr.entries[i]).replace('Defect forever after one defection', 'Defect forever').replace('Suspicious tit-for-tat', 'Susp. tit-for-tat').replace('Win-stay, lose-shift', 'Win-stay').slice(0, 15)
-  const head = `${''.padEnd(16)}${rr.entries.map((_, j) => short(j).slice(0, 6).padStart(7)).join('')}${'total'.padStart(8)}`
-  const rows = rr.entries.map((_, i) => `${short(i).padEnd(16)}${rr.table[i].map((c) => f2(c.mean).padStart(7)).join('')}${f2(rr.totals[i]).padStart(8)}`)
+  const short = (i: number) => shortLabel(entryLabel(rr.entries[i]))
+  const head = `${''.padEnd(19)}${rr.entries.map((_, j) => short(j).slice(0, 6).padStart(7)).join('')}${'total'.padStart(8)}`
+  const rows = rr.entries.map((_, i) => `${short(i).padEnd(19)}${rr.table[i].map((c) => f2(c.mean).padStart(7)).join('')}${f2(rr.totals[i]).padStart(8)}`)
   const ranking = rr.ranking.map((i, k) => {
     const delta = against ? rr.totals[i] - against.totals[against.entries.findIndex((e) => entryId(e) === entryId(rr.entries[i]))] : null
     return `${String(k + 1).padEnd(3)}${entryLabel(rr.entries[i]).padEnd(36)}${f2(rr.totals[i]).padStart(6)}${delta !== null ? `${(delta >= 0 ? '+' : '') + f2(delta)}`.padStart(8) : ''}${rr.table[i].some((c) => c.played) ? '  ±' + f2(Math.max(...rr.table[i].filter((c) => c.played).map((c) => c.sd))) : ''}`
@@ -102,11 +106,49 @@ export function RoundRobinTable({ rr, against, testId }: { rr: RoundRobin; again
       <div style={{ overflowX: 'auto' }}>
         <FixedLines lines={[head, ...rows]} testId={`${testId}-table`} />
       </div>
-      <GroupLabel>Ranking by total (the mean over every opponent, itself included){against ? ', with the change from no mistakes' : ''}</GroupLabel>
+      <GroupLabel>Ranking by total (the mean over every entry, itself included){against ? ', with the change from no mistakes' : ''}</GroupLabel>
       <FixedLines lines={ranking} testId={`${testId}-ranking`} />
       {rr.entries.some((e) => e.kind === 'predictor') && <Note>Predictor’s pairs are played, 50 seeds each; ± is the largest spread among its pairs. Every other pair is the exact expected value.</Note>}
       <Content>{THE_FIELD_LINE}</Content>
-      <span style={{ display: 'none' }}>{n}</span>
+    </div>
+  )
+}
+
+/** Step 3: one entry's record against every entry, round by round, with its running points (Jon, 2026-11-02). */
+export function EntryRecords({ s }: { s: TournamentStore }) {
+  const rr = s.rr3
+  if (!rr) return null
+  const i = s.recordEntry
+  const records = i === null ? [] : s.recordsFor(i)
+  const chunk = 50
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-panel="rr3-records">
+      <GroupLabel>The record of one entry against every entry, round by round</GroupLabel>
+      <Choice value={i === null ? null : String(i)} options={rr.entries.map((e, k) => ({ id: String(k), label: entryLabel(e) }))} onChange={(v) => s.setRecordEntry(Number(v))} />
+      {i !== null && records.length > 0 && (
+        <>
+          <LinePlot series={records.map((r) => ({ label: r.against, color: ENTRY_COLORS[entryId(rr.entries[records.indexOf(r)])] ?? 'var(--text)', data: r.rounds.reduce<number[]>((acc, round) => [...acc, (acc[acc.length - 1] ?? 0) + round.pointsA], [0]) }))} yMax={Math.max(1, ...records.map((r) => r.mine)) * 1.05} xLabel="round" yLabel={`${shortLabel(entryLabel(rr.entries[i]))}’s running points`} width={420} height={200} />
+          <Note>Each line is {entryLabel(rr.entries[i])}’s running total in its match against the named entry. Under it, every match’s moves in rows of {chunk} rounds: the entry’s moves, then the other’s. C is cooperate, D defect.</Note>
+          <div style={{ overflowX: 'auto' }}>
+            <FixedLines
+              lines={records.flatMap((r, j) => {
+                const me = shortLabel(entryLabel(rr.entries[i]))
+                const them = shortLabel(r.against)
+                const lines: string[] = [`vs ${r.against.padEnd(36)}${String(r.mine).padStart(5)} to ${String(r.theirs).padEnd(5)} (${f2(r.tableMean)} a round in the table)`]
+                for (let k = 0; k < r.rounds.length; k += chunk) {
+                  const part = r.rounds.slice(k, k + chunk)
+                  lines.push(`${`${k + 1}–${k + part.length}`.padStart(9)}  ${me.padEnd(17)}${part.map((x) => x.a).join('')}`)
+                  lines.push(`${''.padStart(9)}  ${them.padEnd(17)}${part.map((x) => x.b).join('')}`)
+                }
+                if (j < records.length - 1) lines.push('')
+                return lines
+              })}
+              testId="rr3-record-lines"
+            />
+          </div>
+          {rr.entries.some((e) => e.kind === 'rule' && [e.rule.first, ...OUTCOMES.map((o) => e.rule.after[o])].some((p) => p !== 0 && p !== 1)) && <Note>A rule with generosity draws some of its moves, so its match here is one of the many the table’s exact value averages.</Note>}
+        </>
+      )}
     </div>
   )
 }
@@ -147,7 +189,7 @@ export function PredictorPanel({ s }: { s: TournamentStore }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-panel="predictor">
       <RoundRobinTable rr={rr} testId="rr4" />
-      <FixedLines lines={[`${'Predictor ranks'.padEnd(20)}${String(rank)} of ${rr.entries.length}`]} testId="predictor-rank" />
+      <FixedLines lines={[`${'Predictor ranks'.padEnd(20)}${String(rank)} of ${rr.entries.length}`, `${'Run'.padEnd(20)}${String(s.runs4)} (each run plays new matches)`]} testId="predictor-rank" />
       <Content>{PREDICTING_LINE}</Content>
       <GroupLabel>Predictor against each partner, 200 rounds, no mistakes, 50 seeds</GroupLabel>
       <FixedLines lines={[`${'partner'.padEnd(36)}${'points'.padStart(8)}${'±'.padStart(5)}${'best'.padStart(6)}${'share'.padStart(7)}${'predicted'.padStart(11)}${'probes'.padStart(8)}${'lost'.padStart(7)}`, ...v.map((x) => `${ruleById(x.partner as never).label.padEnd(36)}${x.points.mean.toFixed(0).padStart(8)}${x.points.sd.toFixed(0).padStart(5)}${String(x.best).padStart(6)}${f2(x.shareOfBest).padStart(7)}${f2(x.predictionsShare).padStart(11)}${x.probes.mean.toFixed(1).padStart(8)}${x.lostToProbing.toFixed(0).padStart(7)}`)]} testId="predictor-versus" />
@@ -190,22 +232,41 @@ export function GenerationsPanel({ s }: { s: TournamentStore }) {
   const g = s.gen
   if (!g) return null
   const series = (run: GenerationsRun, rr: RoundRobin) => rr.entries.map((e, i) => ({ label: entryLabel(e), color: ENTRY_COLORS[entryId(e)] ?? 'var(--text)', data: run.shares.map((sh) => sh[i]) }))
-  const pi = g.cleanRR.entries.length - 1
+  const pi = g.cleanRR.entries.findIndex((e) => e.kind === 'predictor')
+  const ti = g.cleanRR.entries.findIndex((e) => entryId(e) === 'tft')
   const endLines = (run: GenerationsRun, rr: RoundRobin) => {
     const last = run.shares[run.shares.length - 1]
     return rr.entries.map((e, i) => `${entryLabel(e).padEnd(36)}${(100 * last[i]).toFixed(1).padStart(7)}%`)
   }
+  const stopText = (c: number | null | undefined) => (c === null ? 'none of the five' : c === undefined ? '' : String(c))
+  const share = (run: GenerationsRun, i: number) => `${(100 * run.shares[run.shares.length - 1][i]).toFixed(1).padStart(6)}%`
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-panel="generations">
-      <GroupLabel>No mistakes: each entry’s share over 300 generations</GroupLabel>
-      <LinePlot series={series(g.clean, g.cleanRR)} yMax={1} xLabel="generation" yLabel="share of the population" />
+      <GroupLabel>Memory, and its cost per stored number, per round</GroupLabel>
+      <Choice value={String(s.cost)} options={MEMORY_COSTS.map((c) => ({ id: String(c), label: String(c) }))} onChange={(v) => s.setCost(Number(v) as (typeof MEMORY_COSTS)[number])} />
+      <FixedLines lines={[`${'entry'.padEnd(36)}${'numbers stored'.padStart(15)}${'cost a round'.padStart(14)}`, ...g.cleanRR.entries.map((e) => `${entryLabel(e).padEnd(36)}${String(memoryUnits(e)).padStart(15)}${(memoryUnits(e) * s.cost).toFixed(2).padStart(14)}`)]} testId="memory-table" />
+      <Note>Numbers stored from one round to the next: nothing for a rule that makes the same move whatever happened; the previous round for a rule that reads it; Predictor’s ten counts and the previous round. The cost is subtracted from the entry’s average points before each generation’s update.</Note>
+      <GroupLabel>No mistakes: each entry’s share over 300 generations, at this cost</GroupLabel>
+      <LinePlot series={series(g.clean, g.cleanRR)} yMax={1} height={300} xLabel="generation" yLabel="share of the population" />
       <FixedLines lines={[`${'At generation 300'.padEnd(36)}`, ...endLines(g.clean, g.cleanRR), `${'Vanished (under 1%)'.padEnd(36)}${g.clean.vanished.map((i) => entryLabel(g.cleanRR.entries[i])).join(', ') || 'none'}`]} testId="gen-clean" />
-      <GroupLabel>With mistakes at {Math.round(g.noisyRR.noise * 100)}%</GroupLabel>
-      <LinePlot series={series(g.noisy, g.noisyRR)} yMax={1} xLabel="generation" yLabel="share of the population" />
+      <GroupLabel>With mistakes at {Math.round(g.noisyRR.noise * 100)}%, at this cost</GroupLabel>
+      <LinePlot series={series(g.noisy, g.noisyRR)} yMax={1} height={300} xLabel="generation" yLabel="share of the population" />
       <FixedLines lines={[`${'At generation 300'.padEnd(36)}`, ...endLines(g.noisy, g.noisyRR), `${'Vanished (under 1%)'.padEnd(36)}${g.noisy.vanished.map((i) => entryLabel(g.noisyRR.entries[i])).join(', ') || 'none'}`]} testId="gen-noisy" />
-      <GroupLabel>Predictor’s cost per round</GroupLabel>
-      <Choice value={String(s.cost)} options={PREDICTOR_COSTS.map((c) => ({ id: String(c), label: String(c) }))} onChange={(v) => s.setCost(Number(v) as (typeof PREDICTOR_COSTS)[number])} />
-      <FixedLines lines={[`${'Predictor’s share at generation 300, no mistakes'.padEnd(52)}${(100 * g.clean.shares[g.clean.shares.length - 1][pi]).toFixed(1).padStart(6)}%`, `${'Predictor’s share at generation 300, with mistakes'.padEnd(52)}${(100 * g.noisy.shares[g.noisy.shares.length - 1][pi]).toFixed(1).padStart(6)}%`, `${'Its starting share'.padEnd(52)}${(100 / g.cleanRR.entries.length).toFixed(1).padStart(6)}%`, `${'Lowest cost at which it ends below its start, no mistakes'.padEnd(52)}${s.costStop?.clean === null ? 'none of the five' : s.costStop?.clean === undefined ? '' : String(s.costStop.clean)}`, `${'The same, with mistakes'.padEnd(52)}${s.costStop?.noisy === null ? 'none of the five' : s.costStop?.noisy === undefined ? '' : String(s.costStop.noisy)}`]} testId="cost-lines" />
+      <GroupLabel>Where the cost stops an entry spreading</GroupLabel>
+      <FixedLines
+        lines={[
+          `${'Every entry’s starting share'.padEnd(70)}${(100 / g.cleanRR.entries.length).toFixed(1).padStart(6)}%`,
+          `${'Predictor’s share at generation 300, no mistakes'.padEnd(70)}${share(g.clean, pi)}`,
+          `${'Predictor’s share at generation 300, with mistakes'.padEnd(70)}${share(g.noisy, pi)}`,
+          `${'Lowest cost at which Predictor ends below its start, no mistakes'.padEnd(70)}${stopText(s.costStop?.predictor.clean)}`,
+          `${'The same, with mistakes'.padEnd(70)}${stopText(s.costStop?.predictor.noisy)}`,
+          `${'Tit-for-tat’s share at generation 300, no mistakes'.padEnd(70)}${share(g.clean, ti)}`,
+          `${'Tit-for-tat’s share at generation 300, with mistakes'.padEnd(70)}${share(g.noisy, ti)}`,
+          `${'Lowest cost at which Tit-for-tat ends below its start, no mistakes'.padEnd(70)}${stopText(s.costStop?.tft.clean)}`,
+          `${'The same, with mistakes'.padEnd(70)}${stopText(s.costStop?.tft.noisy)}`,
+        ]}
+        testId="cost-lines"
+      />
       <Content>{STAND_IN_COST_LINE}</Content>
     </div>
   )
@@ -213,7 +274,8 @@ export function GenerationsPanel({ s }: { s: TournamentStore }) {
 
 // --------------------------------------------------------------- Step 7
 
-export const GRID_COLORS: Record<GridRule, string> = { 0: '#34d399', 1: '#f87171', 2: '#4f9cff' }
+/** An entry's color in the grid: the tournament's colors, so that a rule looks the same in every step. */
+export const gridColor = (grid: Grid, r: GridRule): string => ENTRY_COLORS[entryId(grid.entries[r])] ?? '#e7ecf3'
 
 export function GridCanvas({ grid, size = 400 }: { grid: Grid | null; size?: number }) {
   const ref = useRef<HTMLCanvasElement>(null)
@@ -225,9 +287,9 @@ export function GridCanvas({ grid, size = 400 }: { grid: Grid | null; size?: num
     if (!ctx) return
     const { width, height } = grid.settings
     const img = ctx.createImageData(width, height)
-    const rgb: Record<GridRule, [number, number, number]> = { 0: [52, 211, 153], 1: [248, 113, 113], 2: [79, 156, 255] }
+    const rgb = grid.entries.map((_, r) => rgbOf(gridColor(grid, r)))
     for (let i = 0; i < grid.cells.length; i++) {
-      const [r, g, b] = rgb[grid.cells[i] as GridRule]
+      const [r, g, b] = rgb[grid.cells[i]]
       img.data[4 * i] = r
       img.data[4 * i + 1] = g
       img.data[4 * i + 2] = b
@@ -241,15 +303,14 @@ export function GridCanvas({ grid, size = 400 }: { grid: Grid | null; size?: num
 }
 
 /** The band of the most common rule at each generation. */
-export function CommonBand({ history, width = 420 }: { history: [number, number, number][]; width?: number }) {
+export function CommonBand({ history, colors, width = 420 }: { history: number[][]; colors: string[]; width?: number }) {
   const n = history.length
   return (
     <svg width={width} height={16} viewBox={`0 0 ${width} 16`} style={{ display: 'block', borderRadius: 4 }} role="img" aria-label="the most common rule at each generation" data-band>
       {history.map((s, i) => {
-        let best: GridRule = 0
-        if (s[1] > s[best]) best = 1
-        if (s[2] > s[best]) best = 2
-        return <rect key={i} x={(i / Math.max(1, n)) * width} y={0} width={Math.max(1, width / Math.max(1, n))} height={16} fill={GRID_COLORS[best]} />
+        let best = 0
+        for (let r = 1; r < s.length; r++) if (s[r] > s[best]) best = r
+        return <rect key={i} x={(i / Math.max(1, n)) * width} y={0} width={Math.max(1, width / Math.max(1, n))} height={16} fill={colors[best] ?? '#e7ecf3'} />
       })}
     </svg>
   )
@@ -257,32 +318,42 @@ export function CommonBand({ history, width = 420 }: { history: [number, number,
 
 export function GridPanel({ s }: { s: TournamentStore }) {
   const g = s.grid
+  const entries = s.gridEntries()
+  const labels = entries.map((e) => entryLabel(e))
+  const colors = entries.map((e) => ENTRY_COLORS[entryId(e)] ?? '#e7ecf3')
   const table = s.encounterTable()
   const changes: Change[] = s.changes()
-  const shares = g ? g.shares() : [0, 0, 0]
+  const shares = g ? g.shares() : entries.map(() => 0)
+  const hasPredictor = entries.some((e) => e.kind === 'predictor')
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-panel="grid">
       <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
         <GridCanvas grid={g} size={320} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           <GroupLabel>Key</GroupLabel>
-          {([0, 1, 2] as GridRule[]).map((r) => (
-            <div key={r} style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12 }} data-key={r}>
-              <span style={{ width: 14, height: 14, background: GRID_COLORS[r], borderRadius: 3, display: 'inline-block' }} />
-              {GRID_RULE_LABELS[r]}
+          {entries.map((e, r) => (
+            <div key={entryId(e)} style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12 }} data-key={r}>
+              <span style={{ width: 14, height: 14, background: colors[r], borderRadius: 3, display: 'inline-block' }} />
+              {labels[r]}
             </div>
           ))}
-          <FixedLines lines={[`${'Generation'.padEnd(20)}${String(g?.generation ?? 0).padStart(6)}`, ...([0, 1, 2] as GridRule[]).map((r) => `${GRID_RULE_LABELS[r].padEnd(20)}${(100 * shares[r]).toFixed(1).padStart(5)}%`), `${'Most common'.padEnd(20)}${g ? GRID_RULE_LABELS[g.commonest()] : ''}`, `${'Changes of the rule'.padEnd(20)}${String(changes.length).padStart(6)}`, `${'  in the cycle’s order'.padEnd(20)}${String(changes.filter((c) => c.inOrder).length).padStart(6)}`]} testId="grid-status" />
-          <Note>A change is counted when a rule passes half the grid after another held it. The cycle’s order is tit-for-tat → always-cooperate → always-defect → tit-for-tat.</Note>
+          <FixedLines lines={[`${'Generation'.padEnd(22)}${String(g?.generation ?? 0).padStart(6)}`, ...entries.map((_, r) => `${shortLabel(labels[r]).padEnd(22)}${(100 * shares[r]).toFixed(1).padStart(5)}%`), `${'Most common'.padEnd(22)}${g ? shortLabel(labels[g.commonest()]) : ''}`, `${'Changes of the rule'.padEnd(22)}${String(changes.length).padStart(6)}`, `${'  in the cycle’s order'.padEnd(22)}${String(changes.filter((c) => c.inOrder).length).padStart(6)}`]} testId="grid-status" />
+          <Note>A change is counted when a rule passes half the grid after another held it. The cycle’s order is tit-for-tat → always-cooperate → always-defect → tit-for-tat. The edges {s.boundary === 'wrap' ? 'wrap: the far left touches the far right, the top the bottom' : 'stop: a cell on an edge has five neighbors, in a corner three'}.</Note>
         </div>
       </div>
       <GroupLabel>Each rule’s share over the generations, and the most common rule at each (the band)</GroupLabel>
-      <LinePlot series={([0, 1, 2] as GridRule[]).map((r) => ({ label: GRID_RULE_LABELS[r], color: GRID_COLORS[r], data: s.history.map((h) => h[r]) }))} yMax={1} xLabel={`generation (last ${s.history.length})`} yLabel="share of the grid" />
-      <CommonBand history={s.history} />
-      {changes.length > 0 && <FixedLines lines={changes.slice(-8).map((c) => `${String(c.generation).padStart(5)}: ${GRID_RULE_LABELS[c.from]} → ${GRID_RULE_LABELS[c.to]}${c.inOrder ? '  (the cycle’s order)' : ''}`)} testId="grid-changes" />}
+      <LinePlot series={entries.map((_, r) => ({ label: labels[r], color: colors[r], data: s.history.map((h) => h[r]) }))} yMax={1} xLabel={`generation (last ${s.history.length})`} yLabel="share of the grid" />
+      <CommonBand history={s.history} colors={colors} />
+      {changes.length > 0 && <FixedLines lines={changes.slice(-8).map((c) => `${String(c.generation).padStart(5)}: ${shortLabel(labels[c.from])} → ${shortLabel(labels[c.to])}${c.inOrder ? '  (the cycle’s order)' : ''}`)} testId="grid-changes" />}
       <GroupLabel>Points per encounter at {Math.round(s.noise * 100)}% noise, 10 rounds, row against column</GroupLabel>
-      <FixedLines lines={[`${''.padEnd(20)}${GRID_RULE_LABELS.map((l) => l.slice(0, 10).padStart(12)).join('')}`, ...table.map((row, i) => `${GRID_RULE_LABELS[i].padEnd(20)}${row.map((v) => f2(v).padStart(12)).join('')}`)]} testId="grid-table" />
+      <div style={{ overflowX: 'auto' }}>
+        <FixedLines lines={[`${''.padEnd(18)}${labels.map((l) => shortLabel(l).slice(0, 9).padStart(10)).join('')}`, ...table.map((row, i) => `${shortLabel(labels[i]).padEnd(18)}${row.map((v) => f2(v).padStart(10)).join('')}`)]} testId="grid-table" />
+      </div>
+      {hasPredictor && <Note>Predictor’s row and column are means over 50 played encounters of 10 rounds; every other cell is the exact expected value.</Note>}
       <Content>{THE_GRID_LINE}</Content>
+      <GroupLabel>What you see: pockets, fronts, and what each combination of rules does</GroupLabel>
+      <textarea value={s.gridNotes} onChange={(e) => s.setGridNotes(e.target.value)} maxLength={1500} rows={5} placeholder="What happens locally, in pockets of cells, and what happens with each combination of rules you try." autoComplete="off" autoCorrect="off" spellCheck={false} aria-label="your notes on the grid" data-grid-notes style={{ width: '100%', boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit', fontSize: 12.5, lineHeight: 1.5, padding: 8, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }} />
+      <Note>Saved as you type, with your results.</Note>
     </div>
   )
 }

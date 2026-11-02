@@ -35,8 +35,8 @@ export const PREDICTING_LINE = 'Predictor estimates each partner’s next move f
 /** 10. Part 2, Step 4. */
 export const FINDING_OUT_LINE = 'Finding out costs points: a probe is a defection, and some partners answer it for the rest of the match.'
 
-/** 11. Part 2, Step 6. */
-export const STAND_IN_COST_LINE = 'This cost stands in for what computing a prediction costs an animal. It is not a measured cost of any brain.'
+/** 11. Part 2, Step 6 (the memory cost, Jon 2026-11-02). */
+export const STAND_IN_COST_LINE = 'This cost stands in for what memory costs an animal, as a larger brain costs energy. It is not a measured cost of any brain.'
 
 /** 12. Part 2, Step 5. */
 export const MISTAKES_LINE = 'With mistakes, a move is sometimes the opposite of what the rule specifies.'

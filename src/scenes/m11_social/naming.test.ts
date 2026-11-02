@@ -132,7 +132,7 @@ describe('the lines that are content, each on its panel (§12)', () => {
       ['THE_FIELD_LINE', /Which rule wins depends on which other rules are entered/, 'tournament/steps.ts'],
       ['PREDICTING_LINE', /Predictor estimates each partner’s next move/, 'tournament/steps.ts'],
       ['FINDING_OUT_LINE', /a probe is a defection/, 'tournament/steps.ts'],
-      ['STAND_IN_COST_LINE', /This cost stands in for what computing a prediction costs an animal/, 'tournament/steps.ts'],
+      ['STAND_IN_COST_LINE', /This cost stands in for what memory costs an animal/, 'tournament/steps.ts'],
       ['MISTAKES_LINE', /With mistakes, a move is sometimes the opposite of what the rule specifies/, 'tournament/steps.ts'],
       ['THE_GRID_LINE', /Each cell copies the rule of its highest-scoring neighbor/, 'tournament/steps.ts'],
       ['ONE_VIEWER_LINE', /The 1944 viewers saw a different film/, 'shapes/Reveal.tsx'],

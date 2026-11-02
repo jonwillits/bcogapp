@@ -2,7 +2,7 @@ import { describe, it } from 'vitest'
 import { RULES, ruleById } from './rules'
 import { headToHead, twoRuleRoundRobin, populationThreshold, TWO_RULES_ROUNDS } from './tworules'
 import { roundRobin, predictorVersus, entryLabel, type Entry } from './tournament'
-import { runGenerations, costAtWhichPredictorStops, PREDICTOR_COSTS } from './generations'
+import { runGenerations, costAtWhichEntryStops, costsFor, MEMORY_COSTS } from './generations'
 import { bestTotal } from './best'
 
 /**
@@ -91,8 +91,15 @@ describe('measure:', () => {
       const atP = (g: number) => runP.shares[g].map((s, i) => `${entryLabel(withP.entries[i]).slice(0, 5)} ${(100 * s).toFixed(0)}%`).join(' ')
       console.log(`== Generations, noise ${noise}, with Predictor`)
       for (const g of [0, 10, 20, 30, 50, 100, 200, 300]) console.log(`  gen ${String(g).padStart(3)}: ${atP(g)}`)
-      const stop = costAtWhichPredictorStops(withP, pi)
-      console.log(`  Predictor's final share by cost: ${PREDICTOR_COSTS.map((c) => `${c}: ${(100 * stop.finalShares[c]).toFixed(1)}%`).join('  ')}   stops spreading at cost ${stop.cost === null ? 'none in the list' : stop.cost} (start ${(100 / withP.entries.length).toFixed(1)}%)`)
+      const stop = costAtWhichEntryStops(withP, pi)
+      console.log(`  Predictor's final share by cost per stored number (0 / 1 / 11 units): ${MEMORY_COSTS.map((c) => `${c}: ${(100 * stop.finalShares[c]).toFixed(1)}%`).join('  ')}   stops spreading at ${stop.cost === null ? 'none in the list' : stop.cost} (start ${(100 / withP.entries.length).toFixed(1)}%)`)
+      const ti = withP.entries.findIndex((e) => entryLabel(e) === 'Tit-for-tat')
+      const stopT = costAtWhichEntryStops(withP, ti)
+      console.log(`  Tit-for-tat's final share by cost: ${MEMORY_COSTS.map((c) => `${c}: ${(100 * stopT.finalShares[c]).toFixed(1)}%`).join('  ')}   stops spreading at ${stopT.cost === null ? 'none in the list' : stopT.cost}`)
+      for (const c of MEMORY_COSTS) {
+        const r = runGenerations(withP, costsFor(withP, c))
+        console.log(`  cost ${String(c).padEnd(4)} at 300: ${r.shares[300].map((s, i) => `${entryLabel(withP.entries[i]).slice(0, 5)} ${(100 * s).toFixed(1)}%`).join(' ')}`)
+      }
     }
   })
 })
