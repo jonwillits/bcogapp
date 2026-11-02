@@ -78,7 +78,7 @@ export function LockedPanel({ title, reason, children }: { title: string; reason
   return (
     <div
       data-stage="locked"
-      style={{ position: 'absolute', left: '50%', top: 24, transform: 'translateX(-50%)', width: 'min(560px, calc(100vw - 800px))', minWidth: 380, padding: '16px 20px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 12.5, lineHeight: 1.55, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'auto' }}
+      style={{ position: 'absolute', left: 'calc(50% + var(--stage-shift, 0px))', top: 24, transform: 'translateX(-50%)', width: 'min(560px, calc(100vw - 800px))', minWidth: 380, padding: '16px 20px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 12.5, lineHeight: 1.55, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'auto' }}
     >
       <div style={{ fontSize: 14, fontWeight: 600 }}>{title}</div>
       <Note>{reason}</Note>

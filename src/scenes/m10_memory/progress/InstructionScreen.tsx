@@ -64,7 +64,7 @@ function groupBullets(lines: string[]): (string | string[])[] {
 export function InstructionScreen({ title, willDo, minutes, sitting, sittingLine, ready = READY_DEFAULT, keys, content, onBegin, beginLabel = 'Begin', disabled, extra, inline }: InstructionScreenProps) {
   const style = inline
     ? { width: '100%', maxWidth: 560 }
-    : { position: 'absolute' as const, left: '50%', top: 24, transform: 'translateX(-50%)', width: 'min(560px, calc(100vw - 780px))', minWidth: 360, maxHeight: 'calc(100vh - 170px)', overflowY: 'auto' as const }
+    : { position: 'absolute' as const, left: 'calc(50% + var(--stage-shift, 0px))', top: 24, transform: 'translateX(-50%)', width: 'min(560px, calc(100vw - 780px))', minWidth: 360, maxHeight: 'calc(100vh - 170px)', overflowY: 'auto' as const }
   return (
     <div
       data-instruction

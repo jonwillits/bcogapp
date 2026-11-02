@@ -124,7 +124,7 @@ describe('the lines that are content, each on its panel (§12)', () => {
   it('every line exists and is used where the spec puts it', () => {
     const uses: [string, RegExp, string][] = [
       ['SECOND_RUN_LINE', /A second run is not a first run/, 'Part0.tsx'],
-      ['BEST_TOTAL_LINE', /best possible total knows when the match ends/, 'partners/Reveal.tsx'],
+      ['BEST_TOTAL_LINE', /best possible total is computed with the match’s length/, 'partners/Reveal.tsx'],
       ['PREDICTING_PLAYING_LINE', /Predicting a partner well and playing well against it are different/, 'partners/Reveal.tsx'],
       ['NO_BRAIN_LINE', /An organism does not need a brain to employ a strategy/, 'PartTournament.tsx'],
       ['NEVER_AHEAD_LINE', /Tit-for-tat never scores more than its partner in a single match/, 'tournament/steps.ts'],

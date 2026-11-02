@@ -22,7 +22,7 @@ export const FILMS_MINUTES = 7
 export const PATHS_MINUTES = 8
 
 export const FILMS_WILL_DO = [
-  'You will watch three short films, about 30 seconds each, of a large triangle, a small triangle and a small disc moving on a plain stage with a rectangle that has a door. They play by themselves and cannot be paused or replayed.',
+  'You will watch three short films, about 30 seconds each, of a large triangle, a small triangle, and a small disc moving on a plain stage with a rectangle that has a door. They play by themselves and cannot be paused or replayed.',
   `After each film, a text box: “${DESCRIPTION_PROMPT}” At least ${MIN_DESCRIPTION_CHARS} characters. Write what you saw, in your own words; there is no right answer.`,
   'After the third film and its description, a few short questions about all three films together, each answered with a button or a check. Then this step is finished.',
 ]
@@ -31,13 +31,13 @@ export const FILMS_KEYS = ['There is nothing to press while a film plays.', '“
 export const FILMS_SITTING_LINE = 'Once you press “Begin”, finish the three films and their questions in one sitting. If you leave partway, you will see the same three films again from the first.'
 
 export const PATHS_WILL_DO = [
-  'You will see a grid maze with walls and three marked squares, A, B and C. A dot moves through it, one square at a time, leaving a dashed trace behind it. Now and then the dot pauses.',
-  'At each pause, say where the dot is heading: give 100 points across A, B and C with three sliders. Moving one slider rescales the other two so the three always sum to 100. Press “Commit” and the dot goes on. There are 16 paths and about 40 pauses.',
-  'If you leave partway, your answers so far are kept, and the path you were on is replaced by another of the same kind, so no path is shown twice.',
+  'You will see a grid maze with walls and three marked squares, A, B, and C. A dot moves through it, one square at a time, leaving a dashed trace behind it. Now and then the dot pauses.',
+  'At each pause, say where the dot is heading: give 100 points across A, B, and C with three sliders. Moving one slider rescales the other two so the three always sum to 100. Press “Commit” and the dot goes on. There are 16 paths and about 40 pauses.',
+  'If you leave partway, your answers so far are saved, and the path you were on is replaced by another of the same kind, so no path is shown twice.',
 ]
 
-export const PATHS_KEYS = ['The three sliders set the points for A, B and C.', '“Commit” records your answer at a pause; the dot goes on by itself.']
-export const PATHS_SITTING_LINE = 'You can leave and come back: the answers you have committed are kept, and the path you were on is replaced by another of the same kind.'
+export const PATHS_KEYS = ['The three sliders set the points for A, B, and C.', '“Commit” records your answer at a pause; the dot goes on by itself.']
+export const PATHS_SITTING_LINE = 'You can leave and come back: the answers you have committed are saved, and the path you were on is replaced by another of the same kind.'
 
 export function ShapesLeft({ ctx }: { ctx: PartContext<ShapesStore> }) {
   const s = useStore(ctx.store)

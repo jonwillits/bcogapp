@@ -77,9 +77,9 @@ export function revealData(progress: ProgressStore): RevealData | null {
 
 /** The two procedures in plain words, shown after both units are done and before any comparison (§7.2); here rather than in `screens.tsx` because it names goals, which Step 1 must not before its films are described. */
 export const MODELS_INTRO = [
-  'Two procedures now judge the same paths you judged, at the same pauses. Each gives a split of 100 across A, B and C, as you did.',
-  `- ${INVERSE_PLANNING.label}: it assumes the dot moves efficiently toward its goal, by the shortest paths around walls with some noise, and asks which goal would make the path seen so far an efficient one, allowing the goal to change along the way. Its settings are the ones its authors fitted to adults.`,
-  `- ${HEURISTIC.label}: it takes the goal to be whatever the dot last moved toward, and looks at nothing before the last step.`,
+  'Two procedures now judge the same paths you judged, at the same pauses. Each gives a split of 100 across A, B, and C, as you did.',
+  `- ${INVERSE_PLANNING.label}: it assumes the dot moves efficiently toward its goal, by the shortest paths around walls with some noise, and computes which goal would make the path seen so far an efficient one, allowing the goal to change along the way. Its settings are the ones its authors fitted to adults.`,
+  `- ${HEURISTIC.label}: it takes the goal to be whatever the dot last moved toward, and uses nothing before the last step.`,
   'On most pauses the two agree. On some they do not: where the dot’s last steps fit two goals equally and only the whole path tells them apart.',
   'Before any comparison is shown, predict which procedure your judgments matched better overall, and which on the pauses where the two disagree. Then press “Commit my prediction”.',
 ]

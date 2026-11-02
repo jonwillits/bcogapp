@@ -18,7 +18,7 @@ export const PARTNERS_MINUTES = 18
 
 export const PARTNERS_WILL_DO = [
   'You will play a repeated game against six partners, Partner A to Partner F, one match each, in any order you like. Each partner follows a rule of its own that you cannot see. Your job is to find out, from its moves alone, what each one does.',
-  'The game is the prisoner’s dilemma, with the payoff matrix the reading gives (§11.1.7). On every round, both of you choose Cooperate or Defect at the same time. If both cooperate, 3 points each. If both defect, 1 point each. If one defects while the other cooperates, the defector gets 5 and the cooperator 0.',
+  'The game is the prisoner’s dilemma, with the payoff matrix from the reading (§11.1.7). On every round, both of you choose Cooperate or Defect at the same time. If both cooperate, 3 points each. If both defect, 1 point each. If one defects while the other cooperates, the defector gets 5 and the cooperator 0.',
   'On every round you make two choices and commit them together: what you think the partner will play this round, and what you will play. Only then is the round shown: both moves, both points, and the running totals. The partner’s move is computed from the rounds before, never from your choice this round.',
   'A notes box beside the record is for your own hypotheses about the partner. It is saved with your results and is not scored.',
   'After all six matches, you will match each partner to a description of how it plays, and commit. Nothing about any partner is shown until then.',

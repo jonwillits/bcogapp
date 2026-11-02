@@ -28,7 +28,7 @@ export function TwoRulesPanel({ s }: { s: TournamentStore }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-panel="two-rules">
       <GroupLabel>Run 1 — one round</GroupLabel>
       <FixedLines lines={[`${'Always defect'.padEnd(16)}${moveWord('D').padEnd(11)}${String(t.one.alld).padStart(4)} points`, `${'Tit-for-tat'.padEnd(16)}${moveWord('C').padEnd(11)}${String(t.one.tft).padStart(4)} points`]} testId="run1" />
-      <GroupLabel>Run 2 — a match of R rounds, head to head</GroupLabel>
+      <GroupLabel>Run 2 — a match of R rounds</GroupLabel>
       <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
         <span style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>R</span>
         <Choice value={String(R)} options={TWO_RULES_ROUNDS.map((r) => ({ id: String(r), label: String(r) }))} onChange={(v) => s.setRounds(Number(v))} />

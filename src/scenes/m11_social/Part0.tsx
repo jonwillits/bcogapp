@@ -47,10 +47,10 @@ export class OpenStore implements PartStore {
 export const OPEN_INTRO = {
   title: 'Part 0 — General Lab Instructions',
   lines: [
-    'This lab has six parts. In Part 1 you play a repeated game against six hidden partners, predicting each one’s move before every round. In Part 2 you run tournaments and populations of rules, and build a rule of your own. In Part 3 you describe three short films of moving shapes, and then judge where a dot in a maze is heading. In Part 4 you are the experimenter, testing five hidden chimpanzees in an arena. In Part 5 you judge the heights of the members of two groups of an invented animal. In Part 6 you are a macaque at a table, with two of its brain cells on screen.',
-    'Every part, and every step within a part, opens on a screen like this one that says what you will do, how long it takes, and whether you can leave partway without needing to start over. Experiments are done in one sitting; explorations can be left and returned to, and their steps reopened or redone.',
+    'This lab has six parts, each designed to clarify and explore topics and themes in this module.',
+    'Every part, and every step within a part, opens on a screen like this one. Each one says what you will do, how long it takes, and whether you can leave partway without needing to start over. Experiments are done in one sitting; explorations can be left and returned to, and their steps reopened or redone.',
     'Your progress is saved in this browser on this computer only. A part you have finished does not need to be redone. A part you leave partway is started over when you return, as its screen says. “Export my results” and “Load my results” can be used to transfer your saved results to another computer or browser.',
-    'Part 2 opens once Part 1’s diagnosis is committed, because Part 2 names the rules Part 1 hides. Parts 3, 4, 5 and 6 can be done in any order, before or after Parts 1 and 2. Nothing in one of them tells you what another tests.',
+    'Part 2 opens once Part 1’s diagnosis is committed, because Part 2 names the rules Part 1 hides. Parts 3, 4, 5, and 6 can be done in any order, before or after Parts 1 and 2. Nothing in one of them tells you what another tests.',
     'The Open tab also gathers every part’s results under “My results, all parts”.',
   ],
   content: [COMMIT_RULE_LINE],
@@ -116,7 +116,7 @@ function Left({ ctx }: { ctx: { store: PartStore; header: React.ReactNode; progr
 }
 
 function Stage() {
-  return <OrientingPanel title={OPEN_INTRO.title} lines={OPEN_INTRO.lines} content={OPEN_INTRO.content} footer={`${OPEN_INTRO.time} ${OPEN_INTRO.footer}`} />
+  return <OrientingPanel title={OPEN_INTRO.title} lines={OPEN_INTRO.lines} content={OPEN_INTRO.content} footer={OPEN_INTRO.footer} />
 }
 
 function Right({ ctx }: { ctx: { progress: ProgressStore } }) {

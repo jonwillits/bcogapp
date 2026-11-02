@@ -12,10 +12,10 @@ export { SAVED_HERE_LINE, STORAGE_UNAVAILABLE_LINE } from '../m10_memory/progres
 export const SECOND_RUN_LINE = 'A second run is not a first run: someone who knows what an experiment tests is no longer a naive subject.'
 
 /** 3. Part 1's reveal. */
-export const BEST_TOTAL_LINE = 'The best possible total knows when the match ends, which you did not; against a partner that answers a defection, it ends by defecting on the last round.'
+export const BEST_TOTAL_LINE = 'The best possible total is computed with the match’s length, which you were not told; against a partner that answers a defection, it ends by defecting on the last round.'
 
 /** 4. Part 1's reveal. */
-export const PREDICTING_PLAYING_LINE = 'Predicting a partner well and playing well against it are different things. The reading describes the same difference in language models (§11.2.8).'
+export const PREDICTING_PLAYING_LINE = 'Predicting a partner well and playing well against it are different things. The same difference is described for language models in the reading (§11.2.8).'
 
 /** 5. Part 2. */
 export const NO_BRAIN_LINE = 'These rules are short tables of moves. An organism does not need a brain to employ a strategy (§11.2.1).'
@@ -33,7 +33,7 @@ export const THE_FIELD_LINE = 'Which rule wins depends on which other rules are 
 export const PREDICTING_LINE = 'Predictor estimates each partner’s next move from the partner’s past moves. Tit-for-tat estimates nothing.'
 
 /** 10. Part 2, Step 4. */
-export const FINDING_OUT_LINE = 'Finding out costs: a probe is a defection, and some partners answer it for the rest of the match.'
+export const FINDING_OUT_LINE = 'Finding out costs points: a probe is a defection, and some partners answer it for the rest of the match.'
 
 /** 11. Part 2, Step 6. */
 export const STAND_IN_COST_LINE = 'This cost stands in for what computing a prediction costs an animal. It is not a measured cost of any brain.'

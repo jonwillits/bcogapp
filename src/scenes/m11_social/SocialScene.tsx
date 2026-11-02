@@ -1,4 +1,4 @@
-import { useMemo, useReducer, useRef, useState, type ReactNode } from 'react'
+import { useMemo, useReducer, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Panel } from '../../components/Panel'
 import { SceneCanvasLayout } from '../../components/SceneCanvasLayout'
@@ -133,7 +133,7 @@ export default function SocialScene() {
             {!lockedReason && CanvasPart ? <CanvasPart ctx={ctx} /> : <color attach="background" args={['#0b1020']} />}
             <Stepper store={store} onTick={onTick} />
           </Canvas>
-          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>{stage}</div>
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', '--stage-shift': '-58px' } as CSSProperties}>{stage}</div>
         </>
       }
       left={

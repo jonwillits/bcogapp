@@ -146,7 +146,7 @@ describe('commit, then reveal (§13, item 1)', () => {
     expect(reveal).toMatch(/data-stage="reveal"/)
     for (const r of RULES) expect(reveal).toContain(r.label)
     expect(reveal).toMatch(/you said the same|you said/)
-    expect(reveal).toMatch(/The best possible total knows when the match ends/)
+    expect(reveal).toMatch(/The best possible total is computed with the match’s length/)
     expect(reveal).toMatch(/Predicting a partner well and playing well against it are different/)
     expect(reveal).toMatch(/data-reveal-record="A"/)
     const right = renderToStaticMarkup(<PartnersRight progress={store.progress} seed={store.seed} />)
