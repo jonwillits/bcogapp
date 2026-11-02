@@ -5,7 +5,7 @@ import { InstructionScreen } from '../../m10_memory/progress/InstructionScreen'
 import { BigChoice, Btn, Content, FixedLines, GroupLabel, Note, PANEL_STYLE, PART_TITLES, StagePanel, moveWord, useStore } from '../ui'
 import { LENGTH_LINE } from '../lines'
 import type { PartContext } from '../contract'
-import { LETTERS, MAX_NOTES_CHARS, MIN_ROUNDS, type PartnersStore, type RoundRecord } from './partnersStore'
+import { LETTERS, MAX_NOTES_CHARS, ABOUT_ROUNDS, type PartnersStore, type RoundRecord } from './partnersStore'
 
 /**
  * Part 1's screens before the reveal (spec §5). None of them names a rule,
@@ -16,7 +16,7 @@ import { LETTERS, MAX_NOTES_CHARS, MIN_ROUNDS, type PartnersStore, type RoundRec
  * them by dragging or by pressing (Jon, 2026-11-02).
  */
 
-export const PARTNERS_MINUTES = 14
+export const PARTNERS_MINUTES = 15
 
 export const PARTNERS_WILL_DO = [
   'You will play a repeated game against six partners, Partner A to Partner F. You must play one match with each, in any order you like. Each partner follows a rule of its own that you cannot see. Your job is to find out, from its moves alone, what each one does.',
@@ -193,7 +193,7 @@ function MatchScreen({ s }: { s: PartnersStore }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <PartnerDisc letter={L} size={34} />
         <div style={{ fontSize: 14, fontWeight: 600 }}>{`Partner ${L}`}</div>
-        <FixedLines lines={[`Round ${String(s.rounds.length + (s.state === 'match' ? 1 : 0)).padStart(2)}`]} />
+        <FixedLines lines={[`Round ${String(s.rounds.length + (s.state === 'match' ? 1 : 0)).padStart(2)} of about ${ABOUT_ROUNDS}`]} />
       </div>
       {s.state === 'match' ? (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }} data-round-choices>
@@ -350,7 +350,7 @@ export function PartnersStage({ ctx }: { ctx: PartContext<PartnersStore> }) {
       return (
         <StagePanel testId="choose">
           <div style={{ fontSize: 14, fontWeight: 600 }}>Choose a partner</div>
-          <Note>{`Each partner is one match of at least ${MIN_ROUNDS} rounds. Press a letter to begin its match. The matches can be played in any order.`}</Note>
+          <Note>{`Each partner is one match of about ${ABOUT_ROUNDS} rounds. Press a letter to begin its match. The matches can be played in any order.`}</Note>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }} data-partner-buttons>
             {LETTERS.map((L, i) => (
               <button key={L} type="button" disabled={s.matchDone(i)} onClick={() => s.startMatch(i)} aria-label={`Partner ${L}${s.matchDone(i) ? ', finished' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text)', cursor: s.matchDone(i) ? 'default' : 'pointer', fontSize: 12.5 }}>

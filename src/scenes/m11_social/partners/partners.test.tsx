@@ -47,7 +47,7 @@ function playMatch(store: PartnersStore, partner: number, mine: (k: number) => M
 }
 
 describe('the plan', () => {
-  it('the seed assigns the six rules to the six letters, one each, and a match is 12 to 16 rounds with a new length on a restart', () => {
+  it('the seed assigns the six rules to the six letters, one each, and a match is 15 to 17 rounds with a new length on a restart', () => {
     for (let seed = 1; seed <= 30; seed++) {
       const plan = planPart1(seed)
       expect(new Set(plan.rules).size).toBe(6)
@@ -65,15 +65,15 @@ describe('the plan', () => {
 })
 
 describe('commit, then reveal (§13, item 1)', () => {
-  it('the instruction screen names no rule, no length, and no partner’s nature; it says at least 12 rounds and ends without warning', () => {
+  it('the instruction screen names no rule, no exact length, and no partner’s nature; it says about 16 rounds, varying from match to match', () => {
     const { store } = make(5)
     const { stage, left } = render(store)
     expect(stage).toMatch(/data-instruction/)
     for (const line of PARTNERS_WILL_DO) expect(line).not.toMatch(RULE_WORDS)
     expect(text(stage)).not.toMatch(RULE_WORDS)
     expect(text(left)).not.toMatch(RULE_WORDS)
-    expect(text(stage)).toMatch(/at least 12 rounds, and ends without warning/)
-    expect(text(stage)).not.toMatch(/\b1[3-6] rounds\b/)
+    expect(text(stage)).toMatch(/about 16 rounds, but the exact number varies from match to match/)
+    expect(text(stage)).not.toMatch(/\b1[57] rounds\b/)
   })
   it('during a match, no partner move for the round in hand is in the markup before the two choices are committed, and after the commit the round is shown', () => {
     const { store } = make(5)

@@ -74,5 +74,5 @@ export const COMMIT_RULE_LINE = 'Nothing a test would tell you is shown until yo
 /** Part 6: the best-supported roles, and the share of recorded cells. */
 export const ROLES_LINE = 'The best-supported roles of mirror neurons are modest: telling observed actions apart, and imitation (§11.3.5, §11.2.9). They were a minority of the cells recorded.'
 
-/** Part 1: the unannounced length. */
-export const LENGTH_LINE = 'A match lasts at least 12 rounds, and ends without warning.'
+/** Part 1: the length, given only as about 16 (Jon, 2026-11-02). */
+export const LENGTH_LINE = 'A match lasts about 16 rounds, but the exact number varies from match to match.'

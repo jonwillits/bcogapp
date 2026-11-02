@@ -2,7 +2,7 @@ import type { ProgressStore } from '../../../sim/social/progress/store'
 import { PART1_PARTNERS, unitOfMatch, type UnitId } from '../../../sim/social/parts'
 import { partnerMove } from '../../../sim/social/game/match'
 import { points, ruleById, type Move, type RuleId } from '../../../sim/social/game/rules'
-import { lengthFor, planPart1, MIN_ROUNDS, MAX_ROUNDS, type Part1Plan } from '../../../sim/social/game/plan'
+import { lengthFor, planPart1, MIN_ROUNDS, MAX_ROUNDS, ABOUT_ROUNDS, type Part1Plan } from '../../../sim/social/game/plan'
 import type { PartStore } from '../contract'
 
 /**
@@ -18,7 +18,7 @@ export type PartnersState = 'intro' | 'choose' | 'match' | 'match-over' | 'diagn
 
 export const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'] as const
 export type Letter = (typeof LETTERS)[number]
-export { lengthFor, planPart1, MIN_ROUNDS, MAX_ROUNDS, type Part1Plan }
+export { lengthFor, planPart1, MIN_ROUNDS, MAX_ROUNDS, ABOUT_ROUNDS, type Part1Plan }
 export const MAX_NOTES_CHARS = 1500
 export const DIAGNOSIS_UNIT: UnitId = 'p1-diagnosis'
 
