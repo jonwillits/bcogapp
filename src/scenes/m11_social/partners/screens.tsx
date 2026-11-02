@@ -80,6 +80,9 @@ export function PartnerDisc({ letter, size = 28, muted }: { letter: string; size
 }
 
 /** The record of every round, as aligned rows (§5.3). */
+/** The past tense for the line that reports the round just played. */
+const pastMove = (m: Move): string => (m === 'C' ? 'cooperated' : 'defected')
+
 export function recordLines(rounds: { predicted: Move; partner: Move; student: Move; studentPoints: number; partnerPoints: number }[], marks?: boolean[]): string[] {
   const head = `${'round'.padEnd(7)}${'predicted'.padEnd(11)}${'partner'.padEnd(11)}${'me'.padEnd(11)}${'my pts'.padStart(7)}${'its pts'.padStart(8)}`
   return [head, ...rounds.map((r, i) => `${String(i + 1).padEnd(7)}${moveWord(r.predicted).padEnd(11)}${moveWord(r.partner).padEnd(11)}${moveWord(r.student).padEnd(11)}${String(r.studentPoints).padStart(7)}${String(r.partnerPoints).padStart(8)}${marks?.[i] ? '  *' : ''}`)]
@@ -171,7 +174,7 @@ export function PartnersStage({ ctx }: { ctx: PartContext<PartnersStore> }) {
               </Btn>
             )}
             {s.lastRound && s.state === 'match' && (
-              <FixedLines lines={[`Last round: Partner ${L} ${moveWord(s.lastRound.partner).toLowerCase().padEnd(10)} I ${moveWord(s.lastRound.student).toLowerCase().padEnd(10)} ${String(s.lastRound.studentPoints)} to me, ${String(s.lastRound.partnerPoints)} to it`]} testId="last-round" />
+              <FixedLines lines={[`Last round: Partner ${L} ${`${pastMove(s.lastRound.partner)},`.padEnd(12)}${`I ${pastMove(s.lastRound.student)}:`.padEnd(15)}${String(s.lastRound.studentPoints)} to me, ${String(s.lastRound.partnerPoints)} to it`]} testId="last-round" />
             )}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 220px', gap: 14 }}>
