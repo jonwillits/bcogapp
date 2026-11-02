@@ -40,7 +40,7 @@ export const PART_TITLES: Record<Tab, string> = {
 
 export function TabBar({ tab, onChange, locked }: { tab: Tab; onChange: (t: Tab) => void; locked: Partial<Record<Tab, string | null>> }) {
   return (
-    <div style={{ display: 'flex', gap: 3 }} role="tablist">
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }} role="tablist">
       {TABS.map((t) => (
         <button
           key={t.id}
@@ -50,7 +50,7 @@ export function TabBar({ tab, onChange, locked }: { tab: Tab; onChange: (t: Tab)
           title={locked[t.id] ?? undefined}
           onClick={() => onChange(t.id)}
           style={{
-            flex: 1,
+            flex: '1 1 23%',
             padding: '5px 1px',
             fontSize: 10.5,
             lineHeight: 1.15,
