@@ -796,7 +796,7 @@ export const LABS = [
       { says: 'Part 1: no partner’s move for the round in hand is in the markup before the two choices are committed together', test: 'no partner move for the round in hand is in the markup before the two choices are committed' },
       { says: 'Part 1: a partner’s move comes from its rule on the history before the round, whatever the student chooses this round', test: 'comes from its rule on the history before the round, whatever the student chooses' },
       { says: 'Part 1: no rule name anywhere in Part 1 before the diagnosis is committed; the diagnosis screen holds the six descriptions and no names', test: 'before the diagnosis is committed, no rule name is anywhere in Part 1' },
-      { says: 'Part 1: each match is 15 to 25 rounds with the length drawn by the seed, and no string announces it', test: 'it says at least 15 rounds and ends without warning' },
+      { says: 'Part 1: each match is 12 to 16 rounds with the length drawn by the seed, and no string announces it', test: 'it says at least 12 rounds and ends without warning' },
       { says: 'Part 1: an interrupted match restarts with the same partner from round 1 with a new length; a finished match is never played again', test: 'an interrupted match restarts with the same partner from round 1' },
       { says: 'Part 1: the reveal’s best total is the dynamic program’s, which matches brute force to 12 rounds for every rule', test: 'matches a brute-force search over every sequence of moves for matches of up to 12 rounds' },
       { says: 'Part 1: the record marks the rounds on which the six rules could be told apart', test: 'a round is informative when the six rules do not all make the same move' },

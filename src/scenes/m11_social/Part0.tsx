@@ -11,7 +11,7 @@ import type { PartModule, PartStore } from './contract'
 /**
  * Part 0 (spec §0, §4): the lab's general instructions, over the view for
  * as long as the Open tab shows (Lab 10's rule: one screen, and Begin
- * opens Part 1), saved progress with Export and Load, Clear my saved
+ * Part 1, on the left and under the instructions, opens Part 1), saved progress with Export and Load, Clear my saved
  * results behind an in-page confirmation, and My results, all parts.
  */
 
@@ -55,7 +55,7 @@ export const OPEN_INTRO = {
   ],
   content: [COMMIT_RULE_LINE],
   time: 'About 3 minutes.',
-  footer: 'To move on to Part 1, press “Begin” on the left, or choose the Partners tab.',
+  footer: 'To move on to Part 1, press “Begin Part 1” here or on the left, or choose the Partners tab.',
 }
 
 const PARTS_WITH_UNITS: Part[] = [1, 3, 5]
@@ -84,7 +84,7 @@ function Left({ ctx }: { ctx: { store: PartStore; header: React.ReactNode; progr
             <Content>{OPEN_INTRO.time}</Content>
             <div>
               <Btn primary onClick={() => ctx.openTab('partners')}>
-                Begin
+                Begin Part 1
               </Btn>
             </div>
           </div>
@@ -115,8 +115,20 @@ function Left({ ctx }: { ctx: { store: PartStore; header: React.ReactNode; progr
   )
 }
 
-function Stage() {
-  return <OrientingPanel title={OPEN_INTRO.title} lines={OPEN_INTRO.lines} content={OPEN_INTRO.content} footer={OPEN_INTRO.footer} />
+function Stage({ ctx }: { ctx: { openTab: (tab: Tab) => void } }) {
+  return (
+    <OrientingPanel
+      title={OPEN_INTRO.title}
+      lines={OPEN_INTRO.lines}
+      content={OPEN_INTRO.content}
+      footer={OPEN_INTRO.footer}
+      action={
+        <Btn primary onClick={() => ctx.openTab('partners')}>
+          Begin Part 1
+        </Btn>
+      }
+    />
+  )
 }
 
 function Right({ ctx }: { ctx: { progress: ProgressStore } }) {

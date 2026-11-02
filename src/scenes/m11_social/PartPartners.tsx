@@ -1,4 +1,4 @@
-import type { PartModule } from './contract'
+import type { PartContext, PartModule } from './contract'
 import { registerResults } from './Part0'
 import { PartnersStore } from './partners/partnersStore'
 import { PartnersLeft, PartnersRightBefore, PartnersStage } from './partners/screens'
@@ -11,13 +11,13 @@ import { useStore } from './ui'
  * `'revealed'`, so none of its strings is in the markup before then.
  */
 
-function Stage({ ctx }: { ctx: { store: PartnersStore; progress: PartnersStore['progress']; seed: number } }) {
+function Stage({ ctx }: { ctx: PartContext<PartnersStore> }) {
   const s = useStore(ctx.store)
-  if (s.state === 'revealed') return <PartnersReveal progress={ctx.progress} seed={ctx.seed} />
-  return <PartnersStage ctx={ctx as never} />
+  if (s.state === 'revealed') return <PartnersReveal progress={ctx.progress} seed={ctx.seed} onContinue={() => ctx.openTab('tournament')} />
+  return <PartnersStage ctx={ctx} />
 }
 
-function Right({ ctx }: { ctx: { store: PartnersStore; progress: PartnersStore['progress']; seed: number } }) {
+function Right({ ctx }: { ctx: PartContext<PartnersStore> }) {
   const s = useStore(ctx.store)
   if (s.state === 'revealed') return <PartnersRight progress={ctx.progress} seed={ctx.seed} />
   return <PartnersRightBefore store={ctx.store} />

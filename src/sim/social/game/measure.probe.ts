@@ -53,10 +53,10 @@ describe('measure:', () => {
       const v = predictorVersus(rule, 200)
       console.log(`  ${pad(rule.label, 36)} points ${f2(v.points.mean).padStart(7)}±${f2(v.points.sd)}  best ${v.best}  share ${f2(v.shareOfBest)}  predicted ${f2(v.predictionsShare)}  probes ${f2(v.probes.mean)}  lost to probing ${f2(v.lostToProbing)}`)
     }
-    console.log('\n== Predictor vs each partner, 20 rounds (a Part 1 length), no noise')
+    console.log('\n== Predictor vs each partner, 14 rounds (a Part 1 length), no noise')
     for (const rule of RULES) {
-      const v = predictorVersus(rule, 20)
-      console.log(`  ${pad(rule.label, 36)} points ${f2(v.points.mean).padStart(6)}±${f2(v.points.sd)}  best ${bestTotal(rule, 20).total}  share ${f2(v.shareOfBest)}  predicted ${f2(v.predictionsShare)}`)
+      const v = predictorVersus(rule, 14)
+      console.log(`  ${pad(rule.label, 36)} points ${f2(v.points.mean).padStart(6)}±${f2(v.points.sd)}  best ${bestTotal(rule, 14).total}  share ${f2(v.shareOfBest)}  predicted ${f2(v.predictionsShare)}`)
     }
     const g = predictorVersus(ruleById('grim'), 200)
     const firstProbe = g.sample.rounds.findIndex((r) => r.probeA)

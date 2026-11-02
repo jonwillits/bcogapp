@@ -164,8 +164,9 @@ export class PartnersStore implements PartStore {
     const round: RoundRecord = { predicted: this.draftPredicted!, partner, student, studentPoints: points(student, partner), partnerPoints: points(partner, student) }
     this.rounds.push(round)
     this.lastRound = round
-    this.draftPredicted = null
-    this.draftMine = null
+    // The two choices stay set for the next round (Jon, 2026-11-02: a
+    // student who plays the same again should not have to press both
+    // buttons again); the instruction screen says so.
     if (this.rounds.length >= this.length) this.state = 'match-over'
     this.changed()
   }
@@ -197,6 +198,12 @@ export class PartnersStore implements PartStore {
 
   diagnose(i: number, rule: RuleId): void {
     this.draftDiagnosis[i] = rule
+    this.changed()
+  }
+
+  /** Take a partner's letter back off its description (the matching screen's tray). */
+  undiagnose(i: number): void {
+    this.draftDiagnosis[i] = null
     this.changed()
   }
 

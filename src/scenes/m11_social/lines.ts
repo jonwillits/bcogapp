@@ -75,4 +75,4 @@ export const COMMIT_RULE_LINE = 'Nothing a test would tell you is shown until yo
 export const ROLES_LINE = 'The best-supported roles of mirror neurons are modest: telling observed actions apart, and imitation (§11.3.5, §11.2.9). They were a minority of the cells recorded.'
 
 /** Part 1: the unannounced length. */
-export const LENGTH_LINE = 'A match lasts at least 15 rounds, and ends without warning.'
+export const LENGTH_LINE = 'A match lasts at least 12 rounds, and ends without warning.'

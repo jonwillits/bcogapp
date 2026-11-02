@@ -106,7 +106,7 @@ function groupBullets(lines: string[]): (string | string[])[] {
 }
 
 /** The description of a step, centered over the view while the step waits to begin: the title, what will happen, the content lines, and what to press. */
-export function OrientingPanel({ title, lines, content, footer, onClose }: { title: string; lines: string[]; content?: string[]; footer: string; onClose?: () => void }) {
+export function OrientingPanel({ title, lines, content, footer, onClose, action }: { title: string; lines: string[]; content?: string[]; footer: string; onClose?: () => void; action?: ReactNode }) {
   return (
     <div
       data-orienting
@@ -138,6 +138,7 @@ export function OrientingPanel({ title, lines, content, footer, onClose }: { tit
         <Content key={l}>{l}</Content>
       ))}
       <div style={{ color: 'var(--text-muted)' }}>{footer}</div>
+      {action && <div>{action}</div>}
     </div>
   )
 }

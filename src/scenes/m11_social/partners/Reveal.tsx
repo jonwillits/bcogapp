@@ -5,7 +5,7 @@ import { RULES, ruleById } from '../../../sim/social/game/rules'
 import { bestTotal, informativeRounds } from '../../../sim/social/game/best'
 import { referenceById } from '../../../sim/social/references'
 import { BEST_TOTAL_LINE, PREDICTING_PLAYING_LINE, RESTARTED_LINE } from '../lines'
-import { Content, DotPlot, FixedLines, GroupLabel, Note, ReferencePanel, RIGHT_STYLE, StagePanel, row } from '../ui'
+import { Btn, Content, DotPlot, FixedLines, GroupLabel, Note, ReferencePanel, RIGHT_STYLE, StagePanel, row } from '../ui'
 import { DIAGNOSIS_UNIT, planPart1, type DiagnosisResult, type MatchResult } from './partnersStore'
 import { PartnerDisc, recordLines } from './screens'
 
@@ -68,7 +68,7 @@ export function resultRows(rows: PartnerRow[]): string[] {
   return [head, ...rows.map((r) => `${r.letter.padEnd(9)}${String(r.rounds).padStart(7)}${String(r.points).padStart(5)}${String(r.partnerPoints).padStart(5)}${String(r.correct).padStart(7)}${r.share.toFixed(2).padStart(7)}${String(r.best).padStart(6)}${r.shareOfBest.toFixed(2).padStart(9)}`)]
 }
 
-export function PartnersReveal({ progress, seed }: { progress: ProgressStore; seed: number }) {
+export function PartnersReveal({ progress, seed, onContinue }: { progress: ProgressStore; seed: number; onContinue?: () => void }) {
   const data = revealData(progress, seed)
   if (!data) return null
   const { rows, matches } = data
@@ -119,6 +119,13 @@ export function PartnersReveal({ progress, seed }: { progress: ProgressStore; se
         )
       })}
       {rows.some((r) => r.restarts > 0) && <Content>{RESTARTED_LINE} (Partners {rows.filter((r) => r.restarts > 0).map((r) => r.letter).join(', ')}.)</Content>}
+      {onContinue && (
+        <div>
+          <Btn primary onClick={onContinue}>
+            Continue to Part 2
+          </Btn>
+        </div>
+      )}
     </StagePanel>
   )
 }

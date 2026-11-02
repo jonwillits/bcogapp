@@ -3,13 +3,14 @@ import { RULE_IDS, type RuleId } from './rules'
 
 /**
  * Part 1's plan (spec §5.2, §5.3): the seed assigns the six rules to the
- * six letters, and draws each match's length, 15 to 25 rounds, afresh for
- * each restart. Shared by Part 1's store and Part 2's comparison of the
+ * six letters, and draws each match's length, 12 to 16 rounds, afresh for
+ * each restart (Jon, 2026-11-02: 15 to 25 was too long; the gain in
+ * information over boredom is spent by about 16). Shared by Part 1's store and Part 2's comparison of the
  * student with Predictor, so that neither part imports the other.
  */
 
-export const MIN_ROUNDS = 15
-export const MAX_ROUNDS = 25
+export const MIN_ROUNDS = 12
+export const MAX_ROUNDS = 16
 
 export interface Part1Plan {
   /** The rule each partner, in letter order, plays. */
