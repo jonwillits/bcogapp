@@ -90,13 +90,13 @@ describe('commit, then reveal', () => {
 })
 
 describe('runs and the table', () => {
-  it('a run is 10 trials, counted, and the table shows only tests run with the mean over runs of a pair', () => {
+  it('a run is 20 trials, counted, and the table shows only tests run with the mean over runs of a pair', () => {
     const { store } = fresh(7)
     store.open(2)
     store.begin()
     commitAll(store, 2)
     const r = store.run('T1', 'barriers')!
-    expect(r.trials.length).toBe(10)
+    expect(r.trials.length).toBe(20)
     expect(store.runsUsed).toBe(1)
     store.run('T1', 'barriers')
     const t = store.table()
@@ -131,18 +131,23 @@ describe('runs and the table', () => {
     expect(Object.values(new ArenaStore(1, new ProgressStore(memoryStorage(), 1)).letters).sort()).toEqual(['A', 'B', 'C', 'D', 'E'])
     expect(new ArenaStore(3, new ProgressStore(memoryStorage(), 3)).letters).toEqual(new ArenaStore(3, new ProgressStore(memoryStorage(), 3)).letters)
   })
-  it('the trials play out on a timer and Skip ahead ends them', async () => {
-    const { store } = fresh(8)
+  it('the trials play out on a timer at the speed set: a trial takes trialSeconds of wall clock, and there is no Skip ahead button', async () => {
+    const { store, ctx } = fresh(8)
     store.open(1)
     store.begin()
     commitAll(store, 1)
+    store.setTrialSeconds(0.2)
     store.runAll('T1')
     expect(store.playing).not.toBeNull()
     expect(store.runs.length).toBe(5)
-    await new Promise((r) => setTimeout(r, 120))
-    expect(store.playing!.clock).toBeGreaterThan(0)
+    await new Promise((r) => setTimeout(r, 160))
+    // At 0.2 s a trial, 160 ms is most of a trial on the view's 1.2 s timeline.
+    expect(store.playing!.clock + store.playing!.index * 1.2).toBeGreaterThan(0.6)
+    const leftHtml = renderToStaticMarkup(<Left ctx={ctx} />)
+    expect(leftHtml).not.toContain('Skip ahead')
+    expect(leftHtml).toContain('seconds a trial')
     store.skipToResult()
     expect(store.playing).toBeNull()
-    expect(store.trialOnView!.run.trials.length).toBe(10)
+    expect(store.trialOnView!.run.trials.length).toBe(20)
   })
 })

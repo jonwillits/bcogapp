@@ -27,7 +27,7 @@ describe('texts:', () => {
     out.push(`**Part 3, Step 1 — Three films.** ${para(FILMS_WILL_DO)} About ${FILMS_MINUTES} minutes. Pausing: *${FILMS_SITTING_LINE}* Keys: ${para(FILMS_KEYS)}\n`)
     out.push(`**Part 3, Step 2 — Where is it going?** ${para(PATHS_WILL_DO)} About ${PATHS_MINUTES} minutes. Pausing: *${PATHS_SITTING_LINE}* Keys: ${para(PATHS_KEYS)}\n`)
     out.push(`**Part 3, the two procedures (after both units).** ${para(MODELS_INTRO)}\n`)
-    for (const s of P4) out.push(`**Part 4, ${s.title}.** *${s.reread}* ${para(s.willDo)} About ${s.minutes} minutes; leave any time.${s.content.length ? ' Content: ' + s.content.map((c) => `*${c}*`).join(' ') : ''} Predictions: ${s.predictions.map((p) => `*${p.question}* [${p.choices.join(' / ')}]`).join('; ')}\n`)
+    for (const s of P4) out.push(`**Part 4, ${s.title}.** ${s.reread ? `*${s.reread}* ` : ''}${para(s.willDo)} About ${s.minutes} minutes; leave any time.${s.content.length ? ' Content: ' + s.content.map((c) => `*${c}*`).join(' ') : ''} Predictions: ${s.predictions.map((p) => `*${p.question}* [${p.choices.join(' / ')}]`).join('; ')}\n`)
     out.push(`**Part 5 — Two Groups.** ${para(GROUPS_WILL_DO)} About ${GROUPS_MINUTES} minutes. Pausing: *${GROUPS_SITTING_LINE}* Keys: ${para(GROUPS_KEYS)}\n`)
     for (const s of P6) out.push(`**Part 6, ${s.title}.** *${s.reread}* ${para(s.willDo)} About ${s.minutes} minutes; leave any time.${s.content.length ? ' Content: ' + s.content.map((c) => `*${c}*`).join(' ') : ''} Predictions: ${s.predictions.map((p) => `*${p.question}* [${p.choices.join(' / ')}]`).join('; ')}\n`)
     out.push('\n**The fixed lines (§12):**\n')

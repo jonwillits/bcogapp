@@ -20,7 +20,13 @@ import { STEPS, stepSpec, type Step, type StepSpec } from './steps'
 
 export type StepState = 'intro' | 'predict' | 'running' | 'done'
 export const DIAGNOSIS_KEY = 'p4-diagnosis'
+/** The view's own timeline for a trial, in seconds; the speed setting plays it faster or slower. */
 export const TRIAL_SECONDS = 1.2
+/** Trials in a run (Jon, 2026-11-02: 20, so that one run tells the rules apart more often than 10 did). */
+export const TRIALS_PER_RUN = 20
+/** The speed setting: seconds a trial takes on the screen, from fast to slow. */
+export const SPEED_RANGE = { min: 0.2, max: 1.5, step: 0.1 } as const
+export const DEFAULT_TRIAL_SECONDS = 1.2
 
 export interface Run extends RunResult {
   letter: string
@@ -53,6 +59,8 @@ export class ArenaStore implements PartStore {
   test: string = 'T1'
   animal: AnimalId = 'barriers'
   showSight = false
+  /** Seconds a trial takes on the screen (the speed slider). */
+  trialSeconds: number = DEFAULT_TRIAL_SECONDS
   experience: Experience = 'usual'
   /** The diagnosis in hand: per animal, the rule chosen. */
   readonly draftDiagnosis: Partial<Record<AnimalId, AnimalId>> = {}
@@ -166,6 +174,11 @@ export class ArenaStore implements PartStore {
     this.changed()
   }
 
+  setTrialSeconds(v: number): void {
+    this.trialSeconds = Math.max(SPEED_RANGE.min, Math.min(SPEED_RANGE.max, v))
+    this.changed()
+  }
+
   setExperience(e: Experience): void {
     this.experience = e
     this.changed()
@@ -184,7 +197,7 @@ export class ArenaStore implements PartStore {
     const test = testById(testId)
     if (!this.tests.includes(test)) return null
     this.runsUsed++
-    const result = runTest(animal, test, animal === 'learner' ? this.learnerNow() : null, this.seed * 1000 + this.runsUsed * 17 + testId.charCodeAt(1))
+    const result = runTest(animal, test, animal === 'learner' ? this.learnerNow() : null, this.seed * 1000 + this.runsUsed * 17 + testId.charCodeAt(1), TRIALS_PER_RUN)
     const run: Run = { ...result, letter: this.letters[animal] }
     if (animal === 'learner') run.experience = this.experience
     this.runs.push(run)
@@ -217,7 +230,8 @@ export class ArenaStore implements PartStore {
       this.timer = null
       return
     }
-    this.playing.clock += 0.05
+    // The view's timeline runs at the speed set: a whole trial in `trialSeconds` of wall clock.
+    this.playing.clock += 0.05 * (TRIAL_SECONDS / this.trialSeconds)
     if (this.playing.clock >= TRIAL_SECONDS) {
       this.playing.clock = 0
       this.playing.index++
@@ -229,6 +243,7 @@ export class ArenaStore implements PartStore {
     this.changed()
   }
 
+  /** End the playing at once (no button since Jon's walk; the speed slider is the control). */
   skipToResult(): void {
     this.playing = null
     this.pending = []

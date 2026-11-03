@@ -786,7 +786,7 @@ export const LABS = [
       'Open', 'Partners', 'Tournament', 'Shapes', 'Arena', 'Groups', 'Mirror', 'Begin', 'Export my results', 'Load my results', 'Clear my saved results', 'Erase and start over', 'Keep my results',
       'Replace my saved results', 'Keep what I have', 'Skip Part 1', 'Cooperate', 'Defect', 'Commit this round', 'Save this match and go on', 'Commit my diagnosis', 'Commit my prediction', 'Commit my answers', 'Commit',
       'Run the round-robin', 'Run with Predictor', 'Run with mistakes', 'Run the generations', 'Run', 'Pause', 'Skip ahead 1,000 generations', 'Start again', 'Run again with Predictor', 'Run again with mistakes', 'wrap around', 'stop', 'Drop a 2 × 2 block of tit-for-tat', 'Drop a 3 × 3 block of tit-for-tat',
-      'Run T1 for all five', 'Run 10 trials', 'Run T8 for all five', 'Skip ahead to the result', 'Draw the dominant’s line of sight', 'Next', 'Set', 'Go on to Step 2',
+      'Run T1 for all five', 'Run 20 trials', 'Run T8 for all five', 'Draw the dominant’s line of sight', 'Next', 'Set', 'Go on to Step 2',
       'Precision grip (P)', 'Whole-hand grasp (W)', 'Run 40 grasps', 'Run the test', 'Reset the cells', 'Side view', 'Go on to Step', 'Redo Step', 'Go back to Step', 'Go to Step',
       'Always cooperate', 'Always defect', 'Tit-for-tat', 'Defect forever after one defection', 'Win-stay, lose-shift', 'Suspicious tit-for-tat', 'Predictor', 'My rule', 'Two Rules',
       'the usual room', 'many rooms', 'Line of sight now', 'Line of sight before', 'Barriers', 'Gaze', 'Learner', 'Run seed', 'My results',

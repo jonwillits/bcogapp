@@ -7,7 +7,7 @@ import { Btn, Choice, Content, FixedLines, GroupLabel, Note, PANEL_STYLE, PART_T
 import { InstructionScreen } from '../m10_memory/progress/InstructionScreen'
 import { PROGRAMMED_ANIMALS_LINE, THE_LEARNER_LINE } from './lines'
 import type { PartModule } from './contract'
-import { ArenaStore, TRIAL_SECONDS } from './arena/store'
+import { ArenaStore, TRIAL_SECONDS, TRIALS_PER_RUN, SPEED_RANGE } from './arena/store'
 import { STEPS, type Step } from './arena/steps'
 import { ArenaView, ARENA_LEGEND } from './arena/ArenaView'
 
@@ -98,15 +98,26 @@ function StepControls({ s }: { s: ArenaStore }) {
       <input type="checkbox" checked={s.showSight} onChange={(e) => s.setShowSight(e.target.checked)} /> Draw the dominant’s line of sight
     </label>
   )
+  const speed = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }} data-speed>
+      <GroupLabel>Speed: seconds a trial</GroupLabel>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>fast</span>
+        <input type="range" min={SPEED_RANGE.min} max={SPEED_RANGE.max} step={SPEED_RANGE.step} value={s.trialSeconds} onChange={(e) => s.setTrialSeconds(Number(e.target.value))} aria-label="seconds a trial" style={{ width: 140 }} />
+        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>slow</span>
+        <FixedLines lines={[`${s.trialSeconds.toFixed(1)} s`]} />
+      </div>
+    </div>
+  )
   if (s.step === 1)
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <div>
           <Btn primary onClick={() => s.runAll('T1')} disabled={!!s.playing}>
             Run T1 for all five
           </Btn>
-          {s.playing && <Btn onClick={() => s.skipToResult()}>Skip ahead to the result</Btn>}
         </div>
+        {speed}
         {sight}
       </div>
     )
@@ -118,13 +129,13 @@ function StepControls({ s }: { s: ArenaStore }) {
         <Note>{TESTS.find((t) => t.id === s.test)?.what}</Note>
         <GroupLabel>Animal</GroupLabel>
         <Choice value={s.animal} options={s.order.map((a) => ({ id: a, label: s.letters[a] }))} onChange={(v) => s.setAnimal(v as AnimalId)} />
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <div>
           <Btn primary onClick={() => s.runCurrent()} disabled={!!s.playing}>
-            Run 10 trials
+            Run {TRIALS_PER_RUN} trials
           </Btn>
-          {s.playing && <Btn onClick={() => s.skipToResult()}>Skip ahead to the result</Btn>}
         </div>
         <FixedLines lines={[`${'Runs used'.padEnd(14)}${String(s.runsUsed).padStart(4)}`]} testId="runs-used" />
+        {speed}
         {sight}
         <GroupLabel>Diagnosis</GroupLabel>
         <Note>For each animal, the rule you think it follows. The five descriptions are the five rules, without saying which animal is which.</Note>
@@ -159,13 +170,13 @@ function StepControls({ s }: { s: ArenaStore }) {
         <>
           <GroupLabel>The learner’s experience</GroupLabel>
           <Choice value={s.experience} options={EXPERIENCES.map((e) => ({ id: e.id, label: e.label }))} onChange={(v) => s.setExperience(v as Experience)} />
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          <div>
             <Btn primary onClick={() => s.runAll('T8')} disabled={!!s.playing}>
               Run T8 for all five
             </Btn>
-            {s.playing && <Btn onClick={() => s.skipToResult()}>Skip ahead to the result</Btn>}
           </div>
           <Content>{THE_LEARNER_LINE}</Content>
+          {speed}
           {sight}
         </>
       )}
@@ -176,7 +187,7 @@ function StepControls({ s }: { s: ArenaStore }) {
 function Stage({ ctx }: { ctx: Ctx }) {
   const s = useStore(ctx.store)
   const spec = s.spec
-  if (s.state === 'intro') return <InstructionScreen title={spec.title} willDo={[spec.reread, ...spec.willDo]} minutes={spec.minutes} sitting="leave any time" content={spec.content} onBegin={() => s.begin()} />
+  if (s.state === 'intro') return <InstructionScreen title={spec.title} willDo={spec.reread ? [spec.reread, ...spec.willDo] : spec.willDo} minutes={spec.minutes} sitting="leave any time" content={spec.content} onBegin={() => s.begin()} />
   if (s.state === 'predict')
     return (
       <StagePanel testId="predict">
@@ -191,7 +202,7 @@ function Stage({ ctx }: { ctx: Ctx }) {
     <StagePanel wide testId={`step-${s.step}`}>
       <div style={{ fontSize: 14, fontWeight: 600 }}>{spec.title}</div>
       <ArenaView trial={v?.trial ?? null} letter={v ? v.run.letter : null} clock={v?.clock ?? TRIAL_SECONDS} showSight={s.showSight} door={door} />
-      <FixedLines lines={v ? [`${`Animal ${v.run.letter}`.padEnd(12)}${TEST_SHORT[v.run.test].padEnd(20)}trial ${String(v.index + 1).padStart(2)} of 10`, `${'Went to'.padEnd(12)}${v.clock >= 0.9 ? (v.trial.subordinate === TESTS.find((t) => t.id === v.run.test)!.scoredPiece ? 'the scored piece' : 'the other piece') : ' '}`, `${'This run'.padEnd(12)}${s.playing ? ' ' : `${(v.run.share * 100).toFixed(0)}% on the scored piece`}`] : ['No run yet.', ' ', ' ']} testId="trial-status" />
+      <FixedLines lines={v ? [`${`Animal ${v.run.letter}`.padEnd(12)}${TEST_SHORT[v.run.test].padEnd(20)}trial ${String(v.index + 1).padStart(2)} of ${v.run.trials.length}`, `${'Went to'.padEnd(12)}${v.clock >= 0.9 ? (v.trial.subordinate === TESTS.find((t) => t.id === v.run.test)!.scoredPiece ? 'the scored piece' : 'the other piece') : ' '}`, `${'This run'.padEnd(12)}${s.playing ? ' ' : `${(v.run.share * 100).toFixed(0)}% on the scored piece`}`] : ['No run yet.', ' ', ' ']} testId="trial-status" />
       <Note>{ARENA_LEGEND}</Note>
       {s.step === 3 && s.diagnosed && <RevealOnStage s={s} />}
     </StagePanel>
@@ -209,8 +220,9 @@ function RevealOnStage({ s }: { s: ArenaStore }) {
         </Note>
       ))}
       <FixedLines lines={[`${'Diagnoses right'.padEnd(20)}${String(s.rightCount()).padStart(2)} of 5`]} />
-      <GroupLabel>The build’s matrix: share on the scored piece, mean over twenty seeds of 10 trials (sd), the learner with the usual room</GroupLabel>
-      {s.matrix ? <MatrixLines s={s} /> : <Note data-badge>{s.badge || 'Running the build’s matrix…'}</Note>}
+      <GroupLabel>The full matrix: each animal’s share on the piece the test scores, over 200 trials of each pair, with the spread across runs of 10 in brackets; the learner with the usual room</GroupLabel>
+      {s.matrix ? <MatrixLines s={s} /> : <Note data-badge>{s.badge || 'Running the matrix…'}</Note>}
+      <Note>The learner’s share on T2 is above the three sighted animals’ 0.5: in its history a piece with no barrier beside it was always the one the dominant took, so it leans toward the piece by the clear barrier, which it has never seen a dominant see through. The spread across runs is wide there.</Note>
     </div>
   )
 }

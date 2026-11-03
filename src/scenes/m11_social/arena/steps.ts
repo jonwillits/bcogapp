@@ -3,10 +3,12 @@ import { THE_LEARNER_LINE } from '../lines'
 /**
  * The three steps of Part 4 (spec §8.6): T1 for all five with a
  * prediction first; the student's own tests from the menu, then the
- * diagnosis; then the reveal, the build's matrix, T8 with a prediction,
+ * diagnosis; then the reveal, the full matrix, T8 with a prediction,
  * and the learner's experience with a prediction. Explorations: a step can
  * be left and returned to, reopened or redone; the diagnosis, once
- * committed, stays committed.
+ * committed, stays committed. The texts are Jon's (2026-11-02), with the
+ * passages to reread on Step 1 only, what watching means spelled out
+ * (his Q1), and runs of 20 trials.
  */
 
 export type Step = 1 | 2 | 3
@@ -20,7 +22,8 @@ export interface Prediction {
 export interface StepSpec {
   step: Step
   title: string
-  reread: string
+  /** The passages to reread, on Step 1 only (Jon, 2026-11-02). */
+  reread?: string
   willDo: string[]
   minutes: number
   content: string[]
@@ -31,12 +34,13 @@ export const STEPS: StepSpec[] = [
   {
     step: 1,
     title: 'Step 1 — The standard test',
-    reread: 'Reread §11.1.9 and §11.2.3 of the reading: the food-competition test, and the chain of tests behind it.',
+    reread: 'Make sure you are familiar with §11.1.9, §11.2.3, and §11.2.7 of the reading: the food-competition test, the chain of tests behind it, and five accounts of predicting others. And refresh yourself with Morgan’s Canon in Module 2: a behavior should not be explained by a higher mental process if a simpler one accounts for it.',
     willDo: [
-      'The arena has the layout of the figure in the reading: the subordinate’s room on the left, the central room, and the dominant’s room on the right, each side room with a door onto the central room. Two pieces of food lie in the central room. A door can be open, shut, or raised a little for viewing: a gap the dominant can look through but not pass through. A barrier is a short wall beside a piece, opaque or clear. “Draw the dominant’s line of sight” shades the floor the dominant can see from its door.',
-      'Five hidden subordinates, A to E, each a program with a rule of its own. The dominant is the same program in every trial. It goes to the piece it last watched being placed or moved. If it watched neither, it goes to the nearer of the pieces it can see at release. Before release, while its door is raised, it faces the place it will go to. If both animals reach the same piece, the dominant takes it.',
-      'A run is 10 trials of one test for one animal. The table on the right records, for each animal and each test, the share of trials on which the animal went to the piece the test scores. Which piece that is depends on the test: the piece outside the dominant’s line of sight, the piece by the barrier, or the piece the dominant did not see placed or moved. Each animal follows its rule on about 85% of trials, and where its rule gives no preference it goes at random, so one run is informative but not exact.',
-      'This step runs T1, the standard test, for all five animals. In T1 the pieces are placed with the dominant’s door down, and the dominant then watches through its raised door. One piece lies in the open and one behind an opaque barrier on the subordinate’s side.',
+      'In this part, you will watch animals searching for food in an arena. The arena has the layout of the figure in the reading: the subordinate’s room on the left, the central room, and the dominant’s room on the right, each side room with a door onto the central room. Two pieces of food lie in the central room. A door can be open, shut, or raised a little for viewing: a gap the dominant can look through but not pass through. A barrier is a short wall beside a piece, opaque or clear. “Draw the dominant’s line of sight” shades the floor the dominant can see from its door.',
+      'There are five hidden subordinate animals, A to E. Each follows a program with a rule of its own. The dominant follows the same program in every trial. It goes to the piece it last watched being placed or moved. If it watched neither, it goes to the nearer of the pieces it can see at release. Before release, while its door is raised, it faces the place it will go to. If both animals reach the same piece, the dominant takes it.',
+      'Watching means this: a piece is placed or moved while the dominant’s door is raised, so that the dominant sees it happen through the gap. With its door down, the dominant sees nothing of the placing. Looking at the pieces afterward through the raised door is not watching: the dominant then sees only what is in its line of sight, and a piece behind an opaque barrier is not.',
+      'A run is 20 trials of one test for one animal. The table on the right records, for each animal and each test, the share of trials on which the animal went to the piece of food that the test scores. Which piece that is depends on the test: the piece outside the dominant’s line of sight, the piece by the barrier, or the piece the dominant did not see placed or moved. Each animal follows its rule on about 85% of trials, and where its rule gives no preference, it goes at random. So one run is informative, but not exact. The slider on the left sets how fast the trials play.',
+      'This step runs T1, the standard test, for all five animals. In T1, the pieces are placed with the dominant’s door down, so it has watched neither, and the dominant then looks through its raised door. One piece lies in the open and one behind an opaque barrier on the subordinate’s side.',
       'First, predict: will any of the five animals differ on T1? Then press “Run T1 for all five”.',
     ],
     minutes: 3,
@@ -46,9 +50,8 @@ export const STEPS: StepSpec[] = [
   {
     step: 2,
     title: 'Step 2 — The chain of tests',
-    reread: 'Reread §11.2.3 of the reading, and Morgan’s Canon in Module 2: a behavior should not be explained by a higher mental process if a simpler one accounts for it.',
     willDo: [
-      'Choose a test from the menu, T1 to T7, and an animal, and press “Run 10 trials”. Each run is added to the table. The aim is to rule out simpler explanations: each test in the chain takes away one thing the animal might be using, and an animal whose choice changes under a test was using it. A counter shows the number of runs you have used; it does not limit them.',
+      'Choose a test from the menu, T1 to T7, and an animal, and press “Run 20 trials”. Each run is added to the table. The aim is to rule out simpler explanations. Each test in the chain takes away one thing the animal might be using, and an animal whose choice changes under a test was using it. A counter shows the number of runs you have used; it does not limit them.',
       'The tests:',
       '- T1 Standard.',
       '- T2 Clear barrier: as T1, with a barrier the dominant can see through.',
@@ -66,9 +69,8 @@ export const STEPS: StepSpec[] = [
   {
     step: 3,
     title: 'Step 3 — A new layout',
-    reread: 'Reread §11.2.7 of the reading: five accounts, and the one further possibility, a learner trained on enough examples.',
     willDo: [
-      'Every animal’s rule is now shown beside your diagnosis. Beside your table is the full matrix: every animal on every test, from twenty runs of 10 trials made when the lab was built. The question in the reading is whether what the chimpanzees track is seeing, a step toward a theory of mind, or categories of behavior, the behavior-reading account. The last animal is a learner of the second kind.',
+      'In this step, every animal’s rule is now shown beside your diagnosis. Beside your table is the full matrix: the results from every animal on every test, over 200 trials of each pair. The question in the reading is whether what the chimpanzees track is what the animal is looking at (a step toward a theory of mind), or categories of behavior (the behavior-reading account). The last animal is a learner of the second kind.',
       'Then T8, held back until now: the dominant enters by a door on the top wall it has never used, with barriers at new positions. Predict first whether every animal takes the piece outside the dominant’s line of sight, then press “Run T8 for all five”.',
       'Then the learner’s experience, a setting on the left: the usual room (a history of 300 contests across the layouts of T1 to T7, the dominant always entering by its usual door) or many rooms (the same number of contests across many layouts and doors, but never T8’s exact layout). Predict first what the learner does on T8 after many rooms, then set it and press “Run T8 for all five” again.',
     ],

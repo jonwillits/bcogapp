@@ -55,7 +55,9 @@ export function ArenaView({ trial, letter, clock, showSight, door }: { trial: Tr
   const barriers = view?.barriers ?? []
   const u = Math.max(0, Math.min(1, (clock - 0.3) / 0.6))
   const subChoice = trial ? POSITIONS[trial.view.pieces[trial.subordinate].position] : null
-  const subAt = subChoice ? lerp(SUBORDINATE_DOOR, subChoice, u) : SUBORDINATE_DOOR
+  // Where the dominant takes the piece, the subordinate stops short of it rather than standing on the dominant (Jon, 2026-11-02).
+  const subEnd = subChoice && trial && !trial.got ? lerp(SUBORDINATE_DOOR, subChoice, 0.72) : subChoice
+  const subAt = subEnd ? lerp(SUBORDINATE_DOOR, subEnd, u) : SUBORDINATE_DOOR
   const domStart = trial?.view.subordinateFirst ? Math.max(0, Math.min(1, (clock - 0.6) / 0.5)) : u
   const domAt = trial ? lerp(dEye, trial.dominantTarget, domStart) : dEye
   const doorOpenAtRelease = clock >= 0.3
