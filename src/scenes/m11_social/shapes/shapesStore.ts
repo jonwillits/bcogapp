@@ -67,7 +67,13 @@ export class ShapesStore implements PartStore {
   steps = 0
   judged: PathJudgment[] = []
   shown: string[] = []
-  split: [number, number, number] = [34, 33, 33]
+  /**
+   * The three sliders' points, kept as fractions of 100 so that moving one
+   * rescales the other two in proportion without drift (Jon, 2026-11-02:
+   * rounding at every move had sent all of a slider's loss to one of the
+   * others). `splitRounded` gives the integers shown and committed.
+   */
+  split: [number, number, number] = [100 / 3, 100 / 3, 100 / 3]
   /** Paused at a judgment point. */
   atJudgment = false
   draftOverall: string | null = null
@@ -251,7 +257,7 @@ export class ShapesStore implements PartStore {
     if (!this.shown.includes(p.id)) this.shown.push(p.id)
     this.steps = 0
     this.atJudgment = p.judgments.some((j) => j.steps === 0)
-    this.split = [34, 33, 33]
+    this.split = [100 / 3, 100 / 3, 100 / 3]
     this.savePartial()
     this.startTimer()
   }
@@ -278,36 +284,47 @@ export class ShapesStore implements PartStore {
       return
     }
     this.steps++
-    if (p.judgments.some((j) => j.steps === this.steps) && !this.judged.some((j) => j.path === p.id && j.steps === this.steps)) {
-      this.atJudgment = true
-      this.split = [34, 33, 33]
-    }
+    // At a later pause on the same path the sliders stay where the student left them (Jon, 2026-11-02); they reset to thirds at each new path.
+    if (p.judgments.some((j) => j.steps === this.steps) && !this.judged.some((j) => j.path === p.id && j.steps === this.steps)) this.atJudgment = true
     this.changed()
   }
 
-  /** Move one slider: the other two rescale so the three sum to 100. */
+  /** Move one slider: the other two rescale in proportion to their current values so the three sum to 100; two at zero split the rest equally. */
   setSplit(i: 0 | 1 | 2, value: number): void {
-    const v = Math.max(0, Math.min(100, Math.round(value)))
+    const v = Math.max(0, Math.min(100, value))
     const others = [0, 1, 2].filter((k) => k !== i) as (0 | 1 | 2)[]
     const rest = 100 - v
     const sum = this.split[others[0]] + this.split[others[1]]
     const next: [number, number, number] = [...this.split] as [number, number, number]
     next[i] = v
-    if (sum > 0) {
-      next[others[0]] = Math.round((this.split[others[0]] / sum) * rest)
+    if (sum > 1e-9) {
+      next[others[0]] = (this.split[others[0]] / sum) * rest
       next[others[1]] = rest - next[others[0]]
     } else {
-      next[others[0]] = Math.floor(rest / 2)
-      next[others[1]] = rest - next[others[0]]
+      next[others[0]] = rest / 2
+      next[others[1]] = rest / 2
     }
     this.split = next
     this.changed()
   }
 
+  /** The sliders as integers summing to 100 (largest remainders rounded up), as shown and as committed. */
+  splitRounded(): [number, number, number] {
+    const floors = this.split.map((v) => Math.floor(v + 1e-9))
+    let short = 100 - floors.reduce((a, b) => a + b, 0)
+    const order = [0, 1, 2].sort((a, b) => this.split[b] - floors[b] - (this.split[a] - floors[a]))
+    for (const k of order) {
+      if (short <= 0) break
+      floors[k]++
+      short--
+    }
+    return floors as [number, number, number]
+  }
+
   commitJudgment(): void {
     const p = this.path
     if (this.state !== 'path' || !this.atJudgment || !p) return
-    this.judged.push({ path: p.id, steps: this.steps, split: [...this.split] as [number, number, number] })
+    this.judged.push({ path: p.id, steps: this.steps, split: this.splitRounded() })
     this.atJudgment = false
     this.savePartial()
     this.changed()

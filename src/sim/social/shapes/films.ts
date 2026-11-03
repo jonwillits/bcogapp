@@ -30,8 +30,8 @@ export interface Keyframe {
   y: number
 }
 
-/** The rectangle and its door: the door is the left side's middle third, hinged at its top, with an angle from 0 (shut) to 90 (open). */
-export const HOUSE = { x: 300, y: 100, width: 110, height: 120, doorTop: 140, doorBottom: 180 } as const
+/** The rectangle and its door: the door is the left side's middle (52 px, wide enough for the large triangle to pass without touching the frame), hinged at its top, with an angle from 0 (shut) to 90 (open). */
+export const HOUSE = { x: 300, y: 100, width: 110, height: 120, doorTop: 134, doorBottom: 186 } as const
 
 export interface Film {
   id: 1 | 2 | 3
@@ -51,11 +51,11 @@ export const FILM_2: Film = {
   duration: 30,
   shapes: {
     // The large triangle: inside the house at the start, comes out, strikes, pursues, bumps the shut door, follows the escape and stops.
-    big: [kf(0, 350, 160), kf(4, 350, 160), kf(5, 318, 160), kf(6.5, 262, 160), kf(8, 180, 150), kf(8.6, 130, 140), kf(9, 140, 142), kf(10.5, 200, 90), kf(12, 110, 60), kf(13.5, 70, 150), kf(15, 150, 240), kf(16.5, 240, 250), kf(18, 230, 190), kf(19.5, 275, 165), kf(21, 262, 160), kf(22, 285, 160), kf(22.5, 262, 160), kf(24, 262, 160), kf(25.5, 220, 120), kf(27, 300, 60), kf(28.5, 360, 60), kf(30, 360, 60)],
-    // The small triangle: approaches with the disc, is struck and moves off, is pursued, waits, then escapes with the disc.
-    small: [kf(0, 40, 280), kf(3, 120, 220), kf(5, 160, 180), kf(8, 150, 150), kf(8.6, 110, 130), kf(9.2, 60, 70), kf(10.5, 150, 40), kf(12, 70, 40), kf(13.5, 40, 120), kf(15, 110, 230), kf(16.5, 200, 270), kf(18, 170, 250), kf(21, 170, 250), kf(23, 250, 230), kf(25, 280, 190), kf(26.5, 320, 100), kf(28, 420, 40), kf(30, 470, 20)],
+    big: [kf(0, 350, 160), kf(4, 350, 160), kf(5, 318, 160), kf(6.5, 262, 160), kf(8, 180, 150), kf(8.6, 130, 140), kf(9, 140, 142), kf(10.5, 200, 90), kf(12, 110, 60), kf(13.5, 70, 150), kf(15, 150, 240), kf(16.5, 240, 250), kf(18, 230, 190), kf(19.5, 275, 165), kf(21, 262, 160), kf(22, 279, 160), kf(22.5, 262, 160), kf(24, 262, 160), kf(25.5, 220, 120), kf(27, 300, 60), kf(28.5, 360, 60), kf(30, 360, 60)],
+    // The small triangle: approaches with the disc, is struck and moves off, is pursued, waits, then escapes with the disc up the left of the rectangle and over its top (Jon, 2026-11-02: no shape passes through a wall).
+    small: [kf(0, 40, 280), kf(3, 120, 220), kf(5, 160, 180), kf(8, 150, 150), kf(8.6, 110, 130), kf(9.2, 60, 70), kf(10.5, 150, 40), kf(12, 70, 40), kf(13.5, 40, 120), kf(15, 110, 230), kf(16.5, 200, 270), kf(18, 170, 250), kf(21, 170, 250), kf(23, 250, 230), kf(25, 265, 180), kf(26.5, 255, 90), kf(28, 420, 40), kf(30, 470, 20)],
     // The disc: approaches, keeps clear of the strike, goes to the house, enters it, waits inside, then comes out and escapes.
-    disc: [kf(0, 20, 300), kf(3, 100, 250), kf(5, 150, 210), kf(8, 150, 180), kf(8.6, 150, 205), kf(10, 180, 230), kf(13, 240, 170), kf(15, 275, 160), kf(16.5, 330, 160), kf(18, 355, 140), kf(21, 355, 140), kf(24, 355, 140), kf(25, 330, 160), kf(26, 280, 170), kf(27.5, 330, 110), kf(29, 430, 50), kf(30, 470, 40)],
+    disc: [kf(0, 20, 300), kf(3, 100, 250), kf(5, 150, 210), kf(8, 150, 180), kf(8.6, 150, 205), kf(10, 180, 230), kf(13, 240, 170), kf(15, 275, 160), kf(16.5, 330, 160), kf(18, 355, 140), kf(21, 355, 140), kf(24, 355, 140), kf(25, 330, 160), kf(26, 275, 170), kf(27.5, 265, 80), kf(29, 430, 60), kf(30, 470, 52)],
   },
   // Shut; the large triangle opens it to come out; the disc shuts it behind itself; the disc opens it to leave.
   door: [

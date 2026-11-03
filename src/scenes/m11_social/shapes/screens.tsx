@@ -23,8 +23,8 @@ export const PATHS_MINUTES = 8
 
 export const FILMS_WILL_DO = [
   'You will watch three short films, about 30 seconds each, of a large triangle, a small triangle, and a small disc moving on a plain stage with a rectangle that has a door. They play by themselves and cannot be paused or replayed.',
-  `After each film, a text box: “${DESCRIPTION_PROMPT}” At least ${MIN_DESCRIPTION_CHARS} characters. Write what you saw, in your own words; there is no right answer.`,
-  'After the third film and its description, a few short questions about all three films together, each answered with a button or a check. Then this step is finished.',
+  `After each film, you will see a text box, where you will type a reaction: “${DESCRIPTION_PROMPT}” At least ${MIN_DESCRIPTION_CHARS} characters. Write what you saw, in your own words; there is no right answer.`,
+  'After the third film and its description, you will be given a few short questions about all three films together, each answered with a button or a check. Then this step is finished.',
 ]
 
 export const FILMS_KEYS = ['There is nothing to press while a film plays.', '“Next” after a description opens the next film; after the third, the questions.']
@@ -32,7 +32,7 @@ export const FILMS_SITTING_LINE = 'Once you press “Begin”, finish the three 
 
 export const PATHS_WILL_DO = [
   'You will see a grid maze with walls and three marked squares, A, B, and C. A dot moves through it, one square at a time, leaving a dashed trace behind it. Now and then the dot pauses.',
-  'At each pause, say where the dot is heading: give 100 points across A, B, and C with three sliders. Moving one slider rescales the other two so the three always sum to 100. Press “Commit” and the dot goes on. There are 16 paths and about 40 pauses.',
+  'At each pause, say where the dot is heading: using the three sliders, assign 100 points across A, B, and C. Moving one slider rescales the other two, in proportion to where they stand, so the three always sum to 100. At a later pause on the same path the sliders start where you left them; each new path starts them equal. Press “Commit” and the dot goes on. There are 16 paths and about 40 pauses.',
   'If you leave partway, your answers so far are saved, and the path you were on is replaced by another of the same kind, so no path is shown twice.',
 ]
 
@@ -82,20 +82,21 @@ export function ShapesLeft({ ctx }: { ctx: PartContext<ShapesStore> }) {
 }
 
 function Sliders({ s }: { s: ShapesStore }) {
+  const shown = s.splitRounded()
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-sliders>
       {GOALS.map((g, i) => (
         <div key={g} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <span style={{ width: 16, fontWeight: 700, color: '#f0a94b' }}>{g}</span>
-          <input type="range" min={0} max={100} step={1} value={s.split[i]} onChange={(e) => s.setSplit(i as 0 | 1 | 2, Number(e.target.value))} aria-label={`points for ${g}`} style={{ width: 220 }} />
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, width: 30, textAlign: 'right' }}>{s.split[i]}</span>
+          <input type="range" min={0} max={100} step={1} value={shown[i]} onChange={(e) => s.setSplit(i as 0 | 1 | 2, Number(e.target.value))} aria-label={`points for ${g}`} style={{ width: 220 }} />
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, width: 30, textAlign: 'right' }}>{shown[i]}</span>
         </div>
       ))}
       <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
         <Btn primary onClick={() => s.commitJudgment()}>
           Commit
         </Btn>
-        <FixedLines lines={[`sum ${String(s.split[0] + s.split[1] + s.split[2]).padStart(3)}`]} />
+        <FixedLines lines={[`sum ${String(shown[0] + shown[1] + shown[2]).padStart(3)}`]} />
       </div>
     </div>
   )

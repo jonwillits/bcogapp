@@ -121,9 +121,10 @@ describe('Step 2: the paths', () => {
         expect(m).toMatch(/data-sliders/)
         expect(text(m)).not.toMatch(/inverse planning|last moved toward|data-reveal/i)
         store.setSplit(0, 70)
-        expect(store.split[0] + store.split[1] + store.split[2]).toBe(100)
+        expect(store.split[0] + store.split[1] + store.split[2]).toBeCloseTo(100, 9)
         store.setSplit(2, 10)
-        expect(store.split[0] + store.split[1] + store.split[2]).toBe(100)
+        expect(store.split[0] + store.split[1] + store.split[2]).toBeCloseTo(100, 9)
+        expect(store.splitRounded().reduce((a, b) => a + b, 0)).toBe(100)
         store.commitJudgment()
       } else store.advance()
     }
@@ -173,6 +174,40 @@ describe('Step 2: the paths', () => {
     expect(b.store.judged.length).toBe(kept - 1)
     expect(b.store.judged.every((j) => j.path !== second)).toBe(true)
     expect(new Set(b.store.order).size).toBe(16)
+  })
+  it('moving a slider rescales the other two in proportion, with no drift from rounding; the sliders carry over within a path and reset at the next', () => {
+    const { store } = make(6)
+    finishStep1(store)
+    store.beginPaths()
+    while (store.state === 'path' && !store.atJudgment) store.advance()
+    expect(store.splitRounded()).toEqual([34, 33, 33])
+    // From A at 100 down by one point at a time: B and C rise together.
+    store.setSplit(0, 100)
+    for (let v = 99; v >= 60; v--) store.setSplit(0, v)
+    expect(store.split[1]).toBeCloseTo(20, 9)
+    expect(store.split[2]).toBeCloseTo(20, 9)
+    // In proportion: A down to 20 leaves B and C equal at 40; then B down to 10 gives the 90 to A and C as 20 to 40.
+    store.setSplit(0, 20)
+    expect(store.split[1]).toBeCloseTo(40, 9)
+    expect(store.split[2]).toBeCloseTo(40, 9)
+    store.setSplit(1, 10)
+    expect(store.split[0]).toBeCloseTo(30, 9)
+    expect(store.split[2]).toBeCloseTo(60, 9)
+    expect(store.splitRounded()).toEqual([30, 10, 60])
+    const path = store.path!.id
+    store.commitJudgment()
+    expect(store.judged[store.judged.length - 1].split).toEqual([30, 10, 60])
+    while (store.state === 'path' && !store.atJudgment) store.advance()
+    if (store.path!.id === path) expect(store.splitRounded()).toEqual([30, 10, 60])
+    else expect(store.splitRounded()).toEqual([34, 33, 33])
+    // On to a new path: the sliders start equal again.
+    let guard = 0
+    while (store.state === 'path' && store.path!.id === path && guard++ < 500) {
+      if (store.atJudgment) store.commitJudgment()
+      else store.advance()
+    }
+    while (store.state === 'path' && !store.atJudgment) store.advance()
+    expect(store.splitRounded()).toEqual([34, 33, 33])
   })
   it('the same seed gives the same order of paths', () => {
     expect(planOrder(9)).toEqual(planOrder(9))
