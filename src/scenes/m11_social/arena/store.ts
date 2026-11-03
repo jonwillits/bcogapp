@@ -1,6 +1,9 @@
 import type { ProgressStore } from '../../../sim/social/progress/store'
 import { ANIMAL_IDS, ANIMALS, lettersFor, runTest, type AnimalId, type RunResult, type Trial } from '../../../sim/social/arena/animals'
 import { trainLearner, type Experience } from '../../../sim/social/arena/experience'
+
+const EXPERIENCE_ORDER: Experience[] = ['usual', 'many']
+const EXPERIENCE_SHORT: Record<Experience, string> = { usual: 'usual', many: 'many' }
 import type { ContestLearner } from '../../../sim/social/arena/learner'
 import { animalsByTests, type Matrix } from '../../../sim/social/arena/matrix'
 import { TESTS, testById, type TestSpec } from '../../../sim/social/arena/trial'
@@ -21,6 +24,16 @@ export const TRIAL_SECONDS = 1.2
 
 export interface Run extends RunResult {
   letter: string
+  /** The learner's experience when it ran (the learner only), so that the table keeps its runs under each apart. */
+  experience?: Experience
+}
+
+/** A row of the table: an animal, or the learner under one experience. */
+export interface TableRow {
+  animal: AnimalId
+  experience?: Experience
+  label: string
+  cells: Record<string, { share: number; runs: number }>
 }
 
 export class ArenaStore implements PartStore {
@@ -173,6 +186,7 @@ export class ArenaStore implements PartStore {
     this.runsUsed++
     const result = runTest(animal, test, animal === 'learner' ? this.learnerNow() : null, this.seed * 1000 + this.runsUsed * 17 + testId.charCodeAt(1))
     const run: Run = { ...result, letter: this.letters[animal] }
+    if (animal === 'learner') run.experience = this.experience
     this.runs.push(run)
     this.startPlaying(run)
     return run
@@ -234,7 +248,7 @@ export class ArenaStore implements PartStore {
     return { trial: last.trials[last.trials.length - 1], run: last, index: last.trials.length - 1, clock: TRIAL_SECONDS }
   }
 
-  /** The table: per animal and test, the share over every run of that pair (the mean of the runs' shares), and the number of runs. */
+  /** The table: per animal and test, the share over every run of that pair (the mean of the runs' shares), and the number of runs. The learner's runs are pooled here across experiences; `tableRows` keeps them apart. */
   table(): Record<AnimalId, Record<string, { share: number; runs: number }>> {
     const out = {} as Record<AnimalId, Record<string, { share: number; runs: number }>>
     for (const a of ANIMAL_IDS) out[a] = {}
@@ -245,6 +259,33 @@ export class ArenaStore implements PartStore {
       out[r.animal][r.test] = cell
     }
     return out
+  }
+
+  /**
+   * The table's rows in letter order: one per animal, and for the learner
+   * one per experience it has run under, labeled with the experience once
+   * it has run under both (Jon's walk, 2026-11-02: a run after "many
+   * rooms" must not be pooled with the runs before it).
+   */
+  tableRows(): TableRow[] {
+    const rows: TableRow[] = []
+    for (const a of this.order) {
+      const runs = this.runs.filter((r) => r.animal === a)
+      const experiences: (Experience | undefined)[] = a === 'learner' ? EXPERIENCE_ORDER.filter((e) => runs.some((r) => r.experience === e)) : [undefined]
+      const both = experiences.length > 1
+      for (const e of experiences.length ? experiences : [undefined]) {
+        const cells: TableRow['cells'] = {}
+        for (const r of runs) {
+          if (e !== undefined && r.experience !== e) continue
+          const cell = cells[r.test] ?? { share: 0, runs: 0 }
+          cell.share = (cell.share * cell.runs + r.share) / (cell.runs + 1)
+          cell.runs++
+          cells[r.test] = cell
+        }
+        rows.push({ animal: a, experience: e, label: both && e ? `${this.letters[a]} ${EXPERIENCE_SHORT[e]}` : this.letters[a], cells })
+      }
+    }
+    return rows
   }
 
   testsRun(): string[] {

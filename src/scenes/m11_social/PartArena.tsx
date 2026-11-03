@@ -223,15 +223,17 @@ function MatrixLines({ s }: { s: ArenaStore }) {
 
 function Right({ ctx }: { ctx: Ctx }) {
   const s = useStore(ctx.store)
-  const table = s.table()
+  const tableRows = s.tableRows()
   const tests = s.testsRun()
   const head = `${'animal'.padEnd(8)}${tests.map((t) => t.padStart(10)).join('')}`
-  const rows = s.order.map((a) => `${s.letters[a].padEnd(8)}${tests.map((t) => (table[a][t] ? `${table[a][t].share.toFixed(2)} (${table[a][t].runs})` : '').padStart(10)).join('')}`)
+  const rows = tableRows.map((row) => `${row.label.padEnd(8)}${tests.map((t) => (row.cells[t] ? `${row.cells[t].share.toFixed(2)} (${row.cells[t].runs})` : '').padStart(10)).join('')}`)
+  const learnerSplit = tableRows.some((r) => r.experience === 'many') && tableRows.some((r) => r.experience === 'usual')
   return (
     <Panel title="My table" style={RIGHT_STYLE}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <Note>Per animal and test: the share of trials on which the animal went to the piece the test scores, averaged over your runs of that pair, with the number of runs in brackets. Only tests you have run are shown.</Note>
         {tests.length ? <FixedLines lines={[head, ...rows]} testId="my-table" /> : <Note>No runs yet.</Note>}
+        {learnerSplit && <Note>The learner has a row for each experience it has run under: “usual” is the usual room, “many” is many rooms.</Note>}
         <FixedLines lines={TESTS.filter((t) => tests.includes(t.id)).map((t) => `${t.id}: ${t.scoredLabel}`)} mono={false} />
         <GroupLabel>The five rules, in words</GroupLabel>
         <FixedLines lines={ANIMALS.map((r) => `${s.diagnosed ? `${s.letters[r.id]} ${r.label}: ` : '• '}${r.rule}`)} mono={false} testId="rules-in-words" />
