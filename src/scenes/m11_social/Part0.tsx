@@ -50,7 +50,7 @@ export const OPEN_INTRO = {
     'This lab has five parts, each designed to clarify and explore topics and themes in this module.',
     'Every part, and every step within a part, opens on a screen like this one. Each one says what you will do, how long it takes, and whether you can leave partway without needing to start over. Experiments are done in one sitting; explorations can be left and returned to, and their steps reopened or redone.',
     'Your progress is saved in this browser on this computer only. A part you have finished does not need to be redone. A part you leave partway is started over when you return, as its screen says. “Export my results” and “Load my results” can be used to transfer your saved results to another computer or browser.',
-    'Part 2 opens once Part 1’s diagnosis is committed, because Part 2 names the rules Part 1 hides. Parts 3, 4, and 5 can be done in any order, before or after Parts 1 and 2. Nothing in one of them tells you what another tests. Part 5 is two rounds with the members of an invented animal, about 13 minutes, each round done in one sitting.',
+    'Part 2 opens once Part 1’s diagnosis is committed, because Part 2 names the rules Part 1 hides. Parts 3, 4, and 5 can be done in any order, before or after Parts 1 and 2. Nothing in one of them tells you what another tests. Part 5 is two rounds with the members of an invented animal, about 14 minutes, each round done in one sitting.',
     'The Open tab also gathers every part’s results under “My results, all parts”.',
   ],
   content: [COMMIT_RULE_LINE],

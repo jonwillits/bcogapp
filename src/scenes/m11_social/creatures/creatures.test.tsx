@@ -62,6 +62,7 @@ const NAMES = /Ostra|Velin|Marl|Tesk/
 /** Play a round's training with the right answers, then the memory test, then (Round 1) the surprise, then the sort. */
 function playRound(store: CreaturesStore, timers: ReturnType<typeof handTimers>, memory: (kind: string) => 'seen' | 'new' = (k) => (k === 'old' ? 'seen' : 'new')) {
   while (phaseOf(store) === 'train') {
+    store.go()
     store.answerTraining(store.rightAnswer())
     timers.fire() // the feedback timer
   }
@@ -82,11 +83,13 @@ describe('commit, then reveal', () => {
       expect(m).toMatch(/data-stage="train"/)
       expect(text(m)).not.toMatch(NAMES)
       expect(m).not.toMatch(/data-name=/)
+      store.go()
       store.answerTraining(store.rightAnswer())
       expect(text(stage(ctx))).not.toMatch(NAMES)
       timers.fire()
     }
     while (phaseOf(store) === 'train') {
+      store.go()
       store.answerTraining(store.rightAnswer())
       timers.fire()
     }
@@ -107,13 +110,19 @@ describe('commit, then reveal', () => {
     expect(text(stage(ctx))).toMatch(NAMES)
     store.begin()
     expect(store.round).toBe(1)
+    const ready = stage(ctx)
+    expect(ready).toMatch(/data-stage="train"/)
+    expect(ready).toMatch(/data-choice="go"/) // every showing waits for Go
+    expect(ready).not.toMatch(/data-member=/)
+    store.go()
     const m2 = stage(ctx)
-    expect(m2).toMatch(/data-stage="train"/)
+    expect(m2).toMatch(/data-member=/)
     expect(text(m2)).toMatch(NAMES) // the two buttons
     store.answerTraining('0')
     expect(stage(ctx)).toMatch(/data-name=/) // the correct name under the member during feedback
     timers.fire()
     while (phaseOf(store) === 'train') {
+      store.go()
       store.answerTraining(store.rightAnswer())
       timers.fire()
     }
@@ -142,10 +151,17 @@ describe('commit, then reveal', () => {
     expect(sc.round2.hitRate).toBe(1)
     expect(sc.round2.falseAlarmRateNew).toBe(1)
   })
-  it('the training runs 48 trials on its timers: an unanswered trial counts as wrong after the limit, and the feedback timer brings the next', () => {
+  it('the training runs 48 trials on its timers: every showing waits for Go, an unanswered trial counts as wrong after the limit, and the feedback timer brings the next', () => {
     const { store, timers } = make(8)
     store.begin()
     expect(store.trial).toBe(0)
+    // The first showing waits for Go: no timer runs, and an answer before Go is ignored.
+    expect(store.trialStage).toBe('ready')
+    expect(timers.pending()).toBe(0)
+    store.answerTraining('first')
+    expect(store.answers.training.length).toBe(0)
+    store.go()
+    expect(store.trialStage).toBe('answer')
     expect(timers.pending()).toBe(1)
     timers.fire() // the 4-second limit passes with no answer
     expect(store.trialStage).toBe('feedback')
@@ -153,11 +169,15 @@ describe('commit, then reveal', () => {
     expect(store.answers.training[0].right).toBe(false)
     timers.fire() // the feedback second
     expect(store.trial).toBe(1)
+    expect(store.trialStage).toBe('ready')
+    expect(timers.pending()).toBe(0)
+    store.go()
     store.answerTraining(store.rightAnswer())
     expect(store.answers.training[1].right).toBe(true)
     timers.fire()
     let n = 2
     while (phaseOf(store) === 'train') {
+      store.go()
       store.answerTraining('first')
       timers.fire()
       n++
@@ -173,6 +193,7 @@ describe('commit, then reveal', () => {
     const a = make(13, box)
     a.store.begin()
     const members = a.store.materials.members.map((m) => `${m.marking}|${m.patch}`).join()
+    a.store.go()
     a.store.answerTraining(a.store.rightAnswer())
     const b = make(13, box)
     expect(b.store.phase).toBe('intro')
@@ -188,6 +209,7 @@ describe('commit, then reveal', () => {
     // Round 2 interrupted during its sorting test, after Round 1 was done.
     b.store.begin()
     while (phaseOf(b.store) === 'train') {
+      b.store.go()
       b.store.answerTraining(b.store.rightAnswer())
       b.timers.fire()
     }
@@ -208,6 +230,7 @@ describe('commit, then reveal', () => {
     const d = make(21, box2)
     d.store.begin()
     while (phaseOf(d.store) === 'train') {
+      d.store.go()
       d.store.answerTraining(d.store.rightAnswer())
       d.timers.fire()
     }

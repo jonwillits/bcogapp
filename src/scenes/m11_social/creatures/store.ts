@@ -7,8 +7,10 @@ import type { PartStore } from '../contract'
 /**
  * Part 5's state (PART5_REDESIGN_2026-11-04.md §3, §5): two rounds, each a
  * unit from its instruction screen to the end of its sorting test. A
- * round: 48 training trials with an answer within 4 s and 1 s of feedback,
- * on a timer; the memory test over 24 items; in Round 1 the surprise
+ * round: 48 training trials, each waiting for the student's "Go", then an
+ * answer within 4 s and 1 s of feedback on a timer (the start is the
+ * student's, the exposure is fixed: Jon, 2026-11-04); the memory test over
+ * 24 items; in Round 1 the surprise
  * screen; the sorting test over the same 24 items. Then the predictions,
  * then the reveal. No score is computed for the screen before the
  * predictions are committed (`creatures.test.tsx`), and no string before
@@ -42,9 +44,9 @@ export class CreaturesStore implements PartStore {
   round: 0 | 1 = 0
   phase: Phase = 'intro'
   materials: RoundMaterials
-  /** Training: the trial index, its stage, the answer given, whether it was right. */
+  /** Training: the trial index, its stage ('ready' until the student presses Go), the answer given, whether it was right. */
   trial = 0
-  trialStage: 'answer' | 'feedback' = 'answer'
+  trialStage: 'ready' | 'answer' | 'feedback' = 'ready'
   trialAnswer: string | null = null
   trialRight = false
   /** The members shown so far in this round's training. */
@@ -125,9 +127,16 @@ export class CreaturesStore implements PartStore {
   }
 
   private startTrial(): void {
-    this.trialStage = 'answer'
+    this.trialStage = 'ready'
     this.trialAnswer = null
     this.trialRight = false
+    this.changed()
+  }
+
+  /** Go: the member in hand appears and its 4 seconds start. Every showing, the first included, waits for this. */
+  go(): void {
+    if (this.phase !== 'train' || this.trialStage !== 'ready') return
+    this.trialStage = 'answer'
     this.changed()
     this.timer = this.timers.set(() => this.answerTimedOut(), ANSWER_SECONDS * 1000)
   }

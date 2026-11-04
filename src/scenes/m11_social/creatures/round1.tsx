@@ -1,6 +1,6 @@
 import { InstructionScreen } from '../../m10_memory/progress/InstructionScreen'
 import { ANSWER_SECONDS, FEEDBACK_SECONDS, SHOWINGS_PER_MEMBER, TRAINING_TRIALS, type Item, type Member, type RoundMaterials } from '../../../sim/social/creatures/materials'
-import { BigChoice, FixedLines, Note, StagePanel, useStore } from '../ui'
+import { BigChoice, Btn, FixedLines, Note, StagePanel, useStore } from '../ui'
 import { Creature } from './Creature'
 import type { CreaturesStore } from './store'
 
@@ -19,13 +19,14 @@ export const ROUND1_TITLE = 'Part 5 — Two Rounds: Round 1'
 export const ROUND1_WILL_DO = [
   'In this part, you will do two rounds of a task with the members of an invented animal. In each round, you will first watch a series of showings and answer a question on each one, and then you will answer two series of questions about the members you were shown. This screen describes Round 1. Round 2 is described when you reach it.',
   `In Round 1, you will see ${TRAINING_TRIALS / SHOWINGS_PER_MEMBER} members of one family of the animal, one at a time. Each member is shown ${SHOWINGS_PER_MEMBER} times, so there are ${TRAINING_TRIALS} showings in all. The members look alike in most ways, and each one differs from the others in two small marks on its body and in its size. Your job in this round is to remember each individual member well enough to tell, later, which members you were shown.`,
-  `On each showing, you will answer one question with a button: has this member been shown before in this round, or is this the first time? Press “Seen before in this round” or “First time”. You have ${ANSWER_SECONDS} seconds to answer. Then the screen says “Right” or “Not quite” for ${FEEDBACK_SECONDS} second, with the member still in view, and the next showing follows. If you do not answer in time, the showing counts as wrong and the next one follows. On a member’s first showing, “First time” is the right answer; on its second, third, and fourth showings, “Seen before in this round” is the right answer.`,
+  `Each showing starts when you are ready. Before each one, the screen says “Press ‘Go’ to show member n of ${TRAINING_TRIALS}”, with a “Go” button where the member will appear. When you press “Go”, the member appears, with a question under it: has this member been shown before in this round, or is this the first time? You will answer with one of two buttons, “Seen before in this round” or “First time”. You have ${ANSWER_SECONDS} seconds to answer, so that every member is in view for the same length of time. Then the screen says “Right” or “Not quite” for ${FEEDBACK_SECONDS} second, with the member still in view, and the “Go” button for the next showing returns. You can take as long as you like between showings; the ${ANSWER_SECONDS} seconds start only when you press “Go”. If you do not answer within the ${ANSWER_SECONDS} seconds, the showing counts as wrong, and the next “Go” button appears.`,
+  'On a member’s first showing, “First time” is the right answer. On its second, third, and fourth showings, “Seen before in this round” is the right answer.',
   `After the ${TRAINING_TRIALS} showings, you will see a series of members one at a time, with no time limit, and you will say for each one whether it was among the members shown in this round, with “Seen before” or “New”. Some of them are members you were shown, exactly as you saw them. Some are members you were not shown, and a few of those look much like a member you were shown. A few further questions follow, and then Round 1 is finished.`,
   'Nothing is scored on the screen during the round. Your answers are saved, and the results of both rounds are shown together at the end of the part.',
   'When you are ready, press “Begin”.',
 ]
 
-export const ROUND_KEYS = ['Two buttons answer each showing and each later question. The keys 1 and 2 press the left and the right button.', 'There is nothing else to press.']
+export const ROUND_KEYS = ['Two buttons answer each showing and each later question. The keys 1 and 2 press the left and the right button, and the key 1 also presses “Go”.', 'There is nothing else to press.']
 export const ROUND1_SITTING_LINE = 'Once you press “Begin”, finish Round 1 in one sitting. If you leave partway, Round 1 starts again with other members of the same family.'
 
 export function Round1Intro({ s }: { s: CreaturesStore }) {
@@ -63,15 +64,32 @@ export const ROUND1_TRAINING: TrainingWords = {
   ],
 }
 
+export const GO_LINE = (n: number, of: number) => `Press “Go” to show member ${n} of ${of}. You will then have ${ANSWER_SECONDS} seconds to answer.`
+
 export function TrainingScreen({ store, words, roundLabel }: { store: CreaturesStore; words: TrainingWords; roundLabel: string }) {
   const s = useStore(store)
   const m = s.currentMember
   if (!m) return null
   const feedback = s.trialStage === 'feedback'
   const right = s.rightAnswer()
+  const status = <FixedLines lines={[roundLabel, `showing ${String(s.trial + 1).padStart(2)} of ${TRAINING_TRIALS}`]} testId="train-status" />
+  if (s.trialStage === 'ready') {
+    // The start of every showing is the student's: the member's place stays blank, with Go in it, until they press.
+    return (
+      <StagePanel testId="train">
+        {status}
+        <div style={{ width: 300, height: 300, margin: '0 auto', background: 'var(--bg)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }} data-choice="go">
+          <Btn primary onClick={() => s.go()}>
+            Go
+          </Btn>
+        </div>
+        <Note style={{ color: 'var(--text)' }}>{GO_LINE(s.trial + 1, TRAINING_TRIALS)}</Note>
+      </StagePanel>
+    )
+  }
   return (
     <StagePanel testId="train">
-      <FixedLines lines={[roundLabel, `showing ${String(s.trial + 1).padStart(2)} of ${TRAINING_TRIALS}`]} testId="train-status" />
+      {status}
       <MemberView family={s.materials.family} hue={s.materials.family.hue} who={m} name={feedback && words.nameDuringFeedback ? words.nameDuringFeedback(right) : undefined} testId="training" />
       <Note style={{ color: 'var(--text)' }}>{words.prompt}</Note>
       <BigChoice value={s.trialAnswer as string | null} options={words.buttons.map((b) => ({ id: b.id, label: b.label }))} onChange={(v) => s.answerTraining(v)} disabled={feedback} testId="training-answer" />
