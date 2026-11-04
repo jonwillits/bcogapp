@@ -759,8 +759,8 @@ export const LABS = [
     name: 'Lab 11 — Living Among Others',
     route: '#/m11-social',
     scene: 'src/scenes/m11_social',
-    /** Sim files whose strings reach the screen: the rules and their descriptions, the tests and the animals, the films' prompts and checklist, the classes and references. */
-    strings: ['src/sim/social'],
+    /** Sim files whose strings reach the screen: the rules and their descriptions, the tests and the animals, the films' prompts and checklist, the classes and references; and Lab 10's progress components (the instruction screen, Export and Load, the storage line), which this scene renders. */
+    strings: ['src/sim/social', 'src/scenes/m10_memory/progress'],
     handout: 'social_cognition/among_others_lab/among_others_lab.md',
     report: 'social_cognition/among_others_lab/among_others_lab_report.docx',
     /**
@@ -769,7 +769,7 @@ export const LABS = [
      * what the SCENE makes true, and the handout asserts nothing it cannot
      * find here.
      */
-    handoutPending: true,
+    handoutPending: false,
 
     retired: [
       { term: /\bgrudger\b|\bgrim trigger\b/gi, why: 'the fourth rule is named descriptively on screen: Defect forever after one defection (spec §5.2)', unless: ['literature calls', 'also called'] },
