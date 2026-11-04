@@ -1,5 +1,7 @@
 # Lab 11 walk: instructions for the thread that runs it
 
+**Superseded 2026-11-04: the walk ended, the handout is written, and the lab is live (merged to `main` at `e89bb1b`). Kept as the record of how the walk was briefed.**
+
 This file briefs a fresh Claude Code thread for Jon's interactive walk-through of Lab 11, `m11-social` ("Living Among Others"). The build is finished and committed on the branch `m11-social`, eight commits ahead of `main`, nothing pushed. Jon walks the lab in his own browser and reports what he sees, part by part; the thread fixes on the branch, verifies, records his decisions, and never pushes without asking him.
 
 ## 1. Read first, in this order
