@@ -59,11 +59,7 @@ export const THE_LEARNER_LINE = 'The learner was trained on contests, not on lin
 /** 18, 19, 20, 21. The simulated class's lines, in `src/sim/social/classes.ts`. */
 export { ONE_PERSON_LINE, SIMULATED_CLASS_LINE, REAL_CLASS_LINE, PENDING_CLASS_LINE } from '../../sim/social/classes'
 
-/** 22. Part 6. */
-export const MODEL_CELLS_LINE = 'These are model cells. They do not show what mirror neurons do for the animal.'
-
-/** 23. Part 6, Step 4. */
-export const HUMAN_RESULT_LINE = 'In people, the reversal was measured in the muscles, not in recorded cells (§11.3.5).'
+/** 22 and 23 were Part 6's lines; Part 6 was removed on 2026-11-04 and its lines live in `mirror/lines.ts`, unreachable. */
 
 /** 24. Any results screen whose unit was restarted. */
 export const RESTARTED_LINE = 'This part was interrupted and run again.'
@@ -71,8 +67,17 @@ export const RESTARTED_LINE = 'This part was interrupted and run again.'
 /** The commit-then-reveal rule, on Part 0. */
 export const COMMIT_RULE_LINE = 'Nothing a test would tell you is shown until you commit your answers: not a partner’s rule, not a result, not what a film or a judgment was for.'
 
-/** Part 6: the best-supported roles, and the share of recorded cells. */
-export const ROLES_LINE = 'The best-supported roles of mirror neurons are modest: telling observed actions apart, and imitation (§11.3.5, §11.2.9). They were a minority of the cells recorded.'
+/** Part 5 (PART5_REDESIGN_2026-11-04.md §8). 1. One student, on the reveal. */
+export const ONE_STUDENT_LINE = 'One run is about 24 test items a round, so one student’s scores are noisy; the class shows what one run cannot.'
+
+/** Part 5, §8 item 2. The order of the rounds, on the reveal. */
+export const ORDER_LINE = 'Round 2 came second, so practice, and knowing that a surprise had come once, should both have made memory for individuals better in Round 2. A drop in Round 2 therefore did not come from either. Better sorting in Round 2 is partly the goal, and partly practice and the names, and one student’s run cannot separate them.'
+
+/** Part 5, §8 item 3. Round 1's sorting score. */
+export const BEST_ASSIGNMENT_LINE = 'Your kinds are scored under whichever matching of Kind 1 and Kind 2 to the two groups fits your answers better.'
+
+/** Part 5, §8 item 4. The connection. */
+export const APPLYING_LINE = 'Applying a category already learned is different from learning one.'
 
 /** Part 1: the length, given only as about 16 (Jon, 2026-11-02). */
 export const LENGTH_LINE = 'A match lasts about 16 rounds, but the exact number varies from match to match.'

@@ -68,12 +68,12 @@ export const REFERENCES: Reference[] = [
     differed: 'Their players were language models answering in text; here the player is you, and then a program with counts.',
   },
   {
-    id: 'tajfel1963',
-    title: 'Labeled lines',
-    source: 'Tajfel and Wilkes (1963), Classification and quantitative judgement',
-    where: 'not in the library (spec §11, to request)',
+    id: 'creatures-sources',
+    title: 'Remembering individuals against learning categories',
+    source: 'Nosofsky (1986), Attention, similarity, and the identification–categorization relationship; Hamilton, Katz and Leirer (1980), Cognitive representation of personality impressions; Taylor, Fiske, Etcoff and Ruderman (1978), Categorical and contextual bases of person memory and stereotyping',
+    where: 'not in the library (PART5_REDESIGN_2026-11-04.md §9, to request)',
     values: null,
-    differed: 'Their items were eight lines, judged in centimeters, with the four shorter labeled A and the four longer B; here, the members of two invented groups.',
+    differed: 'Nosofsky compared identification with categorization of the same stimuli between tasks; Hamilton and colleagues gave a memory goal or an impression goal for the same behaviors; Taylor and colleagues measured who-said-what confusions with no instruction to categorize. Here one student does both rounds, in a fixed order, with members of an invented animal.',
   },
   {
     id: 'catmur2007',

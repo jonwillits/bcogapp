@@ -26,7 +26,7 @@ describe('a simulated class', () => {
     }
   })
   it('a real class replaces the simulation, labeled as this term’s, and the toggle shows the simulation again', () => {
-    const e = { ...classEntry('groups-boundary'), real: [{ values: [1.2, 1.0] }, { values: [1.1, 1.05] }] }
+    const e = { ...classEntry('creatures-memory'), real: [{ values: [1.2, 1.0] }, { values: [1.1, 1.05] }] }
     expect(cloudFor(e)).toEqual({ kind: 'real', points: [[1.2, 1.0], [1.1, 1.05]] })
     expect(cloudFor(e, false)).toEqual({ kind: 'pending' })
   })

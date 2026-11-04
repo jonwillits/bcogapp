@@ -5,8 +5,8 @@ import { STEPS as P2 } from './tournament/steps'
 import { FILMS_WILL_DO, FILMS_KEYS, FILMS_SITTING_LINE, PATHS_WILL_DO, PATHS_KEYS, PATHS_SITTING_LINE, FILMS_MINUTES, PATHS_MINUTES } from './shapes/screens'
 import { MODELS_INTRO } from './shapes/Reveal'
 import { STEPS as P4 } from './arena/steps'
-import { GROUPS_WILL_DO, GROUPS_KEYS, GROUPS_SITTING_LINE, GROUPS_MINUTES } from './groups/screens'
-import { STEPS as P6 } from './mirror/steps'
+import { ROUND1_WILL_DO, ROUND_KEYS, ROUND1_SITTING_LINE, ROUND_MINUTES } from './creatures/round1'
+import { round2WillDo, ROUND2_SITTING_LINE, SURPRISE_LINES, PREDICTIONS, PREDICTION_CHOICES } from './creatures/later'
 import * as L from './lines'
 import { ANIMALS } from '../../sim/social/arena/animals'
 import { RULES } from '../../sim/social/game/rules'
@@ -28,8 +28,10 @@ describe('texts:', () => {
     out.push(`**Part 3, Step 2 — Where is it going?** ${para(PATHS_WILL_DO)} About ${PATHS_MINUTES} minutes. Pausing: *${PATHS_SITTING_LINE}* Keys: ${para(PATHS_KEYS)}\n`)
     out.push(`**Part 3, the two procedures (after both units).** ${para(MODELS_INTRO)}\n`)
     for (const s of P4) out.push(`**Part 4, ${s.title}.** ${s.reread ? `*${s.reread}* ` : ''}${para(s.willDo)} About ${s.minutes} minutes; leave any time.${s.content.length ? ' Content: ' + s.content.map((c) => `*${c}*`).join(' ') : ''} Predictions: ${s.predictions.map((p) => `*${p.question}* [${p.choices.join(' / ')}]`).join('; ')}\n`)
-    out.push(`**Part 5 — Two Groups.** ${para(GROUPS_WILL_DO)} About ${GROUPS_MINUTES} minutes. Pausing: *${GROUPS_SITTING_LINE}* Keys: ${para(GROUPS_KEYS)}\n`)
-    for (const s of P6) out.push(`**Part 6, ${s.title}.** *${s.reread}* ${para(s.willDo)} About ${s.minutes} minutes; leave any time.${s.content.length ? ' Content: ' + s.content.map((c) => `*${c}*`).join(' ') : ''} Predictions: ${s.predictions.map((p) => `*${p.question}* [${p.choices.join(' / ')}]`).join('; ')}\n`)
+    out.push(`**Part 5 — Two Rounds: Round 1.** ${para(ROUND1_WILL_DO)} About ${ROUND_MINUTES} minutes. Pausing: *${ROUND1_SITTING_LINE}* Keys: ${para(ROUND_KEYS)}\n`)
+    out.push(`**Part 5, the surprise screen (Round 1).** ${para(SURPRISE_LINES)}\n`)
+    out.push(`**Part 5 — Two Rounds: Round 2.** ${para(round2WillDo(['Ostra', 'Velin']))} About ${ROUND_MINUTES} minutes. Pausing: *${ROUND2_SITTING_LINE}* Keys: ${para(ROUND_KEYS)}\n`)
+    out.push(`**Part 5, the predictions.** ${PREDICTIONS.map((p) => `*${p.question}* [${PREDICTION_CHOICES.join(' / ')}]`).join('; ')}\n`)
     out.push('\n**The fixed lines (§12):**\n')
     for (const [k, v] of Object.entries(L)) if (typeof v === 'string') out.push(`- \`${k}\`: *${v}*`)
     out.push('\n**The six rules, as the diagnosis lists them:**\n')

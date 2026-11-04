@@ -47,10 +47,10 @@ export class OpenStore implements PartStore {
 export const OPEN_INTRO = {
   title: 'Part 0 — General Lab Instructions',
   lines: [
-    'This lab has six parts, each designed to clarify and explore topics and themes in this module.',
+    'This lab has five parts, each designed to clarify and explore topics and themes in this module.',
     'Every part, and every step within a part, opens on a screen like this one. Each one says what you will do, how long it takes, and whether you can leave partway without needing to start over. Experiments are done in one sitting; explorations can be left and returned to, and their steps reopened or redone.',
     'Your progress is saved in this browser on this computer only. A part you have finished does not need to be redone. A part you leave partway is started over when you return, as its screen says. “Export my results” and “Load my results” can be used to transfer your saved results to another computer or browser.',
-    'Part 2 opens once Part 1’s diagnosis is committed, because Part 2 names the rules Part 1 hides. Parts 3, 4, 5, and 6 can be done in any order, before or after Parts 1 and 2. Nothing in one of them tells you what another tests.',
+    'Part 2 opens once Part 1’s diagnosis is committed, because Part 2 names the rules Part 1 hides. Parts 3, 4, and 5 can be done in any order, before or after Parts 1 and 2. Nothing in one of them tells you what another tests. Part 5 is two rounds with the members of an invented animal, about 13 minutes, each round done in one sitting.',
     'The Open tab also gathers every part’s results under “My results, all parts”.',
   ],
   content: [COMMIT_RULE_LINE],
@@ -59,11 +59,11 @@ export const OPEN_INTRO = {
 }
 
 const PARTS_WITH_UNITS: Part[] = [1, 3, 5]
-const EXPLORATIONS: Part[] = [2, 4, 6]
+const EXPLORATIONS: Part[] = [2, 4]
 
 function progressRows(p: ProgressStore): string[] {
   const done = UNIT_IDS.filter((u) => p.isComplete(u))
-  return [1, 2, 3, 4, 5, 6].map((part) => {
+  return [1, 2, 3, 4, 5].map((part) => {
     const label = `Part ${part}`.padEnd(8)
     if (EXPLORATIONS.includes(part as Part)) return `${label}an exploration`
     if (p.partComplete(part as Part)) return `${label}finished`
@@ -138,7 +138,7 @@ function Right({ ctx }: { ctx: { progress: ProgressStore } }) {
   return (
     <Panel title="My results, all parts" style={RIGHT_STYLE}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <Note>Each part’s My results screen is on its own tab once the part is finished. This screen gathers them. Parts 2, 4 and 6 are explorations: what they show is read off their own tabs.</Note>
+        <Note>Each part’s My results screen is on its own tab once the part is finished. This screen gathers them. Parts 2 and 4 are explorations: what they show is read off their own tabs.</Note>
         <FixedLines lines={progressRows(p)} testId="results-all" />
         {finished.length > 0 && (
           <div>

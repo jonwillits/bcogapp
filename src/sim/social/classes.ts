@@ -21,7 +21,8 @@ import { makeRng } from '../random'
  * Simmel (1944) report percentages of descriptions, not ratings (heider_1944,
  * pp. 248–252); Baker, Saxe and Tenenbaum (2009) report correlations with
  * the group mean and no per-participant spread (baker_2009, Table 1, p. 338);
- * Tajfel and Wilkes (1963) is not in the library (spec §11, to request).
+ * Part 5's sources (Nosofsky, 1986; Hamilton, Katz and Leirer, 1980; Taylor
+ * et al., 1978) are not in the library (PART5_REDESIGN_2026-11-04.md §9).
  */
 
 export interface ClassSource {
@@ -74,16 +75,16 @@ export const CLASS_ENTRIES: ClassEntry[] = [
     real: null,
   },
   {
-    id: 'groups-boundary',
-    panel: 'Part 5: the difference at the boundary, labeled against unlabeled',
-    measures: ['labeled set: judged boundary difference as a share of the true one', 'unlabeled set: the same'],
+    id: 'creatures-memory',
+    panel: 'Part 5: memory for individuals, Round 1 against Round 2',
+    measures: ['Round 1: d′ for individuals', 'Round 2: d′ for individuals'],
     sources: [null, null],
     real: null,
   },
   {
-    id: 'groups-spread',
-    panel: 'Part 5: the spread within groups, labeled against unlabeled',
-    measures: ['labeled set: judged spread within groups as a share of the true one', 'unlabeled set: the same'],
+    id: 'creatures-sorting',
+    panel: 'Part 5: sorting accuracy, Round 1 against Round 2',
+    measures: ['Round 1: share sorted into the true group', 'Round 2: the same'],
     sources: [null, null],
     real: null,
   },

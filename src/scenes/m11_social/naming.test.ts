@@ -37,14 +37,19 @@ const file = (name: string) => production(scene).find(([p]) => p.endsWith(name))
 const lines = visibleText(file('lines.ts'), false)
 
 const PART3_FORBIDDEN = /\bgoal|intention|\bagent|animate|\balive\b|purpose|motive|\bchase|\bhide|\bhid\b|\bhiding\b|bully|Heider|Simmel/i
-const PART5_FORBIDDEN = /stereotype|exaggerat|accentuat|\bbias|boundary|categor|Tajfel/i
+/** PART5_REDESIGN §4, item 1: before Round 1's sorting test, no group, kind, sorting, category, name, stereotype or Nosofsky. */
+const PART5_EARLY_FORBIDDEN = /\bgroups?\b|\bkinds?\b|\bsort|categor|Ostra|Velin|Marl|Tesk|stereotype|Nosofsky/i
+/** §4, item 2: before the reveal, nothing says what the comparison is. */
+const PART5_BEFORE_REVEAL = /stereotype|Nosofsky|Hamilton|Taylor|attention|idiosyncratic|\bgoal/i
 const PART1_FORBIDDEN = /tit-for-tat|grudger|\bgrim\b|win-stay|lose-shift|Pavlov|always cooperate|always defect|suspicious|defect forever/i
 
 /** Part 3's files that may hold its forbidden words: the reveals, the models (named only after the prediction), the films' rating strings (after the three descriptions), the references and the class file. */
 const PART3_FILES = (p: string) => p.includes('/shapes/') || p.includes('PartShapes') || p.includes('/paths/')
 const PART3_REVEAL = /Reveal\.tsx$|\/sim\/social\/paths\/models\.ts$|\/sim\/social\/paths\/pool\.ts$|\/sim\/social\/shapes\/films\.ts$|references\.ts$|classes\.ts$|lines\.ts$/
-const PART5_FILES = (p: string) => p.includes('/groups/') || p.includes('PartGroups')
-const PART5_REVEAL = /Reveal\.tsx$|references\.ts$|classes\.ts$|lines\.ts$/
+const PART5_FILES = (p: string) => p.includes('/creatures/') || p.includes('PartCreatures')
+/** The files a student reaches only from Round 1's sorting test onward. */
+const PART5_LATER = /\/creatures\/later\.tsx$|\/creatures\/Reveal\.tsx$/
+const PART5_REVEAL = /\/creatures\/Reveal\.tsx$/
 const PART1_FILES = (p: string) => p.includes('/partners/') || p.includes('PartPartners')
 const PART1_REVEAL = /Reveal\.tsx$/
 
@@ -66,22 +71,41 @@ describe('nothing names what Part 3 tests before its reveal (§13, item 2)', () 
   it('the tab and part titles are neutral', () => {
     const ui = visibleText(file('ui.tsx'))
     expect(ui).toMatch(/Shapes/)
-    expect(ui).toMatch(/Groups/)
+    expect(ui).toMatch(/Creatures/)
     expect(ui).not.toMatch(PART3_FORBIDDEN)
-    expect(ui).not.toMatch(PART5_FORBIDDEN)
+    expect(ui).not.toMatch(PART5_EARLY_FORBIDDEN)
   })
 })
 
-describe('nothing names what Part 5 tests before its reveal (§13, item 3)', () => {
-  it('no Part 5 file outside the reveal holds a forbidden word in a visible string', () => {
+describe('nothing before Round 1’s sorting test mentions groups, and nothing before the reveal says what the comparison is (PART5_REDESIGN §4)', () => {
+  it('no Part 5 file a student reaches before the sorting test, nor Part 0, the tabs or the part titles, holds group, kind, sort, categor-, a group’s name, stereotype or Nosofsky', () => {
     for (const [path, src] of all) {
-      if (!PART5_FILES(path) || PART5_REVEAL.test(path)) continue
-      const hits = textOf(path, src).split('\n').filter((l) => PART5_FORBIDDEN.test(l))
+      // The materials file holds the two names as data; it is checked on its own below.
+      if (!PART5_FILES(path) || PART5_LATER.test(path) || path.endsWith('/creatures/materials.ts')) continue
+      const hits = textOf(path, src).split('\n').filter((l) => PART5_EARLY_FORBIDDEN.test(l))
       expect(hits, `${path}: ${hits.join(' | ')}`).toEqual([])
     }
-    // The sets' data file names nothing either.
-    const sets = production(sim).find(([p]) => p.endsWith('/groups/sets.ts'))![1]
-    expect(visibleText(sets, false)).not.toMatch(PART5_FORBIDDEN)
+    for (const name of ['Part0.tsx', 'ui.tsx']) {
+      const hits = visibleText(file(name)).split('\n').filter((l) => PART5_EARLY_FORBIDDEN.test(l))
+      expect(hits, `${name}: ${hits.join(' | ')}`).toEqual([])
+    }
+    // The materials file holds the names as data only, in one line, and no other forbidden word.
+    const materials = production(sim).find(([p]) => p.endsWith('/creatures/materials.ts'))![1]
+    const hits = visibleText(materials, false).split('\n').filter((l) => /\bgroups?\b|\bkinds?\b|\bsort|categor|stereotype|Nosofsky/i.test(l))
+    expect(hits).toEqual([])
+  })
+  it('no Part 5 file outside the reveal names the comparison: no stereotype, Nosofsky, Hamilton, Taylor, attention, idiosyncratic or goal', () => {
+    for (const [path, src] of all) {
+      if (!PART5_FILES(path) || PART5_REVEAL.test(path)) continue
+      const hits = textOf(path, src).split('\n').filter((l) => PART5_BEFORE_REVEAL.test(l))
+      expect(hits, `${path}: ${hits.join(' | ')}`).toEqual([])
+    }
+  })
+  it('Round 2’s instruction promises nothing about tests', () => {
+    const later = file('creatures/later.tsx')
+    const start = later.indexOf('export function round2WillDo')
+    const end = later.indexOf('export const ROUND2_SITTING_LINE')
+    expect(visibleText(later.slice(start, end))).not.toMatch(/not be tested|\bonly\b|no memory|will not|won’t|won't/i)
   })
 })
 
@@ -139,8 +163,10 @@ describe('the lines that are content, each on its panel (§12)', () => {
       ['GOALS_NOT_BELIEFS_LINE', /Inverse planning infers where something is heading, not what it believes/, 'shapes/Reveal.tsx'],
       ['PROGRAMMED_ANIMALS_LINE', /These are programs with rules\. The same choices do not show the same rule/, 'PartArena.tsx'],
       ['THE_LEARNER_LINE', /The learner was trained on contests, not on lines of sight/, 'arena/steps.ts'],
-      ['MODEL_CELLS_LINE', /These are model cells/, 'PartMirror.tsx'],
-      ['HUMAN_RESULT_LINE', /the reversal was measured in the muscles/, 'mirror/steps.ts'],
+      ['ONE_STUDENT_LINE', /one student’s scores are noisy/, 'creatures/Reveal.tsx'],
+      ['ORDER_LINE', /Round 2 came second/, 'creatures/Reveal.tsx'],
+      ['BEST_ASSIGNMENT_LINE', /whichever matching of Kind 1 and Kind 2/, 'creatures/Reveal.tsx'],
+      ['APPLYING_LINE', /Applying a category already learned/, 'creatures/Reveal.tsx'],
       ['RESTARTED_LINE', /This part was interrupted and run again/, 'partners/Reveal.tsx'],
       ['COMMIT_RULE_LINE', /Nothing a test would tell you is shown until you commit/, 'Part0.tsx'],
     ]
@@ -158,7 +184,7 @@ describe('the lines that are content, each on its panel (§12)', () => {
 
 describe('the chapter’s words are where the instruments use them (§16)', () => {
   it('the vocabulary', () => {
-    for (const w of ['payoff matrix', 'prisoner’s dilemma', 'cooperate', 'defect', 'strategy', 'tit-for-tat', 'evolutionarily stable strategy', 'reciprocal altruism', 'theory of mind', 'inverse planning', 'Morgan’s Canon', 'behavior-reading', 'stereotype', 'mirror neuron', 'premotor cortex', 'Two Rules', 'Suspicious tit-for-tat', 'Defect forever after one defection', 'Win-stay, lose-shift', 'Predictor', 'probe', 'noise', 'generations', 'the cycle', 'line of sight', 'Line of sight now', 'Line of sight before', 'the usual room', 'many rooms', 'precision grip', 'whole-hand grasp', 'a simulated class'])
+    for (const w of ['payoff matrix', 'prisoner’s dilemma', 'cooperate', 'defect', 'strategy', 'tit-for-tat', 'evolutionarily stable strategy', 'reciprocal altruism', 'theory of mind', 'inverse planning', 'Morgan’s Canon', 'behavior-reading', 'stereotype', 'Two Rules', 'Suspicious tit-for-tat', 'Defect forever after one defection', 'Win-stay, lose-shift', 'Predictor', 'probe', 'noise', 'generations', 'the cycle', 'line of sight', 'Line of sight now', 'Line of sight before', 'the usual room', 'many rooms', 'a simulated class', 'Seen before in this round', 'First time', 'Kind 1'])
       expect(screen.toLowerCase(), w).toContain(w.toLowerCase())
   })
   it('the controls carry the names the spec gives them', () => {

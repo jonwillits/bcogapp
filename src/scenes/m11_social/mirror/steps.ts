@@ -1,4 +1,4 @@
-import { HUMAN_RESULT_LINE, MODEL_CELLS_LINE } from '../lines'
+import { HUMAN_RESULT_LINE, MODEL_CELLS_LINE } from './lines'
 
 /**
  * The four steps of Part 6 (spec §10.3): before learning; the other

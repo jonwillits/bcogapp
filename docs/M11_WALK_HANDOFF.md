@@ -13,8 +13,8 @@ Do not re-read the build transcript. What matters from it is in those files.
 
 ## 2. Where the lab lives
 
-- Sim: `src/sim/social/` (`game/`, `arena/`, `mirror/`, `paths/`, `shapes/`, `groups/`, `classes.ts`, `references.ts`, `parts.ts`, `progress/`, `crib.probe.ts`).
-- Scene: `src/scenes/m11_social/` (`SocialScene.tsx`, `Part0.tsx`, `PartPartners.tsx` + `partners/`, `PartTournament.tsx` + `tournament/`, `PartShapes.tsx` + `shapes/`, `PartArena.tsx` + `arena/`, `PartGroups.tsx` + `groups/`, `PartMirror.tsx` + `mirror/`, `ui.tsx`, `lines.ts`, `contract.ts`, `ClassPanel.tsx`).
+- Sim: `src/sim/social/` (`game/`, `arena/`, `creatures/`, `paths/`, `shapes/`, `mirror/` (Part 6, removed 2026-11-04, unreachable), `classes.ts`, `references.ts`, `parts.ts`, `progress/`, `crib.probe.ts`).
+- Scene: `src/scenes/m11_social/` (`SocialScene.tsx`, `Part0.tsx`, `PartPartners.tsx` + `partners/`, `PartTournament.tsx` + `tournament/`, `PartShapes.tsx` + `shapes/`, `PartArena.tsx` + `arena/`, `PartCreatures.tsx` + `creatures/`, `PartMirror.tsx` + `mirror/` (unreachable since 2026-11-04), `ui.tsx`, `lines.ts`, `contract.ts`, `ClassPanel.tsx`).
 - Saved progress: the shared layer `src/sim/progress/` (Lab 10 configures it too; its suite is untouched), Lab 11's configuration in `src/sim/social/progress/`. One storage key, `bcogapp.m11.v1`.
 - Close-out entry: `scripts/labs.config.mjs` (`handoutPending: true`, 43 claims). Timing in a real browser: `scripts/m11-timing.mjs`.
 - Registry: `src/scenes/registry.ts` (`m11-social`; the handout URL is `social_cognition/among_others_lab/among_others_lab.md`, which does not exist yet).
@@ -50,13 +50,13 @@ Jon goes part by part in his browser and writes what he sees. For each message o
 3. Fix the batch, run the affected tests and probes, commit once with the reason.
 4. Report what changed and what he should now see, in a few lines; attach a screenshot only for a visual change.
 
-Playing Part 1 or judging Part 5 himself is not a naive run and he knows it; he does them for the mechanics. "Clear my saved results" on the Open tab resets everything and draws a new seed behind an in-page confirmation.
+Playing Part 1 or doing Part 5's rounds himself is not a naive run and he knows it; he does them for the mechanics. "Clear my saved results" on the Open tab resets everything and draws a new seed behind an in-page confirmation.
 
 ## 6. Driving the scene from the pane
 
 - The canvas is black and the clocks stand still while the pane is hidden: call `mcp__ccd_view__show_pane {pane: "preview"}` (and `tabs_select`) before a screenshot or a sim-driven loop, and again after a reload. Even shown, it may run at a few frames a second; the timing numbers come from `node scripts/m11-timing.mjs` (headed Chromium, dev server up), never from the pane.
 - Buttons: `button.click()` from `javascript_tool` is reliable; a `find` ref's click sometimes lands nowhere. Real key presses do not hold in the pane; synthesized `KeyboardEvent`s on `window` do.
-- The `testId` attributes to read with `read_page` or JS: `partners-status`, `rule-match`, `match`, `last-round`, `predict`, `reveal`, `results-rows`, `rules-table`, `rules-in-words`, `my-table`, `run1`–`run4`, `runs-used`, `rr3`–`rr5`, `predictor-rank`, `predictor-versus`, `student-versus`, `totals`, `shapes-status`, `film`, `describe`, `rate`, `step1-done`, `path`, `path-status`, `judge`, `models-intro`, `trial-status`, `test-result`, `matrix`, `present`, `predicted`, `weights`, `mirror-status`, `record`, `mine`, `parts-done`, `results-all`, `reveal-table`; and the data attributes `data-stage`, `data-lines`, `data-panel`, `data-choice`, `data-chip`, `data-door`, `data-dom-door`, `data-creature`, `data-bar`, `data-checklist`, `data-diagnosis-row`, `data-reveal-record`.
+- The `testId` attributes to read with `read_page` or JS: `partners-status`, `rule-match`, `match`, `last-round`, `predict`, `reveal`, `results-rows`, `rules-table`, `rules-in-words`, `my-table`, `run1`–`run4`, `runs-used`, `rr3`–`rr5`, `predictor-rank`, `predictor-versus`, `student-versus`, `totals`, `shapes-status`, `film`, `describe`, `rate`, `step1-done`, `path`, `path-status`, `judge`, `models-intro`, `trial-status`, `test-result`, `matrix`, `train`, `train-status`, `feedback`, `memory`, `memory-status`, `surprise`, `sort`, `sort-status`, `creatures-status`, `scores`, `predicted`, `record`, `mine`, `parts-done`, `results-all`, `reveal-table`; and the data attributes `data-stage`, `data-lines`, `data-panel`, `data-choice`, `data-chip`, `data-door`, `data-dom-door`, `data-creature`, `data-member`, `data-name`, `data-marking`, `data-patch`, `data-prediction`, `data-bars`, `data-checklist`, `data-diagnosis-row`, `data-reveal-record`.
 - To jump to a later screen, build a saved state in the page: `const m = await import('/src/sim/social/progress/state.ts')` (Vite serves TS), `const st = m.newState(seed)`, fill `st.units['p1-match-0']` and so on (`{status: 'complete', materials, restarts, result}`; the unit ids are `p1-match-0`…`p1-match-5`, `p1-diagnosis`, `p3-films`, `p3-paths`, `p5-sets`), set `st.flags.skippedPart1` if wanted, write `localStorage['bcogapp.m11.v1'] = JSON.stringify(st)` and reload. Opening every tab needs only `?dev=1`.
 - A module edit under HMR leaves the old store instance running, so a string change in a store shows only after a reload.
 
@@ -66,7 +66,7 @@ Playing Part 1 or judging Part 5 himself is not a naive run and he knows it; he 
 PROBE=1 PROBE_DIR=src/sim/social npx vitest run --disable-console-intercept -t "crib:"
 ```
 
-Then by area: the spec §6 numbers `PROBE_DIR=src/sim/social/game -t "measure:"`; the cycle search `-t "cycle:"` (12 min; `CYCLE_QUICK=1 CYCLE_SEEDS=3` for a short one); the animals×tests matrix `PROBE_DIR=src/sim/social/arena -t "matrix:"`; the cells `PROBE_DIR=src/sim/social/mirror -t "mirror:"`; the paths `PROBE_DIR=src/sim/social/paths -t "paths:"`; the films `PROBE_DIR=src/sim/social/shapes -t "films:"`; the texts for the notes `PROBE_DIR=src/scenes/m11_social -t "texts:"`. Probes print; they assert nothing.
+Then by area: the spec §6 numbers `PROBE_DIR=src/sim/social/game -t "measure:"`; the cycle search `-t "cycle:"` (12 min; `CYCLE_QUICK=1 CYCLE_SEEDS=3` for a short one); the animals×tests matrix `PROBE_DIR=src/sim/social/arena -t "matrix:"`; Part 5's materials `PROBE_DIR=src/sim/social/creatures -t "materials:"`; the paths `PROBE_DIR=src/sim/social/paths -t "paths:"`; the films `PROBE_DIR=src/sim/social/shapes -t "films:"`; the texts for the notes `PROBE_DIR=src/scenes/m11_social -t "texts:"`. Probes print; they assert nothing.
 
 ## 8. The questions to put to Jon (walk-through §10, in short)
 
@@ -79,7 +79,7 @@ Then by area: the spec §6 numbers `PROBE_DIR=src/sim/social/game -t "measure:"`
 7. Part 2 Step 1's four predictions commit together. Fine, or one per run?
 8. Part 3's two reveals come together at the end. Fine, or Step 1's at its commit?
 9. The films: Film 2's seven beats readable, the control neutral, speeds and sizes.
-10. Part 5's creature (stilt and bulb) and the set names Ostra, Velin, Marl, Tesk.
+10. Part 5's creature (stilt and bulb), its two features, and the group names Ostra, Velin, Marl, Tesk (Part 5 rebuilt 2026-11-04: PART5_REDESIGN_2026-11-04.md).
 11. The macaque from simple shapes; camera height and distance.
 12. The arena drawing on the dark theme: facing stroke, amber sight shading, white and dashed-blue barriers.
 13. Noise as buttons (0, 1, 5, 10%) and grid speed as buttons (2, 10, 20 a second), not sliders.

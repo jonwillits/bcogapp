@@ -1,11 +1,14 @@
 import { useEffect } from 'react'
 import { Panel } from '../../components/Panel'
+
+/** Part 6 was removed from the lab on 2026-11-04; this file is unreachable and kept as built (PART5_REDESIGN_2026-11-04.md §10). */
+const MIRROR_TITLE = 'Part 6 — Doing and Watching'
 import type { ProgressStore } from '../../sim/social/progress/store'
 import { restingFiring } from '../../sim/social/mirror/schedule'
 import { referenceById } from '../../sim/social/references'
-import { Btn, Choice, Content, FixedLines, GroupLabel, Note, PANEL_STYLE, PART_TITLES, ReferencePanel, RIGHT_STYLE, StagePanel, useStore, useThrottledStore } from './ui'
+import { Btn, Choice, Content, FixedLines, GroupLabel, Note, PANEL_STYLE, ReferencePanel, RIGHT_STYLE, StagePanel, useStore, useThrottledStore } from './ui'
 import { InstructionScreen } from '../m10_memory/progress/InstructionScreen'
-import { MODEL_CELLS_LINE, ROLES_LINE, HUMAN_RESULT_LINE } from './lines'
+import { MODEL_CELLS_LINE, ROLES_LINE, HUMAN_RESULT_LINE } from './mirror/lines'
 import type { PartModule } from './contract'
 import { MirrorStore } from './mirror/store'
 import { STEPS, type Step } from './mirror/steps'
@@ -42,7 +45,7 @@ function Left({ ctx }: { ctx: Ctx }) {
   return (
     <>
       {ctx.header}
-      <Panel title={PART_TITLES.mirror} style={PANEL_STYLE}>
+      <Panel title={MIRROR_TITLE} style={PANEL_STYLE}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <Content>{MODEL_CELLS_LINE}</Content>
           <GroupLabel>Step</GroupLabel>

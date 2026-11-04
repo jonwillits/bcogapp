@@ -27,18 +27,19 @@ function memoryStorage(initial: string | null = null, blocked = false): RawStora
 }
 
 describe('the units of Lab 11', () => {
-  it('six matches, the diagnosis, the films, the paths and the two sets; Parts 2, 4 and 6 have none', () => {
-    expect(UNIT_IDS.length).toBe(PART1_PARTNERS + 4)
+  it('six matches, the diagnosis, the films, the paths and the two rounds; Parts 2 and 4 have none', () => {
+    expect(UNIT_IDS.length).toBe(PART1_PARTNERS + 5)
     expect(unitsOfPart(1)).toEqual([...Array.from({ length: 6 }, (_, i) => unitOfMatch(i)), 'p1-diagnosis'])
     expect(unitsOfPart(3)).toEqual(['p3-films', 'p3-paths'])
-    expect(unitsOfPart(5)).toEqual(['p5-sets'])
+    expect(unitsOfPart(5)).toEqual(['p5-round1', 'p5-round2'])
     for (const p of [0, 2, 4, 6] as const) expect(unitsOfPart(p)).toEqual([])
   })
-  it('the restart table of §4.1: a match, the diagnosis and the films run again as they were; the paths resume; the sets have a reserve pair', () => {
+  it('the restart table of §4.1: a match, the diagnosis and the films run again as they were; the paths resume; each of Part 5’s rounds has a reserve version', () => {
     for (let i = 0; i < PART1_PARTNERS; i++) expect(reservesFor(unitOfMatch(i))).toBe(1)
     expect(reservesFor('p1-diagnosis')).toBe(1)
     expect(reservesFor('p3-films')).toBe(1)
-    expect(reservesFor('p5-sets')).toBe(2)
+    expect(reservesFor('p5-round1')).toBe(2)
+    expect(reservesFor('p5-round2')).toBe(2)
     expect(resumes('p3-paths')).toBe(true)
     for (const u of UNIT_IDS) if (u !== 'p3-paths') expect(resumes(u), u).toBe(false)
   })
@@ -72,17 +73,17 @@ describe('every unit in §4.1 is interrupted, reloaded, and restarted as the tab
       expect(b.interrupted.map((i) => i.unit)).toEqual([unit])
     }
   })
-  it('the two sets restart with the reserve pair, and a second interruption reuses it and says so', () => {
+  it('a Part 5 round restarts with its reserve version, and a second interruption reuses it and says so', () => {
     const box = memoryStorage()
     const a = new ProgressStore(box, 7)
-    a.begin('p5-sets')
+    a.begin('p5-round1')
     const b = new ProgressStore(box)
-    expect(b.materialsSlot('p5-sets')).toBe(1)
+    expect(b.materialsSlot('p5-round1')).toBe(1)
     expect(b.interrupted[0].exhausted).toBe(false)
-    b.begin('p5-sets')
+    b.begin('p5-round1')
     const c = new ProgressStore(box)
-    expect(c.materialsSlot('p5-sets')).toBe(1)
-    expect(c.restarts('p5-sets')).toBe(2)
+    expect(c.materialsSlot('p5-round1')).toBe(1)
+    expect(c.restarts('p5-round1')).toBe(2)
     expect(c.interrupted[0].exhausted).toBe(true)
   })
   it('the paths resume with the judgments already made', () => {
@@ -185,9 +186,26 @@ describe('Export and Load', () => {
     expect(isSavedState({ ...good, skippedPart1: 'yes' })).toBe(false)
     expect(isSavedState({ ...good, sampleNights: false })).toBe(false)
   })
+  it('a state saved with the old Part 5 unit is read with that unit dropped and the two rounds added as not started', () => {
+    const box = memoryStorage()
+    const a = new ProgressStore(box, 41)
+    a.complete('p3-films', {})
+    const old = JSON.parse(box.read()!) as { units: Record<string, unknown> }
+    delete old.units['p5-round1']
+    delete old.units['p5-round2']
+    old.units['p5-sets'] = { status: 'complete', materials: 0, restarts: 0, result: { judgments: [] } }
+    box.write(JSON.stringify(old))
+    const b = new ProgressStore(box)
+    expect(b.seed).toBe(41)
+    expect(b.isComplete('p3-films')).toBe(true)
+    expect(b.status('p5-round1')).toBe('not started')
+    expect(b.status('p5-round2')).toBe('not started')
+    expect('p5-sets' in (b.state.units as Record<string, unknown>)).toBe(false)
+  })
   it('describeReplacement names the parts with units', () => {
     const here = new ProgressStore(memoryStorage(), 31)
-    here.complete('p5-sets', {})
+    here.complete('p5-round1', {})
+    here.complete('p5-round2', {})
     const there = newState(32)
     for (const u of unitsOfPart(1)) there.units[u] = { status: 'complete', materials: 0, restarts: 0 }
     there.units['p3-films'] = { status: 'complete', materials: 0, restarts: 0 }

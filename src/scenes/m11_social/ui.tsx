@@ -15,17 +15,16 @@ export { Btn, Note, GroupLabel, Choice, Content, FixedLines, OrientingPanel, Dot
 export { useStore, useThrottledStore } from '../m09_rat/useStore'
 export { StagePanel, row } from '../m10_memory/ui'
 
-export type Tab = 'open' | 'partners' | 'tournament' | 'shapes' | 'arena' | 'groups' | 'mirror'
+export type Tab = 'open' | 'partners' | 'tournament' | 'shapes' | 'arena' | 'creatures'
 
-/** The tabs: neutral names that hint at nothing Part 3 or Part 5 tests (§13, items 2 and 3). */
+/** The tabs: neutral names that hint at nothing Part 3 or Part 5 tests (§13, items 2 and 3; PART5_REDESIGN §4). Part 6 was removed on 2026-11-04. */
 export const TABS: { id: Tab; title: string; part: string }[] = [
   { id: 'open', title: 'Open', part: 'Part 0' },
   { id: 'partners', title: 'Partners', part: 'Part 1' },
   { id: 'tournament', title: 'Tournament', part: 'Part 2' },
   { id: 'shapes', title: 'Shapes', part: 'Part 3' },
   { id: 'arena', title: 'Arena', part: 'Part 4' },
-  { id: 'groups', title: 'Groups', part: 'Part 5' },
-  { id: 'mirror', title: 'Mirror', part: 'Part 6' },
+  { id: 'creatures', title: 'Creatures', part: 'Part 5' },
 ]
 
 export const PART_TITLES: Record<Tab, string> = {
@@ -34,8 +33,7 @@ export const PART_TITLES: Record<Tab, string> = {
   tournament: 'Part 2 — The Tournament',
   shapes: 'Part 3 — Shapes and Paths',
   arena: 'Part 4 — What the Dominant Saw',
-  groups: 'Part 5 — Two Groups',
-  mirror: 'Part 6 — Doing and Watching',
+  creatures: 'Part 5 — Two Rounds',
 }
 
 export function TabBar({ tab, onChange, locked }: { tab: Tab; onChange: (t: Tab) => void; locked: Partial<Record<Tab, string | null>> }) {
@@ -50,7 +48,7 @@ export function TabBar({ tab, onChange, locked }: { tab: Tab; onChange: (t: Tab)
           title={locked[t.id] ?? undefined}
           onClick={() => onChange(t.id)}
           style={{
-            flex: '1 1 23%',
+            flex: '1 1 30%',
             padding: '5px 1px',
             fontSize: 10.5,
             lineHeight: 1.15,

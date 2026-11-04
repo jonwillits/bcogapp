@@ -14,17 +14,16 @@ import { partners } from './PartPartners'
 import { tournament } from './PartTournament'
 import { shapes } from './PartShapes'
 import { arena } from './PartArena'
-import { groups } from './PartGroups'
-import { mirror } from './PartMirror'
+import { creatures } from './PartCreatures'
 
 /**
  * Module 11's scene: Lab 11, Living Among Others. The student is the
  * subject in Parts 1, 3 and 5 (a player against hidden partners, a viewer
- * of moving shapes and paths, a judge of the members of two groups), the
- * experimenter in Parts 2 and 4 (tournaments and populations of rules;
- * hidden chimpanzees in an arena), and the animal in Part 6 (a macaque
- * with two premotor cells on screen). The sixth installment of the
- * creature spine, and the first whose animal has hands.
+ * of moving shapes and paths, a learner of the members of an invented
+ * animal in two rounds), and the experimenter in Parts 2 and 4
+ * (tournaments and populations of rules; hidden chimpanzees in an arena).
+ * Part 6 (Doing and Watching, the macaque) was removed on 2026-11-04; its
+ * code stays in `mirror/`, unreachable (PART5_REDESIGN_2026-11-04.md §10).
  *
  * Progress is saved on the student's own device under one storage key
  * (`src/sim/social/progress/`, on Lab 10's layer), and every experiment is
@@ -33,7 +32,7 @@ import { mirror } from './PartMirror'
  * surface.
  */
 
-const TAB_PART: Record<Tab, Part> = { open: 0, partners: 1, tournament: 2, shapes: 3, arena: 4, groups: 5, mirror: 6 }
+const TAB_PART: Record<Tab, Part> = { open: 0, partners: 1, tournament: 2, shapes: 3, arena: 4, creatures: 5 }
 
 // Each module is typed to its own store; the shell holds them as the base type.
 const MODULES: Record<Tab, PartModule<PartStore>> = {
@@ -42,8 +41,7 @@ const MODULES: Record<Tab, PartModule<PartStore>> = {
   tournament: tournament as unknown as PartModule<PartStore>,
   shapes: shapes as unknown as PartModule<PartStore>,
   arena: arena as unknown as PartModule<PartStore>,
-  groups: groups as unknown as PartModule<PartStore>,
-  mirror: mirror as unknown as PartModule<PartStore>,
+  creatures: creatures as unknown as PartModule<PartStore>,
 }
 
 const MAX_STEPS_PER_FRAME = 6

@@ -6,7 +6,7 @@
  *      "fast", and the longest task on the main thread while Skip ahead
  *      pays 1,000 generations (spec §16: at least 20 a second; no more than
  *      about 300 ms at a time);
- *   2. frames per second in Part 6's table scene, with and without Chrome's
+ *   2. (removed 2026-11-04 with Part 6)
  *      4× CPU throttle, in a headed Chromium so the GPU draws (spec §16: at
  *      least 30 under the throttle);
  *   3. a film's measured length on a real screen, from the store's clock.
@@ -67,22 +67,7 @@ async function grid(browser) {
   await page.close()
 }
 
-async function mirror(browser, throttle) {
-  const page = await fresh(browser, throttle)
-  await tab(page, 'Mirror'); await page.waitForTimeout(600)
-  await click(page, 'Step 2'); await page.waitForTimeout(300)
-  await click(page, 'Begin'); await page.waitForTimeout(200)
-  await commitFirst(page); await page.waitForTimeout(100)
-  await click(page, 'Commit my prediction'); await page.waitForTimeout(400)
-  await click(page, 'Run 40 grasps'); await page.waitForTimeout(1500)
-  const f = await fps(page, 4)
-  console.log(`Part 6: ${f.toFixed(0)} frames per second${throttle ? ' under the 4× throttle' : ''} while grasps run (asked: at least 30 under the throttle)`)
-  await page.evaluate(() => { const c = document.querySelector('input[type=checkbox]'); c?.click() })
-  await page.waitForTimeout(500)
-  const f2 = await fps(page, 3)
-  console.log(`Part 6: ${f2.toFixed(0)} frames per second${throttle ? ' under the 4× throttle' : ''} in the side view`)
-  await page.close()
-}
+// Part 6 (the Mirror tab) was removed on 2026-11-04; its frame-rate measurement went with it.
 
 async function film(browser) {
   const page = await fresh(browser)
@@ -99,8 +84,6 @@ async function film(browser) {
 const browser = await chromium.launch({ headless: false })
 try {
   await grid(browser)
-  await mirror(browser, false)
-  await mirror(browser, true)
   await film(browser)
 } finally {
   await browser.close()
