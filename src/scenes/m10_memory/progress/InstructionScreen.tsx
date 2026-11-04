@@ -32,6 +32,8 @@ export interface InstructionScreenProps {
   willDo: string[]
   minutes: number
   sitting: Sitting
+  /** The pausing line, where a lab's wording differs from `SITTING_LINES` (Lab 11's matches and films). */
+  sittingLine?: string
   /** What to have ready. */
   ready?: string
   /** The keys or buttons, one per line. */
@@ -59,10 +61,10 @@ function groupBullets(lines: string[]): (string | string[])[] {
   return out
 }
 
-export function InstructionScreen({ title, willDo, minutes, sitting, ready = READY_DEFAULT, keys, content, onBegin, beginLabel = 'Begin', disabled, extra, inline }: InstructionScreenProps) {
+export function InstructionScreen({ title, willDo, minutes, sitting, sittingLine, ready = READY_DEFAULT, keys, content, onBegin, beginLabel = 'Begin', disabled, extra, inline }: InstructionScreenProps) {
   const style = inline
     ? { width: '100%', maxWidth: 560 }
-    : { position: 'absolute' as const, left: '50%', top: 24, transform: 'translateX(-50%)', width: 'min(560px, calc(100vw - 780px))', minWidth: 360, maxHeight: 'calc(100vh - 170px)', overflowY: 'auto' as const }
+    : { position: 'absolute' as const, left: 'calc(50% + var(--stage-shift, 0px))', top: 24, transform: 'translateX(-50%)', width: 'min(560px, calc(100vw - 780px))', minWidth: 360, maxHeight: 'calc(100vh - 170px)', overflowY: 'auto' as const }
   return (
     <div
       data-instruction
@@ -89,7 +91,7 @@ export function InstructionScreen({ title, willDo, minutes, sitting, ready = REA
       </p>
       <GroupLabel>Pausing</GroupLabel>
       <p style={{ margin: 0 }} data-sitting={sitting}>
-        {SITTING_LINES[sitting]}
+        {sittingLine ?? SITTING_LINES[sitting]}
       </p>
       <GroupLabel>What you need</GroupLabel>
       <p style={{ margin: 0 }} data-ready>

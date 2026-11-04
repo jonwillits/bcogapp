@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
 import { Btn, Note } from '../../m06_brain/ui'
-import type { ProgressStore } from '../../../sim/memory/progress/store'
-import type { SavedState } from '../../../sim/memory/progress/state'
-import { describeReplacement, exportFileName, exportText, parseImport } from '../../../sim/memory/progress/transfer'
+import { LAB10_TRANSFER } from '../../../sim/memory/progress/transfer'
+import type { Transfer } from '../../../sim/progress/transfer'
+import type { SavedState } from '../../../sim/progress/state'
 
 /**
  * Export my results and Load my results (spec §4.2; Jon, 2026-10-25: one
@@ -12,14 +12,25 @@ import { describeReplacement, exportFileName, exportText, parseImport } from '..
  * Nothing is uploaded. A loaded file never replaces saved results without
  * the confirmation panel on the page, which says what will be replaced; no
  * browser dialog is used (spec §12, item 11).
+ *
+ * Since 2026-11-01 the store and the transfer are any lab's: Lab 11 hands
+ * in its own (`transfer`), and Lab 10's is the default.
  */
+
+/** What the controls need of a progress store: its state, its seed, and the one way to replace it. */
+export interface TransferableStore<S> {
+  state: S
+  seed: number
+  replaceWith(state: S): void
+}
 
 export const EXPORT_LOAD_LINE = 'Use these if you change computers, or if your browser clears its data. Export writes a small file to your computer; Load reads one back.'
 
-export function ExportLoad({ store }: { store: ProgressStore }) {
+export function ExportLoad<U extends string, F extends string>({ store, transfer = LAB10_TRANSFER as unknown as Transfer<U, F> }: { store: TransferableStore<SavedState<U, F>>; transfer?: Transfer<U, F> }) {
+  const { describeReplacement, exportFileName, exportText, parseImport } = transfer
   const input = useRef<HTMLInputElement>(null)
   const [error, setError] = useState<string | null>(null)
-  const [pending, setPending] = useState<SavedState | null>(null)
+  const [pending, setPending] = useState<SavedState<U, F> | null>(null)
   const [done, setDone] = useState<string | null>(null)
 
   const exportNow = () => {

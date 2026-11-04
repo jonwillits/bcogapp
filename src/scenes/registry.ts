@@ -94,6 +94,7 @@ const FishScene = lazy(() => import('./m07_fish/FishScene'))
 const ObjectsScene = lazy(() => import('./m08_objects/ObjectsScene'))
 const RatScene = lazy(() => import('./m09_rat/RatScene'))
 const MemoryScene = lazy(() => import('./m10_memory/MemoryScene'))
+const SocialScene = lazy(() => import('./m11_social/SocialScene'))
 
 /**
  * Registered, runnable scenes. Order here is the order shown within a module.
@@ -276,6 +277,24 @@ export const scenes: SceneManifest[] = [
         'The Lab 10 handout has not been posted yet. When it is, it will appear here without a reload of the app. Until then the scene itself is open to explore.',
     },
   },
+  {
+    route: 'm11-social',
+    module: 11,
+    title: 'Living Among Others',
+    blurb:
+      'Lab 11. Play the repeated Prisoner’s Dilemma against six hidden partners, then run tournaments, a rule that predicts its partners, and a grid where no rule stays on top. Describe films of moving shapes and judge where a dot is heading. Test five hidden chimpanzees in an arena. Judge the members of two groups. Then be a macaque at a table, with two of its premotor cells on screen. The sixth stage of the creature spine, and the first with hands.',
+    mode: 'both',
+    status: 'building',
+    Component: SocialScene,
+    // The handout is written after the build and Jon's walk-through, from the
+    // as-built notes, so the fetch fails until it lands.
+    lab: {
+      rawUrl: `${INTRO_RAW}/social_cognition/among_others_lab/among_others_lab.md`,
+      sourceUrl: `${INTRO_BLOB}/social_cognition/among_others_lab/among_others_lab.md`,
+      notYet:
+        'The Lab 11 handout has not been posted yet. When it is, it will appear here without a reload of the app. Until then the scene itself is open to explore.',
+    },
+  },
 ]
 
 /**
@@ -290,11 +309,6 @@ export interface PlannedScene {
 }
 
 export const plannedScenes: PlannedScene[] = [
-  {
-    module: 11,
-    title: "Prisoner's Dilemma",
-    idea: 'Iterated prisoner’s dilemma against selectable strategies (tit-for-tat and friends), with a running score.',
-  },
   {
     module: 13,
     title: 'The Structure of Language',

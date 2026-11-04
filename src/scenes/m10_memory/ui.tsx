@@ -81,7 +81,7 @@ export function StagePanel({ children, wide, testId }: { children: ReactNode; wi
   return (
     <div
       data-stage={testId ?? true}
-      style={{ position: 'absolute', left: '50%', top: 24, transform: 'translateX(-50%)', width: wide ? 'min(760px, calc(100vw - 800px))' : 'min(560px, calc(100vw - 800px))', minWidth: 380, maxHeight: 'calc(100vh - 120px)', overflowY: 'auto', padding: '16px 20px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 12.5, lineHeight: 1.55, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'auto' }}
+      style={{ position: 'absolute', left: 'calc(50% + var(--stage-shift, 0px))', top: 24, transform: 'translateX(-50%)', width: wide ? 'min(760px, calc(100vw - 800px))' : 'min(560px, calc(100vw - 800px))', minWidth: 380, maxHeight: 'calc(100vh - 120px)', overflowY: 'auto', padding: '16px 20px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 12.5, lineHeight: 1.55, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'auto' }}
     >
       {children}
     </div>

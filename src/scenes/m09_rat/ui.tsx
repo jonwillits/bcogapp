@@ -106,11 +106,11 @@ function groupBullets(lines: string[]): (string | string[])[] {
 }
 
 /** The description of a step, centered over the view while the step waits to begin: the title, what will happen, the content lines, and what to press. */
-export function OrientingPanel({ title, lines, content, footer, onClose }: { title: string; lines: string[]; content?: string[]; footer: string; onClose?: () => void }) {
+export function OrientingPanel({ title, lines, content, footer, onClose, action }: { title: string; lines: string[]; content?: string[]; footer: string; onClose?: () => void; action?: ReactNode }) {
   return (
     <div
       data-orienting
-      style={{ position: 'absolute', left: '50%', top: 24, transform: 'translateX(-50%)', width: 'min(560px, calc(100vw - 780px))', minWidth: 360, maxHeight: 'calc(100vh - 170px)', overflowY: 'auto', padding: '16px 20px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 12.5, lineHeight: 1.55, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'auto' }}
+      style={{ position: 'absolute', left: 'calc(50% + var(--stage-shift, 0px))', top: 24, transform: 'translateX(-50%)', width: 'min(560px, calc(100vw - 780px))', minWidth: 360, maxHeight: 'calc(100vh - 170px)', overflowY: 'auto', padding: '16px 20px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 12.5, lineHeight: 1.55, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'auto' }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ fontSize: 14, fontWeight: 600 }}>{title}</div>
@@ -138,6 +138,7 @@ export function OrientingPanel({ title, lines, content, footer, onClose }: { tit
         <Content key={l}>{l}</Content>
       ))}
       <div style={{ color: 'var(--text-muted)' }}>{footer}</div>
+      {action && <div>{action}</div>}
     </div>
   )
 }
