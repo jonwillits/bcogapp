@@ -180,7 +180,7 @@ export function DelaysReveal({ progress }: { progress: ProgressStore }) {
         <ReferencePanel reference={reference('discounting-sources')} />
       </Section>
       <Section n={4} title="From the reading">
-        <Para>Delay discounting is the tendency for a reward to count for less the longer one must wait for it, measured by offering a smaller reward sooner against a larger reward later (§12.2.6). This step measured it from your choices: the five indifference points are how much $100 after each delay was worth to you today.</Para>
+        <Para>Delay discounting is the tendency for a reward to count for less the longer one must wait for it, measured by offering a smaller reward sooner against a larger reward later (§12.2.6). This step measured it from your choices: the five indifference points are how much $100 after each delay was worth to you today. Waiting for the larger reward is a test of self-control, in the reading’s words: acting for a later or larger outcome against a present temptation.</Para>
       </Section>
     </div>
   )

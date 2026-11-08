@@ -39,7 +39,7 @@ export const REVERSAL_PAIRS: ReversalPair[] = [
   { id: 'late', sooner: { amount: 50, days: 364, label: '$50 in 52 weeks' }, later: { amount: 55, days: 371, label: '$55 in 53 weeks' } },
 ]
 
-export type DelayItem = { kind: 'titration'; delay: Delay['id']; index: number } | { kind: 'reversal'; pair: ReversalPair['id'] }
+export type DelayItem = { kind: 'titration'; delay: Delay['id']; index: number } | { kind: 'twoAmounts'; pair: ReversalPair['id'] }
 
 export interface DelayPlan {
   items: DelayItem[]
@@ -59,8 +59,8 @@ export function planDelays(rng: Rng): DelayPlan {
   const items: DelayItem[] = []
   order.forEach((d, i) => {
     for (let k = 0; k < 6; k++) items.push({ kind: 'titration', delay: d.id, index: k })
-    if (i + 1 === early) items.push({ kind: 'reversal', pair: 'soon' })
-    if (i + 1 === late) items.push({ kind: 'reversal', pair: 'late' })
+    if (i + 1 === early) items.push({ kind: 'twoAmounts', pair: 'soon' })
+    if (i + 1 === late) items.push({ kind: 'twoAmounts', pair: 'late' })
   })
   return { items, swap: items.map(() => rng.next() < 0.5) }
 }

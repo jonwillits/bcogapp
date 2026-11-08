@@ -847,4 +847,83 @@ export const LABS = [
 
     crib: 'crib: what the parts should read',
   },
+  {
+    id: 'm12-planning',
+    name: 'Lab 12 — Intelligence and Thinking Ahead',
+    route: '#/m12-planning',
+    scene: 'src/scenes/m12_planning',
+    /** Sim files whose strings reach the screen: the items and their sources, the procedures, the lookers, the dispensers' rules, the foragers, the hominins' procedures and tests, the classes and references; and Lab 10's progress components, which this scene renders. */
+    strings: ['src/sim/planning', 'src/scenes/m10_memory/progress'],
+    handout: 'planning_and_decisionmaking/thinking_ahead_lab/thinking_ahead_lab.md',
+    report: 'planning_and_decisionmaking/thinking_ahead_lab/thinking_ahead_lab_report.docx',
+    /**
+     * Built 2026-11-08 with no handout; the handout is written after Jon's
+     * walk-through, from docs/M12_AS_BUILT_NOTES.md. The claims below are
+     * what the SCENE makes true, and the handout asserts nothing it cannot
+     * find here.
+     */
+    handoutPending: true,
+
+    retired: [
+      { term: /\bAsian disease\b/gi, why: 'the disease is never given a place name, as in the chapter (spec §5.2 D)' },
+      { term: /\blife history\b/gi, why: 'the chapter’s glossary uses life history for a species’ timing; a hominin’s past is its days before the lab (spec §7.4.2)', unless: ['Life history is', 'glossary'] },
+      { term: /\boptimal\b/gi, why: 'no looker is called optimal; the third is a myopic approximation (spec §6.4)', unless: ['not optimal', 'optimal model', 'their optimal', 'call'] },
+      { term: /\b(knows?|thinks?|believes?|decides?|wants?|expects?|imagines?|remembers?) (what|where|that|which)\b/gi, why: 'no agentic verb about a program, procedure, model, looker or hominin (spec §11, item 6)', unless: ['student', 'you', 'person', 'people', 'children', 'chooser'] },
+      { term: /\bmarch of progress\b/gi, why: 'no hominin reconstruction or march of progress (spec §11, item 10)' },
+    ],
+
+    controls: [
+      'Open', 'Choices', 'Puzzles', 'Band', 'Corn', 'Begin', 'Begin Part 1', 'Export my results', 'Load my results', 'Clear my saved results', 'Erase and start over', 'Keep my results', 'Replace my saved results', 'Keep what I have',
+      'Option A', 'Option B', 'Spin the wheel', 'Submit my estimate', 'Take 1 now', 'Start the block again', 'Feed at the sure patch', 'Feed at the variable patch', 'Run 1,000 evenings', 'Start the evenings again',
+      'Disks', 'Usual start', 'Scramble', 'Speed', 'Run', 'Skip to the end', 'Commit my prediction', 'Options at each step', 'Steps ahead', 'Take this path',
+      'Eye view', 'Follow view', 'Narrower view', 'Low detail', 'Act', 'Save this day and go on to day 2', 'Save this day and finish Step 1', 'Run T1 for all five', 'Run 10 days', 'Watch day', 'Stop watching', 'Follow', 'from above', 'the elder', 'Commit my diagnosis', 'What the Shallow planner counts at the end of its search', 'Information card: Homo erectus',
+      'Seed', 'Soil', 'varied stock', 'one uniform line', 'even', 'patchy', 'Grow', 'Grow the first experiment', 'Grow the second experiment', 'Restore the nitrates', 'Restore the zinc', 'Identical twins treated more alike', 'The reading’s figures', 'Run the twin study', 'Grow in poor and rich soil', 'Run six seasons',
+      'Go on to Step', 'Go back to Step', 'Go to Step', 'Show the instructions again', 'Run seed', 'My results',
+    ],
+
+    claims: [
+      { says: 'Part 1: expected values are exact for every item, and each bisection converges to within $100/2⁶ of a scripted chooser’s indifference point', test: 'each bisection converges to within $100 / 2⁶ of a scripted chooser’s true indifference point' },
+      { says: 'Part 1: the order from the seed puts the wheel first, the two versions of a pair at least five items apart, the framing problem in the middle third, and each series consecutive', test: 'the order from the seed: the anchor first, the two versions of a pair at least five items apart' },
+      { says: 'Part 1: the four reflection pairs are the source pages’ problems with their published shares, and pair 2’s loss version is Tversky and Kahneman’s Problem 3 as published', test: 'expected values are exact for every item' },
+      { says: 'Part 1: the fits recover a scripted exponential chooser’s γ and a scripted hyperbolic chooser’s k within 5%; an exponential chooser never reverses between the two pairs and a hyperbolic chooser with k from 0.02 to 0.1 does', test: 'a scripted exponential chooser never reverses between the two reversal pairs' },
+      { says: 'Part 1: the dispensers’ best policies are computed exactly from the rules and match the mean of 10,000 simulated blocks; a take pauses 5 s and a delivery 1 s (a departure from the spec, recorded in dispensers.ts)', test: 'the best policies are as the spec says, computed exactly from the rules' },
+      { says: 'Part 1: the survival table is exact for every level of reserves, and each forager’s 1,000 evenings fall within the binomial range', test: 'each rule’s survival over 1,000 evenings is within the binomial range of the exact value' },
+      { says: 'Part 1: no expected value, published share, reference or other version of a problem before the step’s last choice; no dispenser’s rule before both blocks; the delays reveal names none of the gambles’ words, on rendered markup', test: 'no expected value, published share, reference or other version of a problem before the step’s last choice' },
+      { says: 'Part 1: before each reveal no string names what the step tests (reflect, frame, loss aversion, anchor, …; discount, hyperbolic, reversal, self-control; reliable, promise, marshmallow, when a dispenser delivers), and Step 4 says nothing about gains against losses, descriptions or anchors', test: 'no Part 1 file outside the reveal and the data files holds a Step 1 word in a visible string' },
+      { says: 'Part 2: the state graph has 3ⁿ nodes and a shortest path of 2ⁿ − 1 moves for n from 3 to 6, laid out as a triangle of triangles with one-move gaps and every edge a short step', test: 'the layout is a triangle of triangles with the single-peg arrangements at the corners' },
+      { says: 'Part 2: search everything returns a shortest path; goal recursion’s stack reaches depth n; the move pattern solves every n from the usual start; the largest-disk rule solves every n and every scramble', test: 'search everything returns a shortest path; goal recursion’s stack reaches depth n' },
+      { says: 'Part 2: the memorized moves solve four disks and fail on five and on three, and the panel says how', test: 'the memorized moves solve four disks and fail on five, and the panel says how' },
+      { says: 'Part 2: from a scrambled start goal recursion and the move pattern stop where they cannot go on, and say why', test: 'from a scrambled start, the largest-disk rule and search solve the puzzle' },
+      { says: 'Part 2: the futures panel reproduces the chapter’s 8 sequences and 27,000 sequences, about 45 hours at ten a minute', test: 'reproduces the chapter’s numbers' },
+      { says: 'Part 2: 16 scored trees, 10 regular and 6 with a large loss early of which 3 have their best path through it, no two large-loss trees in a row, 3 practice and 6 reserve', test: '16 scored trees: 10 regular, 6 with a large loss early' },
+      { says: 'Part 2: the myopic looker’s expected gain is exact on fixtures; the three lookers run as their rules say', test: 'the myopic looker’s expected gain is exact on small fixtures' },
+      { says: 'Part 2: no state graph before both puzzles are solved, no procedure’s result before its prediction, no best path or looker before the student’s, on rendered markup', test: 'no state graph before both puzzles are solved; no procedure’s result before its prediction' },
+      { says: 'Part 2: before Step 3’s reveal no string names prune, bonsai, large loss, Pavlovian, resource-rational, Huys or Callaway', test: 'no Part 2 file outside the reveal and the lookers holds a forbidden word in a visible string' },
+      { says: 'Part 3: no hidden hominin has been rewarded for carrying a probe or a digging stick, and each saw every step of the termite and tuber chains, on the printed history', test: 'no hidden hominin has been rewarded for carrying a probe or a digging stick' },
+      { says: 'Part 3: on a day no hominin holds more than two items and every item is made where and from what the table says', test: 'on a day, no hominin holds more than two items' },
+      { says: 'Part 3: a history lived in slices is the history lived at once; a run starts each hominin from the end of its history', test: 'a history lived in slices is the history lived at once' },
+      { says: 'Part 3: T1 tells no two hominins apart; every pair is separated by at least one of T2 to T6 under variant A by 0.3 or more, within 10 runs at 95%; the expected profile holds where the spec gives one', test: 'every pair is separated by at least one of T2 to T6 under variant A' },
+      { says: 'Part 3: variant B differs from A only in the Shallow planner’s row', test: 'variant B differs from A in the matrix only where the critic’s values come into play' },
+      { says: 'Part 3: the programmed hominins compute only what their procedures allow: Adapted has no learning code and reads no cue; Learned value and the Copier read no model; the planners’ model is built from observations alone and imports nothing from the needs table', test: 'no hominin imports the table of what each need takes, the chains, the day, or the tests' },
+      { says: 'Part 3: the value learner learns only by Lab 5’s Verdict setting through thirdFactor, written only by learnWeights', test: 'the value learner learns only by Lab 5’s Verdict setting' },
+      { says: 'Part 3: the student’s driven day follows the same rules: the carcass chain ends in a meal at midday, a third item puts one down, a flake is made only at the outcrop, obstacles stop the body', test: 'the carcass chain, driven, ends in a meal at midday' },
+      { says: 'Part 3: no procedure’s name before the diagnosis is committed; Step 4 and the Shallow planner’s setting open only after it; the letters are dealt by the seed', test: 'no hominin’s procedure name before the diagnosis' },
+      { says: 'Part 4: heritability is 0 within a uniform line and within 0.05 of 1 for varied stock in even soil over 20 seeds; Lewontin’s two experiments hold by construction; the twin estimate equals the true share when the fourth slider is at zero and exceeds it above; the earrings give 1 and 0', test: 'heritability is 0 within a uniform line and within 0.05 of 1 for varied stock in even soil' },
+      { says: 'Part 4: no result before each prediction, on rendered markup', test: 'no result before each prediction; the tray’s heritability appears after Grow' },
+      { says: 'Navigation: every part and every step opens from a fresh seed with nothing else done, on an instruction screen with its sections; a step opened out of order runs', test: 'every part and step opens from a fresh seed with nothing else done' },
+      { says: 'Storage: every part opens with nothing done (no locks); a complete unit survives a reload, an interrupted one restarts, a resuming one keeps its partial; with storage blocked the lab runs in memory; the only key is bcogapp.m12.v1', test: 'a complete unit survives a reload; an interrupted one restarts; a resuming one keeps its partial' },
+      { says: 'Structure: only setWiring and learnWeights write a stored weight, Module 12 included', test: 'Module 12 reaches a weight only through learnWeights' },
+      { says: 'Every simulated cloud traces to a data-file entry with a source and page, or shows Simulated class pending', test: 'a pending entry yields pending and no cloud' },
+      { says: 'Screen: the content lines are each on their panel; no agentic verb about a program, procedure, model, looker, forager, rule or hominin; keep and hold not for memory; no British spellings; no browser dialog; the vocabulary present', test: 'every line exists and is used where the spec puts it' },
+      { says: 'Screen: nothing leaves the page: no fetch, no camera, storage only through the shared layer, no Math.random in the sim', test: 'no Math.random in the sim or the scene' },
+      { says: 'Screen: a selected control changes color and never size', test: 'no button style keys font weight, padding, font size or border width on state' },
+      { says: 'Screen: the hominins have one neutral body color and no face, and nothing draws a person or a photograph', test: 'the hominins have one neutral body color and no face' },
+      { says: 'Shell: the Lab button says the handout is not posted yet, not an error', test: 'the Lab pane message for the missing Lab 12 handout is honest' },
+      { says: 'Timing: the dispensers’ delivery, the pause after it and the pause after a take land within about 60 ms of their marks in a real browser; the history lives in slices with no main-thread task over about 150 ms under a 4× throttle (scripts/m12-timing.mjs)', test: null },
+      { says: 'Timing: at least 30 frames a second in Part 3’s range under Chrome’s 4× throttle with six hominins on screen (not measurable in the build’s occluded window; scripts/m12-timing.mjs, for Jon’s walk)', test: null },
+      { says: 'Look: the state graph, the trees’ numbers, the hominins’ rings and labels, and the corn are legible on both themes', test: null },
+    ],
+
+    crib: 'crib: m12',
+  },
 ]

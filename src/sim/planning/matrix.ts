@@ -1,5 +1,5 @@
 import { makeRng } from '../random'
-import { bandForRun, liveHistory, RUN_ORDER, type Band } from './history'
+import { bandForRun, liveHistory, HistoryRun, RUN_ORDER, type Band } from './history'
 import type { ShallowVariant } from './hominins/planners'
 import type { HomininKind } from './hominins/types'
 import { runTest, TEST_IDS, type TestId } from './tests'
@@ -129,4 +129,88 @@ export function printMatrix(m: Matrix): string[] {
 
 export function printSeparability(rows: PairRow[]): string[] {
   return rows.map((r) => `${r.a} vs ${r.b}: best ${r.bestTest ?? 'none'}, difference ${r.difference.toFixed(2)}, runs for 95%: ${r.runsFor95 ?? '>10'}; separating tests: ${r.separatingTests.join(' ') || 'none'}`)
+}
+
+/**
+ * The matrix paid in slices: the histories a few days at a time, then one
+ * test run per slice, for both variants of the Shallow planner from the
+ * same bands. `step()` does one slice and returns whether the whole is
+ * done; `progress` is 0 to 1 and `badge` says what is being computed.
+ */
+export class MatrixRun {
+  readonly seeds: number[]
+  private histories: HistoryRun[]
+  private bands: (Band | null)[]
+  private h = 0
+  /** The test runs still to do: seed index, test, variant. */
+  private queue: { si: number; t: TestId; variant: ShallowVariant }[] = []
+  private cells: Record<ShallowVariant, Matrix['cells']>
+  private stripSum: Record<ShallowVariant, Record<HomininKind, number[]>>
+  private stripRuns: Record<ShallowVariant, number> = { A: 0, B: 0 }
+  private total: number
+  private doneRuns = 0
+  result: { A: Matrix; B: Matrix } | null = null
+  badge = ''
+
+  readonly daysPerSlice: number
+
+  constructor(seeds = MATRIX_SEEDS, daysPerSlice = 40) {
+    this.seeds = seeds
+    this.daysPerSlice = daysPerSlice
+    this.histories = seeds.map((s) => new HistoryRun(s))
+    this.bands = seeds.map(() => null)
+    const empty = () => Object.fromEntries(RUN_ORDER.map((k) => [k, Object.fromEntries(TEST_IDS.map((t) => [t, { mean: 0, sd: 0, runs: [] as number[] }]))])) as Matrix['cells']
+    this.cells = { A: empty(), B: empty() }
+    const strips = () => Object.fromEntries(RUN_ORDER.map((k) => [k, new Array<number>(10).fill(0)])) as Record<HomininKind, number[]>
+    this.stripSum = { A: strips(), B: strips() }
+    for (const variant of ['A', 'B'] as ShallowVariant[]) seeds.forEach((_, si) => TEST_IDS.forEach((t) => this.queue.push({ si, t, variant })))
+    this.total = this.queue.length
+  }
+
+  get progress(): number {
+    const histShare = this.histories.reduce((a, r) => a + r.progress / r.days, 0) / this.histories.length
+    return 0.6 * histShare + 0.4 * (this.doneRuns / this.total)
+  }
+
+  step(): boolean {
+    if (this.result) return true
+    if (this.h < this.histories.length) {
+      const r = this.histories[this.h]
+      if (r.step(this.daysPerSlice)) {
+        this.bands[this.h] = r.band()
+        this.h++
+      }
+      this.badge = `Living the hominins’ days before the lab — seed ${Math.min(this.h + 1, this.histories.length)} of ${this.histories.length}`
+      return false
+    }
+    const job = this.queue.shift()
+    if (job) {
+      const seed = this.seeds[job.si]
+      const rng = makeRng((seed * 31 + TEST_IDS.indexOf(job.t) * 7) >>> 0)
+      const result = runTest(job.t, bandForRun(this.bands[job.si]!, job.variant, rng), rng)
+      for (const k of RUN_ORDER) this.cells[job.variant][k][job.t].runs.push(result.shares[k])
+      if (job.t === 'T2') {
+        this.stripRuns[job.variant]++
+        for (const k of RUN_ORDER) result.strip[k].forEach((v, d) => (this.stripSum[job.variant][k][d] += v ? 1 : 0))
+      }
+      this.doneRuns++
+      this.badge = `Running the build’s tests — ${this.doneRuns} of ${this.total}`
+      return false
+    }
+    const finish = (variant: ShallowVariant): Matrix => {
+      const cells = this.cells[variant]
+      for (const k of RUN_ORDER)
+        for (const t of TEST_IDS) {
+          const c = cells[k][t]
+          const n = c.runs.length
+          c.mean = c.runs.reduce((a, b) => a + b, 0) / n
+          c.sd = Math.sqrt(c.runs.reduce((a, b) => a + (b - c.mean) ** 2, 0) / Math.max(1, n - 1))
+        }
+      const t2Strip = Object.fromEntries(RUN_ORDER.map((k) => [k, this.stripSum[variant][k].map((s) => s / Math.max(1, this.stripRuns[variant]))])) as Record<HomininKind, number[]>
+      return { variant, seeds: this.seeds, cells, t2Strip }
+    }
+    this.result = { A: finish('A'), B: finish('B') }
+    this.badge = ''
+    return true
+  }
 }

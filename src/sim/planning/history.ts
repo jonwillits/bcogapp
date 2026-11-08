@@ -19,11 +19,11 @@ import { Planner, ShallowPlanner, type ShallowVariant } from './hominins/planner
  * stick. `history.test.ts` checks both on the printed counts.
  */
 
-export const HISTORY = {
+export const HISTORY: { days: number; mix: Record<Need, number> } = {
   days: 500,
   /** The chance of each need's day. The usual needs are about 70% carcasses and 30% marrow between them. */
-  mix: { carcass: 0.62, marrow: 0.26, termites: 0.06, tubers: 0.06 } as Record<Need, number>,
-} as const
+  mix: { carcass: 0.62, marrow: 0.26, termites: 0.06, tubers: 0.06 },
+}
 
 export interface HistoryCounts {
   kind: HomininKind
@@ -73,24 +73,67 @@ function emptyCounts(kind: HomininKind): HistoryCounts {
   return { kind, days: 0, deviations: 0, ate: z(), sawElder: {}, own: {}, readyFor: z() }
 }
 
-/** Live the history: the six hominins (the Shallow planner in both variants) through the same days with the same elder. */
-export function liveHistory(seed: number, days = HISTORY.days): Band {
-  const hominins = newBand(seed)
-  const list: Hominin[] = [hominins.adapted, hominins.learnedValue, hominins.copier, hominins.shallowA, hominins.shallowB, hominins.planner]
-  const counts = list.map((h) => emptyCounts(h.kind))
-  const rng = makeRng(seed)
-  const dayKinds: Need[] = []
-  for (let d = 0; d < days; d++) {
-    const need = drawNeed(rng)
-    dayKinds.push(need)
-    const usual = need === 'carcass' || need === 'marrow'
-    const result = runDay({ cue: NEED_TABLE[need].cue, needPresent: usual, elder: usual ? 'atCamp' : 'away' }, list, rng)
-    tally(counts, result, need)
+/**
+ * The history, lived a few days at a time, so that a screen can pay for it in
+ * slices (`APP_DESIGN.md`: nothing synchronous over about 300 ms sits on a
+ * click path). `step(n)` lives up to n more days; `liveHistory` below runs it
+ * to the end at once, and `history.test.ts` checks that the two agree.
+ */
+export class HistoryRun {
+  readonly seed: number
+  readonly days: number
+  readonly hominins: Band['hominins']
+  readonly counts: HistoryCounts[]
+  readonly dayKinds: Need[] = []
+  private readonly list: Hominin[]
+  private readonly rng: Rng
+  private lived = 0
+
+  constructor(seed: number, days = HISTORY.days) {
+    this.seed = seed
+    this.days = days
+    this.hominins = newBand(seed)
+    this.list = [this.hominins.adapted, this.hominins.learnedValue, this.hominins.copier, this.hominins.shallowA, this.hominins.shallowB, this.hominins.planner]
+    this.counts = this.list.map((h) => emptyCounts(h.kind))
+    this.rng = makeRng(seed)
   }
-  // Counts for the two shallow planners keep their variant apart.
-  counts[3].kind = 'shallow'
-  counts[4].kind = 'shallow'
-  return { seed, hominins, counts, dayKinds }
+
+  get done(): boolean {
+    return this.lived >= this.days
+  }
+
+  /** Days lived so far. */
+  get progress(): number {
+    return this.lived
+  }
+
+  /** Live up to `n` more days; returns whether the history is complete. */
+  step(n: number): boolean {
+    for (let k = 0; k < n && this.lived < this.days; k++) {
+      const need = drawNeed(this.rng)
+      this.dayKinds.push(need)
+      const usual = need === 'carcass' || need === 'marrow'
+      const result = runDay({ cue: NEED_TABLE[need].cue, needPresent: usual, elder: usual ? 'atCamp' : 'away' }, this.list, this.rng)
+      tally(this.counts, result, need)
+      this.lived++
+    }
+    return this.done
+  }
+
+  band(): Band {
+    if (!this.done) throw new Error('the history is not complete')
+    const counts = this.counts.map((c) => ({ ...c }))
+    counts[3].kind = 'shallow'
+    counts[4].kind = 'shallow'
+    return { seed: this.seed, hominins: this.hominins, counts, dayKinds: this.dayKinds }
+  }
+}
+
+/** Live the history at once: the six hominins (the Shallow planner in both variants) through the same days with the same elder. */
+export function liveHistory(seed: number, days = HISTORY.days): Band {
+  const run = new HistoryRun(seed, days)
+  run.step(days)
+  return run.band()
 }
 
 function tally(counts: HistoryCounts[], result: DayResult, need: Need): void {

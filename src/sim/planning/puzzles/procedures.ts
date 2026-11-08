@@ -39,7 +39,7 @@ export const PROCEDURES: Record<ProcedureId, ProcedureSpec> = {
   largest: {
     id: 'largest',
     label: 'Largest disk out of place',
-    does: 'It looks at the pegs, finds the largest disk that is not yet on the right peg, and finds the largest disk in that disk’s way: on top of it, or on the right peg. If nothing is in the way, it moves the disk. Otherwise its goal becomes moving the disk in the way to the third peg, and it looks again from there.',
+    does: 'It looks at the pegs, finds the largest disk that is not yet on the right peg, and finds the largest disk in that disk’s way: on top of it, or on the right peg. If nothing is in the way, it moves the disk. Otherwise its goal becomes moving the disk in the way to the third peg, and it looks again from there. This is means–ends analysis (§12.2.2): a heuristic, a rule of thumb that directs search toward small, promising parts of a problem space, which chooses each move by the difference between the current state and the goal and makes the conditions for a move that cannot yet be made into a subgoal.',
     stores: 'one current goal, whatever the number of disks',
     source: 'simon_1975 pp. 272, 281',
   },

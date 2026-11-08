@@ -10,7 +10,7 @@ import { HYPOTHETICAL_MONEY_LINE } from './lines'
 import type { PartContext, PartModule } from './contract'
 import { ChoicesStore, GAMBLES_UNIT, DELAYS_UNIT, dispenserUnit } from './choices/store'
 import { SCREENS, STEP_TITLES, READY_LINE, type Step } from './choices/screens'
-import { OptionCards, Wheel, HigherLower, Estimate, FramingProblem, capital } from './choices/Cards'
+import { OptionCards, Wheel, HigherLower, Estimate, DiseaseProblem, capital } from './choices/Cards'
 import { DispenserScreen } from './choices/Dispenser'
 import { ForagerScreen } from './choices/Forager'
 import { GamblesReveal, DelaysReveal, DispensersReveal, ChoicesResults } from './choices/Reveal'
@@ -121,27 +121,27 @@ function GamblesStage({ s }: { s: ChoicesStore }) {
   const swap = s.gamblePlan.swap[s.gambles.next]
   const title = SCREENS[1].title
   const count = `Choice ${s.gamblesDoneCount() + 1} of ${s.gamblePlan.items.length}`
-  if (it.kind === 'anchor') {
+  if (it.kind === 'wheel') {
     const q = (it.materials === 1 ? ANCHOR.reserve : ANCHOR.published).quantity
     return (
-      <StagePanel testId="anchor">
+      <StagePanel testId="wheel">
         <div style={{ fontSize: 14, fontWeight: 600 }}>{title}</div>
         <Note>{count}: the wheel of fortune.</Note>
-        <Wheel anchor={it.anchor} state={s.wheel} onSpin={() => s.spin()} />
-        {s.wheel === 'stopped' && s.higher === null && <HigherLower quantity={q} anchor={it.anchor} onAnswer={(h) => s.answerHigher(h)} />}
+        <Wheel stopsAt={it.anchor} state={s.wheel} onSpin={() => s.spin()} />
+        {s.wheel === 'stopped' && s.higher === null && <HigherLower quantity={q} stopsAt={it.anchor} onAnswer={(h) => s.answerHigher(h)} />}
         {s.wheel === 'stopped' && s.higher !== null && <Estimate quantity={q} onSubmit={(v) => s.answerEstimate(v)} />}
       </StagePanel>
     )
   }
-  if (it.kind === 'framing') {
+  if (it.kind === 'disease') {
     const f = it.materials === 1 ? FRAMING.reserve : FRAMING.published
     const programs = it.version === 'saved' ? f.saved : f.lost
     const shown: [string, string] = swap ? [programs[1], programs[0]] : [programs[0], programs[1]]
     return (
-      <StagePanel wide testId="framing">
+      <StagePanel wide testId="disease">
         <div style={{ fontSize: 14, fontWeight: 600 }}>{title}</div>
         <Note>{count}.</Note>
-        <FramingProblem intro={f.intro} programs={shown} question={f.question} onChoose={(side) => s.chooseCard(side)} />
+        <DiseaseProblem intro={f.intro} programs={shown} question={f.question} onChoose={(side) => s.chooseCard(side)} />
       </StagePanel>
     )
   }

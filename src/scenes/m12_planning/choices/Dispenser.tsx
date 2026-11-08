@@ -63,7 +63,7 @@ export function DispenserScreen({ s }: { s: ChoicesStore }) {
         <div style={{ height: '100%', width: `${(100 * left) / BLOCK_SECONDS}%`, background: 'var(--accent)' }} />
       </div>
       <Btn primary onClick={() => s.takeNow()} disabled={b.phase !== 'trial'}>
-        Take {TAKE_POINTS} now
+        Take 1 now
       </Btn>
       <Note>Press “Take {TAKE_POINTS} now” or the key 1 to take {TAKE_POINTS} point and end the trial. Or wait.</Note>
     </div>

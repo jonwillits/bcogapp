@@ -187,11 +187,11 @@ export class ChoicesStore implements PartStore {
   noteShown(): void {
     const it = this.currentItem
     if (!it) return
-    if (it.kind === 'framing' && !this.gambles.shownFraming) {
+    if (it.kind === 'disease' && !this.gambles.shownFraming) {
       this.gambles = { ...this.gambles, shownFraming: true }
       this.saveGambles()
     }
-    if (it.kind === 'anchor' && !this.gambles.shownAnchor) {
+    if (it.kind === 'wheel' && !this.gambles.shownAnchor) {
       this.gambles = { ...this.gambles, shownAnchor: true }
       this.saveGambles()
     }
@@ -211,7 +211,7 @@ export class ChoicesStore implements PartStore {
   /** A pair item or a series item answered: `side` is the card chosen, 0 for Option A. */
   chooseCard(side: 0 | 1): void {
     const it = this.currentItem
-    if (!it || (it.kind !== 'pair' && it.kind !== 'series' && it.kind !== 'framing')) return
+    if (!it || (it.kind !== 'pair' && it.kind !== 'series' && it.kind !== 'disease')) return
     const swapped = this.gamblePlan.swap[this.gambles.next]
     // The option index in the item's own order.
     const index = (swapped ? 1 - side : side) as 0 | 1
@@ -244,7 +244,7 @@ export class ChoicesStore implements PartStore {
 
   answerEstimate(estimate: number): void {
     const it = this.currentItem
-    if (!it || it.kind !== 'anchor' || this.higher === null) return
+    if (!it || it.kind !== 'wheel' || this.higher === null) return
     this.gambles = { ...this.gambles, responses: { ...this.gambles.responses, anchor: { anchor: it.anchor, higher: this.higher, estimate, materials: this.gambles.anchorMaterials } } }
     this.advanceGambles()
   }

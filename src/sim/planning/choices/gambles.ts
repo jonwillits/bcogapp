@@ -65,14 +65,14 @@ export interface SeriesItem {
 }
 
 export interface FramingItem {
-  kind: 'framing'
+  kind: 'disease'
   /** 0: the published problem; 1: the reserve, used after an interrupted sitting that had already shown the first. */
   materials: 0 | 1
   version: 'saved' | 'lost'
 }
 
 export interface AnchorItem {
-  kind: 'anchor'
+  kind: 'wheel'
   materials: 0 | 1
   /** Where the wheel stops: 10 or 65, by the seed. */
   anchor: 10 | 65
@@ -161,12 +161,12 @@ export function planGambles(rng: Rng, materials: { framing: 0 | 1; anchor: 0 | 1
     Array.from({ length: 6 }, (_, i): SeriesItem => ({ kind: 'series', series: 'ceGain', index: i })),
     Array.from({ length: 6 }, (_, i): SeriesItem => ({ kind: 'series', series: 'ceLoss', index: i })),
     Array.from({ length: 6 }, (_, i): SeriesItem => ({ kind: 'series', series: 'mixed', index: i })),
-    [{ kind: 'framing', materials: materials.framing, version: framingVersion }],
+    [{ kind: 'disease', materials: materials.framing, version: framingVersion }],
   ]
   for (let attempt = 0; attempt < 10000; attempt++) {
     const order = shuffle(blocks, rng).flat()
     if (acceptable(order)) {
-      const items: Item[] = [{ kind: 'anchor', materials: materials.anchor, anchor }, ...order]
+      const items: Item[] = [{ kind: 'wheel', materials: materials.anchor, anchor }, ...order]
       return { items, swap: items.map(() => rng.next() < 0.5), framingVersion, anchor }
     }
   }
@@ -179,7 +179,7 @@ export function acceptable(order: Item[]): boolean {
     const l = order.findIndex((it) => it.kind === 'pair' && it.pair === pair && it.version === 'loss')
     if (Math.abs(g - l) - 1 < MIN_SEPARATION) return false
   }
-  const f = order.findIndex((it) => it.kind === 'framing')
+  const f = order.findIndex((it) => it.kind === 'disease')
   const n = order.length
   if (f < Math.floor(n / 3) || f > Math.ceil((2 * n) / 3)) return false
   return true

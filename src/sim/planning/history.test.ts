@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { liveHistory, bandForRun, RUN_ORDER } from './history'
+import { liveHistory, bandForRun, HistoryRun, RUN_ORDER } from './history'
 import { makeRng } from '../random'
 import { runDay } from './day'
 import { HANDS, RECIPES } from './range/places'
@@ -68,6 +68,19 @@ describe('the history before the lab', () => {
         expect(hd.final.hands.length).toBeLessThanOrEqual(HANDS)
       }
     }
+  })
+
+  it('a history lived in slices is the history lived at once', () => {
+    const sliced = new HistoryRun(1003, 120)
+    while (!sliced.step(7)) {
+      /* a slice at a time */
+    }
+    const once = liveHistory(1003, 120)
+    expect(sliced.dayKinds).toEqual(once.dayKinds)
+    expect(sliced.band().counts).toEqual(once.counts)
+    const a = runDay({ cue: 'rain', needPresent: true, elder: 'atCamp' }, bandForRun(sliced.band(), 'A', makeRng(5)), makeRng(6))
+    const b = runDay({ cue: 'rain', needPresent: true, elder: 'atCamp' }, bandForRun(once, 'A', makeRng(5)), makeRng(6))
+    expect(a.hominins.map((h) => h.errands)).toEqual(b.hominins.map((h) => h.errands))
   })
 
   it('a run starts each hominin from the end of its history, so two runs from the same band agree', () => {

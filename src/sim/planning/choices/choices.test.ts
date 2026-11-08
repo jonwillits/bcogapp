@@ -27,7 +27,7 @@ describe('expected values and the items (spec §5.1, §5.2)', () => {
   it('the order from the seed: the anchor first, the two versions of a pair at least five items apart, the framing problem in the middle third, each series consecutive', () => {
     for (let seed = 1; seed <= 30; seed++) {
       const plan = planGambles(makeRng(seed))
-      expect(plan.items[0].kind).toBe('anchor')
+      expect(plan.items[0].kind).toBe('wheel')
       expect(acceptable(plan.items.slice(1))).toBe(true)
       expect(plan.items.length).toBe(1 + 8 + 18 + 1)
       for (const series of ['ceGain', 'ceLoss', 'mixed'] as const) {

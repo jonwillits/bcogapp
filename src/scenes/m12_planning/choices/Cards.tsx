@@ -68,9 +68,9 @@ export function capital(s: string): string {
  * seed set, 10 or 65, and looks random. Then two questions: whether the
  * quantity is higher or lower than that number, and an estimate.
  */
-export function Wheel({ anchor, state, onSpin }: { anchor: number; state: 'ready' | 'spinning' | 'stopped'; onSpin: () => void }) {
-  // The pointer is at the top; the wheel turns so that `anchor` ends under it after several turns.
-  const finalAngle = 360 * 5 + (360 - anchor * 3.6)
+export function Wheel({ stopsAt, state, onSpin }: { stopsAt: number; state: 'ready' | 'spinning' | 'stopped'; onSpin: () => void }) {
+  // The pointer is at the top; the wheel turns so that `stopsAt` ends under it after several turns.
+  const finalAngle = 360 * 5 + (360 - stopsAt * 3.6)
   const rotation = state === 'ready' ? 0 : finalAngle
   const ticks = Array.from({ length: 20 }, (_, i) => i * 5)
   return (
@@ -100,23 +100,23 @@ export function Wheel({ anchor, state, onSpin }: { anchor: number; state: 'ready
         </Btn>
       )}
       {state === 'spinning' && <Note>The wheel is turning.</Note>}
-      {state === 'stopped' && <div style={{ fontSize: 15, fontWeight: 600 }} data-wheel-stopped>The wheel stopped at {anchor}.</div>}
+      {state === 'stopped' && <div style={{ fontSize: 15, fontWeight: 600 }} data-wheel-stopped>The wheel stopped at {stopsAt}.</div>}
     </div>
   )
 }
 
-export function HigherLower({ quantity, anchor, onAnswer }: { quantity: string; anchor: number; onAnswer: (higher: boolean) => void }) {
+export function HigherLower({ quantity, stopsAt, onAnswer }: { quantity: string; stopsAt: number; onAnswer: (higher: boolean) => void }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-higher-lower>
       <div style={{ fontSize: 13 }}>
-        Is {quantity} higher or lower than {anchor}?
+        Is {quantity} higher or lower than {stopsAt}?
       </div>
       <div style={{ display: 'flex', gap: 8 }}>
         <Btn primary onClick={() => onAnswer(true)}>
-          Higher than {anchor}
+          Higher than {stopsAt}
         </Btn>
         <Btn primary onClick={() => onAnswer(false)}>
-          Lower than {anchor}
+          Lower than {stopsAt}
         </Btn>
       </div>
     </div>
@@ -158,11 +158,11 @@ export function Estimate({ quantity, onSubmit }: { quantity: string; onSubmit: (
 }
 
 /** The framing problem (spec §5.2 D): one version only, read as written. The programs are the two cards. */
-export function FramingProblem({ intro, programs, question, onChoose }: { intro: string; programs: readonly [string, string]; question: string; onChoose: (side: 0 | 1) => void }) {
+export function DiseaseProblem({ intro, programs, question, onChoose }: { intro: string; programs: readonly [string, string]; question: string; onChoose: (side: 0 | 1) => void }) {
   const a: Option = { outcomes: [{ amount: 0, p: 1 }], text: programs[0] }
   const b: Option = { outcomes: [{ amount: 0, p: 1 }], text: programs[1] }
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-framing>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-disease>
       <GroupLabel>A question that is not about money</GroupLabel>
       <div style={{ fontSize: 13, lineHeight: 1.55 }}>{intro}</div>
       <OptionCardsPlain a={a} b={b} onChoose={onChoose} question={question} />
