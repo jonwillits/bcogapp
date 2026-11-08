@@ -444,4 +444,4 @@ Part 0 about 3; Part 1 about 24 (Step 1: the wheel and 27 cards, about 7; Step 2
 
 ## 9. State, 2026-11-08
 
-Branch `m12-planning`, unmerged, unpushed. The suite and the close-out are reported in the walk-through's §0. The walk-through is `LAB_12_WALKTHROUGH.md` beside the spec. Still Jon's: the walk, the Shallow planner's default, the sources to request, the handout.
+Branch `m12-planning`, unmerged, unpushed. The close-out (`npm run closeout m12-planning`, run alone after the commits above) reported: 1184 tests passed, all document checks passed, 40 claims of which 37 have a test and 3 are notes for the walk (the dispensers' timing in a real browser, the frame rate, and legibility on both themes), the crib printed, nothing committed in the course repository. An earlier run with the whole suite under concurrent load failed two timing tests from other labs (Lab 6's PhotoNet speed and Lab 11's arena timer); they pass alone and are untouched by this build. The walk-through is `LAB_12_WALKTHROUGH.md` beside the spec. Still Jon's: the walk, the Shallow planner's default, the sources to request, the handout.
