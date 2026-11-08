@@ -65,7 +65,15 @@ const socialScene = import.meta.glob('../../../scenes/m11_social/**/*.{ts,tsx}',
   eager: true,
 }) as Record<string, string>
 
-const production = Object.entries({ ...sim, ...scenes, ...fish, ...fishScene, ...rodent, ...ratScene, ...memory, ...memoryScene, ...social, ...socialScene }).filter(
+// Module 12's hominins: Learned value, the Copier's fallback and the Shallow planner's critic, on the Verdict setting, and again no writer of their own.
+const planning = import.meta.glob('../../planning/**/*.ts', { query: '?raw', import: 'default', eager: true }) as Record<string, string>
+const planningScene = import.meta.glob('../../../scenes/m12_planning/**/*.{ts,tsx}', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>
+
+const production = Object.entries({ ...sim, ...scenes, ...fish, ...fishScene, ...rodent, ...ratScene, ...memory, ...memoryScene, ...social, ...socialScene, ...planning, ...planningScene }).filter(
   ([p]) => !p.includes('.test.') && !p.includes('.probe.'),
 )
 
@@ -196,6 +204,21 @@ describe('exactly two code paths write a stored weight', () => {
     }
     // The game's rules are tables of moves, not weights, and learn nothing.
     for (const [path, src] of production) if (path.includes('/social/game/')) expect(src, path).not.toMatch(/learnWeights|thirdFactor/)
+  })
+
+  it('Module 12 reaches a weight only through learnWeights: the value learner’s actors and critic, on the Verdict setting, and nothing in the range, the day or the scene', () => {
+    const learner = production.find(([p]) => p.endsWith('/planning/hominins/valueLearner.ts'))![1]
+    expect(learner).toMatch(/learnWeights\(this\.actors\[a\], /)
+    expect(learner).toMatch(/learnWeights\(this\.critic, /)
+    expect(learner).toMatch(/thirdFactor\('verdict'/)
+    for (const [path, src] of production) {
+      if (!path.includes('/planning/') && !path.includes('/m12_planning/')) continue
+      expect([...src.matchAll(WEIGHT_WRITE)].length, path).toBe(0)
+      expect([...src.matchAll(WEIGHTS_REPLACED)].length, path).toBe(0)
+      expect(src, path).not.toMatch(/alwaysOn/)
+    }
+    // The planners' model is counts and estimates, not weights, and learns nothing by the rule.
+    for (const [path, src] of production) if (path.endsWith('/planning/hominins/model.ts') || path.endsWith('/planning/hominins/planners.ts')) expect(src, path).not.toMatch(/learnWeights|thirdFactor/)
   })
 
   it('the learner reaches a weight only through that one write', () => {

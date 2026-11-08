@@ -95,6 +95,7 @@ const ObjectsScene = lazy(() => import('./m08_objects/ObjectsScene'))
 const RatScene = lazy(() => import('./m09_rat/RatScene'))
 const MemoryScene = lazy(() => import('./m10_memory/MemoryScene'))
 const SocialScene = lazy(() => import('./m11_social/SocialScene'))
+const PlanningScene = lazy(() => import('./m12_planning/PlanningScene'))
 
 /**
  * Registered, runnable scenes. Order here is the order shown within a module.
@@ -293,6 +294,24 @@ export const scenes: SceneManifest[] = [
       sourceUrl: `${INTRO_BLOB}/social_cognition/among_others_lab/among_others_lab.md`,
       notYet:
         'The Lab 11 handout has not been posted yet. When it is, it will appear here without a reload of the app. Until then the scene itself is open to explore.',
+    },
+  },
+  {
+    route: 'm12-planning',
+    module: 12,
+    title: 'Intelligence and Thinking Ahead',
+    blurb:
+      'Lab 12. Choose among hypothetical gambles and delays, wait at two dispensers, and explore a small bird’s evening. Solve the Tower of Hanoi and see your own path on the graph of every arrangement, run five procedures on the puzzle, and pay a point for every look ahead through trees of hidden numbers. Drive a Homo erectus through a day on a range, then diagnose five hidden hominins with a chain of six tests. Grow corn in two trays and compute heritability. The seventh stage of the creature spine.',
+    mode: 'both',
+    status: 'building',
+    Component: PlanningScene,
+    // The handout is written after the build and Jon's walk-through, from the
+    // as-built notes, so the fetch fails until it lands.
+    lab: {
+      rawUrl: `${INTRO_RAW}/planning_and_decisionmaking/thinking_ahead_lab/thinking_ahead_lab.md`,
+      sourceUrl: `${INTRO_BLOB}/planning_and_decisionmaking/thinking_ahead_lab/thinking_ahead_lab.md`,
+      notYet:
+        'The Lab 12 handout has not been posted yet. When it is, it will appear here without a reload of the app. Until then the scene itself is open to explore.',
     },
   },
 ]
