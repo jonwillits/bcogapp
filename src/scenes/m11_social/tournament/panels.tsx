@@ -114,16 +114,16 @@ export function RoundRobinTable({ rr, against, testId }: { rr: RoundRobin; again
   )
 }
 
-/** Step 3: one entry's record against every entry, round by round, with its running points (Jon, 2026-11-02). */
-export function EntryRecords({ s }: { s: TournamentStore }) {
-  const rr = s.rr3
+/** Steps 3 and 5: one entry's record against every entry, round by round, with its running points (Jon, 2026-11-02); Step 5's at its noise (2026-11-08, for the handout's Q14). */
+export function EntryRecords({ s, step = 3 }: { s: TournamentStore; step?: 3 | 5 }) {
+  const rr = step === 3 ? s.rr3 : s.rr5
   if (!rr) return null
   const i = s.recordEntry
-  const records = i === null ? [] : s.recordsFor(i)
+  const records = i === null ? [] : s.recordsFor(i, step)
   const chunk = 50
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-panel="rr3-records">
-      <GroupLabel>The record of one entry against every entry, round by round</GroupLabel>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-panel={`rr${step}-records`}>
+      <GroupLabel>{rr.noise > 0 ? `The record of one entry against every entry, round by round, with mistakes at ${Math.round(rr.noise * 100)}%` : 'The record of one entry against every entry, round by round'}</GroupLabel>
       <Choice value={i === null ? null : String(i)} options={rr.entries.map((e, k) => ({ id: String(k), label: entryLabel(e) }))} onChange={(v) => s.setRecordEntry(Number(v))} />
       {i !== null && records.length > 0 && (
         <>
@@ -143,10 +143,10 @@ export function EntryRecords({ s }: { s: TournamentStore }) {
                 if (j < records.length - 1) lines.push('')
                 return lines
               })}
-              testId="rr3-record-lines"
+              testId={`rr${step}-record-lines`}
             />
           </div>
-          {rr.entries.some((e) => e.kind === 'rule' && [e.rule.first, ...OUTCOMES.map((o) => e.rule.after[o])].some((p) => p !== 0 && p !== 1)) && <Note>A rule with generosity draws some of its moves, so its match here is one of the many the table’s exact value averages.</Note>}
+          {rr.noise > 0 ? <Note>With mistakes, every match is one of the many the table’s value averages, played on the run seed: another seed would give another record, with the same shape.</Note> : rr.entries.some((e) => e.kind === 'rule' && [e.rule.first, ...OUTCOMES.map((o) => e.rule.after[o])].some((p) => p !== 0 && p !== 1)) && <Note>A rule with generosity draws some of its moves, so its match here is one of the many the table’s exact value averages.</Note>}
         </>
       )}
     </div>

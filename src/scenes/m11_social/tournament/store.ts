@@ -4,8 +4,8 @@ import { planPart1, ABOUT_ROUNDS } from '../../../sim/social/game/plan'
 import { makeRng } from '../../../sim/random'
 import { RULES, buildRule, matchesPartner, DEFAULT_CHIPS, GENEROSITY, RULE_NAMES, type Chips, type Generosity, type MemoryOneRule, type Move } from '../../../sim/social/game/rules'
 import { headToHead, twoRuleRoundRobin, populationCurve, populationThreshold, TWO_RULES_ROUNDS, type HeadToHead, type TwoRuleRoundRobin, type PopulationPoint } from '../../../sim/social/game/tworules'
-import { roundRobin, predictorVersus, entryId, entryLabel, type Entry, type RoundRobin, type PredictorVersus } from '../../../sim/social/game/tournament'
-import { playMatch, rulePlayer, type Round } from '../../../sim/social/game/match'
+import { roundRobin, predictorVersus, playerOf, entryId, entryLabel, type Entry, type RoundRobin, type PredictorVersus } from '../../../sim/social/game/tournament'
+import { playMatch, type Round } from '../../../sim/social/game/match'
 import { runGenerations, costAtWhichEntryStops, costsFor, MEMORY_COSTS, type GenerationsRun } from '../../../sim/social/game/generations'
 import { Grid, SHIPPED_GRID, MUTATIONS, startWorldsFor, type StartWorld, type GridRule, type GridBoundary } from '../../../sim/social/game/grid'
 import type { PartStore } from '../contract'
@@ -315,19 +315,20 @@ export class TournamentStore implements PartStore {
 
   /**
    * Step 3's record for one entry: its match against every entry, round by
-   * round, with the running points. Two deterministic rules play the one
-   * match the table's exact value describes; a rule with generosity draws
-   * its moves, so its record is one realized match of the many the exact
-   * value averages, played on the run seed.
+   * round, with the running points. Two deterministic rules with no noise
+   * play the one match the table's exact value describes; a rule with
+   * generosity, Predictor, or any match with mistakes (Step 5, at its noise;
+   * added 2026-11-08 for the handout's Q14) draws its moves, so its record is
+   * one realized match of the many the table's value averages, played on
+   * the run seed.
    */
-  recordsFor(i: number): EntryRecord[] {
-    const rr = this.rr3
+  recordsFor(i: number, step: 3 | 5 = 3): EntryRecord[] {
+    const rr = step === 3 ? this.rr3 : this.rr5
     if (!rr) return []
     const a = rr.entries[i]
-    if (a.kind !== 'rule') return []
     return rr.entries.map((b, j) => {
-      if (b.kind !== 'rule') throw new Error('Step 3 has rules only')
-      const m = playMatch(rulePlayer(a.rule), rulePlayer(b.rule), rr.rounds, rr.noise, makeRng(this.seed * 31 + i * 7 + j))
+      // Step 3's matches between two rules are the table's exact value; every other match here is one realized match on the run seed.
+      const m = playMatch(playerOf(a), playerOf(b), rr.rounds, rr.noise, makeRng(this.seed * 31 + i * 7 + j + step * 1009))
       return { against: entryLabel(b), rounds: m.rounds, mine: m.totalA, theirs: m.totalB, tableMean: rr.table[i][j].mean }
     })
   }
@@ -398,6 +399,7 @@ export class TournamentStore implements PartStore {
     this.enqueue('Playing the matches with mistakes', [
       () => {
         this.rr5 = roundRobin(this.entries(true), this.noise, undefined, undefined, 5000 + run * 1013)
+        this.recordEntry = null
         this.gen = null
         this.costStop = null
       },

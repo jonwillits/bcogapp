@@ -42,7 +42,8 @@ export interface RoundRobin {
   ranking: number[]
 }
 
-function playerOf(e: Entry): Player<unknown> {
+/** The player an entry fields: a memory-one rule, or Predictor with its options. */
+export function playerOf(e: Entry): Player<unknown> {
   return (e.kind === 'rule' ? rulePlayer(e.rule) : predictorPlayer(e.options)) as Player<unknown>
 }
 

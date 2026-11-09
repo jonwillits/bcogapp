@@ -200,6 +200,7 @@ function Stage({ ctx }: { ctx: Ctx }) {
       {s.step === 4 && (s.rr4 && s.versus.length ? <PredictorPanel s={s} /> : <Note>{s.working ? s.badge : 'Press “Run with Predictor” on the left.'}</Note>)}
       {s.step === 4 && <ReferenceForStep4 />}
       {s.step === 5 && (s.rr5 ? <RoundRobinTable rr={s.rr5} against={s.rr4} testId="rr5" /> : <Note>{s.working ? s.badge : 'Set the noise on the left and press “Run with mistakes”.'}</Note>)}
+      {s.step === 5 && s.rr5 && <EntryRecords s={s} step={5} />}
       {s.step === 6 && (s.gen ? <GenerationsPanel s={s} /> : <Note>{s.working ? s.badge : 'Press “Run the generations” on the left.'}</Note>)}
       {s.step === 7 && <GridPanel s={s} />}
       {s.step === 7 && <ReferenceForStep7 />}

@@ -807,6 +807,7 @@ export const LABS = [
       { says: 'Part 2: Predictor’s estimates converge on each partner’s table within 0.05 after 200 rounds, its choice equals a brute-force search, and its probe rate is 5% ± 1%', test: 'its measured probe rate is 5% ± 1% over 10,000 rounds' },
       { says: 'Part 2: the memory cost charges every entry by what it stores, none for a fixed rule, one for a memory-one rule, eleven for Predictor, in Step 6 only', test: 'the memory cost charges every entry by what it stores, in Step 6 only' },
       { says: 'Part 2: Step 3 shows any entry’s record against every entry round by round, and a deterministic pair’s record agrees with the table', test: 'Step 3 shows any entry’s record against every entry, round by round' },
+      { says: 'Part 2: Step 5 shows the same record panel at its noise, with Predictor’s row, so Tit-for-tat’s match against itself with mistakes can be read', test: 'Step 5 shows the same record panel at its noise: Tit-for-tat against itself carries mistakes, and Predictor has a row' },
       { says: 'Part 2: Step 4 can be run again, each run on new seeds', test: 'Step 4 can be run again, and each run plays on new seeds' },
       { says: 'Part 2: the grid holds any set of the entries chosen on the left, at least two, wrapping or bounded, with a saved notes box', test: 'the grid holds any set of the entries chosen on the left' },
       { says: 'Part 2: on a bounded grid a corner has three neighbors and a score is the average per encounter', test: 'on a bounded grid the edges stop' },
