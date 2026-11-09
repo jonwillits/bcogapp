@@ -48,7 +48,7 @@ export const SCREENS: Record<Step, StepScreen> = {
       '- Search everything examines arrangements in order of their distance from the start until it reaches the goal.',
       '- Goal recursion breaks the goal of moving a stack into smaller goals, nested inside one another.',
       '- Largest disk out of place looks at the pegs and works on the largest disk that is not yet on the right peg, and on whatever is in its way.',
-      '- Move pattern repeats a fixed pattern of moves, and needs to remember only whether the next move is odd or even.',
+      '- Move pattern repeats a fixed pattern of moves, and stores only whether the next move is odd or even.',
       '- Memorized moves applies a list of 15 moves, the solution for four disks, one after another.',
       'The slider “Disks” sets the number of disks, from 3 to 6. The setting “Start” chooses the usual start, every disk on the left peg, or “Scramble”, a legal arrangement drawn by your seed, with the goal still every disk on the right peg. Press a procedure’s “Run” to run it from the current start, animated at the speed the slider “Speed” sets; “Skip to the end” shows the result at once.',
       'Before the first run of each procedure, you are asked for a prediction about it, chosen from a short list, and committed with “Commit my prediction”. The prediction is saved, and the procedure runs only after it. The table fills as the procedures run: the moves each took; how many arrangements it examined; the most it had to store at once; whether it solved the puzzle from a scrambled start; and whether it solved the puzzle with one more disk than the current setting. Where a procedure cannot go on, the run stops and the panel says which procedure stopped and why.',

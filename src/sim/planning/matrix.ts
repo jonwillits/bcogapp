@@ -194,7 +194,7 @@ export class MatrixRun {
         for (const k of RUN_ORDER) result.strip[k].forEach((v, d) => (this.stripSum[job.variant][k][d] += v ? 1 : 0))
       }
       this.doneRuns++
-      this.badge = `Running the build’s tests — ${this.doneRuns} of ${this.total}`
+      this.badge = `Running this lab’s own tests — ${this.doneRuns} of ${this.total}`
       return false
     }
     const finish = (variant: ShallowVariant): Matrix => {

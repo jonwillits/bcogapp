@@ -47,11 +47,11 @@ export class OpenStore implements PartStore {
 export const OPEN_INTRO = {
   title: 'Part 0 — General Lab Instructions',
   lines: [
-    'This lab has four parts. In Part 1, Choices, you choose among hypothetical gambles and delays, wait at two dispensers, and explore a small bird’s evening. In Part 2, Puzzles, you solve a puzzle, run five procedures on it, and choose paths through trees of hidden numbers. In Part 3, What They Carried, you drive a hominin through a day on a range, then test five hidden hominins to find out what each one does. In Part 4, Two Trays, you grow corn and compute heritability.',
+    'This lab has four parts. Part 1 is about making choices and decisions. Part 2 is about planning and solving puzzles. In Part 3, you control a simulated Homo erectus, and then test five more to find out what each one does. In Part 4, you grow corn and compute heritability.',
     'Every part, and every step within a part, opens on a screen like this one. Each one says what you will do, how long it takes, what each button does, what is recorded, and whether you can leave partway without starting over. An experiment is done once, in one sitting. An exploration can be opened, left, returned to, and redone.',
     'Your progress is saved in this browser on this computer only. Nothing is sent anywhere. A step you have finished is never redone to reach anything else. A step you leave partway starts over, or goes on from where you stopped, as its screen says. “Export my results” writes your saved results to a file on your computer, and “Load my results” reads such a file back, so you can move your results to another computer or browser.',
-    'The handout suggests an order: Part 1, then Part 2, then Part 3, then Part 4. The app does not enforce it. A step that depends on another step’s results says so on its results screen, in one line, and shows everything else.',
-    'The Open tab also gathers every part’s results under “My results, all parts”.',
+    'We suggest you do them in order: Part 1, then Part 2, then Part 3, then Part 4. The app does not enforce it. A step that depends on another step’s results says so on its results screen, and shows everything else.',
+    'Every part’s results are also gathered on the Open tab, under “My results, all parts”.',
   ],
   content: [ANY_ORDER_LINE, COMMIT_RULE_LINE],
   time: 'About 3 minutes.',
@@ -91,7 +91,7 @@ function Left({ ctx }: { ctx: { store: PartStore; header: ReactNode; progress: P
             </div>
           </div>
           <GroupLabel>Saved progress</GroupLabel>
-          <Note>An experiment is a step done once, in one sitting. The explorations are not counted here, because they can be redone at any time.</Note>
+          <Note>Each experiment is done once, in one sitting. This shows your progress. The explorations in Part 4 are not counted, because they can be redone at any time.</Note>
           <FixedLines lines={progressRows(p)} testId="parts-done" />
           <ExportLoad store={ctx.progress} transfer={LAB12_TRANSFER} />
           <GroupLabel>Start over</GroupLabel>
@@ -141,7 +141,7 @@ function Right({ ctx }: { ctx: { progress: ProgressStore } }) {
   return (
     <Panel title="My results, all parts" style={RIGHT_STYLE}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <Note>Each part’s My results screen is on its own tab. This screen gathers the results of every experiment you have finished. Part 4 is an exploration: what it shows is read off its own tab.</Note>
+        <Note>Each part’s My results screen is on its own tab. The results of every experiment you have finished are gathered here. Part 4 is an exploration, and its results are on its own tab.</Note>
         <FixedLines lines={progressRows(p)} testId="results-all" />
         {any && (
           <div>

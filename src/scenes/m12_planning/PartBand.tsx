@@ -405,7 +405,7 @@ function Bottom({ ctx, press, act }: { ctx: Ctx; press: (k: 'forward' | 'back' |
       <Btn primary onClick={() => { act(); s.act() }}>
         Act
       </Btn>
-      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Arrow keys or WASD walk and turn · “Enter” or “Act” does the first act the panel offers · the range clock runs at {TIME_SCALE} range seconds a second</div>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Arrow keys or WASD walk and turn · “Enter” or “Act” does the first act listed under “Acts” · the range clock runs at {TIME_SCALE} range seconds a second</div>
     </div>
   )
 }
@@ -501,7 +501,7 @@ function Reveal({ s }: { s: BandStore }) {
       <Section title="What each test took away">
         <FixedLines lines={TESTS && Object.keys(TEST_TAKES_AWAY).map((t) => `${t}: ${TEST_TAKES_AWAY[t]}`)} mono={false} />
       </Section>
-      <Section title="The full matrix from the build’s own runs: the mean share over 20 seeds of one ten-day run each, with the spread across seeds in brackets, for each variant of the Shallow planner">
+      <Section title="The full matrix from runs made when this lab was built: the mean share over 20 seeds of one ten-day run each, with the spread across seeds in brackets, for each variant of the Shallow planner">
         {m ? (
           <>
             {(['A', 'B'] as const).map((v) => (
