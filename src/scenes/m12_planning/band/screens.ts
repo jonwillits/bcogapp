@@ -17,6 +17,14 @@ export type Step = 1 | 2 | 3 | 4
 
 export const STEP_TITLES: Record<Step, string> = { 1: 'Step 1 — A day in the range', 2: 'Step 2 — The usual day', 3: 'Step 3 — The chain of tests', 4: 'Step 4 — What each one was doing' }
 
+/** What to press when a step is done, named without ambiguity, at the end of its instructions (Jon, 2026-11-09). */
+export const NEXT_LINE: Record<Step, string> = {
+  1: 'When both days are saved, press “Go on to Step 2” on the left.',
+  2: 'When you have run the usual day and watched what you want to see, press “Go on to Step 3” on the left.',
+  3: 'When your diagnosis is committed, press “Go on to Step 4” on the left.',
+  4: 'When you have read what each one was doing, move on to Part 4 by pressing “Go on to Part 4” on the left, or choose the Corn tab at the top left.',
+}
+
 export interface StepScreen {
   step: Step
   title: string

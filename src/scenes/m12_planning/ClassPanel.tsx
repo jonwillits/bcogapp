@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { cloudFor, PENDING_CLASS_LINE, REAL_CLASS_LINE, SIMULATED_CLASS_LINE, type ClassEntry } from '../../sim/planning/classes'
 import { GroupLabel, Note, Content } from './ui'
 
@@ -12,7 +12,10 @@ import { GroupLabel, Note, Content } from './ui'
  *
  * A binary measure (chose the sure option, or not) is drawn as a column of
  * dots, one per simulated student, the share printed above; a continuous
- * measure as a column of dots along a vertical axis.
+ * measure as a column of dots along a vertical axis. The student's own mark
+ * is larger than a student's dot, ringed in the background color so it
+ * reads among the others, and a key under the plot, outside the dots, says
+ * what each mark is (Jon's walk, 2026-11-09).
  */
 export function ClassPanel({ entry, own, ownLabel = 'you', title }: { entry: ClassEntry; own: (number | null)[] | null; ownLabel?: string; title?: string }) {
   const [preferReal, setPreferReal] = useState(true)
@@ -31,6 +34,7 @@ export function ClassPanel({ entry, own, ownLabel = 'you', title }: { entry: Cla
         <>
           <Content>{cloud.kind === 'real' ? REAL_CLASS_LINE : SIMULATED_CLASS_LINE}</Content>
           <Columns points={cloud.points} measures={entry.measures} own={own} ownLabel={ownLabel} binary={entry.sources.every((s) => s === null || s.share !== undefined)} />
+          <Key binary={entry.sources.every((s) => s === null || s.share !== undefined)} own={own !== null && own.some((v) => v !== null)} ownLabel={ownLabel} />
           {cloud.kind === 'simulated' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               {cloud.sources.map((s, i) => (
@@ -45,6 +49,34 @@ export function ClassPanel({ entry, own, ownLabel = 'you', title }: { entry: Cla
               <input type="checkbox" checked={!preferReal} onChange={(e) => setPreferReal(!e.target.checked)} /> Show the simulated class instead
             </label>
           )}
+        </>
+      )}
+    </div>
+  )
+}
+
+/** The key, under the plot and outside the dots: what a dot is, and what the student's own mark is. */
+function Key({ binary, own, ownLabel }: { binary: boolean; own: boolean; ownLabel: string }) {
+  const item = (mark: ReactNode, label: string) => (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+      <svg width={14} height={14} viewBox="0 0 14 14" aria-hidden>
+        {mark}
+      </svg>
+      {label}
+    </span>
+  )
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 12px', fontSize: 10.5, color: 'var(--text-muted)' }} data-class-key>
+      {binary ? (
+        <>
+          {item(<circle cx={7} cy={7} r={3} fill="var(--accent)" />, 'a simulated student who chose it (yes)')}
+          {item(<circle cx={7} cy={7} r={3} fill="var(--text-muted)" />, 'one who did not (no)')}
+          {own && item(<polygon points="2,2 12,2 7,12" fill="var(--sensor)" stroke="var(--bg)" strokeWidth={1} />, `${ownLabel}: the column you are in`)}
+        </>
+      ) : (
+        <>
+          {item(<circle cx={7} cy={7} r={3} fill="var(--accent)" />, 'a simulated student')}
+          {own && item(<circle cx={7} cy={7} r={5.5} fill="var(--sensor)" stroke="var(--bg)" strokeWidth={1.5} />, ownLabel)}
         </>
       )}
     </div>
@@ -84,7 +116,14 @@ function Columns({ points, measures, own, ownLabel, binary }: { points: number[]
               <text x={x0 + 85 + 16} y={height - 8} fontSize={9} textAnchor="middle" fill="var(--text-muted)">
                 no
               </text>
-              {own && own[i] !== null && <text x={x0 + 25 + (own[i] === 1 ? 0 : 60) + 16} y={height - 60} fontSize={10} textAnchor="middle" fill="var(--sensor)" data-own>{`▼ ${ownLabel}`}</text>}
+              {own && own[i] !== null && (
+                <g data-own transform={`translate(${x0 + 25 + (own[i] === 1 ? 0 : 60) + 16}, ${height - 92})`}>
+                  <polygon points="-7,-12 7,-12 0,0" fill="var(--sensor)" stroke="var(--bg)" strokeWidth={1} />
+                  <text x={0} y={-16} fontSize={10} textAnchor="middle" fill="var(--sensor)">
+                    {ownLabel}
+                  </text>
+                </g>
+              )}
               <text x={x0 + 55} y={28} fontSize={8.5} textAnchor="middle" fill="var(--text-muted)">
                 {m.length > 30 ? m.slice(0, 29) + '…' : m}
               </text>
@@ -100,7 +139,7 @@ function Columns({ points, measures, own, ownLabel, binary }: { points: number[]
             {vals.map((v, j) => (
               <circle key={j} cx={x0 + 40 + ((j * 37) % 50)} cy={Y(v)} r={3} fill="var(--accent)" />
             ))}
-            {own && own[i] !== null && <circle cx={x0 + 65} cy={Y(own[i]!)} r={5} fill="var(--sensor)" data-own />}
+            {own && own[i] !== null && <circle cx={x0 + 65} cy={Y(own[i]!)} r={6} fill="var(--sensor)" stroke="var(--bg)" strokeWidth={1.5} data-own />}
             <text x={x0 + 10} y={Y(hi) + 3} fontSize={9} fill="var(--text-muted)">
               {formatValue(hi)}
             </text>

@@ -15,7 +15,7 @@ import { reference } from '../../sim/planning/references'
 import { BUILT_FOR_THE_EXPERIMENT_LINE, DRAWN_SIMPLY_LINE, EVERY_STEP_SEEN_LINE, FRESH_START_LINE, PROGRAMMED_HOMININS_LINE, THE_ELDER_LINE, RESTARTED_LINE } from './lines'
 import type { PartContext, PartModule } from './contract'
 import { BandStore, DAY_UNIT, DAY_LENGTH, ELDER_COLOR, LETTERS, LETTER_COLORS, STUDENT_COLOR } from './band/store'
-import { SCREENS, STEP_TITLES, READY_LINE, TEST_DESCRIPTION, TEST_TAKES_AWAY, PROCEDURE_DESCRIPTIONS, PROCEDURE_SECTION, NEEDS_TABLE_LINES, ERECTUS_CARD, THREE_STUDIES, placeName, type Step } from './band/screens'
+import { SCREENS, NEXT_LINE, STEP_TITLES, READY_LINE, TEST_DESCRIPTION, TEST_TAKES_AWAY, PROCEDURE_DESCRIPTIONS, PROCEDURE_SECTION, NEEDS_TABLE_LINES, ERECTUS_CARD, THREE_STUDIES, placeName, type Step } from './band/screens'
 import { RangeView3D, AboveCamera, HOMININ_CAMERA, type Figure } from './band/RangeView3D'
 import { registerResults } from './Part0'
 
@@ -90,6 +90,7 @@ function Left({ ctx }: { ctx: Ctx }) {
               {s.step !== 1 && <Btn onClick={() => s.reopen()}>Show the instructions again</Btn>}
               {s.step > 1 && <Btn onClick={() => s.open((s.step - 1) as Step)}>Go back to Step {s.step - 1}</Btn>}
               {s.step < 4 && <Btn onClick={() => s.open((s.step + 1) as Step)}>Go on to Step {s.step + 1}</Btn>}
+              {s.step === 4 && <Btn onClick={() => ctx.openTab('corn')}>Go on to Part 4</Btn>}
             </div>
           )}
           <div>
@@ -284,7 +285,7 @@ function Stage({ ctx }: { ctx: Ctx }) {
   useStore(ctx.progress)
   const screen = SCREENS[s.step]
   if (s.infoOpen) return <OrientingPanel title={ERECTUS_CARD.title} lines={ERECTUS_CARD.lines} content={[DRAWN_SIMPLY_LINE]} footer={ERECTUS_CARD.footer} onClose={() => s.setInfoOpen(false)} />
-  if (s.state === 'intro') return <InstructionScreen title={screen.title} willDo={screen.reread ? [screen.reread, ...screen.willDo] : screen.willDo} minutes={screen.minutes} sitting={screen.sitting} sittingLine={screen.sittingLine} ready={READY_LINE} keys={screen.keys} content={screen.content} onBegin={() => s.begin()} disabled={s.step === 4 && !s.diagnosed} />
+  if (s.state === 'intro') return <InstructionScreen title={screen.title} willDo={screen.reread ? [screen.reread, ...screen.willDo] : screen.willDo} minutes={screen.minutes} sitting={screen.sitting} sittingLine={screen.sittingLine} ready={READY_LINE} keys={screen.keys} content={screen.content} next={NEXT_LINE[s.step]} onBegin={() => s.begin()} disabled={s.step === 4 && !s.diagnosed} />
   if (s.state === 'predict')
     return (
       <StagePanel testId="predict">

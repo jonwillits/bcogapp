@@ -852,7 +852,7 @@ export const LABS = [
     name: 'Lab 12 — Intelligence and Thinking Ahead',
     route: '#/m12-planning',
     scene: 'src/scenes/m12_planning',
-    /** Sim files whose strings reach the screen: the items and their sources, the procedures, the lookers, the dispensers' rules, the foragers, the hominins' procedures and tests, the classes and references; and Lab 10's progress components, which this scene renders. */
+    /** Sim files whose strings reach the screen: the items and their sources, the procedures, the lookers, the dispensers' rules, the hominins' procedures and tests, the classes and references; and Lab 10's progress components, which this scene renders. */
     strings: ['src/sim/planning', 'src/scenes/m10_memory/progress'],
     handout: 'planning_and_decisionmaking/thinking_ahead_lab/thinking_ahead_lab.md',
     report: 'planning_and_decisionmaking/thinking_ahead_lab/thinking_ahead_lab_report.docx',
@@ -874,7 +874,7 @@ export const LABS = [
 
     controls: [
       'Open', 'Choices', 'Puzzles', 'Band', 'Corn', 'Begin', 'Begin Part 1', 'Export my results', 'Load my results', 'Clear my saved results', 'Erase and start over', 'Keep my results', 'Replace my saved results', 'Keep what I have',
-      'Option A', 'Option B', 'Spin the wheel', 'Submit my estimate', 'Take 1 now', 'Start the block again', 'Feed at the sure patch', 'Feed at the variable patch', 'Run 1,000 evenings', 'Start the evenings again',
+      'Option A', 'Option B', 'Spin the wheel', 'Submit my estimate', 'Take 1 now', 'Start the block again', 'Start block 2', 'Go on to Part 2', 'Go on to Part 3', 'Go on to Part 4', 'Open tab: My results, all parts',
       'Disks', 'Usual start', 'Scramble', 'Speed', 'Run', 'Skip to the end', 'Commit my prediction', 'Options at each step', 'Steps ahead', 'Take this path',
       'Eye view', 'Follow view', 'Narrower view', 'Low detail', 'Act', 'Save this day and go on to day 2', 'Save this day and finish Step 1', 'Run T1 for all five', 'Run 10 days', 'Watch day', 'Stop watching', 'Follow', 'from above', 'the elder', 'Commit my diagnosis', 'What the Shallow planner counts at the end of its search', 'Information card: Homo erectus',
       'Seed', 'Soil', 'varied stock', 'one uniform line', 'even', 'patchy', 'Grow', 'Grow the first experiment', 'Grow the second experiment', 'Restore the nitrates', 'Restore the zinc', 'Identical twins treated more alike', 'The reading’s figures', 'Run the twin study', 'Grow in poor and rich soil', 'Run six seasons',
@@ -887,9 +887,8 @@ export const LABS = [
       { says: 'Part 1: the four reflection pairs are the source pages’ problems with their published shares, and pair 2’s loss version is Tversky and Kahneman’s Problem 3 as published', test: 'expected values are exact for every item' },
       { says: 'Part 1: the fits recover a scripted exponential chooser’s γ and a scripted hyperbolic chooser’s k within 5%; an exponential chooser never reverses between the two pairs and a hyperbolic chooser with k from 0.02 to 0.1 does', test: 'a scripted exponential chooser never reverses between the two reversal pairs' },
       { says: 'Part 1: the dispensers’ best policies are computed exactly from the rules and match the mean of 10,000 simulated blocks; a take pauses 5 s and a delivery 1 s (a departure from the spec, recorded in dispensers.ts)', test: 'the best policies are as the spec says, computed exactly from the rules' },
-      { says: 'Part 1: the survival table is exact for every level of reserves, and each forager’s 1,000 evenings fall within the binomial range', test: 'each rule’s survival over 1,000 evenings is within the binomial range of the exact value' },
       { says: 'Part 1: no expected value, published share, reference or other version of a problem before the step’s last choice; no dispenser’s rule before both blocks; the delays reveal names none of the gambles’ words, on rendered markup', test: 'no expected value, published share, reference or other version of a problem before the step’s last choice' },
-      { says: 'Part 1: before each reveal no string names what the step tests (reflect, frame, loss aversion, anchor, …; discount, hyperbolic, reversal, self-control; reliable, promise, marshmallow, when a dispenser delivers), and Step 4 says nothing about gains against losses, descriptions or anchors', test: 'no Part 1 file outside the reveal and the data files holds a Step 1 word in a visible string' },
+      { says: 'Part 1: before each reveal no string names what the step tests (reflect, frame, loss aversion, anchor, …; discount, hyperbolic, reversal, self-control; reliable, promise, marshmallow, when a dispenser delivers)', test: 'no Part 1 file outside the reveal and the data files holds a Step 1 word in a visible string' },
       { says: 'Part 2: the state graph has 3ⁿ nodes and a shortest path of 2ⁿ − 1 moves for n from 3 to 6, laid out as a triangle of triangles with one-move gaps and every edge a short step', test: 'the layout is a triangle of triangles with the single-peg arrangements at the corners' },
       { says: 'Part 2: search everything returns a shortest path; goal recursion’s stack reaches depth n; the move pattern solves every n from the usual start; the largest-disk rule solves every n and every scramble', test: 'search everything returns a shortest path; goal recursion’s stack reaches depth n' },
       { says: 'Part 2: the memorized moves solve four disks and fail on five and on three, and the panel says how', test: 'the memorized moves solve four disks and fail on five, and the panel says how' },
@@ -914,7 +913,7 @@ export const LABS = [
       { says: 'Storage: every part opens with nothing done (no locks); a complete unit survives a reload, an interrupted one restarts, a resuming one keeps its partial; with storage blocked the lab runs in memory; the only key is bcogapp.m12.v1', test: 'a complete unit survives a reload; an interrupted one restarts; a resuming one keeps its partial' },
       { says: 'Structure: only setWiring and learnWeights write a stored weight, Module 12 included', test: 'Module 12 reaches a weight only through learnWeights' },
       { says: 'Every simulated cloud traces to a data-file entry with a source and page, or shows Simulated class pending', test: 'a pending entry yields pending and no cloud' },
-      { says: 'Screen: the content lines are each on their panel; no agentic verb about a program, procedure, model, looker, forager, rule or hominin; keep and hold not for memory; no British spellings; no browser dialog; the vocabulary present', test: 'every line exists and is used where the spec puts it' },
+      { says: 'Screen: the content lines are each on their panel; no agentic verb about a program, procedure, model, looker, rule or hominin; keep and hold not for memory; no British spellings; no browser dialog; the vocabulary present', test: 'every line exists and is used where the spec puts it' },
       { says: 'Screen: nothing leaves the page: no fetch, no camera, storage only through the shared layer, no Math.random in the sim', test: 'no Math.random in the sim or the scene' },
       { says: 'Screen: a selected control changes color and never size', test: 'no button style keys font weight, padding, font size or border width on state' },
       { says: 'Screen: the hominins have one neutral body color and no face, and nothing draws a person or a photograph', test: 'the hominins have one neutral body color and no face' },

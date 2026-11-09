@@ -29,8 +29,7 @@ export const ONE_VERSION_EACH_LINE = 'Each student saw one version of the proble
 /** 8. Part 1, Step 3. */
 export const LABS_POINTS_LINE = 'The children in the reading waited for real treats. These are points in a lab, and nothing is paid for them.'
 
-/** 9. Part 1, Step 4. */
-export const SAME_EXPECTED_VALUE_LINE = 'The two patches give the same amount of food on average: 4 units an evening each.'
+/** 9. Part 1, Step 4, the bird. Removed with the step at Jon's word, 2026-11-09; the number is kept so the spec's list still counts. */
 
 /** 10. Part 2, Step 1. */
 export const LONG_PAUSE_LINE = 'A ring marks a long pause: a time before a move of more than twice your median time between moves.'

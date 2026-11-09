@@ -5,7 +5,6 @@ import { planGambles, acceptable, PAIRS, startSeries, seriesOptions, emptyRespon
 import { answer, indifference, startBisection, finished } from './bisection'
 import { runScriptedDelays, delayResults, exponential, hyperbolic, DELAYS } from './delays'
 import { bestPolicy, pointsPerMinute, simulateBlock, startBlock, advance, take, BLOCK_SECONDS, TAKE_PAUSE, summarize } from './dispensers'
-import { exactSurvival, runRule, survivalChance, RULE_IDS } from './forager'
 
 describe('expected values and the items (spec §5.1, §5.2)', () => {
   it('expected values are exact for every item', () => {
@@ -153,25 +152,5 @@ describe('the dispensers (spec §5.4, §14)', () => {
     s = advance(s, BLOCK_SECONDS + 1, rng)
     expect(s.phase).toBe('done')
     expect(s.elapsed).toBe(BLOCK_SECONDS)
-  })
-})
-
-describe('the forager (spec §5.5, §14)', () => {
-  it('the survival table is exact for every level of reserves', () => {
-    for (let r = 2; r <= 9; r++) {
-      expect(survivalChance(r, 'sure')).toBe(r >= 6 ? 1 : 0)
-      expect(survivalChance(r, 'variable')).toBe(0.5)
-    }
-    expect(exactSurvival('alwaysSure')).toBe(0.5)
-    expect(exactSurvival('alwaysVariable')).toBe(0.5)
-    expect(exactSurvival('variableWhenNeeded')).toBe(0.75)
-  })
-  it('each rule’s survival over 1,000 evenings is within the binomial range of the exact value', () => {
-    const rng = makeRng(7)
-    for (const rule of RULE_IDS) {
-      const p = exactSurvival(rule)
-      const share = runRule(rule, 1000, rng)
-      expect(Math.abs(share - p)).toBeLessThan(4 * Math.sqrt((p * (1 - p)) / 1000))
-    }
   })
 })

@@ -8,7 +8,7 @@ import { Btn, Choice, Content, FixedLines, GroupLabel, Note, PANEL_STYLE, PART_T
 import { InstructionScreen } from '../m10_memory/progress/InstructionScreen'
 import type { PartContext, PartModule } from './contract'
 import { PuzzlesStore, TOWER_UNIT, TREES_UNIT } from './puzzles/store'
-import { SCREENS, STEP_TITLES, READY_LINE, PROCEDURE_PREDICTIONS, type Step } from './puzzles/screens'
+import { SCREENS, NEXT_LINE, STEP_TITLES, READY_LINE, PROCEDURE_PREDICTIONS, type Step } from './puzzles/screens'
 import { Pegs, StateGraphView, TreeView, TreePathPicker, TREE_LEGEND } from './puzzles/Views'
 import { TowerReveal, TreesReveal, PuzzlesResults } from './puzzles/Reveal'
 import { registerResults } from './Part0'
@@ -69,6 +69,7 @@ function Left({ ctx }: { ctx: Ctx }) {
               {s.step === 2 && <Btn onClick={() => s.reopen()}>Show the instructions again</Btn>}
               {s.step > 1 && <Btn onClick={() => s.open((s.step - 1) as Step)}>Go back to Step {s.step - 1}</Btn>}
               {s.step < 3 && <Btn onClick={() => s.open((s.step + 1) as Step)}>Go on to Step {s.step + 1}</Btn>}
+              {s.step === 3 && state === 'done' && <Btn onClick={() => ctx.openTab('band')}>Go on to Part 3</Btn>}
             </div>
           )}
           {state === 'done' && <Note>This step is done and saved. Its results are on the right. An experiment is not redone: someone who knows what it tests is no longer a naive subject.</Note>}
@@ -130,13 +131,19 @@ function Stage({ ctx }: { ctx: Ctx }) {
   useStore(ctx.progress)
   const screen = SCREENS[s.step]
   const state = s.state
-  if (state === 'intro') return <InstructionScreen title={screen.title} willDo={screen.willDo} minutes={screen.minutes} sitting={screen.sitting} sittingLine={screen.sittingLine} ready={READY_LINE} keys={screen.keys} content={screen.content} onBegin={() => s.begin()} />
+  if (state === 'intro') return <InstructionScreen title={screen.title} willDo={screen.willDo} minutes={screen.minutes} sitting={screen.sitting} sittingLine={screen.sittingLine} ready={READY_LINE} keys={screen.keys} content={screen.content} next={NEXT_LINE[s.step]} onBegin={() => s.begin()} />
   if (s.step === 1) {
     if (state === 'done')
       return (
         <StagePanel testId="done">
           <div style={{ fontSize: 14, fontWeight: 600 }}>{screen.title}</div>
           <Note>Both puzzles are solved. The results are on the right, and under “My results, all parts” on the Open tab.</Note>
+          <Note data-next>When you are ready to move on, press “Go on to Step 2” here or on the left.</Note>
+          <div>
+            <Btn primary onClick={() => s.open(2)}>
+              Go on to Step 2
+            </Btn>
+          </div>
         </StagePanel>
       )
     return (
@@ -169,6 +176,12 @@ function Stage({ ctx }: { ctx: Ctx }) {
       <StagePanel testId="done">
         <div style={{ fontSize: 14, fontWeight: 600 }}>{screen.title}</div>
         <Note>The last path is taken. The results are on the right, and under “My results, all parts” on the Open tab.</Note>
+        <Note data-next>When you are ready to move on, press “Go on to Part 3” here or on the left, or choose the Band tab at the top left.</Note>
+        <div>
+          <Btn primary onClick={() => ctx.openTab('band')}>
+            Go on to Part 3
+          </Btn>
+        </div>
       </StagePanel>
     )
   const t = s.currentTree

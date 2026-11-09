@@ -40,6 +40,8 @@ export interface InstructionScreenProps {
   keys?: string[]
   /** Content lines (spec §11), each on its own accent bar. */
   content?: string[]
+  /** What to press when the step is done, named without ambiguity, under its own heading (Jon, Lab 12 walk, 2026-11-09). */
+  next?: string
   onBegin: () => void
   beginLabel?: 'Begin'
   disabled?: boolean
@@ -61,7 +63,7 @@ function groupBullets(lines: string[]): (string | string[])[] {
   return out
 }
 
-export function InstructionScreen({ title, willDo, minutes, sitting, sittingLine, ready = READY_DEFAULT, keys, content, onBegin, beginLabel = 'Begin', disabled, extra, inline }: InstructionScreenProps) {
+export function InstructionScreen({ title, willDo, minutes, sitting, sittingLine, ready = READY_DEFAULT, keys, content, next, onBegin, beginLabel = 'Begin', disabled, extra, inline }: InstructionScreenProps) {
   const style = inline
     ? { width: '100%', maxWidth: 560 }
     : { position: 'absolute' as const, left: 'calc(50% + var(--stage-shift, 0px))', top: 24, transform: 'translateX(-50%)', width: 'min(560px, calc(100vw - 780px))', minWidth: 360, maxHeight: 'calc(100vh - 170px)', overflowY: 'auto' as const }
@@ -105,6 +107,14 @@ export function InstructionScreen({ title, willDo, minutes, sitting, sittingLine
               <li key={k}>{k}</li>
             ))}
           </ul>
+        </>
+      )}
+      {next && (
+        <>
+          <GroupLabel>When you are done</GroupLabel>
+          <p style={{ margin: 0 }} data-next>
+            {next}
+          </p>
         </>
       )}
       {content?.map((l) => (

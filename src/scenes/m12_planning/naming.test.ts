@@ -14,8 +14,7 @@ import * as L from './lines'
  * before Step 2's reveal: discount, hyperbolic, exponential, impulsive,
  * reversal, self-control; before Step 3's reveal: reliable, unreliable,
  * promise, trust, marshmallow, Kidd, persistence, or when a dispenser
- * delivers. Step 4 says nothing about gains against losses, framing or
- * anchors. §11, item 3: before Part 2, Step 3's reveal: prune, pruning,
+ * delivers. §11, item 3: before Part 2, Step 3's reveal: prune, pruning,
  * bonsai, large loss, Pavlovian, resource-rational, Huys, Callaway. The
  * files that may hold those words are the reveal file, the data files
  * (rendered only on the reveal), and the lines file (each line tested for
@@ -42,7 +41,6 @@ const lines = visibleText(file('lines.ts'), false)
 const STEP1_FORBIDDEN = /\breflect|\bframe\b|\bframing|loss aversion|risk[- ]averse|risk[- ]seeking|prospect|value function|\banchor|\bbias|heuristic|Kahneman|Tversky/i
 const STEP2_FORBIDDEN = /discount|hyperbolic|exponential|impulsiv|reversal|self-control/i
 const STEP3_FORBIDDEN = /\breliab|\bunreliab|promise|\btrust|marshmallow|\bKidd\b|persisten|delivers 5 points 8 seconds|on half of its trials/i
-const STEP4_FORBIDDEN = /loss|\bframe\b|framing|anchor|described differently/i
 const PART2_FORBIDDEN = /\bprun|bonsai|large loss|Pavlovian|resource-rational|\bHuys|Callaway/i
 
 const PART1_FILES = (p: string) => p.includes('/choices/') || p.includes('PartChoices') || p.includes('/sim/planning/choices/') || p.endsWith('classes.ts') || p.endsWith('references.ts')
@@ -81,10 +79,6 @@ describe('nothing before Part 1’s reveals names what they test (§11, item 2)'
     expect(d, d.join(' | ')).toEqual([])
     const p = visibleText(dispensers).split('\n').filter((l) => STEP1_FORBIDDEN.test(l) || STEP2_FORBIDDEN.test(l))
     expect(p, p.join(' | ')).toEqual([])
-  })
-  it('Step 4, the bird, says nothing about gains against losses, how a choice is described, or anchors', () => {
-    const t = visibleText(file('choices/Forager.tsx')) + '\n' + visibleText(production(sim).find(([p]) => p.endsWith('/choices/forager.ts'))![1], false)
-    expect(t.split('\n').filter((l) => STEP4_FORBIDDEN.test(l))).toEqual([])
   })
   it('the tab and part titles are neutral', () => {
     const ui = visibleText(file('ui.tsx'))
@@ -150,7 +144,6 @@ describe('the lines that are content, each on its panel (§10)', () => {
       ['ITEMS_DRAWN_SEPARATELY_LINE', /drawn independently/, 'choices/Reveal.tsx'],
       ['ONE_VERSION_EACH_LINE', /Each student saw one version/, 'choices/Reveal.tsx'],
       ['LABS_POINTS_LINE', /points in a lab/, 'choices/screens.ts'],
-      ['SAME_EXPECTED_VALUE_LINE', /same amount of food on average/, 'choices/Forager.tsx'],
       ['LONG_PAUSE_LINE', /twice your median time between moves/, 'puzzles/Reveal.tsx'],
       ['NOT_OPTIMAL_LINE', /None of them is the best possible way to look/, 'puzzles/Reveal.tsx'],
       ['DIFFERENT_TASK_LINE', /were not charged for looking/, 'puzzles/Reveal.tsx'],
@@ -187,7 +180,7 @@ describe('the chapter’s words are where the instruments use them (§14)', () =
     expect(screen).not.toMatch(/life history/)
   })
   it('the controls carry the names the spec gives them', () => {
-    for (const w of ['Begin', 'Option A', 'Option B', 'Spin the wheel', 'Take 1 now', 'Feed at the sure patch', 'Run 1,000 evenings', 'Scramble', 'Skip to the end', 'Take this path', 'Run 10 days', 'Watch day', 'Commit my diagnosis', 'Commit my prediction', 'Grow', 'Restore the nitrates', 'Restore the zinc', 'Identical twins treated more alike', 'What the Shallow planner counts at the end of its search', 'Export my results', 'Load my results', 'Clear my saved results', 'Erase and start over', 'Keep my results'])
+    for (const w of ['Begin', 'Option A', 'Option B', 'Spin the wheel', 'Take 1 now', 'Start block 2', 'Scramble', 'Skip to the end', 'Take this path', 'Run 10 days', 'Watch day', 'Commit my diagnosis', 'Commit my prediction', 'Grow', 'Restore the nitrates', 'Restore the zinc', 'Identical twins treated more alike', 'What the Shallow planner counts at the end of its search', 'Export my results', 'Load my results', 'Clear my saved results', 'Erase and start over', 'Keep my results'])
       expect(screen, w).toContain(w)
   })
   it('a selected tab changes color and nothing else', () => {

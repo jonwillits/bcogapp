@@ -12,17 +12,16 @@ import { ChoicesStore, GAMBLES_UNIT, DELAYS_UNIT, dispenserUnit } from './choice
 import { SCREENS, STEP_TITLES, READY_LINE, type Step } from './choices/screens'
 import { OptionCards, Wheel, HigherLower, Estimate, DiseaseProblem, capital } from './choices/Cards'
 import { DispenserScreen } from './choices/Dispenser'
-import { ForagerScreen } from './choices/Forager'
 import { GamblesReveal, DelaysReveal, DispensersReveal, ChoicesResults } from './choices/Reveal'
 import { registerResults } from './Part0'
 
 /**
  * Part 1's screens (spec §5): the left column runs the step (the step
  * buttons, Begin with Go to and Go back, the progress through a step's
- * items, Redo for the exploration); the stage carries the instruction
- * screen, the cards, the wheel, the dispenser or the bird; the right column
- * carries the step's reveal once its unit is complete, and a line saying
- * what is missing before that.
+ * items); the stage carries the instruction screen, the cards, the wheel or
+ * the dispenser; the right column carries the step's reveal once its unit
+ * is complete, and a line saying what is missing before that. Every screen
+ * names what to press next (Jon, 2026-11-09).
  */
 
 type Ctx = PartContext<ChoicesStore>
@@ -41,9 +40,9 @@ function Left({ ctx }: { ctx: Ctx }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <Content>{HYPOTHETICAL_MONEY_LINE}</Content>
           <GroupLabel>Step</GroupLabel>
-          <Choice value={String(s.step)} options={([1, 2, 3, 4] as Step[]).map((st) => ({ id: String(st), label: `Step ${st}`, title: STEP_TITLES[st] }))} onChange={(v) => s.open(Number(v) as Step)} />
+          <Choice value={String(s.step)} options={([1, 2, 3] as Step[]).map((st) => ({ id: String(st), label: `Step ${st}`, title: STEP_TITLES[st] }))} onChange={(v) => s.open(Number(v) as Step)} />
           <Note>{screen.title}</Note>
-          <FixedLines lines={[`Step 1  ${p.isComplete(GAMBLES_UNIT) ? 'done' : `${s.gamblesDoneCount()} of ${s.gamblePlan.items.length} choices made`}`, `Step 2  ${p.isComplete(DELAYS_UNIT) ? 'done' : `${s.delays.next} of ${s.delayPlan.items.length} choices made`}`, `Step 3  ${p.isComplete(dispenserUnit(0)) && p.isComplete(dispenserUnit(1)) ? 'both blocks done' : p.isComplete(dispenserUnit(0)) ? 'block 1 of 2 done' : 'no block done'}`, `Step 4  an exploration`]} testId="step-progress" />
+          <FixedLines lines={[`Step 1  ${p.isComplete(GAMBLES_UNIT) ? 'done' : `${s.gamblesDoneCount()} of ${s.gamblePlan.items.length} choices made`}`, `Step 2  ${p.isComplete(DELAYS_UNIT) ? 'done' : `${s.delays.next} of ${s.delayPlan.items.length} choices made`}`, `Step 3  ${p.isComplete(dispenserUnit(0)) && p.isComplete(dispenserUnit(1)) ? 'both blocks done' : p.isComplete(dispenserUnit(0)) ? 'block 1 of 2 done' : 'no block done'}`]} testId="step-progress" />
           {state === 'intro' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-intro>
               <Note>What you will do is described over the view. Read it, then press “Begin”.</Note>
@@ -53,22 +52,19 @@ function Left({ ctx }: { ctx: Ctx }) {
                   Begin
                 </Btn>
                 {s.step > 1 && <Btn onClick={() => s.open((s.step - 1) as Step)}>Go back to Step {s.step - 1}</Btn>}
-                {s.step < 4 && <Btn onClick={() => s.open((s.step + 1) as Step)}>Go to Step {s.step + 1}</Btn>}
+                {s.step < 3 && <Btn onClick={() => s.open((s.step + 1) as Step)}>Go to Step {s.step + 1}</Btn>}
               </div>
             </div>
           )}
           {state === 'running' && s.step === 1 && <Note>Choice {s.gamblesDoneCount() + 1} of {s.gamblePlan.items.length}. The results of this step appear on the right after the last choice.</Note>}
           {state === 'running' && s.step === 2 && <Note>Choice {s.delays.next + 1} of {s.delayPlan.items.length}. The results of this step appear on the right after the last choice.</Note>}
-          {state === 'running' && s.step === 3 && <Note>Block {s.blockIndex + 1} of 2 is running over the view. The results of this step appear on the right when both blocks are done.</Note>}
-          {state === 'running' && s.step === 4 && (
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              <Btn onClick={() => s.reopen()}>Show the instructions again</Btn>
-            </div>
-          )}
-          {(state === 'done' || (state === 'running' && s.step === 4)) && (
+          {state === 'running' && s.step === 3 && !s.betweenBlocks && <Note>Block {s.blockIndex + 1} of 2 is running over the view. The results of this step appear on the right when both blocks are done.</Note>}
+          {state === 'running' && s.step === 3 && s.betweenBlocks && <Note>Block 1 of 2 is done and saved. Block 2 starts when you press “Start block 2” over the view.</Note>}
+          {state === 'done' && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {s.step > 1 && <Btn onClick={() => s.open((s.step - 1) as Step)}>Go back to Step {s.step - 1}</Btn>}
-              {s.step < 4 && <Btn onClick={() => s.open((s.step + 1) as Step)}>Go on to Step {s.step + 1}</Btn>}
+              {s.step < 3 && <Btn onClick={() => s.open((s.step + 1) as Step)}>Go on to Step {s.step + 1}</Btn>}
+              {s.step === 3 && <Btn onClick={() => ctx.openTab('puzzles')}>Go on to Part 2</Btn>}
             </div>
           )}
           {state === 'done' && <Note>This step is done and saved. Its results are on the right. An experiment is not redone: someone who knows what it tests is no longer a naive subject.</Note>}
@@ -83,31 +79,37 @@ function Stage({ ctx }: { ctx: Ctx }) {
   useStore(ctx.progress)
   const screen = SCREENS[s.step]
   const state = s.state
-  if (state === 'intro') return <InstructionScreen title={screen.title} willDo={screen.willDo} minutes={screen.minutes} sitting={screen.sitting} sittingLine={screen.sittingLine} ready={READY_LINE} keys={screen.keys} content={screen.content} onBegin={() => s.begin()} />
-  if (s.step === 1) return state === 'done' ? <DoneStage title={screen.title} /> : <GamblesStage s={s} />
-  if (s.step === 2) return state === 'done' ? <DoneStage title={screen.title} /> : <DelaysStage s={s} />
-  if (s.step === 3)
-    return state === 'done' ? (
-      <DoneStage title={screen.title} />
-    ) : (
-      <StagePanel testId="dispenser">
-        <div style={{ fontSize: 14, fontWeight: 600 }}>{screen.title}</div>
-        <DispenserScreen s={s} />
-      </StagePanel>
-    )
-  return (
-    <StagePanel wide testId="forager">
+  if (state === 'intro') return <InstructionScreen title={screen.title} willDo={screen.willDo} minutes={screen.minutes} sitting={screen.sitting} sittingLine={screen.sittingLine} ready={READY_LINE} keys={screen.keys} content={screen.content} next={screen.next} onBegin={() => s.begin()} />
+  if (s.step === 1) return state === 'done' ? <DoneStage step={1} ctx={ctx} /> : <GamblesStage s={s} />
+  if (s.step === 2) return state === 'done' ? <DoneStage step={2} ctx={ctx} /> : <DelaysStage s={s} />
+  return state === 'done' ? (
+    <DoneStage step={3} ctx={ctx} />
+  ) : (
+    <StagePanel testId="dispenser">
       <div style={{ fontSize: 14, fontWeight: 600 }}>{screen.title}</div>
-      <ForagerScreen s={s} />
+      <DispenserScreen s={s} />
     </StagePanel>
   )
 }
 
-function DoneStage({ title }: { title: string }) {
+/** A finished step's stage: where its results are, and what to press next, with the button itself (Jon, 2026-11-09). */
+function DoneStage({ step, ctx }: { step: Step; ctx: Ctx }) {
   return (
     <StagePanel testId="done">
-      <div style={{ fontSize: 14, fontWeight: 600 }}>{title}</div>
+      <div style={{ fontSize: 14, fontWeight: 600 }}>{STEP_TITLES[step]}</div>
       <Note>This step is done. Its results are on the right, and under “My results, all parts” on the Open tab.</Note>
+      <Note data-next>{step < 3 ? `When you are ready to move on, press “Go on to Step ${step + 1}” here or on the left.` : 'When you are ready to move on, press “Go on to Part 2” here or on the left, or choose the Puzzles tab at the top left.'}</Note>
+      <div>
+        {step < 3 ? (
+          <Btn primary onClick={() => ctx.store.open((step + 1) as Step)}>
+            Go on to Step {step + 1}
+          </Btn>
+        ) : (
+          <Btn primary onClick={() => ctx.openTab('puzzles')}>
+            Go on to Part 2
+          </Btn>
+        )}
+      </div>
     </StagePanel>
   )
 }
@@ -193,12 +195,6 @@ function DelaysStage({ s }: { s: ChoicesStore }) {
 function Right({ ctx }: { ctx: Ctx }) {
   const s = useStore(ctx.store)
   const p = useStore(ctx.progress)
-  if (s.step === 4)
-    return (
-      <Panel title="Step 4" style={RIGHT_STYLE}>
-        <Note>Step 4 is an exploration. What it shows is on the screen in the middle, and nothing is saved from it.</Note>
-      </Panel>
-    )
   const done = s.step === 1 ? p.isComplete(GAMBLES_UNIT) : s.step === 2 ? p.isComplete(DELAYS_UNIT) : s.bothBlocksDone
   return (
     <Panel title={`My results: ${STEP_TITLES[s.step]}`} style={RIGHT_STYLE}>

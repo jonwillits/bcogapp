@@ -7,7 +7,7 @@ import { InstructionScreen } from '../m10_memory/progress/InstructionScreen'
 import { MODEL_OF_PLANTS_LINE, MODELS_OWN_GENES_LINE, MODELS_MECHANISM_LINE } from './lines'
 import type { PartContext, PartModule } from './contract'
 import { CornStore, PREDICTIONS, type PredictionKey } from './corn/store'
-import { SCREENS, STEP_TITLES, READY_LINE, SITTING_LINE, type Step } from './corn/screens'
+import { SCREENS, NEXT_LINE, STEP_TITLES, READY_LINE, SITTING_LINE, type Step } from './corn/screens'
 
 /**
  * Part 4's screens (spec §8): trays of corn seen from the side, each plant
@@ -51,6 +51,7 @@ function Left({ ctx }: { ctx: Ctx }) {
                 <Btn onClick={() => s.reopen()}>Show the instructions again</Btn>
                 {s.step > 1 && <Btn onClick={() => s.open((s.step - 1) as Step)}>Go back to Step {s.step - 1}</Btn>}
                 {s.step < 4 && <Btn onClick={() => s.open((s.step + 1) as Step)}>Go on to Step {s.step + 1}</Btn>}
+                {s.step === 4 && <Btn onClick={() => ctx.openTab('open')}>Open tab: My results, all parts</Btn>}
               </div>
             </>
           )}
@@ -176,7 +177,7 @@ function Stage({ ctx }: { ctx: Ctx }) {
   const s = useStore(ctx.store)
   useStore(ctx.progress)
   const screen = SCREENS[s.step]
-  if (s.state === 'intro') return <InstructionScreen title={screen.title} willDo={screen.willDo} minutes={screen.minutes} sitting="leave any time" sittingLine={SITTING_LINE} ready={READY_LINE} content={screen.content} onBegin={() => s.begin()} />
+  if (s.state === 'intro') return <InstructionScreen title={screen.title} willDo={screen.willDo} minutes={screen.minutes} sitting="leave any time" sittingLine={SITTING_LINE} ready={READY_LINE} content={screen.content} next={NEXT_LINE[s.step]} onBegin={() => s.begin()} />
   const share = s.grownShare
   return (
     <StagePanel wide testId={`corn-${s.step}`}>

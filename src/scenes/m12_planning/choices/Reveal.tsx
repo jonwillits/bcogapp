@@ -281,7 +281,6 @@ export function ChoicesResults({ progress }: { progress: ProgressStore }) {
       {delays ? <DelaysReveal progress={progress} /> : <Note>Step 2 is not finished. Its results appear here once its last choice is made.</Note>}
       <GroupLabel>Step 3 — Two dispensers</GroupLabel>
       {dispensers ? <DispensersReveal progress={progress} /> : <Note>Step 3 is not finished. Its results appear here once both blocks are done.</Note>}
-      <Note>Step 4 is an exploration and has no saved results; what it shows is on its own screen.</Note>
     </div>
   )
 }

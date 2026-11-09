@@ -3,7 +3,6 @@ import { makeRng } from '../random'
 import { computeMatrix, separability, MATRIX_SEEDS } from './matrix'
 import { liveHistory, printCounts } from './history'
 import { bestPolicy, pointsPerMinute } from './choices/dispensers'
-import { exactSurvival, RULE_IDS, RULE_LABEL } from './choices/forager'
 import { PAIRS, type PairId } from './choices/gambles'
 import { expectedValue } from './choices/options'
 import { runScriptedDelays, delayResults, exponential, hyperbolic } from './choices/delays'
@@ -36,8 +35,6 @@ describe('crib: m12', () => {
     log(`hyperbolic chooser: k fitted ${h.hyperbolic.parameter.toFixed(4)} (sse ${h.hyperbolic.sse.toFixed(1)}), γ fitted ${h.exponential.parameter.toFixed(4)} (sse ${h.exponential.sse.toFixed(1)}); reverses: ${h.reversals.map((r) => r.choseLater).join('/')}`)
     log('== Part 1, Step 3 — the best policies, exact')
     for (const d of ['blue', 'orange'] as const) { const b = bestPolicy(d); log(`${d}: ${b.description} ${f2(b.pointsPerMinute)} points a minute; taking at once ${f2(pointsPerMinute(d, 0))}; waiting 4 s then taking ${f2(pointsPerMinute(d, 4))}`) }
-    log('== Part 1, Step 4 — the foragers, exact survival over reserves 2 to 9')
-    for (const r of RULE_IDS) log(`${RULE_LABEL[r]}: ${f2(exactSurvival(r))}`)
     log('== Part 2, Step 1 — the state graphs')
     for (const n of [3, 4, 5, 6]) log(`${n} disks: ${stateGraph(n).nodes.length} arrangements, shortest ${stateGraph(n).shortest.length - 1} moves, halfway node ${stateGraph(n).halfway ?? 'none'}`)
     log('== Part 2, Step 2 — the five procedures from the usual start: moves, examined, stored, solved; and with one more disk')

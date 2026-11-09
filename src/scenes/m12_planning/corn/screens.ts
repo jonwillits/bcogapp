@@ -5,6 +5,14 @@ export type Step = 1 | 2 | 3 | 4
 
 export const STEP_TITLES: Record<Step, string> = { 1: 'Step 1 — One tray', 2: 'Step 2 — Two trays', 3: 'Step 3 — Twins', 4: 'Step 4 — Soil that changes' }
 
+/** What to press when a step is done, named without ambiguity, at the end of its instructions (Jon, 2026-11-09). */
+export const NEXT_LINE: Record<Step, string> = {
+  1: 'When you have grown the trays you want to see, press “Go on to Step 2” on the left.',
+  2: 'When both experiments are grown and the restorations seen, press “Go on to Step 3” on the left.',
+  3: 'When the twin study is run, press “Go on to Step 4” on the left.',
+  4: 'This is the lab’s last step. When the two soils and the six seasons are grown, the lab is done: every part’s results are on the Open tab, under “My results, all parts”.',
+}
+
 export interface StepScreen {
   step: Step
   title: string

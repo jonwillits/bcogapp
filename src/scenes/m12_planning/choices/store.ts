@@ -4,17 +4,18 @@ import type { UnitId } from '../../../sim/planning/parts'
 import { answerSeries, emptyResponses, gambleResults, planGambles, seriesDone, type GambleResponses, type GambleResults, type Item, type Plan, type PairId, type Version } from '../../../sim/planning/choices/gambles'
 import { answerTitration, delayResults, emptyDelayResponses, planDelays, titrationDone, type DelayPlan, type DelayResponses, type DelayResults } from '../../../sim/planning/choices/delays'
 import { advance, startBlock, summarize, take, BLOCK_SECONDS, type BlockState, type BlockSummary, type DispenserId } from '../../../sim/planning/choices/dispensers'
-import { drawReserves, feed, runRule, RULE_IDS, type Evening, type Patch, type RuleId } from '../../../sim/planning/choices/forager'
 import type { PartStore } from '../contract'
 import type { Step } from './screens'
 
 /**
- * Part 1's state (spec §5): four steps, each opening on its instruction
+ * Part 1's state (spec §5): three steps, each opening on its instruction
  * screen and each independently accessible. Steps 1 and 2 are units that
  * resume (the responses so far are saved as the unit's partial after every
  * answer); Step 3 is two units, one per dispenser block, each restarted from
- * its start if interrupted; Step 4 is an exploration. A step's reveal is
- * rendered only from a completed unit's saved result.
+ * its start if interrupted, the second started by the student's press after
+ * the first is saved (Jon's walk, 2026-11-09: the stage went blank between
+ * them). Step 4, the bird, was removed at Jon's word the same day. A step's
+ * reveal is rendered only from a completed unit's saved result.
  */
 
 export type StepState = 'intro' | 'running' | 'done'
@@ -93,12 +94,6 @@ export class ChoicesStore implements PartStore {
   blockStopped: string | null = null
   private blockTimer: ReturnType<typeof setInterval> | null = null
   private blockRng: Rng
-  // Step 4
-  evenings: Evening[] = []
-  pendingReserves: number | null = null
-  rules: Record<RuleId, number> | null = null
-  private foragerRng: Rng
-
   constructor(seed: number, progress: ProgressStore) {
     this.seed = seed
     this.progress = progress
@@ -112,7 +107,6 @@ export class ChoicesStore implements PartStore {
     const order = makeRng(seed ^ 0xd15e).next() < 0.5
     this.dispenserOrder = order ? ['blue', 'orange'] : ['orange', 'blue']
     this.blockRng = makeRng(seed ^ 0xb10c)
-    this.foragerRng = makeRng(seed ^ 0xf07a)
   }
 
   subscribe(fn: () => void): () => void {
@@ -141,8 +135,6 @@ export class ChoicesStore implements PartStore {
         return this.progress.isComplete(DELAYS_UNIT) ? 'done' : this.opened.has(2) || this.delays.next > 0 ? 'running' : 'intro'
       case 3:
         return this.progress.isComplete(dispenserUnit(0)) && this.progress.isComplete(dispenserUnit(1)) ? 'done' : this.opened.has(3) ? 'running' : 'intro'
-      case 4:
-        return this.opened.has(4) ? 'running' : 'intro'
     }
   }
 
@@ -162,7 +154,6 @@ export class ChoicesStore implements PartStore {
       this.gambleItemStart = performance.now()
     }
     if (step === 3) this.nextBlock()
-    if (step === 4 && this.evenings.length === 0) this.startEvenings()
     this.changed()
   }
 
@@ -361,6 +352,17 @@ export class ChoicesStore implements PartStore {
     this.changed()
   }
 
+  /** The first block is saved and the second has not started: the stage shows the first block's points and “Start block 2”. */
+  get betweenBlocks(): boolean {
+    return this.block === null && this.blockStopped === null && this.progress.isComplete(dispenserUnit(0)) && !this.progress.isComplete(dispenserUnit(1))
+  }
+
+  /** “Start block 2”, after the first block is saved. */
+  startNextBlock(): void {
+    if (!this.betweenBlocks) return
+    this.nextBlock()
+  }
+
   private stopBlockTimer(): void {
     if (this.blockTimer) clearInterval(this.blockTimer)
     this.blockTimer = null
@@ -376,33 +378,6 @@ export class ChoicesStore implements PartStore {
 
   get bothBlocksDone(): boolean {
     return this.progress.isComplete(dispenserUnit(0)) && this.progress.isComplete(dispenserUnit(1))
-  }
-
-  // ---------------------------------------------------------------- Step 4
-
-  startEvenings(): void {
-    this.evenings = []
-    this.rules = null
-    this.pendingReserves = drawReserves(this.foragerRng)
-    this.changed()
-  }
-
-  feedAt(patch: Patch): void {
-    if (this.pendingReserves === null || this.evenings.length >= 12) return
-    this.evenings = [...this.evenings, feed(this.pendingReserves, patch, this.foragerRng)]
-    this.pendingReserves = this.evenings.length < 12 ? drawReserves(this.foragerRng) : null
-    this.changed()
-  }
-
-  runRules(): void {
-    const out = {} as Record<RuleId, number>
-    for (const r of RULE_IDS) out[r] = runRule(r, 1000, this.foragerRng.fork())
-    this.rules = out
-    this.changed()
-  }
-
-  ownSurvival(): number | null {
-    return this.evenings.length ? this.evenings.filter((e) => e.survived).length / this.evenings.length : null
   }
 
   /** Everything saved for Part 1, for the My results screen. */

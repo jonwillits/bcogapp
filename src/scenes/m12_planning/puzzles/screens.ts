@@ -10,6 +10,13 @@ export type Step = 1 | 2 | 3
 
 export const STEP_TITLES: Record<Step, string> = { 1: 'Step 1 — The tower', 2: 'Step 2 — Five procedures', 3: 'Step 3 — Looking costs' }
 
+/** What to press when a step is done, named without ambiguity, at the end of its instructions and on its finished stage (Jon, 2026-11-09). */
+export const NEXT_LINE: Record<Step, string> = {
+  1: 'When both puzzles are solved, the results appear on the right. To move on, press “Go on to Step 2” on the left.',
+  2: 'This step is an exploration with no end of its own. When you have run the procedures you want to see, press “Go on to Step 3” on the left.',
+  3: 'When the last path is taken, the results appear on the right. To move on to Part 3, choose the Band tab at the top left.',
+}
+
 export interface StepScreen {
   step: Step
   title: string

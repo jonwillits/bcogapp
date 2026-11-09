@@ -13,6 +13,8 @@ import { HOMININ_KINDS } from '../../sim/planning/hominins/types'
 import { PROCEDURE_IDS } from '../../sim/planning/puzzles/procedures'
 import { PROCEDURE_PREDICTIONS } from './puzzles/screens'
 import { GAMBLES_UNIT } from './choices/store'
+import { advance, summarize, BLOCK_SECONDS } from '../../sim/planning/choices/dispensers'
+import { makeRng } from '../../sim/random'
 import { PREDICTIONS } from './corn/store'
 
 /**
@@ -45,9 +47,10 @@ describe('every part and step opens from a fresh seed with nothing else done, on
     expect(p0.all()).toMatch(/data-orienting/)
     expect(text(p0.all())).toMatch(/0 of 4 experiments done/)
     const c = fresh(choices as Mod, (s, p) => new ChoicesStore(s, p))
-    for (const step of [1, 2, 3, 4] as const) {
+    for (const step of [1, 2, 3] as const) {
       c.store.open(step)
       expect(c.all(), `Part 1 step ${step}`).toMatch(/data-instruction/)
+      expect(c.all(), `Part 1 step ${step} names what comes next`).toMatch(/data-next/)
       expect(c.all()).toMatch(/data-will-do/)
       expect(c.all()).toMatch(/data-minutes/)
       expect(c.all()).toMatch(/data-sitting/)
@@ -112,6 +115,49 @@ describe('Part 1: commit, then reveal', () => {
     expect(text(m)).toMatch(/Here is the other version/)
     expect(m).toMatch(/data-class="pair1"/)
     expect(m).toMatch(/data-reference="anchor-1974"/)
+  })
+  it('between the two blocks the stage shows the first block’s points and “Start block 2”, and the second block runs only on that press', () => {
+    const c = fresh(choices as Mod, (s, p) => new ChoicesStore(s, p))
+    c.store.open(3)
+    c.store.begin()
+    expect(c.store.block).not.toBeNull()
+    expect(c.all()).not.toMatch(/data-between-blocks/)
+    // The first block runs out: its unit is saved, the stage is not blank, and nothing is running.
+    c.progress.complete('p1-dispenser-0', { ...summarize(advance(c.store.block!, BLOCK_SECONDS, makeRng(1))), order: 0 })
+    c.store.block = null
+    c.store.open(3)
+    expect(c.store.betweenBlocks).toBe(true)
+    const m = c.all()
+    expect(m).toMatch(/data-between-blocks/)
+    expect(text(m)).toMatch(/Block 1 of 2 is done/)
+    expect(text(m)).toMatch(/Start block 2/)
+    expect(m).not.toMatch(/data-block="/)
+    expect(text(m)).not.toMatch(/8 seconds after|half of its trials|Always wait/)
+    c.store.startNextBlock()
+    expect(c.store.block).not.toBeNull()
+    expect(c.store.blockIndex).toBe(1)
+    expect(c.all()).toMatch(/data-block="/)
+    c.store.open(1)
+  })
+  it('a finished step’s stage names the next button, and Step 3’s points to Part 2', () => {
+    const c = fresh(choices as Mod, (s, p) => new ChoicesStore(s, p))
+    c.progress.begin(GAMBLES_UNIT)
+    c.store.open(1)
+    c.store.begin()
+    while (c.store.currentItem) {
+      if (c.store.currentItem.kind === 'wheel') {
+        c.store.wheel = 'stopped'
+        c.store.answerHigher(true)
+        c.store.answerEstimate(30)
+      } else c.store.chooseCard(0)
+    }
+    expect(text(c.all())).toMatch(/press “Go on to Step 2”/)
+    c.progress.complete('p1-dispenser-0', { trials: [], waitedForDelivery: 0, tookEarly: 0, points: 0, pointsPerMinute: 0, restarts: 0, dispenser: 'blue', order: 0 })
+    c.progress.complete('p1-dispenser-1', { trials: [], waitedForDelivery: 0, tookEarly: 0, points: 0, pointsPerMinute: 0, restarts: 0, dispenser: 'orange', order: 1 })
+    c.store.open(3)
+    const m = text(c.all())
+    expect(m).toMatch(/Go on to Part 2/)
+    expect(m).toMatch(/Puzzles tab/)
   })
   it('no dispenser’s rule before both blocks are done; the delays reveal does not name the gambles’ words', () => {
     const c = fresh(choices as Mod, (s, p) => new ChoicesStore(s, p))

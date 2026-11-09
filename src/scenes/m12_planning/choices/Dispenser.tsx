@@ -8,7 +8,10 @@ import type { ChoicesStore } from './store'
  * orange, a large points counter, a large block timer, and a large line
  * saying what is happening now. “Take 1 now”, or the key 1, takes a point.
  * If the page is hidden or loses focus, the block stops, is not counted, and
- * restarts from the beginning on return, with a line that says why.
+ * restarts from the beginning on return, with a line that says why. Between
+ * the blocks, the first block's points and “Start block 2”: a 3-minute block
+ * in real time starts on the student's press, never on its own (Jon's walk,
+ * 2026-11-09, when the stage went blank here).
  */
 export function DispenserScreen({ s }: { s: ChoicesStore }) {
   useEffect(() => {
@@ -43,6 +46,23 @@ export function DispenserScreen({ s }: { s: ChoicesStore }) {
         </div>
       </div>
     )
+  if (s.betweenBlocks) {
+    const first = s.dispenserResult(0)!
+    const second = s.dispenserOrder[1]
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-between-blocks>
+        <div style={{ fontSize: 15, fontWeight: 600 }}>Block 1 of 2 is done.</div>
+        <Note>
+          At {DISPENSER_LABEL[first.dispenser]} you collected {first.points} points in {BLOCK_SECONDS / 60} minutes. That block is saved. Block 2 of 2 is at {DISPENSER_LABEL[second]}, for another {BLOCK_SECONDS / 60} minutes in real time. When you are ready, press “Start block 2”.
+        </Note>
+        <div>
+          <Btn primary onClick={() => s.startNextBlock()}>
+            Start block 2
+          </Btn>
+        </div>
+      </div>
+    )
+  }
   if (!b) return null
   const color = b.dispenser === 'blue' ? '#4f9cff' : '#f0a94b'
   const left = s.blockSecondsLeft()
