@@ -5,6 +5,7 @@ import type { RawStorage } from '../../../sim/social/progress/storage'
 import { ANIMALS, ANIMAL_IDS } from '../../../sim/social/arena/animals'
 import { arena, ArenaStore } from '../PartArena'
 import { STEPS, type Step } from './steps'
+import { animalsByTests } from '../../../sim/social/arena/matrix'
 
 /**
  * Part 4 (spec §13 item 1, §16): no animal's rule before the diagnosis is
@@ -62,6 +63,25 @@ describe('commit, then reveal', () => {
     expect(after).toMatch(/data-reveal/)
     expect(text(after)).toMatch(LABELS)
     expect(text(after)).toContain('Diagnoses right')
+  })
+  it('the full matrix and My table scroll sideways, with T8 in the matrix’s header and a line saying the table scrolls', () => {
+    const { store, ctx } = fresh()
+    store.open(2)
+    store.begin()
+    commitAll(store, 2)
+    for (const a of ANIMAL_IDS) store.diagnose(a, 'gaze')
+    store.commitDiagnosis()
+    store.open(3)
+    store.begin()
+    commitAll(store, 3)
+    store.matrix = animalsByTests(1, 'usual', 0, 1000, 2)
+    const m = all(ctx)
+    const matrix = m.match(/<div data-lines="matrix"[^>]*>/)![0]
+    expect(matrix).toMatch(/data-scroll="true"/)
+    expect(matrix).toMatch(/overflow-x:auto/)
+    expect(text(m)).toMatch(/T7\s+T8\s+[A-E] (Learner|Gaze|Barriers|Line of sight)/)
+    expect(text(m)).toMatch(/This table scrolls sideways/)
+    expect(m.match(/<div data-lines="my-table"[^>]*>/)?.[0] ?? 'data-scroll="true"').toMatch(/data-scroll="true"/)
   })
   it('T8 is in the menu only in Step 3, and a run of it before then is refused', () => {
     const { store } = fresh()

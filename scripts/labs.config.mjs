@@ -824,6 +824,7 @@ export const LABS = [
       { says: 'Part 4: T1 cannot tell any two animals apart, T1–T7 separate the first four, and only T8 separates the learner from Line of sight before, over twenty seeds', test: 'T1 cannot tell any two animals apart, T1–T7 separate the first four' },
       { says: 'Part 4: the learner computes no line of sight, by a structural test', test: 'learner.ts and features.ts import no geometry' },
       { says: 'Part 4: no animal’s rule before the diagnosis is committed, and T8 is not reachable before Step 3', test: 'T8 is in the menu only in Step 3' },
+      { says: 'Part 4: the full matrix and My table scroll sideways rather than clip, so T8’s columns can be read on any screen', test: 'the full matrix and My table scroll sideways' },
       { says: 'Part 5: every training member has a unique combination of marking and patch color, and no feature value predicts the group', test: 'every training member has a unique combination' },
       { says: 'Part 5: three height levels a group at 5% steps with a 25% gap, and a single threshold on height sorts every item', test: 'three height levels a group at 5% steps' },
       { says: 'Part 5: 24 test items, 12 old, 6 changed in exactly one feature at the same height, 6 new at a group’s height with a combination no training member had; the same 24 for both tests', test: '12 old, 6 changed in exactly one feature' },

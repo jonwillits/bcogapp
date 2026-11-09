@@ -230,8 +230,16 @@ function RevealOnStage({ s }: { s: ArenaStore }) {
 function MatrixLines({ s }: { s: ArenaStore }) {
   const m = s.matrix!
   const head = `${''.padEnd(24)}${TESTS.map((t) => t.id.padStart(11)).join('')}`
-  return <FixedLines lines={[head, ...s.order.map((a) => `${`${s.letters[a]} ${animalById(a).label}`.padEnd(24)}${TESTS.map((t) => `${m.mean[a][t.id].toFixed(2)} (${m.sd[a][t.id].toFixed(2)})`.padStart(11)).join('')}`)]} testId="matrix" />
+  return (
+    <>
+      <FixedLines lines={[head, ...s.order.map((a) => `${`${s.letters[a]} ${animalById(a).label}`.padEnd(24)}${TESTS.map((t) => `${m.mean[a][t.id].toFixed(2)} (${m.sd[a][t.id].toFixed(2)})`.padStart(11)).join('')}`)]} testId="matrix" scroll />
+      <Note>{WIDE_TABLE_NOTE}</Note>
+    </>
+  )
 }
+
+/** Both of Part 4's tables are wider than their panels on most screens; Mac scrollbars show only while scrolling, so the line says it (two students' reports, 2026-11-09). */
+const WIDE_TABLE_NOTE = 'This table scrolls sideways when it is wider than its panel: drag or swipe across it to reach the later tests.'
 
 function Right({ ctx }: { ctx: Ctx }) {
   const s = useStore(ctx.store)
@@ -244,7 +252,8 @@ function Right({ ctx }: { ctx: Ctx }) {
     <Panel title="My table" style={RIGHT_STYLE}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <Note>Per animal and test: the share of trials on which the animal went to the piece the test scores, averaged over your runs of that pair, with the number of runs in brackets. Only tests you have run are shown.</Note>
-        {tests.length ? <FixedLines lines={[head, ...rows]} testId="my-table" /> : <Note>No runs yet.</Note>}
+        {tests.length ? <FixedLines lines={[head, ...rows]} testId="my-table" scroll /> : <Note>No runs yet.</Note>}
+        {tests.length > 5 && <Note>{WIDE_TABLE_NOTE}</Note>}
         {learnerSplit && <Note>The learner has a row for each experience it has run under: “usual” is the usual room, “many” is many rooms.</Note>}
         <FixedLines lines={TESTS.filter((t) => tests.includes(t.id)).map((t) => `${t.id}: ${t.scoredLabel}`)} mono={false} />
         <GroupLabel>The five rules, in words</GroupLabel>
