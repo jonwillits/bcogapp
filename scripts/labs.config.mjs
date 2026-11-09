@@ -921,7 +921,7 @@ export const LABS = [
       { says: 'Shell: the Lab button says the handout is not posted yet, not an error', test: 'the Lab pane message for the missing Lab 12 handout is honest' },
       { says: 'Timing: the dispensers’ delivery, the pause after it and the pause after a take land within about 60 ms of their marks in a real browser; the history lives in slices with no main-thread task over about 150 ms under a 4× throttle (scripts/m12-timing.mjs)', test: null },
       { says: 'Timing: at least 30 frames a second in Part 3’s range under Chrome’s 4× throttle with six hominins on screen (not measurable in the build’s occluded window; scripts/m12-timing.mjs, for Jon’s walk)', test: null },
-      { says: 'Look: the state graph, the trees’ numbers, the hominins’ rings and labels, and the corn are legible on both themes', test: null },
+      { says: 'Look: the state graph, the trees’ numbers, the hominins’ rings and labels, and the corn are legible on the dark theme (the app has no other)', test: null },
     ],
 
     crib: 'crib: m12',
