@@ -82,6 +82,13 @@ export class PuzzlesStore implements PartStore {
   illegalAttempts = 0
   refusal: string | null = null
   private towerStart = 0
+  /**
+   * A replay of the tower after its reveal, not recorded (Jon's walk,
+   * 2026-11-11: students may want to try for fewer moves once they have seen
+   * the state graph). The saved result stays the first attempt; a replay
+   * writes nothing to the record.
+   */
+  replay: { disks: 3 | 4 } | null = null
 
   // Step 2
   procDisks = 3
@@ -154,6 +161,7 @@ export class PuzzlesStore implements PartStore {
 
   open(step: Step): void {
     this.stopPlaying()
+    this.replay = null
     this.step = step
     this.changed()
   }
@@ -203,9 +211,30 @@ export class PuzzlesStore implements PartStore {
     this.towerStart = performance.now()
   }
 
+  /** Play the tower again after the reveal, with nothing recorded. */
+  startReplay(disks: 3 | 4): void {
+    if (this.state !== 'done') return
+    this.replay = { disks }
+    this.disks = disks
+    this.arrangement = startArrangement(disks)
+    this.lifted = null
+    this.moves = []
+    this.times = []
+    this.path = [idOf(this.arrangement)]
+    this.illegalAttempts = 0
+    this.refusal = null
+    this.towerStart = performance.now()
+    this.changed()
+  }
+
+  endReplay(): void {
+    this.replay = null
+    this.changed()
+  }
+
   /** A peg was clicked: lift its top disk, put a lifted disk down, or put it back. */
   clickPeg(peg: Peg): void {
-    if (this.state !== 'running' || isGoal(this.arrangement)) return
+    if (!(this.state === 'running' || this.replay) || isGoal(this.arrangement)) return
     if (this.lifted === null) {
       if (topDisk(this.arrangement, peg) === null) {
         this.refusal = 'That peg has no disk to lift.'
@@ -237,7 +266,7 @@ export class PuzzlesStore implements PartStore {
     this.path.push(idOf(this.arrangement))
     this.lifted = null
     this.refusal = null
-    if (isGoal(this.arrangement)) this.finishTower()
+    if (isGoal(this.arrangement) && !this.replay) this.finishTower()
     this.changed()
   }
 

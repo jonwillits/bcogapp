@@ -5,13 +5,14 @@ import { ProgressStore } from '../../sim/planning/progress/store'
 import type { RawStorage } from '../../sim/planning/progress/storage'
 import { choices, ChoicesStore } from './PartChoices'
 import { puzzles, PuzzlesStore } from './PartPuzzles'
+import { TOWER_UNIT } from './puzzles/store'
 import { band, BandStore } from './PartBand'
 import { corn, CornStore } from './PartCorn'
 import { open } from './Part0'
 import { LETTERS } from './band/store'
 import { HOMININ_KINDS } from '../../sim/planning/hominins/types'
 import { PROCEDURE_IDS } from '../../sim/planning/puzzles/procedures'
-import { idOf, isGoal } from '../../sim/planning/puzzles/hanoi'
+import { goalArrangement, idOf, isGoal, shortestPath, startArrangement } from '../../sim/planning/puzzles/hanoi'
 import { StateGraphView } from './puzzles/Views'
 import { PROCEDURE_PREDICTIONS } from './puzzles/screens'
 import { GAMBLES_UNIT } from './choices/store'
@@ -280,6 +281,47 @@ describe('Part 2: commit, then reveal', () => {
     // A fresh store on the same saved progress opens at the first procedure not predicted: Goal recursion.
     const again = new PuzzlesStore(7, z.progress)
     expect(again.current).toBe('recursion')
+  })
+
+  it('the tower can be played again after its reveal, unrecorded: the replay stage with the map, nothing written to the record, and no replay before the step is done', () => {
+    const z = fresh(puzzles as Mod, (s, p) => new PuzzlesStore(s, p))
+    z.store.open(1)
+    z.store.begin()
+    z.store.startReplay(3)
+    expect(z.store.replay).toBeNull()
+    expect(z.all()).not.toMatch(/data-stage="replay"|Play 3 disks again/)
+    // Solve both puzzles along the shortest path.
+    const solve = () => {
+      const n = z.store.disks
+      const states = shortestPath(n, startArrangement(n), goalArrangement(n))
+      for (let i = 1; i < states.length; i++) {
+        const d = states[i].findIndex((p, k) => p !== states[i - 1][k])
+        z.store.clickPeg(states[i - 1][d])
+        z.store.clickPeg(states[i][d])
+      }
+    }
+    solve()
+    solve()
+    expect(z.store.state).toBe('done')
+    const before = JSON.stringify([z.store.towerResult(3), z.store.towerResult(4)])
+    let m = z.all()
+    expect(m).toMatch(/data-stage="done"/)
+    expect(text(m)).toMatch(/Play 3 disks again \(not recorded\)/)
+    z.store.startReplay(4)
+    m = z.all()
+    expect(m).toMatch(/data-stage="replay"/)
+    expect(m).toMatch(/data-state-graph="4"/)
+    expect(text(m)).toMatch(/Nothing here is saved/)
+    solve()
+    m = z.all()
+    expect(text(m)).toMatch(/Solved in 15 moves, the shortest possible\. Nothing is saved\./)
+    expect(JSON.stringify([z.store.towerResult(3), z.store.towerResult(4)])).toBe(before)
+    expect(z.progress.restarts(TOWER_UNIT(4))).toBe(0)
+    z.store.endReplay()
+    expect(z.all()).toMatch(/data-stage="done"/)
+    z.store.startReplay(3)
+    z.store.open(2)
+    expect(z.store.replay).toBeNull()
   })
 
   it('the snapshot beside the map: the arrangement under the pointer, and where the run passed through it', () => {

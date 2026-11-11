@@ -42,7 +42,7 @@ export const SCREENS: Record<Step, StepScreen> = {
     ],
     minutes: 8,
     sitting: 'one sitting',
-    sittingLine: 'Once you press “Begin”, finish each puzzle in one sitting. A puzzle you leave partway starts again from the beginning when you return, and the restart is noted on the results screen; a puzzle you have solved is saved and not played again.',
+    sittingLine: 'Once you press “Begin”, finish each puzzle in one sitting. A puzzle you leave partway starts again from the beginning when you return, and the restart is noted on the results screen; a puzzle you have solved is saved and not played again for the record. After the results, you can play either puzzle again, unrecorded.',
     keys: ['Click a peg to lift its top disk; click another peg to put the disk there. Click the same peg to put the disk back.'],
     content: [],
   },

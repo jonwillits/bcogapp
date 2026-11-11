@@ -76,7 +76,7 @@ function Left({ ctx }: { ctx: Ctx }) {
               {s.step === 3 && state === 'done' && <Btn onClick={() => ctx.openTab('band')}>Go on to Part 3</Btn>}
             </div>
           )}
-          {state === 'done' && <Note>This step is done and saved. Its results are on the right. An experiment is not redone: someone who knows what it tests is no longer a naive subject.</Note>}
+          {state === 'done' && <Note>This step is done and saved. Its results are on the right. An experiment is not redone: someone who knows what it tests is no longer a naive subject.{s.step === 1 ? ' The tower can be played again over the view, unrecorded.' : ''}</Note>}
         </div>
       </Panel>
     </>
@@ -90,11 +90,46 @@ function Stage({ ctx }: { ctx: Ctx }) {
   const state = s.state
   if (state === 'intro') return <InstructionScreen title={screen.title} willDo={screen.willDo} minutes={screen.minutes} sitting={screen.sitting} sittingLine={screen.sittingLine} ready={READY_LINE} keys={screen.keys} content={screen.content} next={NEXT_LINE[s.step]} onBegin={() => s.begin()} />
   if (s.step === 1) {
+    if (state === 'done' && s.replay) {
+      const n = s.replay.disks
+      const solved = isGoal(s.arrangement)
+      return (
+        <StagePanel wide testId="replay">
+          <div style={{ fontSize: 14, fontWeight: 600 }}>{screen.title}: playing again, not recorded</div>
+          <Note>
+            {n} disks again, with the map of every arrangement in view. Nothing here is saved: your results on the right stay as they are. The shortest solution is {shortestMoves(n)} moves.
+          </Note>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+            <Pegs arrangement={s.arrangement} lifted={s.lifted} onPeg={(p) => s.clickPeg(p)} width={320} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1, minWidth: 0 }}>
+              <FixedLines lines={[`${'moves'.padEnd(10)}${String(s.moves.length).padStart(4)}`, `${'shortest'.padEnd(10)}${String(shortestMoves(n)).padStart(4)}`]} testId="replay-counter" />
+              {s.refusal && <Note style={{ color: 'var(--avoid)' }}>{s.refusal}</Note>}
+              {s.lifted !== null && !s.refusal && <Note>A disk is lifted from the {s.lifted === 0 ? 'left' : s.lifted === 1 ? 'middle' : 'right'} peg. Click the peg to put it on, or the same peg to put it back.</Note>}
+              {solved && <Note data-replay-solved>Solved in {s.moves.length} moves{s.moves.length === shortestMoves(n) ? ', the shortest possible' : `; the shortest is ${shortestMoves(n)}`}. Nothing is saved.</Note>}
+            </div>
+          </div>
+          <StateGraphView disks={n} path={s.path} width={n === 4 ? 400 : 340} />
+          <Note>Dots are arrangements; lines join arrangements one move apart; the heavier line is the shortest solution; the second color is this replay's path so far.</Note>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            <Btn onClick={() => s.startReplay(n)}>Start this replay again</Btn>
+            <Btn onClick={() => s.startReplay(n === 3 ? 4 : 3)}>Play {n === 3 ? 4 : 3} disks instead</Btn>
+            <Btn primary onClick={() => s.endReplay()}>
+              Back to the results
+            </Btn>
+          </div>
+        </StagePanel>
+      )
+    }
     if (state === 'done')
       return (
         <StagePanel testId="done">
           <div style={{ fontSize: 14, fontWeight: 600 }}>{screen.title}</div>
           <Note>Both puzzles are solved. The results are on the right, and under “My results, all parts” on the Open tab.</Note>
+          <Note>You can play either puzzle again, with the map in view, to try for fewer moves. A replay is not recorded: your results stay as they are.</Note>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            <Btn onClick={() => s.startReplay(3)}>Play 3 disks again (not recorded)</Btn>
+            <Btn onClick={() => s.startReplay(4)}>Play 4 disks again (not recorded)</Btn>
+          </div>
           <Note data-next>When you are ready to move on, press “Go on to Step 2” here or on the left.</Note>
           <div>
             <Btn primary onClick={() => s.open(2)}>
