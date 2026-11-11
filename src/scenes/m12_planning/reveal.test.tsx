@@ -11,6 +11,7 @@ import { open } from './Part0'
 import { LETTERS } from './band/store'
 import { HOMININ_KINDS } from '../../sim/planning/hominins/types'
 import { PROCEDURE_IDS } from '../../sim/planning/puzzles/procedures'
+import { isGoal } from '../../sim/planning/puzzles/hanoi'
 import { PROCEDURE_PREDICTIONS } from './puzzles/screens'
 import { GAMBLES_UNIT } from './choices/store'
 import { advance, summarize, BLOCK_SECONDS } from '../../sim/planning/choices/dispensers'
@@ -197,6 +198,40 @@ describe('Part 2: commit, then reveal', () => {
     expect(m).toMatch(/data-stage="trees"/)
     expect(text(m)).not.toMatch(/best path|Look at everything|Look at nothing/)
     for (const id of PROCEDURE_IDS) expect(id).toBeTruthy()
+  })
+
+  it('a finished run stays on view: its last arrangement on the pegs, move N of N, its whole path on the graph, whichever procedure ran last; a change of Disks or Start clears it', () => {
+    const z = fresh(puzzles as Mod, (s, p) => new PuzzlesStore(s, p))
+    z.store.open(2)
+    z.store.begin()
+    const predictAndRun = (id: 'search' | 'memorized') => {
+      z.store.requestRun(id)
+      if (z.store.pendingPrediction === id) {
+        z.store.chooseDraft(id, PROCEDURE_PREDICTIONS[id].choices[0])
+        z.store.commitPrediction()
+      }
+      z.store.skipToEnd()
+    }
+    // Memorized moves at 3 disks stops at its eighth move, short of the goal.
+    predictAndRun('memorized')
+    expect(z.store.onView!.run.procedure).toBe('memorized')
+    expect(z.store.onView!.playing).toBe(false)
+    expect(isGoal(z.store.arrangementOnView)).toBe(false)
+    let m = z.all()
+    expect(text(m)).toMatch(/Memorized moves: move 7 of 7/)
+    expect(text(m)).toMatch(/stopped short of the goal/)
+    // Search everything, run after it, is what stays on view: the goal, not Memorized moves' end (the menu order put Memorized moves last).
+    predictAndRun('search')
+    expect(z.store.onView!.run.procedure).toBe('search')
+    expect(isGoal(z.store.arrangementOnView)).toBe(true)
+    m = z.all()
+    expect(text(m)).toMatch(/Search everything: move 7 of 7/)
+    expect(text(m)).toMatch(/every disk is on the right peg/)
+    const graph = m.slice(m.indexOf('data-state-graph'))
+    expect((graph.match(/var\(--sensor\)/g) ?? []).length).toBeGreaterThanOrEqual(8)
+    z.store.setStart('scramble')
+    expect(z.store.onView).toBeNull()
+    expect(text(z.all())).toMatch(/No procedure has run at this setting/)
   })
 })
 

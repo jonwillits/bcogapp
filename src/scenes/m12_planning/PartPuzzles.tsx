@@ -97,13 +97,13 @@ function ProcedureControls({ s }: { s: PuzzlesStore }) {
       <GroupLabel>Procedures</GroupLabel>
       {PROCEDURE_IDS.map((id) => (
         <div key={id} style={{ display: 'flex', gap: 6, alignItems: 'center' }} data-procedure={id}>
-          <Btn small primary onClick={() => s.requestRun(id)} disabled={!!s.playing || !!s.pendingPrediction}>
+          <Btn small primary onClick={() => s.requestRun(id)} disabled={!!s.onView?.playing || !!s.pendingPrediction}>
             Run
           </Btn>
           <span style={{ fontSize: 12 }}>{PROCEDURES[id].label}</span>
         </div>
       ))}
-      {s.playing && (
+      {s.onView?.playing && (
         <div>
           <Btn small onClick={() => s.skipToEnd()}>
             Skip to the end
@@ -159,15 +159,24 @@ function Stage({ ctx }: { ctx: Ctx }) {
   }
   if (s.step === 2) {
     const a = s.arrangementOnView
-    const playing = s.playing
-    const lastRun = playing?.run ?? null
+    const v = s.onView
+    const run = v?.run ?? null
+    const at = v ? Math.floor(v.index) : 0
+    const finished = !!v && !v.playing && at >= run!.states.length - 1
     return (
       <StagePanel wide testId="procedures">
         <div style={{ fontSize: 14, fontWeight: 600 }}>{screen.title}</div>
         <Pegs arrangement={a} interactive={false} width={420} />
-        <FixedLines lines={[lastRun ? `${PROCEDURES[lastRun.procedure].label}: move ${Math.floor(playing!.index)} of ${lastRun.moves.length}` : 'No procedure is running.', lastRun && lastRun.procedure === 'recursion' && lastRun.stackDepths ? `goals on the stack: ${String(lastRun.stackDepths[Math.floor(playing!.index)] ?? 0).padStart(2)}` : ' ']} testId="procedure-status" />
-        <StateGraphView disks={s.procDisks} path={lastRun ? lastRun.states.slice(0, Math.floor(playing!.index) + 1).map((st) => idOf(st)) : undefined} width={s.procDisks >= 5 ? 520 : 360} />
-        <Note>The pegs show the arrangement as the procedure moves the disks; the graph below marks the arrangements the procedure has passed through. Dots are arrangements; lines join arrangements one move apart; the heavier line is the shortest solution.</Note>
+        <FixedLines
+          lines={[
+            run ? `${PROCEDURES[run.procedure].label}: move ${at} of ${run.moves.length}` : 'No procedure has run at this setting.',
+            run && run.procedure === 'recursion' && run.stackDepths ? `goals on the stack: ${String(run.stackDepths[at] ?? 0).padStart(2)}` : ' ',
+            finished ? (run!.solved ? 'The run is over: every disk is on the right peg.' : 'The run stopped short of the goal; the right panel says why.') : ' ',
+          ]}
+          testId="procedure-status"
+        />
+        <StateGraphView disks={s.procDisks} path={run ? run.states.slice(0, at + 1).map((st) => idOf(st)) : undefined} width={s.procDisks >= 5 ? 520 : 360} />
+        <Note>The pegs show the arrangement as the procedure moves the disks; the graph below marks the arrangements the procedure has passed through. A finished run stays on view until the next “Run”, or a change of “Disks” or “Start”. Dots are arrangements; lines join arrangements one move apart; the heavier line is the shortest solution.</Note>
       </StagePanel>
     )
   }

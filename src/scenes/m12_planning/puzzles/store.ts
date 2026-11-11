@@ -2,7 +2,7 @@ import { makeRng, type Rng } from '../../../sim/random'
 import type { ProgressStore } from '../../../sim/planning/progress/store'
 import type { UnitId } from '../../../sim/planning/parts'
 import { applyMove, goalArrangement, idOf, illegalBecause, isGoal, scrambled, startArrangement, stateGraph, topDisk, type Arrangement, type Move, type Peg } from '../../../sim/planning/puzzles/hanoi'
-import { runProcedure, PROCEDURE_IDS, type ProcedureId, type Run } from '../../../sim/planning/puzzles/procedures'
+import { runProcedure, type ProcedureId, type Run } from '../../../sim/planning/puzzles/procedures'
 import { treeSet, bestPath, LOOK_COST, N_NODES, childrenOf, stepOf, PRACTICE_TREES, SCORED_TREES, type Tree, type TreeSet } from '../../../sim/planning/puzzles/trees'
 import { runLooker, LOOKER_IDS, type LookerId, type LookerRun } from '../../../sim/planning/puzzles/lookers'
 import type { PartStore } from '../contract'
@@ -91,7 +91,15 @@ export class PuzzlesStore implements PartStore {
   /** The most recent scrambled-start run per procedure, and the n+1 run. */
   scrambledRuns: Partial<Record<ProcedureId, Run>> = {}
   transferRuns: Partial<Record<ProcedureId, Run>> = {}
-  playing: { run: Run; index: number } | null = null
+  /**
+   * The run on view: the most recent run, its index into its states, and
+   * whether it is still animating. A finished run stays on view, pegs at its
+   * last arrangement and its whole path on the graph, until the next Run or
+   * a change of Disks or Start (Jon's walk, 2026-11-10: the first build
+   * dropped the run the moment it ended, and the pegs fell back to another
+   * stored run's end, chosen by menu order).
+   */
+  onView: { run: Run; index: number; playing: boolean } | null = null
   pendingPrediction: ProcedureId | null = null
   draft: Partial<Record<ProcedureId, string>> = {}
   futures = { options: 2, steps: 3 }
@@ -248,12 +256,15 @@ export class PuzzlesStore implements PartStore {
     this.scrambledRuns = {}
     this.transferRuns = {}
     this.stopPlaying()
+    this.onView = null
     this.changed()
   }
 
   setStart(s: 'usual' | 'scramble'): void {
     this.start = s
     if (s === 'scramble') this.scramble = scrambled(this.procDisks, this.scrambleRng)
+    this.stopPlaying()
+    this.onView = null
     this.changed()
   }
 
@@ -299,39 +310,45 @@ export class PuzzlesStore implements PartStore {
     this.runs[id] = run
     if (this.start === 'scramble') this.scrambledRuns[id] = run
     this.transferRuns[id] = runProcedure(id, this.procDisks + 1, startArrangement(this.procDisks + 1))
-    this.playing = { run, index: 0 }
+    this.onView = { run, index: 0, playing: true }
     if (!this.timer) this.timer = setInterval(() => this.tickTimer(), 50)
     this.changed()
   }
 
   private tickTimer(): void {
-    if (!this.playing) {
+    const v = this.onView
+    if (!v || !v.playing) {
       this.stopPlaying()
       return
     }
     // `speed` states a second.
-    this.playing.index = Math.min(this.playing.run.states.length - 1, this.playing.index + (this.speed * 50) / 1000)
-    if (this.playing.index >= this.playing.run.states.length - 1) this.playing = null
+    const last = v.run.states.length - 1
+    v.index = Math.min(last, v.index + (this.speed * 50) / 1000)
+    if (v.index >= last) {
+      v.index = last
+      this.stopPlaying()
+    }
     this.changed()
   }
 
+  /** Finish the run on view at once: its last arrangement, its whole path. */
   skipToEnd(): void {
+    if (this.onView) this.onView.index = this.onView.run.states.length - 1
     this.stopPlaying()
     this.changed()
   }
 
+  /** Stop the animation; the run stays on view. */
   private stopPlaying(): void {
-    this.playing = null
+    if (this.onView) this.onView.playing = false
     if (this.timer) clearInterval(this.timer)
     this.timer = null
   }
 
-  /** The arrangement on view: the playing run's current state, the last run's end, or the start. */
+  /** The arrangement on view: the run on view at its current index, or the start when no run has been made at this setting. */
   get arrangementOnView(): Arrangement {
-    if (this.playing) return this.playing.run.states[Math.floor(this.playing.index)]
-    const ids = PROCEDURE_IDS.filter((id) => this.runs[id])
-    const last = ids.length ? this.runs[ids[ids.length - 1]] : null
-    return last ? last.states[last.states.length - 1] : this.startArrangementNow()
+    if (this.onView) return this.onView.run.states[Math.floor(this.onView.index)]
+    return this.startArrangementNow()
   }
 
   setFutures(options: number, steps: number): void {
