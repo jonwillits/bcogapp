@@ -11,7 +11,8 @@ import { open } from './Part0'
 import { LETTERS } from './band/store'
 import { HOMININ_KINDS } from '../../sim/planning/hominins/types'
 import { PROCEDURE_IDS } from '../../sim/planning/puzzles/procedures'
-import { isGoal } from '../../sim/planning/puzzles/hanoi'
+import { idOf, isGoal } from '../../sim/planning/puzzles/hanoi'
+import { StateGraphView } from './puzzles/Views'
 import { PROCEDURE_PREDICTIONS } from './puzzles/screens'
 import { GAMBLES_UNIT } from './choices/store'
 import { advance, summarize, BLOCK_SECONDS } from '../../sim/planning/choices/dispensers'
@@ -183,12 +184,14 @@ describe('Part 2: commit, then reveal', () => {
     z.store.open(2)
     z.store.begin()
     let m = z.all()
-    expect(m).not.toMatch(/data-procedure-status[^>]*>.*move \d/)
+    expect(m).not.toMatch(/data-procedure-status/)
+    // Run does nothing before the prediction: the card asks for it, and no result is shown.
     z.store.requestRun('search')
-    expect(z.store.pendingPrediction).toBe('search')
+    expect(z.store.onView).toBeNull()
     expect(text(z.all())).not.toMatch(/examined\s+\d/)
     z.store.chooseDraft('search', PROCEDURE_PREDICTIONS.search.choices[0])
     z.store.commitPrediction()
+    z.store.requestRun('search')
     z.store.skipToEnd()
     m = z.all()
     expect(text(m)).toMatch(/Search everything\s+\d+/)
@@ -205,11 +208,12 @@ describe('Part 2: commit, then reveal', () => {
     z.store.open(2)
     z.store.begin()
     const predictAndRun = (id: 'search' | 'memorized') => {
-      z.store.requestRun(id)
-      if (z.store.pendingPrediction === id) {
+      z.store.goTo(id)
+      if (z.store.predicted(id) === null) {
         z.store.chooseDraft(id, PROCEDURE_PREDICTIONS[id].choices[0])
         z.store.commitPrediction()
       }
+      z.store.requestRun(id)
       z.store.skipToEnd()
     }
     // Memorized moves at 3 disks stops at its eighth move, short of the goal.
@@ -219,19 +223,76 @@ describe('Part 2: commit, then reveal', () => {
     expect(isGoal(z.store.arrangementOnView)).toBe(false)
     let m = z.all()
     expect(text(m)).toMatch(/Memorized moves: move 7 of 7/)
-    expect(text(m)).toMatch(/stopped short of the goal/)
+    expect(text(m)).toMatch(/Stopped short of the goal/)
     // Search everything, run after it, is what stays on view: the goal, not Memorized moves' end (the menu order put Memorized moves last).
     predictAndRun('search')
     expect(z.store.onView!.run.procedure).toBe('search')
     expect(isGoal(z.store.arrangementOnView)).toBe(true)
     m = z.all()
     expect(text(m)).toMatch(/Search everything: move 7 of 7/)
-    expect(text(m)).toMatch(/every disk is on the right peg/)
+    expect(text(m)).toMatch(/the goal is reached/)
     const graph = m.slice(m.indexOf('data-state-graph'))
     expect((graph.match(/var\(--sensor\)/g) ?? []).length).toBeGreaterThanOrEqual(8)
     z.store.setStart('scramble')
     expect(z.store.onView).toBeNull()
     expect(text(z.all())).toMatch(/No procedure has run at this setting/)
+  })
+
+  it('the walk through the procedures: one at a time on the stage, read then predicted then run; Go on waits for a run; the row of names goes anywhere; a return opens at the first procedure not predicted', () => {
+    const z = fresh(puzzles as Mod, (s, p) => new PuzzlesStore(s, p))
+    z.store.open(2)
+    z.store.begin()
+    expect(z.store.current).toBe('search')
+    let m = z.all()
+    const stage = () => m.slice(0, m.indexOf('data-stage') > 0 ? m.indexOf('</div>', m.lastIndexOf('data-go-on')) : m.length)
+    expect(m).toMatch(/data-procedure-strip/)
+    expect(m).toMatch(/data-predict="search"/)
+    expect(text(m)).toMatch(/Procedure 1 of 5: Search everything/)
+    expect(text(m)).toMatch(/It examines arrangements in order of their distance/)
+    // No controls, pegs or map before the prediction; the left column has no Run buttons.
+    expect(m).not.toMatch(/data-procedure-controls|data-pegs|data-state-graph/)
+    expect(text(m)).not.toMatch(/Go on to the next procedure/)
+    z.store.chooseDraft('search', PROCEDURE_PREDICTIONS.search.choices[1])
+    z.store.commitPrediction()
+    m = z.all()
+    expect(m).toMatch(/data-prediction="search"/)
+    expect(text(m)).toMatch(/Your prediction: 100 to 200/)
+    expect(text(m)).toMatch(/set “Disks” to 5/)
+    expect(m).toMatch(/data-procedure-controls/)
+    expect(m).toMatch(/data-snapshot="none"/)
+    expect(text(m)).toMatch(/“Go on to the next procedure” appears after the run/)
+    expect(text(m)).not.toMatch(/Go on to the next procedure\./)
+    expect(stage()).toBeTruthy()
+    z.store.requestRun('search')
+    z.store.skipToEnd()
+    m = z.all()
+    expect(text(m)).toMatch(/Next: Goal recursion/)
+    z.store.nextProcedure()
+    expect(z.store.current).toBe('recursion')
+    expect(z.store.onView).toBeNull()
+    m = z.all()
+    expect(m).toMatch(/data-predict="recursion"/)
+    expect(text(m)).toMatch(/1\. Search everything ✓/)
+    // The row of names goes anywhere, a procedure not yet predicted included.
+    z.store.goTo('memorized')
+    expect(z.store.tourIndex).toBe(4)
+    expect(z.all()).toMatch(/data-predict="memorized"/)
+    // A fresh store on the same saved progress opens at the first procedure not predicted: Goal recursion.
+    const again = new PuzzlesStore(7, z.progress)
+    expect(again.current).toBe('recursion')
+  })
+
+  it('the snapshot beside the map: the arrangement under the pointer, and where the run passed through it', () => {
+    const z = fresh(puzzles as Mod, (s, p) => new PuzzlesStore(s, p))
+    z.store.open(2)
+    z.store.begin()
+    z.store.chooseDraft('search', PROCEDURE_PREDICTIONS.search.choices[0])
+    z.store.commitPrediction()
+    z.store.requestRun('search')
+    z.store.skipToEnd()
+    const html = renderToStaticMarkup(<StateGraphView disks={3} path={z.store.onView!.run.states.map((st) => idOf(st))} hovered={26} onHover={() => {}} />)
+    expect(html).toMatch(/data-hovered="26"/)
+    expect(html).toMatch(/cursor:crosshair/)
   })
 })
 

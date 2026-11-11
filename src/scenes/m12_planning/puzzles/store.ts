@@ -2,7 +2,7 @@ import { makeRng, type Rng } from '../../../sim/random'
 import type { ProgressStore } from '../../../sim/planning/progress/store'
 import type { UnitId } from '../../../sim/planning/parts'
 import { applyMove, goalArrangement, idOf, illegalBecause, isGoal, scrambled, startArrangement, stateGraph, topDisk, type Arrangement, type Move, type Peg } from '../../../sim/planning/puzzles/hanoi'
-import { runProcedure, type ProcedureId, type Run } from '../../../sim/planning/puzzles/procedures'
+import { PROCEDURE_IDS, runProcedure, type ProcedureId, type Run } from '../../../sim/planning/puzzles/procedures'
 import { treeSet, bestPath, LOOK_COST, N_NODES, childrenOf, stepOf, PRACTICE_TREES, SCORED_TREES, type Tree, type TreeSet } from '../../../sim/planning/puzzles/trees'
 import { runLooker, LOOKER_IDS, type LookerId, type LookerRun } from '../../../sim/planning/puzzles/lookers'
 import type { PartStore } from '../contract'
@@ -11,7 +11,8 @@ import { PROCEDURE_PREDICTIONS, type Step } from './screens'
 /**
  * Part 2's state (spec §6): Step 1, two puzzles as two units, each
  * restarted from the start if interrupted; Step 2, an exploration of five
- * procedures with a prediction before each one's first run; Step 3, the
+ * procedures walked one at a time in the middle of the screen, each read,
+ * predicted, then run at any setting (Jon's walk, 2026-11-11); Step 3, the
  * trees as one resuming unit, with the three lookers run on the student's
  * own trees after the last choice.
  */
@@ -100,8 +101,18 @@ export class PuzzlesStore implements PartStore {
    * stored run's end, chosen by menu order).
    */
   onView: { run: Run; index: number; playing: boolean } | null = null
-  pendingPrediction: ProcedureId | null = null
   draft: Partial<Record<ProcedureId, string>> = {}
+  /**
+   * The walk through the procedures (Jon's walk, 2026-11-11: the first build
+   * put five Run buttons, the sliders and the prediction box in the left
+   * column and the descriptions in the right, which scattered what the
+   * student needed). One procedure is on view at a time, in PROCEDURE_IDS
+   * order; it opens at the first procedure not yet predicted, so a student
+   * who left picks up where they were, and the row of names goes anywhere.
+   */
+  tourIndex = 0
+  /** The procedures run at least once this session; “Go on” waits for a run. */
+  hasRun = new Set<ProcedureId>()
   futures = { options: 2, steps: 3 }
   private timer: ReturnType<typeof setInterval> | null = null
   private scrambleRng: Rng
@@ -125,6 +136,8 @@ export class PuzzlesStore implements PartStore {
     this.treesPartial = partial ?? { records: [], index: 0, shown: false, reserveUsed: [], swaps: {}, restarts: progress.restarts(TREES_UNIT) }
     if (partial?.shown) this.swapInReserve()
     this.lookerRng = makeRng(seed ^ 0x100c)
+    const first = PROCEDURE_IDS.findIndex((id) => this.predicted(id) === null)
+    this.tourIndex = first < 0 ? 0 : first
   }
 
   subscribe(fn: () => void): () => void {
@@ -281,13 +294,28 @@ export class PuzzlesStore implements PartStore {
     return this.progress.prediction(PROCEDURE_PREDICTIONS[id].key)
   }
 
-  /** Run asks for the prediction first, once per procedure. */
+  /** The procedure on view in the walk. */
+  get current(): ProcedureId {
+    return PROCEDURE_IDS[this.tourIndex]
+  }
+
+  /** Go to a procedure by name: the row of names, or “Go on to the next procedure”. The run on view is cleared, since it was another procedure's. */
+  goTo(id: ProcedureId): void {
+    const i = PROCEDURE_IDS.indexOf(id)
+    if (i < 0) return
+    this.tourIndex = i
+    this.stopPlaying()
+    this.onView = null
+    this.changed()
+  }
+
+  nextProcedure(): void {
+    if (this.tourIndex < PROCEDURE_IDS.length - 1) this.goTo(PROCEDURE_IDS[this.tourIndex + 1])
+  }
+
+  /** A procedure runs only once its prediction is committed; before that, Run does nothing, and the card asks for the prediction. */
   requestRun(id: ProcedureId): void {
-    if (this.predicted(id) === null) {
-      this.pendingPrediction = id
-      this.changed()
-      return
-    }
+    if (this.predicted(id) === null) return
     this.run(id)
   }
 
@@ -296,18 +324,19 @@ export class PuzzlesStore implements PartStore {
     this.changed()
   }
 
+  /** Commit the prediction for the procedure on view. The run is the student's next press, at the setting the card names. */
   commitPrediction(): void {
-    const id = this.pendingPrediction
-    if (!id || !this.draft[id]) return
+    const id = this.current
+    if (this.predicted(id) !== null || !this.draft[id]) return
     this.progress.commitPrediction(PROCEDURE_PREDICTIONS[id].key, this.draft[id]!)
-    this.pendingPrediction = null
-    this.run(id)
+    this.changed()
   }
 
   private run(id: ProcedureId): void {
     const start = this.startArrangementNow()
     const run = runProcedure(id, this.procDisks, start)
     this.runs[id] = run
+    this.hasRun.add(id)
     if (this.start === 'scramble') this.scrambledRuns[id] = run
     this.transferRuns[id] = runProcedure(id, this.procDisks + 1, startArrangement(this.procDisks + 1))
     this.onView = { run, index: 0, playing: true }

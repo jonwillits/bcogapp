@@ -1,7 +1,8 @@
+import { useEffect, useState } from 'react'
 import { Panel } from '../../components/Panel'
 import type { ProgressStore } from '../../sim/planning/progress/store'
 import { PROCEDURE_IDS, PROCEDURES, shortestMoves } from '../../sim/planning/puzzles/procedures'
-import { idOf } from '../../sim/planning/puzzles/hanoi'
+import { arrangementOf, idOf, isGoal } from '../../sim/planning/puzzles/hanoi'
 import { sequences, minutesToExamine, timeInWords, FUTURES_PRESETS, STATES_PER_MINUTE } from '../../sim/planning/puzzles/futures'
 import { LOOK_COST } from '../../sim/planning/puzzles/trees'
 import { Btn, Choice, Content, FixedLines, GroupLabel, Note, PANEL_STYLE, PART_TITLES, RIGHT_STYLE, StagePanel, Para, useStore } from './ui'
@@ -15,9 +16,12 @@ import { registerResults } from './Part0'
 
 /**
  * Part 2's screens (spec §6): the left column runs the step; the stage
- * carries the instruction screen, the pegs, the procedures' animation, or
- * the tree; the right column carries the step's reveal once its unit is
- * complete, the procedures' table and the futures panel in Step 2.
+ * carries the instruction screen, the pegs, the walk through the five
+ * procedures, or the tree; the right column carries the step's reveal once
+ * its unit is complete, the procedures' table and the futures panel in
+ * Step 2. In Step 2 everything the student acts on is on the stage, one
+ * procedure at a time: its description, its prediction, then the puzzle
+ * with the controls (Jon's walk, 2026-11-11).
  */
 
 type Ctx = PartContext<PuzzlesStore>
@@ -57,7 +61,7 @@ function Left({ ctx }: { ctx: Ctx }) {
               <Note>Click a peg to lift its top disk, then click the peg to put it on. The results of this step appear on the right when both puzzles are solved.</Note>
             </>
           )}
-          {state === 'running' && s.step === 2 && <ProcedureControls s={s} />}
+          {state === 'running' && s.step === 2 && <Note>The procedures are walked one at a time in the middle of the screen; the table on the right fills as they run.</Note>}
           {state === 'running' && s.step === 3 && (
             <>
               <FixedLines lines={[`${'tree'.padEnd(20)}${`${s.treesPartial.index + 1} of ${s.totalTrees}`.padStart(10)}`, `${'this tree is'.padEnd(20)}${(s.isPractice ? 'practice' : 'scored').padStart(10)}`, `${'clicks this tree'.padEnd(20)}${String(s.looks.length).padStart(10)}`, `${'running total'.padEnd(20)}${String(s.runningTotal).padStart(10)}`]} testId="tree-status" />
@@ -76,53 +80,6 @@ function Left({ ctx }: { ctx: Ctx }) {
         </div>
       </Panel>
     </>
-  )
-}
-
-function ProcedureControls({ s }: { s: PuzzlesStore }) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-procedure-controls>
-      <GroupLabel>Disks</GroupLabel>
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <input type="range" min={3} max={6} step={1} value={s.procDisks} onChange={(e) => s.setProcDisks(Number(e.target.value))} aria-label="number of disks" style={{ width: 140 }} />
-        <FixedLines lines={[`${s.procDisks} disks, ${3 ** s.procDisks} arrangements`]} />
-      </div>
-      <GroupLabel>Start</GroupLabel>
-      <Choice value={s.start} options={[{ id: 'usual', label: 'Usual start' }, { id: 'scramble', label: 'Scramble' }]} onChange={(v) => s.setStart(v as 'usual' | 'scramble')} />
-      <GroupLabel>Speed</GroupLabel>
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <input type="range" min={1} max={20} step={1} value={s.speed} onChange={(e) => s.setSpeed(Number(e.target.value))} aria-label="moves a second" style={{ width: 140 }} />
-        <FixedLines lines={[`${String(s.speed).padStart(2)} moves a second`]} />
-      </div>
-      <GroupLabel>Procedures</GroupLabel>
-      {PROCEDURE_IDS.map((id) => (
-        <div key={id} style={{ display: 'flex', gap: 6, alignItems: 'center' }} data-procedure={id}>
-          <Btn small primary onClick={() => s.requestRun(id)} disabled={!!s.onView?.playing || !!s.pendingPrediction}>
-            Run
-          </Btn>
-          <span style={{ fontSize: 12 }}>{PROCEDURES[id].label}</span>
-        </div>
-      ))}
-      {s.onView?.playing && (
-        <div>
-          <Btn small onClick={() => s.skipToEnd()}>
-            Skip to the end
-          </Btn>
-        </div>
-      )}
-      {s.pendingPrediction && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: 8, border: '1px solid var(--accent)', borderRadius: 8 }} data-predict>
-          <GroupLabel>Predict first: {PROCEDURES[s.pendingPrediction].label}</GroupLabel>
-          <Note>{PROCEDURE_PREDICTIONS[s.pendingPrediction].question}</Note>
-          <Choice value={s.draft[s.pendingPrediction] ?? null} options={PROCEDURE_PREDICTIONS[s.pendingPrediction].choices.map((c) => ({ id: c, label: c }))} onChange={(c) => s.chooseDraft(s.pendingPrediction!, c)} />
-          <div>
-            <Btn primary onClick={() => s.commitPrediction()} disabled={!s.draft[s.pendingPrediction]}>
-              Commit my prediction
-            </Btn>
-          </div>
-        </div>
-      )}
-    </div>
   )
 }
 
@@ -157,29 +114,7 @@ function Stage({ ctx }: { ctx: Ctx }) {
       </StagePanel>
     )
   }
-  if (s.step === 2) {
-    const a = s.arrangementOnView
-    const v = s.onView
-    const run = v?.run ?? null
-    const at = v ? Math.floor(v.index) : 0
-    const finished = !!v && !v.playing && at >= run!.states.length - 1
-    return (
-      <StagePanel wide testId="procedures">
-        <div style={{ fontSize: 14, fontWeight: 600 }}>{screen.title}</div>
-        <Pegs arrangement={a} interactive={false} width={420} />
-        <FixedLines
-          lines={[
-            run ? `${PROCEDURES[run.procedure].label}: move ${at} of ${run.moves.length}` : 'No procedure has run at this setting.',
-            run && run.procedure === 'recursion' && run.stackDepths ? `goals on the stack: ${String(run.stackDepths[at] ?? 0).padStart(2)}` : ' ',
-            finished ? (run!.solved ? 'The run is over: every disk is on the right peg.' : 'The run stopped short of the goal; the right panel says why.') : ' ',
-          ]}
-          testId="procedure-status"
-        />
-        <StateGraphView disks={s.procDisks} path={run ? run.states.slice(0, at + 1).map((st) => idOf(st)) : undefined} width={s.procDisks >= 5 ? 520 : 360} />
-        <Note>The pegs show the arrangement as the procedure moves the disks; the graph below marks the arrangements the procedure has passed through. A finished run stays on view until the next “Run”, or a change of “Disks” or “Start”. Dots are arrangements; lines join arrangements one move apart; the heavier line is the shortest solution.</Note>
-      </StagePanel>
-    )
-  }
+  if (s.step === 2) return <ProcedureTour s={s} title={screen.title} />
   if (state === 'done')
     return (
       <StagePanel testId="done">
@@ -215,6 +150,161 @@ function Stage({ ctx }: { ctx: Ctx }) {
       </div>
       <Note>{TREE_LEGEND}</Note>
     </StagePanel>
+  )
+}
+
+/**
+ * Step 2's stage: the walk through the five procedures. A row of names at
+ * the top goes to any of them; the one on view is read (how it works, what
+ * it stores, where it comes from), predicted, then run on the puzzle with
+ * the controls under the pegs. Pointing at a dot on the map draws that
+ * arrangement in the box beside it. “Go on to the next procedure” appears
+ * once the procedure has run; under the fifth, “Go on to Step 3”.
+ */
+function ProcedureTour({ s, title }: { s: PuzzlesStore; title: string }) {
+  const [hovered, setHovered] = useState<number | null>(null)
+  const id = s.current
+  // The dot under the pointer belongs to one map: a new procedure, setting or start clears it.
+  useEffect(() => setHovered(null), [id, s.procDisks, s.start])
+  const proc = PROCEDURES[id]
+  const pred = PROCEDURE_PREDICTIONS[id]
+  const committed = s.predicted(id)
+  const k = s.tourIndex + 1
+  const last = s.tourIndex === PROCEDURE_IDS.length - 1
+  const a = s.arrangementOnView
+  const v = s.onView
+  const run = v?.run ?? null
+  const at = v ? Math.floor(v.index) : 0
+  const finished = !!v && !v.playing && at >= run!.states.length - 1
+  const path = run ? run.states.slice(0, at + 1).map((st) => idOf(st)) : undefined
+  return (
+    <StagePanel wide testId="procedures">
+      {/* One block inside the scrolling panel, so the pegs, the status lines and the map keep their height when the card is taller than the window: a flex column squashes an SVG and an overflow-hidden block to nothing. */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flexShrink: 0 }} data-procedure-card={id}>
+        <div style={{ fontSize: 14, fontWeight: 600 }}>{title}</div>
+        <div data-procedure-strip>
+          <Choice value={id} options={PROCEDURE_IDS.map((p, i) => ({ id: p, label: `${i + 1}. ${PROCEDURES[p].label}${s.predicted(p) !== null ? ' ✓' : ''}`, title: s.predicted(p) !== null ? 'predicted' : 'not yet predicted' }))} onChange={(p) => s.goTo(p)} />
+        </div>
+        <GroupLabel>
+          Procedure {k} of {PROCEDURE_IDS.length}: {proc.label}
+        </GroupLabel>
+        <Para>
+          {proc.does} It stores {proc.stores}. Source: {proc.source}.
+        </Para>
+        {committed === null ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: 10, border: '1px solid var(--accent)', borderRadius: 8 }} data-predict={id}>
+            <GroupLabel>Predict first</GroupLabel>
+            <Note>Use what you have just read. The prediction is saved, and the procedure runs only after it; the puzzle appears here once it is committed.</Note>
+            <Content>{pred.question}</Content>
+            <Choice value={s.draft[id] ?? null} options={pred.choices.map((c) => ({ id: c, label: c }))} onChange={(c) => s.chooseDraft(id, c)} />
+            <div>
+              <Btn primary onClick={() => s.commitPrediction()} disabled={!s.draft[id]}>
+                Commit my prediction
+              </Btn>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div data-prediction={id}>
+              <Note>
+                Your prediction: <strong>{committed}</strong>. {pred.check}
+              </Note>
+            </div>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }} data-procedure-controls>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <GroupLabel>Disks</GroupLabel>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <input type="range" min={3} max={6} step={1} value={s.procDisks} onChange={(e) => s.setProcDisks(Number(e.target.value))} aria-label="number of disks" style={{ width: 110 }} />
+                  <FixedLines lines={[`${s.procDisks} disks, ${3 ** s.procDisks} arrangements`]} />
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <GroupLabel>Start</GroupLabel>
+                <Choice value={s.start} options={[{ id: 'usual', label: 'Usual start' }, { id: 'scramble', label: 'Scramble' }]} onChange={(st) => s.setStart(st as 'usual' | 'scramble')} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <GroupLabel>Speed</GroupLabel>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <input type="range" min={1} max={20} step={1} value={s.speed} onChange={(e) => s.setSpeed(Number(e.target.value))} aria-label="moves a second" style={{ width: 110 }} />
+                  <FixedLines lines={[`${String(s.speed).padStart(2)} moves a second`]} />
+                </div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <Btn primary onClick={() => s.requestRun(id)} disabled={!!v?.playing}>
+                Run
+              </Btn>
+              {v?.playing && <Btn onClick={() => s.skipToEnd()}>Skip to the end</Btn>}
+              <Note>“Run” runs {proc.label} from the start shown, at the setting above.</Note>
+            </div>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+              <Pegs arrangement={a} interactive={false} width={320} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1, minWidth: 0 }}>
+                <FixedLines
+                  lines={[
+                    run ? `${PROCEDURES[run.procedure].label}: move ${at} of ${run.moves.length}` : 'No procedure has run at this setting.',
+                    run && run.procedure === 'recursion' && run.stackDepths ? `goals on the stack: ${String(run.stackDepths[at] ?? 0).padStart(2)}` : ' ',
+                    finished ? (run!.solved ? 'The run is over: the goal is reached.' : 'Stopped short of the goal: the table says why.') : ' ',
+                  ]}
+                  testId="procedure-status"
+                />
+                <Note>The pegs show the arrangement as the procedure moves the disks. A finished run stays on view until the next “Run”, or a change of “Disks” or “Start”.</Note>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+              <StateGraphView disks={s.procDisks} path={path} width={s.procDisks >= 5 ? 400 : 360} hovered={hovered} onHover={setHovered} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1, minWidth: 0 }}>
+                <Snapshot id={hovered} disks={s.procDisks} path={path} />
+                <Note>The map marks the arrangements the run has passed through. Dots are arrangements; lines join arrangements one move apart; the heavier line is the shortest solution. Point at a dot to see that arrangement in the box above.</Note>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }} data-go-on>
+              {s.hasRun.has(id) ? (
+                last ? (
+                  <>
+                    <Btn primary onClick={() => s.open(3)}>
+                      Go on to Step 3
+                    </Btn>
+                    <Note data-next>All five procedures are predicted and run. Go back to any of them from the row of names, or go on to Step 3.</Note>
+                  </>
+                ) : (
+                  <>
+                    <Btn primary onClick={() => s.nextProcedure()}>
+                      Go on to the next procedure
+                    </Btn>
+                    <Note data-next>Next: {PROCEDURES[PROCEDURE_IDS[s.tourIndex + 1]].label}. Or run this one again at another setting first.</Note>
+                  </>
+                )
+              ) : (
+                <Note data-next>Press “Run” to see the procedure on the puzzle. {last ? '“Go on to Step 3” appears after the run.' : '“Go on to the next procedure” appears after the run.'}</Note>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </StagePanel>
+  )
+}
+
+/** The arrangement under the pointer, drawn small beside the map, with where the run on view passed through it. */
+function Snapshot({ id, disks, path }: { id: number | null; disks: number; path?: number[] }) {
+  const box = { width: 220, minHeight: 130, padding: 8, borderRadius: 8, border: '1px dashed var(--border)', display: 'flex', flexDirection: 'column' as const, gap: 4, flexShrink: 0 }
+  if (id === null)
+    return (
+      <div style={box} data-snapshot="none">
+        <GroupLabel>Snapshot</GroupLabel>
+        <Note>Point at a dot on the map to see that arrangement here.</Note>
+      </div>
+    )
+  const a = arrangementOf(id, disks)
+  const k = path ? path.indexOf(id) : -1
+  const where = isGoal(a) ? 'the goal' : id === 0 ? 'the usual start' : `arrangement ${id}`
+  return (
+    <div style={box} data-snapshot={id}>
+      <GroupLabel>Snapshot: {where}</GroupLabel>
+      <Pegs arrangement={a} interactive={false} width={200} />
+      <Note>{k < 0 ? 'The run on view has not passed through it.' : k === 0 ? 'The start of the run on view.' : `The run on view reached it at move ${k}.`}</Note>
+    </div>
   )
 }
 
@@ -266,15 +356,7 @@ function ProceduresRight({ s }: { s: PuzzlesStore }) {
             {PROCEDURES[r!.procedure].label}, on {r!.disks} disks: {r!.stopped}
           </Note>
         ))}
-        <GroupLabel>What each procedure does, and what it stores</GroupLabel>
-        {PROCEDURE_IDS.map((id) => (
-          <div key={id} style={{ display: 'flex', flexDirection: 'column', gap: 2 }} data-procedure-text={id}>
-            <Note style={{ color: 'var(--text)' }}>
-              <strong>{PROCEDURES[id].label}.</strong> {PROCEDURES[id].does} It stores {PROCEDURES[id].stores}. Source: {PROCEDURES[id].source}.
-            </Note>
-            {s.predicted(id) && <Note>Your prediction: {s.predicted(id)}</Note>}
-          </div>
-        ))}
+        <Note>What each procedure does, what it stores and where it comes from is on the stage, with your prediction, as the walk reaches it.</Note>
         <GroupLabel>The futures panel</GroupLabel>
         <Para>With a number of options at each step and a number of steps ahead, the number of possible sequences is the options multiplied by themselves once per step. At about {STATES_PER_MINUTE} states a minute, the rate the reading gives for people thinking aloud (§12.2.2), examining every sequence takes the time printed.</Para>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
