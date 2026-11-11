@@ -1,7 +1,7 @@
 import { makeRng, type Rng } from '../../../sim/random'
 import type { ProgressStore } from '../../../sim/planning/progress/store'
 import type { UnitId } from '../../../sim/planning/parts'
-import { applyMove, goalArrangement, idOf, illegalBecause, isGoal, scrambled, startArrangement, stateGraph, topDisk, type Arrangement, type Move, type Peg } from '../../../sim/planning/puzzles/hanoi'
+import { applyMove, arrangementOf, goalArrangement, idOf, illegalBecause, isGoal, scrambled, startArrangement, stateGraph, topDisk, type Arrangement, type Move, type Peg } from '../../../sim/planning/puzzles/hanoi'
 import { PROCEDURE_IDS, runProcedure, type ProcedureId, type Run } from '../../../sim/planning/puzzles/procedures'
 import { treeSet, bestPath, LOOK_COST, N_NODES, childrenOf, stepOf, PRACTICE_TREES, SCORED_TREES, type Tree, type TreeSet } from '../../../sim/planning/puzzles/trees'
 import { runLooker, LOOKER_IDS, type LookerId, type LookerRun } from '../../../sim/planning/puzzles/lookers'
@@ -92,8 +92,10 @@ export class PuzzlesStore implements PartStore {
 
   // Step 2
   procDisks = 3
-  start: 'usual' | 'scramble' = 'usual'
+  /** The usual start, a scramble drawn by the seed, or an arrangement the student clicked on the map (Jon's walk, 2026-11-11). */
+  start: 'usual' | 'scramble' | 'chosen' = 'usual'
   scramble: Arrangement
+  chosenStart: Arrangement | null = null
   speed = 4
   runs: Partial<Record<ProcedureId, Run>> = {}
   /** The most recent scrambled-start run per procedure, and the n+1 run. */
@@ -315,6 +317,8 @@ export class PuzzlesStore implements PartStore {
   setProcDisks(n: number): void {
     this.procDisks = Math.max(3, Math.min(6, Math.round(n)))
     this.scramble = scrambled(this.procDisks, this.scrambleRng)
+    this.chosenStart = null
+    if (this.start === 'chosen') this.start = 'usual'
     this.runs = {}
     this.scrambledRuns = {}
     this.transferRuns = {}
@@ -323,9 +327,28 @@ export class PuzzlesStore implements PartStore {
     this.changed()
   }
 
-  setStart(s: 'usual' | 'scramble'): void {
+  setStart(s: 'usual' | 'scramble' | 'chosen'): void {
+    if (s === 'chosen' && !this.chosenStart) return
     this.start = s
     if (s === 'scramble') this.scramble = scrambled(this.procDisks, this.scrambleRng)
+    this.stopPlaying()
+    this.onView = null
+    this.changed()
+  }
+
+  /** A dot on the map was clicked: the next run starts from that arrangement. Not while a run is playing. */
+  chooseStart(id: number): void {
+    if (this.onView?.playing) return
+    if (id < 0 || id >= 3 ** this.procDisks) return
+    this.chosenStart = arrangementOf(id, this.procDisks)
+    this.start = 'chosen'
+    this.stopPlaying()
+    this.onView = null
+    this.changed()
+  }
+
+  /** Reset: back to the start arrangement, the last run's path off the map. The start setting stays. */
+  resetView(): void {
     this.stopPlaying()
     this.onView = null
     this.changed()
@@ -337,6 +360,7 @@ export class PuzzlesStore implements PartStore {
   }
 
   startArrangementNow(): Arrangement {
+    if (this.start === 'chosen' && this.chosenStart) return this.chosenStart
     return this.start === 'usual' ? startArrangement(this.procDisks) : this.scramble
   }
 
@@ -387,7 +411,7 @@ export class PuzzlesStore implements PartStore {
     const run = runProcedure(id, this.procDisks, start)
     this.runs[id] = run
     this.hasRun.add(id)
-    if (this.start === 'scramble') this.scrambledRuns[id] = run
+    if (this.start !== 'usual') this.scrambledRuns[id] = run
     this.transferRuns[id] = runProcedure(id, this.procDisks + 1, startArrangement(this.procDisks + 1))
     this.onView = { run, index: 0, playing: true }
     if (!this.timer) this.timer = setInterval(() => this.tickTimer(), 50)

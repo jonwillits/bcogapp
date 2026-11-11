@@ -264,7 +264,7 @@ function ProcedureTour({ s, title }: { s: PuzzlesStore; title: string }) {
                 Your prediction: <strong>{committed}</strong>. {pred.check}
               </Note>
             </div>
-            <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }} data-procedure-controls>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px', alignItems: 'start' }} data-procedure-controls>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                 <GroupLabel>Disks</GroupLabel>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -273,23 +273,28 @@ function ProcedureTour({ s, title }: { s: PuzzlesStore; title: string }) {
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                <GroupLabel>Start</GroupLabel>
-                <Choice value={s.start} options={[{ id: 'usual', label: 'Usual start' }, { id: 'scramble', label: 'Scramble' }]} onChange={(st) => s.setStart(st as 'usual' | 'scramble')} />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                 <GroupLabel>Speed</GroupLabel>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                   <input type="range" min={1} max={20} step={1} value={s.speed} onChange={(e) => s.setSpeed(Number(e.target.value))} aria-label="moves a second" style={{ width: 110 }} />
                   <FixedLines lines={[`${String(s.speed).padStart(2)} moves a second`]} />
                 </div>
               </div>
-            </div>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <Btn primary onClick={() => s.requestRun(id)} disabled={!!v?.playing}>
-                Run
-              </Btn>
-              {v?.playing && <Btn onClick={() => s.skipToEnd()}>Skip to the end</Btn>}
-              <Note>“Run” runs {proc.label} from the start shown, at the setting above.</Note>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <GroupLabel>Start</GroupLabel>
+                <Choice value={s.start} options={[{ id: 'usual', label: 'Usual start' }, { id: 'scramble', label: 'Scramble' }, { id: 'chosen', label: 'Chosen on the map', title: s.chosenStart ? 'the arrangement you clicked on the map' : 'click a dot on the map to choose a start' }]} disabledIds={s.chosenStart ? [] : ['chosen']} onChange={(st) => s.setStart(st as 'usual' | 'scramble' | 'chosen')} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <GroupLabel>Run</GroupLabel>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <Btn primary onClick={() => s.requestRun(id)} disabled={!!v?.playing}>
+                    Run
+                  </Btn>
+                  <Btn onClick={() => s.resetView()} disabled={!v}>
+                    Reset
+                  </Btn>
+                  {v?.playing && <Btn onClick={() => s.skipToEnd()}>Skip to the end</Btn>}
+                </div>
+              </div>
             </div>
             <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
               <Pegs arrangement={a} interactive={false} width={320} />
@@ -306,10 +311,10 @@ function ProcedureTour({ s, title }: { s: PuzzlesStore; title: string }) {
               </div>
             </div>
             <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-              <StateGraphView disks={s.procDisks} path={path} width={s.procDisks >= 5 ? 400 : 360} hovered={hovered} onHover={setHovered} />
+              <StateGraphView disks={s.procDisks} path={path} width={s.procDisks >= 5 ? 400 : 360} hovered={hovered} onHover={setHovered} onPick={(n) => s.chooseStart(n)} highlight={s.start === 'chosen' && s.chosenStart ? [idOf(s.chosenStart)] : undefined} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1, minWidth: 0 }}>
                 <Snapshot id={hovered} disks={s.procDisks} path={path} />
-                <Note>Each dot is an arrangement of the disks. Each line joins two arrangements one move apart. The heavier line is the shortest solution. The arrangements this run has passed through are marked. Point at a dot to see that arrangement in the box above.</Note>
+                <Note>Each dot is an arrangement of the disks. Each line joins two arrangements one move apart. The heavier line is the shortest solution. The arrangements this run has passed through are marked. Point at a dot to see that arrangement in the box above. Click a dot to start the next run from that arrangement; it is then marked in green, and “Start” reads “Chosen on the map”. Press “Reset” to clear the last run from the map.</Note>
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }} data-go-on>
@@ -357,7 +362,7 @@ function Snapshot({ id, disks, path }: { id: number | null; disks: number; path?
     <div style={box} data-snapshot={id}>
       <GroupLabel>Snapshot: {where}</GroupLabel>
       <Pegs arrangement={a} interactive={false} width={200} />
-      <Note>{k < 0 ? 'The run on view has not passed through it.' : k === 0 ? 'The start of the run on view.' : `The run on view reached it at move ${k}.`}</Note>
+      <Note>{k < 0 ? 'The run on view has not passed through it.' : k === 0 ? 'The start of the run on view.' : `The run on view reached it at move ${k}.`} Click the dot to start the next run here.</Note>
     </div>
   )
 }
@@ -402,7 +407,7 @@ function ProceduresRight({ s }: { s: PuzzlesStore }) {
     <Panel title="The results table" style={RIGHT_STYLE}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <Note>
-          Each row is a procedure, filled when it has run at the current setting of {n} disks. Moves: how many it made. Examined: how many arrangements it examined (for Search everything, every arrangement taken from its waiting list; for the others, every arrangement passed through). Stored: the most it had to store at once (arrangements waiting, goals on a stack, moves in a list, or one fact). Scrambled: whether its most recent run from a scrambled start solved the puzzle. {n + 1} disks: whether it solved the puzzle with one more disk than the setting, from the usual start.
+          Each row is a procedure, filled when it has run at the current setting of {n} disks. Moves: how many it made. Examined: how many arrangements it examined (for Search everything, every arrangement taken from its waiting list; for the others, every arrangement passed through). Stored: the most it had to store at once (arrangements waiting, goals on a stack, moves in a list, or one fact). Scrambled: whether its most recent run from a scrambled start, or from a start you chose on the map, solved the puzzle. {n + 1} disks: whether it solved the puzzle with one more disk than the setting, from the usual start.
         </Note>
         <FixedLines lines={[`${'procedure'.padEnd(28)}${'moves'.padStart(6)}${'examined'.padStart(9)}${'stored'.padStart(8)}${'scrambled'.padStart(10)}${`${n + 1} disks`.padStart(12)}`, ...rows, `${'shortest solution'.padEnd(28)}${String(shortestMoves(n)).padStart(6)}`]} testId="procedures-table" />
         {stopped.map((r, i) => (

@@ -49,7 +49,7 @@ export function Pegs({ arrangement, lifted, onPeg, width = 360, interactive = tr
  * drawn over it in order with every node visited marked and every long
  * pause ringed, and the halfway node marked for four disks.
  */
-export function StateGraphView({ disks, path, pauses, highlight, width = 420, hovered, onHover }: { disks: number; path?: number[]; pauses?: number[]; highlight?: number[]; width?: number; /** The dot the pointer is over, ringed; `onHover` reports it, or null when the pointer leaves (the snapshot beside the map, Jon's walk, 2026-11-11). */ hovered?: number | null; onHover?: (id: number | null) => void }) {
+export function StateGraphView({ disks, path, pauses, highlight, width = 420, hovered, onHover, onPick }: { disks: number; path?: number[]; pauses?: number[]; highlight?: number[]; width?: number; /** The dot the pointer is over, ringed; `onHover` reports it, or null when the pointer leaves (the snapshot beside the map, Jon's walk, 2026-11-11). */ hovered?: number | null; onHover?: (id: number | null) => void; /** A dot clicked: the student picks that arrangement as the next start (Jon, 2026-11-11). */ onPick?: (id: number) => void }) {
   const g = stateGraph(disks)
   const height = width * 0.9
   const pad = 18
@@ -77,7 +77,7 @@ export function StateGraphView({ disks, path, pauses, highlight, width = 420, ho
         <circle key={`p${i}`} cx={X(g.nodes[id].x)} cy={Y(g.nodes[id].y)} r={r + 6} fill="none" stroke="var(--avoid)" strokeWidth={2} data-pause={id} />
       ))}
       {hovered !== null && hovered !== undefined && g.nodes[hovered] && <circle cx={X(g.nodes[hovered].x)} cy={Y(g.nodes[hovered].y)} r={r + 5} fill="none" stroke="var(--accent)" strokeWidth={2} data-hovered={hovered} />}
-      {onHover && g.nodes.map((n) => <circle key={`h${n.id}`} cx={X(n.x)} cy={Y(n.y)} r={Math.max(r + 4, 6)} fill="transparent" onMouseEnter={() => onHover(n.id)} style={{ cursor: 'crosshair' }} />)}
+      {onHover && g.nodes.map((n) => <circle key={`h${n.id}`} cx={X(n.x)} cy={Y(n.y)} r={Math.max(r + 4, 6)} fill="transparent" onMouseEnter={() => onHover(n.id)} onClick={onPick ? () => onPick(n.id) : undefined} style={{ cursor: onPick ? 'pointer' : 'crosshair' }} />)}
       {g.halfway !== null && <circle cx={X(g.nodes[g.halfway].x)} cy={Y(g.nodes[g.halfway].y)} r={r + 4} fill="none" stroke="var(--actuator)" strokeWidth={1.5} strokeDasharray="3 2" data-halfway />}
       <text x={X(g.nodes[g.shortest[0]].x)} y={Y(g.nodes[g.shortest[0]].y) - 8} fontSize={10} textAnchor="middle" fill="var(--text)">
         start
