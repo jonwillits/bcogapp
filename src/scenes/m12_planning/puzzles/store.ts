@@ -130,7 +130,17 @@ export class PuzzlesStore implements PartStore {
   known: (number | null)[] = new Array<number | null>(N_NODES).fill(null)
   looks: number[] = []
   chosen: number[] = []
-  revealAll = false
+  /**
+   * The tree just taken, kept on view with its path's numbers and its
+   * points until “Next tree” (Jon's walk, 2026-11-11: the spec's one-second
+   * flash of every number was a working-memory test and a timed transition;
+   * now a scored tree shows only the path's numbers, a practice tree every
+   * number, and the student goes on when ready). The record is saved at
+   * once, so a reload here loses nothing.
+   */
+  afterPath: { tree: Tree; record: TreeRecord } | null = null
+  /** The instruction screen shown again over a tree in progress (Jon, 2026-11-11). */
+  instructionsOpen = false
   private lookerRng: Rng
 
   constructor(seed: number, progress: ProgressStore) {
@@ -162,7 +172,18 @@ export class PuzzlesStore implements PartStore {
   open(step: Step): void {
     this.stopPlaying()
     this.replay = null
+    this.instructionsOpen = false
     this.step = step
+    this.changed()
+  }
+
+  showInstructions(): void {
+    this.instructionsOpen = true
+    this.changed()
+  }
+
+  hideInstructions(): void {
+    this.instructionsOpen = false
     this.changed()
   }
 
@@ -442,7 +463,7 @@ export class PuzzlesStore implements PartStore {
     this.known = new Array<number | null>(N_NODES).fill(null)
     this.looks = []
     this.chosen = []
-    this.revealAll = false
+    this.afterPath = null
     this.treesPartial = { ...this.treesPartial, shown: true }
     this.progress.savePartial(TREES_UNIT, this.treesPartial)
   }
@@ -451,14 +472,49 @@ export class PuzzlesStore implements PartStore {
     return this.treesPartial.index < this.totalTrees ? this.treeAt(this.treesPartial.index) : null
   }
 
+  /** Whether the tree on view (the one just taken, while its feedback is up) is a practice tree. */
   get isPractice(): boolean {
+    if (this.afterPath) return !this.afterPath.record.scored
     return this.treesPartial.index < PRACTICE_TREES
+  }
+
+  /** The index of the tree on view in the sequence; during the feedback, the tree just taken. */
+  get indexOnView(): number {
+    return this.afterPath ? this.treesPartial.index - 1 : this.treesPartial.index
+  }
+
+  /** The label of the tree on view: Practice n of 3, or Test n of 16 (Jon, 2026-11-11). */
+  get treeLabel(): string {
+    const i = this.indexOnView
+    return i < PRACTICE_TREES ? `Practice ${i + 1} of ${PRACTICE_TREES}` : `Test ${i - PRACTICE_TREES + 1} of ${SCORED_TREES}`
+  }
+
+  /** Whether every number of the tree on view is shown: after the path, on a practice tree only. */
+  get revealAll(): boolean {
+    return this.afterPath !== null && !this.afterPath.record.scored
+  }
+
+  /** The practice trees' total so far, points; shown as an example, never scored. */
+  get practiceTotal(): number {
+    return this.treesPartial.records.filter((r) => !r.scored).reduce((s, r) => s + r.net, 0)
+  }
+
+  /** The points of the chosen nodes whose numbers are known, and whether any chosen node is still hidden. */
+  pathSoFar(): { known: number[]; hidden: number } {
+    const known: number[] = []
+    let hidden = 0
+    for (const n of this.chosen) {
+      const v = this.known[n]
+      if (v === null) hidden++
+      else known.push(v)
+    }
+    return { known, hidden }
   }
 
   /** Uncover a node for a point. */
   look(node: number): void {
     const t = this.currentTree
-    if (!t || this.revealAll || this.known[node] !== null) return
+    if (!t || this.afterPath || this.known[node] !== null) return
     this.known[node] = t.values[node]
     this.looks.push(node)
     this.changed()
@@ -466,7 +522,7 @@ export class PuzzlesStore implements PartStore {
 
   /** Choose a node for the path: a step-1 node, then a child, then a grandchild; choosing elsewhere restarts the path from that node's step. */
   choosePathNode(node: number): void {
-    if (this.revealAll) return
+    if (this.afterPath) return
     const step = stepOf(node)
     if (step === 1) this.chosen = [node]
     else if (step === 2 && this.chosen.length >= 1 && childrenOf(this.chosen[0]).includes(node)) this.chosen = [this.chosen[0], node]
@@ -476,26 +532,29 @@ export class PuzzlesStore implements PartStore {
   }
 
   get canTake(): boolean {
-    return this.chosen.length === 3 && !this.revealAll
+    return this.chosen.length === 3 && !this.afterPath
   }
 
+  /** Take the chosen path: the record is saved at once; the tree stays on view with its feedback until “Next tree”. */
   takePath(): void {
     const t = this.currentTree
     if (!t || !this.canTake) return
     const path = this.chosen as [number, number, number]
     const net = path.reduce((s, n) => s + t.values[n], 0) - this.looks.length * LOOK_COST
     const record: TreeRecord = { tree: t, looks: [...this.looks], path, net, scored: !this.isPractice }
-    this.revealAll = true
+    for (const n of path) this.known[n] = t.values[n]
+    this.afterPath = { tree: t, record }
+    this.treesPartial = { ...this.treesPartial, records: [...this.treesPartial.records, record], index: this.treesPartial.index + 1, shown: false }
+    if (this.treesPartial.index >= this.totalTrees) this.finishTrees()
+    else this.progress.savePartial(TREES_UNIT, this.treesPartial)
     this.changed()
-    setTimeout(() => {
-      this.treesPartial = { ...this.treesPartial, records: [...this.treesPartial.records, record], index: this.treesPartial.index + 1, shown: false }
-      if (this.treesPartial.index >= this.totalTrees) this.finishTrees()
-      else {
-        this.progress.savePartial(TREES_UNIT, this.treesPartial)
-        this.startTree()
-      }
-      this.changed()
-    }, 1000)
+  }
+
+  /** On from the feedback to the next tree, or to the results after the last. */
+  nextTree(): void {
+    this.afterPath = null
+    if (!this.progress.isComplete(TREES_UNIT)) this.startTree()
+    this.changed()
   }
 
   private finishTrees(): void {
@@ -515,9 +574,6 @@ export class PuzzlesStore implements PartStore {
     return this.treesPartial.records.filter((r) => r.scored).reduce((s, r) => s + r.net, 0)
   }
 
-  pointsThisTree(): number {
-    return -this.looks.length * LOOK_COST
-  }
 }
 
 export { stateGraph, goalArrangement, bestPath }

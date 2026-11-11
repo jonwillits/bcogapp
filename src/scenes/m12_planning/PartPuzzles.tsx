@@ -10,7 +10,7 @@ import { InstructionScreen } from '../m10_memory/progress/InstructionScreen'
 import type { PartContext, PartModule } from './contract'
 import { PuzzlesStore, TOWER_UNIT, TREES_UNIT } from './puzzles/store'
 import { SCREENS, NEXT_LINE, STEP_TITLES, READY_LINE, PROCEDURE_PREDICTIONS, type Step } from './puzzles/screens'
-import { Pegs, StateGraphView, TreeView, TreePathPicker, TREE_LEGEND } from './puzzles/Views'
+import { Pegs, StateGraphView, TreeView, TreePathPicker, TreeExample, TREE_LEGEND } from './puzzles/Views'
 import { TowerReveal, TreesReveal, PuzzlesResults } from './puzzles/Reveal'
 import { registerResults } from './Part0'
 
@@ -61,16 +61,17 @@ function Left({ ctx }: { ctx: Ctx }) {
               <Note>Click a peg to lift its top disk, then click the peg to put it on. The results of this step appear on the right when both puzzles are solved.</Note>
             </>
           )}
-          {state === 'running' && s.step === 2 && <Note>The procedures are walked one at a time in the middle of the screen; the table on the right fills as they run.</Note>}
+          {state === 'running' && s.step === 2 && <Note>You run the procedures one at a time in the middle of the screen. The results are in the table on the right.</Note>}
           {state === 'running' && s.step === 3 && (
             <>
-              <FixedLines lines={[`${'tree'.padEnd(20)}${`${s.treesPartial.index + 1} of ${s.totalTrees}`.padStart(10)}`, `${'this tree is'.padEnd(20)}${(s.isPractice ? 'practice' : 'scored').padStart(10)}`, `${'clicks this tree'.padEnd(20)}${String(s.looks.length).padStart(10)}`, `${'running total'.padEnd(20)}${String(s.runningTotal).padStart(10)}`]} testId="tree-status" />
+              <FixedLines lines={[`${'tree'.padEnd(16)}${s.treeLabel.padStart(16)}`, `${'clicks this tree'.padEnd(16)}${String(s.looks.length).padStart(16)}`, `${'practice total'.padEnd(16)}${String(s.practiceTotal).padStart(16)}`, `${'total, tests'.padEnd(16)}${String(s.runningTotal).padStart(16)}`]} testId="tree-status" />
               <Note>Uncover numbers by clicking nodes, choose a path, and press “Take this path” over the view. The results of this step appear on the right after the last tree.</Note>
             </>
           )}
-          {(state === 'done' || (state === 'running' && s.step === 2)) && (
+          {(state === 'done' || (state === 'running' && (s.step === 2 || s.step === 3))) && (
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {s.step === 2 && <Btn onClick={() => s.reopen()}>Show the instructions again</Btn>}
+              {s.step === 2 && state === 'running' && <Btn onClick={() => s.reopen()}>Show the instructions again</Btn>}
+              {s.step === 3 && state === 'running' && <Btn onClick={() => s.showInstructions()}>Show the instructions again</Btn>}
               {s.step > 1 && <Btn onClick={() => s.open((s.step - 1) as Step)}>Go back to Step {s.step - 1}</Btn>}
               {s.step < 3 && <Btn onClick={() => s.open((s.step + 1) as Step)}>Go on to Step {s.step + 1}</Btn>}
               {s.step === 3 && state === 'done' && <Btn onClick={() => ctx.openTab('band')}>Go on to Part 3</Btn>}
@@ -88,7 +89,8 @@ function Stage({ ctx }: { ctx: Ctx }) {
   useStore(ctx.progress)
   const screen = SCREENS[s.step]
   const state = s.state
-  if (state === 'intro') return <InstructionScreen title={screen.title} willDo={screen.willDo} minutes={screen.minutes} sitting={screen.sitting} sittingLine={screen.sittingLine} ready={READY_LINE} keys={screen.keys} content={screen.content} next={NEXT_LINE[s.step]} onBegin={() => s.begin()} />
+  if (state === 'intro') return <InstructionScreen title={screen.title} willDo={screen.willDo} minutes={screen.minutes} sitting={screen.sitting} sittingLine={screen.sittingLine} ready={READY_LINE} keys={screen.keys} content={screen.content} next={NEXT_LINE[s.step]} figure={s.step === 3 ? <TreeExample /> : undefined} onBegin={() => s.begin()} />
+  if (s.step === 3 && s.instructionsOpen) return <InstructionScreen title={screen.title} willDo={screen.willDo} minutes={screen.minutes} sitting={screen.sitting} sittingLine={screen.sittingLine} ready={READY_LINE} keys={screen.keys} content={screen.content} next={NEXT_LINE[s.step]} figure={<TreeExample />} onBegin={() => s.hideInstructions()} beginLabel="Back to the tree" />
   if (s.step === 1) {
     if (state === 'done' && s.replay) {
       const n = s.replay.disks
@@ -150,7 +152,7 @@ function Stage({ ctx }: { ctx: Ctx }) {
     )
   }
   if (s.step === 2) return <ProcedureTour s={s} title={screen.title} />
-  if (state === 'done')
+  if (state === 'done' && !s.afterPath)
     return (
       <StagePanel testId="done">
         <div style={{ fontSize: 14, fontWeight: 600 }}>{screen.title}</div>
@@ -163,26 +165,43 @@ function Stage({ ctx }: { ctx: Ctx }) {
         </div>
       </StagePanel>
     )
-  const t = s.currentTree
+  const after = s.afterPath
+  const t = after ? after.tree : s.currentTree
   if (!t) return null
+  const practice = s.isPractice
+  const sofar = s.pathSoFar()
+  const signed = (v: number) => (v > 0 ? `+${v}` : `−${Math.abs(v)}`)
+  const looksCost = s.looks.length * LOOK_COST
+  const pathTerms = [...sofar.known.map(signed), ...Array.from({ length: sofar.hidden }, () => '?')]
+  const subtotal = sofar.known.reduce((a, b) => a + b, 0) - looksCost
+  const scoreLine = ['Score:', looksCost ? `−${looksCost} (clicks)` : '0 (clicks)', ...pathTerms, '=', `${subtotal < 0 ? `−${-subtotal}` : subtotal}${sofar.hidden ? ' so far' : ''}`].join(' ')
   return (
     <StagePanel wide testId="trees">
-      <div style={{ fontSize: 14, fontWeight: 600 }}>{screen.title}</div>
-      <Note>
-        Tree {s.treesPartial.index + 1} of {s.totalTrees}{s.isPractice ? ' (practice, not scored)' : ''}. Each click costs {LOOK_COST} point.
-      </Note>
+      <div style={{ fontSize: 14, fontWeight: 600 }}>
+        {screen.title}: {s.treeLabel}
+      </div>
+      <Note>{practice ? 'A practice tree. It is not scored; its points are shown as an example only.' : 'A test. Its points count toward your total.'} Each click costs {LOOK_COST} point.</Note>
       <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-        <Big label="points this tree so far" value={String(s.pointsThisTree()).padStart(4)} />
-        <Big label="running total, scored trees" value={String(s.runningTotal).padStart(4)} />
+        <Big label={practice ? 'practice total' : 'total, tests'} value={String(practice ? s.practiceTotal : s.runningTotal).padStart(4)} />
+        <FixedLines lines={[scoreLine, after ? `This tree: ${after.record.net} points${practice ? ' (practice, not counted)' : ', added to your total'}.` : ' ']} testId="tree-score" />
       </div>
-      <TreeView tree={t} known={s.known} chosen={s.chosen} revealAll={s.revealAll} onLook={(n) => s.look(n)} onChoose={(n) => s.choosePathNode(n)} />
-      {!s.revealAll && <TreePathPicker chosen={s.chosen} known={s.known} onChoose={(n) => s.choosePathNode(n)} />}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <Btn primary onClick={() => s.takePath()} disabled={!s.canTake}>
-          Take this path
-        </Btn>
-        <Note>{s.revealAll ? 'Every number is shown for a moment; the next tree follows.' : s.chosen.length < 3 ? `Choose ${3 - s.chosen.length} more node${3 - s.chosen.length === 1 ? '' : 's'} for your path.` : 'Your path is chosen.'}</Note>
-      </div>
+      <TreeView tree={t} known={s.known} chosen={s.chosen} revealAll={s.revealAll} settled={!!after} onLook={(n) => s.look(n)} onChoose={(n) => s.choosePathNode(n)} />
+      {!after && <TreePathPicker chosen={s.chosen} known={s.known} onChoose={(n) => s.choosePathNode(n)} />}
+      {after ? (
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }} data-after-path>
+          <Btn primary onClick={() => s.nextTree()}>
+            {s.treesResult ? 'See the results' : 'Next tree'}
+          </Btn>
+          <Note data-next>{practice ? 'Every number is shown, because this is a practice tree. On the tests, only the numbers on your path are shown. Take as long as you like, then press “Next tree”.' : s.treesResult ? 'That was the last tree. Press “See the results”.' : 'The numbers on your path are shown. Press “Next tree” when you are ready.'}</Note>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <Btn primary onClick={() => s.takePath()} disabled={!s.canTake}>
+            Take this path
+          </Btn>
+          <Note>{s.chosen.length < 3 ? `Choose ${3 - s.chosen.length} more node${3 - s.chosen.length === 1 ? '' : 's'} for your path.` : 'Your path is chosen.'}</Note>
+        </div>
+      )}
       <Note>{TREE_LEGEND}</Note>
     </StagePanel>
   )
@@ -229,7 +248,7 @@ function ProcedureTour({ s, title }: { s: PuzzlesStore; title: string }) {
         {committed === null ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: 10, border: '1px solid var(--accent)', borderRadius: 8 }} data-predict={id}>
             <GroupLabel>Predict first</GroupLabel>
-            <Note>Use what you have just read. The prediction is saved, and the procedure runs only after it; the puzzle appears here once it is committed.</Note>
+            <Note>Use what you have just read. Once you commit, your prediction is saved and the puzzle appears here.</Note>
             <Content>{pred.question}</Content>
             <Choice value={s.draft[id] ?? null} options={pred.choices.map((c) => ({ id: c, label: c }))} onChange={(c) => s.chooseDraft(id, c)} />
             <div>
@@ -279,18 +298,18 @@ function ProcedureTour({ s, title }: { s: PuzzlesStore; title: string }) {
                   lines={[
                     run ? `${PROCEDURES[run.procedure].label}: move ${at} of ${run.moves.length}` : 'No procedure has run at this setting.',
                     run && run.procedure === 'recursion' && run.stackDepths ? `goals on the stack: ${String(run.stackDepths[at] ?? 0).padStart(2)}` : ' ',
-                    finished ? (run!.solved ? 'The run is over: the goal is reached.' : 'Stopped short of the goal: the table says why.') : ' ',
+                    finished ? (run!.solved ? 'The run is over: the goal is reached.' : 'Stopped short of the goal: see the table.') : ' ',
                   ]}
                   testId="procedure-status"
                 />
-                <Note>The pegs show the arrangement as the procedure moves the disks. A finished run stays on view until the next “Run”, or a change of “Disks” or “Start”.</Note>
+                <Note>You see the arrangement on the pegs as the procedure moves the disks. A finished run stays in view until you press “Run” again or change “Disks” or “Start”.</Note>
               </div>
             </div>
             <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
               <StateGraphView disks={s.procDisks} path={path} width={s.procDisks >= 5 ? 400 : 360} hovered={hovered} onHover={setHovered} />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1, minWidth: 0 }}>
                 <Snapshot id={hovered} disks={s.procDisks} path={path} />
-                <Note>The map marks the arrangements the run has passed through. Dots are arrangements; lines join arrangements one move apart; the heavier line is the shortest solution. Point at a dot to see that arrangement in the box above.</Note>
+                <Note>Each dot is an arrangement of the disks. Each line joins two arrangements one move apart. The heavier line is the shortest solution. The arrangements this run has passed through are marked. Point at a dot to see that arrangement in the box above.</Note>
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }} data-go-on>
@@ -300,7 +319,7 @@ function ProcedureTour({ s, title }: { s: PuzzlesStore; title: string }) {
                     <Btn primary onClick={() => s.open(3)}>
                       Go on to Step 3
                     </Btn>
-                    <Note data-next>All five procedures are predicted and run. Go back to any of them from the row of names, or go on to Step 3.</Note>
+                    <Note data-next>You have predicted and run all five procedures. Click a name in the row to go back to one, or go on to Step 3.</Note>
                   </>
                 ) : (
                   <>
@@ -391,7 +410,7 @@ function ProceduresRight({ s }: { s: PuzzlesStore }) {
             {PROCEDURES[r!.procedure].label}, on {r!.disks} disks: {r!.stopped}
           </Note>
         ))}
-        <Note>What each procedure does, what it stores and where it comes from is on the stage, with your prediction, as the walk reaches it.</Note>
+        <Note>You can read each procedure’s description and source, and see your prediction about it, in the middle of the screen when you reach it.</Note>
         <GroupLabel>The futures panel</GroupLabel>
         <Para>With a number of options at each step and a number of steps ahead, the number of possible sequences is the options multiplied by themselves once per step. At about {STATES_PER_MINUTE} states a minute, the rate the reading gives for people thinking aloud (§12.2.2), examining every sequence takes the time printed.</Para>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>

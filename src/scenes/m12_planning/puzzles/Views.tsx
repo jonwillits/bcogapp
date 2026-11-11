@@ -94,7 +94,7 @@ const key = (a: number, b: number) => (a < b ? `${a}-${b}` : `${b}-${a}`)
 export const GRAPH_LEGEND = 'Each dot is an arrangement of the disks, and each line joins two arrangements one legal move apart. The heavier line along one side is the shortest solution. Dots and lines in the second color are your own path, in the order you made your moves; a red ring marks a long pause; a dashed green ring marks the halfway node of the four-disk puzzle.'
 
 /** A tree of hidden numbers (spec §6.4): the start at the top, two choices at each of three steps. Hidden nodes show a question mark; uncovered nodes their number; the chosen path is outlined. */
-export function TreeView({ tree, known, chosen, revealAll, onLook, onChoose, width = 440 }: { tree: Tree; known: (number | null)[]; chosen: number[]; revealAll: boolean; onLook: (n: number) => void; onChoose: (n: number) => void; width?: number }) {
+export function TreeView({ tree, known, chosen, revealAll, settled, onLook, onChoose, width = 440 }: { tree: Tree; known: (number | null)[]; chosen: number[]; revealAll: boolean; /** The path is taken: no node is clickable and no node carries a choosing label. */ settled?: boolean; onLook: (n: number) => void; onChoose: (n: number) => void; width?: number }) {
   const height = 300
   const pos = (n: number): { x: number; y: number } => {
     const step = stepOf(n)
@@ -122,11 +122,11 @@ export function TreeView({ tree, known, chosen, revealAll, onLook, onChoose, wid
         const shown = value !== null
         return (
           <g key={n} data-tree-node={n} data-known={shown ? value : undefined}>
-            <circle cx={p.x} cy={p.y} r={18} fill={shown ? (value! < 0 ? 'var(--avoid)' : 'var(--actuator)') : 'var(--surface-2)'} stroke={onPath(n) ? 'var(--accent)' : 'var(--border)'} strokeWidth={onPath(n) ? 3 : 1} style={{ cursor: 'pointer' }} onClick={() => (shown ? onChoose(n) : onLook(n))} />
+            <circle cx={p.x} cy={p.y} r={18} fill={shown ? (value! < 0 ? 'var(--avoid)' : 'var(--actuator)') : 'var(--surface-2)'} stroke={onPath(n) ? 'var(--accent)' : 'var(--border)'} strokeWidth={onPath(n) ? 3 : 1} style={{ cursor: settled ? 'default' : 'pointer' }} onClick={settled ? undefined : () => (shown ? onChoose(n) : onLook(n))} />
             <text x={p.x} y={p.y + 4} fontSize={12} fontWeight={600} textAnchor="middle" fill={shown ? '#0b111c' : 'var(--text)'} style={{ pointerEvents: 'none' }}>
               {shown ? (value! > 0 ? `+${value}` : `−${Math.abs(value!)}`) : '?'}
             </text>
-            {shown && !revealAll && (
+            {shown && !revealAll && !settled && (
               <text x={p.x} y={p.y + 30} fontSize={9} textAnchor="middle" fill="var(--text-muted)" style={{ cursor: 'pointer' }} onClick={() => onChoose(n)}>
                 {onPath(n) ? 'on your path' : 'click to choose'}
               </text>
@@ -135,6 +135,20 @@ export function TreeView({ tree, known, chosen, revealAll, onLook, onChoose, wid
         )
       })}
     </svg>
+  )
+}
+
+/** A made-up tree for the instruction screen (Jon, 2026-11-11): regular values only, three uncovered, a path chosen through one hidden node. It teaches the mechanics and nothing about the measure. */
+const EXAMPLE_TREE: Tree = { kind: 'regular', values: [10, -5, 5, -5, 10, -10, 5, -10, 5, 10, -5, 5, 10, -5], lossNode: null }
+const EXAMPLE_KNOWN: (number | null)[] = EXAMPLE_TREE.values.map((v, n) => ([0, 2, 3].includes(n) ? v : null))
+export const EXAMPLE_CAPTION = 'An example. Three numbers have been uncovered, at a cost of 3 points: +10, +5 and −5. The path outlined runs through +10, +5 and a node still hidden. If that node turns out to be +5, the path is worth 20 points, and the tree earns 20 − 3 = 17 points.'
+
+export function TreeExample() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-tree-example>
+      <TreeView tree={EXAMPLE_TREE} known={EXAMPLE_KNOWN} chosen={[0, 2, 6]} revealAll={false} settled onLook={() => {}} onChoose={() => {}} width={360} />
+      <Note>{EXAMPLE_CAPTION}</Note>
+    </div>
   )
 }
 
