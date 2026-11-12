@@ -26,7 +26,7 @@ import { registerResults } from './Part0'
  * note, since the day's acts and status are under and over the view, the
  * test menu and Run 10 days, Watch day n, Follow, the diagnosis); the stage
  * carries the instruction screens and the status lines over the view; the
- * right column carries My table, the table of what each need takes, and
+ * right column carries My table, the table of what each need requires, and
  * the five procedures in words.
  */
 
@@ -451,7 +451,7 @@ function Right({ ctx }: { ctx: Ctx }) {
         )}
         {s.step >= 2 && s.step <= 3 && (
           <>
-            <Note>Per hominin and test: for T1 and T3 to T6, the share of the ten days on which the hominin reached the need’s place within the window holding what it takes, averaged over your runs of that test, with the number of runs in brackets; for T2, the share of days 2 to 10 on which it carried a flake to the grassland. Only tests you have run are shown.</Note>
+            <Note>Per hominin and test: for T1 and T3 to T6, the share of the ten days on which the hominin reached the need’s place within the window holding what it requires, averaged over your runs of that test, with the number of runs in brackets; for T2, the share of days 2 to 10 on which it carried a flake to the grassland. Only tests you have run are shown.</Note>
             {tests.length ? <FixedLines lines={[`${'hominin'.padEnd(9)}${tests.map((t) => t.padStart(10)).join('')}`, ...LETTERS.map((l) => `${l.padEnd(9)}${tests.map((t) => (table[l][t] ? `${table[l][t]!.share.toFixed(2)} (${table[l][t]!.runs})` : '').padStart(10)).join('')}`)]} testId="my-table" /> : <Note>No runs yet.</Note>}
             {strips && (
               <>
@@ -478,7 +478,7 @@ function Right({ ctx }: { ctx: Ctx }) {
           </>
         )}
         {s.step === 4 && s.diagnosed && <Reveal s={s} />}
-        <GroupLabel>What each need takes</GroupLabel>
+        <GroupLabel>What each need requires</GroupLabel>
         <Note>This table describes the range, not any hominin’s rule. A preparatory act is an errand before the need’s place: fetching an item at its source, or making an item from what is in hand.</Note>
         <div style={{ overflowX: 'auto' }}>
           <FixedLines lines={NEEDS_TABLE_LINES} testId="needs-table" />

@@ -1,7 +1,7 @@
 import type { Item, Place } from './places'
 
 /**
- * What each need takes (spec §7.3): the table shown on screen throughout
+ * What each need requires (spec §7.3): the table shown on screen throughout
  * Part 3, because it describes the range and not any hominin's rule. **The
  * world reads it; no programmed hominin may** (spec §11, item 4, by the
  * structural test in `structure.test.ts`). The planners learn their own
