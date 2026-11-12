@@ -102,11 +102,11 @@ async function range(browser, throttle) {
   await page.keyboard.down('ArrowUp'); await page.waitForTimeout(4600); await page.keyboard.up('ArrowUp')
   await page.waitForTimeout(200)
   const near = await page.evaluate(() => [...document.querySelectorAll('[data-lines="day-status"] [data-line]')].map((e) => e.textContent.trim()))
-  await page.keyboard.press('Enter'); await page.waitForTimeout(800)
+  await page.keyboard.press('KeyJ'); await page.waitForTimeout(800)
   const during = await page.evaluate(() => !!document.querySelector('[data-act-progress]'))
   await page.waitForTimeout(6000)
   const after = await page.evaluate(() => [...document.querySelectorAll('[data-lines="day-status"] [data-line]')].map((e) => e.textContent.trim()))
-  console.log(`range${throttle ? ' (4× throttle)' : ''}: after the drive: ${near.join(' | ')}; act in progress 0.8 s after Enter: ${during}; after 6.8 s: ${after.join(' | ')}`)
+  console.log(`range${throttle ? ' (4× throttle)' : ''}: after the drive: ${near.join(' | ')}; act in progress 0.8 s after J: ${during}; after 6.8 s: ${after.join(' | ')}`)
   const f1 = await fps(page, 4)
   console.log(`range${throttle ? ' (4× throttle)' : ''}: Step 1, the student and the elder on screen: ${f1.toFixed(0)} frames a second`)
   // Step 2: live the history (sliced), then run T1 and watch day 1 with all six on screen.

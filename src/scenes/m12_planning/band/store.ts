@@ -206,11 +206,23 @@ export class BandStore implements PartStore {
     return this.progress.isComplete(DAY_UNIT(n)) ? (this.progress.result(DAY_UNIT(n)) as DayRecord) : null
   }
 
-  /** The act key or button: the first act the panel offers. */
+  /** Enter, or its button: make what the hands allow. */
   act(): void {
-    const acts = this.day?.available() ?? []
-    if (acts.length) acts[0].run()
+    this.day?.make()
     this.changed()
+  }
+
+  /** J or K, or a hand's button: that hand picks up or puts down. */
+  hand(side: 0 | 1): void {
+    this.day?.hand(side)
+    this.changed()
+  }
+
+  /** The fraction of a step left over after this frame's steps, from the frame loop; the view draws the body that much short of its last step, so it moves at one rate across frames. */
+  alpha = 1
+
+  frame(alpha: number): void {
+    this.alpha = alpha
   }
 
   tick(dt: number, cmd: DriveCommand): void {

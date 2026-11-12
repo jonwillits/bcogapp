@@ -4,7 +4,8 @@ import { AnimalCamera } from '../m09_rat/AnimalCamera'
 import { TESTS, type TestId } from '../../sim/planning/tests'
 import { RUN_ORDER } from '../../sim/planning/history'
 import { HOMININ_LABEL, HOMININ_KINDS, type HomininKind } from '../../sim/planning/hominins/types'
-import { positionAt, fmt, describeHands, TIME_SCALE } from '../../sim/planning/studentDay'
+import { positionAt, groundAt, fmt, handLines, TIME_SCALE, type GroundItem } from '../../sim/planning/studentDay'
+import { DT } from './contract'
 import { MORNING_SECONDS, WINDOW_SECONDS } from '../../sim/planning/range/places'
 import { NEED_TABLE } from '../../sim/planning/range/needs'
 import { separability } from '../../sim/planning/matrix'
@@ -21,7 +22,8 @@ import { registerResults } from './Part0'
 
 /**
  * Part 3's screens (spec §7): the range in 3D in the canvas; the left
- * column runs the step (Begin, the predictions, the acts in Step 1, the
+ * column runs the step (Begin, the predictions, in Step 1 only the step's
+ * note, since the day's acts and status are under and over the view, the
  * test menu and Run 10 days, Watch day n, Follow, the diagnosis); the stage
  * carries the instruction screens and the status lines over the view; the
  * right column carries My table, the table of what each need takes, and
@@ -78,7 +80,15 @@ function Left({ ctx }: { ctx: Ctx }) {
               </div>
             </div>
           )}
-          {state === 'running' && s.step === 1 && <DayControls s={s} />}
+          {state === 'running' && s.step === 1 && (
+            <div data-day-note>
+              {s.day ? (
+                <Note>Walk with the arrow keys or the drive pad under the view. The buttons for your two hands and for making are under the view too, and appear only when an act is possible. The clock and what you hold are over the view. The day’s log is on the right.</Note>
+              ) : (
+                <Note>{s.dayRecord(1) && s.dayRecord(2) ? 'Both days are done and saved. Their summaries are on the right.' : 'The day is saved.'}</Note>
+              )}
+            </div>
+          )}
           {state === 'running' && s.step >= 2 && (
             <>
               {screen.predictions.length > 0 && <FixedLines lines={screen.predictions.map((p) => `Your prediction: ${s.prediction(p.key) ?? '—'}`)} mono={false} />}
@@ -101,73 +111,6 @@ function Left({ ctx }: { ctx: Ctx }) {
         </div>
       </Panel>
     </>
-  )
-}
-
-function DayControls({ s }: { s: BandStore }) {
-  const d = s.day
-  if (!d) {
-    const done1 = s.dayRecord(1)
-    const done2 = s.dayRecord(2)
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <Note>
-          {done1 && done2 ? 'Both days are done and saved. Their summaries are on the right.' : 'The day is saved.'}
-        </Note>
-      </div>
-    )
-  }
-  const st = d.state
-  const acts = d.available()
-  const left = st.phase === 'morning' || st.phase === 'dawn' ? MORNING_SECONDS - st.clock : st.phase === 'midday' ? MORNING_SECONDS + WINDOW_SECONDS - st.clock : 0
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-day-controls>
-      <FixedLines
-        lines={[
-          `${'day'.padEnd(16)}${`${s.dayIndex} of 2`.padStart(12)}`,
-          `${'range clock'.padEnd(16)}${fmt(st.clock).padStart(12)}`,
-          `${st.phase === 'midday' ? 'window left' : 'morning left'.padEnd(16)}${st.phase === 'done' || st.phase === 'afternoon' ? '—'.padStart(12) : `${Math.ceil(left)} s`.padStart(12)}`,
-          `${'in hand'.padEnd(16)}${describeHands(st.hands).slice(0, 26).padStart(12)}`,
-          `${'near'.padEnd(16)}${(d.nearPlace() ? placeName(d.nearPlace()!) : 'open ground').padStart(12)}`,
-        ]}
-        testId="day-status"
-      />
-      {st.act && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }} data-act-progress>
-          <Note>{st.message}</Note>
-          <div style={{ height: 8, borderRadius: 4, background: 'var(--surface-2)', border: '1px solid var(--border)', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${(100 * (st.act.total - st.act.left)) / st.act.total}%`, background: 'var(--accent)' }} />
-          </div>
-        </div>
-      )}
-      {!st.act && st.phase !== 'done' && (
-        <>
-          <GroupLabel>Acts</GroupLabel>
-          {acts.length ? (
-            acts.map((a) => (
-              <div key={a.id}>
-                <Btn small primary onClick={() => { a.run(); s.changed() }}>
-                  {a.label}
-                </Btn>
-              </div>
-            ))
-          ) : (
-            <Note>Nothing to do here. Walk to a place to pick something up, or hold what a making needs.</Note>
-          )}
-        </>
-      )}
-      {st.phase === 'done' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-day-done>
-          <GroupLabel>The day is over</GroupLabel>
-          <Note>{st.ate ? 'Your hominin ate.' : 'Your hominin did not eat.'} The day’s record is on the right.</Note>
-          <div>
-            <Btn primary onClick={() => s.finishDay()}>
-              {s.dayIndex === 1 ? 'Save this day and go on to day 2' : 'Save this day and finish Step 1'}
-            </Btn>
-          </div>
-        </div>
-      )}
-    </div>
   )
 }
 
@@ -241,7 +184,7 @@ function RunControls({ s }: { s: BandStore }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }} data-variant>
           <GroupLabel>What the Shallow planner counts at the end of its search</GroupLabel>
           <Choice value={s.variant} options={[{ id: 'A', label: 'nothing (a pure depth limit)' }, { id: 'B', label: 'a learned estimate of the state it ends in' }]} onChange={(v) => s.setVariant(v as 'A' | 'B')} />
-          <Note>In the first variant, a sequence that reaches no food within two preparatory acts and a place counts for nothing. In the second, such a sequence is valued by an estimate of the state it ends in, learned by a critic over states, Lab 5’s Verdict setting, from the hominin’s own mornings, as AlphaZero scores the position at the end of each continuation with its critic (§12.2.3). The setting applies to your later runs. The handout asks you to leave it as set.</Note>
+          <Note>In the first variant, a sequence that reaches no food within two preparatory acts and a place counts for nothing. In the second, such a sequence is valued by an estimate of the state it ends in, learned by a critic over states, Lab 5’s Verdict setting, from the hominin’s own mornings, as AlphaZero scores the position at the end of each continuation with its critic (§12.2.3). The setting applies to your later runs. The handout says to leave it as set.</Note>
         </div>
       )}
     </div>
@@ -313,6 +256,28 @@ function Stage({ ctx }: { ctx: Ctx }) {
           {l}
         </div>
       ))}
+      {s.step === 1 && s.day && <DayStatus s={s} />}
+    </div>
+  )
+}
+
+/** The day's status block, over the view: the clock, each hand, the place within reach. Fixed lines, one fact to a line. */
+function DayStatus({ s }: { s: BandStore }) {
+  const d = s.day!
+  const st = d.state
+  const left = st.phase === 'morning' || st.phase === 'dawn' ? MORNING_SECONDS - st.clock : st.phase === 'midday' ? MORNING_SECONDS + WINDOW_SECONDS - st.clock : 0
+  const near = d.nearGround()
+  return (
+    <div style={{ marginTop: 4 }}>
+      <FixedLines
+        lines={[
+          `${'range clock'.padEnd(16)}${fmt(st.clock).padStart(16)}`,
+          `${(st.phase === 'midday' ? 'window left' : 'morning left').padEnd(16)}${(st.phase === 'done' || st.phase === 'afternoon' ? '—' : `${Math.ceil(left)} s`).padStart(16)}`,
+          ...handLines(st.slots),
+          `${'near'.padEnd(16)}${(near ? `${near.item === 'diggingStick' ? 'a digging stick' : `a ${near.item}`} on the ground` : d.nearPlace() ? placeName(d.nearPlace()!) : 'open ground').padStart(16)}`,
+        ]}
+        testId="day-status"
+      />
     </div>
   )
 }
@@ -322,15 +287,17 @@ function cueLine(cue: string): string {
 }
 
 function CanvasPart({ ctx }: { ctx: Ctx }) {
-  const s = ctx.store
+  const s = useStore(ctx.store)
   const figures = (): Figure[] => {
     const out: Figure[] = []
     if (s.step === 1 && s.day) {
       const d = s.day
-      const p = d.pose
-      out.push({ id: 'me', label: 'you', ring: STUDENT_COLOR, x: p.x, z: p.y, heading: p.heading, moving: d.body.lastStep !== 0 || d.body.lastTurn !== 0, hands: d.state.hands })
-      const e = positionAt(d.elderSegments, d.state.clock)
-      out.push({ id: 'elder', label: 'the elder', ring: ELDER_COLOR, x: e.x, z: e.z, heading: e.heading, moving: e.moving, hands: handsAt(d.elderSegments, d.state.clock), doing: e.doing })
+      // Drawn a fraction of a step behind the sim, so the body moves at one rate across frames.
+      const p = d.renderPose(s.alpha)
+      const clock = d.renderClock(s.alpha, DT)
+      out.push({ id: 'me', label: 'you', ring: STUDENT_COLOR, x: p.x, z: p.y, heading: p.heading, moving: d.body.lastStep !== 0 || d.body.lastTurn !== 0, hands: d.state.slots })
+      const e = positionAt(d.elderSegments, clock)
+      out.push({ id: 'elder', label: 'the elder', ring: ELDER_COLOR, x: e.x, z: e.z, heading: e.heading, moving: e.moving, hands: slotsOf(handsAt(d.elderSegments, clock)), doing: e.doing })
       return out
     }
     const w = s.watching
@@ -340,17 +307,28 @@ function CanvasPart({ ctx }: { ctx: Ctx }) {
       const letter = s.letters[kind]
       const segs = day ? day.hominins[i].segments : []
       const p = day ? positionAt(segs, t) : { x: (i - 2) * 1.6, z: -1.5, heading: Math.PI / 2, moving: false, doing: '' }
-      out.push({ id: letter, label: letter, ring: LETTER_COLORS[letter], x: p.x, z: p.z, heading: p.heading, moving: p.moving, hands: day ? handsAt(segs, t) : [], doing: day ? p.doing : undefined })
+      out.push({ id: letter, label: letter, ring: LETTER_COLORS[letter], x: p.x, z: p.z, heading: p.heading, moving: p.moving, hands: day ? slotsOf(handsAt(segs, t)) : [null, null], doing: day ? p.doing : undefined })
     })
     if (!day || day.elder.present) {
       const e = day ? positionAt(day.elder.segments, t) : { x: 0, z: 1.5, heading: -Math.PI / 2, moving: false, doing: '' }
-      out.push({ id: 'elder', label: 'the elder', ring: ELDER_COLOR, x: e.x, z: e.z, heading: e.heading, moving: e.moving, hands: day ? handsAt(day.elder.segments, t) : [], doing: day ? e.doing : undefined })
+      out.push({ id: 'elder', label: 'the elder', ring: ELDER_COLOR, x: e.x, z: e.z, heading: e.heading, moving: e.moving, hands: day ? slotsOf(handsAt(day.elder.segments, t)) : [null, null], doing: day ? e.doing : undefined })
     }
     return out
   }
   const figs = figures()
   const day = s.step === 1 ? s.day : null
   const w = s.watching
+  // Items lying in the range: what the student put down or struck off, and what any hominin on view has put down.
+  const ground: GroundItem[] = []
+  if (day) {
+    ground.push(...day.state.ground, ...groundAt(day.elderSegments, day.state.clock, 9))
+  } else if (w) {
+    const wd = w.run.days[w.day]
+    wd.hominins.forEach((h, i) => ground.push(...groundAt(h.segments, w.clock, i)))
+    if (wd.elder.present) ground.push(...groundAt(wd.elder.segments, w.clock, 9))
+  }
+  // The place labels and the figures' labels are hidden while a screen lies over the view, so its text stays legible.
+  const overlay = s.state === 'intro' || s.infoOpen
   const cue = day ? day.state.cue : w ? NEED_TABLE[w.run.days[w.day].need].cue : 'vultures'
   const need = day ? day.state.need : w ? w.run.days[w.day].need : 'carcass'
   const needPresent = day ? day.state.needPresent : w ? w.clock >= MORNING_SECONDS && w.clock < MORNING_SECONDS + WINDOW_SECONDS && w.run.test !== 'T2' : false
@@ -363,7 +341,7 @@ function CanvasPart({ ctx }: { ctx: Ctx }) {
   }
   return (
     <>
-      <RangeView3D obstacles={s.obstacles} cue={cue} need={need} needPresent={needPresent} elderAway={elderAway} figures={figs} clock={ctx.clock} lowDetail={ctx.lowDetail} hideId={followed && ctx.view === 'eye' ? followed.id : null} labels />
+      <RangeView3D obstacles={s.obstacles} cue={cue} need={need} needPresent={needPresent} elderAway={elderAway} figures={figures} ground={ground} clock={ctx.clock} lowDetail={ctx.lowDetail} hideId={followed && ctx.view === 'eye' ? followed.id : null} labels={!overlay} />
       {followed ? <AnimalCamera pose={pose} view={ctx.view} fov={ctx.fov} scale={HOMININ_CAMERA} /> : <AboveCamera fov={ctx.fov} />}
     </>
   )
@@ -385,16 +363,24 @@ function handsAt(segments: readonly { kind: string; t0: number; t1?: number; ite
 }
 type Item = import('../../sim/planning/range/places').Item
 
-function Bottom({ ctx, press, act }: { ctx: Ctx; press: (k: 'forward' | 'back' | 'left' | 'right', down: boolean) => void; act: () => void }) {
+/** A programmed hominin's hands as two slots, left then right. */
+function slotsOf(hands: Item[]): (Item | null)[] {
+  return [hands[0] ?? null, hands[1] ?? null]
+}
+
+function Bottom({ ctx, press }: { ctx: Ctx; press: (k: 'forward' | 'back' | 'left' | 'right', down: boolean) => void; act: () => void; hand: (side: 0 | 1) => void }) {
   const s = useStore(ctx.store)
   if (s.step !== 1 || !s.day) return null
+  const d = s.day
+  const st = d.state
+  const acts = d.available()
   const key = (k: 'forward' | 'back' | 'left' | 'right', label: string) => (
     <button type="button" aria-label={k} onPointerDown={(e) => { e.preventDefault(); press(k, true) }} onPointerUp={() => press(k, false)} onPointerLeave={() => press(k, false)} onPointerCancel={() => press(k, false)} style={{ width: 40, height: 34, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text)', fontSize: 14, fontWeight: 600, cursor: 'pointer', touchAction: 'none' }}>
       {label}
     </button>
   )
   return (
-    <div style={{ display: 'flex', gap: 14, alignItems: 'center', pointerEvents: 'auto' }}>
+    <div style={{ display: 'flex', gap: 14, alignItems: 'center', pointerEvents: 'auto', flexWrap: 'wrap', justifyContent: 'center', maxWidth: 'min(760px, calc(100vw - 700px))' }} data-day-controls>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 40px)', gap: 4, justifyContent: 'center' }} data-drivepad>
         <span />
         {key('forward', '▲')}
@@ -403,10 +389,36 @@ function Bottom({ ctx, press, act }: { ctx: Ctx; press: (k: 'forward' | 'back' |
         {key('back', '▼')}
         {key('right', '▶')}
       </div>
-      <Btn primary onClick={() => { act(); s.act() }}>
-        Act
-      </Btn>
-      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Arrow keys or WASD walk and turn · “Enter” or “Act” does the first act listed under “Acts” · the range clock runs at {TIME_SCALE} range seconds a second</div>
+      {st.act ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 260 }} data-act-progress>
+          <Note>{st.message}</Note>
+          <div style={{ height: 8, borderRadius: 4, background: 'var(--surface-2)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${(100 * (st.act.total - st.act.left)) / st.act.total}%`, background: 'var(--accent)' }} />
+          </div>
+        </div>
+      ) : st.phase === 'done' ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-day-done>
+          <Note>The day is over. {st.ate ? 'Your hominin ate.' : 'Your hominin did not eat.'} The day’s record is on the right.</Note>
+          <div>
+            <Btn primary onClick={() => s.finishDay()}>
+              {s.dayIndex === 1 ? 'Save this day and go on to day 2' : 'Save this day and finish Step 1'}
+            </Btn>
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-start' }} data-acts>
+          {acts.length ? (
+            acts.map((a) => (
+              <Btn key={a.id} small primary onClick={() => (a.key === 'Enter' ? s.act() : s.hand(a.key === 'J' ? 0 : 1))}>
+                {a.label}
+              </Btn>
+            ))
+          ) : (
+            <Note>Nothing to pick up, make or put down here. Walk to a place, or to an item on the ground.</Note>
+          )}
+        </div>
+      )}
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', flexBasis: '100%', textAlign: 'center' }}>Arrow keys or WASD walk and turn · “J” is the left hand, “K” the right: pick up or put down · “Enter” makes · the range clock runs at {TIME_SCALE} range seconds a second</div>
     </div>
   )
 }

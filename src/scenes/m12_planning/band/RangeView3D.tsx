@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import { PLACE_XZ, PLACES, type Item, type Place } from '../../../sim/planning/range/places'
 import type { Cue, Need } from '../../../sim/planning/range/needs'
 import { NEED_TABLE } from '../../../sim/planning/range/needs'
-import type { Obstacle } from '../../../sim/planning/studentDay'
+import type { GroundItem, Obstacle } from '../../../sim/planning/studentDay'
 import { placeName } from './screens'
 
 /**
@@ -15,7 +15,10 @@ import { placeName } from './screens'
  * simple shapes: an upright body with long legs, a plain head with no
  * facial detail, hands that visibly carry up to two items, one neutral body
  * color for every hominin, and a colored ring at the feet with a label.
- * Drawing only; nothing here reaches the sim. The world's (x, z) maps to
+ * The figures are read through a function once a frame and placed in the
+ * frame loop, not through React's render, so a walking body moves every
+ * frame and not every panel update (Jon's walk, 2026-11-11: the self view
+ * jumped a step at a time). Drawing only; nothing here reaches the sim. The world's (x, z) maps to
  * three.js (x, −z) as Lab 9's `toThree` does, so the range's north is away
  * from a camera that looks along −z.
  */
@@ -28,7 +31,8 @@ export interface Figure {
   z: number
   heading: number
   moving: boolean
-  hands: readonly Item[]
+  /** What each hand holds, left then right; null for an empty hand. */
+  hands: readonly (Item | null)[]
   /** A word on what it is doing, shown under the label when set. */
   doing?: string
 }
@@ -39,7 +43,10 @@ export interface RangeViewProps {
   need: Need
   needPresent: boolean
   elderAway: boolean
-  figures: Figure[]
+  /** The figures now; read once a frame in the frame loop, and once a render for what React draws (hands, labels). */
+  figures: () => Figure[]
+  /** Items lying in the range. */
+  ground?: GroundItem[]
   /** Seconds, for the animation. */
   clock: () => number
   lowDetail: boolean
@@ -52,7 +59,18 @@ const BODY = '#a88a6a'
 const GROUND = '#5f7a3a'
 const DRY = '#b8a070'
 
-export function RangeView3D({ obstacles, cue, need, needPresent, elderAway, figures, clock, lowDetail, hideId, labels }: RangeViewProps) {
+/** The figures as sampled once per frame: every hominin reads the same list. */
+type Sample = (key: number) => Figure[]
+
+export function RangeView3D({ obstacles, cue, need, needPresent, elderAway, figures, ground, clock, lowDetail, hideId, labels }: RangeViewProps) {
+  const figuresRef = useRef(figures)
+  figuresRef.current = figures
+  const latest = useRef<{ key: number; list: Figure[] }>({ key: -1, list: [] })
+  const sample: Sample = (key) => {
+    if (latest.current.key !== key) latest.current = { key, list: figuresRef.current() }
+    return latest.current.list
+  }
+  const figs = figures()
   const sky = cue === 'rain' ? '#6f7f93' : cue === 'dry' ? '#c9c0a6' : '#9fc4ea'
   const fogColor = cue === 'rain' ? '#7a8798' : cue === 'dry' ? '#cfc7ae' : '#b7d3ee'
   return (
@@ -64,11 +82,12 @@ export function RangeView3D({ obstacles, cue, need, needPresent, elderAway, figu
       <Ground />
       <Stream />
       <Ridge />
-      {obstacles.map((o, i) => (o.kind === 'tree' || o.kind === 'bigTree' ? <Tree key={i} o={o} lowDetail={lowDetail} /> : o.kind === 'rock' ? <Rock key={i} o={o} /> : <Mound key={i} o={o} />))}
+      {obstacles.map((o, i) => (o.kind === 'stone' ? null : o.kind === 'tree' || o.kind === 'bigTree' ? <Tree key={i} o={o} lowDetail={lowDetail} /> : o.kind === 'rock' ? <Rock key={i} o={o} /> : <Mound key={i} o={o} />))}
       <PlaceMarkers labels={labels} />
       <Cues cue={cue} clock={clock} elderAway={elderAway} />
       {needPresent && <NeedObject need={need} />}
-      {figures.map((f) => (hideId === f.id ? null : <Hominin key={f.id} f={f} clock={clock} labels={labels} />))}
+      {ground?.map((g) => <GroundMesh key={g.id} g={g} />)}
+      {figs.map((f) => (hideId === f.id ? null : <Hominin key={f.id} f={f} sample={sample} clock={clock} labels={labels} />))}
     </>
   )
 }
@@ -312,11 +331,20 @@ function Termites({ clock }: { clock: () => number }) {
 function NeedObject({ need }: { need: Need }) {
   const p = PLACE_XZ[NEED_TABLE[need].place]
   if (need === 'carcass')
+    // A low rounded body with four legs out to one side, about 0.9 m high (Jon, 2026-11-11: less tall, less boxy).
     return (
-      <mesh position={[p.x, 0.5, -p.z]} rotation={[0, 0.4, 0]}>
-        <boxGeometry args={[3, 1, 1.4]} />
-        <meshStandardMaterial color="#7a3b2e" />
-      </mesh>
+      <group position={[p.x, 0, -p.z]} rotation={[0, 0.4, 0]}>
+        <mesh position={[0, 0.42, 0]} scale={[1.7, 0.42, 0.8]}>
+          <sphereGeometry args={[1, 14, 10]} />
+          <meshStandardMaterial color="#7a3b2e" />
+        </mesh>
+        {[-1.0, -0.4, 0.4, 1.0].map((x, i) => (
+          <mesh key={i} position={[x, 0.22, 0.85]} rotation={[1.25, 0, i % 2 ? 0.25 : -0.25]}>
+            <cylinderGeometry args={[0.06, 0.09, 0.9, 6]} />
+            <meshStandardMaterial color="#5a2a20" />
+          </mesh>
+        ))}
+      </group>
     )
   if (need === 'marrow')
     return (
@@ -367,18 +395,34 @@ function ItemMesh({ item }: { item: Item }) {
   }
 }
 
-/** A stylized hominin: no face, one neutral color, long legs that swing when it moves, hands that carry up to two items, a ring and a label at its feet. */
-function Hominin({ f, clock, labels }: { f: Figure; clock: () => number; labels: boolean }) {
+/** An item lying in the range, drawn larger than in a hand so it can be seen from the follow camera. */
+function GroundMesh({ g }: { g: GroundItem }) {
+  const lying = g.item === 'sapling' || g.item === 'probe' || g.item === 'diggingStick'
+  return (
+    <group position={[g.x, lying ? 0.06 : 0.2, -g.z]} rotation={lying ? [0, g.id * 0.9, Math.PI / 2 - 0.3] : [0, g.id * 0.9, 0]} scale={lying ? 1.2 : 1.8}>
+      <ItemMesh item={g.item} />
+    </group>
+  )
+}
+
+/** A stylized hominin: no face, one neutral color, long legs that swing when it moves, hands that carry up to two items, a ring and a label at its feet. Its place and heading are set every frame from the sample; React draws only what changes slowly. */
+function Hominin({ f, sample, clock, labels }: { f: Figure; sample: Sample; clock: () => number; labels: boolean }) {
+  const group = useRef<THREE.Group>(null)
   const legL = useRef<THREE.Mesh>(null)
   const legR = useRef<THREE.Mesh>(null)
-  useFrame(() => {
+  useFrame((state) => {
+    const cur = sample(state.clock.elapsedTime).find((x) => x.id === f.id) ?? f
+    if (group.current) {
+      group.current.position.set(cur.x, 0, -cur.z)
+      group.current.rotation.y = cur.heading - Math.PI / 2
+    }
     const t = clock()
-    const swing = f.moving ? Math.sin(t * 7) * 0.5 : 0
+    const swing = cur.moving ? Math.sin(t * 7) * 0.5 : 0
     if (legL.current) legL.current.rotation.x = swing
     if (legR.current) legR.current.rotation.x = -swing
   })
   return (
-    <group position={[f.x, 0, -f.z]} rotation={[0, f.heading - Math.PI / 2, 0]}>
+    <group ref={group}>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
         <ringGeometry args={[0.55, 0.75, 24]} />
         <meshBasicMaterial color={f.ring} side={THREE.DoubleSide} />
@@ -407,7 +451,7 @@ function Hominin({ f, clock, labels }: { f: Figure; clock: () => number; labels:
           </mesh>
           {f.hands[side === -1 ? 0 : 1] && (
             <group position={[0, -0.2, 0.3]}>
-              <ItemMesh item={f.hands[side === -1 ? 0 : 1]} />
+              <ItemMesh item={f.hands[side === -1 ? 0 : 1]!} />
             </group>
           )}
         </group>

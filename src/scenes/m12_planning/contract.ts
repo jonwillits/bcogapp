@@ -17,8 +17,12 @@ import type { Tab } from './ui'
 
 /** What the student's keys ask of the driven hominin on one step: Lab 9's drive command, and the act key. */
 export interface DriveCommand extends Command {
-  /** The act key was pressed since the last step: pick up, make, or put down, whichever the panel offers. */
+  /** Enter was pressed since the last step: make what the hands allow. */
   act: boolean
+  /** J was pressed since the last step: the left hand picks up or puts down. */
+  left?: boolean
+  /** K was pressed since the last step: the right hand picks up or puts down. */
+  right?: boolean
 }
 
 export interface PartStore {
@@ -26,6 +30,8 @@ export interface PartStore {
   version: number
   /** Called from the frame loop, DT at a time, while this part's tab shows and the part has something moving. */
   tick?(dt: number, cmd: DriveCommand): void
+  /** Called once a frame after the steps, with the fraction of a step left over, so a drawn body can be placed between steps. */
+  frame?(alpha: number): void
   /** The frame loop's clock, for drawing. */
   clock?(): number
 }
@@ -59,7 +65,7 @@ export interface PartModule<S extends PartStore = PartStore> {
   /** Inside the 3D canvas (Part 3), or null for a blank view. */
   Canvas?: (p: { ctx: PartContext<S> }) => ReactNode
   /** Under the view (Part 3's drive bar), or nothing. */
-  Bottom?: (p: { ctx: PartContext<S>; press: (k: 'forward' | 'back' | 'left' | 'right', down: boolean) => void; act: () => void }) => ReactNode
+  Bottom?: (p: { ctx: PartContext<S>; press: (k: 'forward' | 'back' | 'left' | 'right', down: boolean) => void; act: () => void; hand: (side: 0 | 1) => void }) => ReactNode
   /** The part's My results screen, for Part 0's gathering; null before the part has results. */
   Results?: (p: { progress: ProgressStore }) => ReactNode
 }

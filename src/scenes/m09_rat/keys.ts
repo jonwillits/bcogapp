@@ -47,12 +47,15 @@ export function commandOf(h: Held): Command {
  * Listen for the drive keys while mounted; the held set lives in a ref the
  * frame loop reads. `enabled` false ignores every key. `onEnter` is called
  * on the Enter key (Here is my nest on the Home tab; Jon, 2026-10-20),
- * never while a control has focus.
+ * never while a control has focus. `onKey` maps further key codes to
+ * handlers (Lab 12's J and K, one hand each), called once per press.
  */
-export function useDriveKeys(enabled: boolean, onEnter?: () => void): { held: MutableRefObject<Held>; press: (k: DriveKey, down: boolean) => void } {
+export function useDriveKeys(enabled: boolean, onEnter?: () => void, onKey?: Record<string, () => void>): { held: MutableRefObject<Held>; press: (k: DriveKey, down: boolean) => void } {
   const held = useRef<Held>({ forward: false, back: false, left: false, right: false })
   const enter = useRef(onEnter)
   enter.current = onEnter
+  const extra = useRef(onKey)
+  extra.current = onKey
   useEffect(() => {
     if (!enabled) {
       held.current = { forward: false, back: false, left: false, right: false }
@@ -61,6 +64,12 @@ export function useDriveKeys(enabled: boolean, onEnter?: () => void): { held: Mu
     const onDown = (e: KeyboardEvent) => {
       if ((e.code === 'Enter' || e.code === 'NumpadEnter') && !isInteractive(e.target)) {
         enter.current?.()
+        e.preventDefault()
+        return
+      }
+      const other = extra.current?.[e.code]
+      if (other && !isInteractive(e.target) && !e.repeat) {
+        other()
         e.preventDefault()
         return
       }

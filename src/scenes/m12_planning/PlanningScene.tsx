@@ -58,6 +58,7 @@ function Stepper({ store, held, onTick }: { store: PartStore; held: () => DriveC
       store.tick(DT, held())
     }
     if (any) onTick()
+    store.frame?.(carry.current / DT)
   })
   return null
 }
@@ -85,12 +86,29 @@ export default function PlanningScene() {
   const clock = () => clockRef.current
   const store = storeFor(tab)
   const actRef = useRef(false)
+  const leftRef = useRef(false)
+  const rightRef = useRef(false)
   const drivingTab = tab === 'band'
-  const { held, press } = useDriveKeys(drivingTab, () => {
-    actRef.current = true
-  })
+  const handKeys = useMemo(
+    () => ({
+      KeyJ: () => {
+        leftRef.current = true
+      },
+      KeyK: () => {
+        rightRef.current = true
+      },
+    }),
+    [],
+  )
+  const { held, press } = useDriveKeys(
+    drivingTab,
+    () => {
+      actRef.current = true
+    },
+    handKeys,
+  )
   useEffect(() => {
-    // Nothing else is bound while driving; the keys are the arrows, WASD and Enter (`useDriveKeys`).
+    // Nothing else is bound while driving; the keys are the arrows, WASD, Enter, J and K (`useDriveKeys`).
   }, [drivingTab, store])
   const lastPanel = useRef(0)
   const onTick = () => {
@@ -104,8 +122,12 @@ export default function PlanningScene() {
   const heldNow = (): DriveCommand => {
     const c = commandOf(held.current)
     const act = actRef.current
+    const left = leftRef.current
+    const right = rightRef.current
     actRef.current = false
-    return { ...c, act }
+    leftRef.current = false
+    rightRef.current = false
+    return { ...c, act, left, right }
   }
   const fov = view === 'follow' || narrow ? FOV_NARROW : FOV_NORMAL
 
@@ -166,6 +188,10 @@ export default function PlanningScene() {
             press={press}
             act={() => {
               actRef.current = true
+            }}
+            hand={(side) => {
+              if (side === 0) leftRef.current = true
+              else rightRef.current = true
             }}
           />
         ) : undefined

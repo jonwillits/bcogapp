@@ -115,6 +115,21 @@ describe('words that must not be on screen (§11, items 6 and 7)', () => {
       expect(hits, `${path}: ${hits.join(' | ')}`).toEqual([])
     }
   })
+  it('no literal-use violation Jon has caught: no figurative verb for what the student does to the hominin or what a program does, and no inanimate thing that tells, asks, suggests, offers, gathers or invites (LAB_COMMON_FEATURES §8; Jon, 2026-11-11)', () => {
+    const banned: [RegExp, string][] = [
+      [/\byou (drive|steer|pilot|ride) (a|the|your) hominin/i, 'the student controls or moves the hominin; drive is for vehicles'],
+      [/\b(procedure|program|planner|looker|rule)s? (walks?|wanders?|explores?|hunts?|tries|looks? for)\b/i, 'a program runs, searches, examines, stores; it does not walk or try'],
+      [/\bthe (table|panel|screen|line|row|strip|app|tab|column|button|card|map|view|handout|lab|step|part) (tells?|asks?|suggests?|offers?|gathers?|invites?|lets?|wants?|knows?|thinks?|decides?|remembers?|notices?|sees?)\b/i, 'an inanimate thing shows, says, prints, records, lists, states'],
+      [/\bwe record\b/i, 'say what the student will see, not what the build does'],
+    ]
+    for (const [path, src] of all) {
+      const text = textOf(path, src)
+      for (const [re, why] of banned) {
+        const hits = text.split('\n').filter((l) => re.test(l))
+        expect(hits, `${path}: ${why}: ${hits.join(' | ')}`).toEqual([])
+      }
+    }
+  })
   it('keep and hold are not used for memory or information; carry is used only for objects', () => {
     for (const [path, src] of all) {
       const t = textOf(path, src)
