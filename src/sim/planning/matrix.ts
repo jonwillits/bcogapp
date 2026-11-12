@@ -180,7 +180,7 @@ export class MatrixRun {
         this.bands[this.h] = r.band()
         this.h++
       }
-      this.badge = `Living the hominins’ days before the lab — seed ${Math.min(this.h + 1, this.histories.length)} of ${this.histories.length}`
+      this.badge = `Computing the hominins’ days before the lab — seed ${Math.min(this.h + 1, this.histories.length)} of ${this.histories.length}`
       return false
     }
     const job = this.queue.shift()

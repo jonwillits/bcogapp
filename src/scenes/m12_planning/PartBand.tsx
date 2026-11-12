@@ -154,7 +154,7 @@ function RunControls({ s }: { s: BandStore }) {
   )
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-run-controls>
-      {!ready && <Note data-badge>Living the hominins’ days before the lab: day {hp.lived} of {hp.of}. A run can start when this reaches {hp.of}.</Note>}
+      {!ready && <Note data-badge>Computing the hominins’ days before the lab: day {hp.lived} of {hp.of}. A run can start when this reaches {hp.of}.</Note>}
       {s.step === 2 && (
         <div>
           <Btn primary onClick={() => s.run('T1')} disabled={!ready}>

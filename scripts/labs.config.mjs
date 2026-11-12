@@ -862,7 +862,7 @@ export const LABS = [
      * what the SCENE makes true, and the handout asserts nothing it cannot
      * find here.
      */
-    handoutPending: true,
+    handoutPending: false,
 
     retired: [
       { term: /\bAsian disease\b/gi, why: 'the disease is never given a place name, as in the chapter (spec §5.2 D)' },
@@ -876,7 +876,7 @@ export const LABS = [
       'Open', 'Choices', 'Puzzles', 'Band', 'Corn', 'Begin', 'Begin Part 1', 'Export my results', 'Load my results', 'Clear my saved results', 'Erase and start over', 'Keep my results', 'Replace my saved results', 'Keep what I have',
       'Option A', 'Option B', 'Spin the wheel', 'Submit my estimate', 'Take 1 now', 'Start the block again', 'Start block 2', 'Go on to Part 2', 'Go on to Part 3', 'Go on to Part 4', 'Open tab: My results, all parts',
       'Disks', 'Usual start', 'Scramble', 'Speed', 'Run', 'Skip to the end', 'Commit my prediction', 'Options at each step', 'Steps ahead', 'Take this path',
-      'Eye view', 'Follow view', 'Narrower view', 'Low detail', 'Left hand', 'Right hand', 'Enter', 'Pause', 'Resume', 'Wait here until midday', 'Stop waiting', 'Save this day and go on to day 2', 'Save this day and finish Step 1', 'Run T1 for all five', 'Run 10 days', 'Watch day', 'Stop watching', 'Follow', 'from above', 'the elder', 'Commit my diagnosis', 'What the Shallow planner counts at the end of its search', 'Information card: Homo erectus',
+      'Eye view', 'Follow view', 'Narrower view', 'Low detail', 'left hand', 'right hand', 'Enter', 'Pause', 'Resume', 'Wait here until midday', 'Stop waiting', 'Save this day and go on to day 2', 'Save this day and finish Step 1', 'Run T1 for all five', 'Run 10 days', 'Watch day', 'Stop watching', 'Follow', 'from above', 'the elder', 'Commit my diagnosis', 'What the Shallow planner counts at the end of its search', 'Information card: Homo erectus',
       'varied stock', 'one uniform line', 'even', 'patchy', 'Grow', 'Grow the first experiment', 'Grow the second experiment', 'Restore the nitrates', 'Restore the zinc', 'Identical twins treated more alike', 'The reading’s figures', 'Run the twin study', 'Grow in poor and rich soil', 'Run six seasons',
       'Go on to Step', 'Go back to Step', 'Go to Step', 'Show the instructions again', 'Run seed', 'My results',
     ],

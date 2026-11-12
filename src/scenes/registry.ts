@@ -301,7 +301,7 @@ export const scenes: SceneManifest[] = [
     module: 12,
     title: 'Intelligence and Thinking Ahead',
     blurb:
-      'Lab 12. Choose among hypothetical gambles and delays, wait at two dispensers, and explore a small bird’s evening. Solve the Tower of Hanoi and see your own path on the graph of every arrangement, run five procedures on the puzzle, and pay a point for every look ahead through trees of hidden numbers. Drive a Homo erectus through a day on a range, then diagnose five hidden hominins with a chain of six tests. Grow corn in two trays and compute heritability. The seventh stage of the creature spine.',
+      'Lab 12. Choose among hypothetical gambles and delays, and wait at two dispensers. Solve the Tower of Hanoi and see your own path on the graph of every arrangement, run five procedures on the puzzle, and pay a point for every look ahead through trees of hidden numbers. Control a Homo erectus-like hominin through two days on a range, then diagnose five hidden hominins with a chain of six tests. Grow corn in four trays and compute heritability. The seventh stage of the creature spine.',
     mode: 'both',
     status: 'building',
     Component: PlanningScene,
