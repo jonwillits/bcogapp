@@ -121,6 +121,15 @@ describe('words that must not be on screen (§11, items 6 and 7)', () => {
       [/\b(procedure|program|planner|looker|rule)s? (walks?|wanders?|explores?|hunts?|tries|looks? for)\b/i, 'a program runs, searches, examines, stores; it does not walk or try'],
       [/\bthe (table|panel|screen|line|row|strip|app|tab|column|button|card|map|view|handout|lab|step|part) (tells?|asks?|suggests?|offers?|gathers?|invites?|lets?|wants?|knows?|thinks?|decides?|remembers?|notices?|sees?)\b/i, 'an inanimate thing shows, says, prints, records, lists, states'],
       [/\bwe record\b/i, 'say what the student will see, not what the build does'],
+      // The sweep of Parts 3 and 4 (Jon, 2026-11-11): what a step, a run or a table does is said as what the student will see or do.
+      [/\bthe (run|table|panel|strip|step) records\b/i, 'say what the student will see: "you will see, in the table, …"'],
+      [/\b(this|the) step (runs|reproduces|simulates|states)\b/i, 'the student runs, reproduces, simulates; a step opens'],
+      [/\b(setting|slider|menu|control|“[^”]+”) chooses\b/i, 'the student chooses with a control: "use X to choose"'],
+      [/\b(hominins?|programs?|procedures?|planners?|copier|each) (has|have) seen\b/i, 'a program records or stores what it is shown; it does not see'],
+      [/\b(lived a history|have to be lived|from where it stood)\b/i, 'a program is computed and starts in a state; it does not live or stand'],
+      [/\b(study|experiment|model|simulation) (compares|has to estimate|cannot read|assumes)\b/i, 'a study is a comparison; people compare and estimate'],
+      [/\bthe range holds\b/i, 'the hominins are on the range'],
+      [/\b(panel|table|screen|card) gives\b/i, 'a panel shows'],
     ]
     for (const [path, src] of all) {
       const text = textOf(path, src)
@@ -167,9 +176,9 @@ describe('the lines that are content, each on its panel (§10)', () => {
       ['THE_ELDER_LINE', /set by the scene/, 'PartBand.tsx'],
       ['BUILT_FOR_THE_EXPERIMENT_LINE', /built for this experiment/, 'PartBand.tsx'],
       ['DRAWN_SIMPLY_LINE', /not a reconstruction/, 'band/screens.ts'],
-      ['EVERY_STEP_SEEN_LINE', /has seen every step of making and using them/, 'PartBand.tsx'],
+      ['EVERY_STEP_SEEN_LINE', /has recorded every step of making and using them/, 'PartBand.tsx'],
       ['MODEL_OF_PLANTS_LINE', /plants in a model/, 'PartCorn.tsx'],
-      ['MODELS_OWN_GENES_LINE', /A breeder or a twin study/, 'PartCorn.tsx'],
+      ['MODELS_OWN_GENES_LINE', /A breeder, or anyone running a twin study/, 'PartCorn.tsx'],
       ['MODELS_MECHANISM_LINE', /poor soil limits how tall any plant can grow/, 'PartCorn.tsx'],
       ['RESTARTED_LINE', /interrupted and run again/, 'choices/Reveal.tsx'],
       ['COMMIT_RULE_LINE', /Nothing an experiment would tell you is shown until you commit/, 'Part0.tsx'],

@@ -40,8 +40,24 @@ export type Hand = 0 | 1
 export const HAND_NAME: Record<Hand, string> = { 0: 'left hand', 1: 'right hand' }
 export const HAND_KEY: Record<Hand, string> = { 0: 'J', 1: 'K' }
 
+/** Range seconds the act at the need's place takes (cutting, breaking, probing, digging); the window is WINDOW_SECONDS. */
+export const EAT_SECONDS = 15
+
+/** Over the view when the student stands at the need's place holding what it requires: the act is a press away. */
+export const AT_THE_PLACE_LINE = 'You are at the place holding what the need requires. Press Enter, or the button under the view.'
+
+/** The act at the need's place, as the Enter button names it (Jon, 2026-11-11: the day should end with something you press). */
+export function eatLabel(need: Need): string {
+  return need === 'carcass' ? 'cut meat from the carcass with the flake' : need === 'marrow' ? 'break a bone with the cobble for its marrow' : need === 'termites' ? 'take termites from the mound with the probe' : 'dig a tuber with the digging stick'
+}
+
+/** The same act under way, for the bar. */
+export function eatingLabel(need: Need): string {
+  return need === 'carcass' ? 'Cutting meat from the carcass.' : need === 'marrow' ? 'Breaking a bone for its marrow.' : need === 'termites' ? 'Taking termites from the mound.' : 'Digging a tuber.'
+}
+
 export interface ActInProgress {
-  kind: 'pickUp' | 'make' | 'putDown'
+  kind: 'pickUp' | 'make' | 'putDown' | 'eat'
   item?: Item
   what?: Made
   hand?: Hand
@@ -241,6 +257,10 @@ export class StudentDay {
     }
     const here = this.nearPlace()
     let first = true
+    if (this.canEat()) {
+      out.push({ id: 'eat', key: 'Enter', label: `Enter: ${eatLabel(s.need)}`, run: () => this.startAct({ kind: 'eat', left: EAT_SECONDS, total: EAT_SECONDS }) })
+      first = false
+    }
     for (const what of ['diggingStick', 'probe', 'flake'] as Made[]) {
       const r = RECIPES[what]
       if (!canMake(s.hands, what)) continue
@@ -251,6 +271,15 @@ export class StudentDay {
     return out
   }
 
+  /** Midday, at the need's place, holding what the need requires, nothing eaten yet: the act at the place is possible. Eating is this act, not arrival (Jon, 2026-11-11). */
+  canEat(): boolean {
+    const s = this.state
+    if (s.phase !== 'midday' || !s.needPresent || s.ate) return false
+    const spec = NEED_TABLE[s.need]
+    const d = Math.hypot(this.body.x - PLACE_XZ[spec.place].x, this.body.y - PLACE_XZ[spec.place].z)
+    return d < REACH && s.hands.includes(spec.takes)
+  }
+
   /** The hand key: the act offered for that hand, if any. */
   hand(hand: Hand): boolean {
     const key = HAND_KEY[hand]
@@ -259,7 +288,7 @@ export class StudentDay {
     return !!a
   }
 
-  /** Enter: the first make offered, if any. */
+  /** Enter: the act at the need's place if it is possible, else the first make offered, if any. */
   make(): boolean {
     const a = this.available().find((x) => x.key === 'Enter')
     if (a) a.run()
@@ -268,7 +297,7 @@ export class StudentDay {
 
   private startAct(a: ActInProgress): void {
     this.state.act = a
-    this.state.message = a.kind === 'pickUp' ? `Picking up ${a.groundId ? the(a.item!) : an(a.item!)} with the ${HAND_NAME[a.hand!]}.` : a.kind === 'make' ? `Making ${an(a.what!)}.` : `Putting down ${the(a.item!)}.`
+    this.state.message = a.kind === 'pickUp' ? `Picking up ${a.groundId ? the(a.item!) : an(a.item!)} with the ${HAND_NAME[a.hand!]}.` : a.kind === 'make' ? `Making ${an(a.what!)}.` : a.kind === 'eat' ? eatingLabel(this.state.need) : `Putting down ${the(a.item!)}.`
   }
 
   private sync(): void {
@@ -310,6 +339,12 @@ export class StudentDay {
         s.log.push(`${fmt(s.clock)}: made ${an(a.what)}; it lies on the ground`)
         s.message = `${capital(an(a.what))} lies on the ground in front of you.`
       }
+    } else if (a.kind === 'eat') {
+      if (s.needPresent && !s.ate) {
+        s.ate = true
+        s.message = 'You ate. The day is a success.'
+        s.log.push(`${fmt(s.clock)}: ate; ${eatLabel(s.need).replace(/ with the .*$/, '')}`)
+      }
     } else if (a.kind === 'putDown' && a.item && a.hand !== undefined) {
       if (s.slots[a.hand] === a.item) {
         s.slots[a.hand] = null
@@ -346,7 +381,7 @@ export class StudentDay {
       if ((cmd.act || cmd.left || cmd.right) && s.clock - this.lastAct > 0.5) {
         this.lastAct = s.clock
         const done = cmd.left ? this.hand(0) : cmd.right ? this.hand(1) : this.make()
-        if (!done) s.message = cmd.act ? 'Nothing can be made with what you hold here.' : s.slots[cmd.left ? 0 : 1] ? 'That hand is busy.' : 'Nothing within reach to pick up.'
+        if (!done) s.message = cmd.act ? 'Nothing can be made or eaten here with what you hold.' : s.slots[cmd.left ? 0 : 1] ? 'That hand is busy.' : 'Nothing within reach to pick up.'
       }
     }
     s.clock += rt
@@ -360,14 +395,11 @@ export class StudentDay {
     if (s.phase === 'midday') {
       const spec = NEED_TABLE[s.need]
       const d = Math.hypot(this.body.x - PLACE_XZ[spec.place].x, this.body.y - PLACE_XZ[spec.place].z)
-      if (!s.ate && d < REACH && s.hands.includes(spec.takes)) {
-        s.ate = true
-        s.message = `You reached ${spec.place === 'grassland' ? 'the grassland' : spec.place === 'oldKill' ? 'the old kill' : spec.place === 'mounds' ? 'the termite mounds' : 'the tuber flats'} holding ${spec.takesLabel.split(',')[0]}, and ate.`
-        s.log.push(`${fmt(s.clock)}: ate`)
-      }
+      if (!s.ate && !s.act && d < REACH && s.hands.includes(spec.takes) && s.message !== AT_THE_PLACE_LINE) s.message = AT_THE_PLACE_LINE
       if (s.clock >= MORNING_SECONDS + WINDOW_SECONDS) {
         s.phase = 'afternoon'
         s.needPresent = false
+        if (s.act?.kind === 'eat') s.act = null
         if (!s.ate) {
           s.message = 'The window closed. Nothing was eaten today.'
           s.log.push(`${fmt(s.clock)}: the window closed; nothing eaten`)
@@ -379,6 +411,11 @@ export class StudentDay {
 
   get pose(): Pose {
     return this.body.pose
+  }
+
+  /** A paused day: the body is drawn where it stands, with no step before it to slide from. */
+  hold(): void {
+    this.prev = { x: this.body.x, y: this.body.y, heading: this.body.heading }
   }
 
   /** The pose `alpha` of a step before the current one, for drawing between steps: the body then moves at one rate across frames instead of a step at a time. */

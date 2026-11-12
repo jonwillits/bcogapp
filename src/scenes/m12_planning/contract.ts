@@ -30,6 +30,8 @@ export interface PartStore {
   version: number
   /** Called from the frame loop, DT at a time, while this part's tab shows and the part has something moving. */
   tick?(dt: number, cmd: DriveCommand): void
+  /** Space, while driving: pause the student's day, or start it again. */
+  togglePause?(): void
   /** Called once a frame after the steps, with the fraction of a step left over, so a drawn body can be placed between steps. */
   frame?(alpha: number): void
   /** The frame loop's clock, for drawing. */

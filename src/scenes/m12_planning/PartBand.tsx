@@ -15,6 +15,7 @@ import { ReferencePanel } from './ReferencePanel'
 import { reference } from '../../sim/planning/references'
 import { BUILT_FOR_THE_EXPERIMENT_LINE, DRAWN_SIMPLY_LINE, EVERY_STEP_SEEN_LINE, FRESH_START_LINE, PROGRAMMED_HOMININS_LINE, THE_ELDER_LINE, RESTARTED_LINE } from './lines'
 import type { PartContext, PartModule } from './contract'
+import type { ReactNode } from 'react'
 import { BandStore, DAY_UNIT, DAY_LENGTH, ELDER_COLOR, LETTERS, LETTER_COLORS, STUDENT_COLOR } from './band/store'
 import { SCREENS, NEXT_LINE, STEP_TITLES, READY_LINE, TEST_DESCRIPTION, TEST_TAKES_AWAY, PROCEDURE_DESCRIPTIONS, PROCEDURE_SECTION, NEEDS_TABLE_LINES, ERECTUS_CARD, THREE_STUDIES, placeName, type Step } from './band/screens'
 import { RangeView3D, AboveCamera, HOMININ_CAMERA, type Figure } from './band/RangeView3D'
@@ -85,8 +86,13 @@ function Left({ ctx }: { ctx: Ctx }) {
               {s.day ? (
                 <Note>Walk with the arrow keys or the drive pad under the view. The buttons for your two hands and for making are under the view too, and appear only when an act is possible. The clock and what you hold are over the view. The day’s log is on the right.</Note>
               ) : (
-                <Note>{s.dayRecord(1) && s.dayRecord(2) ? 'Both days are done and saved. Their summaries are on the right.' : 'The day is saved.'}</Note>
+                <Note>The day is saved.</Note>
               )}
+            </div>
+          )}
+          {state === 'done' && s.step === 1 && (
+            <div data-step-done>
+              <Note>Both days are done and saved. Their records are on the right. Press “Go on to Step 2”, below.</Note>
             </div>
           )}
           {state === 'running' && s.step >= 2 && (
@@ -184,7 +190,7 @@ function RunControls({ s }: { s: BandStore }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }} data-variant>
           <GroupLabel>What the Shallow planner counts at the end of its search</GroupLabel>
           <Choice value={s.variant} options={[{ id: 'A', label: 'nothing (a pure depth limit)' }, { id: 'B', label: 'a learned estimate of the state it ends in' }]} onChange={(v) => s.setVariant(v as 'A' | 'B')} />
-          <Note>In the first variant, a sequence that reaches no food within two preparatory acts and a place counts for nothing. In the second, such a sequence is valued by an estimate of the state it ends in, learned by a critic over states, Lab 5’s Verdict setting, from the hominin’s own mornings, as AlphaZero scores the position at the end of each continuation with its critic (§12.2.3). The setting applies to your later runs. The handout says to leave it as set.</Note>
+          <Note>In the first variant, a sequence that reaches no food within two preparatory acts and a place counts for nothing. In the second, such a sequence is valued by an estimate of the state it ends in. A critic over states learns that estimate from the hominin’s own mornings, as in Lab 5’s Verdict setting. AlphaZero scores the position at the end of each continuation with its critic in the same way (§12.2.3). The setting applies to your later runs. The handout says to leave it as set.</Note>
         </div>
       )}
     </div>
@@ -196,7 +202,7 @@ function Diagnosis({ s }: { s: BandStore }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-diagnosis>
       <GroupLabel>Diagnosis</GroupLabel>
-      <Note>For each hominin, the procedure you think it follows. The five descriptions are the five procedures, in plain words, without saying which hominin is which. The same description may be chosen for more than one hominin if you think they do the same.</Note>
+      <Note>For each hominin, the procedure you think it runs. The five descriptions are the five procedures, in plain words, without saying which hominin is which. The same description may be chosen for more than one hominin if you think they do the same.</Note>
       {LETTERS.map((l) => (
         <div key={l} style={{ display: 'flex', gap: 6, alignItems: 'center' }} data-diagnosis-row={l}>
           <span style={{ fontWeight: 700, width: 16, color: LETTER_COLORS[l] }}>{l}</span>
@@ -240,8 +246,10 @@ function Stage({ ctx }: { ctx: Ctx }) {
   const lines: string[] = []
   if (s.step === 1 && s.day) {
     const st = s.day.state
-    lines.push(`Day ${s.dayIndex} of 2 · ${cueLine(st.cue)} · ${st.phase === 'dawn' ? 'dawn' : st.phase === 'morning' ? `morning, ${Math.ceil(MORNING_SECONDS - st.clock)} s of range time left` : st.phase === 'midday' ? `midday: the need is at its place for ${Math.ceil(MORNING_SECONDS + WINDOW_SECONDS - st.clock)} s more` : st.phase === 'afternoon' ? 'afternoon' : 'the day is over'}`)
+    lines.push(`Day ${s.dayIndex} of 2 · ${cueLine(st.cue)} · ${st.phase === 'dawn' ? 'dawn' : st.phase === 'morning' ? `morning, ${Math.ceil(MORNING_SECONDS - st.clock)} s of range time left` : st.phase === 'midday' ? `midday: the need is at its place for ${Math.ceil(MORNING_SECONDS + WINDOW_SECONDS - st.clock)} s more` : st.phase === 'afternoon' ? 'afternoon' : 'the day is over'}${s.paused || s.infoOpen ? ' · PAUSED' : s.waiting ? ' · waiting for midday, the clock running fast' : ''}`)
     lines.push(st.message)
+  } else if (s.step === 1 && s.state === 'done') {
+    lines.push('Step 1 is done: both days are saved. Press “Go on to Step 2” on the left.')
   } else if (s.watching) {
     const w = s.watching
     const day = w.run.days[w.day]
@@ -331,7 +339,7 @@ function CanvasPart({ ctx }: { ctx: Ctx }) {
   const overlay = s.state === 'intro' || s.infoOpen
   const cue = day ? day.state.cue : w ? NEED_TABLE[w.run.days[w.day].need].cue : 'vultures'
   const need = day ? day.state.need : w ? w.run.days[w.day].need : 'carcass'
-  const needPresent = day ? day.state.needPresent : w ? w.clock >= MORNING_SECONDS && w.clock < MORNING_SECONDS + WINDOW_SECONDS && w.run.test !== 'T2' : false
+  const needPresent = day ? day.state.needPresent && !day.state.ate : w ? w.clock >= MORNING_SECONDS && w.clock < MORNING_SECONDS + WINDOW_SECONDS && w.run.test !== 'T2' : false
   const elderAway = w ? !w.run.days[w.day].elder.present : false
   const followId = s.step === 1 ? 'me' : s.follow === 'above' ? null : s.follow
   const followed = followId ? figs.find((f) => f.id === followId) : null
@@ -398,7 +406,7 @@ function Bottom({ ctx, press }: { ctx: Ctx; press: (k: 'forward' | 'back' | 'lef
         </div>
       ) : st.phase === 'done' ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-day-done>
-          <Note>The day is over. {st.ate ? 'Your hominin ate.' : 'Your hominin did not eat.'} The day’s record is on the right.</Note>
+          {st.ate ? <Success>The day is over. You ate: the day is a success. The day’s record is on the right.</Success> : <Note>The day is over. Your hominin did not eat. The day’s record is on the right.</Note>}
           <div>
             <Btn primary onClick={() => s.finishDay()}>
               {s.dayIndex === 1 ? 'Save this day and go on to day 2' : 'Save this day and finish Step 1'}
@@ -407,6 +415,7 @@ function Bottom({ ctx, press }: { ctx: Ctx; press: (k: 'forward' | 'back' | 'lef
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-start' }} data-acts>
+          {st.ate && <Success>You ate. The day is a success.</Success>}
           {acts.length ? (
             acts.map((a) => (
               <Btn key={a.id} small primary onClick={() => (a.key === 'Enter' ? s.act() : s.hand(a.key === 'J' ? 0 : 1))}>
@@ -414,11 +423,26 @@ function Bottom({ ctx, press }: { ctx: Ctx; press: (k: 'forward' | 'back' | 'lef
               </Btn>
             ))
           ) : (
-            <Note>Nothing to pick up, make or put down here. Walk to a place, or to an item on the ground.</Note>
+            <Note>Nothing to pick up, put down, make or eat here. Walk to a place, or to an item on the ground.</Note>
           )}
         </div>
       )}
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', flexBasis: '100%', textAlign: 'center' }}>Arrow keys or WASD walk and turn · “J” is the left hand, “K” the right: pick up or put down · “Enter” makes · the range clock runs at {TIME_SCALE} range seconds a second</div>
+      {st.phase !== 'done' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-start' }} data-day-time>
+          <Btn small onClick={() => s.togglePause()}>{s.paused ? 'Resume (Space)' : 'Pause (Space)'}</Btn>
+          {(st.phase === 'dawn' || st.phase === 'morning') && !st.act && <Btn small onClick={() => (s.waiting ? s.stopWaiting() : s.waitForMidday())}>{s.waiting ? 'Stop waiting' : 'Wait here until midday'}</Btn>}
+        </div>
+      )}
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', flexBasis: '100%', textAlign: 'center' }}>Arrow keys or WASD walk and turn · “J” is the left hand, “K” the right: pick up or put down · “Enter” makes, or eats at the need’s place · “Space” pauses · the range clock runs at {TIME_SCALE} range seconds a second</div>
+    </div>
+  )
+}
+
+/** The one line that marks a success in the day, in the accent color so it cannot be missed (Jon, 2026-11-11). */
+function Success({ children }: { children: ReactNode }) {
+  return (
+    <div data-success style={{ padding: '6px 12px', borderRadius: 'var(--radius-sm)', background: 'var(--accent)', color: '#fff', fontWeight: 700, fontSize: 13 }}>
+      {children}
     </div>
   )
 }
@@ -451,7 +475,7 @@ function Right({ ctx }: { ctx: Ctx }) {
         )}
         {s.step >= 2 && s.step <= 3 && (
           <>
-            <Note>Per hominin and test: for T1 and T3 to T6, the share of the ten days on which the hominin reached the need’s place within the window holding what it requires, averaged over your runs of that test, with the number of runs in brackets; for T2, the share of days 2 to 10 on which it carried a flake to the grassland. Only tests you have run are shown.</Note>
+            <Note>One row per hominin, one column per test. For T1 and T3 to T6, the number is the share of the ten days on which the hominin reached the need’s place within the window holding what the need requires, averaged over your runs of that test. The number of runs is in brackets. For T2, it is the share of days 2 to 10 on which the hominin carried a flake to the grassland. Only tests you have run are shown.</Note>
             {tests.length ? <FixedLines lines={[`${'hominin'.padEnd(9)}${tests.map((t) => t.padStart(10)).join('')}`, ...LETTERS.map((l) => `${l.padEnd(9)}${tests.map((t) => (table[l][t] ? `${table[l][t]!.share.toFixed(2)} (${table[l][t]!.runs})` : '').padStart(10)).join('')}`)]} testId="my-table" /> : <Note>No runs yet.</Note>}
             {strips && (
               <>

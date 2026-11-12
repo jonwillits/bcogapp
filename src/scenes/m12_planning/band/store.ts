@@ -32,6 +32,9 @@ export const LETTERS = ['A', 'B', 'C', 'D', 'E'] as const
 export type Letter = (typeof LETTERS)[number]
 export const LETTER_COLORS: Record<Letter, string> = { A: '#4f9cff', B: '#f0a94b', C: '#34d399', D: '#c084fc', E: '#f87171' }
 export const ELDER_COLOR = '#ffffff'
+
+/** Steps of the student's day taken for each step of real time while waiting for midday. */
+export const WAIT_SPEED = 8
 export const STUDENT_COLOR = '#fde047'
 /** How long a day plays past the window's end, range seconds. */
 export const DAY_LENGTH = MORNING_SECONDS + WINDOW_SECONDS + 10
@@ -206,9 +209,33 @@ export class BandStore implements PartStore {
     return this.progress.isComplete(DAY_UNIT(n)) ? (this.progress.result(DAY_UNIT(n)) as DayRecord) : null
   }
 
-  /** Enter, or its button: make what the hands allow. */
+  /** Enter, or its button: eat at the need's place, or make what the hands allow. */
   act(): void {
     this.day?.make()
+    this.changed()
+  }
+
+  /** The student's day stands still: Space or the Pause button (Jon, 2026-11-11). The information card pauses it too. */
+  paused = false
+  /** The clock runs at WAIT_SPEED steps a step while the student stands still, until midday or until anything is pressed (Jon, 2026-11-11: a fast chain left a long wait). */
+  waiting = false
+
+  togglePause(): void {
+    if (this.step !== 1 || !this.day || this.day.state.phase === 'done') return
+    this.paused = !this.paused
+    this.waiting = false
+    this.changed()
+  }
+
+  waitForMidday(): void {
+    if (this.step !== 1 || !this.day || this.day.state.act || (this.day.state.phase !== 'dawn' && this.day.state.phase !== 'morning')) return
+    this.waiting = true
+    this.paused = false
+    this.changed()
+  }
+
+  stopWaiting(): void {
+    this.waiting = false
     this.changed()
   }
 
@@ -227,7 +254,22 @@ export class BandStore implements PartStore {
 
   tick(dt: number, cmd: DriveCommand): void {
     this.seconds += dt
-    if (this.step === 1 && this.day) this.day.tick(dt, cmd)
+    if (this.step === 1 && this.day) {
+      const pressed = cmd.forward !== 0 || cmd.turn !== 0 || cmd.act || !!cmd.left || !!cmd.right
+      if (this.paused || this.infoOpen) {
+        this.day.hold()
+      } else if (this.waiting && !pressed) {
+        for (let i = 0; i < WAIT_SPEED && this.waiting; i++) {
+          this.day.tick(dt, { forward: 0, turn: 0, act: false })
+          if (this.day.state.phase !== 'dawn' && this.day.state.phase !== 'morning') this.waiting = false
+        }
+        this.day.hold()
+      } else {
+        this.waiting = false
+        this.day.tick(dt, cmd)
+      }
+      if (this.day.state.phase === 'done') this.paused = false
+    }
     if (this.watching) {
       this.watching.clock += dt * this.speed
       if (this.watching.clock >= DAY_LENGTH) this.watching.clock = DAY_LENGTH

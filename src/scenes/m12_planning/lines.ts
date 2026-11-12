@@ -44,7 +44,7 @@ export const DIFFERENT_TASK_LINE = 'Huys and colleagues’ participants learned 
 export const PROGRAMMED_HOMININS_LINE = 'These are programs with procedures. The same behavior on a day does not show the same procedure.'
 
 /** 14. Part 3. */
-export const FRESH_START_LINE = 'Every run starts each hominin from where it stood at the end of its days before the lab, and a hominin that learns goes on learning within a run.'
+export const FRESH_START_LINE = 'Every run starts each hominin in the state it reached at the end of its days before the lab, and a hominin that learns goes on learning within a run.'
 
 /** 15. Part 3. */
 export const THE_ELDER_LINE = 'The elder’s errands are set by the scene to fit each day’s need. She is not one of the five hidden hominins.'
@@ -56,13 +56,13 @@ export const BUILT_FOR_THE_EXPERIMENT_LINE = 'The needs and the range are built 
 export const DRAWN_SIMPLY_LINE = 'The hominins are drawn simply on purpose. How Homo erectus looked is reconstructed from fossils with uncertainty, and these figures are not a reconstruction.'
 
 /** 18. Part 3, T4 and T5. */
-export const EVERY_STEP_SEEN_LINE = 'No hidden hominin has ever been rewarded for carrying a probe or a digging stick, but each has seen every step of making and using them.'
+export const EVERY_STEP_SEEN_LINE = 'No hidden hominin has ever been rewarded for carrying a probe or a digging stick, but each has recorded every step of making and using them.'
 
 /** 19. Part 4. */
 export const MODEL_OF_PLANTS_LINE = 'These are plants in a model. Nothing in this part measures real people or groups of people.'
 
 /** 20. Part 4. */
-export const MODELS_OWN_GENES_LINE = 'Heritability here is computed from the genetic values the model assigned to the plants, which the model stores. A breeder or a twin study cannot read those values and has to estimate heritability from resemblance among relatives.'
+export const MODELS_OWN_GENES_LINE = 'Heritability here is computed from the genetic values the model assigned to the plants, which the model stores. A breeder, or anyone running a twin study, cannot read those values and has to estimate heritability from resemblance among relatives.'
 
 /** 21. Part 4, Step 4. */
 export const MODELS_MECHANISM_LINE = 'In this model, the poor soil limits how tall any plant can grow. Why heritability differed between poor and affluent families in the study the reading describes was not measured this way.'

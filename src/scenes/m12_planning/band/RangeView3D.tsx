@@ -71,6 +71,16 @@ export function RangeView3D({ obstacles, cue, need, needPresent, elderAway, figu
     return latest.current.list
   }
   const figs = figures()
+  // Labels of figures standing within a few meters of one another are stacked, each a line above the last, so the band at camp reads as a list from above instead of a heap (Jon, 2026-11-11).
+  const lift = new Map<string, number>()
+  for (const f of [...figs].sort((a, b) => a.id.localeCompare(b.id))) {
+    let n = 0
+    for (const [id, l] of lift) {
+      const g = figs.find((x) => x.id === id)!
+      if (Math.hypot(f.x - g.x, f.z - g.z) < LABEL_STACK_METERS) n = Math.max(n, l + 1)
+    }
+    lift.set(f.id, n)
+  }
   const sky = cue === 'rain' ? '#6f7f93' : cue === 'dry' ? '#c9c0a6' : '#9fc4ea'
   const fogColor = cue === 'rain' ? '#7a8798' : cue === 'dry' ? '#cfc7ae' : '#b7d3ee'
   return (
@@ -87,7 +97,7 @@ export function RangeView3D({ obstacles, cue, need, needPresent, elderAway, figu
       <Cues cue={cue} clock={clock} elderAway={elderAway} />
       {needPresent && <NeedObject need={need} />}
       {ground?.map((g) => <GroundMesh key={g.id} g={g} />)}
-      {figs.map((f) => (hideId === f.id ? null : <Hominin key={f.id} f={f} sample={sample} clock={clock} labels={labels} />))}
+      {figs.map((f) => (hideId === f.id ? null : <Hominin key={f.id} f={f} sample={sample} clock={clock} labels={labels} lift={lift.get(f.id) ?? 0} />))}
     </>
   )
 }
@@ -406,7 +416,10 @@ function GroundMesh({ g }: { g: GroundItem }) {
 }
 
 /** A stylized hominin: no face, one neutral color, long legs that swing when it moves, hands that carry up to two items, a ring and a label at its feet. Its place and heading are set every frame from the sample; React draws only what changes slowly. */
-function Hominin({ f, sample, clock, labels }: { f: Figure; sample: Sample; clock: () => number; labels: boolean }) {
+const LABEL_STACK_METERS = 4
+const LABEL_LINE_PX = 20
+
+function Hominin({ f, sample, clock, labels, lift }: { f: Figure; sample: Sample; clock: () => number; labels: boolean; lift: number }) {
   const group = useRef<THREE.Group>(null)
   const legL = useRef<THREE.Mesh>(null)
   const legR = useRef<THREE.Mesh>(null)
@@ -458,7 +471,7 @@ function Hominin({ f, sample, clock, labels }: { f: Figure; sample: Sample; cloc
       ))}
       {labels && (
         <Html position={[0, 2.5, 0]} center zIndexRange={[10, 0]} style={{ pointerEvents: 'none' }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: f.ring, background: 'rgba(0,0,0,0.5)', padding: '1px 6px', borderRadius: 6, whiteSpace: 'nowrap', textAlign: 'center' }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: f.ring, background: 'rgba(0,0,0,0.5)', padding: '1px 6px', borderRadius: 6, whiteSpace: 'nowrap', textAlign: 'center', transform: `translateY(${-lift * LABEL_LINE_PX}px)` }}>
             {f.label}
             {f.doing && <div style={{ fontSize: 9, fontWeight: 400, color: '#fff' }}>{f.doing}</div>}
           </div>

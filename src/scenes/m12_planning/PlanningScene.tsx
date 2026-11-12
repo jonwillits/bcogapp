@@ -97,8 +97,9 @@ export default function PlanningScene() {
       KeyK: () => {
         rightRef.current = true
       },
+      Space: () => store.togglePause?.(),
     }),
-    [],
+    [store],
   )
   const { held, press } = useDriveKeys(
     drivingTab,
@@ -108,7 +109,7 @@ export default function PlanningScene() {
     handKeys,
   )
   useEffect(() => {
-    // Nothing else is bound while driving; the keys are the arrows, WASD, Enter, J and K (`useDriveKeys`).
+    // Nothing else is bound while driving; the keys are the arrows, WASD, Enter, J, K and Space (`useDriveKeys`).
   }, [drivingTab, store])
   const lastPanel = useRef(0)
   const onTick = () => {

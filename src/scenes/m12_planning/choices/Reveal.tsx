@@ -168,7 +168,7 @@ export function DelaysReveal({ progress }: { progress: ProgressStore }) {
         <Para>A smaller summed squared error means the curve passes closer to your five points. γ is the share of a reward’s value that survives one day of delay under the first curve; k is how fast the hyperbolic curve falls at first.</Para>
       </Section>
       <Section n={2} title="The two reversal pairs">
-        <Para>Two of your choices were between $50 and $55: once with the $50 today and the $55 in 1 week, and once with the $50 in 52 weeks and the $55 in 53 weeks. The two pairs are the same pair of rewards pushed 52 weeks into the future. The table gives your choice in each, and what each fitted curve says a chooser with your parameter would choose.</Para>
+        <Para>Two of your choices were between $50 and $55: once with the $50 today and the $55 in 1 week, and once with the $50 in 52 weeks and the $55 in 53 weeks. The two pairs are the same pair of rewards pushed 52 weeks into the future. The table shows your choice in each, and what each fitted curve says a chooser with your parameter would choose.</Para>
         <FixedLines
           lines={[`${'pair'.padEnd(34)}${'you chose'.padEnd(16)}${'constant factor says'.padEnd(22)}hyperbolic says`, ...res.reversals.map((rv) => `${`${rv.pair.sooner.label} or ${rv.pair.later.label}`.padEnd(34)}${(rv.choseLater === null ? 'not answered' : rv.choseLater ? rv.pair.later.label : rv.pair.sooner.label).padEnd(16)}${(rv.exponentialSaysLater ? rv.pair.later.label : rv.pair.sooner.label).padEnd(22)}${rv.hyperbolicSaysLater ? rv.pair.later.label : rv.pair.sooner.label}`)]}
           testId="reversals"

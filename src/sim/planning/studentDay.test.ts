@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { makeRng } from '../random'
-import { StudentDay, obstacles, positionAt, groundAt, needFootprint, TIME_SCALE } from './studentDay'
+import { StudentDay, obstacles, positionAt, groundAt, needFootprint, TIME_SCALE, EAT_SECONDS, AT_THE_PLACE_LINE } from './studentDay'
 import { MORNING_SECONDS, PLACE_XZ, WINDOW_SECONDS } from './range/places'
 import { execute, type Segment, type Standing } from './range/acts'
 import { chainFor } from './range/chains'
@@ -81,14 +81,56 @@ describe('the student’s day', () => {
     const walked = driveTo(day, PLACE_XZ.grassland.x, PLACE_XZ.grassland.z)
     expect(walked).toBeLessThan(120)
     expect(s.clock).toBeLessThan(MORNING_SECONDS)
-    // Wait for midday and the window.
+    // Before midday nothing at the grassland is offered on Enter.
+    expect(day.available().find((a) => a.id === 'eat')).toBeUndefined()
+    // Wait for midday and the window: arrival is not a meal (Jon, 2026-11-11); the act at the place is.
     waitFor(day, (MORNING_SECONDS + 5 - s.clock) / TIME_SCALE)
-    expect(s.phase === 'midday' || s.ate).toBe(true)
-    waitFor(day, 1)
+    expect(s.phase).toBe('midday')
+    expect(s.ate).toBe(false)
+    expect(s.message).toBe(AT_THE_PLACE_LINE)
+    const eat = day.available().find((a) => a.id === 'eat')!
+    expect(eat.label).toBe('Enter: cut meat from the carcass with the flake')
+    expect(eat.key).toBe('Enter')
+    day.tick(DT, { forward: 0, turn: 0, act: true })
+    expect(s.act?.kind).toBe('eat')
+    expect(s.message).toBe('Cutting meat from the carcass.')
+    waitFor(day, EAT_SECONDS / TIME_SCALE + 0.1)
     expect(s.ate).toBe(true)
+    expect(s.message).toBe('You ate. The day is a success.')
+    expect(s.hands).toEqual(['cobble', 'flake'])
+    expect(day.available().find((a) => a.id === 'eat')).toBeUndefined()
     waitFor(day, (WINDOW_SECONDS + 15) / TIME_SCALE)
     expect(s.phase).toBe('done')
-    expect(s.log.some((l) => /ate$/.test(l))).toBe(true)
+    expect(s.log.some((l) => /: ate; cut meat from the carcass$/.test(l))).toBe(true)
+  })
+
+  it('standing at the place holding what the need requires is not a meal; the window closing cancels the act at the place and nothing is eaten', () => {
+    const day = new StudentDay('hyenas', makeRng(3), obstacles(makeRng(2)))
+    const s = day.state
+    driveTo(day, PLACE_XZ.riverbank.x, PLACE_XZ.riverbank.z)
+    day.available().find((a) => a.id === 'pickUp-cobble@0')!.run()
+    waitFor(day, 10 / TIME_SCALE + 0.1)
+    driveTo(day, PLACE_XZ.oldKill.x, PLACE_XZ.oldKill.z)
+    waitFor(day, (MORNING_SECONDS + WINDOW_SECONDS - 10 - s.clock) / TIME_SCALE)
+    expect(s.phase).toBe('midday')
+    expect(s.ate).toBe(false)
+    expect(day.available().find((a) => a.id === 'eat')!.label).toBe('Enter: break a bone with the cobble for its marrow')
+    // Started with 10 range seconds left, the 15-second act is cut off by the window.
+    day.make()
+    expect(s.act?.kind).toBe('eat')
+    waitFor(day, 12 / TIME_SCALE)
+    expect(s.phase).toBe('afternoon')
+    expect(s.act).toBeNull()
+    expect(s.ate).toBe(false)
+    expect(s.message).toBe('The window closed. Nothing was eaten today.')
+  })
+
+  it('hold() draws a still body: the pose before the step is the pose itself', () => {
+    const day = new StudentDay('vultures', makeRng(1), obstacles(makeRng(2)))
+    day.tick(DT, { forward: 1, turn: 0, act: false })
+    expect(day.renderPose(0)).not.toEqual(day.renderPose(1))
+    day.hold()
+    expect(day.renderPose(0)).toEqual(day.renderPose(1))
   })
 
   it('a full hand offers no pick-up, only a put-down; an item put down lies where it was dropped and can be picked up again; no flake away from the outcrop', () => {

@@ -9,7 +9,9 @@ import { TOWER_UNIT } from './puzzles/store'
 import { band, BandStore } from './PartBand'
 import { corn, CornStore } from './PartCorn'
 import { open } from './Part0'
-import { LETTERS } from './band/store'
+import { LETTERS, WAIT_SPEED } from './band/store'
+import { DT } from './contract'
+import { TIME_SCALE } from '../../sim/planning/studentDay'
 import { HOMININ_KINDS } from '../../sim/planning/hominins/types'
 import { PROCEDURE_IDS } from '../../sim/planning/puzzles/procedures'
 import { goalArrangement, idOf, isGoal, shortestPath, startArrangement } from '../../sim/planning/puzzles/hanoi'
@@ -43,6 +45,56 @@ function fresh<S>(mod: Mod, make: (seed: number, progress: ProgressStore) => S, 
   return { store, progress, ctx, all }
 }
 const text = (html: string) => html.replace(/<[^>]+>/g, ' ').replace(/&#x27;/g, '’').replace(/&quot;/g, '"').replace(/\s+/g, ' ')
+
+describe('the student’s day: pause and waiting for midday (Jon, 2026-11-11)', () => {
+  const still = { forward: 0 as const, turn: 0 as const, act: false }
+  it('Space pauses the clock and the body; the information card pauses them too; the day ends unpaused', () => {
+    const b = fresh(band as Mod, (s, p) => new BandStore(s, p))
+    b.store.open(1)
+    b.store.begin()
+    const day = b.store.day!
+    for (let i = 0; i < 50; i++) b.store.tick(DT, still)
+    const t0 = day.state.clock
+    expect(t0).toBeGreaterThan(0)
+    b.store.togglePause()
+    expect(b.store.paused).toBe(true)
+    for (let i = 0; i < 50; i++) b.store.tick(DT, { ...still, forward: 1 })
+    expect(day.state.clock).toBe(t0)
+    expect(day.renderPose(0)).toEqual(day.renderPose(1))
+    expect(text(b.all())).toMatch(/PAUSED/)
+    b.store.togglePause()
+    expect(b.store.paused).toBe(false)
+    b.store.setInfoOpen(true)
+    for (let i = 0; i < 50; i++) b.store.tick(DT, still)
+    expect(day.state.clock).toBe(t0)
+    b.store.setInfoOpen(false)
+    b.store.tick(DT, still)
+    expect(day.state.clock).toBeGreaterThan(t0)
+    expect(text(b.all())).not.toMatch(/PAUSED/)
+  })
+  it('Wait here until midday runs the clock WAIT_SPEED times faster while nothing is pressed, stops at a press, and stops by itself at midday', () => {
+    const b = fresh(band as Mod, (s, p) => new BandStore(s, p))
+    b.store.open(1)
+    b.store.begin()
+    const day = b.store.day!
+    const t0 = day.state.clock
+    b.store.waitForMidday()
+    expect(b.store.waiting).toBe(true)
+    for (let i = 0; i < 50; i++) b.store.tick(DT, still)
+    expect(day.state.clock - t0).toBeCloseTo(50 * DT * TIME_SCALE * WAIT_SPEED, 5)
+    expect(text(b.all())).toMatch(/waiting for midday/)
+    b.store.tick(DT, { ...still, turn: 1 })
+    expect(b.store.waiting).toBe(false)
+    b.store.waitForMidday()
+    let n = 0
+    while (b.store.waiting && n++ < 20000) b.store.tick(DT, still)
+    expect(day.state.phase).toBe('midday')
+    expect(b.store.waiting).toBe(false)
+    // At midday there is nothing to wait for.
+    b.store.waitForMidday()
+    expect(b.store.waiting).toBe(false)
+  })
+})
 
 describe('every part and step opens from a fresh seed with nothing else done, on an instruction screen', () => {
   it('Part 0 and the four parts render from a fresh state', () => {
