@@ -877,7 +877,7 @@ export const LABS = [
       'Option A', 'Option B', 'Spin the wheel', 'Submit my estimate', 'Take 1 now', 'Start the block again', 'Start block 2', 'Go on to Part 2', 'Go on to Part 3', 'Go on to Part 4', 'Open tab: My results, all parts',
       'Disks', 'Usual start', 'Scramble', 'Speed', 'Run', 'Skip to the end', 'Commit my prediction', 'Options at each step', 'Steps ahead', 'Take this path',
       'Eye view', 'Follow view', 'Narrower view', 'Low detail', 'Left hand', 'Right hand', 'Enter', 'Pause', 'Resume', 'Wait here until midday', 'Stop waiting', 'Save this day and go on to day 2', 'Save this day and finish Step 1', 'Run T1 for all five', 'Run 10 days', 'Watch day', 'Stop watching', 'Follow', 'from above', 'the elder', 'Commit my diagnosis', 'What the Shallow planner counts at the end of its search', 'Information card: Homo erectus',
-      'Seed', 'Soil', 'varied stock', 'one uniform line', 'even', 'patchy', 'Grow', 'Grow the first experiment', 'Grow the second experiment', 'Restore the nitrates', 'Restore the zinc', 'Identical twins treated more alike', 'The reading’s figures', 'Run the twin study', 'Grow in poor and rich soil', 'Run six seasons',
+      'varied stock', 'one uniform line', 'even', 'patchy', 'Grow', 'Grow the first experiment', 'Grow the second experiment', 'Restore the nitrates', 'Restore the zinc', 'Identical twins treated more alike', 'The reading’s figures', 'Run the twin study', 'Grow in poor and rich soil', 'Run six seasons',
       'Go on to Step', 'Go back to Step', 'Go to Step', 'Show the instructions again', 'Run seed', 'My results',
     ],
 

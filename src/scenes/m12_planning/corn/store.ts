@@ -1,6 +1,6 @@
 import { makeRng, type Rng } from '../../../sim/random'
 import type { ProgressStore } from '../../../sim/planning/progress/store'
-import { oneTray, trayStats, lewontinFirst, lewontinSecond, twins, TWIN_PRESET, poorAndRich, seasons, type Tray, type SeedKind, type SoilKind, type Nutrients, type TwinShares, type TwinResults, type TrayStats } from '../../../sim/planning/corn/model'
+import { fourTrays, trayStats, lewontinFirst, lewontinSecond, twins, TWIN_PRESET, poorAndRich, seasons, type Tray, type FourTrays, type Nutrients, type TwinShares, type TwinResults, type TrayStats } from '../../../sim/planning/corn/model'
 import type { PartStore } from '../contract'
 
 /**
@@ -16,7 +16,7 @@ export type StepState = 'intro' | 'running'
 export const GROW_SECONDS = 5
 
 export const PREDICTIONS = {
-  s1: { key: 'p4-s1', question: 'About what will the heritability within this tray be, with the seed and soil set on the left?', choices: ['about 0', 'about one half', 'about 1'] },
+  s1: { key: 'p4-s1', question: 'Four trays will grow at once: a varied stock and one uniform line, each in even soil and in patchy soil. In which trays will the heritability within the tray be near 1?', choices: ['the varied stock in even soil only', 'both trays of varied stock', 'both trays in even soil', 'all four'] },
   s2first: { key: 'p4-s2-first', question: 'Two uniform lines, different from each other, in the same even soil. Within each tray, will the heritability be high? And is the difference between the trays genetic?', choices: ['high within; difference genetic', 'high within; difference environmental', 'zero within; difference genetic', 'zero within; difference environmental'] },
   s2second: { key: 'p4-s2-second', question: 'One varied stock, grown in two trays, one in the complete nutrient solution and one with half the nitrates and no zinc. Within each tray, will the heritability be high? And is the difference between the trays genetic?', choices: ['high within; difference genetic', 'high within; difference environmental', 'zero within; difference genetic', 'zero within; difference environmental'] },
   s3: { key: 'p4-s3', question: 'If identical twins are treated more alike than fraternal twins, will the twin estimate of heritability be too high, too low, or right?', choices: ['too high', 'too low', 'right'] },
@@ -35,10 +35,8 @@ export class CornStore implements PartStore {
   private rng: Rng
   drafts: Partial<Record<PredictionKey, string>> = {}
 
-  // Step 1
-  seedKind: SeedKind = 'varied'
-  soil: SoilKind = 'even'
-  tray: Tray | null = null
+  // Step 1: the four combinations, grown at once (Jon, 2026-11-11).
+  trays: FourTrays | null = null
   /** Growing: 0 to 1 over GROW_SECONDS. */
   growing: number | null = null
   private growTimer: ReturnType<typeof setInterval> | null = null
@@ -109,17 +107,9 @@ export class CornStore implements PartStore {
   }
 
   // Step 1
-  setSeedKind(k: SeedKind): void {
-    this.seedKind = k
-    this.changed()
-  }
-  setSoil(k: SoilKind): void {
-    this.soil = k
-    this.changed()
-  }
   grow(): void {
     if (!this.predicted('s1')) return
-    this.tray = oneTray(this.seedKind, this.soil, this.rng)
+    this.trays = fourTrays(this.rng)
     this.startGrowing()
   }
   private startGrowing(): void {

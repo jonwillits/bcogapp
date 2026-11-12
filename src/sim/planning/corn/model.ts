@@ -99,6 +99,17 @@ export function oneTray(seed: SeedKind, soil: SoilKind, rng: Rng): Tray {
   return grow(drawGenetics(seed, rng), soil, 'complete', rng)
 }
 
+/** Step 1 as Jon asked for it (2026-11-11): the four combinations grown at once. The same 48 genetic values go into both varied-stock trays, so the two soils are compared on the same seed. */
+export type FourTrays = Record<SeedKind, Record<SoilKind, Tray>>
+export function fourTrays(rng: Rng): FourTrays {
+  const varied = drawGenetics('varied', rng)
+  const uniform = drawGenetics('uniform', rng)
+  return {
+    varied: { even: grow(varied, 'even', 'complete', rng), patchy: grow(varied, 'patchy', 'complete', rng) },
+    uniform: { even: grow(uniform, 'even', 'complete', rng), patchy: grow(uniform, 'patchy', 'complete', rng) },
+  }
+}
+
 /**
  * The earrings (spec §8.2, §12.3.5): 200 people, 100 of each sex, in a time
  * when only women wore earrings and in a time when anyone might. The
@@ -168,6 +179,8 @@ export interface TwinResults {
   estimate: number
   /** The true share from genes that the simulation used, of the total variance including the identical-only share. */
   trueShare: number
+  /** Each pair's two trait values, in units of the trait's spread, for the scatter plots: identical pairs and fraternal pairs. */
+  pairs: { identical: [number[], number[]]; fraternal: [number[], number[]] }
 }
 
 export function correlation(x: number[], y: number[]): number {
@@ -206,7 +219,7 @@ export function twins(shares: TwinShares, rng: Rng, pairs = TWIN_PAIRS): TwinRes
   const identical = correlation(mz[0], mz[1])
   const fraternal = correlation(dz[0], dz[1])
   const total = shares.genes + shares.shared + shares.rest + shares.identicalOnly
-  return { identical, fraternal, estimate: 2 * (identical - fraternal), trueShare: total === 0 ? 0 : shares.genes / total }
+  return { identical, fraternal, estimate: 2 * (identical - fraternal), trueShare: total === 0 ? 0 : shares.genes / total, pairs: { identical: mz, fraternal: dz } }
 }
 
 /** The preset that reproduces the chapter's figures: correlations of about 0.71 and 0.44 and an estimate of about 0.54 (§12.3.5). */

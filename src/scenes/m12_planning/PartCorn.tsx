@@ -1,5 +1,5 @@
 import { Panel } from '../../components/Panel'
-import { EARRINGS, MODEL, PLANTS, type Tray, type TrayStats } from '../../sim/planning/corn/model'
+import { EARRINGS, MODEL, PLANTS, TWIN_PAIRS, type Tray, type TrayStats, type FourTrays, type TwinShares, type TwinResults } from '../../sim/planning/corn/model'
 import { reference } from '../../sim/planning/references'
 import { ReferencePanel } from './ReferencePanel'
 import { Btn, Choice, Content, FixedLines, GroupLabel, Note, PANEL_STYLE, PART_TITLES, RIGHT_STYLE, StagePanel, Para, Section, useStore } from './ui'
@@ -89,16 +89,13 @@ function Controls({ s }: { s: CornStore }) {
   if (s.step === 1)
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <GroupLabel>Seed</GroupLabel>
-        <Choice value={s.seedKind} options={[{ id: 'varied', label: 'varied stock' }, { id: 'uniform', label: 'one uniform line' }]} onChange={(v) => s.setSeedKind(v as 'varied' | 'uniform')} />
-        <GroupLabel>Soil</GroupLabel>
-        <Choice value={s.soil} options={[{ id: 'even', label: 'even' }, { id: 'patchy', label: 'patchy' }]} onChange={(v) => s.setSoil(v as 'even' | 'patchy')} />
         <Prediction s={s} k="s1" />
         <div>
           <Btn primary onClick={() => s.grow()} disabled={!s.predicted('s1') || busy}>
             Grow
           </Btn>
         </div>
+        <Note>Four trays grow at once: a varied stock and one uniform line, each in even soil and in patchy soil.</Note>
       </div>
     )
   if (s.step === 2)
@@ -184,7 +181,7 @@ function Stage({ ctx }: { ctx: Ctx }) {
       <div style={{ fontSize: 14, fontWeight: 600 }}>{screen.title}</div>
       {s.step === 1 && (
         <>
-          {s.tray ? <TrayPanel tray={s.tray} share={share} label={`${s.tray.seed === 'varied' ? 'varied stock' : 'one uniform line'}, ${s.tray.soil} soil`} stats={s.stats(s.tray)} /> : <Note>Commit your prediction on the left, then press “Grow”.</Note>}
+          {s.trays ? <FourTraysView trays={s.trays} share={share} stats={s.stats.bind(s)} /> : <Note>Commit your prediction on the left, then press “Grow”.</Note>}
           <Content>{MODELS_OWN_GENES_LINE}</Content>
           <Earrings />
         </>
@@ -270,21 +267,33 @@ function TrayView({ tray, share, width = 340 }: { tray: Tray; share: number; wid
   )
 }
 
-function statsLines(st: TrayStats): string[] {
-  return [`${'variance of genetic values'.padEnd(30)}${st.varianceGenetic.toFixed(1).padStart(8)}`, `${'variance of heights'.padEnd(30)}${st.varianceHeight.toFixed(1).padStart(8)}`, `${'heritability'.padEnd(30)}${st.heritability.toFixed(2).padStart(8)}`, `${'mean height, cm'.padEnd(30)}${st.meanHeight.toFixed(1).padStart(8)}`]
-}
+const SEED_LABEL = { varied: 'varied stock', uniform: 'one uniform line' } as const
+const SOIL_LABEL = { even: 'even soil', patchy: 'patchy soil' } as const
 
-function TrayPanel({ tray, share, label, stats }: { tray: Tray; share: number; label: string; stats: TrayStats }) {
+/** Step 1's four trays in a 2 × 2 grid, seed by row and soil by column, the heritability under each, and the pattern stated under the grid (Jon, 2026-11-11). */
+function FourTraysView({ trays, share, stats }: { trays: FourTrays; share: number; stats: (t: Tray) => TrayStats }) {
   const grown = share >= 1
+  const h = (seed: 'varied' | 'uniform', soil: 'even' | 'patchy') => stats(trays[seed][soil]).heritability
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-tray-panel>
-      <GroupLabel>{label}</GroupLabel>
-      <TrayView tray={tray} share={share} />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-four-trays>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        {(['varied', 'uniform'] as const).map((seed) =>
+          (['even', 'patchy'] as const).map((soil) => (
+            <div key={`${seed}-${soil}`} style={{ display: 'flex', flexDirection: 'column', gap: 4 }} data-tray-cell={`${seed}-${soil}`}>
+              <GroupLabel>
+                {SEED_LABEL[seed]}, {SOIL_LABEL[soil]}
+              </GroupLabel>
+              <TrayView tray={trays[seed][soil]} share={share} width={320} />
+              <div style={{ fontSize: 12 }}>{grown ? `heritability within the tray ${h(seed, soil).toFixed(2)}` : 'growing'}</div>
+            </div>
+          )),
+        )}
+      </div>
       {grown ? (
         <>
-          <FixedLines lines={statsLines(stats)} testId="tray-stats" />
+          <FixedLines lines={[`${'heritability within the tray'.padEnd(30)}${'even soil'.padStart(14)}${'patchy soil'.padStart(14)}`, ...(['varied', 'uniform'] as const).map((seed) => `${SEED_LABEL[seed].padEnd(30)}${h(seed, 'even').toFixed(2).padStart(14)}${h(seed, 'patchy').toFixed(2).padStart(14)}`)]} testId="tray-stats" />
           <Para>
-            The variance of the plants’ genetic values is {stats.varianceGenetic.toFixed(1)} and the variance of their heights is {stats.varianceHeight.toFixed(1)}, both in square centimeters, so the heritability within this tray, the first divided by the second, is {stats.heritability.toFixed(2)}. A heritability near 1 means nearly all the variation in height in this tray goes with variation in the genetic values; near 0, almost none does.
+            Within the varied stock, the heritability is {h('varied', 'even').toFixed(2)} in even soil and {h('varied', 'patchy').toFixed(2)} in patchy soil: the same seed, and the number depends on the soil. Within the uniform line it is {h('uniform', 'even').toFixed(2)} in even soil and {h('uniform', 'patchy').toFixed(2)} in patchy soil: the plants’ genetic values do not vary, so no variation in height goes with them, whatever the soil. Heritability within a tray is the variance of the plants’ genetic values divided by the variance of their heights. A heritability near 1 means nearly all the variation in height in that tray goes with variation in the genetic values; near 0, almost none does.
           </Para>
         </>
       ) : (
@@ -331,13 +340,96 @@ function Earrings() {
   )
 }
 
+/** The division of the trait's variance as the sliders set it, one stacked bar; the identical-only share is appended, since it is variance added for identical pairs alone. */
+function SharesBar({ shares }: { shares: TwinShares }) {
+  const total = 1 + shares.identicalOnly
+  const parts: { key: string; label: string; v: number; color: string }[] = [
+    { key: 'genes', label: 'genes', v: shares.genes, color: 'var(--accent)' },
+    { key: 'shared', label: 'shared environment', v: shares.shared, color: '#f0a94b' },
+    { key: 'rest', label: 'the rest', v: shares.rest, color: '#8f9aa6' },
+    ...(shares.identicalOnly > 0 ? [{ key: 'identicalOnly', label: 'identical twins only', v: shares.identicalOnly, color: '#f87171' }] : []),
+  ]
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }} data-shares-bar>
+      <GroupLabel>The variance, as the sliders divide it</GroupLabel>
+      <div style={{ display: 'flex', height: 22, width: '100%', borderRadius: 6, overflow: 'hidden', border: '1px solid var(--border)' }}>
+        {parts.map((p) => (
+          <div key={p.key} title={`${p.label} ${p.v.toFixed(2)}`} style={{ width: `${(100 * p.v) / total}%`, background: p.color, color: '#fff', fontSize: 11, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+            {p.v / total > 0.09 ? `${p.label} ${p.v.toFixed(2)}` : ''}
+          </div>
+        ))}
+      </div>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{shares.identicalOnly > 0 ? `The three shares sum to one; the red part is environment shared by identical twins only, ${shares.identicalOnly.toFixed(2)} more, added on top.` : 'The three shares sum to one. The fourth slider adds environment shared by identical twins only.'}</div>
+    </div>
+  )
+}
+
+/** One dot per pair: the first twin's trait value across, the second's up, in units of the trait's spread; the diagonal is where equal values lie. */
+function PairsPlot({ xs, ys, label, r }: { xs: number[]; ys: number[]; label: string; r: number }) {
+  const W = 230
+  const pad = 18
+  const lim = 3
+  const X = (v: number) => pad + ((Math.max(-lim, Math.min(lim, v)) + lim) / (2 * lim)) * (W - 2 * pad)
+  const Y = (v: number) => W - pad - ((Math.max(-lim, Math.min(lim, v)) + lim) / (2 * lim)) * (W - 2 * pad)
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }} data-pairs-plot={label}>
+      <GroupLabel>{label}</GroupLabel>
+      <svg width={W} height={W} viewBox={`0 0 ${W} ${W}`} role="img" aria-label={`${label}: one dot per pair, the first twin across and the second up`} style={{ background: 'var(--bg)', borderRadius: 8 }}>
+        <line x1={X(-lim)} y1={Y(-lim)} x2={X(lim)} y2={Y(lim)} stroke="var(--text-muted)" strokeDasharray="4 4" />
+        <line x1={pad} y1={W - pad} x2={W - pad} y2={W - pad} stroke="var(--border)" />
+        <line x1={pad} y1={pad} x2={pad} y2={W - pad} stroke="var(--border)" />
+        {xs.map((x, i) => (
+          <circle key={i} cx={X(x)} cy={Y(ys[i])} r={2} fill="var(--accent)" opacity={0.55} />
+        ))}
+        <text x={W / 2} y={W - 4} fontSize={9} fill="var(--text-muted)" textAnchor="middle">
+          first twin
+        </text>
+        <text x={8} y={W / 2} fontSize={9} fill="var(--text-muted)" textAnchor="middle" transform={`rotate(-90 8 ${W / 2})`}>
+          second twin
+        </text>
+      </svg>
+      <div style={{ fontSize: 12 }}>correlation {r.toFixed(2)}</div>
+    </div>
+  )
+}
+
+/** The true share from genes beside the twin estimate, as two bars on the same scale, so an estimate that overshoots is seen to. */
+function EstimateBars({ r }: { r: TwinResults }) {
+  const rows = [
+    { label: 'the share from genes the simulation used', v: r.trueShare, color: 'var(--accent)' },
+    { label: 'the twin estimate, twice the difference of the correlations', v: r.estimate, color: '#f0a94b' },
+  ]
+  const max = 1.2
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-estimate-bars>
+      {rows.map((row) => (
+        <div key={row.label} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 48px', gap: 8, alignItems: 'center', fontSize: 12 }}>
+          <span>{row.label}</span>
+          <div style={{ position: 'relative', height: 16, background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${(100 * Math.max(0, Math.min(max, row.v))) / max}%`, background: row.color }} />
+            <div style={{ position: 'absolute', left: `${100 / max}%`, top: 0, bottom: 0, width: 1, background: 'var(--text-muted)' }} title="1" />
+          </div>
+          <span style={{ fontVariantNumeric: 'tabular-nums', textAlign: 'right' }}>{row.v.toFixed(2)}</span>
+        </div>
+      ))}
+      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>The scale runs from 0 to 1.2; the thin line marks 1.</div>
+    </div>
+  )
+}
+
 function Twins({ s }: { s: CornStore }) {
   const r = s.twinResults
   return (
-    <Section title="A twin study in a model population: 500 pairs of identical twins and 500 pairs of fraternal twins">
+    <Section title={`A twin study in a model population: ${TWIN_PAIRS} pairs of identical twins and ${TWIN_PAIRS} pairs of fraternal twins`}>
+      <SharesBar shares={s.shares} />
       <Para>Set the shares on the left and press “Run the twin study”. The simulation draws each pair’s trait values from the shares, computes the correlation within identical pairs and within fraternal pairs, and the standard estimate of heritability, twice their difference (§12.3.5), beside the true share from genes that it used.</Para>
       {r ? (
         <>
+          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <PairsPlot xs={r.pairs.identical[0]} ys={r.pairs.identical[1]} label="identical pairs" r={r.identical} />
+            <PairsPlot xs={r.pairs.fraternal[0]} ys={r.pairs.fraternal[1]} label="fraternal pairs" r={r.fraternal} />
+          </div>
+          <EstimateBars r={r} />
           <FixedLines lines={[`${'correlation within identical pairs'.padEnd(40)}${r.identical.toFixed(2).padStart(8)}`, `${'correlation within fraternal pairs'.padEnd(40)}${r.fraternal.toFixed(2).padStart(8)}`, `${'estimate: twice the difference'.padEnd(40)}${r.estimate.toFixed(2).padStart(8)}`, `${'true share from genes in the simulation'.padEnd(40)}${r.trueShare.toFixed(2).padStart(8)}`]} testId="twins" />
           <Para>
             Identical twins correlated {r.identical.toFixed(2)} and fraternal twins {r.fraternal.toFixed(2)}, so the estimate is {r.estimate.toFixed(2)}, against a true share of {r.trueShare.toFixed(2)}. The estimate rests on the assumption that both kinds of twins share their environments to the same degree; the fourth slider breaks that assumption by an amount you set.

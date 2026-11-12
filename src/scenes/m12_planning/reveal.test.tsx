@@ -520,13 +520,16 @@ describe('Part 4: commit, then reveal', () => {
     k.store.open(1)
     k.store.begin()
     k.store.grow()
-    expect(k.store.tray).toBeNull()
+    expect(k.store.trays).toBeNull()
     expect(k.all()).not.toMatch(/data-lines="tray-stats"/)
     k.store.draft('s1', PREDICTIONS.s1.choices[2])
     k.store.commit('s1')
     k.store.grow()
     k.store.growing = null
+    // Four trays in a grid, the heritability under each, and the table and sentence under the grid (Jon, 2026-11-11).
+    expect((k.all().match(/data-tray-cell=/g) ?? []).length).toBe(4)
     expect(k.all()).toMatch(/data-lines="tray-stats"/)
     expect(text(k.all())).toMatch(/heritability/)
+    expect(text(k.all())).toMatch(/one uniform line, even soil/)
   })
 })

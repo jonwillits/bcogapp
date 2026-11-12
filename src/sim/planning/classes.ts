@@ -130,7 +130,7 @@ export const CLASS_ENTRIES: ClassEntry[] = [
     id: 'lossRatio',
     panel: 'Part 1, Step 1: the loss ratio',
     measures: ['the point of indifference divided by $50'],
-    // Tversky and Kahneman (1992) is to be requested (spec §9); Huys et al.'s 1.4 is a fitted parameter of a different task, with no per-person spread reported in the summary.
+    // Tversky and Kahneman (1992, p. 311) report the median λ, 2.25, and no spread between people, so the class stays pending by design, like the wheel's; Huys et al.'s 1.4 is a fitted parameter of a different task.
     sources: [null],
     real: null,
   },
@@ -138,7 +138,7 @@ export const CLASS_ENTRIES: ClassEntry[] = [
     id: 'discountK',
     panel: 'Part 1, Step 2: the hyperbolic rate k',
     measures: ['k, per day'],
-    // A source with the spread of k among college students is to be requested (spec §9).
+    // No source in the library gives the spread of k among college students (Green and Myerson, 2004, review group medians); pending until one is added (spec §9).
     sources: [null],
     real: null,
   },
