@@ -102,14 +102,12 @@ export function TreesReveal({ progress }: { progress: ProgressStore }) {
   const belowAfterLoss = shareBelow(loss, (rec) => rec.tree.lossNode!)
   const smallLossAt1 = (rec: TreeRecord) => rec.looks.find((n) => stepOf(n) === 1 && (rec.tree.values[n] === -10 || rec.tree.values[n] === -5))
   const belowAfterSmall = shareBelow(regular.filter((rec) => smallLossAt1(rec) !== undefined), (rec) => smallLossAt1(rec)!)
-  const lossBest = scored.filter((x) => x.tree.kind === 'lossBest')
-  const missed = lossBest.reduce((s, x) => s + (bestPath(x.tree).value - x.path.reduce((a, n) => a + x.tree.values[n], 0)), 0)
-  const myopicOnLossBest = r.lookers.oneMore.filter((_, i) => scored[i].tree.kind === 'lossBest')
-  const myopicMissed = myopicOnLossBest.reduce((s, run, k) => s + (bestPath(lossBest[k].tree).value - run.path.reduce((a, n) => a + lossBest[k].tree.values[n], 0)), 0)
-  const myopicBelow = shareBelow(
-    r.lookers.oneMore.map((run, i) => ({ tree: scored[i].tree, looks: run.looks, path: run.path, net: run.net, scored: true })).filter((x) => x.tree.lossNode !== null),
-    (rec) => rec.tree.lossNode!,
-  )
+  const missedOn = (recs: { tree: Tree; path: number[] }[]) => recs.filter((x) => x.tree.kind === 'lossBest').reduce((s, x) => s + (bestPath(x.tree).value - x.path.reduce((a, n) => a + x.tree.values[n], 0)), 0)
+  const lookerRecs = (id: (typeof LOOKER_IDS)[number]): TreeRecord[] => r.lookers[id].map((run, i) => ({ tree: scored[i].tree, looks: run.looks, path: run.path, net: run.net, scored: true }))
+  const lossRow = (label: string, recs: TreeRecord[]) => {
+    const b = shareBelow(recs.filter((x) => x.tree.lossNode !== null), (rec) => rec.tree.lossNode!)
+    return `${label.padEnd(38)}${`${b.saw} of ${loss.length}`.padStart(16)}${(b.saw ? `${b.below} of ${b.saw}` : '—').padStart(17)}${String(missedOn(recs)).padStart(18)}`
+  }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }} data-reveal="trees">
       {r.restarts > 0 && <Content>{RESTARTED_LINE}</Content>}
@@ -124,11 +122,12 @@ export function TreesReveal({ progress }: { progress: ProgressStore }) {
       </Section>
       <Section n={3} title="After a large loss">
         <Para>
-          On the 6 trees with a large loss of {LARGE_LOSS} at a first-step node, this counts the trees on which you uncovered that node and then uncovered at least one node below it: {belowAfterLoss.below} of {belowAfterLoss.saw} trees on which you uncovered the loss, a share of {share(belowAfterLoss)}. Beside it, on the regular trees on which you uncovered a small loss (−10 or −5) at a first-step node, the share on which you then uncovered a node below it: {belowAfterSmall.below} of {belowAfterSmall.saw}, a share of {share(belowAfterSmall)}. The third looker, One more look when it is worth it, looked below the large loss on {myopicBelow.below} of {myopicBelow.saw} of its trees.
+          On the 6 trees with a large loss of {LARGE_LOSS} at a first-step node, this counts the trees on which you uncovered that node and then uncovered at least one node below it: {belowAfterLoss.below} of {belowAfterLoss.saw} trees on which you uncovered the loss, a share of {share(belowAfterLoss)}. Beside it, on the regular trees on which you uncovered a small loss (−10 or −5) at a first-step node, the share on which you then uncovered a node below it: {belowAfterSmall.below} of {belowAfterSmall.saw}, a share of {share(belowAfterSmall)}.
         </Para>
         <Para>
-          On the 3 trees whose best path ran through the large loss, the points you did not earn, the best path’s sum minus your path’s sum, come to {missed}; the third looker’s came to {myopicMissed}.
+          Below, three counts for you and for the three lookers on the same trees: on how many of the 6 large-loss trees the {LARGE_LOSS} was uncovered, on how many of those a look then went below it, and, on the 3 trees whose best path ran through the large loss, the points not earned, the best path’s sum minus the path taken.
         </Para>
+        <FixedLines lines={[`${''.padEnd(38)}${`${LARGE_LOSS} uncovered`.padStart(16)}${'looked below it'.padStart(17)}${'points not earned'.padStart(18)}`, lossRow('You', scored), ...LOOKER_IDS.map((id) => lossRow(LOOKER_LABEL[id], lookerRecs(id)))]} testId="large-loss" />
         <Para>The reading reports that in Huys and colleagues’ task a large loss roughly doubled the chance that a person stopped looking further down that branch, even when a larger gain lay beyond it (§12.2.4).</Para>
         <Content>{DIFFERENT_TASK_LINE}</Content>
         <ReferencePanel reference={reference('huys-2012')} />
