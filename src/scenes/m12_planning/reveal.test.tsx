@@ -435,6 +435,30 @@ describe('Part 2: commit, then reveal', () => {
     expect(again.treesPartial.index).toBe(4)
   })
 
+  it('the trees results screen prints the large-loss counts for the student and the three lookers: Look at nothing uncovers the −40 on none, Look at everything on all six and misses nothing', () => {
+    const z = fresh(puzzles as Mod, (s, p) => new PuzzlesStore(s, p))
+    z.store.open(3)
+    z.store.begin()
+    for (let i = 0; i < 19; i++) {
+      z.store.look(0)
+      z.store.choosePathNode(1)
+      z.store.choosePathNode(4)
+      z.store.choosePathNode(10)
+      z.store.takePath()
+      z.store.nextTree()
+    }
+    expect(z.store.treesResult).not.toBeNull()
+    const m = z.all()
+    expect(m).toMatch(/data-reveal="trees"/)
+    const table = m.slice(m.indexOf('data-lines="large-loss"'))
+    const rows = text(table.slice(0, table.indexOf('</div></div>'))).split(/(?=You|Look at|One more)/).map((r) => r.trim())
+    expect(rows.length).toBe(5)
+    expect(rows[1]).toMatch(/^You\s+\d of 6\s+(\d of \d|—)\s+-?\d+$/)
+    expect(rows[2]).toMatch(/^Look at nothing\s+0 of 6\s+—\s+-?\d+$/)
+    expect(rows[3]).toMatch(/^Look at everything\s+6 of 6\s+6 of 6\s+0$/)
+    expect(rows[4]).toMatch(/^One more look when it is worth it\s+\d of 6\s+(\d of \d|—)\s+-?\d+$/)
+  })
+
   it('a start chosen on the map: the next run starts there, counts as a run from another start, is cleared by a change of Disks; Reset clears the run on view and keeps the start', () => {
     const z = fresh(puzzles as Mod, (s, p) => new PuzzlesStore(s, p))
     z.store.open(2)
