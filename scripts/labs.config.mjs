@@ -927,4 +927,72 @@ export const LABS = [
 
     crib: 'crib: m12',
   },
+  {
+    id: 'm13-language',
+    name: 'Lab 13 — Sounds, Words, and Predictions',
+    route: '#/m13-language',
+    scene: 'src/scenes/m13_language',
+    /** Sim files whose strings reach the screen: the references, the learners' and models' names, the grammar's vocabulary; and Lab 10's progress components, which this scene renders. */
+    strings: ['src/sim/language', 'src/scenes/m10_memory/progress'],
+    handout: 'language/sounds_words_lab/sounds_words_lab.md',
+    report: 'language/sounds_words_lab/sounds_words_lab_report.docx',
+    /**
+     * Built 2026-11-15 with no handout; the handout is written after Jon's
+     * walk-through, from docs/M13_AS_BUILT_NOTES.md. The claims below are
+     * what the SCENE makes true, and the handout asserts nothing it cannot
+     * find here.
+     */
+    handoutPending: true,
+
+    retired: [
+      { term: /\bcategorical perception\b/gi, why: 'held back until Part 1, Step 3’s reveal; the handout may use it only after naming that reveal (spec §11, item 2)', unless: ['after the reveal', 'reveal'] },
+      { term: /\b(learner|network|model|classifier|transformer) (hears|notices|knows|thinks|remembers|expects|tries)\b/gi, why: 'no agentic verb about a program (spec §11, item 6)' },
+      { term: /\bPARSER\b/g, why: 'PARSER is not built until Perruchet and Vinter (1998) is in the library; its panel reads Reference pending', unless: ['pending', 'not built'] },
+      { term: /\bvoice (actor|artist)|female voice|male voice\b/gi, why: 'the voices are voice 1 to voice 12 on screen (spec §11, item 14)' },
+    ],
+
+    controls: [
+      'Open', 'Sounds', 'Stream', 'Words', 'Predictors', 'Begin', 'Begin Part 1', 'Play a test sound', 'Export my results', 'Load my results', 'Clear my saved results', 'Erase and start over', 'Keep my results', 'Replace my saved results', 'Keep what I have', 'Open anyway', 'Show the instructions again', 'Back to the step',
+      'Play', 'Wide bands', 'Narrow bands', 'Next', 'Back', 'Commit my prediction', 'Commit my labels', 'B', 'D', 'G', 'X matched the first', 'X matched the second', 'Start block 2', 'Start again', 'Train', 'Train again', 'Train on one pitch', 'Train on one voice', 'Run on the 14 sounds', 'Show voice timing',
+      'Play the minute', 'Commit my answer', 'Play again, with the words marked', 'Play again, with each word’s last syllable lengthened', 'Clear the highlight', 'Check this word', 'Empty the tray', 'Show me the words', 'Show the words and end the search', 'Keep searching', 'Commit my predictions', 'How much of the stream', 'Run the learners', 'Show stress',
+      'Hear it again', 'Run the models', 'Back to the fitted value',
+      'Show me sentences', 'Window size', 'Count words before and after separately', 'Count', 'Order', 'Prediction from counts', 'One point per word', 'Compute', 'Allow any token', 'Remove the last token', 'Clear the prompt', 'Temperature', 'Generate a sentence', 'Snapshot', 'Change the prompt',
+      'Go on to Step', 'Go back to Step', 'Go to Step', 'Go on to Part', 'Run seed', 'My results',
+    ],
+
+    claims: [
+      { says: 'Part 1: the 14 continuum sounds differ only in the second formant’s onset, 1,320 to 2,880 Hz in 120 Hz steps, F1 and F2 steady at 360 and 2,160 Hz, from Liberman’s p. 359', test: null },
+      { says: 'Part 1: the spectrogram puts a tone’s energy in the right bin at the right time in both views, and the classifier’s patch is the spectrogram’s own output pooled to 40 bands by 10 frames', test: 'a 1 kHz tone peaks in the 1 kHz bin in both views' },
+      { says: 'Part 1: ABX scoring is exact, and the predicted discrimination matches the paper’s formula on a hand-worked fixture, giving 50% and 100% for the paper’s two example pairs', test: 'the paper’s two example pairs' },
+      { says: 'Part 1: the classifier learns by Lab 7’s rule through learnWeights and thirdFactor only, and labels the two held-out voices well above chance (77% over 10 seeds)', test: 'on the shipped tokens, trained on ten voices' },
+      { says: 'Part 1: no syllable name, track, or count before Step 2’s commit; no curve, reference, formula, or boundary before both blocks of Step 3; nothing trains before its prediction, on rendered markup', test: 'Step 2: no syllable name, track, or count before the commit' },
+      { says: 'Part 1: before Step 3’s reveal no string in Part 1 names a category, a boundary, within, across, the predicted line, Liberman or Haskins, and Step 4 says nothing about sharp or gradual changes until Step 3 is done', test: 'no Part 1 file outside Step 3’s reveal holds a Step 3 word' },
+      { says: 'Part 2: transitional probabilities from a stream equal counts divided by counts; the stream never repeats a word; the six nonwords’ pairs never occur in any stream; the part-words are the paper’s two and four by its rule', test: 'a transitional probability is a count divided by a count' },
+      { says: 'Part 2: a true word colors exactly its instances on the board, a part-word changes nothing, and the proportions and the term appear only after the first word is found', test: 'counts only before the first word is found' },
+      { says: 'Part 2: the learners read only the syllables they take in (no word list, boundary, or foil), and the recurrent network moves weights only through learnWeights', test: 'the dips learner imports no word list' },
+      { says: 'Part 2: no word or replay before Step 1’s commit; no learner runs before the three predictions; Steps 2 to 4 open behind the one-line notice while Step 1 is not committed', test: 'Steps 2 to 4 open behind the one-line notice' },
+      { says: 'Part 2: the assembled stream has no acoustic cue to a word boundary: durations identical, peak intensity within 0.07 dB and pitch within 0.07 Hz over 21 minutes (training/m13/make_stream.py)', test: null },
+      { says: 'Part 3: 60 learning trials, each word 5 times, never on neighboring trials, 5 objects with the target; 12 test trials with 4; the key measure counts 48 pairs', test: '60 learning trials, each word 5 times' },
+      { says: 'Part 3: each model reproduces hand-computed choices on a fixture; guess and check stores one object per word and reads no count; tallying reads no record of its past picks; the fit lands within 0.06 of a scripted accuracy', test: 'guess and check: a first random pick' },
+      { says: 'Part 3: no word’s spelling, score, or model before the test is done; the key measure and the rows wait for the prediction; a sample sequence stands in when Steps 1 and 2 are not done', test: 'no word’s spelling, score, or model before the test is done' },
+      { says: 'Part 4: the generator emits only sentences the parser accepts over 10,000 sentences; the parser rejects a fixture of ungrammatical ones; after boys who Mary chases only plural verbs are legal', test: 'every generated sentence is accepted' },
+      { says: 'Part 4: the count model matches a hand-worked fixture at every window size; the two orders add the same counts with before and after summed and different counts separated; prediction from counts is a count divided by a count', test: 'matches a hand-worked fixture: the stream' },
+      { says: 'Part 4: the runtime’s next-token probabilities and attention weights match PyTorch’s within 1e-4 on 34 prompts; the transformer is causal; every snapshot is frozen through a scripted session', test: 'probabilities and attention weights within 1e-4' },
+      { says: 'Part 4: the agreement probes number 50 per depth, every one legal with the agreeing verb and illegal with the other, with the nearest noun always differing in number from the subject', test: '50 per depth; every one a legal sentence' },
+      { says: 'Part 4: no count or neighbor before Step 2’s prediction; no distribution before Step 3’s; no palette, distribution or attention before Step 4’s two predictions', test: 'no count or neighbor before the prediction' },
+      { says: 'Navigation: every part and every step opens from a fresh seed with nothing else done, on an instruction screen with its sections; a step opened out of order runs; a finished step names the button that comes next', test: 'every part and step opens from a fresh seed with nothing else done' },
+      { says: 'Storage: no part is locked; a complete unit survives a reload; an interrupted one restarts, Part 3’s on the reserve set; the board resumes; with storage blocked the lab runs in memory; the only key is bcogapp.m13.v1', test: 'Part 3’s unit, interrupted, restarts on the reserve set' },
+      { says: 'Structure: only learnWeights writes a learned weight, and only the classifier and the recurrent network call it', test: 'only the classifier and the simple recurrent network call learnWeights' },
+      { says: 'Every reference value traces to a data-file entry with its source and page, or shows Reference pending; no class is drawn', test: 'every line exists and is used where the spec puts it' },
+      { says: 'Screen: the content lines are each on their panel; no agentic verb about a program or the app; no British spellings; no pictograph; the voices are voice n; the controls carry their names', test: 'the controls carry the names the spec gives them' },
+      { says: 'Screen: nothing leaves the page: no POST, no camera, no microphone (getUserMedia is never called), storage only through the shared layer, no Math.random in the sim or the scene, no browser dialog', test: 'getUserMedia was never called by anything above' },
+      { says: 'Screen: a selected control changes color and never size', test: 'no button style keys font weight, padding, font size or border width on state' },
+      { says: 'Shell: the Lab button says the handout is not posted yet, not an error; nothing imports a 3D library or Module 2’s engine', test: 'the Lab pane message for the missing Lab 13 handout is honest' },
+      { says: 'Timing: a cursor drawn against the audio clock is within one frame of the clock (median 5 ms, max 16 ms); the classifier trains in 1.6 s under a 4× CPU throttle; the learners at 21 minutes on 20 streams hold no task over 167 ms (scripts/m13-timing.mjs, 2026-11-15)', test: null },
+      { says: 'Look: the spectrogram’s color map, the six word colors with their patterns, and the attention lines are legible on the dark theme (the app has no other)', test: null },
+      { says: 'Sound: the continuum sounds like b, d, g in order; the stream sounds even; the words sound like English (LAB_13_STIMULI.md)', test: null },
+    ],
+
+    crib: 'crib: m13',
+  },
 ]
