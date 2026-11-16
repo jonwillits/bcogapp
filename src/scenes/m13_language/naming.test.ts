@@ -57,7 +57,8 @@ const P2_PRE_COMMIT_FILES = /\/stream\/(screens|store)\.ts$|PartStream\.tsx$|\/u
 const P3_FORBIDDEN = /\bguess|hypothes|\bcheck|\bverif|\btall(y|ies|ied)\b|\bcount|associat|\bpropos|the previous time|Trueswell|Medina|\bYu\b|\bSmith\b/i
 const P3_GLOBAL_FORBIDDEN = /hypothes|\btall(y|ies|ied)\b|\bpropose|the previous time|Trueswell|Medina|\bYu\b|\bSmith\b/i
 const P3_FILES = (p: string) => p.includes('/words/') || p.includes('PartWords') || p.includes('/sim/language/words/')
-const P3_AFTER = /\/words\/(Reveal|Models|Step3)\.tsx$|\/words\/step3Screen\.ts$|\/sim\/language\/words\/models\/|\/sim\/language\/references\.ts$/
+// The words layer's own identifiers name the models (guessCheck, tally); what reaches the screen before the reveal is tested on rendered markup in reveal.test.tsx.
+const P3_AFTER = /\/words\/(Reveal|Models|Step3)\.tsx$|\/words\/step3Screen\.ts$|\/sim\/language\/words\/|\/sim\/language\/references\.ts$/
 
 describe('nothing before Part 1’s reveals names what they test (§11, item 2)', () => {
   it('no Part 1 file outside Step 2’s reveal holds a Step 2 word in a visible string', () => {
