@@ -16,12 +16,12 @@ export const WINDOW_S = 4
 
 const FLOOR = -70
 function colorOf(db: number): [number, number, number] {
-  const t = Math.min(1, Math.max(0, (db - FLOOR) / -FLOOR))
-  if (t < 0.6) {
-    const u = t / 0.6
+  const t = Math.pow(Math.min(1, Math.max(0, (db - FLOOR) / -FLOOR)), 2.2)
+  if (t < 0.55) {
+    const u = t / 0.55
     return [11 + 68 * u, 16 + 140 * u, 32 + 223 * u]
   }
-  const u = (t - 0.6) / 0.4
+  const u = (t - 0.55) / 0.45
   return [79 + 176 * u, 156 + 99 * u, 255]
 }
 

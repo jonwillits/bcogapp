@@ -54,14 +54,14 @@ export interface SpectrogramProps {
 const FLOOR = -70
 
 function colorOf(db: number): [number, number, number] {
-  // 0 at the floor, 1 at the loudest point.
-  const t = Math.min(1, Math.max(0, (db - FLOOR) / -FLOOR))
+  // 0 at the floor, 1 at the loudest point; the curve is bent so that the quiet range stays dark and the top 25 dB spans most of the brightness.
+  const t = Math.pow(Math.min(1, Math.max(0, (db - FLOOR) / -FLOOR)), 2.2)
   // background (11, 16, 32) → blue (79, 156, 255) → white.
-  if (t < 0.6) {
-    const u = t / 0.6
+  if (t < 0.55) {
+    const u = t / 0.55
     return [11 + (79 - 11) * u, 16 + (156 - 16) * u, 32 + (255 - 32) * u]
   }
-  const u = (t - 0.6) / 0.4
+  const u = (t - 0.55) / 0.45
   return [79 + (255 - 79) * u, 156 + (255 - 156) * u, 255]
 }
 
@@ -122,14 +122,16 @@ export function Spectrogram({ samples, sampleRate, view, width = 520, height = 2
       }
       g.stroke()
     }
-    // Axes.
+    // Axes (the same mapping as the overlay's X and Y, written out so that the effect's inputs are plain values).
+    const yOf = (hz: number) => pad.t + waveH + plotH - (hz / maxHz) * plotH
+    const xOf = (sec: number) => pad.l + (sec / duration) * plotW
     g.fillStyle = '#9aa6b8'
     g.font = '10px system-ui'
     g.textAlign = 'right'
     for (let hz = 0; hz <= maxHz; hz += 1000) {
-      g.fillText(`${hz}`, pad.l - 4, Y(hz) + 3)
+      g.fillText(`${hz}`, pad.l - 4, yOf(hz) + 3)
       g.fillStyle = 'rgba(154,166,184,0.25)'
-      g.fillRect(pad.l, Y(hz), plotW, 1)
+      g.fillRect(pad.l, yOf(hz), plotW, 1)
       g.fillStyle = '#9aa6b8'
     }
     g.save()
@@ -140,7 +142,7 @@ export function Spectrogram({ samples, sampleRate, view, width = 520, height = 2
     g.restore()
     g.textAlign = 'center'
     const tick = duration > 2 ? 0.5 : duration > 0.8 ? 0.1 : 0.05
-    for (let s = 0; s <= duration + 1e-9; s += tick) g.fillText(`${s.toFixed(tick < 0.1 ? 2 : 1)}`, X(s), height - 8)
+    for (let s = 0; s <= duration + 1e-9; s += tick) g.fillText(`${s.toFixed(tick < 0.1 ? 2 : 1)}`, xOf(s), height - 8)
     g.fillText('time (s)', pad.l + plotW / 2, height - 0)
   }, [sg, samples, width, height, maxHz, noWaveform, plotW, plotH, waveH, pad.l, pad.t, duration])
 

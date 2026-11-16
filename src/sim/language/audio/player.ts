@@ -72,5 +72,6 @@ export class Player {
   }
 }
 
-/** One player for the scene. */
+/** One player for the scene. In development builds it is exposed for scripts/m13-timing.mjs, which reads its clock. */
 export const player = new Player()
+if (typeof window !== 'undefined' && (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV) (window as unknown as { __m13player?: Player }).__m13player = player

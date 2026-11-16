@@ -1,5 +1,5 @@
-import type { CSSProperties, ReactNode } from 'react'
-import { Btn, Note, GroupLabel, Choice } from '../m06_brain/ui'
+import type { CSSProperties, HTMLAttributes, ReactNode } from 'react'
+import { Btn, GroupLabel, Choice } from '../m06_brain/ui'
 import { Content, FixedLines, OrientingPanel, DotPlot, statusStyle } from '../m09_rat/ui'
 
 /**
@@ -12,7 +12,16 @@ import { Content, FixedLines, OrientingPanel, DotPlot, statusStyle } from '../m0
  * block of aligned rows. Every text is selectable. A large timer and a
  * large line saying what is happening now on every timed screen (Lab 10).
  */
-export { Btn, Note, GroupLabel, Choice, Content, FixedLines, OrientingPanel, DotPlot, statusStyle }
+export { Btn, GroupLabel, Choice, Content, FixedLines, OrientingPanel, DotPlot, statusStyle }
+
+/** Lab 6's Note, with any data attribute passed through, so that a line's presence can be tested on rendered markup. */
+export function Note({ children, style, ...rest }: { children: ReactNode; style?: CSSProperties } & HTMLAttributes<HTMLParagraphElement>) {
+  return (
+    <p {...rest} style={{ margin: 0, fontSize: 11.5, color: 'var(--text-muted)', lineHeight: 1.45, ...style }}>
+      {children}
+    </p>
+  )
+}
 export { useStore, useThrottledStore } from '../m09_rat/useStore'
 export { StagePanel, row, Countdown, useCountdown } from '../m10_memory/ui'
 export { BigChoice, Section, Para, rgbOf } from '../m12_planning/ui'

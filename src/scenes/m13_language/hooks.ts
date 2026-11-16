@@ -15,7 +15,10 @@ export function useAudioCursor(read: () => number | null, active: boolean): numb
     }
     let raf = 0
     const tick = () => {
-      setPos(read())
+      const v = read()
+      setPos(v)
+      // For scripts/m13-timing.mjs only: what was drawn and when, in development builds.
+      if ((import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV) (window as unknown as { __m13cursor?: unknown }).__m13cursor = { cursorS: v, at: performance.now() }
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
