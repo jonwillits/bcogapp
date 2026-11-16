@@ -52,6 +52,8 @@ export interface InstructionScreenProps {
   extra?: ReactNode
   /** Centered over a view (the default) or inline in a column. */
   inline?: boolean
+  /** The inline width cap (560 px by default); Lab 13 passes "none" so the screen fills its frame between the columns. */
+  maxWidth?: number | string
 }
 
 function groupBullets(lines: string[]): (string | string[])[] {
@@ -66,9 +68,9 @@ function groupBullets(lines: string[]): (string | string[])[] {
   return out
 }
 
-export function InstructionScreen({ title, willDo, minutes, sitting, sittingLine, ready = READY_DEFAULT, keys, content, next, figure, onBegin, beginLabel = 'Begin', disabled, extra, inline }: InstructionScreenProps) {
+export function InstructionScreen({ title, willDo, minutes, sitting, sittingLine, ready = READY_DEFAULT, keys, content, next, figure, onBegin, beginLabel = 'Begin', disabled, extra, inline, maxWidth = 560 }: InstructionScreenProps) {
   const style = inline
-    ? { width: '100%', maxWidth: 560 }
+    ? { width: '100%', maxWidth, boxSizing: 'border-box' as const }
     : { position: 'absolute' as const, left: 'calc(50% + var(--stage-shift, 0px))', top: 24, transform: 'translateX(-50%)', width: 'min(560px, calc(100vw - 780px))', minWidth: 360, maxHeight: 'calc(100vh - 170px)', overflowY: 'auto' as const }
   return (
     <div

@@ -86,8 +86,8 @@ export function TabBar({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void
  * scrolls sideways inside itself rather than growing. The column itself is
  * the one scroll container (no `maxHeight` here), so there is one vertical
  * scrollbar per column, not one inside another. The center panel sits
- * between the columns, 0.02 of the window from each (Jon, 2026-11-16: 0.05 was too much), and never wider than
- * its design width.
+ * between the columns, 0.02 of the window from each (Jon, 2026-11-16: 0.05 was too much), and spans the room
+ * between them, with no cap (Jon, 2026-11-16).
  */
 export const LEFT_WIDTH = 'min(310px, 30vw)'
 export const RIGHT_WIDTH = 'min(440px, 30vw)'
@@ -97,10 +97,10 @@ export const RIGHT_STYLE: CSSProperties = { width: RIGHT_WIDTH, maxWidth: RIGHT_
 const CENTER_GAP = '2vw'
 /** The room between the columns' gaps: the window minus the layout's 12 px padding on each side, both columns, a reserved scrollbar gutter on each (16 px), and both gaps. */
 export const STAGE_ROOM = `calc(100vw - 24px - 32px - ${LEFT_WIDTH} - ${RIGHT_WIDTH} - 2 * ${CENTER_GAP})`
-/** The center panel's width: its design width, or the room when that is less. It never grows past the room; what does not fit scrolls sideways inside the panel. */
-export const stageWidth = (max: number) => `min(${max}px, ${STAGE_ROOM})`
-/** The center panel's left edge: after the left column and its gap, plus half of whatever room the panel does not use, so that it sits centered between the columns with equal gaps. */
-export const stageLeft = (max: number) => `calc(12px + 16px + ${LEFT_WIDTH} + ${CENTER_GAP} + max(0px, (${STAGE_ROOM} - ${max}px) / 2))`
+/** The center panel's width is the room: the window minus the two columns and the two gaps, with no cap (Jon, 2026-11-16: a cap left a widening gap at small font sizes). What does not fit scrolls sideways inside the panel. The argument is kept for the callers; it no longer caps anything. */
+export const stageWidth = (_max: number) => STAGE_ROOM
+/** The center panel's left edge: after the left column and its gap. */
+export const stageLeft = (_max: number) => `calc(12px + 16px + ${LEFT_WIDTH} + ${CENTER_GAP})`
 
 /** The center panel: positioned between the columns, scrolling vertically inside itself when tall, never horizontally for text (text wraps; only a fixed-width block can be wider). */
 export function StagePanel({ children, wide, testId }: { children: ReactNode; wide?: boolean; testId?: string }) {

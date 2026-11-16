@@ -252,6 +252,7 @@ export function StepStage<Step extends number, S extends StepStore<Step>>({ ctx,
       <div data-instruction-frame style={{ position: 'absolute', left: stageLeft(560), top: 24, width: stageWidth(560), maxHeight: 'calc(100vh - 170px)', overflowY: 'auto', overflowX: 'auto', pointerEvents: 'auto', display: 'flex', boxSizing: 'border-box' }}>
       <InstructionScreen
         inline
+        maxWidth="none"
         title={screen.title}
         willDo={screen.willDo}
         minutes={screen.minutes}
