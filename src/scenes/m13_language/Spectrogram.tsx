@@ -71,10 +71,11 @@ function colorOf(db: number): [number, number, number] {
 export function Spectrogram({ samples, sampleRate, view, width = 520, height = 220, maxHz = 5000, cursorS = null, tracks, marks, highlights, frequencyLines, noWaveform, testId }: SpectrogramProps) {
   const canvas = useRef<HTMLCanvasElement>(null)
   const sg: Sg | null = useMemo(() => (samples ? spectrogram(samples, sampleRate, view, 0.001, maxHz) : null), [samples, sampleRate, view, maxHz])
-  // The waveform strip, its gap from the spectrogram, and the space the two take above the plot.
+  // The waveform strip, its label above it, the gap and the spectrogram's label below it; the space the three take above the plot (Jon, 2026-11-16: more room, and each picture named).
+  const labelH = noWaveform ? 0 : 12
   const strip = noWaveform ? 0 : 34
-  const gap = noWaveform ? 0 : 8
-  const waveH = strip + gap
+  const gap = noWaveform ? 0 : 10
+  const waveH = strip + gap + 2 * labelH
   const pad = { l: 44, r: 8, t: 6, b: 22 }
   const plotW = width - pad.l - pad.r
   const plotH = height - pad.t - pad.b - waveH
@@ -108,11 +109,17 @@ export function Spectrogram({ samples, sampleRate, view, width = 520, height = 2
       }
     }
     g.putImageData(img, pad.l, pad.t + waveH)
-    // The waveform, on its own axis: a framed strip with a zero line, labeled.
+    // The waveform, on its own axis: a framed strip with a zero line, labeled, under the word waveform; the word spectrogram above the plot.
     if (!noWaveform) {
-      const mid = pad.t + strip / 2
+      const top = pad.t + labelH
+      const mid = top + strip / 2
+      g.fillStyle = '#9aa6b8'
+      g.font = '10px system-ui'
+      g.textAlign = 'left'
+      g.fillText('waveform', pad.l, pad.t + 9)
+      g.fillText('spectrogram', pad.l, top + strip + gap + 9)
       g.fillStyle = 'rgba(154,166,184,0.08)'
-      g.fillRect(pad.l, pad.t, plotW, strip)
+      g.fillRect(pad.l, top, plotW, strip)
       g.fillStyle = 'rgba(154,166,184,0.35)'
       g.fillRect(pad.l, mid, plotW, 1)
       g.strokeStyle = '#9aa6b8'
@@ -132,13 +139,13 @@ export function Spectrogram({ samples, sampleRate, view, width = 520, height = 2
       }
       g.stroke()
       g.strokeStyle = 'rgba(154,166,184,0.4)'
-      g.strokeRect(pad.l + 0.5, pad.t + 0.5, plotW - 1, strip - 1)
+      g.strokeRect(pad.l + 0.5, top + 0.5, plotW - 1, strip - 1)
       g.fillStyle = '#9aa6b8'
       g.font = '9px system-ui'
       g.textAlign = 'right'
-      g.fillText('+', pad.l - 4, pad.t + 9)
+      g.fillText('+', pad.l - 4, top + 9)
       g.fillText('0', pad.l - 4, mid + 3)
-      g.fillText('−', pad.l - 4, pad.t + strip - 2)
+      g.fillText('−', pad.l - 4, top + strip - 2)
       g.save()
       g.translate(10, mid)
       g.rotate(-Math.PI / 2)
@@ -168,7 +175,7 @@ export function Spectrogram({ samples, sampleRate, view, width = 520, height = 2
     const tick = duration > 2 ? 0.5 : duration > 0.8 ? 0.1 : 0.05
     for (let s = 0; s <= duration + 1e-9; s += tick) g.fillText(`${s.toFixed(tick < 0.1 ? 2 : 1)}`, xOf(s), height - 8)
     g.fillText('time (s)', pad.l + plotW / 2, height - 0)
-  }, [sg, samples, width, height, maxHz, noWaveform, plotW, plotH, waveH, strip, pad.l, pad.t, duration])
+  }, [sg, samples, width, height, maxHz, noWaveform, plotW, plotH, waveH, strip, gap, labelH, pad.l, pad.t, duration])
 
   return (
     <div style={{ position: 'relative', width, height }} data-spectrogram={testId ?? view} data-view={view}>
@@ -184,10 +191,11 @@ export function Spectrogram({ samples, sampleRate, view, width = 520, height = 2
             )}
           </g>
         ))}
-        {frequencyLines?.map((f) => (
+        {frequencyLines?.map((f, i) => (
+          // Labels alternate ends, the first at the left and the second at the right, so two close lines never put one label over the other (Jon, 2026-11-16).
           <g key={f.label} data-frequency-line={f.label}>
             <line x1={pad.l} y1={Y(f.hz)} x2={width - pad.r} y2={Y(f.hz)} stroke={f.color ?? '#ffd166'} strokeWidth={1.5} strokeDasharray="5 3" />
-            <text x={width - pad.r - 2} y={Y(f.hz) - 4} fontSize={12} fontWeight={700} textAnchor="end" fill={f.color ?? '#ffd166'} stroke="#0b1020" strokeWidth={3.5} paintOrder="stroke" style={{ paintOrder: 'stroke' }}>
+            <text x={i % 2 === 0 ? pad.l + 3 : width - pad.r - 2} y={Y(f.hz) - 4} fontSize={12} fontWeight={700} textAnchor={i % 2 === 0 ? 'start' : 'end'} fill={f.color ?? '#ffd166'} stroke="#0b1020" strokeWidth={3.5} paintOrder="stroke" style={{ paintOrder: 'stroke' }}>
               {f.label}
             </text>
           </g>

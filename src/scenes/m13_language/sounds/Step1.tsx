@@ -71,7 +71,9 @@ export function Step1Stage({ s }: { s: SoundsStore }) {
   const room = useWidth(ref, 700)
   // Two pictures side by side on Pitch and Voice; three on Vowels, with the map on the right.
   const two = Math.max(240, Math.floor((room - 10) / 2))
-  const three = Math.max(170, Math.floor((room - 20 - 240) / 3))
+  // The three vowels share the room three inRow when each gets at least 220 px; in a narrower room they stack at full width, legible over small (Jon, 2026-11-16: three inRow at 174 px were too small to read). The vowel map sits under them.
+  const inRow = Math.floor((room - 20) / 3) >= 220
+  const three = inRow ? Math.floor((room - 20) / 3) : Math.min(560, room)
   const one = Math.min(560, room)
   const single = screen === 'time' || screen === 'frequency' || screen === 'energy' || screen === 'patterns'
   return (
@@ -101,13 +103,15 @@ export function Step1Stage({ s }: { s: SoundsStore }) {
         )}
         {screen === 'vowels' && vowels && (
           <>
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'nowrap', flexDirection: inRow ? 'row' : 'column', alignItems: 'flex-start' }} data-vowels-layout={inRow ? 'three-in-a-row' : 'stacked'}>
               {(['ee_120', 'ah_120', 'oo_120'] as const).map((k) => (
-                <Sound key={k} s={s} clipKey={`vowel:${k}`} label={`${k.slice(0, 2)} at 120 Hz`} view="wide" frequencyLines={f2(k)} width={three} height={Math.round(three * 0.75)} />
+                <Sound key={k} s={s} clipKey={`vowel:${k}`} label={`${k.slice(0, 2)} at 120 Hz`} view="wide" frequencyLines={f2(k)} width={three} height={Math.round(three * (inRow ? 0.8 : 0.42))} />
               ))}
+            </div>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
               <div>
                 <GroupLabel>The vowel map</GroupLabel>
-                <Scatter width={240} height={200} xLabel="second formant (Hz), increasing to the left" yLabel="first formant (Hz), increasing downward" flipX flipY testId="vowel-map" points={[{ x: vowels.vowels.ee[1], y: vowels.vowels.ee[0], label: 'ee, as in see' }, { x: vowels.vowels.ah[1], y: vowels.vowels.ah[0], label: 'ah, as in father' }, { x: vowels.vowels.oo[1], y: vowels.vowels.oo[0], label: 'oo, as in who' }]} />
+                <Scatter width={Math.min(360, room)} height={240} xLabel="second formant (Hz), increasing to the left" yLabel="first formant (Hz), increasing downward" flipX flipY testId="vowel-map" points={[{ x: vowels.vowels.ee[1], y: vowels.vowels.ee[0], label: 'ee, as in see' }, { x: vowels.vowels.ah[1], y: vowels.vowels.ah[0], label: 'ah, as in father' }, { x: vowels.vowels.oo[1], y: vowels.vowels.oo[0], label: 'oo, as in who' }]} />
                 <Note>The plot has the orientation of the reading’s vowel map (§13.1.6): the axes are turned so that the first formant increases downward and the second increases leftward.</Note>
               </div>
             </div>

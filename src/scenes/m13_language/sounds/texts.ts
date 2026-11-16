@@ -27,7 +27,7 @@ export const TOUR_TEXT: Record<TourScreen, string[]> = {
   ],
   energy: [
     'Brightness shows energy. The brighter a point, the more energy the sound has at that time and that frequency; the dark background is silence or nearly so. A speech sound is not one frequency but many at once, with more energy at some than at others, and the picture shows which.',
-    'Printed spectrograms, including the reading’s figures, use the reverse: more energy is drawn darker.',
+    'Printed spectrograms, including the reading’s figures, are the other way around: the background is white, and more energy is drawn darker.',
   ],
   patterns: [
     'There are two views of the same sound, and each shows one kind of pattern. In “Narrow bands” you see thin, evenly spaced horizontal lines. These lines are the harmonics of the voice. The lowest line is the pitch, the rate at which the vocal folds vibrate, and the lines above it lie at two, three, four times that frequency, and so on: a voice at 120 Hz has harmonics at 120, 240, 360 Hz and up.',

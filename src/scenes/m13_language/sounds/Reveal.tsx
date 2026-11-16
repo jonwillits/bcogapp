@@ -127,7 +127,8 @@ function VotScreen({ s, width }: { s: SoundsStore; width: number }) {
   const vot = s.tts?.vot
   if (!vot) return <Note data-loading>Loading.</Note>
   return (
-    <div style={{ display: 'flex', flexWrap: 'nowrap', gap: 10 }} data-vot>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-vot>
+      <div style={{ display: 'flex', flexWrap: 'nowrap', gap: 10 }}>
       {(['tot', 'dot'] as const).map((k) => {
         const v = vot[k]
         const clip = s.clip(`vot:${k}`)
@@ -143,6 +144,7 @@ function VotScreen({ s, width }: { s: SoundsStore; width: number }) {
           </div>
         )
       })}
+      </div>
       <Para>In tot, the vocal folds start vibrating tens of milliseconds after the release; in dot, almost at once. The reading’s figure (§13.3.1) draws the same timing difference.</Para>
     </div>
   )
