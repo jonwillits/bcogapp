@@ -35,7 +35,9 @@ def main(repo, rev):
     def card(title, wav, png_name, text, narrow=False, tracks=None, marks=None, title_png=None):
         png = os.path.join(rev, "png", png_name)
         draw(wav, png, narrow=narrow, title=title_png or title, tracks=tracks, marks=marks)
-        rel = os.path.relpath(wav, rev)
+        # The page is served from rev, so the sound must be the copy under rev/audio,
+        # not a path that climbs out of the served folder (the server answers 404).
+        rel = "audio/" + os.path.relpath(wav, audio) if wav.startswith(audio + os.sep) else os.path.relpath(wav, rev)
         return f'<div class="card"><h3>{html.escape(title)}</h3><audio controls preload="none" src="{rel}"></audio><p>{text}</p><img src="png/{png_name}" alt=""></div>'
 
     # 1. Vowels
