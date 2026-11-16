@@ -86,7 +86,7 @@ export function TabBar({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void
  * scrolls sideways inside itself rather than growing. The column itself is
  * the one scroll container (no `maxHeight` here), so there is one vertical
  * scrollbar per column, not one inside another. The center panel sits
- * between the columns, 0.05 of the window from each, and never wider than
+ * between the columns, 0.02 of the window from each (Jon, 2026-11-16: 0.05 was too much), and never wider than
  * its design width.
  */
 export const LEFT_WIDTH = 'min(310px, 30vw)'
@@ -94,7 +94,7 @@ export const RIGHT_WIDTH = 'min(440px, 30vw)'
 export const PANEL_STYLE: CSSProperties = { width: LEFT_WIDTH, maxWidth: LEFT_WIDTH, overflowX: 'auto' }
 export const RIGHT_STYLE: CSSProperties = { width: RIGHT_WIDTH, maxWidth: RIGHT_WIDTH, overflowX: 'auto' }
 /** The gap between a side column and the center panel, as a share of the window. */
-const CENTER_GAP = '5vw'
+const CENTER_GAP = '2vw'
 /** The room between the columns' gaps: the window minus the layout's 12 px padding on each side, both columns, a reserved scrollbar gutter on each (16 px), and both gaps. */
 export const STAGE_ROOM = `calc(100vw - 24px - 32px - ${LEFT_WIDTH} - ${RIGHT_WIDTH} - 2 * ${CENTER_GAP})`
 /** The center panel's width: its design width, or the room when that is less. It never grows past the room; what does not fit scrolls sideways inside the panel. */
