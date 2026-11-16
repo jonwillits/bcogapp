@@ -1,6 +1,7 @@
 import { describe, it } from 'vitest'
 import { makeClassifier, train, accuracy, confusion, forward, shares, splitRun1, splitOnePitch, splitOneVoice, LABELS, RATE, PASSES, HIDDEN } from './classifier'
 import { loadShippedTokens, loadContinuumPatches } from './tokens.node'
+import { STEPS } from './abx'
 
 /**
  * Stop 2, Part 1 (spec §13, step 3): the classifier's held-out accuracy
@@ -50,15 +51,15 @@ describe('classifier', () => {
     }
     out.push(`run 2 one pitch (train ${splitOnePitch(s.tokens, s.heldOutVoices).training.length}, test ${splitOnePitch(s.tokens, s.heldOutVoices).test.length}): mean ${f(mean(pitch))}% sd ${f(sd(pitch))}`)
     out.push(`run 2 one voice (train ${splitOneVoice(s.tokens, 1).training.length}, test ${splitOneVoice(s.tokens, 1).test.length}): mean ${f(mean(voice))}% sd ${f(sd(voice))}`)
-    out.push('run 3 labeling curve on the 14 continuum steps, mean share over seeds (b / d / g), and the most likely label:')
-    for (let k = 0; k < 14; k++) {
+    out.push(`run 3 labeling curve on the ${STEPS} continuum steps the lab plays, mean share over seeds (b / d / g), and the most likely label:`)
+    for (let k = 0; k < STEPS; k++) {
       const b = mean(run3.map((r) => r[k][0]))
       const d = mean(run3.map((r) => r[k][1]))
       const g = mean(run3.map((r) => r[k][2]))
       const top = LABELS[[b, d, g].indexOf(Math.max(b, d, g))]
       out.push(`  step ${String(k + 1).padStart(2)}: ${b.toFixed(2)} / ${d.toFixed(2)} / ${g.toFixed(2)}  ${top}`)
     }
-    const seq = Array.from({ length: 14 }, (_, k) => {
+    const seq = Array.from({ length: STEPS }, (_, k) => {
       const v = [0, 1, 2].map((i) => mean(run3.map((r) => r[k][i])))
       return LABELS[v.indexOf(Math.max(...v))]
     }).join('')

@@ -24,7 +24,7 @@ export const RESTARTED_LINE = 'This part was interrupted and run again.'
 export const HEADPHONES_LINE = 'This step plays sound. Use headphones or earbuds if you have them, and set a comfortable volume once. Small differences between sounds may be harder to hear through speakers. You can still do every step without headphones.'
 
 /** 2. Parts 1 to 3, wherever a sound is first played. */
-export const MADE_OFFLINE_LINE = 'Every sound in this lab was made by a computer before the lab was posted. Nothing is recorded from you, and this lab never turns on a microphone.'
+export const MADE_OFFLINE_LINE = 'Every sound in this lab was made by a computer before the lab was posted. Nothing is recorded from you, and this lab never turns on a camera or microphone.'
 
 /** 3. Part 1, Step 1. */
 export const SETTINGS_NOT_MEASUREMENTS_LINE = 'Every frequency marked on this screen is a setting of the synthesizer that made the sound, not a measurement of the sound.'

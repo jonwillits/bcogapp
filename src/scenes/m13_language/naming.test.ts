@@ -146,7 +146,12 @@ describe('words that must not be on screen (§11, items 6, 7 and 14)', () => {
     const banned: [RegExp, string][] = [
       [/\byou (drive|steer|pilot|ride)\b/i, 'the student controls or moves; drive is for vehicles'],
       [/\b(procedure|program|learner|model|network|rule)s? (walks?|wanders?|explores?|hunts?|tries|looks? for|listens? for)\b/i, 'a program runs, computes, stores; it does not walk or try'],
-      [/\bthe (table|panel|screen|line|row|strip|app|tab|column|button|card|map|view|handout|lab|step|part|board|tray|plot|slider|menu) (tells?|asks?|suggests?|offers?|gathers?|invites?|lets?|wants?|knows?|thinks?|decides?|remembers?|notices?|sees?|gives?)\b/i, 'an inanimate thing shows, says, prints, records, lists, states'],
+      [/\bthe (table|panel|screen|line|row|strip|app|tab|column|button|card|map|view|handout|lab|step|part|board|tray|plot|slider|menu|tour|block|formula|picture|spectrogram|names?) (tells?|asks?|suggests?|offers?|gathers?|invites?|lets?|wants?|knows?|thinks?|decides?|remembers?|notices?|sees?|gives?|points? out|assumes?|measures?)\b/i, 'an inanimate thing shows, says, prints, records, lists, states'],
+      // Jon, Lab 13 walk, 2026-11-16: a tour that points out, names that go to a screen, a view that measures, a block that asks, a formula that assumes.
+      [/\b(tour|names?|buttons?|row of names|screen’s names) (go(es)? to|take you to|points? out)\b/i, 'the student presses a name to go to a screen; a tour has screens'],
+      [/\b(view|picture|spectrogram|plot) measures\b/i, 'a view shows; a program measures'],
+      [/\b(block|run|trial) (asks?|wants?)\b/i, 'in a block the student gives an answer'],
+      [/\bit assumes that\b/i, 'a formula rests on an assumption; people assume'],
       [/\bwe record\b/i, 'say what the student will see, not what the build does'],
       [/\bthe (run|table|panel|strip|step|board) records\b/i, 'say what the student will see'],
       [/\b(this|the) step (runs|reproduces|simulates|states)\b/i, 'the student runs; a step opens'],
@@ -262,7 +267,7 @@ describe('the shell', () => {
     }
   })
   it('the controls carry the names the spec gives them', () => {
-    for (const w of ['Begin', 'Begin Part 1', 'Play a test sound', 'Export my results', 'Load my results', 'Clear my saved results', 'Erase and start over', 'Keep my results', 'Open anyway', 'Show the instructions again', 'Commit my prediction', 'Commit my labels', 'Start block 2', 'X matched the first', 'X matched the second', 'Train', 'Run on the 14 sounds', 'Play the minute', 'Commit my answer', 'Check this word', 'Empty the tray', 'Clear the highlight', 'Show me the words', 'How much of the stream', 'Run the learners', 'Show stress', 'Hear it again', 'Run the models', 'Back to the fitted value', 'Show me sentences', 'Window size', 'Count words before and after separately', 'Count', 'Compute', 'Allow any token', 'Remove the last token', 'Clear the prompt', 'Temperature', 'Generate a sentence', 'Snapshot', 'Change the prompt'])
+    for (const w of ['Begin', 'Begin Part 1', 'Play a test sound', 'Export my results', 'Load my results', 'Clear my saved results', 'Erase and start over', 'Keep my results', 'Open anyway', 'Show the instructions again', 'Commit my prediction', 'Commit my labels', 'Go to Step 2', 'Start block 1', 'Start block 2', 'X matched the first', 'X matched the second', 'Train', 'Run on the 9 sounds', 'Play the minute', 'Commit my answer', 'Check this word', 'Empty the tray', 'Clear the highlight', 'Show me the words', 'How much of the stream', 'Run the learners', 'Show stress', 'Hear it again', 'Run the models', 'Back to the fitted value', 'Show me sentences', 'Window size', 'Count words before and after separately', 'Count', 'Compute', 'Allow any token', 'Remove the last token', 'Clear the prompt', 'Temperature', 'Generate a sentence', 'Snapshot', 'Change the prompt'])
       expect(screen, w).toContain(w)
   })
 })

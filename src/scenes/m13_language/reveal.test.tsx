@@ -17,7 +17,7 @@ import { abxTrials, labelingTrials } from '../../sim/language/sounds/abx'
 export const labelsFixture = { order: ['bee', 'bah', 'boo', 'dee', 'dah', 'doo'], labels: { bee: 'b', bah: 'b', boo: 'd', dee: 'd', dah: 'd', doo: 'd' }, correct: 5, seconds: 40, restarts: 0 }
 export const labelingFixture = (() => {
   const trials = labelingTrials(makeRng(1))
-  return { trials, answers: trials.map((s) => (s <= 4 ? 'b' : s <= 9 ? 'd' : 'g')), seconds: trials.map(() => 1), restarts: 0 }
+  return { trials, answers: trials.map((s) => (s <= 4 ? 'b' : 'd')), seconds: trials.map(() => 1), restarts: 0 }
 })()
 export const abxFixture = (() => {
   const trials = abxTrials(makeRng(2))

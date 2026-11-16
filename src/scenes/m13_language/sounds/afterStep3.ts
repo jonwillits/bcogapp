@@ -4,4 +4,4 @@
  * this file is read only then, and it is the one Step 4 file that may name
  * a sharp or gradual change.
  */
-export const RUN3_AFTER_STEP3 = { key: 'p1-s4-run3', question: 'Run on the 14 synthetic sounds of Step 3, will the network’s most likely label change from b to d to g sharply, gradually, or not in that order?', choices: ['sharply', 'gradually', 'not in that order'] } as const
+export const RUN3_AFTER_STEP3 = { key: 'p1-s4-run3', question: 'Run on the 9 synthetic sounds of Step 3, will the network’s most likely label change from b to d sharply, gradually, or not in that order?', choices: ['sharply', 'gradually', 'not in that order'] } as const

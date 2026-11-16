@@ -4,28 +4,34 @@ import type { Rng } from '../../random'
  * Part 1, Step 3's design and analysis (spec §5.3), after Liberman, Harris,
  * Hoffman and Griffith (1957).
  *
- *   Block 1, labeling: each of the 14 sounds 6 times, in 6 shuffled rounds
- *   of 14: 84 trials. The original's interval was 6 s (p. 360); this step
+ * The lab plays the first 9 of the 14 synthesized steps (Jon, walk,
+ * 2026-11-16): the b–d boundary alone makes the point, step 9 is the last
+ * sure d by ear and in the paper's listener (Fig. 2, p. 361: d 83% at step
+ * 9, g 78% at step 10), and the shorter series cuts the two blocks from
+ * about 9 minutes to about 5. Steps 10 to 14 stay shipped and unplayed.
+ *
+ *   Block 1, labeling: each of the 9 sounds 6 times, in 6 shuffled rounds
+ *   of 9: 54 trials. The original's interval was 6 s (p. 360); this step
  *   plays the next sound 800 ms after the answer.
- *   Block 2, telling apart: ABX triads over the 12 two-step pairs (1, 3) to
- *   (12, 14), each in the four orders ABA, ABB, BAA, BAB: 48 triads in a
+ *   Block 2, telling apart: ABX triads over the 7 two-step pairs (1, 3) to
+ *   (7, 9), each in the four orders ABA, ABB, BAA, BAB: 28 triads in a
  *   seeded order, the sounds of a triad 1 s apart (p. 360).
  *
  * The analysis: labeling curves (the share of each sound's 6 presentations
- * labeled b, d, g); discrimination (the share of each pair's 4 triads
+ * labeled b or d); discrimination (the share of each pair's 4 triads
  * correct); the discrimination predicted from the labels alone, by the
- * paper's formula (pp. 362–363); and where the curves cross.
+ * paper's formula (pp. 362–363); and where the two curves cross.
  */
 
-export const STEPS = 14
+export const STEPS = 9
 export const LABELING_ROUNDS = 6
 export const LABELING_GAP_MS = 800
-export const PAIRS: [number, number][] = Array.from({ length: 12 }, (_, i) => [i + 1, i + 3])
+export const PAIRS: [number, number][] = Array.from({ length: STEPS - 2 }, (_, i) => [i + 1, i + 3])
 export const ORDERS = ['ABA', 'ABB', 'BAA', 'BAB'] as const
 export type Order = (typeof ORDERS)[number]
 export const TRIAD_INTERVAL_S = 1.0
-export type Label = 'b' | 'd' | 'g'
-export const LABELS: Label[] = ['b', 'd', 'g']
+export type Label = 'b' | 'd'
+export const LABELS: Label[] = ['b', 'd']
 
 function shuffle<T>(rng: Rng, xs: T[]): T[] {
   const a = xs.slice()
@@ -36,7 +42,7 @@ function shuffle<T>(rng: Rng, xs: T[]): T[] {
   return a
 }
 
-/** The 84 labeling trials: 6 rounds, each a shuffle of the 14 steps (1-based). */
+/** The 54 labeling trials: 6 rounds, each a shuffle of the 9 steps (1-based). */
 export function labelingTrials(rng: Rng): number[] {
   const out: number[] = []
   for (let r = 0; r < LABELING_ROUNDS; r++) out.push(...shuffle(rng, Array.from({ length: STEPS }, (_, i) => i + 1)))
@@ -58,16 +64,16 @@ export function triadOf(pair: [number, number], order: Order): Triad {
   return { pair, order, sounds, xIsFirst: order === 'ABA' || order === 'BAB' }
 }
 
-/** The 48 triads in a seeded order. */
+/** The 28 triads in a seeded order. */
 export function abxTrials(rng: Rng): Triad[] {
   const all: Triad[] = []
   for (const p of PAIRS) for (const o of ORDERS) all.push(triadOf(p, o))
   return shuffle(rng, all)
 }
 
-/** The labeling curves: for each step 1 to 14, the share of its presentations labeled b, d, g. */
+/** The labeling curves: for each step 1 to 9, the share of its presentations labeled b or d. */
 export function labelingCurves(trials: readonly number[], answers: readonly Label[]): Record<Label, number[]> {
-  const counts: Record<Label, number[]> = { b: Array(STEPS).fill(0), d: Array(STEPS).fill(0), g: Array(STEPS).fill(0) }
+  const counts: Record<Label, number[]> = { b: Array(STEPS).fill(0), d: Array(STEPS).fill(0) }
   const n = Array(STEPS).fill(0)
   trials.forEach((step, i) => {
     const a = answers[i]
@@ -76,7 +82,7 @@ export function labelingCurves(trials: readonly number[], answers: readonly Labe
     n[step - 1]++
   })
   const share = (l: Label) => counts[l].map((c, k) => (n[k] ? c / n[k] : 0))
-  return { b: share('b'), d: share('d'), g: share('g') }
+  return { b: share('b'), d: share('d') }
 }
 
 /** Discrimination: for each two-step pair, the share of its triads answered correctly; plotted at the pair's middle step. */
@@ -97,7 +103,9 @@ export function discrimination(trials: readonly Triad[], answers: readonly ('fir
  * The discrimination predicted from the labels alone (pp. 362–363). For a
  * pair of sounds A and B, with p the shares of A's labels and p′ of B's:
  *
- *   predicted = 1/2 + 1/4 · [ (p_b − p′_b)² + (p_d − p′_d)² + (p_g − p′_g)² ]
+ *   predicted = 1/2 + 1/4 · [ (p_b − p′_b)² + (p_d − p′_d)² ]
+ *
+ * (the paper's sum runs over its three labels; with two labels it has two terms)
  *
  * which is the paper's average over the ABA and ABB orders of
  * P Corr = 1·P_R + 0·P_W + ½·P_I, where P_R is the chance of hearing a
@@ -113,7 +121,7 @@ export function predictedFromLabels(p: Record<Label, number>, q: Record<Label, n
 }
 
 export function predictedCurve(curves: Record<Label, number[]>): { middle: number; predicted: number }[] {
-  return PAIRS.map(([a, b]) => ({ middle: (a + b) / 2, predicted: predictedFromLabels({ b: curves.b[a - 1], d: curves.d[a - 1], g: curves.g[a - 1] }, { b: curves.b[b - 1], d: curves.d[b - 1], g: curves.g[b - 1] }) }))
+  return PAIRS.map(([a, b]) => ({ middle: (a + b) / 2, predicted: predictedFromLabels({ b: curves.b[a - 1], d: curves.d[a - 1] }, { b: curves.b[b - 1], d: curves.d[b - 1] }) }))
 }
 
 /** Where two labeling curves cross: the first step at which the second curve rises to meet or pass the first, as a fractional step by linear interpolation; null if they never cross. */

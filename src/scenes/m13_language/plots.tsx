@@ -116,15 +116,16 @@ export function BarChart({ bars, width = 400, max, format = (v) => v.toFixed(2),
   )
 }
 
-/** Labeled points on a plane. */
+/** Labeled points on a plane. The domain is padded by a tenth on each side, and a label sits on whichever side of its point has room, so no label runs off the plot (Jon, 2026-11-16). */
 export function Scatter({ points, width = 320, height = 240, xLabel, yLabel, flipX, flipY, testId, children }: { points: { x: number; y: number; label: string; color?: string }[]; width?: number; height?: number; xLabel: string; yLabel: string; flipX?: boolean; flipY?: boolean; testId?: string; children?: ReactNode }) {
   const pad = { l: 40, r: 12, t: 12, b: 30 }
   const xs = points.map((p) => p.x)
   const ys = points.map((p) => p.y)
-  const lo = Math.min(...xs)
-  const hi = Math.max(...xs)
-  const ylo = Math.min(...ys)
-  const yhi = Math.max(...ys)
+  const span = (a: number, b: number) => (b - a || 1) * 0.12
+  const lo = Math.min(...xs) - span(Math.min(...xs), Math.max(...xs))
+  const hi = Math.max(...xs) + span(Math.min(...xs), Math.max(...xs))
+  const ylo = Math.min(...ys) - span(Math.min(...ys), Math.max(...ys))
+  const yhi = Math.max(...ys) + span(Math.min(...ys), Math.max(...ys))
   const X = (x: number) => {
     const u = (x - lo) / (hi - lo || 1)
     return pad.l + (flipX ? 1 - u : u) * (width - pad.l - pad.r)
@@ -133,16 +134,20 @@ export function Scatter({ points, width = 320, height = 240, xLabel, yLabel, fli
     const u = (y - ylo) / (yhi - ylo || 1)
     return height - pad.b - (flipY ? 1 - u : u) * (height - pad.t - pad.b)
   }
+  const midX = (pad.l + width - pad.r) / 2
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${yLabel} against ${xLabel}`} style={{ display: 'block', background: 'var(--bg)', borderRadius: 8 }} data-plot={testId ?? 'scatter'}>
-      {points.map((p) => (
-        <g key={p.label} data-point={p.label}>
-          <circle cx={X(p.x)} cy={Y(p.y)} r={4} fill={p.color ?? 'var(--accent)'} />
-          <text x={X(p.x) + 6} y={Y(p.y) + 3} fontSize={10} fill="var(--text)">
-            {p.label}
-          </text>
-        </g>
-      ))}
+      {points.map((p) => {
+        const right = X(p.x) <= midX
+        return (
+          <g key={p.label} data-point={p.label}>
+            <circle cx={X(p.x)} cy={Y(p.y)} r={4} fill={p.color ?? 'var(--accent)'} />
+            <text x={X(p.x) + (right ? 7 : -7)} y={Y(p.y) + 3.5} fontSize={10} textAnchor={right ? 'start' : 'end'} fill="var(--text)">
+              {p.label}
+            </text>
+          </g>
+        )
+      })}
       {children}
       <text x={(pad.l + width - pad.r) / 2} y={height - 4} fontSize={10} textAnchor="middle" fill="var(--text-muted)">
         {xLabel}
@@ -151,10 +156,10 @@ export function Scatter({ points, width = 320, height = 240, xLabel, yLabel, fli
         {yLabel}
       </text>
       <text x={pad.l} y={height - pad.b + 12} fontSize={9} fill="var(--text-muted)">
-        {(flipX ? hi : lo).toFixed(0)}
+        {(flipX ? Math.max(...xs) : Math.min(...xs)).toFixed(0)}
       </text>
       <text x={width - pad.r} y={height - pad.b + 12} fontSize={9} textAnchor="end" fill="var(--text-muted)">
-        {(flipX ? lo : hi).toFixed(0)}
+        {(flipX ? Math.min(...xs) : Math.max(...xs)).toFixed(0)}
       </text>
     </svg>
   )

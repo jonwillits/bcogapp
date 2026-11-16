@@ -3,7 +3,7 @@ import { Panel } from '../../components/Panel'
 import { SceneCanvasLayout } from '../../components/SceneCanvasLayout'
 import { makeRng } from '../../sim/random'
 import { ProgressStore } from '../../sim/language/progress/store'
-import { Note, TabBar, type Tab } from './ui'
+import { Note, PANEL_STYLE, TabBar, type Tab } from './ui'
 import { useStore } from './ui'
 import type { PartContext, PartModule, PartStore } from './contract'
 import { StorageLine } from '../m10_memory/progress/StorageLine'
@@ -57,7 +57,7 @@ export default function LanguageScene() {
   const store = storeFor(tab)
 
   const header = (
-    <Panel title={TITLE} style={{ width: 310 }}>
+    <Panel title={TITLE} style={PANEL_STYLE}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <TabBar tab={tab} onChange={setTab} />
         <StorageLine available={progress.storageAvailable} />

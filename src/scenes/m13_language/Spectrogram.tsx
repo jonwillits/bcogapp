@@ -9,7 +9,10 @@ import { spectrogram, type Spectrogram as Sg, type View } from '../../sim/langua
  * (`sim/language/audio/spectrogram.ts`) computes the classifier's input.
  *
  * The color map runs from the theme's background through blue to white,
- * so that energy is bright on the dark theme (checked by eye on the walk).
+ * so that energy is bright on the dark theme (Jon, walk, 2026-11-16: kept;
+ * open call §9.8 closed). The waveform strip sits on its own axis above the
+ * spectrogram, labeled, with a gap between them; the frequency labels are
+ * drawn with a dark halo so they read over the picture (Jon, 2026-11-16).
  */
 
 export interface Track {
@@ -68,7 +71,10 @@ function colorOf(db: number): [number, number, number] {
 export function Spectrogram({ samples, sampleRate, view, width = 520, height = 220, maxHz = 5000, cursorS = null, tracks, marks, highlights, frequencyLines, noWaveform, testId }: SpectrogramProps) {
   const canvas = useRef<HTMLCanvasElement>(null)
   const sg: Sg | null = useMemo(() => (samples ? spectrogram(samples, sampleRate, view, 0.001, maxHz) : null), [samples, sampleRate, view, maxHz])
-  const waveH = noWaveform ? 0 : 36
+  // The waveform strip, its gap from the spectrogram, and the space the two take above the plot.
+  const strip = noWaveform ? 0 : 34
+  const gap = noWaveform ? 0 : 8
+  const waveH = strip + gap
   const pad = { l: 44, r: 8, t: 6, b: 22 }
   const plotW = width - pad.l - pad.r
   const plotH = height - pad.t - pad.b - waveH
@@ -102,12 +108,16 @@ export function Spectrogram({ samples, sampleRate, view, width = 520, height = 2
       }
     }
     g.putImageData(img, pad.l, pad.t + waveH)
-    // The waveform.
+    // The waveform, on its own axis: a framed strip with a zero line, labeled.
     if (!noWaveform) {
+      const mid = pad.t + strip / 2
+      g.fillStyle = 'rgba(154,166,184,0.08)'
+      g.fillRect(pad.l, pad.t, plotW, strip)
+      g.fillStyle = 'rgba(154,166,184,0.35)'
+      g.fillRect(pad.l, mid, plotW, 1)
       g.strokeStyle = '#9aa6b8'
       g.lineWidth = 1
       g.beginPath()
-      const mid = pad.t + waveH / 2
       const step = Math.max(1, Math.floor(samples.length / plotW))
       for (let x = 0; x < plotW; x++) {
         const i = Math.floor((x / plotW) * samples.length)
@@ -117,10 +127,24 @@ export function Spectrogram({ samples, sampleRate, view, width = 520, height = 2
           if (samples[k] < lo) lo = samples[k]
           if (samples[k] > hi) hi = samples[k]
         }
-        g.moveTo(pad.l + x, mid - hi * (waveH / 2 - 2))
-        g.lineTo(pad.l + x, mid - lo * (waveH / 2 - 2))
+        g.moveTo(pad.l + x, mid - hi * (strip / 2 - 2))
+        g.lineTo(pad.l + x, mid - lo * (strip / 2 - 2))
       }
       g.stroke()
+      g.strokeStyle = 'rgba(154,166,184,0.4)'
+      g.strokeRect(pad.l + 0.5, pad.t + 0.5, plotW - 1, strip - 1)
+      g.fillStyle = '#9aa6b8'
+      g.font = '9px system-ui'
+      g.textAlign = 'right'
+      g.fillText('+', pad.l - 4, pad.t + 9)
+      g.fillText('0', pad.l - 4, mid + 3)
+      g.fillText('−', pad.l - 4, pad.t + strip - 2)
+      g.save()
+      g.translate(10, mid)
+      g.rotate(-Math.PI / 2)
+      g.textAlign = 'center'
+      g.fillText('pressure', 0, 0)
+      g.restore()
     }
     // Axes (the same mapping as the overlay's X and Y, written out so that the effect's inputs are plain values).
     const yOf = (hz: number) => pad.t + waveH + plotH - (hz / maxHz) * plotH
@@ -144,7 +168,7 @@ export function Spectrogram({ samples, sampleRate, view, width = 520, height = 2
     const tick = duration > 2 ? 0.5 : duration > 0.8 ? 0.1 : 0.05
     for (let s = 0; s <= duration + 1e-9; s += tick) g.fillText(`${s.toFixed(tick < 0.1 ? 2 : 1)}`, xOf(s), height - 8)
     g.fillText('time (s)', pad.l + plotW / 2, height - 0)
-  }, [sg, samples, width, height, maxHz, noWaveform, plotW, plotH, waveH, pad.l, pad.t, duration])
+  }, [sg, samples, width, height, maxHz, noWaveform, plotW, plotH, waveH, strip, pad.l, pad.t, duration])
 
   return (
     <div style={{ position: 'relative', width, height }} data-spectrogram={testId ?? view} data-view={view}>
@@ -162,8 +186,8 @@ export function Spectrogram({ samples, sampleRate, view, width = 520, height = 2
         ))}
         {frequencyLines?.map((f) => (
           <g key={f.label} data-frequency-line={f.label}>
-            <line x1={pad.l} y1={Y(f.hz)} x2={width - pad.r} y2={Y(f.hz)} stroke={f.color ?? 'var(--sensor)'} strokeDasharray="4 3" />
-            <text x={width - pad.r - 2} y={Y(f.hz) - 3} fontSize={10} textAnchor="end" fill={f.color ?? 'var(--sensor)'}>
+            <line x1={pad.l} y1={Y(f.hz)} x2={width - pad.r} y2={Y(f.hz)} stroke={f.color ?? '#ffd166'} strokeWidth={1.5} strokeDasharray="5 3" />
+            <text x={width - pad.r - 2} y={Y(f.hz) - 4} fontSize={12} fontWeight={700} textAnchor="end" fill={f.color ?? '#ffd166'} stroke="#0b1020" strokeWidth={3.5} paintOrder="stroke" style={{ paintOrder: 'stroke' }}>
               {f.label}
             </text>
           </g>

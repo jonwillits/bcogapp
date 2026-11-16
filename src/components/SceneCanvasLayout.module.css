@@ -25,19 +25,27 @@
   pointer-events: auto;
 }
 
+/* A column is the one scroll container for its panels. `scrollbar-gutter`
+   reserves the room a classic (layout-width) scrollbar takes, so a column
+   that starts to scroll never shrinks its panels and never scrolls sideways
+   (Lab 13 walk, 2026-11-16). */
 .left {
   grid-column: 1;
   grid-row: 1 / span 2;
   align-self: start;
   max-height: 100%;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
 }
 .right {
   grid-column: 3;
   grid-row: 1 / span 2;
   align-self: start;
   max-height: 100%;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
 }
 .bottom {
   grid-column: 2;

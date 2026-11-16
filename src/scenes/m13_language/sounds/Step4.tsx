@@ -1,20 +1,22 @@
-import { useCallback } from 'react'
+import { useCallback, type ReactNode } from 'react'
 import { Btn, Choice, Content, FixedLines, GroupLabel, Note, StagePanel } from '../ui'
 import { LinePlot } from '../plots'
 import { Spectrogram } from '../Spectrogram'
 import { useAudioCursor } from '../hooks'
 import { SYNTHETIC_TEST_LINE, MADE_OFFLINE_LINE } from '../lines'
 import { LABELS } from '../../../sim/language/sounds/classifier'
+import { STEPS } from '../../../sim/language/sounds/abx'
 import { STEP4_PANEL } from './texts'
 import { tokenSamples } from './assets'
 import { PREDICTIONS, type PredictionKey, type RunState, type SoundsStore } from './store'
 
 /**
  * Step 4's screens (spec §5.4): the network's panel, three runs each with
- * a prediction committed first, the curve of held-out accuracy by pass,
- * the confusion table, and run 3's labeling curve on the 14 sounds beside
- * the student's own from Step 3 when that is done. Nothing here uses a
- * word from Step 3's held-back list until Step 3 is done.
+ * a prediction committed first, in the center panel one under another
+ * (Jon, 2026-11-16: the left column is navigation only), the curve of
+ * held-out accuracy by pass, the confusion table, and run 3's labeling
+ * curve on the 9 sounds of Step 3. Nothing here uses a word from Step 3's
+ * held-back list until Step 3 is done.
  */
 const COLORS: Record<string, string> = { b: 'var(--accent)', d: 'var(--sensor)', g: 'var(--actuator)' }
 
@@ -41,12 +43,25 @@ function Prediction({ s, k }: { s: SoundsStore; k: PredictionKey }) {
   )
 }
 
-export function Step4Controls({ s }: { s: SoundsStore }) {
-  const ready = s.tokens !== null && s.continuumPatches !== null
-  const step3Done = s.isDone(3)
+/** One run's block in the center: its prediction, then its button(s), then its results. */
+function Run({ k, children }: { k: string; children: ReactNode }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-step4-controls>
-      {!ready && <Note data-loading>{s.tokens ? 'The 14 sounds are loading.' : `The 540 training syllables are loading: ${s.tokenProgress} prepared.`}</Note>}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 10 }} data-run-block={k}>
+      {children}
+    </div>
+  )
+}
+
+function Loading({ s }: { s: SoundsStore }) {
+  const ready = s.tokens !== null && s.continuumPatches !== null
+  if (ready) return null
+  return <Note data-loading>{s.tokens ? `The ${STEPS} sounds are loading.` : `The 540 training syllables are loading: ${s.tokenProgress} prepared.`}</Note>
+}
+
+function Run1Controls({ s }: { s: SoundsStore }) {
+  const ready = s.tokens !== null && s.continuumPatches !== null
+  return (
+    <>
       <GroupLabel>Run 1</GroupLabel>
       <Prediction s={s} k="run1" />
       <div style={{ display: 'flex', gap: 6 }}>
@@ -54,6 +69,14 @@ export function Step4Controls({ s }: { s: SoundsStore }) {
           {s.run1.state === 'done' ? 'Train again' : 'Train'}
         </Btn>
       </div>
+    </>
+  )
+}
+
+function Run2Controls({ s }: { s: SoundsStore }) {
+  const ready = s.tokens !== null && s.continuumPatches !== null
+  return (
+    <>
       <GroupLabel>Run 2</GroupLabel>
       <Prediction s={s} k="run2" />
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -64,15 +87,24 @@ export function Step4Controls({ s }: { s: SoundsStore }) {
           Train on one voice
         </Btn>
       </div>
+    </>
+  )
+}
+
+function Run3Controls({ s }: { s: SoundsStore }) {
+  const ready = s.tokens !== null && s.continuumPatches !== null
+  const step3Done = s.isDone(3)
+  return (
+    <>
       <GroupLabel>Run 3</GroupLabel>
       <Prediction s={s} k={step3Done ? 'run3After' : 'run3'} />
       <div>
         <Btn onClick={() => s.run3Now()} disabled={!ready || !s.predicted('run3') || s.run1.state !== 'done'}>
-          Run on the 14 sounds
+          Run on the 9 sounds
         </Btn>
       </div>
       {s.run1.state !== 'done' && <Note>Run 3 uses the network from run 1, so run 1 comes first.</Note>}
-    </div>
+    </>
   )
 }
 
@@ -121,9 +153,19 @@ export function Step4Stage({ s }: { s: SoundsStore }) {
           <Spectrogram samples={sample} sampleRate={16000} view="wide" width={360} height={200} cursorS={cursor} highlights={[{ fromS: Math.max(0, t![sampleIndex].burstS - 0.02), toS: t![sampleIndex].burstS + 0.08, color: '#f0a94b', label: 'the patch' }]} testId="token-sample" />
         </div>
       )}
-      <RunPanel title="Run 1: ten voices in, two held out" run={s.run1} note="Trained on voices 1 to 10 at all three pitches (450 syllables); tested on voices 11 and 12 (90 syllables) after every pass." />
-      <RunPanel title={s.run2.which === 'voice' ? 'Run 2: one voice' : 'Run 2: one pitch'} run={s.run2} note={s.run2.which === 'voice' ? 'Trained on voice 1 at its three pitches (45 syllables); tested on the other eleven voices (495 syllables).' : 'Trained on every voice at its own pitch only (150 syllables); tested on every shifted syllable and the two held-out voices (390 syllables).'} />
-      {s.run3.state === 'done' && s.run3.shares && <Run3 s={s} />}
+      <Loading s={s} />
+      <Run k="run1">
+        <Run1Controls s={s} />
+        <RunPanel title="Run 1: ten voices in, two held out" run={s.run1} note="Trained on voices 1 to 10 at all three pitches (450 syllables); tested on voices 11 and 12 (90 syllables) after every pass." />
+      </Run>
+      <Run k="run2">
+        <Run2Controls s={s} />
+        <RunPanel title={s.run2.which === 'voice' ? 'Run 2: one voice' : 'Run 2: one pitch'} run={s.run2} note={s.run2.which === 'voice' ? 'Trained on voice 1 at its three pitches (45 syllables); tested on the other eleven voices (495 syllables).' : 'Trained on every voice at its own pitch only (150 syllables); tested on every shifted syllable and the two held-out voices (390 syllables).'} />
+      </Run>
+      <Run k="run3">
+        <Run3Controls s={s} />
+        {s.run3.state === 'done' && s.run3.shares && <Run3 s={s} />}
+      </Run>
       <Content>{MADE_OFFLINE_LINE}</Content>
     </StagePanel>
   )
@@ -135,12 +177,12 @@ function Run3({ s }: { s: SoundsStore }) {
   const top = shares.map((sh) => LABELS[sh.indexOf(Math.max(...sh))])
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-run="run3">
-      <GroupLabel>Run 3: the network from run 1 on the 14 sounds of Step 3</GroupLabel>
-      <Note>For each of the 14 sounds, the three outputs are scaled to shares that sum to 100%. Each line is one label’s share, sound by sound. The most likely label at each sound is printed under the plot.</Note>
-      <LinePlot series={series} width={460} height={200} xLabel="sound, 1 to 14" yLabel="share of the outputs (%)" xMin={1} xMax={14} xTicks={[1, 4, 7, 10, 14].map((x) => ({ x, label: String(x) }))} testId="run3-curve" />
-      <FixedLines lines={['sound:  ' + Array.from({ length: 14 }, (_, i) => String(i + 1).padStart(3)).join(''), 'label:  ' + top.map((l) => l.padStart(3)).join('')]} testId="run3-labels" />
+      <GroupLabel>{`The network from run 1 on the ${STEPS} sounds of Step 3`}</GroupLabel>
+      <Note>{`For each of the ${STEPS} sounds, the three outputs are scaled to shares that sum to 100%. Each line is one label’s share, sound by sound. The most likely label at each sound is printed under the plot.`}</Note>
+      <LinePlot series={series} width={460} height={200} xLabel={`sound, 1 to ${STEPS}`} yLabel="share of the outputs (%)" xMin={1} xMax={STEPS} xTicks={[1, 3, 5, 7, 9].map((x) => ({ x, label: String(x) }))} testId="run3-curve" />
+      <FixedLines lines={['sound:  ' + Array.from({ length: STEPS }, (_, i) => String(i + 1).padStart(3)).join(''), 'label:  ' + top.map((l) => l.padStart(3)).join('')]} testId="run3-labels" />
       <Content>{SYNTHETIC_TEST_LINE}</Content>
-      {!s.isDone(3) && <Note data-missing="step3">Your own labels of these 14 sounds appear beside the network’s once Step 3 is done.</Note>}
+      {!s.isDone(3) && <Note data-missing="step3">{`Your own labels of these ${STEPS} sounds appear beside the network’s once Step 3 is done.`}</Note>}
     </div>
   )
 }

@@ -4,7 +4,7 @@ import type { UnitId } from '../../../sim/language/parts'
 import type { View } from '../../../sim/language/audio/spectrogram'
 import { player } from '../../../sim/language/audio/player'
 import { bufferFrom, type Clip } from '../../../sim/language/audio/clips'
-import { abxTrials, labelingTrials, LABELING_GAP_MS, TRIAD_INTERVAL_S, type Label as Lbl, type Triad } from '../../../sim/language/sounds/abx'
+import { abxTrials, labelingTrials, LABELING_GAP_MS, STEPS, TRIAD_INTERVAL_S, type Label as Lbl, type Triad } from '../../../sim/language/sounds/abx'
 import { accuracy, confusion, forward, makeClassifier, shares, splitOnePitch, splitOneVoice, splitRun1, train, PASSES, type Classifier, type Token } from '../../../sim/language/sounds/classifier'
 import { StepStore } from '../steps'
 import type { Step } from './screens'
@@ -16,8 +16,9 @@ import { continuumClip, continuumPatch, loadContinuum, loadTts, loadVowels, syll
  * screen and each independently accessible. Step 2 is one unit (the six
  * labels, from the first label to the commit); Step 3 is two units, one
  * per block, each a timed block in real time that stops when the page is
- * hidden or loses focus; Steps 1 and 4 are explorations whose predictions
- * stay committed. Every sound is decoded before its step's first trial
+ * hidden or loses focus, and each opening on its own screen with a Start
+ * button (Jon, 2026-11-16); Steps 1 and 4 are explorations whose
+ * predictions stay committed. Every sound is decoded before its step's first trial
  * (`ensureLoaded`), and played on the Web Audio clock (`player`).
  */
 
@@ -32,7 +33,7 @@ export const PREDICTIONS = {
   pitch: { key: 'p1-s1-pitch', question: 'When the pitch of the vowel goes up from 100 Hz to 200 Hz, what will move on the spectrogram?', choices: ['the harmonics', 'the formants', 'both', 'neither'] },
   run1: { key: 'p1-s4-run1', question: 'Trained on ten voices and tested on the two voices it never learned from, what percentage of the held-out syllables will the network label correctly? Chance is 33%.', choices: ['under 50%', '50% to 75%', '75% to 90%', 'over 90%'] },
   run2: { key: 'p1-s4-run2', question: 'Trained on one pitch only, or on one voice only, and tested on all the rest, will the percentage correct be higher than, about the same as, or lower than in run 1?', choices: ['higher', 'about the same', 'lower'] },
-  run3: { key: 'p1-s4-run3', question: 'Run on the 14 synthetic sounds of Step 3, in what order will the network’s most likely label change from the first sound to the fourteenth?', choices: ['b, then d, then g', 'another order', 'one label for all 14'] },
+  run3: { key: 'p1-s4-run3', question: `Run on the ${STEPS} synthetic sounds of Step 3, in what order will the network’s most likely label change from the first sound to the ninth?`, choices: ['b, then d', 'another order', `one label for all ${STEPS}`] },
   // Asked instead of run3's when Step 3 is done (spec §5.4; §11, item 2): the wording is in afterStep3.ts.
   run3After: RUN3_AFTER_STEP3,
 } as const
@@ -134,8 +135,12 @@ export class SoundsStore extends StepStore<Step> {
     return step === 3 && this.progress.isComplete(LABELING_UNIT) && !this.progress.isComplete(ABX_UNIT)
   }
 
+  /** Step 3 is open and block 1 has not started: its own screen, with Start block 1 (Jon, 2026-11-16: each block gets its instructions right before it). */
+  get beforeBlock1(): boolean {
+    return this.step === 3 && !this.progress.isComplete(LABELING_UNIT) && this.block === null && this.blockStopped === null
+  }
   get betweenBlocks(): boolean {
-    return this.step === 3 && this.progress.isComplete(LABELING_UNIT) && !this.progress.isComplete(ABX_UNIT) && this.block === null
+    return this.step === 3 && this.progress.isComplete(LABELING_UNIT) && !this.progress.isComplete(ABX_UNIT) && this.block === null && this.blockStopped === null
   }
 
   protected onOpen(): void {
@@ -150,7 +155,6 @@ export class SoundsStore extends StepStore<Step> {
       if (this.progress.status(LABELS_UNIT) !== 'in progress') this.progress.begin(LABELS_UNIT)
       this.labelsStarted = performance.now()
     }
-    if (step === 3) this.startNextBlock()
   }
 
   // ------------------------------------------------------------ loading
@@ -172,7 +176,8 @@ export class SoundsStore extends StepStore<Step> {
         for (const [k, v] of Object.entries(this.tts.vot)) this.clips.set(`vot:${k}`, await votClip(v.file, ctx))
       } else if (step === 3) {
         this.continuum = this.continuum ?? (await loadContinuum())
-        for (const s of this.continuum.steps) this.clips.set(`cont:${s.step}`, await continuumClip(s.file, ctx))
+        // The lab plays the first STEPS of the shipped 14 (abx.ts).
+        for (const s of this.continuum.steps.filter((x) => x.step <= STEPS)) this.clips.set(`cont:${s.step}`, await continuumClip(s.file, ctx))
       } else {
         this.tts = this.tts ?? (await loadTts())
         this.continuum = this.continuum ?? (await loadContinuum())
@@ -183,7 +188,7 @@ export class SoundsStore extends StepStore<Step> {
           this.changed()
         })
         const steps: Float32Array[] = []
-        for (const s of this.continuum.steps) {
+        for (const s of this.continuum.steps.filter((x) => x.step <= STEPS)) {
           const c = await continuumClip(s.file, ctx)
           this.clips.set(`cont:${s.step}`, c)
           steps.push(continuumPatch(c))
@@ -317,9 +322,9 @@ export class SoundsStore extends StepStore<Step> {
 
   // ------------------------------------------------------------ Step 3
 
-  /** Start the block that is not yet done: labeling first, then telling apart; the second only on the student's press. */
-  startNextBlock(): void {
-    if (!this.progress.isComplete(LABELING_UNIT)) this.beginBlock('labeling')
+  /** Block 1, on the student's press of Start block 1. */
+  startBlock1(): void {
+    if (!this.progress.isComplete(LABELING_UNIT) && this.block === null) this.beginBlock('labeling')
   }
   startBlock2(): void {
     if (this.progress.isComplete(LABELING_UNIT) && !this.progress.isComplete(ABX_UNIT)) this.beginBlock('abx')
@@ -377,13 +382,13 @@ export class SoundsStore extends StepStore<Step> {
     })
   }
 
-  /** The student's answer: B, D or G in block 1; first or second in block 2. */
+  /** The student's answer: B or D in block 1; first or second in block 2. */
   answer(a: Lbl | 'first' | 'second'): void {
     const b = this.block
     if (!b || b.phase !== 'answer') return
     const seconds = (performance.now() - this.trialStart) / 1000
     if (b.kind === 'labeling') {
-      if (a !== 'b' && a !== 'd' && a !== 'g') return
+      if (a !== 'b' && a !== 'd') return
       b.answers.push(a)
     } else {
       if (a !== 'first' && a !== 'second') return
