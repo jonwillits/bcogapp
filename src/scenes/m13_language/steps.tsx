@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Panel } from '../../components/Panel'
 import type { ProgressStore } from '../../sim/language/progress/store'
 import { InstructionScreen, type Sitting } from '../m10_memory/progress/InstructionScreen'
-import { Btn, Choice, Content, FixedLines, GroupLabel, Note, PANEL_STYLE, PART_TITLES, NEXT_TAB, TABS, STAGE_LEFT, StagePanel, stageWidth, useStore, type Tab } from './ui'
+import { Btn, Choice, Content, FixedLines, GroupLabel, Note, PANEL_STYLE, PART_TITLES, NEXT_TAB, TABS, StagePanel, stageLeft, stageWidth, useStore, type Tab } from './ui'
 import type { PartContext, PartStore } from './contract'
 
 /**
@@ -249,7 +249,7 @@ export function StepStage<Step extends number, S extends StepStore<Step>>({ ctx,
   }
   if (state === 'intro' || s.instructionsShown)
     return (
-      <div data-instruction-frame style={{ position: 'absolute', left: STAGE_LEFT, top: 24, width: stageWidth(560), minWidth: 320, maxHeight: 'calc(100vh - 170px)', overflowY: 'auto', pointerEvents: 'auto', display: 'flex', boxSizing: 'border-box' }}>
+      <div data-instruction-frame style={{ position: 'absolute', left: stageLeft(560), top: 24, width: stageWidth(560), maxHeight: 'calc(100vh - 170px)', overflowY: 'auto', overflowX: 'auto', pointerEvents: 'auto', display: 'flex', boxSizing: 'border-box' }}>
       <InstructionScreen
         inline
         title={screen.title}

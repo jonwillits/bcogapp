@@ -95,17 +95,19 @@ export const PANEL_STYLE: CSSProperties = { width: LEFT_WIDTH, maxWidth: LEFT_WI
 export const RIGHT_STYLE: CSSProperties = { width: RIGHT_WIDTH, maxWidth: RIGHT_WIDTH, overflowX: 'auto' }
 /** The gap between a side column and the center panel, as a share of the window. */
 const CENTER_GAP = '5vw'
-/** The center panel's left edge and the room it has: the layout's 12 px padding, the left column, a gap; then the window minus both columns and both gaps. */
-export const STAGE_LEFT = `calc(12px + ${LEFT_WIDTH} + ${CENTER_GAP})`
-export const STAGE_ROOM = `calc(100vw - 24px - ${LEFT_WIDTH} - ${RIGHT_WIDTH} - 2 * ${CENTER_GAP})`
+/** The room between the columns' gaps: the window minus the layout's 12 px padding on each side, both columns, a reserved scrollbar gutter on each (16 px), and both gaps. */
+export const STAGE_ROOM = `calc(100vw - 24px - 32px - ${LEFT_WIDTH} - ${RIGHT_WIDTH} - 2 * ${CENTER_GAP})`
+/** The center panel's width: its design width, or the room when that is less. It never grows past the room; what does not fit scrolls sideways inside the panel. */
 export const stageWidth = (max: number) => `min(${max}px, ${STAGE_ROOM})`
+/** The center panel's left edge: after the left column and its gap, plus half of whatever room the panel does not use, so that it sits centered between the columns with equal gaps. */
+export const stageLeft = (max: number) => `calc(12px + 16px + ${LEFT_WIDTH} + ${CENTER_GAP} + max(0px, (${STAGE_ROOM} - ${max}px) / 2))`
 
 /** The center panel: positioned between the columns, scrolling vertically inside itself when tall, never horizontally for text (text wraps; only a fixed-width block can be wider). */
 export function StagePanel({ children, wide, testId }: { children: ReactNode; wide?: boolean; testId?: string }) {
   return (
     <div
       data-stage={testId ?? true}
-      style={{ position: 'absolute', left: STAGE_LEFT, top: 24, width: stageWidth(wide ? 760 : 560), minWidth: 320, maxHeight: 'calc(100vh - 120px)', overflowY: 'auto', overflowX: 'auto', padding: '16px 20px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 12.5, lineHeight: 1.55, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'auto', boxSizing: 'border-box' }}
+      style={{ position: 'absolute', left: stageLeft(wide ? 760 : 560), top: 24, width: stageWidth(wide ? 760 : 560), maxHeight: 'calc(100vh - 120px)', overflowY: 'auto', overflowX: 'auto', padding: '16px 20px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 12.5, lineHeight: 1.55, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'auto', boxSizing: 'border-box' }}
     >
       {children}
     </div>

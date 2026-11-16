@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState, type ReactNode } from 'react'
 import { Panel } from '../../components/Panel'
-import { SceneCanvasLayout } from '../../components/SceneCanvasLayout'
+import { ColumnsLayout } from './ColumnsLayout'
 import { makeRng } from '../../sim/random'
 import { ProgressStore } from '../../sim/language/progress/store'
 import { Note, PANEL_STYLE, TabBar, type Tab } from './ui'
@@ -72,7 +72,7 @@ export default function LanguageScene() {
   const mod = MODULES[tab]
   const stage: ReactNode = <mod.Stage ctx={ctx} />
   return (
-    <SceneCanvasLayout
+    <ColumnsLayout
       canvas={
         <>
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 40%, #121a2a 0%, #0b1020 70%)' }} />

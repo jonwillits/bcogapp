@@ -1,0 +1,42 @@
+/* Lab 13's three columns (Jon, 2026-11-16; LAB_COMMON_FEATURES §1). Unlike the
+   shared SceneCanvasLayout, the columns never stack at a narrow width: a side
+   column is capped at 0.3 of the window and scrolls sideways inside its panels
+   past that, and the center panel takes the room between them. Each column
+   is its panels' one scroll container, with the room a classic scrollbar
+   takes reserved, so a column that starts to scroll never scrolls sideways. */
+.wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.canvas {
+  position: absolute;
+  inset: 0;
+}
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: 1fr;
+  gap: 12px;
+  padding: 12px;
+}
+.overlay > * {
+  pointer-events: auto;
+}
+.left,
+.right {
+  align-self: start;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+}
+.left {
+  grid-column: 1;
+}
+.right {
+  grid-column: 3;
+}

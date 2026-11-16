@@ -3,7 +3,7 @@ import { Panel } from '../../components/Panel'
 import type { ProgressStore } from '../../sim/language/progress/store'
 import { LAB13_TRANSFER } from '../../sim/language/progress/transfer'
 import { UNIT_IDS, partOf, unitsOfPart, type Part } from '../../sim/language/parts'
-import { Btn, Content, GroupLabel, Note, OrientingPanel, PANEL_STYLE, RIGHT_STYLE, FixedLines, useStore, PART_TITLES, type Tab } from './ui'
+import { Btn, Content, GroupLabel, Note, PANEL_STYLE, RIGHT_STYLE, FixedLines, StagePanel, useStore, PART_TITLES, type Tab } from './ui'
 import { ANY_ORDER_LINE, COMMIT_RULE_LINE, SECOND_RUN_LINE, HEADPHONES_LINE, MADE_OFFLINE_LINE } from './lines'
 import { ExportLoad } from '../m10_memory/progress/ExportLoad'
 import { playTestSound } from './testSound'
@@ -133,19 +133,29 @@ function Left({ ctx }: { ctx: { store: PartStore; header: ReactNode; progress: P
   )
 }
 
+/** The Open tab's center panel: Lab 9's orienting panel's content, in this lab's center-panel geometry (between the columns, never wider than the room; Jon, 2026-11-16). */
 function Stage({ ctx }: { ctx: { openTab: (tab: Tab) => void } }) {
   return (
-    <OrientingPanel
-      title={OPEN_INTRO.title}
-      lines={OPEN_INTRO.lines}
-      content={OPEN_INTRO.content}
-      footer={OPEN_INTRO.footer}
-      action={
-        <Btn primary onClick={() => ctx.openTab('sounds')}>
-          Begin Part 1
-        </Btn>
-      }
-    />
+    <StagePanel testId="open">
+      <div data-orienting style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ fontSize: 14, fontWeight: 600 }}>{OPEN_INTRO.title}</div>
+        <GroupLabel>What will happen</GroupLabel>
+        {OPEN_INTRO.lines.map((l) => (
+          <p key={l.slice(0, 24)} style={{ margin: 0 }}>
+            {l}
+          </p>
+        ))}
+        {OPEN_INTRO.content.map((l) => (
+          <Content key={l}>{l}</Content>
+        ))}
+        <div style={{ color: 'var(--text-muted)' }}>{OPEN_INTRO.footer}</div>
+        <div>
+          <Btn primary onClick={() => ctx.openTab('sounds')}>
+            Begin Part 1
+          </Btn>
+        </div>
+      </div>
+    </StagePanel>
   )
 }
 
