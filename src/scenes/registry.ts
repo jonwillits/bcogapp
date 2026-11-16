@@ -96,6 +96,7 @@ const RatScene = lazy(() => import('./m09_rat/RatScene'))
 const MemoryScene = lazy(() => import('./m10_memory/MemoryScene'))
 const SocialScene = lazy(() => import('./m11_social/SocialScene'))
 const PlanningScene = lazy(() => import('./m12_planning/PlanningScene'))
+const LanguageScene = lazy(() => import('./m13_language/LanguageScene'))
 
 /**
  * Registered, runnable scenes. Order here is the order shown within a module.
@@ -314,6 +315,25 @@ export const scenes: SceneManifest[] = [
         'The Lab 12 handout has not been posted yet. When it is, it will appear here without a reload of the app. Until then the scene itself is open to explore.',
     },
   },
+  {
+    route: 'm13-language',
+    module: 13,
+    title: 'Sounds, Words, and Predictions',
+    blurb:
+      'Lab 13. No creature and no 3D world: you are the listener, the learner, and the experimenter. Read spectrograms, label synthetic syllables, and train a small network to label them. Hear a made-up language with no pauses, find its words on a board, and run three programs that find words in their own ways. Learn what new words refer to from ambiguous scenes, and run two models on your own choices. Then look inside a count model, a simple recurrent network, and a transformer trained on one small corpus.',
+    mode: 'both',
+    status: 'building',
+    Component: LanguageScene,
+    // The handout is written after the build and Jon's walk-through, from the
+    // as-built notes, so the fetch fails until it lands. The folder name is
+    // provisional (spec §15, question 1).
+    lab: {
+      rawUrl: `${INTRO_RAW}/language/sounds_words_lab/sounds_words_lab.md`,
+      sourceUrl: `${INTRO_BLOB}/language/sounds_words_lab/sounds_words_lab.md`,
+      notYet:
+        'The Lab 13 handout has not been posted yet. When it is, it will appear here without a reload of the app. Until then the scene itself is open to explore.',
+    },
+  },
 ]
 
 /**
@@ -328,11 +348,6 @@ export interface PlannedScene {
 }
 
 export const plannedScenes: PlannedScene[] = [
-  {
-    module: 13,
-    title: 'The Structure of Language',
-    idea: 'Acoustics → phonetics → morphemes → words → phrases → sentences; syntax vs. semantics.',
-  },
   {
     module: 14,
     title: 'Symbols vs. Statistics',
