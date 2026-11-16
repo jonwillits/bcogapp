@@ -61,7 +61,7 @@ describe('every part and step opens from a fresh seed with nothing else done, on
     expect(m).toMatch(/data-orienting/)
     expect(text(m)).toMatch(/Part 1\s+0 of 3 experiments done/)
     expect(text(m)).toMatch(/Part 2\s+0 of 2 experiments done/)
-    expect(text(m)).toMatch(/Part 3\s+0 of 1 experiments done/)
+    expect(text(m)).toMatch(/Part 3\s+0 of 1 experiment done/)
     expect(text(m)).toMatch(/Part 4\s+an exploration/)
     expect(text(m)).toMatch(/Play a test sound/)
     expect(text(m)).toMatch(/headphones or earbuds/)

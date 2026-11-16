@@ -58,7 +58,7 @@ export const OPEN_INTRO = {
     'This lab has four parts. Part 1 is about the sounds of speech: you will read pictures of sounds, label syllables by what you hear, and train a small network to label them too. Part 2 is about finding the words in a stream of speech with no pauses: you will hear a made-up language, find its words on a board, and run three programs that find words in their own ways. Part 3 is about learning what new words refer to: you will hear new words with new objects and click what each word names, and then run two models on your own choices. Part 4 is about predicting the next word: you will look inside a count model, a simple recurrent network, and a transformer, all trained on one small made-up corpus.',
     'Every part, and every step within a part, opens on a screen like this one. Each one says what you will do, how long it takes, what each button does, what is recorded, and whether you can leave partway without starting over. An experiment is done once, in one sitting. An exploration can be opened, left, returned to, and redone.',
     'Your progress is saved in this browser on this computer only. Nothing is sent anywhere. A step you have finished is never redone to reach anything else. A step you leave partway starts over, or goes on from where you stopped, as its screen says. “Export my results” writes your saved results to a file on your computer, and “Load my results” reads such a file back, so you can move your results to another computer or browser.',
-    'We suggest you do them in order: Part 1, then Part 2, then Part 3, then Part 4. The app does not enforce it. A step that depends on another step’s results says so on its results screen, and shows everything else. Three steps in Parts 2 and 3 show how another step’s material is divided; each of those asks first, in one line, whether to open anyway.',
+    'We suggest you do them in order: Part 1, then Part 2, then Part 3, then Part 4. The app does not enforce it. A step that depends on another step’s results says so on its results screen, and shows everything else. Four steps in Parts 2 and 3 show how another step’s material is divided; each of those asks first, in one line, whether to open anyway.',
     'Parts 1, 2, and 3 play sound. Press “Play a test sound” on the left to hear a short tone and set a comfortable volume once.',
     'Every part’s results are also gathered on the Open tab, under “My results, all parts”.',
   ],
@@ -78,7 +78,7 @@ export function progressRows(p: ProgressStore): string[] {
     const n = unitsOfPart(part as Part).length
     const k = done.filter((u) => partOf(u) === part).length
     if (k === n) return `${label}every experiment done`
-    return `${label}${k} of ${n} experiments done`
+    return `${label}${k} of ${n} ${n === 1 ? 'experiment' : 'experiments'} done`
   })
 }
 
