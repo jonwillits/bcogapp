@@ -1,0 +1,205 @@
+{
+ "name": "srn",
+ "kind": "srn",
+ "vocab": [
+  "boy",
+  "boys",
+  "girl",
+  "girls",
+  "man",
+  "men",
+  "woman",
+  "women",
+  "John",
+  "Mary",
+  "dog",
+  "dogs",
+  "cat",
+  "cats",
+  "lion",
+  "lions",
+  "mouse",
+  "mice",
+  "bird",
+  "birds",
+  "glass",
+  "glasses",
+  "plate",
+  "plates",
+  "cookie",
+  "cookies",
+  "sandwich",
+  "sandwiches",
+  "rock",
+  "rocks",
+  "chases",
+  "chase",
+  "feeds",
+  "feed",
+  "eats",
+  "eat",
+  "sees",
+  "see",
+  "hears",
+  "hear",
+  "breaks",
+  "break",
+  "carries",
+  "carry",
+  "walks",
+  "walk",
+  "lives",
+  "live",
+  "sleeps",
+  "sleep",
+  "who",
+  "."
+ ],
+ "pad": 52,
+ "dModel": 32,
+ "nLayers": 2,
+ "nHeads": 2,
+ "maxLen": 32,
+ "dFF": 128,
+ "hidden": 64,
+ "tensors": {
+  "w_ih.weight": {
+   "dtype": "f32",
+   "offset": 0,
+   "shape": [
+    64,
+    53
+   ]
+  },
+  "w_ih.bias": {
+   "dtype": "f32",
+   "offset": 13568,
+   "shape": [
+    64
+   ]
+  },
+  "w_hh.weight": {
+   "dtype": "f32",
+   "offset": 13824,
+   "shape": [
+    64,
+    64
+   ]
+  },
+  "out.weight": {
+   "dtype": "f32",
+   "offset": 30208,
+   "shape": [
+    53,
+    64
+   ]
+  },
+  "out.bias": {
+   "dtype": "f32",
+   "offset": 43776,
+   "shape": [
+    53
+   ]
+  }
+ },
+ "snapshots": [
+  {
+   "updates": 0,
+   "weightsFile": "srn_00000.bin",
+   "heldOutAccuracy": 0.01580381471389646,
+   "agreementByDepth": {
+    "0": 0.58,
+    "1": 0.48,
+    "2": 0.58,
+    "3": 0.4
+   },
+   "loss": null
+  },
+  {
+   "updates": 50,
+   "weightsFile": "srn_00050.bin",
+   "heldOutAccuracy": 0.34822888283378745,
+   "agreementByDepth": {
+    "0": 0.58,
+    "1": 0.44,
+    "2": 0.52,
+    "3": 0.44
+   },
+   "loss": 3.609074773788452
+  },
+  {
+   "updates": 200,
+   "weightsFile": "srn_00200.bin",
+   "heldOutAccuracy": 0.3656675749318801,
+   "agreementByDepth": {
+    "0": 0.6,
+    "1": 0.44,
+    "2": 0.52,
+    "3": 0.44
+   },
+   "loss": 2.896090950965881
+  },
+  {
+   "updates": 500,
+   "weightsFile": "srn_00500.bin",
+   "heldOutAccuracy": 0.3888283378746594,
+   "agreementByDepth": {
+    "0": 1.0,
+    "1": 0.9,
+    "2": 0.3,
+    "3": 0.0
+   },
+   "loss": 2.2804535627365112
+  },
+  {
+   "updates": 1000,
+   "weightsFile": "srn_01000.bin",
+   "heldOutAccuracy": 0.4,
+   "agreementByDepth": {
+    "0": 1.0,
+    "1": 1.0,
+    "2": 0.74,
+    "3": 0.44
+   },
+   "loss": 1.9740205252170562
+  },
+  {
+   "updates": 3000,
+   "weightsFile": "srn_03000.bin",
+   "heldOutAccuracy": 0.40054495912806537,
+   "agreementByDepth": {
+    "0": 1.0,
+    "1": 1.0,
+    "2": 1.0,
+    "3": 0.96
+   },
+   "loss": 1.8404447388648988
+  },
+  {
+   "updates": 10000,
+   "weightsFile": "srn_10000.bin",
+   "heldOutAccuracy": 0.40435967302452314,
+   "agreementByDepth": {
+    "0": 1.0,
+    "1": 1.0,
+    "2": 1.0,
+    "3": 0.96
+   },
+   "loss": 1.764119462966919
+  },
+  {
+   "updates": 20000,
+   "weightsFile": "srn_20000.bin",
+   "heldOutAccuracy": 0.40081743869209807,
+   "agreementByDepth": {
+    "0": 1.0,
+    "1": 1.0,
+    "2": 1.0,
+    "3": 0.9
+   },
+   "loss": 1.7235933780670165
+  }
+ ],
+ "params": 10997,
+ "trainingSeconds": 15.5
+}

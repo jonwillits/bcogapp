@@ -1,0 +1,388 @@
+{
+ "name": "transformer",
+ "kind": "transformer",
+ "vocab": [
+  "boy",
+  "boys",
+  "girl",
+  "girls",
+  "man",
+  "men",
+  "woman",
+  "women",
+  "John",
+  "Mary",
+  "dog",
+  "dogs",
+  "cat",
+  "cats",
+  "lion",
+  "lions",
+  "mouse",
+  "mice",
+  "bird",
+  "birds",
+  "glass",
+  "glasses",
+  "plate",
+  "plates",
+  "cookie",
+  "cookies",
+  "sandwich",
+  "sandwiches",
+  "rock",
+  "rocks",
+  "chases",
+  "chase",
+  "feeds",
+  "feed",
+  "eats",
+  "eat",
+  "sees",
+  "see",
+  "hears",
+  "hear",
+  "breaks",
+  "break",
+  "carries",
+  "carry",
+  "walks",
+  "walk",
+  "lives",
+  "live",
+  "sleeps",
+  "sleep",
+  "who",
+  "."
+ ],
+ "pad": 52,
+ "dModel": 32,
+ "nLayers": 2,
+ "nHeads": 2,
+ "maxLen": 32,
+ "dFF": 128,
+ "hidden": 64,
+ "tensors": {
+  "tok.weight": {
+   "dtype": "f32",
+   "offset": 0,
+   "shape": [
+    53,
+    32
+   ]
+  },
+  "pos.weight": {
+   "dtype": "f32",
+   "offset": 6784,
+   "shape": [
+    32,
+    32
+   ]
+  },
+  "layers.0.ln1.weight": {
+   "dtype": "f32",
+   "offset": 10880,
+   "shape": [
+    32
+   ]
+  },
+  "layers.0.ln1.bias": {
+   "dtype": "f32",
+   "offset": 11008,
+   "shape": [
+    32
+   ]
+  },
+  "layers.0.qkv.weight": {
+   "dtype": "f32",
+   "offset": 11136,
+   "shape": [
+    96,
+    32
+   ]
+  },
+  "layers.0.qkv.bias": {
+   "dtype": "f32",
+   "offset": 23424,
+   "shape": [
+    96
+   ]
+  },
+  "layers.0.o.weight": {
+   "dtype": "f32",
+   "offset": 23808,
+   "shape": [
+    32,
+    32
+   ]
+  },
+  "layers.0.o.bias": {
+   "dtype": "f32",
+   "offset": 27904,
+   "shape": [
+    32
+   ]
+  },
+  "layers.0.ln2.weight": {
+   "dtype": "f32",
+   "offset": 28032,
+   "shape": [
+    32
+   ]
+  },
+  "layers.0.ln2.bias": {
+   "dtype": "f32",
+   "offset": 28160,
+   "shape": [
+    32
+   ]
+  },
+  "layers.0.fc.weight": {
+   "dtype": "f32",
+   "offset": 28288,
+   "shape": [
+    128,
+    32
+   ]
+  },
+  "layers.0.fc.bias": {
+   "dtype": "f32",
+   "offset": 44672,
+   "shape": [
+    128
+   ]
+  },
+  "layers.0.proj.weight": {
+   "dtype": "f32",
+   "offset": 45184,
+   "shape": [
+    32,
+    128
+   ]
+  },
+  "layers.0.proj.bias": {
+   "dtype": "f32",
+   "offset": 61568,
+   "shape": [
+    32
+   ]
+  },
+  "layers.1.ln1.weight": {
+   "dtype": "f32",
+   "offset": 61696,
+   "shape": [
+    32
+   ]
+  },
+  "layers.1.ln1.bias": {
+   "dtype": "f32",
+   "offset": 61824,
+   "shape": [
+    32
+   ]
+  },
+  "layers.1.qkv.weight": {
+   "dtype": "f32",
+   "offset": 61952,
+   "shape": [
+    96,
+    32
+   ]
+  },
+  "layers.1.qkv.bias": {
+   "dtype": "f32",
+   "offset": 74240,
+   "shape": [
+    96
+   ]
+  },
+  "layers.1.o.weight": {
+   "dtype": "f32",
+   "offset": 74624,
+   "shape": [
+    32,
+    32
+   ]
+  },
+  "layers.1.o.bias": {
+   "dtype": "f32",
+   "offset": 78720,
+   "shape": [
+    32
+   ]
+  },
+  "layers.1.ln2.weight": {
+   "dtype": "f32",
+   "offset": 78848,
+   "shape": [
+    32
+   ]
+  },
+  "layers.1.ln2.bias": {
+   "dtype": "f32",
+   "offset": 78976,
+   "shape": [
+    32
+   ]
+  },
+  "layers.1.fc.weight": {
+   "dtype": "f32",
+   "offset": 79104,
+   "shape": [
+    128,
+    32
+   ]
+  },
+  "layers.1.fc.bias": {
+   "dtype": "f32",
+   "offset": 95488,
+   "shape": [
+    128
+   ]
+  },
+  "layers.1.proj.weight": {
+   "dtype": "f32",
+   "offset": 96000,
+   "shape": [
+    32,
+    128
+   ]
+  },
+  "layers.1.proj.bias": {
+   "dtype": "f32",
+   "offset": 112384,
+   "shape": [
+    32
+   ]
+  },
+  "lnf.weight": {
+   "dtype": "f32",
+   "offset": 112512,
+   "shape": [
+    32
+   ]
+  },
+  "lnf.bias": {
+   "dtype": "f32",
+   "offset": 112640,
+   "shape": [
+    32
+   ]
+  },
+  "out.weight": {
+   "dtype": "f32",
+   "offset": 112768,
+   "shape": [
+    53,
+    32
+   ]
+  },
+  "out.bias": {
+   "dtype": "f32",
+   "offset": 119552,
+   "shape": [
+    53
+   ]
+  }
+ },
+ "snapshots": [
+  {
+   "updates": 0,
+   "weightsFile": "transformer_00000.bin",
+   "heldOutAccuracy": 0.020708446866485014,
+   "agreementByDepth": {
+    "0": 0.42,
+    "1": 0.46,
+    "2": 0.48,
+    "3": 0.36
+   },
+   "loss": null
+  },
+  {
+   "updates": 50,
+   "weightsFile": "transformer_00050.bin",
+   "heldOutAccuracy": 0.3536784741144414,
+   "agreementByDepth": {
+    "0": 0.54,
+    "1": 0.38,
+    "2": 0.4,
+    "3": 0.44
+   },
+   "loss": 3.3200532388687134
+  },
+  {
+   "updates": 200,
+   "weightsFile": "transformer_00200.bin",
+   "heldOutAccuracy": 0.39291553133514984,
+   "agreementByDepth": {
+    "0": 1.0,
+    "1": 0.9,
+    "2": 0.56,
+    "3": 0.42
+   },
+   "loss": 2.385373673439026
+  },
+  {
+   "updates": 500,
+   "weightsFile": "transformer_00500.bin",
+   "heldOutAccuracy": 0.3989100817438692,
+   "agreementByDepth": {
+    "0": 1.0,
+    "1": 1.0,
+    "2": 1.0,
+    "3": 0.76
+   },
+   "loss": 1.949971833229065
+  },
+  {
+   "updates": 1000,
+   "weightsFile": "transformer_01000.bin",
+   "heldOutAccuracy": 0.4029972752043597,
+   "agreementByDepth": {
+    "0": 1.0,
+    "1": 1.0,
+    "2": 1.0,
+    "3": 0.98
+   },
+   "loss": 1.8506515073776244
+  },
+  {
+   "updates": 3000,
+   "weightsFile": "transformer_03000.bin",
+   "heldOutAccuracy": 0.4095367847411444,
+   "agreementByDepth": {
+    "0": 1.0,
+    "1": 1.0,
+    "2": 0.98,
+    "3": 1.0
+   },
+   "loss": 1.79237726688385
+  },
+  {
+   "updates": 10000,
+   "weightsFile": "transformer_10000.bin",
+   "heldOutAccuracy": 0.4032697547683924,
+   "agreementByDepth": {
+    "0": 1.0,
+    "1": 1.0,
+    "2": 0.98,
+    "3": 0.94
+   },
+   "loss": 1.7263425409793853
+  },
+  {
+   "updates": 20000,
+   "weightsFile": "transformer_20000.bin",
+   "heldOutAccuracy": 0.40490463215258854,
+   "agreementByDepth": {
+    "0": 1.0,
+    "1": 1.0,
+    "2": 0.96,
+    "3": 0.9
+   },
+   "loss": 1.6280289673805237
+  }
+ ],
+ "params": 29941,
+ "trainingSeconds": 44.4
+}

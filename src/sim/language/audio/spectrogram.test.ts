@@ -59,7 +59,8 @@ describe('the spectrogram', () => {
   it('reads a shipped WAV and computes its patch, once the sounds are shipped', () => {
     const f = join(PUB, 'syllables', 'bee.wav')
     if (!existsSync(f)) return
-    const w = parseWav(readFileSync(f).buffer.slice(0))
+    const b = readFileSync(f)
+    const w = parseWav(b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength))
     expect(w.sampleRate).toBe(16000)
     expect(w.samples.length).toBeGreaterThan(1600)
     const p = classifierPatch(w.samples, w.sampleRate, 0.03)

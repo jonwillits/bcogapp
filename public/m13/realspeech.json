@@ -1,0 +1,694 @@
+{
+ "citation": "MacWhinney, B. (2000). The CHILDES Project: Tools for Analyzing Talk (3rd ed.). Lawrence Erlbaum. Data from TalkBank (talkbank.org), used under TalkBank's terms (CC BY-NC-SA 3.0).",
+ "corpora": [
+  "Bates",
+  "Bernstein",
+  "Bliss",
+  "Bloom",
+  "Bohannon",
+  "Braunwald",
+  "Brent",
+  "Brown",
+  "CAPIL",
+  "Champaign",
+  "Clark",
+  "Demetras1",
+  "Demetras2",
+  "EHS",
+  "Evans",
+  "Feldman",
+  "Garvey",
+  "Gathercole",
+  "Gelman",
+  "Gleason",
+  "Gopnik",
+  "HSLLD",
+  "Haggerty",
+  "Hall",
+  "Hicks",
+  "Higginson",
+  "Kuczaj",
+  "Lego",
+  "MacWhinney",
+  "McCune",
+  "McMillan",
+  "Morisset",
+  "Nelson",
+  "NewEngland",
+  "NewmanRatner",
+  "Nicolopoulou",
+  "Nippold",
+  "OCSC",
+  "Peters",
+  "PetersonMcCabe",
+  "Post",
+  "Rollins",
+  "Rowe",
+  "Sachs",
+  "Sawyer",
+  "Snow",
+  "Soderstrom",
+  "Sprott",
+  "StoopsMontag",
+  "Suppes",
+  "Tardif",
+  "Valian",
+  "VanHouten",
+  "VanKleeck",
+  "Warren",
+  "Weist"
+ ],
+ "transcriptsRead": 9306,
+ "transcriptsUsed": 3384,
+ "ageCeilingMonths": 36,
+ "utterancesUsed": 831345,
+ "utterancesDropped": 57663,
+ "syllableTokens": 4332075,
+ "syllableTypes": 5563,
+ "syllabification": "CMU Pronouncing Dictionary (cmudict 0.7b), first pronunciation, maximal-onset rule",
+ "histogram": {
+  "bins": [
+   0.0,
+   0.05,
+   0.1,
+   0.15,
+   0.2,
+   0.25,
+   0.3,
+   0.35,
+   0.4,
+   0.45,
+   0.5,
+   0.55,
+   0.6,
+   0.65,
+   0.7,
+   0.75,
+   0.8,
+   0.85,
+   0.9,
+   0.95,
+   1.0
+  ],
+  "inside": [
+   64563,
+   30678,
+   26514,
+   19784,
+   20738,
+   6320,
+   9140,
+   7538,
+   5668,
+   17297,
+   9135,
+   12597,
+   6866,
+   5931,
+   4957,
+   10106,
+   13713,
+   28235,
+   8655,
+   9199
+  ],
+  "across": [
+   1016179,
+   170669,
+   85228,
+   33864,
+   33107,
+   23683,
+   10835,
+   16004,
+   28305,
+   15122,
+   3157,
+   398,
+   2205,
+   644,
+   1424,
+   606,
+   602,
+   290,
+   2220,
+   1024
+  ],
+  "insideN": 317634,
+  "acrossN": 1445566,
+  "insideMean": 0.3712532845872708,
+  "acrossMean": 0.06385884967658964
+ },
+ "dipsLearner": {
+  "cuts": 414080,
+  "cutsOnBoundary": 401748,
+  "precision": 0.970218315301391,
+  "boundaries": 894442,
+  "boundariesFound": 401748,
+  "recall": 0.44916048217771526,
+  "note": "cuts and boundaries counted at interior transitions only (the first and last transition of an utterance have one neighbor)"
+ },
+ "madeUpLanguage": {
+  "hist": {
+   "inside": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    257,
+    252,
+    0,
+    0,
+    498,
+    770,
+    0,
+    257,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    990
+   ],
+   "across": [
+    37,
+    383,
+    432,
+    233,
+    282,
+    0,
+    98,
+    0,
+    0,
+    0,
+    0,
+    0,
+    46,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  "shares": {
+   "cuts": 1511,
+   "cutsOnBoundary": 1465,
+   "precision": 0.9695565850430179,
+   "boundaries": 1511,
+   "boundariesFound": 1465,
+   "recall": 0.9695565850430179
+  }
+ },
+ "utterances": [
+  {
+   "words": [
+    "she's",
+    "such",
+    "a",
+    "pretty",
+    "baby"
+   ],
+   "syllables": [
+    "SHIYZ",
+    "SAHCH",
+    "AH",
+    "PRIH",
+    "TIY",
+    "BEY",
+    "BIY"
+   ],
+   "stress": [
+    1,
+    1,
+    0,
+    1,
+    0,
+    1,
+    0
+   ],
+   "wordOf": [
+    0,
+    1,
+    2,
+    3,
+    3,
+    4,
+    4
+   ],
+   "tp": [
+    0.001,
+    0.816,
+    0.004,
+    0.988,
+    0.003,
+    0.771
+   ]
+  },
+  {
+   "words": [
+    "want",
+    "daddy",
+    "outside",
+    "too"
+   ],
+   "syllables": [
+    "WAANT",
+    "DAE",
+    "DIY",
+    "AWT",
+    "SAYD",
+    "TUW"
+   ],
+   "stress": [
+    1,
+    1,
+    0,
+    1,
+    1,
+    1
+   ],
+   "wordOf": [
+    0,
+    1,
+    1,
+    2,
+    2,
+    3
+   ],
+   "tp": [
+    0.006,
+    0.556,
+    0.003,
+    0.1,
+    0.012
+   ]
+  },
+  {
+   "words": [
+    "that's",
+    "lower",
+    "isn't",
+    "it"
+   ],
+   "syllables": [
+    "DHAETS",
+    "LOW",
+    "ER",
+    "IH",
+    "ZAHNT",
+    "IHT"
+   ],
+   "stress": [
+    1,
+    1,
+    0,
+    1,
+    0,
+    1
+   ],
+   "wordOf": [
+    0,
+    1,
+    1,
+    2,
+    2,
+    3
+   ],
+   "tp": [
+    0.0,
+    0.007,
+    0.003,
+    0.472,
+    0.178
+   ]
+  },
+  {
+   "words": [
+    "ya",
+    "calling",
+    "somebody",
+    "up"
+   ],
+   "syllables": [
+    "YAA",
+    "KAO",
+    "LIHNG",
+    "SAHM",
+    "BAA",
+    "DIY",
+    "AHP"
+   ],
+   "stress": [
+    1,
+    1,
+    0,
+    1,
+    2,
+    0,
+    1
+   ],
+   "wordOf": [
+    0,
+    1,
+    1,
+    2,
+    2,
+    2,
+    3
+   ],
+   "tp": [
+    0.002,
+    0.604,
+    0.005,
+    0.036,
+    0.339,
+    0.004
+   ]
+  },
+  {
+   "words": [
+    "its",
+    "yucky",
+    "outside",
+    "strictly",
+    "yucky"
+   ],
+   "syllables": [
+    "IHTS",
+    "YAH",
+    "KIY",
+    "AWT",
+    "SAYD",
+    "STRIHKT",
+    "LIY",
+    "YAH",
+    "KIY"
+   ],
+   "stress": [
+    1,
+    1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    1,
+    0
+   ],
+   "wordOf": [
+    0,
+    1,
+    1,
+    2,
+    2,
+    3,
+    3,
+    4,
+    4
+   ],
+   "tp": [
+    0.002,
+    0.282,
+    0.002,
+    0.1,
+    0.0,
+    1.0,
+    0.0,
+    0.282
+   ]
+  },
+  {
+   "words": [
+    "it",
+    "snowing",
+    "outside",
+    "today"
+   ],
+   "syllables": [
+    "IHT",
+    "SNOW",
+    "IHNG",
+    "AWT",
+    "SAYD",
+    "TAH",
+    "DEY"
+   ],
+   "stress": [
+    1,
+    1,
+    0,
+    1,
+    1,
+    0,
+    1
+   ],
+   "wordOf": [
+    0,
+    1,
+    1,
+    2,
+    2,
+    3,
+    3
+   ],
+   "tp": [
+    0.0,
+    0.066,
+    0.007,
+    0.1,
+    0.004,
+    0.151
+   ]
+  },
+  {
+   "words": [
+    "a",
+    "table",
+    "and",
+    "another",
+    "chair"
+   ],
+   "syllables": [
+    "AH",
+    "TEY",
+    "BAHL",
+    "AHND",
+    "AH",
+    "NAH",
+    "DHER",
+    "CHEHR"
+   ],
+   "stress": [
+    0,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    1
+   ],
+   "wordOf": [
+    0,
+    1,
+    1,
+    2,
+    3,
+    3,
+    3,
+    4
+   ],
+   "tp": [
+    0.001,
+    0.501,
+    0.021,
+    0.039,
+    0.037,
+    0.086,
+    0.004
+   ]
+  },
+  {
+   "words": [
+    "oh",
+    "here's",
+    "a",
+    "chicken",
+    "too"
+   ],
+   "syllables": [
+    "OW",
+    "HHIHRZ",
+    "AH",
+    "CHIH",
+    "KAHN",
+    "TUW"
+   ],
+   "stress": [
+    1,
+    1,
+    0,
+    1,
+    0,
+    1
+   ],
+   "wordOf": [
+    0,
+    1,
+    2,
+    3,
+    3,
+    4
+   ],
+   "tp": [
+    0.002,
+    0.352,
+    0.003,
+    0.74,
+    0.008
+   ]
+  },
+  {
+   "words": [
+    "is",
+    "he",
+    "eating",
+    "dinner"
+   ],
+   "syllables": [
+    "IHZ",
+    "HHIY",
+    "IY",
+    "TIHNG",
+    "DIH",
+    "NER"
+   ],
+   "stress": [
+    1,
+    1,
+    1,
+    0,
+    1,
+    0
+   ],
+   "wordOf": [
+    0,
+    1,
+    2,
+    2,
+    3,
+    3
+   ],
+   "tp": [
+    0.046,
+    0.003,
+    0.24,
+    0.004,
+    0.091
+   ]
+  },
+  {
+   "words": [
+    "okay",
+    "now",
+    "the",
+    "orange",
+    "one"
+   ],
+   "syllables": [
+    "OW",
+    "KEY",
+    "NAW",
+    "DHAH",
+    "AO",
+    "RAHNJH",
+    "WAHN"
+   ],
+   "stress": [
+    2,
+    1,
+    1,
+    0,
+    1,
+    0,
+    1
+   ],
+   "wordOf": [
+    0,
+    0,
+    1,
+    2,
+    3,
+    3,
+    4
+   ],
+   "tp": [
+    0.47,
+    0.013,
+    0.015,
+    0.003,
+    0.582,
+    0.099
+   ]
+  },
+  {
+   "words": [
+    "mine's",
+    "gonna",
+    "going",
+    "in",
+    "the",
+    "bed"
+   ],
+   "syllables": [
+    "MAYNZ",
+    "GAA",
+    "NAH",
+    "GOW",
+    "IHNG",
+    "IHN",
+    "DHAH",
+    "BEHD"
+   ],
+   "stress": [
+    1,
+    1,
+    0,
+    1,
+    0,
+    0,
+    0,
+    1
+   ],
+   "wordOf": [
+    0,
+    1,
+    1,
+    2,
+    2,
+    3,
+    4,
+    5
+   ],
+   "tp": [
+    0.081,
+    0.857,
+    0.051,
+    0.234,
+    0.025,
+    0.283,
+    0.004
+   ]
+  }
+ ],
+ "candidates": {
+  "allDips": 40,
+  "someNot": 40,
+  "pretty": 18
+ }
+}

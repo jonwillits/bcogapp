@@ -1,0 +1,2502 @@
+[
+ {
+  "depth": 0,
+  "prefix": [
+   "girls"
+  ],
+  "agreeing": "eat",
+  "other": "eats"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "women"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "mice"
+  ],
+  "agreeing": "eat",
+  "other": "eats"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "girl"
+  ],
+  "agreeing": "sleeps",
+  "other": "sleep"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "woman"
+  ],
+  "agreeing": "sees",
+  "other": "see"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "man"
+  ],
+  "agreeing": "sees",
+  "other": "see"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "men"
+  ],
+  "agreeing": "eat",
+  "other": "eats"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "birds"
+  ],
+  "agreeing": "eat",
+  "other": "eats"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "lions"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "boy"
+  ],
+  "agreeing": "lives",
+  "other": "live"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "birds"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "mice"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "dog"
+  ],
+  "agreeing": "lives",
+  "other": "live"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "woman"
+  ],
+  "agreeing": "walks",
+  "other": "walk"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "girl"
+  ],
+  "agreeing": "sees",
+  "other": "see"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "woman"
+  ],
+  "agreeing": "eats",
+  "other": "eat"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "boy"
+  ],
+  "agreeing": "sees",
+  "other": "see"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "mouse"
+  ],
+  "agreeing": "walks",
+  "other": "walk"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "mouse"
+  ],
+  "agreeing": "lives",
+  "other": "live"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "woman"
+  ],
+  "agreeing": "sleeps",
+  "other": "sleep"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "birds"
+  ],
+  "agreeing": "walk",
+  "other": "walks"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "dog"
+  ],
+  "agreeing": "hears",
+  "other": "hear"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "boys"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "man"
+  ],
+  "agreeing": "eats",
+  "other": "eat"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "man"
+  ],
+  "agreeing": "lives",
+  "other": "live"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "girls"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "girl"
+  ],
+  "agreeing": "eats",
+  "other": "eat"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "girls"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "cat"
+  ],
+  "agreeing": "sees",
+  "other": "see"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "bird"
+  ],
+  "agreeing": "sees",
+  "other": "see"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "girl"
+  ],
+  "agreeing": "hears",
+  "other": "hear"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "dogs"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "lion"
+  ],
+  "agreeing": "lives",
+  "other": "live"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "lions"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "boys"
+  ],
+  "agreeing": "walk",
+  "other": "walks"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "mice"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "birds"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "men"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "lions"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "dogs"
+  ],
+  "agreeing": "eat",
+  "other": "eats"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "women"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "lions"
+  ],
+  "agreeing": "eat",
+  "other": "eats"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "mice"
+  ],
+  "agreeing": "hear",
+  "other": "hears"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "cat"
+  ],
+  "agreeing": "lives",
+  "other": "live"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "dogs"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "dogs"
+  ],
+  "agreeing": "walk",
+  "other": "walks"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "women"
+  ],
+  "agreeing": "hear",
+  "other": "hears"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "man"
+  ],
+  "agreeing": "walks",
+  "other": "walk"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "lion"
+  ],
+  "agreeing": "sees",
+  "other": "see"
+ },
+ {
+  "depth": 0,
+  "prefix": [
+   "birds"
+  ],
+  "agreeing": "hear",
+  "other": "hears"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "woman",
+   "who",
+   "dogs",
+   "hear"
+  ],
+  "agreeing": "eats",
+  "other": "eat"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "men",
+   "who",
+   "cat",
+   "chases"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "bird",
+   "who",
+   "dogs",
+   "see"
+  ],
+  "agreeing": "lives",
+  "other": "live"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "lion",
+   "who",
+   "lions",
+   "chase"
+  ],
+  "agreeing": "hears",
+  "other": "hear"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "mouse",
+   "who",
+   "women",
+   "hear"
+  ],
+  "agreeing": "sees",
+  "other": "see"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "boy",
+   "who",
+   "lions",
+   "hear"
+  ],
+  "agreeing": "lives",
+  "other": "live"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "girls",
+   "who",
+   "mouse",
+   "sees"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "cats",
+   "who",
+   "cat",
+   "sees"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "girls",
+   "who",
+   "girl",
+   "feeds"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "lions",
+   "who",
+   "boy",
+   "feeds"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "dogs",
+   "who",
+   "lion",
+   "chases"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "birds",
+   "who",
+   "woman",
+   "feeds"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "cat",
+   "who",
+   "women",
+   "see"
+  ],
+  "agreeing": "hears",
+  "other": "hear"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "women",
+   "who",
+   "boy",
+   "feeds"
+  ],
+  "agreeing": "hear",
+  "other": "hears"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "boys",
+   "who",
+   "cat",
+   "chases"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "girls",
+   "who",
+   "girl",
+   "chases"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "men",
+   "who",
+   "dog",
+   "sees"
+  ],
+  "agreeing": "eat",
+  "other": "eats"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "man",
+   "who",
+   "girls",
+   "feed"
+  ],
+  "agreeing": "walks",
+  "other": "walk"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "mice",
+   "who",
+   "cat",
+   "sees"
+  ],
+  "agreeing": "walk",
+  "other": "walks"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "boys",
+   "who",
+   "girl",
+   "feeds"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "dogs",
+   "who",
+   "bird",
+   "sees"
+  ],
+  "agreeing": "eat",
+  "other": "eats"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "dogs",
+   "who",
+   "cat",
+   "hears"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "girls",
+   "who",
+   "girl",
+   "chases"
+  ],
+  "agreeing": "walk",
+  "other": "walks"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "lion",
+   "who",
+   "cats",
+   "see"
+  ],
+  "agreeing": "sees",
+  "other": "see"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "mouse",
+   "who",
+   "girls",
+   "feed"
+  ],
+  "agreeing": "lives",
+  "other": "live"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "boys",
+   "who",
+   "dog",
+   "chases"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "girls",
+   "who",
+   "man",
+   "sees"
+  ],
+  "agreeing": "walk",
+  "other": "walks"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "mice",
+   "who",
+   "lion",
+   "sees"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "mouse",
+   "who",
+   "men",
+   "see"
+  ],
+  "agreeing": "sees",
+  "other": "see"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "cats",
+   "who",
+   "cat",
+   "sees"
+  ],
+  "agreeing": "hear",
+  "other": "hears"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "girl",
+   "who",
+   "dogs",
+   "hear"
+  ],
+  "agreeing": "sleeps",
+  "other": "sleep"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "lion",
+   "who",
+   "cats",
+   "chase"
+  ],
+  "agreeing": "walks",
+  "other": "walk"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "dogs",
+   "who",
+   "woman",
+   "sees"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "bird",
+   "who",
+   "girls",
+   "feed"
+  ],
+  "agreeing": "walks",
+  "other": "walk"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "girl",
+   "who",
+   "women",
+   "feed"
+  ],
+  "agreeing": "lives",
+  "other": "live"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "boy",
+   "who",
+   "cats",
+   "see"
+  ],
+  "agreeing": "eats",
+  "other": "eat"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "lion",
+   "who",
+   "lions",
+   "see"
+  ],
+  "agreeing": "sleeps",
+  "other": "sleep"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "boy",
+   "who",
+   "boys",
+   "feed"
+  ],
+  "agreeing": "eats",
+  "other": "eat"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "cats",
+   "who",
+   "bird",
+   "hears"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "bird",
+   "who",
+   "boys",
+   "feed"
+  ],
+  "agreeing": "lives",
+  "other": "live"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "birds",
+   "who",
+   "woman",
+   "feeds"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "dogs",
+   "who",
+   "boy",
+   "hears"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "dogs",
+   "who",
+   "mouse",
+   "sees"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "mouse",
+   "who",
+   "women",
+   "feed"
+  ],
+  "agreeing": "hears",
+  "other": "hear"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "men",
+   "who",
+   "boy",
+   "chases"
+  ],
+  "agreeing": "walk",
+  "other": "walks"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "bird",
+   "who",
+   "birds",
+   "hear"
+  ],
+  "agreeing": "lives",
+  "other": "live"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "mouse",
+   "who",
+   "dogs",
+   "see"
+  ],
+  "agreeing": "sees",
+  "other": "see"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "girls",
+   "who",
+   "bird",
+   "sees"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "dogs",
+   "who",
+   "girl",
+   "sees"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 1,
+  "prefix": [
+   "lion",
+   "who",
+   "birds",
+   "chase"
+  ],
+  "agreeing": "lives",
+  "other": "live"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "boy",
+   "who",
+   "mice",
+   "who",
+   "mice",
+   "hear",
+   "hear"
+  ],
+  "agreeing": "sees",
+  "other": "see"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "girls",
+   "who",
+   "boy",
+   "who",
+   "woman",
+   "chases",
+   "hears"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "boys",
+   "who",
+   "boy",
+   "who",
+   "woman",
+   "hears",
+   "feeds"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "mice",
+   "who",
+   "man",
+   "who",
+   "mouse",
+   "chases",
+   "feeds"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "dogs",
+   "who",
+   "woman",
+   "who",
+   "mouse",
+   "chases",
+   "chases"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "bird",
+   "who",
+   "girls",
+   "who",
+   "mice",
+   "hear",
+   "hear"
+  ],
+  "agreeing": "lives",
+  "other": "live"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "bird",
+   "who",
+   "dogs",
+   "who",
+   "cats",
+   "chase",
+   "see"
+  ],
+  "agreeing": "eats",
+  "other": "eat"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "girls",
+   "who",
+   "man",
+   "who",
+   "girl",
+   "sees",
+   "feeds"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "lions",
+   "who",
+   "lion",
+   "who",
+   "cat",
+   "chases",
+   "chases"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "girl",
+   "who",
+   "men",
+   "who",
+   "women",
+   "see",
+   "hear"
+  ],
+  "agreeing": "sleeps",
+  "other": "sleep"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "bird",
+   "who",
+   "lions",
+   "who",
+   "lions",
+   "hear",
+   "see"
+  ],
+  "agreeing": "sees",
+  "other": "see"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "cat",
+   "who",
+   "girls",
+   "who",
+   "mice",
+   "chase",
+   "feed"
+  ],
+  "agreeing": "sleeps",
+  "other": "sleep"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "dogs",
+   "who",
+   "mouse",
+   "who",
+   "bird",
+   "chases",
+   "hears"
+  ],
+  "agreeing": "walk",
+  "other": "walks"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "lion",
+   "who",
+   "men",
+   "who",
+   "men",
+   "hear",
+   "see"
+  ],
+  "agreeing": "eats",
+  "other": "eat"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "girls",
+   "who",
+   "woman",
+   "who",
+   "man",
+   "feeds",
+   "feeds"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "man",
+   "who",
+   "mice",
+   "who",
+   "girls",
+   "feed",
+   "chase"
+  ],
+  "agreeing": "hears",
+  "other": "hear"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "mice",
+   "who",
+   "boy",
+   "who",
+   "boy",
+   "feeds",
+   "sees"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "man",
+   "who",
+   "lions",
+   "who",
+   "girls",
+   "chase",
+   "hear"
+  ],
+  "agreeing": "eats",
+  "other": "eat"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "girl",
+   "who",
+   "girls",
+   "who",
+   "men",
+   "see",
+   "see"
+  ],
+  "agreeing": "eats",
+  "other": "eat"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "boys",
+   "who",
+   "boy",
+   "who",
+   "man",
+   "sees",
+   "feeds"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "boy",
+   "who",
+   "girls",
+   "who",
+   "men",
+   "feed",
+   "feed"
+  ],
+  "agreeing": "eats",
+  "other": "eat"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "cats",
+   "who",
+   "woman",
+   "who",
+   "dog",
+   "hears",
+   "hears"
+  ],
+  "agreeing": "hear",
+  "other": "hears"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "dogs",
+   "who",
+   "lion",
+   "who",
+   "cat",
+   "sees",
+   "hears"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "lion",
+   "who",
+   "men",
+   "who",
+   "girls",
+   "chase",
+   "chase"
+  ],
+  "agreeing": "hears",
+  "other": "hear"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "boy",
+   "who",
+   "lions",
+   "who",
+   "girls",
+   "feed",
+   "chase"
+  ],
+  "agreeing": "sees",
+  "other": "see"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "bird",
+   "who",
+   "women",
+   "who",
+   "mice",
+   "see",
+   "feed"
+  ],
+  "agreeing": "hears",
+  "other": "hear"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "mouse",
+   "who",
+   "women",
+   "who",
+   "dogs",
+   "see",
+   "hear"
+  ],
+  "agreeing": "walks",
+  "other": "walk"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "man",
+   "who",
+   "girls",
+   "who",
+   "women",
+   "feed",
+   "chase"
+  ],
+  "agreeing": "hears",
+  "other": "hear"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "mouse",
+   "who",
+   "men",
+   "who",
+   "lions",
+   "hear",
+   "hear"
+  ],
+  "agreeing": "walks",
+  "other": "walk"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "men",
+   "who",
+   "cat",
+   "who",
+   "lion",
+   "hears",
+   "sees"
+  ],
+  "agreeing": "eat",
+  "other": "eats"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "girl",
+   "who",
+   "men",
+   "who",
+   "cats",
+   "see",
+   "chase"
+  ],
+  "agreeing": "walks",
+  "other": "walk"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "girls",
+   "who",
+   "mouse",
+   "who",
+   "boy",
+   "feeds",
+   "hears"
+  ],
+  "agreeing": "eat",
+  "other": "eats"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "men",
+   "who",
+   "man",
+   "who",
+   "boy",
+   "hears",
+   "feeds"
+  ],
+  "agreeing": "hear",
+  "other": "hears"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "dog",
+   "who",
+   "girls",
+   "who",
+   "men",
+   "see",
+   "chase"
+  ],
+  "agreeing": "eats",
+  "other": "eat"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "girl",
+   "who",
+   "lions",
+   "who",
+   "dogs",
+   "hear",
+   "hear"
+  ],
+  "agreeing": "eats",
+  "other": "eat"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "women",
+   "who",
+   "woman",
+   "who",
+   "man",
+   "chases",
+   "feeds"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "bird",
+   "who",
+   "cats",
+   "who",
+   "lions",
+   "chase",
+   "chase"
+  ],
+  "agreeing": "sees",
+  "other": "see"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "mice",
+   "who",
+   "man",
+   "who",
+   "woman",
+   "feeds",
+   "feeds"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "boy",
+   "who",
+   "girls",
+   "who",
+   "girls",
+   "chase",
+   "hear"
+  ],
+  "agreeing": "hears",
+  "other": "hear"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "boys",
+   "who",
+   "woman",
+   "who",
+   "woman",
+   "feeds",
+   "feeds"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "boys",
+   "who",
+   "girl",
+   "who",
+   "boy",
+   "feeds",
+   "feeds"
+  ],
+  "agreeing": "eat",
+  "other": "eats"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "birds",
+   "who",
+   "girl",
+   "who",
+   "lion",
+   "chases",
+   "feeds"
+  ],
+  "agreeing": "eat",
+  "other": "eats"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "women",
+   "who",
+   "woman",
+   "who",
+   "boy",
+   "feeds",
+   "chases"
+  ],
+  "agreeing": "eat",
+  "other": "eats"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "dog",
+   "who",
+   "men",
+   "who",
+   "boys",
+   "feed",
+   "feed"
+  ],
+  "agreeing": "sleeps",
+  "other": "sleep"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "birds",
+   "who",
+   "girl",
+   "who",
+   "woman",
+   "feeds",
+   "feeds"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "girl",
+   "who",
+   "dogs",
+   "who",
+   "lions",
+   "hear",
+   "hear"
+  ],
+  "agreeing": "lives",
+  "other": "live"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "lions",
+   "who",
+   "girl",
+   "who",
+   "girl",
+   "hears",
+   "feeds"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "dog",
+   "who",
+   "women",
+   "who",
+   "girls",
+   "chase",
+   "feed"
+  ],
+  "agreeing": "walks",
+  "other": "walk"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "women",
+   "who",
+   "man",
+   "who",
+   "cat",
+   "sees",
+   "chases"
+  ],
+  "agreeing": "eat",
+  "other": "eats"
+ },
+ {
+  "depth": 2,
+  "prefix": [
+   "man",
+   "who",
+   "cats",
+   "who",
+   "men",
+   "chase",
+   "hear"
+  ],
+  "agreeing": "sleeps",
+  "other": "sleep"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "cats",
+   "who",
+   "girl",
+   "who",
+   "boy",
+   "who",
+   "man",
+   "chases",
+   "hears",
+   "chases"
+  ],
+  "agreeing": "hear",
+  "other": "hears"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "boys",
+   "who",
+   "boy",
+   "who",
+   "lion",
+   "who",
+   "woman",
+   "hears",
+   "chases",
+   "feeds"
+  ],
+  "agreeing": "eat",
+  "other": "eats"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "men",
+   "who",
+   "cat",
+   "who",
+   "dog",
+   "who",
+   "boy",
+   "chases",
+   "hears",
+   "chases"
+  ],
+  "agreeing": "hear",
+  "other": "hears"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "boys",
+   "who",
+   "dog",
+   "who",
+   "cat",
+   "who",
+   "bird",
+   "chases",
+   "sees",
+   "sees"
+  ],
+  "agreeing": "walk",
+  "other": "walks"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "boy",
+   "who",
+   "girls",
+   "who",
+   "cats",
+   "who",
+   "girls",
+   "feed",
+   "chase",
+   "feed"
+  ],
+  "agreeing": "eats",
+  "other": "eat"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "girls",
+   "who",
+   "girl",
+   "who",
+   "boy",
+   "who",
+   "boy",
+   "hears",
+   "sees",
+   "feeds"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "dogs",
+   "who",
+   "woman",
+   "who",
+   "bird",
+   "who",
+   "dog",
+   "chases",
+   "hears",
+   "feeds"
+  ],
+  "agreeing": "eat",
+  "other": "eats"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "cats",
+   "who",
+   "boy",
+   "who",
+   "girl",
+   "who",
+   "boy",
+   "chases",
+   "chases",
+   "hears"
+  ],
+  "agreeing": "walk",
+  "other": "walks"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "woman",
+   "who",
+   "cats",
+   "who",
+   "girls",
+   "who",
+   "boys",
+   "feed",
+   "hear",
+   "chase"
+  ],
+  "agreeing": "eats",
+  "other": "eat"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "boys",
+   "who",
+   "cat",
+   "who",
+   "lion",
+   "who",
+   "woman",
+   "feeds",
+   "sees",
+   "hears"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "birds",
+   "who",
+   "bird",
+   "who",
+   "boy",
+   "who",
+   "lion",
+   "hears",
+   "sees",
+   "chases"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "dogs",
+   "who",
+   "cat",
+   "who",
+   "woman",
+   "who",
+   "girl",
+   "feeds",
+   "sees",
+   "sees"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "girls",
+   "who",
+   "boy",
+   "who",
+   "dog",
+   "who",
+   "dog",
+   "chases",
+   "chases",
+   "feeds"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "man",
+   "who",
+   "lions",
+   "who",
+   "dogs",
+   "who",
+   "birds",
+   "hear",
+   "see",
+   "chase"
+  ],
+  "agreeing": "hears",
+  "other": "hear"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "lions",
+   "who",
+   "man",
+   "who",
+   "woman",
+   "who",
+   "cat",
+   "sees",
+   "feeds",
+   "chases"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "birds",
+   "who",
+   "mouse",
+   "who",
+   "man",
+   "who",
+   "woman",
+   "feeds",
+   "hears",
+   "sees"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "girl",
+   "who",
+   "boys",
+   "who",
+   "boys",
+   "who",
+   "girls",
+   "feed",
+   "feed",
+   "feed"
+  ],
+  "agreeing": "sees",
+  "other": "see"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "woman",
+   "who",
+   "dogs",
+   "who",
+   "lions",
+   "who",
+   "men",
+   "feed",
+   "see",
+   "see"
+  ],
+  "agreeing": "sees",
+  "other": "see"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "dogs",
+   "who",
+   "boy",
+   "who",
+   "boy",
+   "who",
+   "girl",
+   "hears",
+   "hears",
+   "hears"
+  ],
+  "agreeing": "eat",
+  "other": "eats"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "men",
+   "who",
+   "boy",
+   "who",
+   "boy",
+   "who",
+   "cat",
+   "chases",
+   "feeds",
+   "feeds"
+  ],
+  "agreeing": "hear",
+  "other": "hears"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "boy",
+   "who",
+   "lions",
+   "who",
+   "women",
+   "who",
+   "lions",
+   "chase",
+   "feed",
+   "see"
+  ],
+  "agreeing": "eats",
+  "other": "eat"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "girls",
+   "who",
+   "man",
+   "who",
+   "bird",
+   "who",
+   "bird",
+   "sees",
+   "hears",
+   "hears"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "girls",
+   "who",
+   "woman",
+   "who",
+   "dog",
+   "who",
+   "dog",
+   "hears",
+   "chases",
+   "sees"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "cats",
+   "who",
+   "bird",
+   "who",
+   "girl",
+   "who",
+   "bird",
+   "chases",
+   "chases",
+   "chases"
+  ],
+  "agreeing": "eat",
+  "other": "eats"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "girls",
+   "who",
+   "lion",
+   "who",
+   "woman",
+   "who",
+   "woman",
+   "sees",
+   "hears",
+   "hears"
+  ],
+  "agreeing": "hear",
+  "other": "hears"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "cat",
+   "who",
+   "men",
+   "who",
+   "lions",
+   "who",
+   "mice",
+   "chase",
+   "see",
+   "feed"
+  ],
+  "agreeing": "walks",
+  "other": "walk"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "lion",
+   "who",
+   "men",
+   "who",
+   "women",
+   "who",
+   "girls",
+   "feed",
+   "feed",
+   "feed"
+  ],
+  "agreeing": "lives",
+  "other": "live"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "cat",
+   "who",
+   "girls",
+   "who",
+   "men",
+   "who",
+   "boys",
+   "see",
+   "hear",
+   "hear"
+  ],
+  "agreeing": "sleeps",
+  "other": "sleep"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "lions",
+   "who",
+   "lion",
+   "who",
+   "man",
+   "who",
+   "dog",
+   "chases",
+   "sees",
+   "sees"
+  ],
+  "agreeing": "hear",
+  "other": "hears"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "women",
+   "who",
+   "woman",
+   "who",
+   "cat",
+   "who",
+   "woman",
+   "feeds",
+   "chases",
+   "feeds"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "woman",
+   "who",
+   "girls",
+   "who",
+   "boys",
+   "who",
+   "women",
+   "hear",
+   "chase",
+   "feed"
+  ],
+  "agreeing": "sleeps",
+  "other": "sleep"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "lions",
+   "who",
+   "dog",
+   "who",
+   "lion",
+   "who",
+   "woman",
+   "hears",
+   "chases",
+   "sees"
+  ],
+  "agreeing": "live",
+  "other": "lives"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "lions",
+   "who",
+   "man",
+   "who",
+   "cat",
+   "who",
+   "girl",
+   "feeds",
+   "chases",
+   "feeds"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "dog",
+   "who",
+   "women",
+   "who",
+   "mice",
+   "who",
+   "girls",
+   "chase",
+   "hear",
+   "hear"
+  ],
+  "agreeing": "walks",
+  "other": "walk"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "cat",
+   "who",
+   "birds",
+   "who",
+   "dogs",
+   "who",
+   "cats",
+   "chase",
+   "chase",
+   "hear"
+  ],
+  "agreeing": "lives",
+  "other": "live"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "mice",
+   "who",
+   "woman",
+   "who",
+   "woman",
+   "who",
+   "cat",
+   "sees",
+   "hears",
+   "sees"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "mouse",
+   "who",
+   "mice",
+   "who",
+   "cats",
+   "who",
+   "birds",
+   "chase",
+   "chase",
+   "chase"
+  ],
+  "agreeing": "hears",
+  "other": "hear"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "dog",
+   "who",
+   "lions",
+   "who",
+   "girls",
+   "who",
+   "lions",
+   "hear",
+   "see",
+   "see"
+  ],
+  "agreeing": "walks",
+  "other": "walk"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "mice",
+   "who",
+   "mouse",
+   "who",
+   "mouse",
+   "who",
+   "woman",
+   "feeds",
+   "hears",
+   "sees"
+  ],
+  "agreeing": "walk",
+  "other": "walks"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "boys",
+   "who",
+   "woman",
+   "who",
+   "dog",
+   "who",
+   "woman",
+   "feeds",
+   "hears",
+   "hears"
+  ],
+  "agreeing": "see",
+  "other": "sees"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "boys",
+   "who",
+   "woman",
+   "who",
+   "woman",
+   "who",
+   "man",
+   "chases",
+   "hears",
+   "chases"
+  ],
+  "agreeing": "sleep",
+  "other": "sleeps"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "lion",
+   "who",
+   "girls",
+   "who",
+   "boys",
+   "who",
+   "girls",
+   "feed",
+   "see",
+   "chase"
+  ],
+  "agreeing": "sleeps",
+  "other": "sleep"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "dog",
+   "who",
+   "dogs",
+   "who",
+   "girls",
+   "who",
+   "boys",
+   "hear",
+   "see",
+   "hear"
+  ],
+  "agreeing": "walks",
+  "other": "walk"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "mouse",
+   "who",
+   "mice",
+   "who",
+   "dogs",
+   "who",
+   "birds",
+   "see",
+   "see",
+   "chase"
+  ],
+  "agreeing": "eats",
+  "other": "eat"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "dog",
+   "who",
+   "mice",
+   "who",
+   "men",
+   "who",
+   "boys",
+   "feed",
+   "see",
+   "hear"
+  ],
+  "agreeing": "sleeps",
+  "other": "sleep"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "girl",
+   "who",
+   "girls",
+   "who",
+   "girls",
+   "who",
+   "dogs",
+   "see",
+   "feed",
+   "chase"
+  ],
+  "agreeing": "walks",
+  "other": "walk"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "woman",
+   "who",
+   "men",
+   "who",
+   "dogs",
+   "who",
+   "lions",
+   "hear",
+   "hear",
+   "see"
+  ],
+  "agreeing": "hears",
+  "other": "hear"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "bird",
+   "who",
+   "mice",
+   "who",
+   "lions",
+   "who",
+   "mice",
+   "chase",
+   "chase",
+   "hear"
+  ],
+  "agreeing": "sleeps",
+  "other": "sleep"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "cat",
+   "who",
+   "girls",
+   "who",
+   "birds",
+   "who",
+   "cats",
+   "see",
+   "chase",
+   "chase"
+  ],
+  "agreeing": "eats",
+  "other": "eat"
+ },
+ {
+  "depth": 3,
+  "prefix": [
+   "boys",
+   "who",
+   "mouse",
+   "who",
+   "woman",
+   "who",
+   "boy",
+   "hears",
+   "chases",
+   "sees"
+  ],
+  "agreeing": "walk",
+  "other": "walks"
+ }
+]

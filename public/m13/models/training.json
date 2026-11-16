@@ -1,0 +1,225 @@
+{
+ "seed": 1,
+ "vocab": 52,
+ "trainSentences": 9000,
+ "heldOutSentences": 1000,
+ "heldOutAlsoInTrain": 0.635,
+ "batch": 32,
+ "lr": 0.001,
+ "snapshots": [
+  0,
+  50,
+  200,
+  500,
+  1000,
+  3000,
+  10000,
+  20000
+ ],
+ "models": {
+  "transformer": {
+   "params": 29941,
+   "seconds": 44.4,
+   "snapshots": [
+    {
+     "updates": 0,
+     "weightsFile": "transformer_00000.bin",
+     "heldOutAccuracy": 0.020708446866485014,
+     "agreementByDepth": {
+      "0": 0.42,
+      "1": 0.46,
+      "2": 0.48,
+      "3": 0.36
+     },
+     "loss": null
+    },
+    {
+     "updates": 50,
+     "weightsFile": "transformer_00050.bin",
+     "heldOutAccuracy": 0.3536784741144414,
+     "agreementByDepth": {
+      "0": 0.54,
+      "1": 0.38,
+      "2": 0.4,
+      "3": 0.44
+     },
+     "loss": 3.3200532388687134
+    },
+    {
+     "updates": 200,
+     "weightsFile": "transformer_00200.bin",
+     "heldOutAccuracy": 0.39291553133514984,
+     "agreementByDepth": {
+      "0": 1.0,
+      "1": 0.9,
+      "2": 0.56,
+      "3": 0.42
+     },
+     "loss": 2.385373673439026
+    },
+    {
+     "updates": 500,
+     "weightsFile": "transformer_00500.bin",
+     "heldOutAccuracy": 0.3989100817438692,
+     "agreementByDepth": {
+      "0": 1.0,
+      "1": 1.0,
+      "2": 1.0,
+      "3": 0.76
+     },
+     "loss": 1.949971833229065
+    },
+    {
+     "updates": 1000,
+     "weightsFile": "transformer_01000.bin",
+     "heldOutAccuracy": 0.4029972752043597,
+     "agreementByDepth": {
+      "0": 1.0,
+      "1": 1.0,
+      "2": 1.0,
+      "3": 0.98
+     },
+     "loss": 1.8506515073776244
+    },
+    {
+     "updates": 3000,
+     "weightsFile": "transformer_03000.bin",
+     "heldOutAccuracy": 0.4095367847411444,
+     "agreementByDepth": {
+      "0": 1.0,
+      "1": 1.0,
+      "2": 0.98,
+      "3": 1.0
+     },
+     "loss": 1.79237726688385
+    },
+    {
+     "updates": 10000,
+     "weightsFile": "transformer_10000.bin",
+     "heldOutAccuracy": 0.4032697547683924,
+     "agreementByDepth": {
+      "0": 1.0,
+      "1": 1.0,
+      "2": 0.98,
+      "3": 0.94
+     },
+     "loss": 1.7263425409793853
+    },
+    {
+     "updates": 20000,
+     "weightsFile": "transformer_20000.bin",
+     "heldOutAccuracy": 0.40490463215258854,
+     "agreementByDepth": {
+      "0": 1.0,
+      "1": 1.0,
+      "2": 0.96,
+      "3": 0.9
+     },
+     "loss": 1.6280289673805237
+    }
+   ]
+  },
+  "srn": {
+   "params": 10997,
+   "seconds": 15.5,
+   "snapshots": [
+    {
+     "updates": 0,
+     "weightsFile": "srn_00000.bin",
+     "heldOutAccuracy": 0.01580381471389646,
+     "agreementByDepth": {
+      "0": 0.58,
+      "1": 0.48,
+      "2": 0.58,
+      "3": 0.4
+     },
+     "loss": null
+    },
+    {
+     "updates": 50,
+     "weightsFile": "srn_00050.bin",
+     "heldOutAccuracy": 0.34822888283378745,
+     "agreementByDepth": {
+      "0": 0.58,
+      "1": 0.44,
+      "2": 0.52,
+      "3": 0.44
+     },
+     "loss": 3.609074773788452
+    },
+    {
+     "updates": 200,
+     "weightsFile": "srn_00200.bin",
+     "heldOutAccuracy": 0.3656675749318801,
+     "agreementByDepth": {
+      "0": 0.6,
+      "1": 0.44,
+      "2": 0.52,
+      "3": 0.44
+     },
+     "loss": 2.896090950965881
+    },
+    {
+     "updates": 500,
+     "weightsFile": "srn_00500.bin",
+     "heldOutAccuracy": 0.3888283378746594,
+     "agreementByDepth": {
+      "0": 1.0,
+      "1": 0.9,
+      "2": 0.3,
+      "3": 0.0
+     },
+     "loss": 2.2804535627365112
+    },
+    {
+     "updates": 1000,
+     "weightsFile": "srn_01000.bin",
+     "heldOutAccuracy": 0.4,
+     "agreementByDepth": {
+      "0": 1.0,
+      "1": 1.0,
+      "2": 0.74,
+      "3": 0.44
+     },
+     "loss": 1.9740205252170562
+    },
+    {
+     "updates": 3000,
+     "weightsFile": "srn_03000.bin",
+     "heldOutAccuracy": 0.40054495912806537,
+     "agreementByDepth": {
+      "0": 1.0,
+      "1": 1.0,
+      "2": 1.0,
+      "3": 0.96
+     },
+     "loss": 1.8404447388648988
+    },
+    {
+     "updates": 10000,
+     "weightsFile": "srn_10000.bin",
+     "heldOutAccuracy": 0.40435967302452314,
+     "agreementByDepth": {
+      "0": 1.0,
+      "1": 1.0,
+      "2": 1.0,
+      "3": 0.96
+     },
+     "loss": 1.764119462966919
+    },
+    {
+     "updates": 20000,
+     "weightsFile": "srn_20000.bin",
+     "heldOutAccuracy": 0.40081743869209807,
+     "agreementByDepth": {
+      "0": 1.0,
+      "1": 1.0,
+      "2": 1.0,
+      "3": 0.9
+     },
+     "loss": 1.7235933780670165
+    }
+   ]
+  }
+ }
+}
