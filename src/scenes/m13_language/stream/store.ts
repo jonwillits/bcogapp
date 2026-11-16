@@ -5,9 +5,10 @@ import { player } from '../../../sim/language/audio/player'
 import { bufferFrom, type Clip } from '../../../sim/language/audio/clips'
 import type { Spectrogram } from '../../../sim/language/audio/spectrogram'
 import { streamFor, SYLLABLES, SYLLABLES_PER_MINUTE, WORDS, type Stream, type Syllable, type Word } from '../../../sim/language/stream/language'
-import { scoreTest, testTrials } from '../../../sim/language/stream/test'
+import { scoreTest, scoreTestByRecognition, testTrials } from '../../../sim/language/stream/test'
 import { trainDips, dipsScorer } from '../../../sim/language/stream/learners/dips'
 import { makeSrn, trainSrn, srnScorer } from '../../../sim/language/stream/learners/srn'
+import { makeParser, trainParser, parserScorer, parserKnows } from '../../../sim/language/stream/learners/parser'
 import { boardSyllables, isWord, newBoard, trayCount, TRAY_MAX, type BoardState } from '../../../sim/language/stream/board'
 import { StepStore } from '../steps'
 import { NOTICE_LINE, type Step } from './screens'
@@ -41,12 +42,17 @@ export interface BoardResult extends BoardState {
   seconds: number
 }
 
-export type LearnerId = 'dips' | 'srn'
-export const LEARNERS: LearnerId[] = ['dips', 'srn']
+export type LearnerId = 'dips' | 'srn' | 'parser'
+export const LEARNERS: LearnerId[] = ['dips', 'srn', 'parser']
+export type TestKind = 'nonword' | 'partword'
+/** PARSER's two test rules (spec §6.3; Perruchet and Vinter, 1998, p. 256): the spec's is the default, and the student can switch. */
+export type ParserRule = 'spec' | 'paper'
 
 export interface AmountResult {
-  /** [student's stream, then the 19 others], each learner's score on each test. */
-  scores: Record<LearnerId, { nonword: number[]; partword: number[] }>
+  /** [student's stream, then the 19 others], each learner's score on each test; PARSER's under the spec's rule. */
+  scores: Record<LearnerId, Record<TestKind, number[]>>
+  /** PARSER's scores on the same streams under the paper's rule. */
+  parserPaper: Record<TestKind, number[]>
 }
 
 export class StreamStore extends StepStore<Step> {
@@ -84,6 +90,7 @@ export class StreamStore extends StepStore<Step> {
   amountIndex = 3
   results = new Map<number, AmountResult>()
   running: { amount: number; done: number } | null = null
+  parserRule: ParserRule = 'spec'
 
   // Step 4
   utterance = 0
@@ -348,14 +355,23 @@ export class StreamStore extends StepStore<Step> {
   get amountSyllables(): number {
     return Math.round(AMOUNTS_MIN[this.amountIndex] * SYLLABLES_PER_MINUTE)
   }
+  setParserRule(r: ParserRule): void {
+    this.parserRule = r
+    this.changed()
+  }
+  /** A learner's 20 scores on a test at a run amount; PARSER's under the rule the student has chosen (both are computed at the run). */
+  scoresOf(r: AmountResult, l: LearnerId, test: TestKind): number[] {
+    return l === 'parser' && this.parserRule === 'paper' ? r.parserPaper[test] : r.scores[l][test]
+  }
 
-  /** Run both learners on the student's stream and 19 others at the slider's amount, one stream per slice, so that no task holds the main thread long. */
+  /** Run the three learners on the student's stream and 19 others at the slider's amount, one stream per slice, so that no task holds the main thread long. */
   async runLearners(): Promise<void> {
     if (!this.allPredicted || this.running) return
     const amount = this.amountIndex
     if (this.results.has(amount)) return
     const n = Math.round(AMOUNTS_MIN[amount] * SYLLABLES_PER_MINUTE)
-    const scores: AmountResult['scores'] = { dips: { nonword: [], partword: [] }, srn: { nonword: [], partword: [] } }
+    const scores: AmountResult['scores'] = { dips: { nonword: [], partword: [] }, srn: { nonword: [], partword: [] }, parser: { nonword: [], partword: [] } }
+    const parserPaper: AmountResult['parserPaper'] = { nonword: [], partword: [] }
     this.running = { amount, done: 0 }
     this.changed()
     for (let k = 0; k <= OTHER_STREAMS; k++) {
@@ -371,10 +387,16 @@ export class StreamStore extends StepStore<Step> {
       trainSrn(srn, s.syllables, 0, n)
       scores.srn.nonword.push(scoreTest(nw, srnScorer(srn), makeRng(seed + 5)))
       scores.srn.partword.push(scoreTest(pw, srnScorer(srn), makeRng(seed + 6)))
+      const parser = makeParser(seed)
+      trainParser(parser, s.syllables.slice(0, n))
+      scores.parser.nonword.push(scoreTest(nw, parserScorer(parser), makeRng(seed + 7)))
+      scores.parser.partword.push(scoreTest(pw, parserScorer(parser), makeRng(seed + 8)))
+      parserPaper.nonword.push(scoreTestByRecognition(nw, parserKnows(parser), makeRng(seed + 9)))
+      parserPaper.partword.push(scoreTestByRecognition(pw, parserKnows(parser), makeRng(seed + 10)))
       this.running = { amount, done: k + 1 }
       this.changed()
     }
-    this.results.set(amount, { scores })
+    this.results.set(amount, { scores, parserPaper })
     this.running = null
     this.changed()
   }

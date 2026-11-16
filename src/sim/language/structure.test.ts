@@ -4,7 +4,8 @@ import { describe, it, expect } from 'vitest'
  * The learners and the models compute only what their procedures allow,
  * by structural tests on their source (spec §11, item 5): the dips learner
  * reads only the syllables it has taken in; the recurrent network learns
- * only by learnWeights; guess and check stores one object per word and
+ * only by learnWeights; PARSER reads no table of probabilities, no word
+ * list and no boundary; guess and check stores one object per word and
  * reads no count; tallying reads no record of its own past picks; no
  * learner or model imports the stream's word list, the word-object
  * pairing, or the true boundaries.
@@ -28,9 +29,20 @@ describe('the learners read only the stream', () => {
     expect(s).toMatch(/learnWeights\(/)
     expect(s).not.toMatch(/\.weights\[[^\]]+\]\s*=[^=]/)
   })
-  it('the scorer gives a learner a string and nothing about which string is the word', () => {
+  it('PARSER imports no word list, boundary, foil, count or transitional probability, and reads no position: its only inputs are the syllables and the seeded draw', () => {
+    const s = src('stream/learners/parser.ts')
+    expect(s).not.toMatch(/\bWORDS\b|withinWord|syllablesOf|wordIndex|position\b|nonwords|partwords|countPairs|transitionalProbability|tpTable|Counts\b/)
+    expect(s).toMatch(/import \{ SYLLABLES, type Syllable \} from '\.\.\/language'/)
+    expect(s).toMatch(/export function trainParser\(p: Parser, stream: readonly Syllable\[\]\)/)
+  })
+  it('the scorer gives a learner a string and nothing about which string is the word, and the paper’s rule gives PARSER one string at a time', () => {
     const s = src('stream/test.ts')
     expect(s).toMatch(/export type Scorer = \(syllables: readonly Syllable\[\]\) => number/)
+    expect(s).toMatch(/export function scoreTestByRecognition\(trials: readonly Trial\[\], knows: \(syllables: readonly Syllable\[\]\) => boolean, rng: Rng\)/)
+  })
+  it('three callers, and no other, train a learner on the stream', () => {
+    const callers = Object.entries(files).filter(([p, s]) => !p.includes('.test.') && !p.includes('.probe.') && /trainDips\(|trainSrn\(|trainParser\(/.test(s.replace(/\/\*[\s\S]*?\*\//g, '')))
+    expect(callers.map(([p]) => p.replace(/^\.\//, '')).sort()).toEqual(['stream/learners/dips.ts', 'stream/learners/parser.ts', 'stream/learners/srn.ts'])
   })
 })
 

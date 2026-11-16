@@ -947,21 +947,21 @@ export const LABS = [
     retired: [
       { term: /\bcategorical perception\b/gi, why: 'held back until Part 1, Step 3’s reveal; the handout may use it only after naming that reveal (spec §11, item 2)', unless: ['after the reveal', 'reveal'] },
       { term: /\b(learner|network|model|classifier|transformer) (hears|notices|knows|thinks|remembers|expects|tries)\b/gi, why: 'no agentic verb about a program (spec §11, item 6)' },
-      { term: /\bPARSER\b/g, why: 'PARSER is not built until Perruchet and Vinter (1998) is in the library; its panel reads Reference pending', unless: ['pending', 'not built'] },
+      { term: /\bReference pending\b.*\bPARSER\b|\bPARSER\b.*\b(not built|Reference pending)\b/g, why: 'PARSER is built, from Perruchet and Vinter (1998) with every parameter and its page; its panel is no longer pending' },
       { term: /\bvoice (actor|artist)|female voice|male voice\b/gi, why: 'the voices are voice 1 to voice 12 on screen (spec §11, item 14)' },
     ],
 
     controls: [
       'Open', 'Sounds', 'Stream', 'Words', 'Predictors', 'Begin', 'Begin Part 1', 'Play a test sound', 'Export my results', 'Load my results', 'Clear my saved results', 'Erase and start over', 'Keep my results', 'Replace my saved results', 'Keep what I have', 'Open anyway', 'Show the instructions again', 'Back to the step',
-      'Play', 'Wide bands', 'Narrow bands', 'Next', 'Back', 'Commit my prediction', 'Commit my labels', 'B', 'D', 'G', 'X matched the first', 'X matched the second', 'Start block 2', 'Start again', 'Train', 'Train again', 'Train on one pitch', 'Train on one voice', 'Run on the 14 sounds', 'Show voice timing',
-      'Play the minute', 'Commit my answer', 'Play again, with the words marked', 'Play again, with each word’s last syllable lengthened', 'Clear the highlight', 'Check this word', 'Empty the tray', 'Show me the words', 'Show the words and end the search', 'Keep searching', 'Commit my predictions', 'How much of the stream', 'Run the learners', 'Show stress',
+      'Play', 'Wide bands', 'Narrow bands', 'Next', 'Back', 'Go to Step 2', 'Commit my prediction', 'Commit my labels', 'B', 'D', 'X matched the first', 'X matched the second', 'Start block 1', 'Start block 2', 'Start again', 'Train', 'Train again', 'Train on one pitch', 'Train on one voice', 'Run on the 9 sounds', 'Show voice timing',
+      'Play the minute', 'Commit my answer', 'Play again, with the words marked', 'Play again, with each word’s last syllable lengthened', 'Clear the highlight', 'Check this word', 'Empty the tray', 'Show me the words', 'Show the words and end the search', 'Keep searching', 'Commit my predictions', 'How much of the stream', 'Run the learners', 'PARSER’s test rule', 'Higher weight wins', 'Known word wins, else random', 'Show stress',
       'Hear it again', 'Run the models', 'Back to the fitted value',
       'Show me sentences', 'Window size', 'Count words before and after separately', 'Count', 'Order', 'Prediction from counts', 'One point per word', 'Compute', 'Allow any token', 'Remove the last token', 'Clear the prompt', 'Temperature', 'Generate a sentence', 'Snapshot', 'Change the prompt',
       'Go on to Step', 'Go back to Step', 'Go to Step', 'Go on to Part', 'Run seed', 'My results',
     ],
 
     claims: [
-      { says: 'Part 1: the 14 continuum sounds differ only in the second formant’s onset, 1,320 to 2,880 Hz in 120 Hz steps, F1 and F2 steady at 360 and 2,160 Hz, from Liberman’s p. 359', test: null },
+      { says: 'Part 1: the 14 shipped continuum sounds differ only in the second formant’s onset, 1,320 to 2,880 Hz in 120 Hz steps, F1 and F2 steady at 360 and 2,160 Hz, from Liberman’s p. 359; the lab plays the first 9 (Jon, 2026-11-16: the b–d boundary alone; 54 labeling trials, 28 triads over 7 pairs)', test: '9 steps: 54 labeling trials, 6 of each step' },
       { says: 'Part 1: the spectrogram puts a tone’s energy in the right bin at the right time in both views, and the classifier’s patch is the spectrogram’s own output pooled to 40 bands by 10 frames', test: 'a 1 kHz tone peaks in the 1 kHz bin in both views' },
       { says: 'Part 1: ABX scoring is exact, and the predicted discrimination matches the paper’s formula on a hand-worked fixture, giving 50% and 100% for the paper’s two example pairs', test: 'the paper’s two example pairs' },
       { says: 'Part 1: the classifier learns by Lab 7’s rule through learnWeights and thirdFactor only, and labels the two held-out voices well above chance (77% over 10 seeds)', test: 'on the shipped tokens, trained on ten voices' },
@@ -969,7 +969,8 @@ export const LABS = [
       { says: 'Part 1: before Step 3’s reveal no string in Part 1 names a category, a boundary, within, across, the predicted line, Liberman or Haskins, and Step 4 says nothing about sharp or gradual changes until Step 3 is done', test: 'no Part 1 file outside Step 3’s reveal holds a Step 3 word' },
       { says: 'Part 2: transitional probabilities from a stream equal counts divided by counts; the stream never repeats a word; the six nonwords’ pairs never occur in any stream; the part-words are the paper’s two and four by its rule', test: 'a transitional probability is a count divided by a count' },
       { says: 'Part 2: a true word colors exactly its instances on the board, a part-word changes nothing, and the proportions and the term appear only after the first word is found', test: 'counts only before the first word is found' },
-      { says: 'Part 2: the learners read only the syllables they take in (no word list, boundary, or foil), and the recurrent network moves weights only through learnWeights', test: 'the dips learner imports no word list' },
+      { says: 'Part 2: the three learners read only the syllables they take in (no word list, boundary, foil, count or probability), the recurrent network moves weights only through learnWeights, and three callers and no other train a learner', test: 'the dips learner imports no word list' },
+      { says: 'Part 2: PARSER follows Perruchet and Vinter (1998) with every parameter from its page: one time step reproduces the paper’s Table 1 to the last digit; the six words are its strongest units after 21 minutes on most streams; on a wordless stream no word is a unit; its two test rules (the spec’s and the paper’s) are both scored at every run, the spec’s the default', test: 'reproduces Table 1 (p. 252)' },
       { says: 'Part 2: no word or replay before Step 1’s commit; no learner runs before the three predictions; Steps 2 to 4 open behind the one-line notice while Step 1 is not committed', test: 'Steps 2 to 4 open behind the one-line notice' },
       { says: 'Part 2: the assembled stream has no acoustic cue to a word boundary: durations identical, peak intensity within 0.07 dB and pitch within 0.07 Hz over 21 minutes (training/m13/make_stream.py)', test: null },
       { says: 'Part 3: 60 learning trials, each word 5 times, never on neighboring trials, 5 objects with the target; 12 test trials with 4; the key measure counts 48 pairs', test: '60 learning trials, each word 5 times' },

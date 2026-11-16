@@ -123,6 +123,23 @@ export function scoreTest(trials: readonly Trial[], score: Scorer, rng: Rng): nu
   return (100 * correct) / trials.length
 }
 
+/**
+ * The test rule of Perruchet and Vinter (1998, p. 256), for a learner that
+ * recognizes strings rather than scoring them: on each trial the word is
+ * chosen if the learner has it as one unit above its threshold, and
+ * otherwise the choice is random, by the seeded stream. The rule looks at
+ * the word alone, so it cannot be written as a `Scorer`; the learner is
+ * still given a string and nothing about which string is the word.
+ */
+export function scoreTestByRecognition(trials: readonly Trial[], knows: (syllables: readonly Syllable[]) => boolean, rng: Rng): number {
+  let correct = 0
+  for (const t of trials) {
+    if (knows(t.word)) correct++
+    else if (rng.next() < 0.5) correct++
+  }
+  return (100 * correct) / trials.length
+}
+
 /** A check used by the tests: every nonword's pairs are absent from this stream. */
 export function nonwordPairsAbsent(stream: Stream): boolean {
   const c = countPairs(stream.syllables)

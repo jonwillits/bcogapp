@@ -4,8 +4,8 @@ import { ReferencePanel } from '../ReferencePanel'
 import { reference } from '../../../sim/language/references'
 import { nonwords, partwords } from '../../../sim/language/stream/test'
 import { ADULTS_21_MINUTES_LINE, INFANTS_MEASURED_DIFFERENTLY_LINE } from '../lines'
-import { LEARNER_NAMES, LEARNER_TEXT, PREDICTION_QUESTIONS, STEP3_PANEL } from './texts'
-import { AMOUNTS_MIN, LEARNERS, type LearnerId, type StreamStore } from './store'
+import { LEARNER_NAMES, LEARNER_TEXT, PARSER_RULE_LINES, PARSER_RULE_NAMES, PREDICTION_QUESTIONS, STEP3_PANEL } from './texts'
+import { AMOUNTS_MIN, LEARNERS, type LearnerId, type ParserRule, type StreamStore } from './store'
 import { useState } from 'react'
 
 /**
@@ -14,9 +14,11 @@ import { useState } from 'react'
  * plot of percent correct against minutes on a logarithmic axis, one line
  * per learner per test with the 20 streams' range shaded, chance, the
  * adults' means at 21 minutes, and the infants' 2 minutes marked on the
- * axis with no point; the reveal's aligned rows; each learner's panel.
+ * axis with no point; the reveal's aligned rows; PARSER's test rule, the
+ * spec's by default and the paper's on a two-option control, both scored
+ * at every run; each learner's panel.
  */
-const COLORS: Record<LearnerId, string> = { dips: 'var(--accent)', srn: 'var(--sensor)' }
+const COLORS: Record<LearnerId, string> = { dips: 'var(--accent)', srn: 'var(--sensor)', parser: 'var(--actuator)' }
 const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length
 
 export function Step3Controls({ s }: { s: StreamStore }) {
@@ -62,8 +64,8 @@ export function Step3Stage({ s }: { s: StreamStore }) {
   const series: Series[] = []
   for (const l of LEARNERS)
     for (const test of ['nonword', 'partword'] as const) {
-      const pts = amounts.map((a) => [AMOUNTS_MIN[a], mean(s.results.get(a)!.scores[l][test])] as [number, number])
-      const band = amounts.map((a) => [AMOUNTS_MIN[a], Math.min(...s.results.get(a)!.scores[l][test]), Math.max(...s.results.get(a)!.scores[l][test])] as [number, number, number])
+      const pts = amounts.map((a) => [AMOUNTS_MIN[a], mean(s.scoresOf(s.results.get(a)!, l, test))] as [number, number])
+      const band = amounts.map((a) => [AMOUNTS_MIN[a], Math.min(...s.scoresOf(s.results.get(a)!, l, test)), Math.max(...s.scoresOf(s.results.get(a)!, l, test))] as [number, number, number])
       series.push({ label: `${LEARNER_NAMES[l]}, ${test === 'nonword' ? 'nonwords' : 'part-words'}`, color: COLORS[l], dashed: test === 'partword', points: pts, band })
     }
   const ran = amounts.length > 0
@@ -81,8 +83,15 @@ export function Step3Stage({ s }: { s: StreamStore }) {
           <LinePlot series={series} width={620} height={260} xLabel="minutes of the stream taken in (logarithmic axis)" yLabel="percent of 36 test trials correct" xMin={0.5} xMax={21} logX xTicks={AMOUNTS_MIN.map((m) => ({ x: m, label: m < 1 ? '0.5' : String(m) }))} yMin={0} yMax={100} yTicks={[0, 25, 50, 75, 100]} hLines={[{ y: 50, label: 'chance, 50%' }, { y: 76, label: 'adults, nonwords, 76% at 21 min', color: 'var(--accent)' }, { y: 65, label: 'adults, part-words, 65% at 21 min', color: 'var(--sensor)' }]} marks={[{ x: 2, label: 'infants, 2 minutes: measured by listening times, not by a test like this one' }]} testId="learners-plot" />
           <Note>Each line is one learner on one version of the test: the mean over your stream and 19 others, with the shaded band from the lowest to the highest of the 20 streams. The solid lines are the nonword test, the dashed lines the part-word test.</Note>
           <GroupLabel>Scores at the amounts you have run</GroupLabel>
-          <FixedLines lines={['learner, test'.padEnd(34) + amounts.map((a) => `${AMOUNTS_MIN[a] < 1 ? '0.5' : AMOUNTS_MIN[a]} min`.padStart(9)).join(''), ...LEARNERS.flatMap((l) => (['nonword', 'partword'] as const).map((t) => `${LEARNER_NAMES[l]}, ${t === 'nonword' ? 'nonwords' : 'part-words'}`.padEnd(34) + amounts.map((a) => `${mean(s.results.get(a)!.scores[l][t]).toFixed(1)}%`.padStart(9)).join('')))]} testId="learners-table" />
+          <FixedLines lines={['learner, test'.padEnd(34) + amounts.map((a) => `${AMOUNTS_MIN[a] < 1 ? '0.5' : AMOUNTS_MIN[a]} min`.padStart(9)).join(''), ...LEARNERS.flatMap((l) => (['nonword', 'partword'] as const).map((t) => `${LEARNER_NAMES[l]}, ${t === 'nonword' ? 'nonwords' : 'part-words'}`.padEnd(34) + amounts.map((a) => `${mean(s.scoresOf(s.results.get(a)!, l, t)).toFixed(1)}%`.padStart(9)).join('')))]} testId="learners-table" />
           <Note>The table shows each learner’s mean percentage correct over the 20 streams at each amount run so far; the adults scored 76% against nonwords and 65% against part-words after 21 minutes.</Note>
+          <GroupLabel>PARSER’s test rule</GroupLabel>
+          <div data-parser-rule={s.parserRule}>
+            <Choice value={s.parserRule} options={(Object.keys(PARSER_RULE_NAMES) as ParserRule[]).map((r) => ({ id: r, label: PARSER_RULE_NAMES[r] }))} onChange={(r) => s.setParserRule(r)} />
+          </div>
+          {PARSER_RULE_LINES.map((p) => (
+            <Note key={p.slice(0, 12)}>{p}</Note>
+          ))}
           <Content>{ADULTS_21_MINUTES_LINE}</Content>
           <Content>{INFANTS_MEASURED_DIFFERENTLY_LINE}</Content>
           <Note>{`The six nonwords: ${nonwords().map((f) => f.syllables.join('')).join(', ')}. The six part-words: ${partwords().map((f) => f.syllables.join('')).join(', ')}.`}</Note>
@@ -96,6 +105,7 @@ export function Step3Stage({ s }: { s: StreamStore }) {
         </Note>
       ))}
       {which === 'parser' && <ReferencePanel reference={reference('perruchet-1998')} />}
+      {which === 'parser' && <ReferencePanel reference={reference('perruchet-1998-speed')} />}
       {ran && (
         <>
           <ReferencePanel reference={reference('saffran-adults')} />

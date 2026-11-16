@@ -17,7 +17,7 @@ export const STEP1_AFTER_COMMIT = [
 export const PREDICTION_QUESTIONS = {
   partwords: { key: 'p2-s3-partwords', question: 'The test has two versions: each word against a nonword, a string of syllables from the language in an order never heard, or against a part-word, a string made of two syllables of a word plus one more. Will the part-word test be harder for the learners than the nonword test?', choices: ['harder', 'about the same', 'easier'] },
   reach76: { key: 'p2-s3-reach76', question: 'The adults in the original experiment scored 76% against nonwords after 21 minutes. At which amount of listening will the first learner, cut at the dips, first reach 76% against nonwords?', choices: ['30 seconds', '1 minute', '2 minutes', '4 minutes or more'] },
-  least: { key: 'p2-s3-least', question: 'Which of the learners will need the least listening to reach 76% against nonwords?', choices: ['cut at the dips', 'the simple recurrent network', 'they will tie'] },
+  least: { key: 'p2-s3-least', question: 'Which of the learners will need the least listening to reach 76% against nonwords?', choices: ['cut at the dips', 'the simple recurrent network', 'PARSER', 'they will tie'] },
 } as const
 
 export const LEARNER_NAMES = { dips: 'Cut at the dips', srn: 'A simple recurrent network', parser: 'PARSER' } as const
@@ -31,8 +31,20 @@ export const LEARNER_TEXT: Record<keyof typeof LEARNER_NAMES, string[]> = {
     'This learner is a simple recurrent network (§13.2.9). It takes in one syllable at a time, coded as one of 12 inputs, together with a copy of its own 12 hidden units’ activity from the syllable before, which is its context. Its 12 outputs are compared with the code of the next syllable, and the difference is passed back through the connections to move the weights, by the rule of Module 7: the network is trained to predict the next syllable, one pass through the stream, and the stream itself supplies the target.',
     'On the test, its score for a three-syllable string is minus its mean prediction error on the string’s second and third syllables: the string is fed in with the context reset to its starting value, and at each of the two later syllables the error is the sum over the 12 outputs of the squared difference between the output and the syllable’s code. Lower error is more word-like. Scoring moves no weight. It stores its weights and nothing else: it is never given the words.',
   ],
-  parser: ['PARSER (Perruchet and Vinter, 1998) is the third learner the lab plans. Its parameters come from the paper, which is not yet in the course library, so it is not built: the panel reads Reference pending.'],
+  parser: [
+    'This learner is PARSER (Perruchet and Vinter, 1998). It stores units, each with a weight. It starts with the 12 syllables as units, each at a weight of 1. It takes in the stream in small pieces: for each piece, a seeded draw sets how many units the piece covers, 1, 2, or 3. A unit covers the stream where it matches, if its weight is 1 or more; where several match, the longest is used; a syllable on its own always matches.',
+    'A piece of 2 or 3 units that is not yet a unit becomes a new unit at a weight of 1, and each unit inside it gains 0.5. A piece that is already a unit gains 0.5, and so does each unit inside it. A piece of one unit adds 0.5 to that unit. After every piece, every unit loses 0.05, and every unit that shares a syllable with the piece loses 0.005 more. A unit whose weight reaches 0 is dropped; the 12 syllables are never dropped. Pieces inside words recur more often than pieces across word boundaries, so the words come to be the strongest units, with no count and no probability. Every number here is the paper’s (pp. 250 to 252).',
+    'On the test, its score for a three-syllable string is the string’s weight as a unit, or 0 if the string is not a unit, and its choice is the string with the higher score. The paper scored its test by another rule, on the control under the table: the word is chosen if it is a unit with a weight above 1, and otherwise the choice is random (p. 256). It stores the units and their weights and nothing else: it is never given the words.',
+  ],
 }
+
+/** PARSER's two test rules on the control under the table: the spec's (§6.3) is the default. */
+export const PARSER_RULE_NAMES = { spec: 'Higher weight wins', paper: 'Known word wins, else random' } as const
+
+export const PARSER_RULE_LINES = [
+  'Under “Higher weight wins”, PARSER’s choice on each trial is the string with the higher weight as a unit, 0 for a string that is not a unit. Under “Known word wins, else random”, the paper’s rule, the word is chosen if it is a unit with a weight above 1, and otherwise the choice is random. Both rules score the same units from the same run; switching changes PARSER’s lines and rows and nothing else.',
+  'The two rules give different scores at the shorter amounts, from one store of units: a detail of how a test is scored changes the result.',
+]
 
 export const STEP3_PANEL = [
   'Each learner takes in the first so many syllables of your stream, the same stream Step 1 plays, and then takes the test. The slider sets how many: 30 seconds, 1, 2, 4, 7, 14, or 21 minutes of the language, which is 108, 216, 432, 864, 1,512, 3,024, or 4,536 syllables at 216 a minute. The same is done on 19 other streams of the same language, drawn from other seeds, and the plot shades the range over the 20 streams.',
