@@ -1,0 +1,146 @@
+[
+ {
+  "id": "object01",
+  "set": 0,
+  "fill": "#e4572e",
+  "pattern": "stripes"
+ },
+ {
+  "id": "object02",
+  "set": 0,
+  "fill": "#f3a712",
+  "pattern": "crosshatch"
+ },
+ {
+  "id": "object03",
+  "set": 0,
+  "fill": "#a8c256",
+  "pattern": "waves"
+ },
+ {
+  "id": "object04",
+  "set": 0,
+  "fill": "#3d9970",
+  "pattern": "checks"
+ },
+ {
+  "id": "object05",
+  "set": 0,
+  "fill": "#2bb3c0",
+  "pattern": "rings"
+ },
+ {
+  "id": "object06",
+  "set": 0,
+  "fill": "#3f7fd9",
+  "pattern": "dots"
+ },
+ {
+  "id": "object07",
+  "set": 0,
+  "fill": "#7b5ea7",
+  "pattern": "stripes"
+ },
+ {
+  "id": "object08",
+  "set": 0,
+  "fill": "#d64f9a",
+  "pattern": "crosshatch"
+ },
+ {
+  "id": "object09",
+  "set": 0,
+  "fill": "#c0a080",
+  "pattern": "waves"
+ },
+ {
+  "id": "object10",
+  "set": 0,
+  "fill": "#8fa3b5",
+  "pattern": "checks"
+ },
+ {
+  "id": "object11",
+  "set": 0,
+  "fill": "#f0e68c",
+  "pattern": "rings"
+ },
+ {
+  "id": "object12",
+  "set": 0,
+  "fill": "#ff8c69",
+  "pattern": "dots"
+ },
+ {
+  "id": "object13",
+  "set": 1,
+  "fill": "#e4572e",
+  "pattern": "dots"
+ },
+ {
+  "id": "object14",
+  "set": 1,
+  "fill": "#f3a712",
+  "pattern": "stripes"
+ },
+ {
+  "id": "object15",
+  "set": 1,
+  "fill": "#a8c256",
+  "pattern": "crosshatch"
+ },
+ {
+  "id": "object16",
+  "set": 1,
+  "fill": "#3d9970",
+  "pattern": "waves"
+ },
+ {
+  "id": "object17",
+  "set": 1,
+  "fill": "#2bb3c0",
+  "pattern": "checks"
+ },
+ {
+  "id": "object18",
+  "set": 1,
+  "fill": "#3f7fd9",
+  "pattern": "rings"
+ },
+ {
+  "id": "object19",
+  "set": 1,
+  "fill": "#7b5ea7",
+  "pattern": "dots"
+ },
+ {
+  "id": "object20",
+  "set": 1,
+  "fill": "#d64f9a",
+  "pattern": "stripes"
+ },
+ {
+  "id": "object21",
+  "set": 1,
+  "fill": "#c0a080",
+  "pattern": "crosshatch"
+ },
+ {
+  "id": "object22",
+  "set": 1,
+  "fill": "#8fa3b5",
+  "pattern": "waves"
+ },
+ {
+  "id": "object23",
+  "set": 1,
+  "fill": "#f0e68c",
+  "pattern": "checks"
+ },
+ {
+  "id": "object24",
+  "set": 1,
+  "fill": "#ff8c69",
+  "pattern": "rings"
+ }
+]

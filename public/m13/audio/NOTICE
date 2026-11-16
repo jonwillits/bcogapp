@@ -1,0 +1,11 @@
+Lab 13's sounds, objects, and data: how each was made, and under what license.
+
+Every sound in this folder was made by a computer program, offline, by the scripts in training/m13/ of the app repository. Nothing was recorded from a person.
+
+vowels/, continuum/, stream/: a cascade formant synthesizer of the design described by Klatt (1980), written for this lab (training/m13/klatt.py), licensed with the app (GPL-3.0-or-later). The continuum follows Liberman, Harris, Hoffman, and Griffith (1957), p. 359 and Fig. 1; the stream's syllables follow Saffran, Newport, and Aslin (1996), Experiment 1, p. 612.
+
+syllables/, tokens/, vot/, words/: the text-to-speech model Kokoro-82M (hexgrad/Kokoro-82M on Hugging Face), weights and voice packs under the Apache License 2.0 (the model card: "With Apache-licensed weights, Kokoro can be deployed anywhere"), driven by phoneme strings. The voices used are American English voice packs from that repository, named on screen only as voice 1 to voice 12. The pitch-shifted copies in tokens/ were made with Praat's overlap-add resynthesis through parselmouth (Praat: GPL-3.0; parselmouth: GPL-3.0).
+
+objects/: 24 shapes drawn by training/m13/make_objects.py, licensed with the app.
+
+realspeech.json: counts, a histogram, two shares, and about ten utterances derived from the CHILDES North American English corpora (MacWhinney, B. (2000). The CHILDES Project: Tools for Analyzing Talk, 3rd ed. Lawrence Erlbaum), data from TalkBank (talkbank.org), used under TalkBank's terms (CC BY-NC-SA 3.0). No transcript is shipped; the utterances shipped contain no personal names. Words were turned into syllables with the CMU Pronouncing Dictionary (cmudict 0.7b, Carnegie Mellon University, BSD-style license: see cmudict-LICENSE in this folder).

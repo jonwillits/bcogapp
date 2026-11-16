@@ -1,0 +1,216 @@
+{
+ "source": "Liberman, Harris, Hoffman and Griffith (1957), p. 359 and Fig. 1",
+ "steps": [
+  {
+   "step": 1,
+   "file": "step01.wav",
+   "f2Onset": 1320,
+   "f1Onset": 240,
+   "f1Steady": 360,
+   "f2Steady": 2160,
+   "f0": 120,
+   "durationS": 0.3,
+   "transitionS": 0.04,
+   "bandwidths": [
+    60,
+    90
+   ]
+  },
+  {
+   "step": 2,
+   "file": "step02.wav",
+   "f2Onset": 1440,
+   "f1Onset": 240,
+   "f1Steady": 360,
+   "f2Steady": 2160,
+   "f0": 120,
+   "durationS": 0.3,
+   "transitionS": 0.04,
+   "bandwidths": [
+    60,
+    90
+   ]
+  },
+  {
+   "step": 3,
+   "file": "step03.wav",
+   "f2Onset": 1560,
+   "f1Onset": 240,
+   "f1Steady": 360,
+   "f2Steady": 2160,
+   "f0": 120,
+   "durationS": 0.3,
+   "transitionS": 0.04,
+   "bandwidths": [
+    60,
+    90
+   ]
+  },
+  {
+   "step": 4,
+   "file": "step04.wav",
+   "f2Onset": 1680,
+   "f1Onset": 240,
+   "f1Steady": 360,
+   "f2Steady": 2160,
+   "f0": 120,
+   "durationS": 0.3,
+   "transitionS": 0.04,
+   "bandwidths": [
+    60,
+    90
+   ]
+  },
+  {
+   "step": 5,
+   "file": "step05.wav",
+   "f2Onset": 1800,
+   "f1Onset": 240,
+   "f1Steady": 360,
+   "f2Steady": 2160,
+   "f0": 120,
+   "durationS": 0.3,
+   "transitionS": 0.04,
+   "bandwidths": [
+    60,
+    90
+   ]
+  },
+  {
+   "step": 6,
+   "file": "step06.wav",
+   "f2Onset": 1920,
+   "f1Onset": 240,
+   "f1Steady": 360,
+   "f2Steady": 2160,
+   "f0": 120,
+   "durationS": 0.3,
+   "transitionS": 0.04,
+   "bandwidths": [
+    60,
+    90
+   ]
+  },
+  {
+   "step": 7,
+   "file": "step07.wav",
+   "f2Onset": 2040,
+   "f1Onset": 240,
+   "f1Steady": 360,
+   "f2Steady": 2160,
+   "f0": 120,
+   "durationS": 0.3,
+   "transitionS": 0.04,
+   "bandwidths": [
+    60,
+    90
+   ]
+  },
+  {
+   "step": 8,
+   "file": "step08.wav",
+   "f2Onset": 2160,
+   "f1Onset": 240,
+   "f1Steady": 360,
+   "f2Steady": 2160,
+   "f0": 120,
+   "durationS": 0.3,
+   "transitionS": 0.04,
+   "bandwidths": [
+    60,
+    90
+   ]
+  },
+  {
+   "step": 9,
+   "file": "step09.wav",
+   "f2Onset": 2280,
+   "f1Onset": 240,
+   "f1Steady": 360,
+   "f2Steady": 2160,
+   "f0": 120,
+   "durationS": 0.3,
+   "transitionS": 0.04,
+   "bandwidths": [
+    60,
+    90
+   ]
+  },
+  {
+   "step": 10,
+   "file": "step10.wav",
+   "f2Onset": 2400,
+   "f1Onset": 240,
+   "f1Steady": 360,
+   "f2Steady": 2160,
+   "f0": 120,
+   "durationS": 0.3,
+   "transitionS": 0.04,
+   "bandwidths": [
+    60,
+    90
+   ]
+  },
+  {
+   "step": 11,
+   "file": "step11.wav",
+   "f2Onset": 2520,
+   "f1Onset": 240,
+   "f1Steady": 360,
+   "f2Steady": 2160,
+   "f0": 120,
+   "durationS": 0.3,
+   "transitionS": 0.04,
+   "bandwidths": [
+    60,
+    90
+   ]
+  },
+  {
+   "step": 12,
+   "file": "step12.wav",
+   "f2Onset": 2640,
+   "f1Onset": 240,
+   "f1Steady": 360,
+   "f2Steady": 2160,
+   "f0": 120,
+   "durationS": 0.3,
+   "transitionS": 0.04,
+   "bandwidths": [
+    60,
+    90
+   ]
+  },
+  {
+   "step": 13,
+   "file": "step13.wav",
+   "f2Onset": 2760,
+   "f1Onset": 240,
+   "f1Steady": 360,
+   "f2Steady": 2160,
+   "f0": 120,
+   "durationS": 0.3,
+   "transitionS": 0.04,
+   "bandwidths": [
+    60,
+    90
+   ]
+  },
+  {
+   "step": 14,
+   "file": "step14.wav",
+   "f2Onset": 2880,
+   "f1Onset": 240,
+   "f1Steady": 360,
+   "f2Steady": 2160,
+   "f0": 120,
+   "durationS": 0.3,
+   "transitionS": 0.04,
+   "bandwidths": [
+    60,
+    90
+   ]
+  }
+ ],
+ "sampleRate": 16000
+}

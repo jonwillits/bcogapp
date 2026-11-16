@@ -1,0 +1,294 @@
+{
+ "source": "Saffran, Newport and Aslin (1996), Experiment 1, p. 612",
+ "words": [
+  "babupu",
+  "bupada",
+  "dutaba",
+  "patubi",
+  "pidabu",
+  "tutibu"
+ ],
+ "syllables": [
+  "pa",
+  "pi",
+  "pu",
+  "ta",
+  "ti",
+  "tu",
+  "ba",
+  "bi",
+  "bu",
+  "da",
+  "di",
+  "du"
+ ],
+ "syllablesPerMinute": 216,
+ "syllableS": 0.27778,
+ "lengthenS": 0.1,
+ "f0": 190,
+ "tractScale": 1.12,
+ "vowelFormants": {
+  "a": [
+   700,
+   1200,
+   2600,
+   3400
+  ],
+  "i": [
+   300,
+   2300,
+   3000,
+   3600
+  ],
+  "u": [
+   320,
+   850,
+   2300,
+   3300
+  ]
+ },
+ "f2Locus": {
+  "p": 900,
+  "b": 900,
+  "t": 1800,
+  "d": 1800
+ },
+ "f1Onset": 220,
+ "closureS": 0.06,
+ "transitionS": 0.045,
+ "votS": {
+  "p": 0.05,
+  "t": 0.055,
+  "b": 0.008,
+  "d": 0.01
+ },
+ "bandwidths": [
+  70,
+  100,
+  160,
+  220
+ ],
+ "plain": {
+  "pa": {
+   "file": "pa.wav",
+   "durationS": 0.2777,
+   "closureS": 0.06,
+   "votS": 0.05,
+   "transitionS": 0.045
+  },
+  "pi": {
+   "file": "pi.wav",
+   "durationS": 0.2777,
+   "closureS": 0.06,
+   "votS": 0.05,
+   "transitionS": 0.045
+  },
+  "pu": {
+   "file": "pu.wav",
+   "durationS": 0.2777,
+   "closureS": 0.06,
+   "votS": 0.05,
+   "transitionS": 0.045
+  },
+  "ta": {
+   "file": "ta.wav",
+   "durationS": 0.2777,
+   "closureS": 0.06,
+   "votS": 0.055,
+   "transitionS": 0.045
+  },
+  "ti": {
+   "file": "ti.wav",
+   "durationS": 0.2777,
+   "closureS": 0.06,
+   "votS": 0.055,
+   "transitionS": 0.045
+  },
+  "tu": {
+   "file": "tu.wav",
+   "durationS": 0.2777,
+   "closureS": 0.06,
+   "votS": 0.055,
+   "transitionS": 0.045
+  },
+  "ba": {
+   "file": "ba.wav",
+   "durationS": 0.2777,
+   "closureS": 0.06,
+   "votS": 0.008,
+   "transitionS": 0.045
+  },
+  "bi": {
+   "file": "bi.wav",
+   "durationS": 0.2777,
+   "closureS": 0.06,
+   "votS": 0.008,
+   "transitionS": 0.045
+  },
+  "bu": {
+   "file": "bu.wav",
+   "durationS": 0.2777,
+   "closureS": 0.06,
+   "votS": 0.008,
+   "transitionS": 0.045
+  },
+  "da": {
+   "file": "da.wav",
+   "durationS": 0.2777,
+   "closureS": 0.06,
+   "votS": 0.01,
+   "transitionS": 0.045
+  },
+  "di": {
+   "file": "di.wav",
+   "durationS": 0.2777,
+   "closureS": 0.06,
+   "votS": 0.01,
+   "transitionS": 0.045
+  },
+  "du": {
+   "file": "du.wav",
+   "durationS": 0.2777,
+   "closureS": 0.06,
+   "votS": 0.01,
+   "transitionS": 0.045
+  }
+ },
+ "long": {
+  "pa": {
+   "file": "pa_long.wav",
+   "durationS": 0.3777,
+   "closureS": 0.06,
+   "votS": 0.05,
+   "transitionS": 0.045
+  },
+  "pi": {
+   "file": "pi_long.wav",
+   "durationS": 0.3777,
+   "closureS": 0.06,
+   "votS": 0.05,
+   "transitionS": 0.045
+  },
+  "pu": {
+   "file": "pu_long.wav",
+   "durationS": 0.3777,
+   "closureS": 0.06,
+   "votS": 0.05,
+   "transitionS": 0.045
+  },
+  "ta": {
+   "file": "ta_long.wav",
+   "durationS": 0.3777,
+   "closureS": 0.06,
+   "votS": 0.055,
+   "transitionS": 0.045
+  },
+  "ti": {
+   "file": "ti_long.wav",
+   "durationS": 0.3777,
+   "closureS": 0.06,
+   "votS": 0.055,
+   "transitionS": 0.045
+  },
+  "tu": {
+   "file": "tu_long.wav",
+   "durationS": 0.3777,
+   "closureS": 0.06,
+   "votS": 0.055,
+   "transitionS": 0.045
+  },
+  "ba": {
+   "file": "ba_long.wav",
+   "durationS": 0.3777,
+   "closureS": 0.06,
+   "votS": 0.008,
+   "transitionS": 0.045
+  },
+  "bi": {
+   "file": "bi_long.wav",
+   "durationS": 0.3777,
+   "closureS": 0.06,
+   "votS": 0.008,
+   "transitionS": 0.045
+  },
+  "bu": {
+   "file": "bu_long.wav",
+   "durationS": 0.3777,
+   "closureS": 0.06,
+   "votS": 0.008,
+   "transitionS": 0.045
+  },
+  "da": {
+   "file": "da_long.wav",
+   "durationS": 0.3777,
+   "closureS": 0.06,
+   "votS": 0.01,
+   "transitionS": 0.045
+  },
+  "di": {
+   "file": "di_long.wav",
+   "durationS": 0.3777,
+   "closureS": 0.06,
+   "votS": 0.01,
+   "transitionS": 0.045
+  },
+  "du": {
+   "file": "du_long.wav",
+   "durationS": 0.3777,
+   "closureS": 0.06,
+   "votS": 0.01,
+   "transitionS": 0.045
+  }
+ },
+ "probe": {
+  "minutes": 21,
+  "syllables": 4536,
+  "seed": 2024,
+  "boundary": {
+   "duration": {
+    "mean": 0.2777500000000002,
+    "sd": 4.884040226172468e-14,
+    "n": 1512
+   },
+   "peak": {
+    "mean": 84.8931397302523,
+    "sd": 1.7993773422637227,
+    "n": 1512
+   },
+   "pitch": {
+    "mean": 191.03047736945445,
+    "sd": 0.38016391618153883,
+    "n": 1512
+   }
+  },
+  "inside": {
+   "duration": {
+    "mean": 0.2777499999999999,
+    "sd": 4.839788312173979e-14,
+    "n": 3024
+   },
+   "peak": {
+    "mean": 84.96033283055341,
+    "sd": 1.9619571986014035,
+    "n": 3024
+   },
+   "pitch": {
+    "mean": 191.10498561002964,
+    "sd": 0.4035718647620768,
+    "n": 3024
+   }
+  },
+  "difference": {
+   "duration": 3.3306690738754696e-16,
+   "peak": -0.06719310030111103,
+   "pitch": -0.07450824057519867
+  },
+  "tolerance": {
+   "durationS": 0.001,
+   "peakDb": 0.5,
+   "pitchHz": 1.0
+  },
+  "withinTolerance": true
+ },
+ "sampleRate": 16000
+}

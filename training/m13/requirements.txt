@@ -1,0 +1,12 @@
+# Pinned to what made the Lab 13 stimuli on 2026-11-15 (Python 3.12, macOS, Apple M5 Pro), in a venv outside Box and outside the repo's shipped files.
+torch==2.15.0
+numpy==2.5.5
+scipy==1.18.1
+soundfile==0.14.0
+praat-parselmouth==0.4.7
+kokoro==0.9.4
+misaki[en]==0.9.4
+cmudict==1.1.3
+pypdf==7.1.0
+pymupdf==2.1
+matplotlib==3.11.2

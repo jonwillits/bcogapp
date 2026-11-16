@@ -1,0 +1,140 @@
+{
+ "vowels": {
+  "ee": [
+   300,
+   2300,
+   3000,
+   3600
+  ],
+  "ah": [
+   700,
+   1200,
+   2600,
+   3400
+  ],
+  "oo": [
+   320,
+   850,
+   2300,
+   3300
+  ]
+ },
+ "bandwidths": [
+  60,
+  90,
+  150,
+  200
+ ],
+ "tractScale": 1.15,
+ "sounds": {
+  "ah_100": {
+   "file": "ah_100.wav",
+   "f0": 100,
+   "formants": [
+    700,
+    1200,
+    2600,
+    3400
+   ],
+   "bandwidths": [
+    60,
+    90,
+    150,
+    200
+   ],
+   "duration_s": 0.6,
+   "sampleRate": 16000
+  },
+  "ah_200": {
+   "file": "ah_200.wav",
+   "f0": 200,
+   "formants": [
+    700,
+    1200,
+    2600,
+    3400
+   ],
+   "bandwidths": [
+    60,
+    90,
+    150,
+    200
+   ],
+   "duration_s": 0.6,
+   "sampleRate": 16000
+  },
+  "ah_100_short": {
+   "file": "ah_100_short.wav",
+   "f0": 100,
+   "formants": [
+    805,
+    1380,
+    2990,
+    3910
+   ],
+   "bandwidths": [
+    60,
+    90,
+    150,
+    200
+   ],
+   "duration_s": 0.6,
+   "sampleRate": 16000,
+   "tractScale": 1.15
+  },
+  "ee_120": {
+   "file": "ee_120.wav",
+   "f0": 120,
+   "formants": [
+    300,
+    2300,
+    3000,
+    3600
+   ],
+   "bandwidths": [
+    60,
+    90,
+    150,
+    200
+   ],
+   "duration_s": 0.6,
+   "sampleRate": 16000
+  },
+  "ah_120": {
+   "file": "ah_120.wav",
+   "f0": 120,
+   "formants": [
+    700,
+    1200,
+    2600,
+    3400
+   ],
+   "bandwidths": [
+    60,
+    90,
+    150,
+    200
+   ],
+   "duration_s": 0.6,
+   "sampleRate": 16000
+  },
+  "oo_120": {
+   "file": "oo_120.wav",
+   "f0": 120,
+   "formants": [
+    320,
+    850,
+    2300,
+    3300
+   ],
+   "bandwidths": [
+    60,
+    90,
+    150,
+    200
+   ],
+   "duration_s": 0.6,
+   "sampleRate": 16000
+  }
+ }
+}
