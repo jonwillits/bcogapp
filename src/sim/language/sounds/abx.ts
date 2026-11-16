@@ -1,0 +1,130 @@
+import type { Rng } from '../../random'
+
+/**
+ * Part 1, Step 3's design and analysis (spec §5.3), after Liberman, Harris,
+ * Hoffman and Griffith (1957).
+ *
+ *   Block 1, labeling: each of the 14 sounds 6 times, in 6 shuffled rounds
+ *   of 14: 84 trials. The original's interval was 6 s (p. 360); this step
+ *   plays the next sound 800 ms after the answer.
+ *   Block 2, telling apart: ABX triads over the 12 two-step pairs (1, 3) to
+ *   (12, 14), each in the four orders ABA, ABB, BAA, BAB: 48 triads in a
+ *   seeded order, the sounds of a triad 1 s apart (p. 360).
+ *
+ * The analysis: labeling curves (the share of each sound's 6 presentations
+ * labeled b, d, g); discrimination (the share of each pair's 4 triads
+ * correct); the discrimination predicted from the labels alone, by the
+ * paper's formula (pp. 362–363); and where the curves cross.
+ */
+
+export const STEPS = 14
+export const LABELING_ROUNDS = 6
+export const LABELING_GAP_MS = 800
+export const PAIRS: [number, number][] = Array.from({ length: 12 }, (_, i) => [i + 1, i + 3])
+export const ORDERS = ['ABA', 'ABB', 'BAA', 'BAB'] as const
+export type Order = (typeof ORDERS)[number]
+export const TRIAD_INTERVAL_S = 1.0
+export type Label = 'b' | 'd' | 'g'
+export const LABELS: Label[] = ['b', 'd', 'g']
+
+function shuffle<T>(rng: Rng, xs: T[]): T[] {
+  const a = xs.slice()
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = rng.int(i + 1)
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
+/** The 84 labeling trials: 6 rounds, each a shuffle of the 14 steps (1-based). */
+export function labelingTrials(rng: Rng): number[] {
+  const out: number[] = []
+  for (let r = 0; r < LABELING_ROUNDS; r++) out.push(...shuffle(rng, Array.from({ length: STEPS }, (_, i) => i + 1)))
+  return out
+}
+
+export interface Triad {
+  pair: [number, number]
+  order: Order
+  /** The three sounds, in the order played. */
+  sounds: [number, number, number]
+  /** Whether X matched the first sound. */
+  xIsFirst: boolean
+}
+
+export function triadOf(pair: [number, number], order: Order): Triad {
+  const [a, b] = pair
+  const sounds: [number, number, number] = order === 'ABA' ? [a, b, a] : order === 'ABB' ? [a, b, b] : order === 'BAA' ? [b, a, a] : [b, a, b]
+  return { pair, order, sounds, xIsFirst: order === 'ABA' || order === 'BAB' }
+}
+
+/** The 48 triads in a seeded order. */
+export function abxTrials(rng: Rng): Triad[] {
+  const all: Triad[] = []
+  for (const p of PAIRS) for (const o of ORDERS) all.push(triadOf(p, o))
+  return shuffle(rng, all)
+}
+
+/** The labeling curves: for each step 1 to 14, the share of its presentations labeled b, d, g. */
+export function labelingCurves(trials: readonly number[], answers: readonly Label[]): Record<Label, number[]> {
+  const counts: Record<Label, number[]> = { b: Array(STEPS).fill(0), d: Array(STEPS).fill(0), g: Array(STEPS).fill(0) }
+  const n = Array(STEPS).fill(0)
+  trials.forEach((step, i) => {
+    const a = answers[i]
+    if (!a) return
+    counts[a][step - 1]++
+    n[step - 1]++
+  })
+  const share = (l: Label) => counts[l].map((c, k) => (n[k] ? c / n[k] : 0))
+  return { b: share('b'), d: share('d'), g: share('g') }
+}
+
+/** Discrimination: for each two-step pair, the share of its triads answered correctly; plotted at the pair's middle step. */
+export function discrimination(trials: readonly Triad[], answers: readonly ('first' | 'second')[]): { middle: number; correct: number; n: number }[] {
+  return PAIRS.map(([a, b]) => {
+    let correct = 0
+    let n = 0
+    trials.forEach((t, i) => {
+      if (t.pair[0] !== a || !answers[i]) return
+      n++
+      if ((answers[i] === 'first') === t.xIsFirst) correct++
+    })
+    return { middle: (a + b) / 2, correct: n ? correct / n : 0, n }
+  })
+}
+
+/**
+ * The discrimination predicted from the labels alone (pp. 362–363). For a
+ * pair of sounds A and B, with p the shares of A's labels and p′ of B's:
+ *
+ *   predicted = 1/2 + 1/4 · [ (p_b − p′_b)² + (p_d − p′_d)² + (p_g − p′_g)² ]
+ *
+ * which is the paper's average over the ABA and ABB orders of
+ * P Corr = 1·P_R + 0·P_W + ½·P_I, where P_R is the chance of hearing a
+ * sequence that leads to a correct discrimination, P_W one that leads to a
+ * wrong one, and P_I one that leads to either equally often. Identical
+ * labels give 50%; labels that never agree give 100%, as for the paper's
+ * two example pairs.
+ */
+export function predictedFromLabels(p: Record<Label, number>, q: Record<Label, number>): number {
+  let s = 0
+  for (const l of LABELS) s += (p[l] - q[l]) ** 2
+  return 0.5 + 0.25 * s
+}
+
+export function predictedCurve(curves: Record<Label, number[]>): { middle: number; predicted: number }[] {
+  return PAIRS.map(([a, b]) => ({ middle: (a + b) / 2, predicted: predictedFromLabels({ b: curves.b[a - 1], d: curves.d[a - 1], g: curves.g[a - 1] }, { b: curves.b[b - 1], d: curves.d[b - 1], g: curves.g[b - 1] }) }))
+}
+
+/** Where two labeling curves cross: the first step at which the second curve rises to meet or pass the first, as a fractional step by linear interpolation; null if they never cross. */
+export function crossing(first: number[], second: number[]): number | null {
+  for (let k = 0; k + 1 < first.length; k++) {
+    const d0 = first[k] - second[k]
+    const d1 = first[k + 1] - second[k + 1]
+    if (d0 > 0 && d1 <= 0) {
+      const t = d0 / (d0 - d1)
+      return k + 1 + t
+    }
+  }
+  return null
+}

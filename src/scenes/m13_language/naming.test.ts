@@ -49,7 +49,7 @@ const P1_STEP3_FORBIDDEN = /categor|\bboundar|\bwithin\b|\bacross\b|predicted fr
 const P1_STEP4_BEFORE_STEP3 = /\bsharp|\bgradual|where (the )?labels change|abrupt/i
 const P1_FILES = (p: string) => p.includes('/sounds/') || p.includes('PartSounds') || p.includes('/sim/language/sounds/')
 const P1_STEP2_REVEAL = /\/sounds\/(Reveal|LabelsReveal)\.tsx$|\/sim\/language\/sounds\/syllables\.ts$|\/sim\/language\/references\.ts$/
-const P1_STEP3_REVEAL = /\/sounds\/(Reveal|Step3Reveal|AfterStep3)\.tsx$|\/sim\/language\/sounds\/liberman\.ts$|\/sim\/language\/references\.ts$/
+const P1_STEP3_REVEAL = /\/sounds\/(Reveal|Step3Reveal)\.tsx$|\/sounds\/afterStep3\.ts$|\/sim\/language\/sounds\/abx\.ts$|\/sim\/language\/references\.ts$/
 // Part 2
 const P2_STEP1_FORBIDDEN = /transitional|probabilit|statistic|\bfollow|\bpredict(s|ed|ing|able|or)?\b|\bsix\b/i
 const P2_PRE_COMMIT_FILES = /\/stream\/(screens|store)\.ts$|PartStream\.tsx$|\/ui\.tsx$/
@@ -106,14 +106,15 @@ describe('nothing before Part 3, Step 2’s end names what Part 3 tests (§11, i
   it('no Part 3 file outside Step 3 and the reveal holds a held-back word in a visible string', () => {
     for (const [path, src] of all) {
       if (!P3_FILES(path) || P3_AFTER.test(path)) continue
-      const hits = hitsIn(path, src, P3_FORBIDDEN, (l) => /^p3-/.test(l) || /^Step 3 — /.test(l))
+      // The two model identifiers, as bare literals, are the store's keys, never printed.
+      const hits = hitsIn(path, src, P3_FORBIDDEN, (l) => /^p3-/.test(l) || /^Step 3 — /.test(l) || /^(tally|guessCheck)$/.test(l))
       expect(hits, `${path}: ${hits.join(' | ')}`).toEqual([])
     }
   })
   it('nowhere in the lab, outside Part 3’s Step 3, its reveal and the references, is tallying, a hypothesis, propose, the previous time, or one of the four authors named', () => {
     for (const [path, src] of all) {
       if (P3_AFTER.test(path)) continue
-      const hits = hitsIn(path, src, P3_GLOBAL_FORBIDDEN, (l) => /^p3-/.test(l) || /^Step 3 — /.test(l))
+      const hits = hitsIn(path, src, P3_GLOBAL_FORBIDDEN, (l) => /^p3-/.test(l) || /^Step 3 — /.test(l) || /^(tally|guessCheck)$/.test(l))
       expect(hits, `${path}: ${hits.join(' | ')}`).toEqual([])
     }
   })

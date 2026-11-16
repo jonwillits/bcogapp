@@ -1,23 +1,127 @@
+import { makeRng } from '../../../sim/random'
 import type { ProgressStore } from '../../../sim/language/progress/store'
 import type { UnitId } from '../../../sim/language/parts'
+import type { View } from '../../../sim/language/audio/spectrogram'
+import { player } from '../../../sim/language/audio/player'
+import { bufferFrom, type Clip } from '../../../sim/language/audio/clips'
+import { abxTrials, labelingTrials, LABELING_GAP_MS, TRIAD_INTERVAL_S, type Label as Lbl, type Triad } from '../../../sim/language/sounds/abx'
+import { accuracy, confusion, forward, makeClassifier, shares, splitOnePitch, splitOneVoice, splitRun1, train, PASSES, type Classifier, type Token } from '../../../sim/language/sounds/classifier'
 import { StepStore } from '../steps'
 import type { Step } from './screens'
+import { RUN3_AFTER_STEP3 } from './afterStep3'
+import { continuumClip, continuumPatch, loadContinuum, loadTts, loadVowels, syllableClip, tokenPatches, tokensClip, votClip, vowelClip, SIX_ORDER, type Continuum, type Six, type Tts, type Vowels } from './assets'
 
 /**
  * Part 1's state (spec §5): four steps, each opening on its instruction
  * screen and each independently accessible. Step 2 is one unit (the six
- * labels, from the first label to the commit); Step 3 is two units, one per
- * block, the second started by the student's press after the first is
- * saved; Steps 1 and 4 are explorations whose predictions stay committed.
+ * labels, from the first label to the commit); Step 3 is two units, one
+ * per block, each a timed block in real time that stops when the page is
+ * hidden or loses focus; Steps 1 and 4 are explorations whose predictions
+ * stay committed. Every sound is decoded before its step's first trial
+ * (`ensureLoaded`), and played on the Web Audio clock (`player`).
  */
 
 export const LABELS_UNIT: UnitId = 'p1-labels'
 export const LABELING_UNIT: UnitId = 'p1-labeling'
 export const ABX_UNIT: UnitId = 'p1-abx'
 
+export type TourScreen = 'time' | 'frequency' | 'energy' | 'patterns' | 'pitch' | 'voice' | 'vowels'
+export const TOUR: TourScreen[] = ['time', 'frequency', 'energy', 'patterns', 'pitch', 'voice', 'vowels']
+
+export const PREDICTIONS = {
+  pitch: { key: 'p1-s1-pitch', question: 'When the pitch of the vowel goes up from 100 Hz to 200 Hz, what will move on the spectrogram?', choices: ['the harmonics', 'the formants', 'both', 'neither'] },
+  run1: { key: 'p1-s4-run1', question: 'Trained on ten voices and tested on the two voices it never learned from, what percentage of the held-out syllables will the network label correctly? Chance is 33%.', choices: ['under 50%', '50% to 75%', '75% to 90%', 'over 90%'] },
+  run2: { key: 'p1-s4-run2', question: 'Trained on one pitch only, or on one voice only, and tested on all the rest, will the percentage correct be higher than, about the same as, or lower than in run 1?', choices: ['higher', 'about the same', 'lower'] },
+  run3: { key: 'p1-s4-run3', question: 'Run on the 14 synthetic sounds of Step 3, in what order will the network’s most likely label change from the first sound to the fourteenth?', choices: ['b, then d, then g', 'another order', 'one label for all 14'] },
+  // Asked instead of run3's when Step 3 is done (spec §5.4; §11, item 2): the wording is in afterStep3.ts.
+  run3After: RUN3_AFTER_STEP3,
+} as const
+export type PredictionKey = keyof typeof PREDICTIONS
+
+export interface LabelsResult {
+  order: Six[]
+  labels: Record<Six, 'b' | 'd'>
+  correct: number
+  seconds: number
+  restarts: number
+}
+export interface LabelingResult {
+  trials: number[]
+  answers: Lbl[]
+  seconds: number[]
+  restarts: number
+}
+export interface AbxResult {
+  trials: Triad[]
+  answers: ('first' | 'second')[]
+  seconds: number[]
+  restarts: number
+}
+
+export type Block =
+  | { kind: 'labeling'; trials: number[]; answers: Lbl[]; i: number; phase: 'waiting' | 'playing' | 'answer'; seconds: number[]; restarts: number }
+  | { kind: 'abx'; trials: Triad[]; answers: ('first' | 'second')[]; i: number; phase: 'waiting' | 'playing' | 'answer'; seconds: number[]; restarts: number }
+
+export interface RunState {
+  state: 'idle' | 'training' | 'done'
+  curve: number[]
+  accuracy: number | null
+  confusion: number[][] | null
+  pass: number
+  trainingSize: number
+  testSize: number
+  net: Classifier | null
+}
+
 export class SoundsStore extends StepStore<Step> {
+  // Loading
+  vowels: Vowels | null = null
+  continuum: Continuum | null = null
+  tts: Tts | null = null
+  clips = new Map<string, Clip>()
+  loadingFor = new Set<string>()
+  loaded = new Set<string>()
+  loadError: string | null = null
+  tokens: Token[] | null = null
+  tokenProgress = 0
+  continuumPatches: Float32Array[] | null = null
+
+  // Step 1
+  tour: TourScreen = 'time'
+  view: View = 'wide'
+  drafts: Partial<Record<PredictionKey, string>> = {}
+  /** What is playing: the clip key and its start and end on the audio clock. */
+  playing: { key: string; start: number; end: number } | null = null
+
+  // Step 2
+  readonly sixOrder: Six[]
+  labels: Partial<Record<Six, 'b' | 'd'>> = {}
+  labelsStarted = 0
+  showVot = false
+
+  // Step 3
+  block: Block | null = null
+  blockStopped: string | null = null
+  private timers: ReturnType<typeof setTimeout>[] = []
+
+  // Step 4
+  run1: RunState = { state: 'idle', curve: [], accuracy: null, confusion: null, pass: 0, trainingSize: 0, testSize: 0, net: null }
+  run2: RunState & { which: 'pitch' | 'voice' | null } = { state: 'idle', curve: [], accuracy: null, confusion: null, pass: 0, trainingSize: 0, testSize: 0, net: null, which: null }
+  run3: { state: 'idle' | 'done'; shares: number[][] | null } = { state: 'idle', shares: null }
+  private trainSeed = 0
+
   constructor(seed: number, progress: ProgressStore) {
     super(seed, progress, [1, 2, 3, 4])
+    const rng = makeRng(seed ^ 0x51a)
+    const order = [...SIX_ORDER]
+    for (let i = order.length - 1; i > 0; i--) {
+      const j = rng.int(i + 1)
+      ;[order[i], order[j]] = [order[j], order[i]]
+    }
+    // A restarted unit gets a new order: the restart count turns the shuffle.
+    for (let r = 0; r < progress.restarts(LABELS_UNIT); r++) order.push(order.shift()!)
+    this.sixOrder = order
+    this.trainSeed = seed ^ 0x7ab
   }
 
   isDone(step: Step): boolean {
@@ -27,11 +131,375 @@ export class SoundsStore extends StepStore<Step> {
   }
 
   protected underWay(step: Step): boolean {
-    // Between the two blocks of Step 3, the step is running: block 1 is saved and block 2 waits for its press.
     return step === 3 && this.progress.isComplete(LABELING_UNIT) && !this.progress.isComplete(ABX_UNIT)
   }
 
   get betweenBlocks(): boolean {
-    return this.underWay(3) && !this.opened.has(3)
+    return this.step === 3 && this.progress.isComplete(LABELING_UNIT) && !this.progress.isComplete(ABX_UNIT) && this.block === null
+  }
+
+  protected onOpen(): void {
+    this.stopBlock(null)
+    player.stop()
+    this.playing = null
+  }
+
+  protected onBegin(step: Step): void {
+    void this.ensureLoaded(step)
+    if (step === 2 && !this.progress.isComplete(LABELS_UNIT)) {
+      if (this.progress.status(LABELS_UNIT) !== 'in progress') this.progress.begin(LABELS_UNIT)
+      this.labelsStarted = performance.now()
+    }
+    if (step === 3) this.startNextBlock()
+  }
+
+  // ------------------------------------------------------------ loading
+
+  /** Decode a step's sounds before its first trial; `changed()` when done. */
+  async ensureLoaded(step: Step): Promise<void> {
+    const key = `step${step}`
+    if (this.loaded.has(key) || this.loadingFor.has(key)) return
+    this.loadingFor.add(key)
+    this.changed()
+    const ctx = player.ensure()
+    try {
+      if (step === 1) {
+        this.vowels = this.vowels ?? (await loadVowels())
+        for (const [k, s] of Object.entries(this.vowels.sounds)) this.clips.set(`vowel:${k}`, await vowelClip(s.file, ctx))
+      } else if (step === 2) {
+        this.tts = this.tts ?? (await loadTts())
+        for (const k of SIX_ORDER) this.clips.set(`six:${k}`, await syllableClip(this.tts.six[k].file, ctx))
+        for (const [k, v] of Object.entries(this.tts.vot)) this.clips.set(`vot:${k}`, await votClip(v.file, ctx))
+      } else if (step === 3) {
+        this.continuum = this.continuum ?? (await loadContinuum())
+        for (const s of this.continuum.steps) this.clips.set(`cont:${s.step}`, await continuumClip(s.file, ctx))
+      } else {
+        this.tts = this.tts ?? (await loadTts())
+        this.continuum = this.continuum ?? (await loadContinuum())
+        const tk = await tokensClip(ctx)
+        this.clips.set('tokens', tk)
+        this.tokens = await tokenPatches(tk, this.tts.tokens.tokens, (n) => {
+          this.tokenProgress = n
+          this.changed()
+        })
+        const steps: Float32Array[] = []
+        for (const s of this.continuum.steps) {
+          const c = await continuumClip(s.file, ctx)
+          this.clips.set(`cont:${s.step}`, c)
+          steps.push(continuumPatch(c))
+        }
+        this.continuumPatches = steps
+      }
+      this.loaded.add(key)
+    } catch (e) {
+      this.loadError = `A sound file could not be loaded: ${String(e)}`
+    } finally {
+      this.loadingFor.delete(key)
+      this.changed()
+    }
+  }
+
+  isLoaded(step: Step): boolean {
+    return this.loaded.has(`step${step}`)
+  }
+
+  clip(key: string): Clip | null {
+    return this.clips.get(key) ?? null
+  }
+
+  // ------------------------------------------------------------ playback
+
+  /** Play one clip now; the cursor follows the audio clock. */
+  play(key: string): void {
+    const c = this.clips.get(key)
+    if (!c) return
+    const ctx = player.ensure()
+    if (!ctx) return
+    const buffer = c.buffer ?? bufferFrom(ctx, c.samples, c.sampleRate)
+    const r = player.play(buffer)
+    this.playing = { key, start: r.start, end: r.end }
+    this.changed()
+    this.after((r.end - ctx.currentTime) * 1000 + 50, () => {
+      if (this.playing?.key === key) this.playing = null
+      this.changed()
+    })
+  }
+
+  /** Play a token from the one tokens file: a short buffer cut from it. */
+  playToken(i: number): void {
+    const c = this.clips.get('tokens')
+    const t = this.tts?.tokens.tokens[i]
+    if (!c || !t) return
+    const ctx = player.ensure()
+    if (!ctx) return
+    const r = player.play(bufferFrom(ctx, c.samples.slice(t.start, t.start + t.length), c.sampleRate))
+    this.playing = { key: `token:${i}`, start: r.start, end: r.end }
+    this.changed()
+  }
+
+  /** The cursor's position in a clip, from the audio clock; null when it is not playing. */
+  cursorIn(key: string): number | null {
+    if (!this.playing || this.playing.key !== key) return null
+    const t = player.now() - this.playing.start
+    return t < 0 || t > this.playing.end - this.playing.start ? null : t
+  }
+
+  private after(ms: number, fn: () => void): void {
+    const id = setTimeout(() => {
+      this.timers = this.timers.filter((t) => t !== id)
+      fn()
+    }, Math.max(0, ms))
+    this.timers.push(id)
+  }
+
+  private clearTimers(): void {
+    for (const t of this.timers) clearTimeout(t)
+    this.timers = []
+  }
+
+  // ------------------------------------------------------------ Step 1
+
+  goTour(s: TourScreen): void {
+    this.tour = s
+    this.changed()
+  }
+  tourNext(): void {
+    const i = TOUR.indexOf(this.tour)
+    if (i + 1 < TOUR.length) this.goTour(TOUR[i + 1])
+  }
+  tourBack(): void {
+    const i = TOUR.indexOf(this.tour)
+    if (i > 0) this.goTour(TOUR[i - 1])
+  }
+  setView(v: View): void {
+    this.view = v
+    this.changed()
+  }
+  draft(k: PredictionKey, v: string): void {
+    this.drafts[k] = v
+    this.changed()
+  }
+  predicted(k: PredictionKey): string | null {
+    return this.progress.prediction(PREDICTIONS[k].key)
+  }
+  commit(k: PredictionKey): void {
+    const v = this.drafts[k]
+    if (!v) return
+    this.progress.commitPrediction(PREDICTIONS[k].key, v)
+    this.changed()
+  }
+
+  // ------------------------------------------------------------ Step 2
+
+  setLabel(s: Six, l: 'b' | 'd'): void {
+    if (this.progress.isComplete(LABELS_UNIT)) return
+    this.labels[s] = l
+    this.changed()
+  }
+  get allLabeled(): boolean {
+    return SIX_ORDER.every((s) => this.labels[s])
+  }
+  commitLabels(): void {
+    if (!this.allLabeled || this.progress.isComplete(LABELS_UNIT)) return
+    const labels = { ...this.labels } as Record<Six, 'b' | 'd'>
+    const correct = SIX_ORDER.filter((s) => labels[s] === s[0]).length
+    const result: LabelsResult = { order: this.sixOrder, labels, correct, seconds: (performance.now() - this.labelsStarted) / 1000, restarts: this.progress.restarts(LABELS_UNIT) }
+    this.progress.complete(LABELS_UNIT, result)
+    this.changed()
+  }
+  labelsResult(): LabelsResult | null {
+    return (this.progress.result(LABELS_UNIT) as LabelsResult | undefined) ?? null
+  }
+  toggleVot(): void {
+    this.showVot = !this.showVot
+    this.changed()
+  }
+
+  // ------------------------------------------------------------ Step 3
+
+  /** Start the block that is not yet done: labeling first, then telling apart; the second only on the student's press. */
+  startNextBlock(): void {
+    if (!this.progress.isComplete(LABELING_UNIT)) this.beginBlock('labeling')
+  }
+  startBlock2(): void {
+    if (this.progress.isComplete(LABELING_UNIT) && !this.progress.isComplete(ABX_UNIT)) this.beginBlock('abx')
+  }
+
+  private beginBlock(kind: 'labeling' | 'abx'): void {
+    const unit = kind === 'labeling' ? LABELING_UNIT : ABX_UNIT
+    const restarts = this.progress.restarts(unit) + (this.block?.restarts ?? 0)
+    if (this.progress.status(unit) !== 'in progress') this.progress.begin(unit)
+    const rng = makeRng((this.seed ^ (kind === 'labeling' ? 0x1ab : 0xabc)) + restarts * 101)
+    this.block = kind === 'labeling' ? { kind, trials: labelingTrials(rng), answers: [], i: 0, phase: 'waiting', seconds: [], restarts } : { kind, trials: abxTrials(rng), answers: [], i: 0, phase: 'waiting', seconds: [], restarts }
+    this.blockStopped = null
+    this.changed()
+    void this.ensureLoaded(3).then(() => this.playTrial())
+  }
+
+  private trialStart = 0
+
+  /** Play the current trial's sound or triad on the audio clock; the answer buttons appear when the last sound ends. */
+  private playTrial(): void {
+    const b = this.block
+    if (!b || b.phase !== 'waiting' || !this.isLoaded(3)) return
+    const ctx = player.ensure()
+    if (!ctx) return
+    b.phase = 'playing'
+    const buf = (step: number) => {
+      const c = this.clips.get(`cont:${step}`)!
+      return c.buffer ?? bufferFrom(ctx, c.samples, c.sampleRate)
+    }
+    let end: number
+    if (b.kind === 'labeling') {
+      const r = player.play(buf(b.trials[b.i]))
+      end = r.end
+      this.playing = { key: `cont:${b.trials[b.i]}`, start: r.start, end: r.end }
+    } else {
+      const t = b.trials[b.i]
+      const items: { buffer: AudioBuffer; offsetS: number }[] = []
+      let off = 0
+      for (const s of t.sounds) {
+        const bb = buf(s)
+        items.push({ buffer: bb, offsetS: off })
+        off += bb.duration + TRIAD_INTERVAL_S
+      }
+      const r = player.playSequence(items)
+      end = r.end
+      this.playing = { key: 'triad', start: r.start, end: r.end }
+    }
+    this.changed()
+    this.after((end - ctx.currentTime) * 1000, () => {
+      if (this.block !== b || b.phase !== 'playing') return
+      b.phase = 'answer'
+      this.trialStart = performance.now()
+      this.playing = null
+      this.changed()
+    })
+  }
+
+  /** The student's answer: B, D or G in block 1; first or second in block 2. */
+  answer(a: Lbl | 'first' | 'second'): void {
+    const b = this.block
+    if (!b || b.phase !== 'answer') return
+    const seconds = (performance.now() - this.trialStart) / 1000
+    if (b.kind === 'labeling') {
+      if (a !== 'b' && a !== 'd' && a !== 'g') return
+      b.answers.push(a)
+    } else {
+      if (a !== 'first' && a !== 'second') return
+      b.answers.push(a)
+    }
+    b.seconds.push(seconds)
+    b.i++
+    if (b.i >= b.trials.length) {
+      this.finishBlock()
+      return
+    }
+    b.phase = 'waiting'
+    this.changed()
+    // The next sound plays 800 ms after the answer in block 1; in block 2 the next triad starts after the same gap.
+    this.after(LABELING_GAP_MS, () => this.playTrial())
+  }
+
+  private finishBlock(): void {
+    const b = this.block!
+    if (b.kind === 'labeling') {
+      const result: LabelingResult = { trials: b.trials, answers: b.answers, seconds: b.seconds, restarts: b.restarts }
+      this.progress.complete(LABELING_UNIT, result)
+    } else {
+      const result: AbxResult = { trials: b.trials, answers: b.answers, seconds: b.seconds, restarts: b.restarts }
+      this.progress.complete(ABX_UNIT, result)
+    }
+    this.block = null
+    this.changed()
+  }
+
+  /** The page was hidden or lost focus during a block: the block stops, and starts again from its first trial on the student's press (LAB_COMMON_FEATURES §7). */
+  stopBlock(reason: string | null): void {
+    if (!this.block) return
+    this.clearTimers()
+    player.stop()
+    this.playing = null
+    if (reason) {
+      this.blockStopped = reason
+      this.block = { ...this.block, phase: 'waiting', i: 0, answers: [], seconds: [], restarts: this.block.restarts + 1 } as Block
+      // The restart is recorded in the block; the trials are redrawn when it starts again.
+      const kind = this.block.kind
+      const restarts = this.block.restarts
+      this.block = null
+      this.pendingRestart = { kind, restarts }
+    } else this.block = null
+    this.changed()
+  }
+  private pendingRestart: { kind: 'labeling' | 'abx'; restarts: number } | null = null
+
+  /** Start again after a stop. */
+  startAgain(): void {
+    const p = this.pendingRestart
+    if (!p) return
+    this.pendingRestart = null
+    this.blockStopped = null
+    const unit = p.kind === 'labeling' ? LABELING_UNIT : ABX_UNIT
+    const rng = makeRng((this.seed ^ (p.kind === 'labeling' ? 0x1ab : 0xabc)) + (this.progress.restarts(unit) + p.restarts) * 101)
+    this.block = p.kind === 'labeling' ? { kind: 'labeling', trials: labelingTrials(rng), answers: [], i: 0, phase: 'waiting', seconds: [], restarts: p.restarts } : { kind: 'abx', trials: abxTrials(rng), answers: [], i: 0, phase: 'waiting', seconds: [], restarts: p.restarts }
+    this.changed()
+    void this.ensureLoaded(3).then(() => this.playTrial())
+  }
+
+  labelingResult(): LabelingResult | null {
+    return (this.progress.result(LABELING_UNIT) as LabelingResult | undefined) ?? null
+  }
+  abxResult(): AbxResult | null {
+    return (this.progress.result(ABX_UNIT) as AbxResult | undefined) ?? null
+  }
+
+  // ------------------------------------------------------------ Step 4
+
+  private async trainRun(run: RunState, training: Token[], test: Token[], seed: number): Promise<void> {
+    run.state = 'training'
+    run.curve = []
+    run.accuracy = null
+    run.confusion = null
+    run.pass = 0
+    run.trainingSize = training.length
+    run.testSize = test.length
+    const net = makeClassifier(seed)
+    run.net = net
+    this.changed()
+    // One pass per slice, so that the main thread is free between passes and the curve draws as it rises.
+    for (let p = 0; p < PASSES; p++) {
+      await new Promise((r) => setTimeout(r, 0))
+      train(net, training, test, seed + p * 17, 1, undefined, undefined)
+      run.curve.push(net.curve[net.curve.length - 1])
+      run.pass = p + 1
+      this.changed()
+    }
+    run.accuracy = accuracy(net, test)
+    run.confusion = confusion(net, test)
+    run.state = 'done'
+    this.changed()
+  }
+
+  get heldOut(): number[] {
+    return this.tts?.tokens.heldOutVoices ?? []
+  }
+
+  train1(): void {
+    if (!this.tokens || !this.predicted('run1') || this.run1.state === 'training') return
+    const { training, test } = splitRun1(this.tokens, this.heldOut)
+    this.trainSeed += 1
+    void this.trainRun(this.run1, training, test, this.trainSeed)
+  }
+  train2(which: 'pitch' | 'voice'): void {
+    if (!this.tokens || !this.predicted('run2') || this.run2.state === 'training') return
+    const { training, test } = which === 'pitch' ? splitOnePitch(this.tokens, this.heldOut) : splitOneVoice(this.tokens, 1)
+    this.run2.which = which
+    this.trainSeed += 1
+    void this.trainRun(this.run2, training, test, this.trainSeed)
+  }
+  run3Now(): void {
+    if (!this.run1.net || !this.continuumPatches || !this.predicted('run3')) return
+    this.run3 = { state: 'done', shares: this.continuumPatches.map((p) => shares(forward(this.run1.net!, p).o)) }
+    this.changed()
   }
 }

@@ -10,6 +10,19 @@ import { words, WordsStore } from './PartWords'
 import { predictors, PredictorsStore } from './PartPredictors'
 import { NOTICE_LINE as STREAM_NOTICE } from './stream/screens'
 import { NOTICE_LINE as WORDS_NOTICE } from './words/screens'
+import { makeRng } from '../../sim/random'
+import { abxTrials, labelingTrials } from '../../sim/language/sounds/abx'
+
+/** Saved results of the right shape, for the finished-step stages. */
+export const labelsFixture = { order: ['bee', 'bah', 'boo', 'dee', 'dah', 'doo'], labels: { bee: 'b', bah: 'b', boo: 'd', dee: 'd', dah: 'd', doo: 'd' }, correct: 5, seconds: 40, restarts: 0 }
+export const labelingFixture = (() => {
+  const trials = labelingTrials(makeRng(1))
+  return { trials, answers: trials.map((s) => (s <= 4 ? 'b' : s <= 9 ? 'd' : 'g')), seconds: trials.map(() => 1), restarts: 0 }
+})()
+export const abxFixture = (() => {
+  const trials = abxTrials(makeRng(2))
+  return { trials, answers: trials.map((t) => (t.xIsFirst ? 'first' : 'second')), seconds: trials.map(() => 1), restarts: 0 }
+})()
 
 /**
  * Every part and step opens from a fresh seed with nothing else done, on an
@@ -129,7 +142,7 @@ describe('every part and step opens from a fresh seed with nothing else done, on
     const k = fresh(predictors as Mod, (s, p) => new PredictorsStore(s, p))
     k.store.open(3)
     k.store.begin()
-    expect(k.all()).toMatch(/data-stage="predictors-3"/)
+    expect(k.all()).toMatch(/data-stage="predictors-3/)
   })
 })
 
@@ -137,13 +150,13 @@ describe('a finished step’s stage names the button that comes next', () => {
   it('Part 1, Step 2 done points at Step 3; Part 1, Step 3 done points at Step 4; Part 3’s unit done points at Step 3', () => {
     const c = fresh(sounds as Mod, (s, p) => new SoundsStore(s, p))
     c.progress.begin('p1-labels')
-    c.progress.complete('p1-labels', {})
+    c.progress.complete('p1-labels', labelsFixture)
     c.store.open(2)
     let m = text(c.all())
     expect(m).toMatch(/press “Go on to Step 3”/)
     expect(m).toMatch(/This step is done and saved/)
-    c.progress.complete('p1-labeling', {})
-    c.progress.complete('p1-abx', {})
+    c.progress.complete('p1-labeling', labelingFixture)
+    c.progress.complete('p1-abx', abxFixture)
     c.store.open(3)
     m = text(c.all())
     expect(m).toMatch(/press “Go on to Step 4”/)
@@ -166,7 +179,7 @@ describe('a finished step’s stage names the button that comes next', () => {
   })
   it('Part 1, Step 3 between its blocks is running, not on its instruction screen, on a fresh store', () => {
     const progress = new ProgressStore(memoryStorage(), 7)
-    progress.complete('p1-labeling', {})
+    progress.complete('p1-labeling', labelingFixture)
     const c = fresh(sounds as Mod, (s, p) => new SoundsStore(s, p), 7, progress)
     c.store.open(3)
     expect(c.store.state).toBe('running')
