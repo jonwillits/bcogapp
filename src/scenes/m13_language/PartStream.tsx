@@ -8,16 +8,18 @@ import { StreamStore, MINUTE_UNIT, BOARD_UNIT } from './stream/store'
 import { SCREENS, STEP_TITLES } from './stream/screens'
 import { Step1Stage } from './stream/Step1'
 import { Step2Stage, Step2Panel } from './stream/Step2'
-import { Step3Stage, Step3Controls } from './stream/Step3'
-import { Step4Stage, Step4Controls } from './stream/Step4'
+import { Step3Stage } from './stream/Step3'
+import { Step4Stage } from './stream/Step4'
 import { MinuteReveal, BoardReveal, StreamResults } from './stream/Reveal'
 import { registerResults } from './Part0'
 
 /**
- * Part 2's screens (spec §6): the left column runs the step; the stage
- * carries the instruction screen and then the minute, the board, the
- * learners, or the real speech; the right column carries the board's panel
- * of counts and, once a unit is complete, its reveal.
+ * Part 2's screens (spec §6): the left column is navigation only (Jon,
+ * 2026-11-16, LAB_COMMON_FEATURES §1); the stage carries the instruction
+ * screen and then the minute, the board, the learners with their
+ * predictions and slider, or the real speech with its menu; the right
+ * column carries the board's panel of counts and, once a unit is complete,
+ * its reveal.
  */
 
 type Ctx = PartContext<StreamStore>
@@ -30,7 +32,7 @@ function progressLines(s: StreamStore): string[] {
 }
 
 function Left({ ctx }: { ctx: Ctx }) {
-  return <StepLeft ctx={ctx} tab="stream" screens={SCREENS} progressLines={progressLines} topLines={[MADE_UP_LANGUAGE_LINE]} controls={(s) => (s.step === 3 ? <Step3Controls s={s} /> : s.step === 4 ? <Step4Controls s={s} /> : null)} />
+  return <StepLeft ctx={ctx} tab="stream" screens={SCREENS} progressLines={progressLines} topLines={[MADE_UP_LANGUAGE_LINE]} />
 }
 
 function Stage({ ctx }: { ctx: Ctx }) {
@@ -50,8 +52,8 @@ function Right({ ctx }: { ctx: Ctx }) {
         {s.step === 1 && (minute ? <MinuteReveal result={minute} /> : <Note data-results-pending>The results of this step appear here once your answer is committed. Nothing about the language’s words is shown before then.</Note>)}
         {s.step === 2 && s.state !== 'intro' && !board && <Step2Panel s={s} />}
         {s.step === 2 && board && <BoardReveal seed={s.seed} result={board} />}
-        {s.step === 3 && s.state !== 'intro' && <Content>Each learner’s panel is in the center, under the plot. The reveal’s table of scores fills in as you run the learners at each amount.</Content>}
-        {s.step === 4 && s.state !== 'intro' && <Content>The strip, the histogram, and the dips learner’s shares are in the center. Choose an utterance on the left.</Content>}
+        {s.step === 3 && s.state !== 'intro' && <Content>The predictions, the slider, the plot, the table of scores, and each learner’s description are in the center. The table fills in as you run the learners at each amount.</Content>}
+        {s.step === 4 && s.state !== 'intro' && <Content>The menu of utterances, the strip, the histogram, and the dips learner’s shares are in the center.</Content>}
       </div>
     </Panel>
   )

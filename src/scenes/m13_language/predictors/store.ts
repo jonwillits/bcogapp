@@ -26,7 +26,6 @@ export const PREDICTIONS = {
 } as const
 export type PredictionKey = keyof typeof PREDICTIONS
 
-export const TEN_WORDS = ['boy', 'boys', 'Mary', 'dog', 'cats', 'mouse', 'glass', 'cookie', 'chases', 'walks']
 export const SHOW_SENTENCES = 20
 export const WINDOW_DEFAULT = 4
 export const TEMPERATURES = { min: 0.2, max: 2.0, step: 0.1 }

@@ -38,6 +38,8 @@ export const READY_LINE = 'Nothing is needed. You will answer in the app. The re
 export const READY_SOUND_LINE = 'Headphones or earbuds, if you have them. You will answer in the app. The report is filled in from the results screens afterward.'
 
 export const EXPLORATION_SITTING_LINE = 'You can leave and come back at any time. Your predictions stay committed, and nothing else in this step is saved.'
+/** For an exploration that asks no prediction (Part 2's Step 4, Part 4's Steps 1 and 5): the line above would name predictions the step lacks (Jon's walk, 2026-11-17). */
+export const EXPLORATION_NO_PREDICTION_LINE = 'You can leave and come back at any time. Nothing in this step is saved.'
 
 export abstract class StepStore<Step extends number> implements PartStore {
   readonly seed: number
@@ -247,9 +249,10 @@ export function StepStage<Step extends number, S extends StepStore<Step>>({ ctx,
       </StagePanel>
     )
   }
+  // The frame is a plain block, not a flex row: a flex frame with a capped height stretched the screen's bordered box to the frame's height while its text ran on below the border (Jon, 2026-11-17, Part 4's Step 2). As a block, the whole box scrolls inside the frame.
   if (state === 'intro' || s.instructionsShown)
     return (
-      <div data-instruction-frame style={{ position: 'absolute', left: stageLeft(560), top: 24, width: stageWidth(560), maxHeight: 'calc(100vh - 170px)', overflowY: 'auto', overflowX: 'auto', pointerEvents: 'auto', display: 'flex', boxSizing: 'border-box' }}>
+      <div data-instruction-frame style={{ position: 'absolute', left: stageLeft(560), top: 24, width: stageWidth(560), maxHeight: 'calc(100vh - 170px)', overflowY: 'auto', overflowX: 'auto', pointerEvents: 'auto', boxSizing: 'border-box' }}>
       <InstructionScreen
         inline
         maxWidth="none"

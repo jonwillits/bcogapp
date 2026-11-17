@@ -228,9 +228,9 @@
    "file": "boo.wav",
    "phonemes": "bu",
    "voice": 1,
-   "durationS": 0.4172,
-   "burstS": 0.07,
-   "voicingS": 0.0716,
+   "durationS": 0.3593,
+   "burstS": 0.032,
+   "voicingS": 0.0436,
    "tracks": {
     "timesS": [
      0.0,
@@ -256,73 +256,73 @@
      0.1
     ],
     "f1": [
-     842,
-     1681,
-     781,
-     471,
-     503,
+     642,
+     539,
+     518,
+     470,
+     491,
+     514,
+     522,
      519,
-     528,
-     547,
-     566,
-     545,
-     532,
-     543,
-     569,
-     594,
-     602,
-     603,
-     597,
-     595,
-     599,
-     585,
-     574
+     518,
+     516,
+     515,
+     525,
+     549,
+     577,
+     617,
+     623,
+     631,
+     650,
+     655,
+     643,
+     612
     ],
     "f2": [
-     1722,
-     2030,
-     1682,
-     1505,
-     1469,
-     1441,
-     1431,
-     1441,
-     1452,
+     1995,
+     1964,
+     1782,
+     1464,
+     1439,
      1424,
-     1380,
-     1348,
-     1343,
-     1335,
-     1312,
-     1267,
-     1210,
-     1165,
-     1140,
-     1117,
-     1095
+     1423,
+     1436,
+     1452,
+     1452,
+     1442,
+     1421,
+     1388,
+     1357,
+     1347,
+     1309,
+     1284,
+     1289,
+     1287,
+     1258,
+     1202
     ],
     "f3": [
-     2473,
-     3147,
-     2860,
-     2750,
-     2773,
+     3175,
+     3121,
+     3041,
+     2730,
+     2762,
+     2786,
+     2735,
+     2729,
      2737,
-     2716,
-     2713,
-     2721,
-     2721,
-     2738,
-     2800,
-     2870,
-     2905,
-     2913,
-     2931,
-     2957,
-     2965,
-     3006,
-     2996,
-     2982
+     2702,
+     2661,
+     2695,
+     2771,
+     2821,
+     2929,
+     2990,
+     3022,
+     3018,
+     3026,
+     3042,
+     3042
     ]
    }
   },
@@ -532,11 +532,11 @@
   },
   "doo": {
    "file": "doo.wav",
-   "phonemes": "du",
+   "phonemes": "du\u02d0",
    "voice": 1,
    "durationS": 0.4357,
-   "burstS": 0.058,
-   "voicingS": 0.0698,
+   "burstS": 0.05,
+   "voicingS": 0.0718,
    "tracks": {
     "timesS": [
      0.0,
@@ -562,73 +562,73 @@
      0.1
     ],
     "f1": [
-     824,
-     847,
-     641,
-     397,
-     332,
-     344,
-     360,
-     377,
-     398,
-     419,
-     436,
-     448,
-     461,
+     1232,
+     1263,
+     1172,
+     493,
+     309,
+     298,
+     319,
+     331,
+     343,
+     355,
+     368,
+     385,
+     401,
+     407,
+     411,
+     430,
+     464,
      486,
-     513,
-     522,
-     533,
-     549,
-     550,
-     546,
-     557
+     490,
+     490,
+     503
     ],
     "f2": [
+     2484,
+     2533,
+     2594,
+     2387,
+     2304,
+     2298,
      2290,
-     2238,
-     2213,
-     2207,
-     2215,
-     2240,
-     2274,
-     2295,
-     2278,
-     2217,
-     2173,
-     2163,
-     2136,
-     2087,
-     2024,
-     1937,
-     1868,
-     1809,
-     1723,
-     1651,
-     1610
+     2325,
+     2372,
+     2394,
+     2377,
+     2341,
+     2316,
+     2303,
+     2312,
+     2316,
+     2312,
+     2316,
+     2306,
+     2277,
+     2247
     ],
     "f3": [
-     3497,
-     3496,
-     3301,
-     3073,
-     2953,
-     2909,
-     2937,
-     2975,
-     2985,
-     2962,
-     2918,
-     2823,
-     2737,
-     2746,
-     2814,
-     2850,
-     2832,
-     2797,
-     2786,
-     2791,
-     2779
+     3670,
+     3785,
+     3742,
+     3205,
+     3075,
+     3082,
+     3079,
+     3043,
+     3064,
+     3065,
+     3013,
+     2983,
+     2996,
+     3010,
+     2997,
+     2942,
+     2885,
+     2857,
+     2848,
+     2820,
+     2774
     ]
    }
   }
@@ -729,10 +729,10 @@
   {
    "word": "sprock",
    "set": 0,
-   "phonemes": "sp\u0279\u0251k",
+   "phonemes": "sp\u0279\u02c8\u0251k",
    "file": "sprock.wav",
    "voice": 1,
-   "durationS": 0.5628
+   "durationS": 0.6209
   },
   {
    "word": "wug",
@@ -745,10 +745,10 @@
   {
    "word": "zorch",
    "set": 0,
-   "phonemes": "z\u0254\u0279\u02a7",
+   "phonemes": "z\u0254\u0279t\u0283",
    "file": "zorch.wav",
    "voice": 1,
-   "durationS": 0.4577
+   "durationS": 0.4124
   },
   {
    "word": "crannel",
@@ -5069,7 +5069,7 @@
     "start": 1733193,
     "length": 4800,
     "burstS": 0.04,
-    "pitchHz": 184.9
+    "pitchHz": 194.1
    },
    {
     "voice": 9,
@@ -5078,9 +5078,9 @@
     "vowel": "ah",
     "shift": -3,
     "start": 1737993,
-    "length": 4800,
+    "length": 4768,
     "burstS": 0.04,
-    "pitchHz": 147.9
+    "pitchHz": 163.7
    },
    {
     "voice": 9,
@@ -5088,10 +5088,10 @@
     "consonant": "d",
     "vowel": "ah",
     "shift": 3,
-    "start": 1742793,
-    "length": 4800,
-    "burstS": 0.04,
-    "pitchHz": 221.1
+    "start": 1742761,
+    "length": 4768,
+    "burstS": 0.038,
+    "pitchHz": 231.0
    },
    {
     "voice": 9,
@@ -5099,7 +5099,7 @@
     "consonant": "d",
     "vowel": "oh",
     "shift": 0,
-    "start": 1747593,
+    "start": 1747529,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 186.6
@@ -5110,7 +5110,7 @@
     "consonant": "d",
     "vowel": "oh",
     "shift": -3,
-    "start": 1752393,
+    "start": 1752329,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 158.6
@@ -5121,7 +5121,7 @@
     "consonant": "d",
     "vowel": "oh",
     "shift": 3,
-    "start": 1757193,
+    "start": 1757129,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 224.1
@@ -5132,7 +5132,7 @@
     "consonant": "d",
     "vowel": "oo",
     "shift": 0,
-    "start": 1761993,
+    "start": 1761929,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 180.5
@@ -5143,7 +5143,7 @@
     "consonant": "d",
     "vowel": "oo",
     "shift": -3,
-    "start": 1766793,
+    "start": 1766729,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 147.9
@@ -5154,7 +5154,7 @@
     "consonant": "d",
     "vowel": "oo",
     "shift": 3,
-    "start": 1771593,
+    "start": 1771529,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 201.7
@@ -5165,7 +5165,7 @@
     "consonant": "g",
     "vowel": "ee",
     "shift": 0,
-    "start": 1776393,
+    "start": 1776329,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 180.5
@@ -5176,7 +5176,7 @@
     "consonant": "g",
     "vowel": "ee",
     "shift": -3,
-    "start": 1781193,
+    "start": 1781129,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 148.5
@@ -5187,7 +5187,7 @@
     "consonant": "g",
     "vowel": "ee",
     "shift": 3,
-    "start": 1785993,
+    "start": 1785929,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 215.8
@@ -5198,7 +5198,7 @@
     "consonant": "g",
     "vowel": "ay",
     "shift": 0,
-    "start": 1790793,
+    "start": 1790729,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 189.0
@@ -5209,7 +5209,7 @@
     "consonant": "g",
     "vowel": "ay",
     "shift": -3,
-    "start": 1795593,
+    "start": 1795529,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 160.6
@@ -5220,7 +5220,7 @@
     "consonant": "g",
     "vowel": "ay",
     "shift": 3,
-    "start": 1800393,
+    "start": 1800329,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 225.2
@@ -5231,7 +5231,7 @@
     "consonant": "g",
     "vowel": "ah",
     "shift": 0,
-    "start": 1805193,
+    "start": 1805129,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 188.2
@@ -5242,7 +5242,7 @@
     "consonant": "g",
     "vowel": "ah",
     "shift": -3,
-    "start": 1809993,
+    "start": 1809929,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 159.6
@@ -5253,7 +5253,7 @@
     "consonant": "g",
     "vowel": "ah",
     "shift": 3,
-    "start": 1814793,
+    "start": 1814729,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 226.1
@@ -5264,7 +5264,7 @@
     "consonant": "g",
     "vowel": "oh",
     "shift": 0,
-    "start": 1819593,
+    "start": 1819529,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 177.7
@@ -5275,7 +5275,7 @@
     "consonant": "g",
     "vowel": "oh",
     "shift": -3,
-    "start": 1824393,
+    "start": 1824329,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 149.4
@@ -5286,7 +5286,7 @@
     "consonant": "g",
     "vowel": "oh",
     "shift": 3,
-    "start": 1829193,
+    "start": 1829129,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 219.6
@@ -5297,7 +5297,7 @@
     "consonant": "g",
     "vowel": "oo",
     "shift": 0,
-    "start": 1833993,
+    "start": 1833929,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 195.7
@@ -5308,7 +5308,7 @@
     "consonant": "g",
     "vowel": "oo",
     "shift": -3,
-    "start": 1838793,
+    "start": 1838729,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 151.3
@@ -5319,7 +5319,7 @@
     "consonant": "g",
     "vowel": "oo",
     "shift": 3,
-    "start": 1843593,
+    "start": 1843529,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 215.4
@@ -5330,7 +5330,7 @@
     "consonant": "b",
     "vowel": "ee",
     "shift": 0,
-    "start": 1848393,
+    "start": 1848329,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 186.0
@@ -5341,7 +5341,7 @@
     "consonant": "b",
     "vowel": "ee",
     "shift": -3,
-    "start": 1853033,
+    "start": 1852969,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 157.9
@@ -5352,7 +5352,7 @@
     "consonant": "b",
     "vowel": "ee",
     "shift": 3,
-    "start": 1857673,
+    "start": 1857609,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 223.2
@@ -5363,7 +5363,7 @@
     "consonant": "b",
     "vowel": "ay",
     "shift": 0,
-    "start": 1862313,
+    "start": 1862249,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 185.2
@@ -5374,7 +5374,7 @@
     "consonant": "b",
     "vowel": "ay",
     "shift": -3,
-    "start": 1867113,
+    "start": 1867049,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 158.6
@@ -5385,7 +5385,7 @@
     "consonant": "b",
     "vowel": "ay",
     "shift": 3,
-    "start": 1871913,
+    "start": 1871849,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 216.6
@@ -5396,7 +5396,7 @@
     "consonant": "b",
     "vowel": "ah",
     "shift": 0,
-    "start": 1876713,
+    "start": 1876649,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 183.2
@@ -5407,7 +5407,7 @@
     "consonant": "b",
     "vowel": "ah",
     "shift": -3,
-    "start": 1881353,
+    "start": 1881289,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 154.2
@@ -5418,7 +5418,7 @@
     "consonant": "b",
     "vowel": "ah",
     "shift": 3,
-    "start": 1885993,
+    "start": 1885929,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 218.0
@@ -5429,7 +5429,7 @@
     "consonant": "b",
     "vowel": "oh",
     "shift": 0,
-    "start": 1890633,
+    "start": 1890569,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 177.8
@@ -5440,7 +5440,7 @@
     "consonant": "b",
     "vowel": "oh",
     "shift": -3,
-    "start": 1895273,
+    "start": 1895209,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 147.5
@@ -5451,7 +5451,7 @@
     "consonant": "b",
     "vowel": "oh",
     "shift": 3,
-    "start": 1899913,
+    "start": 1899849,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 211.1
@@ -5462,7 +5462,7 @@
     "consonant": "b",
     "vowel": "oo",
     "shift": 0,
-    "start": 1904553,
+    "start": 1904489,
     "length": 4672,
     "burstS": 0.032,
     "pitchHz": 185.7
@@ -5473,7 +5473,7 @@
     "consonant": "b",
     "vowel": "oo",
     "shift": -3,
-    "start": 1909225,
+    "start": 1909161,
     "length": 4672,
     "burstS": 0.032,
     "pitchHz": 156.5
@@ -5484,7 +5484,7 @@
     "consonant": "b",
     "vowel": "oo",
     "shift": 3,
-    "start": 1913897,
+    "start": 1913833,
     "length": 4672,
     "burstS": 0.032,
     "pitchHz": 221.4
@@ -5495,7 +5495,7 @@
     "consonant": "d",
     "vowel": "ee",
     "shift": 0,
-    "start": 1918569,
+    "start": 1918505,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 185.6
@@ -5506,7 +5506,7 @@
     "consonant": "d",
     "vowel": "ee",
     "shift": -3,
-    "start": 1923369,
+    "start": 1923305,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 157.4
@@ -5517,7 +5517,7 @@
     "consonant": "d",
     "vowel": "ee",
     "shift": 3,
-    "start": 1928169,
+    "start": 1928105,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 220.9
@@ -5528,10 +5528,10 @@
     "consonant": "d",
     "vowel": "ay",
     "shift": 0,
-    "start": 1932969,
-    "length": 4640,
-    "burstS": 0.03,
-    "pitchHz": 193.9
+    "start": 1932905,
+    "length": 4059,
+    "burstS": 0.04,
+    "pitchHz": 205.4
    },
    {
     "voice": 10,
@@ -5539,10 +5539,10 @@
     "consonant": "d",
     "vowel": "ay",
     "shift": -3,
-    "start": 1937609,
-    "length": 4640,
-    "burstS": 0.03,
-    "pitchHz": 162.5
+    "start": 1936964,
+    "length": 4027,
+    "burstS": 0.04,
+    "pitchHz": 172.7
    },
    {
     "voice": 10,
@@ -5550,10 +5550,10 @@
     "consonant": "d",
     "vowel": "ay",
     "shift": 3,
-    "start": 1942249,
-    "length": 4640,
-    "burstS": 0.03,
-    "pitchHz": 230.2
+    "start": 1940991,
+    "length": 4059,
+    "burstS": 0.038,
+    "pitchHz": 237.6
    },
    {
     "voice": 10,
@@ -5561,7 +5561,7 @@
     "consonant": "d",
     "vowel": "ah",
     "shift": 0,
-    "start": 1946889,
+    "start": 1945050,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 182.6
@@ -5572,7 +5572,7 @@
     "consonant": "d",
     "vowel": "ah",
     "shift": -3,
-    "start": 1951529,
+    "start": 1949690,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 153.3
@@ -5583,7 +5583,7 @@
     "consonant": "d",
     "vowel": "ah",
     "shift": 3,
-    "start": 1956169,
+    "start": 1954330,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 216.1
@@ -5594,7 +5594,7 @@
     "consonant": "d",
     "vowel": "oh",
     "shift": 0,
-    "start": 1960809,
+    "start": 1958970,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 194.5
@@ -5605,7 +5605,7 @@
     "consonant": "d",
     "vowel": "oh",
     "shift": -3,
-    "start": 1965449,
+    "start": 1963610,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 164.4
@@ -5616,7 +5616,7 @@
     "consonant": "d",
     "vowel": "oh",
     "shift": 3,
-    "start": 1970089,
+    "start": 1968250,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 231.5
@@ -5627,7 +5627,7 @@
     "consonant": "d",
     "vowel": "oo",
     "shift": 0,
-    "start": 1974729,
+    "start": 1972890,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 187.5
@@ -5638,7 +5638,7 @@
     "consonant": "d",
     "vowel": "oo",
     "shift": -3,
-    "start": 1979529,
+    "start": 1977690,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 158.0
@@ -5649,7 +5649,7 @@
     "consonant": "d",
     "vowel": "oo",
     "shift": 3,
-    "start": 1984169,
+    "start": 1982330,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 222.5
@@ -5660,7 +5660,7 @@
     "consonant": "g",
     "vowel": "ee",
     "shift": 0,
-    "start": 1988809,
+    "start": 1986970,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 187.2
@@ -5671,7 +5671,7 @@
     "consonant": "g",
     "vowel": "ee",
     "shift": -3,
-    "start": 1993449,
+    "start": 1991610,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 158.5
@@ -5682,7 +5682,7 @@
     "consonant": "g",
     "vowel": "ee",
     "shift": 3,
-    "start": 1998089,
+    "start": 1996250,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 224.3
@@ -5693,7 +5693,7 @@
     "consonant": "g",
     "vowel": "ay",
     "shift": 0,
-    "start": 2002729,
+    "start": 2000890,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 177.5
@@ -5704,7 +5704,7 @@
     "consonant": "g",
     "vowel": "ay",
     "shift": -3,
-    "start": 2007369,
+    "start": 2005530,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 149.2
@@ -5715,7 +5715,7 @@
     "consonant": "g",
     "vowel": "ay",
     "shift": 3,
-    "start": 2012009,
+    "start": 2010170,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 211.2
@@ -5726,7 +5726,7 @@
     "consonant": "g",
     "vowel": "ah",
     "shift": 0,
-    "start": 2016649,
+    "start": 2014810,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 185.0
@@ -5737,7 +5737,7 @@
     "consonant": "g",
     "vowel": "ah",
     "shift": -3,
-    "start": 2021449,
+    "start": 2019610,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 154.4
@@ -5748,7 +5748,7 @@
     "consonant": "g",
     "vowel": "ah",
     "shift": 3,
-    "start": 2026249,
+    "start": 2024410,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 220.2
@@ -5759,7 +5759,7 @@
     "consonant": "g",
     "vowel": "oh",
     "shift": 0,
-    "start": 2031049,
+    "start": 2029210,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 180.5
@@ -5770,7 +5770,7 @@
     "consonant": "g",
     "vowel": "oh",
     "shift": -3,
-    "start": 2035689,
+    "start": 2033850,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 150.5
@@ -5781,7 +5781,7 @@
     "consonant": "g",
     "vowel": "oh",
     "shift": 3,
-    "start": 2040329,
+    "start": 2038490,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 212.8
@@ -5792,7 +5792,7 @@
     "consonant": "g",
     "vowel": "oo",
     "shift": 0,
-    "start": 2044969,
+    "start": 2043130,
     "length": 4672,
     "burstS": 0.032,
     "pitchHz": 187.0
@@ -5803,7 +5803,7 @@
     "consonant": "g",
     "vowel": "oo",
     "shift": -3,
-    "start": 2049641,
+    "start": 2047802,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 157.7
@@ -5814,7 +5814,7 @@
     "consonant": "g",
     "vowel": "oo",
     "shift": 3,
-    "start": 2054281,
+    "start": 2052442,
     "length": 4672,
     "burstS": 0.032,
     "pitchHz": 221.4
@@ -5825,7 +5825,7 @@
     "consonant": "b",
     "vowel": "ee",
     "shift": 0,
-    "start": 2058953,
+    "start": 2057114,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 149.8
@@ -5836,7 +5836,7 @@
     "consonant": "b",
     "vowel": "ee",
     "shift": -3,
-    "start": 2063753,
+    "start": 2061914,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 126.3
@@ -5847,7 +5847,7 @@
     "consonant": "b",
     "vowel": "ee",
     "shift": 3,
-    "start": 2068553,
+    "start": 2066714,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 176.4
@@ -5858,7 +5858,7 @@
     "consonant": "b",
     "vowel": "ay",
     "shift": 0,
-    "start": 2073353,
+    "start": 2071514,
     "length": 4473,
     "burstS": 0.04,
     "pitchHz": 144.0
@@ -5869,7 +5869,7 @@
     "consonant": "b",
     "vowel": "ay",
     "shift": -3,
-    "start": 2077826,
+    "start": 2075987,
     "length": 4441,
     "burstS": 0.04,
     "pitchHz": 123.9
@@ -5880,7 +5880,7 @@
     "consonant": "b",
     "vowel": "ay",
     "shift": 3,
-    "start": 2082267,
+    "start": 2080428,
     "length": 4441,
     "burstS": 0.04,
     "pitchHz": 168.3
@@ -5891,7 +5891,7 @@
     "consonant": "b",
     "vowel": "ah",
     "shift": 0,
-    "start": 2086708,
+    "start": 2084869,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 146.1
@@ -5902,7 +5902,7 @@
     "consonant": "b",
     "vowel": "ah",
     "shift": -3,
-    "start": 2091508,
+    "start": 2089669,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 124.1
@@ -5913,7 +5913,7 @@
     "consonant": "b",
     "vowel": "ah",
     "shift": 3,
-    "start": 2096308,
+    "start": 2094469,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 177.5
@@ -5924,7 +5924,7 @@
     "consonant": "b",
     "vowel": "oh",
     "shift": 0,
-    "start": 2101108,
+    "start": 2099269,
     "length": 4574,
     "burstS": 0.04,
     "pitchHz": 147.5
@@ -5935,7 +5935,7 @@
     "consonant": "b",
     "vowel": "oh",
     "shift": -3,
-    "start": 2105682,
+    "start": 2103843,
     "length": 4510,
     "burstS": 0.04,
     "pitchHz": 124.5
@@ -5946,7 +5946,7 @@
     "consonant": "b",
     "vowel": "oh",
     "shift": 3,
-    "start": 2110192,
+    "start": 2108353,
     "length": 4638,
     "burstS": 0.04,
     "pitchHz": 177.2
@@ -5957,7 +5957,7 @@
     "consonant": "b",
     "vowel": "oo",
     "shift": 0,
-    "start": 2114830,
+    "start": 2112991,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 146.7
@@ -5968,7 +5968,7 @@
     "consonant": "b",
     "vowel": "oo",
     "shift": -3,
-    "start": 2119630,
+    "start": 2117791,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 125.7
@@ -5979,7 +5979,7 @@
     "consonant": "b",
     "vowel": "oo",
     "shift": 3,
-    "start": 2124430,
+    "start": 2122591,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 173.2
@@ -5990,7 +5990,7 @@
     "consonant": "d",
     "vowel": "ee",
     "shift": 0,
-    "start": 2129230,
+    "start": 2127391,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 149.3
@@ -6001,7 +6001,7 @@
     "consonant": "d",
     "vowel": "ee",
     "shift": -3,
-    "start": 2134030,
+    "start": 2132191,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 126.3
@@ -6012,7 +6012,7 @@
     "consonant": "d",
     "vowel": "ee",
     "shift": 3,
-    "start": 2138830,
+    "start": 2136991,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 178.5
@@ -6023,7 +6023,7 @@
     "consonant": "d",
     "vowel": "ay",
     "shift": 0,
-    "start": 2143630,
+    "start": 2141791,
     "length": 4118,
     "burstS": 0.04,
     "pitchHz": 146.4
@@ -6034,7 +6034,7 @@
     "consonant": "d",
     "vowel": "ay",
     "shift": -3,
-    "start": 2147748,
+    "start": 2145909,
     "length": 4182,
     "burstS": 0.04,
     "pitchHz": 121.4
@@ -6045,7 +6045,7 @@
     "consonant": "d",
     "vowel": "ay",
     "shift": 3,
-    "start": 2151930,
+    "start": 2150091,
     "length": 4086,
     "burstS": 0.04,
     "pitchHz": 174.3
@@ -6056,10 +6056,10 @@
     "consonant": "d",
     "vowel": "ah",
     "shift": 0,
-    "start": 2156016,
+    "start": 2154177,
     "length": 4800,
     "burstS": 0.04,
-    "pitchHz": 152.0
+    "pitchHz": 151.6
    },
    {
     "voice": 11,
@@ -6067,10 +6067,10 @@
     "consonant": "d",
     "vowel": "ah",
     "shift": -3,
-    "start": 2160816,
+    "start": 2158977,
     "length": 4800,
     "burstS": 0.04,
-    "pitchHz": 126.6
+    "pitchHz": 131.4
    },
    {
     "voice": 11,
@@ -6078,10 +6078,10 @@
     "consonant": "d",
     "vowel": "ah",
     "shift": 3,
-    "start": 2165616,
+    "start": 2163777,
     "length": 4800,
     "burstS": 0.04,
-    "pitchHz": 170.3
+    "pitchHz": 184.0
    },
    {
     "voice": 11,
@@ -6089,7 +6089,7 @@
     "consonant": "d",
     "vowel": "oh",
     "shift": 0,
-    "start": 2170416,
+    "start": 2168577,
     "length": 4230,
     "burstS": 0.04,
     "pitchHz": 143.1
@@ -6100,7 +6100,7 @@
     "consonant": "d",
     "vowel": "oh",
     "shift": -3,
-    "start": 2174646,
+    "start": 2172807,
     "length": 4134,
     "burstS": 0.04,
     "pitchHz": 121.0
@@ -6111,7 +6111,7 @@
     "consonant": "d",
     "vowel": "oh",
     "shift": 3,
-    "start": 2178780,
+    "start": 2176941,
     "length": 4262,
     "burstS": 0.04,
     "pitchHz": 168.7
@@ -6122,7 +6122,7 @@
     "consonant": "d",
     "vowel": "oo",
     "shift": 0,
-    "start": 2183042,
+    "start": 2181203,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 151.4
@@ -6133,7 +6133,7 @@
     "consonant": "d",
     "vowel": "oo",
     "shift": -3,
-    "start": 2187842,
+    "start": 2186003,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 125.2
@@ -6144,7 +6144,7 @@
     "consonant": "d",
     "vowel": "oo",
     "shift": 3,
-    "start": 2192642,
+    "start": 2190803,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 182.1
@@ -6155,7 +6155,7 @@
     "consonant": "g",
     "vowel": "ee",
     "shift": 0,
-    "start": 2197442,
+    "start": 2195603,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 148.0
@@ -6166,7 +6166,7 @@
     "consonant": "g",
     "vowel": "ee",
     "shift": -3,
-    "start": 2202242,
+    "start": 2200403,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 125.8
@@ -6177,7 +6177,7 @@
     "consonant": "g",
     "vowel": "ee",
     "shift": 3,
-    "start": 2207042,
+    "start": 2205203,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 196.6
@@ -6188,7 +6188,7 @@
     "consonant": "g",
     "vowel": "ay",
     "shift": 0,
-    "start": 2211842,
+    "start": 2210003,
     "length": 4603,
     "burstS": 0.04,
     "pitchHz": 145.7
@@ -6199,7 +6199,7 @@
     "consonant": "g",
     "vowel": "ay",
     "shift": -3,
-    "start": 2216445,
+    "start": 2214606,
     "length": 4667,
     "burstS": 0.04,
     "pitchHz": 123.1
@@ -6210,7 +6210,7 @@
     "consonant": "g",
     "vowel": "ay",
     "shift": 3,
-    "start": 2221112,
+    "start": 2219273,
     "length": 4667,
     "burstS": 0.04,
     "pitchHz": 171.4
@@ -6221,7 +6221,7 @@
     "consonant": "g",
     "vowel": "ah",
     "shift": 0,
-    "start": 2225779,
+    "start": 2223940,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 148.7
@@ -6232,7 +6232,7 @@
     "consonant": "g",
     "vowel": "ah",
     "shift": -3,
-    "start": 2230579,
+    "start": 2228740,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 126.7
@@ -6243,7 +6243,7 @@
     "consonant": "g",
     "vowel": "ah",
     "shift": 3,
-    "start": 2235379,
+    "start": 2233540,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 180.2
@@ -6254,7 +6254,7 @@
     "consonant": "g",
     "vowel": "oh",
     "shift": 0,
-    "start": 2240179,
+    "start": 2238340,
     "length": 4695,
     "burstS": 0.04,
     "pitchHz": 142.8
@@ -6265,7 +6265,7 @@
     "consonant": "g",
     "vowel": "oh",
     "shift": -3,
-    "start": 2244874,
+    "start": 2243035,
     "length": 4759,
     "burstS": 0.04,
     "pitchHz": 119.5
@@ -6276,7 +6276,7 @@
     "consonant": "g",
     "vowel": "oh",
     "shift": 3,
-    "start": 2249633,
+    "start": 2247794,
     "length": 4695,
     "burstS": 0.04,
     "pitchHz": 170.3
@@ -6287,7 +6287,7 @@
     "consonant": "g",
     "vowel": "oo",
     "shift": 0,
-    "start": 2254328,
+    "start": 2252489,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 146.8
@@ -6298,7 +6298,7 @@
     "consonant": "g",
     "vowel": "oo",
     "shift": -3,
-    "start": 2259128,
+    "start": 2257289,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 125.8
@@ -6309,7 +6309,7 @@
     "consonant": "g",
     "vowel": "oo",
     "shift": 3,
-    "start": 2263928,
+    "start": 2262089,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 176.0
@@ -6320,7 +6320,7 @@
     "consonant": "b",
     "vowel": "ee",
     "shift": 0,
-    "start": 2268728,
+    "start": 2266889,
     "length": 4736,
     "burstS": 0.036,
     "pitchHz": 110.4
@@ -6331,7 +6331,7 @@
     "consonant": "b",
     "vowel": "ee",
     "shift": -3,
-    "start": 2273464,
+    "start": 2271625,
     "length": 4736,
     "burstS": 0.036,
     "pitchHz": 93.3
@@ -6342,7 +6342,7 @@
     "consonant": "b",
     "vowel": "ee",
     "shift": 3,
-    "start": 2278200,
+    "start": 2276361,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 131.5
@@ -6353,7 +6353,7 @@
     "consonant": "b",
     "vowel": "ay",
     "shift": 0,
-    "start": 2283000,
+    "start": 2281161,
     "length": 4768,
     "burstS": 0.038,
     "pitchHz": 108.9
@@ -6364,7 +6364,7 @@
     "consonant": "b",
     "vowel": "ay",
     "shift": -3,
-    "start": 2287768,
+    "start": 2285929,
     "length": 4768,
     "burstS": 0.038,
     "pitchHz": 91.7
@@ -6375,7 +6375,7 @@
     "consonant": "b",
     "vowel": "ay",
     "shift": 3,
-    "start": 2292536,
+    "start": 2290697,
     "length": 4704,
     "burstS": 0.034,
     "pitchHz": 129.7
@@ -6386,7 +6386,7 @@
     "consonant": "b",
     "vowel": "ah",
     "shift": 0,
-    "start": 2297240,
+    "start": 2295401,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 105.9
@@ -6397,7 +6397,7 @@
     "consonant": "b",
     "vowel": "ah",
     "shift": -3,
-    "start": 2301880,
+    "start": 2300041,
     "length": 4800,
     "burstS": 0.04,
     "pitchHz": 91.7
@@ -6408,7 +6408,7 @@
     "consonant": "b",
     "vowel": "ah",
     "shift": 3,
-    "start": 2306680,
+    "start": 2304841,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 129.7
@@ -6419,7 +6419,7 @@
     "consonant": "b",
     "vowel": "oh",
     "shift": 0,
-    "start": 2311320,
+    "start": 2309481,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 106.0
@@ -6430,7 +6430,7 @@
     "consonant": "b",
     "vowel": "oh",
     "shift": -3,
-    "start": 2315960,
+    "start": 2314121,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 89.0
@@ -6441,7 +6441,7 @@
     "consonant": "b",
     "vowel": "oh",
     "shift": 3,
-    "start": 2320600,
+    "start": 2318761,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 126.1
@@ -6452,7 +6452,7 @@
     "consonant": "b",
     "vowel": "oo",
     "shift": 0,
-    "start": 2325240,
+    "start": 2323401,
     "length": 4672,
     "burstS": 0.032,
     "pitchHz": 118.3
@@ -6463,7 +6463,7 @@
     "consonant": "b",
     "vowel": "oo",
     "shift": -3,
-    "start": 2329912,
+    "start": 2328073,
     "length": 4672,
     "burstS": 0.032,
     "pitchHz": 101.2
@@ -6474,7 +6474,7 @@
     "consonant": "b",
     "vowel": "oo",
     "shift": 3,
-    "start": 2334584,
+    "start": 2332745,
     "length": 4672,
     "burstS": 0.032,
     "pitchHz": 142.9
@@ -6485,7 +6485,7 @@
     "consonant": "d",
     "vowel": "ee",
     "shift": 0,
-    "start": 2339256,
+    "start": 2337417,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 119.1
@@ -6496,7 +6496,7 @@
     "consonant": "d",
     "vowel": "ee",
     "shift": -3,
-    "start": 2343896,
+    "start": 2342057,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 106.3
@@ -6507,7 +6507,7 @@
     "consonant": "d",
     "vowel": "ee",
     "shift": 3,
-    "start": 2348536,
+    "start": 2346697,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 144.5
@@ -6518,7 +6518,7 @@
     "consonant": "d",
     "vowel": "ay",
     "shift": 0,
-    "start": 2353176,
+    "start": 2351337,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 125.2
@@ -6529,7 +6529,7 @@
     "consonant": "d",
     "vowel": "ay",
     "shift": -3,
-    "start": 2357816,
+    "start": 2355977,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 105.5
@@ -6540,7 +6540,7 @@
     "consonant": "d",
     "vowel": "ay",
     "shift": 3,
-    "start": 2362456,
+    "start": 2360617,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 149.0
@@ -6551,7 +6551,7 @@
     "consonant": "d",
     "vowel": "ah",
     "shift": 0,
-    "start": 2367096,
+    "start": 2365257,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 118.4
@@ -6562,7 +6562,7 @@
     "consonant": "d",
     "vowel": "ah",
     "shift": -3,
-    "start": 2371736,
+    "start": 2369897,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 98.7
@@ -6573,7 +6573,7 @@
     "consonant": "d",
     "vowel": "ah",
     "shift": 3,
-    "start": 2376376,
+    "start": 2374537,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 140.8
@@ -6584,7 +6584,7 @@
     "consonant": "d",
     "vowel": "oh",
     "shift": 0,
-    "start": 2381016,
+    "start": 2379177,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 126.8
@@ -6595,7 +6595,7 @@
     "consonant": "d",
     "vowel": "oh",
     "shift": -3,
-    "start": 2385656,
+    "start": 2383817,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 106.4
@@ -6606,7 +6606,7 @@
     "consonant": "d",
     "vowel": "oh",
     "shift": 3,
-    "start": 2390296,
+    "start": 2388457,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 150.8
@@ -6617,7 +6617,7 @@
     "consonant": "d",
     "vowel": "oo",
     "shift": 0,
-    "start": 2394936,
+    "start": 2393097,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 127.8
@@ -6628,7 +6628,7 @@
     "consonant": "d",
     "vowel": "oo",
     "shift": -3,
-    "start": 2399576,
+    "start": 2397737,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 110.0
@@ -6639,7 +6639,7 @@
     "consonant": "d",
     "vowel": "oo",
     "shift": 3,
-    "start": 2404216,
+    "start": 2402377,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 154.5
@@ -6650,7 +6650,7 @@
     "consonant": "g",
     "vowel": "ee",
     "shift": 0,
-    "start": 2408856,
+    "start": 2407017,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 128.7
@@ -6661,7 +6661,7 @@
     "consonant": "g",
     "vowel": "ee",
     "shift": -3,
-    "start": 2413496,
+    "start": 2411657,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 107.4
@@ -6672,7 +6672,7 @@
     "consonant": "g",
     "vowel": "ee",
     "shift": 3,
-    "start": 2418136,
+    "start": 2416297,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 153.1
@@ -6683,7 +6683,7 @@
     "consonant": "g",
     "vowel": "ay",
     "shift": 0,
-    "start": 2422776,
+    "start": 2420937,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 125.7
@@ -6694,7 +6694,7 @@
     "consonant": "g",
     "vowel": "ay",
     "shift": -3,
-    "start": 2427416,
+    "start": 2425577,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 105.5
@@ -6705,7 +6705,7 @@
     "consonant": "g",
     "vowel": "ay",
     "shift": 3,
-    "start": 2432056,
+    "start": 2430217,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 146.7
@@ -6716,7 +6716,7 @@
     "consonant": "g",
     "vowel": "ah",
     "shift": 0,
-    "start": 2436696,
+    "start": 2434857,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 119.7
@@ -6727,7 +6727,7 @@
     "consonant": "g",
     "vowel": "ah",
     "shift": -3,
-    "start": 2441336,
+    "start": 2439497,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 100.4
@@ -6738,7 +6738,7 @@
     "consonant": "g",
     "vowel": "ah",
     "shift": 3,
-    "start": 2445976,
+    "start": 2444137,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 142.0
@@ -6749,7 +6749,7 @@
     "consonant": "g",
     "vowel": "oh",
     "shift": 0,
-    "start": 2450616,
+    "start": 2448777,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 116.0
@@ -6760,7 +6760,7 @@
     "consonant": "g",
     "vowel": "oh",
     "shift": -3,
-    "start": 2455256,
+    "start": 2453417,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 98.0
@@ -6771,7 +6771,7 @@
     "consonant": "g",
     "vowel": "oh",
     "shift": 3,
-    "start": 2459896,
+    "start": 2458057,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 138.8
@@ -6782,7 +6782,7 @@
     "consonant": "g",
     "vowel": "oo",
     "shift": 0,
-    "start": 2464536,
+    "start": 2462697,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 119.4
@@ -6793,7 +6793,7 @@
     "consonant": "g",
     "vowel": "oo",
     "shift": -3,
-    "start": 2469176,
+    "start": 2467337,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 100.9
@@ -6804,7 +6804,7 @@
     "consonant": "g",
     "vowel": "oo",
     "shift": 3,
-    "start": 2473816,
+    "start": 2471977,
     "length": 4640,
     "burstS": 0.03,
     "pitchHz": 143.6

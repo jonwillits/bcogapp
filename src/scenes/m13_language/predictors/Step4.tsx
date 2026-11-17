@@ -9,29 +9,34 @@ import { STEP4_MODELS } from './texts'
 import { PREDICTIONS, TEMPERATURES, type PredictorsStore } from './store'
 
 /**
- * Step 4's screens (spec §8.5): the prompt palette from the parser, Allow
- * any token, the two next-token distributions grouped as nouns, verbs,
- * who and the end mark, attention as lines from the last token back to
- * each earlier token per layer and computation, the same word in two
- * sentences, and temperature with Generate a sentence.
+ * Step 4's screens (spec §8.5; Jon, 2026-11-17: everything in the center).
+ * The two predictions and Commit above the palette; the prompt palette from
+ * the parser, Allow any token, the two next-token distributions grouped as
+ * nouns, verbs, who and the end mark, attention as lines from the last
+ * token back to each earlier token per layer and computation, the same word
+ * in two sentences; Temperature and Generate a sentence beside the
+ * generated sentences.
  */
 const groupOf = (t: string) => (t === WHO ? 'who' : t === END ? 'the end mark' : kindOf(t) === 'verb' ? 'verbs' : 'nouns')
 const GROUPS = ['nouns', 'verbs', 'who', 'the end mark']
 
-export function Step4Controls({ s }: { s: PredictorsStore }) {
+/** The two predictions, asked once, above what they predict. */
+export function Step4Predictions({ s }: { s: PredictorsStore }) {
   const ok = s.allPredicted4
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-step4-controls>
-      {(['agree', 'temp'] as const).map((k) => {
-        const committed = s.predicted(k)
-        return (
-          <div key={k} style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 8, border: '1px solid var(--border)', borderRadius: 8 }} data-predict={k}>
-            <GroupLabel>Predict first</GroupLabel>
-            <Note>{PREDICTIONS[k].question}</Note>
-            {committed ? <FixedLines lines={[`Committed: ${committed}`]} mono={false} /> : <Choice value={s.drafts[k] ?? null} options={PREDICTIONS[k].choices.map((c) => ({ id: c, label: c }))} onChange={(c) => s.draft(k, c)} />}
-          </div>
-        )
-      })}
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        {(['agree', 'temp'] as const).map((k) => {
+          const committed = s.predicted(k)
+          return (
+            <div key={k} style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 8, border: '1px solid var(--border)', borderRadius: 8, flex: '1 1 260px', minWidth: 0 }} data-predict={k}>
+              <GroupLabel>Predict first</GroupLabel>
+              <Note>{PREDICTIONS[k].question}</Note>
+              {committed ? <FixedLines lines={[`Committed: ${committed}`]} mono={false} /> : <Choice value={s.drafts[k] ?? null} options={PREDICTIONS[k].choices.map((c) => ({ id: c, label: c }))} onChange={(c) => s.draft(k, c)} />}
+            </div>
+          )
+        })}
+      </div>
       {!ok && (
         <div>
           <Btn
@@ -46,11 +51,19 @@ export function Step4Controls({ s }: { s: PredictorsStore }) {
           </Btn>
         </div>
       )}
+    </div>
+  )
+}
+
+/** Temperature and Generate a sentence, beside the generated sentences. */
+function GenerateControls({ s }: { s: PredictorsStore }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: 220, flexShrink: 0 }} data-step4-generate>
       <GroupLabel>Temperature</GroupLabel>
-      <input type="range" min={TEMPERATURES.min} max={TEMPERATURES.max} step={TEMPERATURES.step} value={s.temperature} onChange={(e) => s.setTemperature(Number(e.target.value))} aria-label="Temperature" disabled={!ok} style={{ width: '100%' }} />
+      <input type="range" min={TEMPERATURES.min} max={TEMPERATURES.max} step={TEMPERATURES.step} value={s.temperature} onChange={(e) => s.setTemperature(Number(e.target.value))} aria-label="Temperature" style={{ width: '100%' }} />
       <FixedLines lines={[`${s.temperature.toFixed(1)}`]} />
       <div>
-        <Btn onClick={() => s.generate()} disabled={!ok || !s.final}>
+        <Btn onClick={() => s.generate()} disabled={!s.final}>
           Generate a sentence
         </Btn>
       </div>
@@ -117,16 +130,17 @@ export function Step4Stage({ s }: { s: PredictorsStore }) {
           {p}
         </Note>
       ))}
-      {s.descs && <FixedLines lines={[`transformer: ${s.descs.transformer.params.toLocaleString()} weights; held-out next-token accuracy ${(100 * s.descs.transformer.snapshots[s.descs.transformer.snapshots.length - 1].heldOutAccuracy).toFixed(1)}% after ${s.descs.transformer.snapshots[s.descs.transformer.snapshots.length - 1].updates.toLocaleString()} updates`, `recurrent network: ${s.descs.srn.params.toLocaleString()} weights; held-out next-token accuracy ${(100 * s.descs.srn.snapshots[s.descs.srn.snapshots.length - 1].heldOutAccuracy).toFixed(1)}% after ${s.descs.srn.snapshots[s.descs.srn.snapshots.length - 1].updates.toLocaleString()} updates`]} testId="model-sizes" />}
+      {s.descs && <FixedLines lines={[`transformer: ${s.descs.transformer.params.toLocaleString()} weights; held-out next-token accuracy ${(100 * s.descs.transformer.snapshots[s.descs.transformer.snapshots.length - 1].heldOutAccuracy).toFixed(1)}% after ${s.descs.transformer.snapshots[s.descs.transformer.snapshots.length - 1].updates.toLocaleString()} updates`, `recurrent network: ${s.descs.srn.params.toLocaleString()} weights; held-out next-token accuracy ${(100 * s.descs.srn.snapshots[s.descs.srn.snapshots.length - 1].heldOutAccuracy).toFixed(1)}% after ${s.descs.srn.snapshots[s.descs.srn.snapshots.length - 1].updates.toLocaleString()} updates`]} testId="model-sizes" scroll />}
       {s.loadError && <Note data-load-error>{s.loadError}</Note>}
       {!s.final && !s.loadError && <Note data-loading>The two networks are loading.</Note>}
       <Content>{TRAINED_BEFORE_LINE}</Content>
-      {!ok && <Note data-awaiting-commit>The palette, the distributions, and the attention appear once your two predictions are committed on the left.</Note>}
+      <Step4Predictions s={s} />
+      {!ok && <Note data-awaiting-commit>The palette, the distributions, and the attention appear once your two predictions above are committed.</Note>}
       {ok && (
-        <div data-reveal="networks" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div data-reveal="networks" style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
           <GroupLabel>Your prompt</GroupLabel>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }} data-prompt>
-            <FixedLines lines={[s.prompt.length ? s.prompt.join(' ') : '(empty: click a token below)']} />
+            <FixedLines lines={[s.prompt.length ? s.prompt.join(' ') : '(empty: press a token below)']} />
             {!s.promptAllowed && <Note data-not-allowed>not a sentence the grammar allows</Note>}
             <Btn small onClick={() => s.removeLast()} disabled={!s.prompt.length}>
               Remove the last token
@@ -177,8 +191,13 @@ export function Step4Stage({ s }: { s: PredictorsStore }) {
             </>
           )}
           <GroupLabel>Generated sentences</GroupLabel>
-          <Note>{`“Generate a sentence” samples one token at a time from the transformer’s probabilities at the temperature on the left, from the start of a sentence, until the end mark or 32 tokens. A low temperature favors the most probable tokens; a high one flattens the probabilities. Each sentence is marked with whether the grammar allows it.`}</Note>
-          {s.generated.length > 0 && <FixedLines lines={s.generated.map((g) => `T ${g.temperature.toFixed(1)}  ${g.allowed ? 'allowed    ' : 'not allowed'}  ${g.tokens.join(' ')}`)} testId="generated" />}
+          <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+            <GenerateControls s={s} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: '1 1 280px', minWidth: 0 }}>
+              <Note>{`“Generate a sentence” samples one token at a time from the transformer’s probabilities at the temperature set beside it, from the start of a sentence, until the end mark or 32 tokens. A low temperature favors the most probable tokens; a high one flattens the probabilities. Each sentence is marked with whether the grammar allows it.`}</Note>
+              {s.generated.length > 0 && <FixedLines lines={s.generated.map((g) => `T ${g.temperature.toFixed(1)}  ${g.allowed ? 'allowed    ' : 'not allowed'}  ${g.tokens.join(' ')}`)} testId="generated" scroll />}
+            </div>
+          </div>
           <Content>{NOT_ENGLISH_LINE}</Content>
           <Note>{`Your predictions: after boys who Mary chases, ${s.predicted('agree')}; at temperature 2.0, ${s.predicted('temp')}.`}</Note>
           <ReferencePanel reference={reference('elman-1991')} />

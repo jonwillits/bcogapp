@@ -8,16 +8,18 @@ import type { PartContext, PartModule } from './contract'
 import { WordsStore, WORDS_UNIT } from './words/store'
 import { SCREENS, STEP_TITLES } from './words/screens'
 import { Step12Stage } from './words/Step12'
-import { Step3Stage, Step3Controls } from './words/Step3'
+import { Step3Stage } from './words/Step3'
 import { WordsReveal, WordsResults } from './words/Reveal'
 import { loadObjects, loadWordFiles, type ObjectFile, type WordFile } from './words/assets'
 import { registerResults } from './Part0'
 
 /**
- * Part 3's screens (spec §7): the left column runs the step; the stage
- * carries the instruction screen and then the trials, the test, or the
- * models; the right column carries the reveal of Steps 1 and 2 once the
- * test is done, and a line saying what is missing before that.
+ * Part 3's screens (spec §7): the left column is navigation only (Jon,
+ * 2026-11-16, LAB_COMMON_FEATURES §1); the stage carries the instruction
+ * screen and then the trials, the test, or the models with their
+ * prediction and settings; the right column carries the reveal of Steps 1
+ * and 2 once the test is done, and a line saying what is missing before
+ * that.
  */
 
 type Ctx = PartContext<WordsStore>
@@ -43,7 +45,7 @@ function progressLines(s: WordsStore): string[] {
 }
 
 function Left({ ctx }: { ctx: Ctx }) {
-  return <StepLeft ctx={ctx} tab="words" screens={SCREENS} progressLines={progressLines} topLines={[HEADPHONES_LINE]} controls={(s) => (s.step === 3 ? <Step3Controls s={s} /> : s.currentTrial ? <Note>{s.trialLabel}. The results of Steps 1 and 2 appear on the right when the test is done.</Note> : null)} />
+  return <StepLeft ctx={ctx} tab="words" screens={SCREENS} progressLines={progressLines} topLines={[HEADPHONES_LINE]} />
 }
 
 function Stage({ ctx }: { ctx: Ctx }) {
@@ -60,7 +62,7 @@ function Right({ ctx }: { ctx: Ctx }) {
         <FixedLines lines={progressLines(s)} testId="results-progress" />
         {s.loadError && <Note data-load-error>{s.loadError}</Note>}
         {s.step !== 3 && (r && s.loadedOk ? <WordsReveal seed={s.seed} result={r} words={s.words} objects={s.objects} /> : r ? <Note data-loading>Loading the words and objects.</Note> : <Note data-results-pending>The results of Steps 1 and 2 appear here once the test is done. Nothing about which object a word names is shown before then.</Note>)}
-        {s.step === 3 && s.state !== 'intro' && <Content>The key measure, the two models, and the three rows are in the center. Your prediction and the models’ settings are on the left.</Content>}
+        {s.step === 3 && s.state !== 'intro' && <Content>Your prediction, the key measure, the two models, the three rows, and the models’ settings are in the center.</Content>}
       </div>
     </Panel>
   )

@@ -8,19 +8,22 @@ import { STEP5_PANEL } from './texts'
 import type { PredictorsStore } from './store'
 
 /**
- * Step 5's screens (spec §8.6): the snapshot slider; at each snapshot the
- * two networks' distributions for one fixed prompt, agreement by depth,
- * and the transformer's input embeddings on a plane beside the count
- * model's points.
+ * Step 5's screens (spec §8.6; Jon, 2026-11-17: everything in the center).
+ * The snapshot slider and Change the prompt above the panels; at each
+ * snapshot the two networks' distributions for one fixed prompt, agreement
+ * by depth, and the transformer's input embeddings on a plane beside the
+ * count model's points.
  */
 export function Step5Controls({ s }: { s: PredictorsStore }) {
   const n = s.snapshotUpdates.length
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-step5-controls>
-      <GroupLabel>Snapshot</GroupLabel>
-      <input type="range" min={0} max={n - 1} step={1} value={s.snapshotIndex} onChange={(e) => void s.setSnapshot(Number(e.target.value))} aria-label="Snapshot" style={{ width: '100%' }} />
-      <FixedLines lines={[`after ${s.snapshotUpdates[s.snapshotIndex].toLocaleString()} updates`]} />
-      <div>
+    <div style={{ display: 'flex', gap: 16, alignItems: 'flex-end', flexWrap: 'wrap' }} data-step5-controls>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, width: 260 }}>
+        <GroupLabel>Snapshot</GroupLabel>
+        <input type="range" min={0} max={n - 1} step={1} value={s.snapshotIndex} onChange={(e) => void s.setSnapshot(Number(e.target.value))} aria-label="Snapshot" style={{ width: '100%' }} />
+        <FixedLines lines={[`after ${s.snapshotUpdates[s.snapshotIndex].toLocaleString()} updates`]} />
+      </div>
+      <div style={{ paddingBottom: 2 }}>
         <Btn onClick={() => s.changePrompt()}>Change the prompt</Btn>
       </div>
       {s.loadingSnapshot && <Note data-loading>Loading the snapshot.</Note>}
@@ -59,9 +62,10 @@ export function Step5Stage({ s }: { s: PredictorsStore }) {
         </Note>
       ))}
       <Content>{TRAINED_BEFORE_LINE}</Content>
+      <Step5Controls s={s} />
       {!models && <Note data-loading>{s.loadError ?? 'The snapshot is loading.'}</Note>}
       {models && out && agree && (
-        <div data-snapshot={updates} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div data-snapshot={updates} style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
           <GroupLabel>{`After ${updates.toLocaleString()} updates: the next token after “${s.fixedPrompt.join(' ')}”`}</GroupLabel>
           <Note>The twelve most probable tokens for each network; plural verb forms green, singular orange, other tokens blue.</Note>
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
@@ -80,7 +84,7 @@ export function Step5Stage({ s }: { s: PredictorsStore }) {
           {desc && (
             <>
               <GroupLabel>Every snapshot: held-out accuracy and agreement by depth, as measured when the networks were trained</GroupLabel>
-              <FixedLines lines={['updates    transformer: acc  d0  d1  d2  d3     recurrent: acc  d0  d1  d2  d3', ...desc.transformer.snapshots.map((sn, i) => { const r = desc.srn.snapshots[i]; const f = (x: number) => String(Math.round(100 * x)).padStart(3); return `${String(sn.updates).padStart(7)}    ${f(sn.heldOutAccuracy)}% ${[0, 1, 2, 3].map((d) => f(sn.agreementByDepth[String(d)])).join(' ')}      ${f(r.heldOutAccuracy)}% ${[0, 1, 2, 3].map((d) => f(r.agreementByDepth[String(d)])).join(' ')}` })]} testId="all-snapshots" />
+              <FixedLines lines={['updates    transformer: acc  d0  d1  d2  d3     recurrent: acc  d0  d1  d2  d3', ...desc.transformer.snapshots.map((sn, i) => { const r = desc.srn.snapshots[i]; const f = (x: number) => String(Math.round(100 * x)).padStart(3); return `${String(sn.updates).padStart(7)}    ${f(sn.heldOutAccuracy)}% ${[0, 1, 2, 3].map((d) => f(sn.agreementByDepth[String(d)])).join(' ')}      ${f(r.heldOutAccuracy)}% ${[0, 1, 2, 3].map((d) => f(r.agreementByDepth[String(d)])).join(' ')}` })]} testId="all-snapshots" scroll />
             </>
           )}
           <GroupLabel>The transformer’s input embeddings, beside the count model’s points</GroupLabel>

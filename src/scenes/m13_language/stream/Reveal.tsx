@@ -93,7 +93,7 @@ export function BoardReveal({ seed, result }: { seed: number; result: BoardResul
         </div>
       </Section>
       <Section n={3} title="Each word’s average transitional probability inside it">
-        <Para>For each word, the mean of its two transitions from the table, from highest to lowest. The original study split the six words this way and found that the three words with the highest average transitional probabilities were learned better than the three with the lowest, 79% against 72% (p. 614). Beside it, where each word fell in your own order of finding; shown words have no place.</Para>
+        <Para>For each word, the mean of its two transitions from the table, from highest to lowest. The original study’s authors split the six words this way and found that the three words with the highest average transitional probabilities were learned better than the three with the lowest, 79% against 72% (p. 614). Beside it, where each word fell in your own order of finding; shown words have no place.</Para>
         <FixedLines lines={avgs.map((a, i) => `${i + 1}. ${a.word.padEnd(7)} average ${a.avg.toFixed(2)}   your order: ${foundOrder.includes(a.word) ? `found ${foundOrder.indexOf(a.word) + 1}${['st', 'nd', 'rd'][foundOrder.indexOf(a.word)] ?? 'th'}` : 'shown'}`)} testId="word-averages" />
         <Note data-ranking>{foundOrder.length >= 2 ? `The three words highest by average transitional probability are ${rank.slice(0, 3).join(', ')}; of the words you found, ${foundOrder.filter((w) => rank.slice(0, 3).includes(w)).length} of your first ${Math.min(3, foundOrder.length)} were among them.` : 'You found fewer than two words, so there is no order of finding to compare.'}</Note>
         <ReferencePanel reference={reference('saffran-high-low')} />

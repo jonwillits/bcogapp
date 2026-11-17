@@ -143,10 +143,12 @@ export class SoundsStore extends StepStore<Step> {
     return this.step === 3 && this.progress.isComplete(LABELING_UNIT) && !this.progress.isComplete(ABX_UNIT) && this.block === null && this.blockStopped === null
   }
 
-  protected onOpen(): void {
+  protected onOpen(step: Step): void {
     this.stopBlock(null)
     player.stop()
     this.playing = null
+    // A finished or half-finished step draws its pictures from the decoded sounds, which `onBegin` alone would never load again after a reload (Jon, 2026-11-17: Step 2's six spectrograms came back black). Decode them when such a step is opened.
+    if (this.isDone(step) || this.underWay(step)) void this.ensureLoaded(step)
   }
 
   protected onBegin(step: Step): void {

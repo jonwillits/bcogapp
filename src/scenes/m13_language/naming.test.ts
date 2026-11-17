@@ -152,6 +152,11 @@ describe('words that must not be on screen (§11, items 6, 7 and 14)', () => {
       [/\b(view|picture|spectrogram|plot) measures\b/i, 'a view shows; a program measures'],
       [/\b(block|run|trial) (asks?|wants?)\b/i, 'in a block the student gives an answer'],
       [/\bit assumes that\b/i, 'a formula rests on an assumption; people assume'],
+      // Jon, Lab 13 walk, 2026-11-17 (Part 2's screens): a panel that runs a learner, a learner that needs listening, a menu that chooses.
+      [/\b(panel|screen|table|plot|strip) (runs|computes|trains)\b/i, 'a program runs; a panel shows what was run'],
+      [/\b(learners?|networks?|models?|programs?|classifiers?) (needs?|will need|needed)\b/i, 'a program takes in or is given; it does not need'],
+      [/\bmenu( on the \w+)? chooses\b/i, 'the student chooses from a menu'],
+      [/\bdarkness shows energy\b/i, 'the lab draws bright on dark: brightness shows energy'],
       [/\bwe record\b/i, 'say what the student will see, not what the build does'],
       [/\bthe (run|table|panel|strip|step|board) records\b/i, 'say what the student will see'],
       [/\b(this|the) step (runs|reproduces|simulates|states)\b/i, 'the student runs; a step opens'],

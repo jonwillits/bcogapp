@@ -7,14 +7,15 @@ import { STEP4_PANEL } from './texts'
 import type { StreamStore } from './store'
 
 /**
- * Step 4's screens (spec §6.4): a menu of utterances, the strip with the
- * transitional probability above each pair and the true boundaries under
- * it, Show stress, the histogram of transitional probabilities inside
+ * Step 4's screens (spec §6.4), all in the center (the left column is
+ * navigation only; Jon, 2026-11-16): a menu of utterances, the strip with
+ * the transitional probability above each pair and the true boundaries
+ * under it, Show stress, the histogram of transitional probabilities inside
  * words and across boundaries in the sample beside the made-up language's,
  * the dips learner's two shares on both, the other cues, and the pending
  * reference.
  */
-export function Step4Controls({ s }: { s: StreamStore }) {
+function Step4Controls({ s }: { s: StreamStore }) {
   const r = s.real
   if (!r) return <Note data-loading>The sample is loading.</Note>
   return (
@@ -56,6 +57,7 @@ export function Step4Stage({ s }: { s: StreamStore }) {
           {p}
         </Note>
       ))}
+      <Step4Controls s={s} />
       <GroupLabel>{u.words.join(' ')}</GroupLabel>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 0, overflowX: 'auto', paddingBottom: 6 }} data-utterance-strip>
         {u.syllables.map((syl, i) => (
@@ -96,7 +98,7 @@ export function Step4Stage({ s }: { s: StreamStore }) {
       <Note>The first learner of Step 3, run on the whole sample: a cut wherever a transitional probability is lower than at both neighboring pairs. Two shares: how many of its cuts fall on a true word boundary, and how many of the true boundaries it finds. The same two shares for the made-up language over 21 minutes are beside them.</Note>
       <FixedLines lines={['                                   real speech   made-up language', `cuts that fall on a word boundary   ${pct(r.dipsLearner.precision).padStart(8)}      ${pct(r.madeUpLanguage.shares.precision).padStart(8)}`, `word boundaries found               ${pct(r.dipsLearner.recall).padStart(8)}      ${pct(r.madeUpLanguage.shares.recall).padStart(8)}`, `cuts made                          ${r.dipsLearner.cuts.toLocaleString().padStart(9)}      ${r.madeUpLanguage.shares.cuts.toLocaleString().padStart(8)}`, `true boundaries                    ${r.dipsLearner.boundaries.toLocaleString().padStart(9)}      ${r.madeUpLanguage.shares.boundaries.toLocaleString().padStart(8)}`]} testId="dips-shares" />
       <GroupLabel>The other cues</GroupLabel>
-      <Note>In English conversation, about 90% of content words, such as nouns and verbs, begin with a stressed syllable, and infants use stress and the patterns of which sounds can occur together as cues to word boundaries as well (§13.2.3). Press “Show stress” on the left to mark the syllables the dictionary gives primary stress.</Note>
+      <Note>In English conversation, about 90% of content words, such as nouns and verbs, begin with a stressed syllable, and infants use stress and the patterns of which sounds can occur together as cues to word boundaries as well (§13.2.3). Press “Show stress” above the strip to mark the syllables the dictionary gives primary stress.</Note>
       <FixedLines lines={[`The sample: ${r.utterancesUsed.toLocaleString()} utterances from ${r.transcriptsUsed.toLocaleString()} transcripts in ${r.corpora.length} corpora; ${r.syllableTokens.toLocaleString()} syllables of ${r.syllableTypes.toLocaleString()} kinds; ${r.utterancesDropped.toLocaleString()} utterances dropped for a word not in the dictionary.`, `Syllables: ${r.syllabification}.`]} mono={false} />
       <Content>{REAL_SPEECH_LINE}</Content>
       <Note>{r.citation}</Note>

@@ -8,47 +8,58 @@ import { STEP3_ONE_POINT, STEP3_ORDER, STEP3_PREDICT } from './texts'
 import { PREDICTIONS, type PredictorsStore } from './store'
 
 /**
- * Step 3's screens (spec §8.4): Order, with the two sentences' contributions
- * and the switch; Prediction from counts, with its committed prediction,
- * Compute, and the two distributions over every word; One point per word.
+ * Step 3's screens (spec §8.4; Jon, 2026-11-17: everything in the center).
+ * The three screens' names at the top of the stage; Order, with the two
+ * sentences' contributions and the switch above them; Prediction from
+ * counts, with its prediction and Compute above the two distributions over
+ * every word; One point per word.
  */
 const idx = (t: string) => VOCABULARY.indexOf(t)
 
-export function Step3Controls({ s }: { s: PredictorsStore }) {
-  const committed = s.predicted('counts')
+/** The three screens' names, at the top of the stage. */
+export function Step3Screens({ s }: { s: PredictorsStore }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-step3-controls>
       <Choice value={s.screen3} options={[{ id: 'order', label: 'Order' }, { id: 'predict', label: 'Prediction from counts' }, { id: 'point', label: 'One point per word' }]} onChange={(v) => s.goScreen3(v as 'order' | 'predict' | 'point')} />
-      {s.screen3 === 'order' && (
-        <label style={{ fontSize: 12, display: 'flex', gap: 6, alignItems: 'center' }}>
-          <input type="checkbox" checked={s.separate} onChange={(e) => s.setSeparate(e.target.checked)} /> Count words before and after separately
-        </label>
-      )}
-      {s.screen3 === 'predict' && (
-        <>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 8, border: '1px solid var(--border)', borderRadius: 8 }} data-predict="counts">
-            <GroupLabel>Predict first</GroupLabel>
-            <Note>{PREDICTIONS.counts.question}</Note>
-            {committed ? (
-              <FixedLines lines={[`Committed: ${committed}`]} mono={false} />
-            ) : (
-              <>
-                <Choice value={s.drafts.counts ?? null} options={PREDICTIONS.counts.choices.map((c) => ({ id: c, label: c }))} onChange={(c) => s.draft('counts', c)} />
-                <div>
-                  <Btn primary onClick={() => s.commit('counts')} disabled={!s.drafts.counts}>
-                    Commit my prediction
-                  </Btn>
-                </div>
-              </>
-            )}
-          </div>
-          <div>
-            <Btn primary onClick={() => s.compute()} disabled={!committed || s.computed}>
-              Compute
-            </Btn>
-          </div>
-        </>
-      )}
+    </div>
+  )
+}
+
+/** The Order screen's switch, above the two tables. */
+function SeparateSwitch({ s }: { s: PredictorsStore }) {
+  return (
+    <label style={{ fontSize: 12, display: 'flex', gap: 6, alignItems: 'center' }}>
+      <input type="checkbox" checked={s.separate} onChange={(e) => s.setSeparate(e.target.checked)} /> Count words before and after separately
+    </label>
+  )
+}
+
+/** The Prediction screen's prediction and Compute, above the two distributions. */
+function PredictControls({ s }: { s: PredictorsStore }) {
+  const committed = s.predicted('counts')
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-step3-predict-controls>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 8, border: '1px solid var(--border)', borderRadius: 8, maxWidth: 560 }} data-predict="counts">
+        <GroupLabel>Predict first</GroupLabel>
+        <Note>{PREDICTIONS.counts.question}</Note>
+        {committed ? (
+          <FixedLines lines={[`Committed: ${committed}`]} mono={false} />
+        ) : (
+          <>
+            <Choice value={s.drafts.counts ?? null} options={PREDICTIONS.counts.choices.map((c) => ({ id: c, label: c }))} onChange={(c) => s.draft('counts', c)} />
+            <div>
+              <Btn primary onClick={() => s.commit('counts')} disabled={!s.drafts.counts}>
+                Commit my prediction
+              </Btn>
+            </div>
+          </>
+        )}
+      </div>
+      <div>
+        <Btn primary onClick={() => s.compute()} disabled={!committed || s.computed}>
+          Compute
+        </Btn>
+      </div>
     </div>
   )
 }
@@ -82,6 +93,8 @@ export function Step3Stage({ s }: { s: PredictorsStore }) {
   return (
     <StagePanel wide testId={`predictors-3-${s.screen3}`}>
       <div style={{ fontSize: 14, fontWeight: 600 }}>What counts cannot do</div>
+      <Note>Three screens. Press a screen’s name to go to it.</Note>
+      <Step3Screens s={s} />
       {s.screen3 === 'order' && (
         <>
           {STEP3_ORDER.map((p) => (
@@ -89,6 +102,7 @@ export function Step3Stage({ s }: { s: PredictorsStore }) {
               {p}
             </Note>
           ))}
+          <SeparateSwitch s={s} />
           <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
             <Contribution sentence={a.slice(0, 3)} separate={s.separate} />
             <Contribution sentence={b.slice(0, 3)} separate={s.separate} />
@@ -104,7 +118,8 @@ export function Step3Stage({ s }: { s: PredictorsStore }) {
             </Note>
           ))}
           <Note>{`The prompt: ${usedPrompt.join(' ')}. ${hasThe ? '' : 'The grammar has no article, so the prompt is boys who dogs chase: a plural subject, boys, with a relative clause whose own noun, dogs, is also plural; the next word in the grammar is a plural verb.'}`}</Note>
-          {!s.computed && <Note data-awaiting-commit>The two distributions appear once your prediction is committed on the left and “Compute” is pressed.</Note>}
+          <PredictControls s={s} />
+          {!s.computed && <Note data-awaiting-commit>The two distributions appear once your prediction above is committed and “Compute” is pressed.</Note>}
           {s.computed && (
             <div data-reveal="ngram" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <GroupLabel>{`From the one word before: after ${usedPrompt[usedPrompt.length - 1]}`}</GroupLabel>
@@ -126,7 +141,7 @@ export function Step3Stage({ s }: { s: PredictorsStore }) {
             </Note>
           ))}
           {s.model && !s.counting ? (
-            <FixedLines lines={[`chases, in “boys who Mary chases walk”:  the one list of ${embedding(s.model, idx('chases')).length} counts`, `chases, in “Mary chases boys”:           the same list of ${embedding(s.model, idx('chases')).length} counts`, `the first ten counts of that list: ${Array.from(embedding(s.model, idx('chases')).slice(0, 10)).map((v) => Math.round(v)).join(' ')}`]} testId="one-point" />
+            <FixedLines lines={[`chases, in “boys who Mary chases walk”:  the one list of ${embedding(s.model, idx('chases')).length} counts`, `chases, in “Mary chases boys”:           the same list of ${embedding(s.model, idx('chases')).length} counts`, `the first ten counts of that list: ${Array.from(embedding(s.model, idx('chases')).slice(0, 10)).map((v) => Math.round(v)).join(' ')}`]} testId="one-point" scroll />
           ) : (
             <Note>Run “Count” in Step 2 to see the list.</Note>
           )}

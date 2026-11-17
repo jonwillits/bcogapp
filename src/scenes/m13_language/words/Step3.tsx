@@ -6,44 +6,60 @@ import { FITTED_TO_YOUR_ACCURACY_LINE, SMALL_NUMBERS_LINE } from '../lines'
 import { PREDICTION, type WordsStore } from './store'
 
 /**
- * Step 3's screens (spec §7.3): the prediction committed first; the key
- * measure for the student (or the one-line notice that the models run on a
- * sample sequence); the two models' panels; Run the models; the three rows
- * with each cell's mean and 90% range; the two sliders with Back to the
- * fitted value; the line about how often 48 pairs tell the models apart,
- * from the build's measurement; and the pending references.
+ * Step 3's screens (spec §7.3), all in the center (the left column is
+ * navigation only; Jon, 2026-11-16): the prediction committed first; the
+ * key measure for the student (or the one-line notice that the models run
+ * on a sample sequence); the two models' panels; Run the models; the three
+ * rows with each cell's mean and 90% range; the two sliders with Back to
+ * the fitted value; the line about how often 48 pairs tell the models
+ * apart, from the build's measurement; and the pending references.
  */
 const pct = (x: number) => (Number.isNaN(x) ? '  —' : `${Math.round(100 * x)}%`.padStart(4))
 
 /** From the build's measurement (docs/M13_AS_BUILT_NOTES.md §4.4): students simulated by each model at a range of accuracies, and how often their after-wrong share fell inside the other model's 90% range. */
 export const HOW_OFTEN_LINE = 'In the build’s measurement, for simulated students with an overall accuracy near chance (about 25%), the after-wrong share fell inside both models’ ranges about 7 times in 10, so 48 pairs did not tell the two apart. For simulated students at 33% accuracy and above, the after-wrong share fell inside the range of the model that produced it 19 times in 20 and inside the other model’s range 2 times in 20 or fewer.'
 
-export function Step3Controls({ s }: { s: WordsStore }) {
+/** The prediction, at the top of the stage. */
+function PredictionBox({ s }: { s: WordsStore }) {
   const committed = s.predicted()
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-step3-controls>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 8, border: '1px solid var(--border)', borderRadius: 8 }} data-predict="after-wrong">
-        <GroupLabel>Predict first</GroupLabel>
-        <Note>{PREDICTION.question}</Note>
-        {committed ? (
-          <FixedLines lines={[`Committed: ${committed}`]} mono={false} />
-        ) : (
-          <>
-            <Choice value={s.draft} options={PREDICTION.choices.map((c) => ({ id: c, label: c }))} onChange={(c) => s.setDraft(c)} />
-            <div>
-              <Btn primary onClick={() => s.commit()} disabled={!s.draft}>
-                Commit my prediction
-              </Btn>
-            </div>
-          </>
-        )}
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 8, border: '1px solid var(--border)', borderRadius: 8 }} data-predict="after-wrong">
+      <GroupLabel>Predict first</GroupLabel>
+      <Note>{PREDICTION.question}</Note>
+      {committed ? (
+        <FixedLines lines={[`Committed: ${committed}`]} mono={false} />
+      ) : (
+        <>
+          <Choice value={s.draft} options={PREDICTION.choices.map((c) => ({ id: c, label: c }))} onChange={(c) => s.setDraft(c)} />
+          <div>
+            <Btn primary onClick={() => s.commit()} disabled={!s.draft}>
+              Commit my prediction
+            </Btn>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+/** Run the models, in the section of the three rows. */
+function RunButton({ s }: { s: WordsStore }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-step3-controls>
       <div>
-        <Btn primary onClick={() => s.runModels()} disabled={!committed || s.computing || s.fitted !== null}>
+        <Btn primary onClick={() => s.runModels()} disabled={!s.predicted() || s.computing || s.fitted !== null}>
           Run the models
         </Btn>
       </div>
       {s.computing && <Note data-computing>Fitting each model’s setting and running it 200 times.</Note>}
+    </div>
+  )
+}
+
+/** The two settings, under the rows, once the models have run. */
+function Sliders({ s }: { s: WordsStore }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-step3-sliders>
       {s.fitted && (
         <>
           <GroupLabel>Guess and check’s setting, α</GroupLabel>
@@ -77,7 +93,8 @@ export function Step3Stage({ s }: { s: WordsStore }) {
     <StagePanel wide testId="words-3">
       <div style={{ fontSize: 14, fontWeight: 600 }}>Two models on your trials</div>
       {s.usingSample && <Note data-missing="steps12">Steps 1 and 2 are not done, so the models run on a sample sequence of 60 trials drawn from your seed, with the choices of a scripted chooser standing in for yours. Your own row stays empty until Steps 1 and 2 are done.</Note>}
-      {!committed && <Note data-awaiting-commit>The key measure and the models appear once your prediction is committed on the left.</Note>}
+      <PredictionBox s={s} />
+      {!committed && <Note data-awaiting-commit>The key measure and the models appear once your prediction is committed above.</Note>}
       {committed && (
         <div data-reveal="models" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <Section n={1} title="The key measure">
@@ -100,12 +117,13 @@ export function Step3Stage({ s }: { s: WordsStore }) {
             <Content>{FITTED_TO_YOUR_ACCURACY_LINE}</Content>
           </Section>
           <Section n={3} title="The three rows">
-            {!gc && !ta && <Note>Press “Run the models” on the left.</Note>}
+            <RunButton s={s} />
             {gc && ta && (
               <>
                 <FixedLines lines={['                     after right          after wrong         overall', `you                  ${km ? pct(share(km.afterRight)).padEnd(21) : '  —'.padEnd(21)}${km ? pct(share(km.afterWrong)).padEnd(20) : '  —'.padEnd(20)}${km ? pct(km.accuracy) : '  —'}`, `guess and check      ${pct(gc.afterRight.mean)} [${pct(gc.afterRight.lo).trim()}–${pct(gc.afterRight.hi).trim()}]`.padEnd(42) + `${pct(gc.afterWrong.mean)} [${pct(gc.afterWrong.lo).trim()}–${pct(gc.afterWrong.hi).trim()}]`.padEnd(20) + pct(gc.accuracy.mean), `tallying             ${pct(ta.afterRight.mean)} [${pct(ta.afterRight.lo).trim()}–${pct(ta.afterRight.hi).trim()}]`.padEnd(42) + `${pct(ta.afterWrong.mean)} [${pct(ta.afterWrong.lo).trim()}–${pct(ta.afterWrong.hi).trim()}]`.padEnd(20) + pct(ta.accuracy.mean), 'chance                20%                  20%                 20%']} testId="three-rows" />
                 <Para>{`Guess and check at α = ${gc.param.toFixed(3)} reaches an overall accuracy of ${pct(gc.accuracy.mean).trim()} (the fit aimed at ${pct(s.targetAccuracy).trim()}); tallying at β = ${ta.param.toFixed(2)} reaches ${pct(ta.accuracy.mean).trim()}. After a wrong choice, guess and check is correct ${pct(gc.afterWrong.mean).trim()} of the time and tallying ${pct(ta.afterWrong.mean).trim()}${km ? `; you were correct ${pct(share(km.afterWrong)).trim()} of the time` : ''}.`}</Para>
                 {s.fitted && gc.accuracy.mean < s.targetAccuracy - 0.05 && <Note data-ceiling>{`Guess and check, as stated here, cannot reach an overall accuracy of ${pct(s.targetAccuracy).trim()}: at α = 1 it keeps a wrong pick whenever that object is on the screen again, and its accuracy tops out near ${pct(gc.accuracy.mean).trim()}. The fit chose the value nearest your accuracy.`}</Note>}
+                <Sliders s={s} />
               </>
             )}
             <Content>{SMALL_NUMBERS_LINE}</Content>

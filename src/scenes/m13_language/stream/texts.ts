@@ -17,7 +17,7 @@ export const STEP1_AFTER_COMMIT = [
 export const PREDICTION_QUESTIONS = {
   partwords: { key: 'p2-s3-partwords', question: 'The test has two versions: each word against a nonword, a string of syllables from the language in an order never heard, or against a part-word, a string made of two syllables of a word plus one more. Will the part-word test be harder for the learners than the nonword test?', choices: ['harder', 'about the same', 'easier'] },
   reach76: { key: 'p2-s3-reach76', question: 'The adults in the original experiment scored 76% against nonwords after 21 minutes. At which amount of listening will the first learner, cut at the dips, first reach 76% against nonwords?', choices: ['30 seconds', '1 minute', '2 minutes', '4 minutes or more'] },
-  least: { key: 'p2-s3-least', question: 'Which of the learners will need the least listening to reach 76% against nonwords?', choices: ['cut at the dips', 'the simple recurrent network', 'PARSER', 'they will tie'] },
+  least: { key: 'p2-s3-least', question: 'Which of the learners will reach 76% against nonwords with the least listening?', choices: ['cut at the dips', 'the simple recurrent network', 'PARSER', 'they will tie'] },
 } as const
 
 export const LEARNER_NAMES = { dips: 'Cut at the dips', srn: 'A simple recurrent network', parser: 'PARSER' } as const

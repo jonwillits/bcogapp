@@ -1,15 +1,73 @@
+import type { Category, VerbClass } from '../../../sim/language/predictors/grammar'
+
 /**
- * Part 4's panel texts: the grammar's rules in plain sentences, the count
- * model's explanation, what counts cannot do, the two networks, and the
- * snapshots. Every chapter term defined as the chapter defines it, with
- * its section (spec §4.4).
+ * Part 4's panel texts: the grammar's symbols and rules, the count model's
+ * explanation, the one similarity measure, what counts cannot do, the two
+ * networks, and the snapshots. Every chapter term defined as the chapter
+ * defines it, with its section (spec §4.4). The vocabulary's groups and the
+ * verbs' subjects and objects are built on the screen from grammar.ts, so
+ * that they cannot go stale (Jon, 2026-11-17).
  */
+
+/** The nouns' groups in plain words, as Step 1 lists the vocabulary. */
+export const GROUP_NAMES: Record<Category, string> = {
+  human: 'people',
+  animalLarge: 'large animals',
+  animalSmall: 'small animals',
+  breakable: 'things that break',
+  food: 'food',
+  other: 'other things',
+}
+
+/** The verbs' three classes in plain words. */
+export const CLASS_NAMES: Record<VerbClass, string> = {
+  transitive: 'needs an object',
+  optional: 'may have an object or not',
+  intransitive: 'never has an object',
+}
+
+const EVERY_GROUP: Category[] = ['human', 'animalLarge', 'animalSmall', 'breakable', 'food', 'other']
+
+/** A set of groups in plain words: every group is “anything”; both animal groups together are “animals”; otherwise the groups' names, joined. */
+export function groupsInWords(cats: readonly Category[]): string {
+  if (EVERY_GROUP.every((c) => cats.includes(c))) return 'anything'
+  const set = new Set(cats)
+  const parts: string[] = []
+  if (set.has('human')) parts.push(GROUP_NAMES.human)
+  if (set.has('animalLarge') && set.has('animalSmall')) parts.push('animals')
+  else if (set.has('animalLarge')) parts.push(GROUP_NAMES.animalLarge)
+  else if (set.has('animalSmall')) parts.push(GROUP_NAMES.animalSmall)
+  for (const c of ['breakable', 'food', 'other'] as const) if (set.has(c)) parts.push(GROUP_NAMES[c])
+  if (parts.length <= 1) return parts.join('')
+  return `${parts.slice(0, -1).join(', ')} or ${parts[parts.length - 1]}`
+}
+
+/** The grammar as rewrite rules, each with its reading in plain words. The rule is printed in a monospace block; the reading beside it. */
+export const REWRITE_RULES: { rule: string; reading: string }[] = [
+  { rule: 'S  → NP VP .', reading: 'a sentence is a noun phrase, then a verb phrase, then the end mark' },
+  { rule: 'NP → N  |  N who RC', reading: 'a noun phrase is a noun alone, or a noun followed by who and a relative clause' },
+  { rule: 'VP → V  |  V NP', reading: 'a verb phrase is a verb alone, or a verb and the noun phrase that is its object' },
+  { rule: 'RC → VP  |  NP V', reading: 'a relative clause is a verb phrase, so the noun before who is its subject (boy who chases dogs), or a noun phrase and a verb, so the noun before who is its object (boy who dogs chase)' },
+]
+
+/** Every symbol in the rules, defined. */
+export const GRAMMAR_SYMBOLS: { symbol: string; meaning: string }[] = [
+  { symbol: '→', meaning: 'read “is made of”: the symbol on the left is made of the symbols on the right, in that order' },
+  { symbol: '|', meaning: 'read “or”: one of the choices is taken' },
+  { symbol: 'S', meaning: 'a sentence' },
+  { symbol: 'NP', meaning: 'a noun phrase: a noun, with a relative clause attached to it or not' },
+  { symbol: 'VP', meaning: 'a verb phrase: a verb, with its object or not' },
+  { symbol: 'N', meaning: 'one noun from the vocabulary, a person, an animal or a thing, in its singular or its plural form' },
+  { symbol: 'V', meaning: 'one verb from the vocabulary, in its singular or its plural form' },
+  { symbol: 'RC', meaning: 'a relative clause: what follows who and says more about the noun before it' },
+  { symbol: '.', meaning: 'the end mark, the token that ends every sentence' },
+]
+
+/** The rules the rewrite rules leave out, in plain sentences. */
 export const GRAMMAR_RULES = [
-  'Every sentence has a subject noun, then a verb, then sometimes an object noun, then the end mark. The nouns are in six groups: people (boy, girl, man, woman, and the names John and Mary), large animals (dog, cat, lion), small animals (mouse, bird), things that break (glass, plate), food (cookie, sandwich), and other things (rock).',
-  'A singular subject takes the singular form of the verb (boy walks) and a plural subject the plural form (boys walk), even when a relative clause comes between the subject and its verb (boys who Mary chases walk).',
-  'Some verbs need an object: chases, feeds, breaks, carries. Some may have one or not: eats, sees, hears. Some cannot have one: walks, lives, sleeps.',
-  'Which nouns go with which verbs: only people and animals chase, feed, eat, see, hear, walk, live, and sleep; only people feed; only people and large animals break and carry; only food is eaten; only things that break are broken; only people and animals are chased, fed, and heard.',
-  'A relative clause begins with who after a person or animal, and says more about that noun. Either the noun is the clause’s subject (boy who chases dogs) or its object (boy who dogs chase). A relative clause can contain another, up to three deep.',
+  'N and V agree in number: a singular noun takes the singular verb form (boy walks) and a plural noun the plural form (boys walk). The V of the sentence’s verb phrase agrees with the N that begins the sentence’s noun phrase, even when a relative clause comes between them (boys who Mary chases walk). In RC → VP, the verb agrees with the noun before who; in RC → NP V, it agrees with the noun inside the clause.',
+  'Which verbs take an object, and which nouns may be a verb’s subject or its object, are in the list of verbs above. A verb that needs an object always takes VP → V NP; a verb that never has one always takes VP → V; a verb that may have one takes either, and the object’s noun is drawn from the groups the list names.',
+  'The subject of a sentence is always a person or an animal, and only a person or an animal can be followed by who. A relative clause can contain another, up to three deep. There is no article: no the or a.',
 ]
 
 export const STEP2_PANEL = [
@@ -17,10 +75,16 @@ export const STEP2_PANEL = [
   'Each word’s list of counts, one for each other word, is its embedding (§13.2.10): a list of numbers learned from the word’s contexts, so that words used alike have similar lists. With “Count words before and after separately” on, the list of words that came before and the list of words that came after are joined into one list twice as long, as the original program did; off, the two are added together.',
 ]
 
+/** The one similarity measure of Step 2, defined in plain words (Jon, 2026-11-17: correlation, not cosine, because it is easier to explain). */
+export const SIMILARITY_TEXT = [
+  'How similar are two words? Take their two lists of counts, one count per column of the table, and compute the correlation of the two lists: how the two rise and fall together over the same positions. A correlation of 1 means the two lists rise and fall exactly in step, 0 means no relation, and −1 means exactly opposite.',
+  'To compute it, each list is centered on its own mean (the mean of the list is subtracted from every count in it) and divided by its own spread, so that a frequent word and a rare word are compared on the same footing; then the products of the two centered, scaled lists are averaged, position by position. The four strips below show four words’ lists in the table’s colors, shrunk to fit; the matrix under them shows the correlation of every pair.',
+]
+
 export const VIEWS_TEXT = {
   plane: 'The plane: each word’s list of counts is a point in a space with one dimension per count. The plane shows only the two directions in which the words’ lists differ most (the first two principal components), after each list is scaled to the same length, so distances on the plane are a flattened picture of distances in the full space.',
-  tree: 'The tree: words are joined into clusters by average linkage on cosine similarity. The two words whose lists point in the most similar directions join first; a cluster joins the cluster whose members are, on average, most similar to its own. The height of a join is one minus that average similarity.',
-  neighbors: 'The nearest neighbors: for the clicked word, the five words whose lists have the highest cosine similarity with its list. A cosine similarity of 1 means two lists point in exactly the same direction; 0 means they share nothing.',
+  tree: 'The tree: words are joined into clusters by average linkage on correlation. The two words whose lists have the highest correlation join first; a cluster joins the cluster whose members have, on average, the highest correlation with its own. A join is drawn at a height of one minus that average correlation, so a low join is a close pair and a high join a distant one. Each noun is a leaf at the left; follow its line to the right to the join where it meets the rest. Leaf colors: people blue, animals orange, things green.',
+  neighbors: 'The nearest neighbors: for the word whose name you pressed, the five words whose lists have the highest correlation with its list, computed as the demo above computes it. A correlation of 1 means two lists rise and fall exactly in step; 0 means no relation.',
 }
 
 export const STEP3_ORDER = [

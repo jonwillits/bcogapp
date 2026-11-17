@@ -9,19 +9,21 @@ import { AMOUNTS_MIN, LEARNERS, type LearnerId, type ParserRule, type StreamStor
 import { useState } from 'react'
 
 /**
- * Step 3's screens (spec §6.3): three predictions committed before the
- * first run; the slider of how much of the stream; Run the learners; the
- * plot of percent correct against minutes on a logarithmic axis, one line
- * per learner per test with the 20 streams' range shaded, chance, the
+ * Step 3's screens (spec §6.3), all in the center (the left column is
+ * navigation only; Jon, 2026-11-16): three predictions committed before
+ * the first run; the slider of how much of the stream; Run the learners;
+ * the plot of percent correct against minutes on a logarithmic axis, one
+ * line per learner per test with the 20 streams' range shaded, chance, the
  * adults' means at 21 minutes, and the infants' 2 minutes marked on the
  * axis with no point; the reveal's aligned rows; PARSER's test rule, the
  * spec's by default and the paper's on a two-option control, both scored
- * at every run; each learner's panel.
+ * at every run; each learner's description.
  */
 const COLORS: Record<LearnerId, string> = { dips: 'var(--accent)', srn: 'var(--sensor)', parser: 'var(--actuator)' }
 const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length
 
-export function Step3Controls({ s }: { s: StreamStore }) {
+/** The predictions, the slider and Run the learners, at the top of the stage under the two paragraphs. */
+function Step3Controls({ s }: { s: StreamStore }) {
   const keys = ['partwords', 'reach76', 'least'] as const
   const committed = s.allPredicted
   return (
@@ -77,7 +79,8 @@ export function Step3Stage({ s }: { s: StreamStore }) {
           {p}
         </Note>
       ))}
-      {!s.allPredicted && <Note data-awaiting-commit>The plot appears once your three predictions are committed on the left and the learners have run.</Note>}
+      <Step3Controls s={s} />
+      {!s.allPredicted && <Note data-awaiting-commit>The plot appears once your three predictions are committed above and the learners have run.</Note>}
       {ran && (
         <div data-reveal="learners">
           <LinePlot series={series} width={620} height={260} xLabel="minutes of the stream taken in (logarithmic axis)" yLabel="percent of 36 test trials correct" xMin={0.5} xMax={21} logX xTicks={AMOUNTS_MIN.map((m) => ({ x: m, label: m < 1 ? '0.5' : String(m) }))} yMin={0} yMax={100} yTicks={[0, 25, 50, 75, 100]} hLines={[{ y: 50, label: 'chance, 50%' }, { y: 76, label: 'adults, nonwords, 76% at 21 min', color: 'var(--accent)' }, { y: 65, label: 'adults, part-words, 65% at 21 min', color: 'var(--sensor)' }]} marks={[{ x: 2, label: 'infants, 2 minutes: measured by listening times, not by a test like this one' }]} testId="learners-plot" />

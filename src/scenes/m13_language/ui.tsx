@@ -102,14 +102,22 @@ export const stageWidth = (_max: number) => STAGE_ROOM
 /** The center panel's left edge: after the left column and its gap. */
 export const stageLeft = (_max: number) => `calc(12px + 16px + ${LEFT_WIDTH} + ${CENTER_GAP})`
 
-/** The center panel: positioned between the columns, scrolling vertically inside itself when tall, never horizontally for text (text wraps; only a fixed-width block can be wider). */
+/**
+ * The center panel: positioned between the columns, scrolling vertically
+ * inside itself when tall, never horizontally for text (text wraps; only a
+ * fixed-width block can be wider). The scroll container is a plain block
+ * and the column of children is a separate inner flex box: a flex column
+ * with a capped height shrinks any child whose overflow is hidden (a block
+ * of fixed lines, a table) to nothing once the panel overflows (Jon,
+ * 2026-11-17: Part 4's count table appeared and then vanished).
+ */
 export function StagePanel({ children, wide, testId }: { children: ReactNode; wide?: boolean; testId?: string }) {
   return (
     <div
       data-stage={testId ?? true}
-      style={{ position: 'absolute', left: stageLeft(wide ? 760 : 560), top: 24, width: stageWidth(wide ? 760 : 560), maxHeight: 'calc(100vh - 120px)', overflowY: 'auto', overflowX: 'auto', padding: '16px 20px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 12.5, lineHeight: 1.55, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'auto', boxSizing: 'border-box' }}
+      style={{ position: 'absolute', left: stageLeft(wide ? 760 : 560), top: 24, width: stageWidth(wide ? 760 : 560), maxHeight: 'calc(100vh - 120px)', overflowY: 'auto', overflowX: 'auto', padding: '16px 20px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 12.5, lineHeight: 1.55, pointerEvents: 'auto', boxSizing: 'border-box' }}
     >
-      {children}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>{children}</div>
     </div>
   )
 }

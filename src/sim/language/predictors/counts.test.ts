@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { makeRng } from '../../random'
 import { corpus, SETTINGS, VOCABULARY, nounOf, verbOf } from './grammar'
-import { makeCountModel, countStream, embedding, nearest, contribution, sameCounts, principalPlane, clusterTree, cosine } from './counts'
+import { makeCountModel, countStream, embedding, nearest, contribution, sameCounts, principalPlane, clusterTree, cosine, correlation } from './counts'
 import { makeNgram, predictFromOne, predictFromTwo } from './ngram'
 
 /**
@@ -9,7 +9,9 @@ import { makeNgram, predictFromOne, predictFromTwo } from './ngram'
  * every window size; the two orders add the same counts when before and
  * after are not separated and the window spans the sentence, and different
  * counts when they are; the prediction from counts is a count divided by
- * a count; on the corpus, cat's nearest neighbors are animate nouns.
+ * a count; on the corpus, cat's nearest neighbors are animate nouns. The
+ * one similarity measure of Step 2 is the Pearson correlation (Jon,
+ * 2026-11-17), checked on a hand-worked fixture.
  */
 const idx = (t: string) => VOCABULARY.indexOf(t)
 const toks = (s: string) => s.split(' ').map(idx)
@@ -44,6 +46,20 @@ describe('the count model', () => {
     expect(c.before[idx('chases')][idx('dog')]).toBe(4)
     expect(d.before[idx('chases')][idx('dog')]).toBe(0)
   })
+  it('correlation on a hand-worked fixture: in step gives 1, opposite gives −1, a constant list gives 0, and it is symmetric', () => {
+    const f = (xs: number[]) => Float64Array.from(xs)
+    expect(correlation(f([1, 2, 3]), f([2, 4, 6]))).toBeCloseTo(1, 12)
+    expect(correlation(f([1, 2, 3]), f([3, 2, 1]))).toBeCloseTo(-1, 12)
+    expect(correlation(f([1, 2, 3]), f([5, 5, 5]))).toBe(0)
+    expect(correlation(f([5, 5, 5]), f([1, 2, 3]))).toBe(0)
+    // By hand: centered a = [−1, 0, 1], centered b = [−2, 1, 1]; products sum to 3; spreads √2 and √6; 3 / √12 = 0.8660.
+    expect(correlation(f([1, 2, 3]), f([0, 3, 3]))).toBeCloseTo(3 / Math.sqrt(12), 12)
+    expect(correlation(f([0, 3, 3]), f([1, 2, 3]))).toBeCloseTo(3 / Math.sqrt(12), 12)
+    // Correlation ignores a shift and a positive scale of either list; cosine does not ignore a shift.
+    expect(correlation(f([1, 2, 3]), f([101, 102, 103]))).toBeCloseTo(1, 12)
+    expect(cosine(f([1, 2, 3]), f([101, 102, 103]))).toBeLessThan(1)
+    expect(correlation(f([]), f([]))).toBe(0)
+  })
   it('on the corpus, cat’s nearest neighbors are nouns of its kind, and the views compute', () => {
     const all = corpus(makeRng(SETTINGS.corpusSeed), SETTINGS.corpusSentences).flat().map(idx)
     const m = countStream(makeCountModel(4, true), all)
@@ -57,6 +73,26 @@ describe('the count model', () => {
     const tree = clusterTree(VOCABULARY.slice(0, 10).map((_, i) => embedding(m, i)))
     expect(tree.members.length).toBe(10)
     expect(cosine(embedding(m, idx('dog')), embedding(m, idx('dogs')))).toBeGreaterThan(0.5)
+    expect(correlation(embedding(m, idx('dog')), embedding(m, idx('dogs')))).toBeGreaterThan(0.5)
+    // The tree's heights are correlation distances: 0 at a leaf, below 1 at the root, and a parent at least as high as its children.
+    const walk = (c: typeof tree): void => {
+      if (!c.children) return expect(c.height).toBe(0)
+      for (const ch of c.children) {
+        expect(ch.height).toBeLessThanOrEqual(c.height + 1e-12)
+        walk(ch)
+      }
+    }
+    walk(tree)
+    expect(tree.height).toBeLessThan(1)
+  })
+  it('the similarity demo’s four words: the two people correlate more with each other than either does with the food, at window 4 with before and after separate', () => {
+    const all = corpus(makeRng(SETTINGS.corpusSeed), SETTINGS.corpusSentences).flat().map(idx)
+    const m = countStream(makeCountModel(4, true), all)
+    const r = (a: string, b: string) => correlation(embedding(m, idx(a)), embedding(m, idx(b)))
+    expect(r('boy', 'boy')).toBeCloseTo(1, 9)
+    expect(r('boy', 'girl')).toBeGreaterThan(r('boy', 'cookie'))
+    expect(r('girl', 'dog')).toBeGreaterThan(r('girl', 'cookie'))
+    expect(r('boy', 'cookie')).toBeLessThan(0.8)
   })
 })
 

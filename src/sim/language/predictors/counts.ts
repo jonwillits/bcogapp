@@ -58,6 +58,7 @@ export function embedding(m: CountModel, word: number): Float64Array {
   return e
 }
 
+/** Cosine similarity, kept for reference and for the tests; the screens use `correlation`. */
 export function cosine(a: Float64Array, b: Float64Array): number {
   let dot = 0
   let na = 0
@@ -70,12 +71,46 @@ export function cosine(a: Float64Array, b: Float64Array): number {
   return na && nb ? dot / Math.sqrt(na * nb) : 0
 }
 
-/** The k nearest neighbors of a word by cosine similarity of embeddings, among `among` (default every word but itself). */
+/**
+ * Pearson correlation of two lists of the same length: each list is centered
+ * on its own mean and divided by its own spread, then the products are
+ * averaged. 1 means the two rise and fall exactly in step, 0 no relation,
+ * −1 exactly opposite. A list with no spread (every entry the same) has
+ * no correlation with anything; the function returns 0 for it. This is the
+ * one similarity measure Step 2 uses, in the demo, the nearest neighbors
+ * and the tree (Jon, 2026-11-17: correlation, not cosine, because it is
+ * easier to explain; a change from the spec's cosine).
+ */
+export function correlation(a: Float64Array, b: Float64Array): number {
+  const n = Math.min(a.length, b.length)
+  if (n === 0) return 0
+  let ma = 0
+  let mb = 0
+  for (let i = 0; i < n; i++) {
+    ma += a[i]
+    mb += b[i]
+  }
+  ma /= n
+  mb /= n
+  let dot = 0
+  let va = 0
+  let vb = 0
+  for (let i = 0; i < n; i++) {
+    const x = a[i] - ma
+    const y = b[i] - mb
+    dot += x * y
+    va += x * x
+    vb += y * y
+  }
+  return va > 0 && vb > 0 ? dot / Math.sqrt(va * vb) : 0
+}
+
+/** The k nearest neighbors of a word by the correlation of embeddings, among `among` (default every word but itself). */
 export function nearest(m: CountModel, word: number, k = 5, among?: number[]): { word: number; similarity: number }[] {
   const e = embedding(m, word)
   const cands = (among ?? m.vocab.map((_, i) => i)).filter((i) => i !== word)
   return cands
-    .map((i) => ({ word: i, similarity: cosine(e, embedding(m, i)) }))
+    .map((i) => ({ word: i, similarity: correlation(e, embedding(m, i)) }))
     .sort((a, b) => b.similarity - a.similarity)
     .slice(0, k)
 }
@@ -144,12 +179,12 @@ export interface Cluster {
   children?: [Cluster, Cluster]
 }
 
-/** Agglomerative clustering by average linkage on cosine distance (1 − similarity): the two most similar clusters join first. */
+/** Agglomerative clustering by average linkage on correlation distance (1 − correlation): the two most similar clusters join first. */
 export function clusterTree(vectors: Float64Array[]): Cluster {
   let clusters: Cluster[] = vectors.map((_, i) => ({ members: [i], height: 0 }))
   const dist = (a: Cluster, b: Cluster) => {
     let s = 0
-    for (const i of a.members) for (const j of b.members) s += 1 - cosine(vectors[i], vectors[j])
+    for (const i of a.members) for (const j of b.members) s += 1 - correlation(vectors[i], vectors[j])
     return s / (a.members.length * b.members.length)
   }
   while (clusters.length > 1) {

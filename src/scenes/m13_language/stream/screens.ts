@@ -1,5 +1,5 @@
 import { HEADPHONES_LINE, MADE_OFFLINE_LINE, MADE_UP_LANGUAGE_LINE, COUNTS_FROM_YOUR_STREAM_LINE, REAL_SPEECH_LINE } from '../lines'
-import { READY_SOUND_LINE, EXPLORATION_SITTING_LINE, type StepScreen } from '../steps'
+import { READY_SOUND_LINE, EXPLORATION_SITTING_LINE, EXPLORATION_NO_PREDICTION_LINE, type StepScreen } from '../steps'
 
 /**
  * Part 2's instruction screens (spec §6, §4.4). None of them, before Step
@@ -37,7 +37,7 @@ export const SCREENS: Record<Step, StepScreen> = {
     kind: 'experiment',
     willDo: [
       'In this step you will hear one minute of a made-up language. The language has words, but its words have no meanings, and it has no grammar. A synthetic voice speaks its words one after another, with no pauses between them. Your task, as in the original experiment, is to work out where its words begin and end. There is no test.',
-      'Press “Play the minute”. The sound plays for 60 seconds. A large timer counts down. Under the timer, a spectrogram scrolls past a cursor at the sound being played. A spectrogram is a picture of a sound: time runs from left to right, frequency from bottom to top, and darkness shows energy. Nothing on the screen marks where a word begins or ends.',
+      'Press “Play the minute”. The sound plays for 60 seconds. A large timer counts down. Under the timer, a spectrogram scrolls past a cursor at the sound being played. A spectrogram is a picture of a sound: time runs from left to right, frequency from bottom to top, and brightness shows energy. Nothing on the screen marks where a word begins or ends.',
       'When the minute ends, answer one question: how many different words do you think the language has? Choose a number from 1 to 20. A box under the number takes any words you think you heard, typed as they sound. The box is optional. Then press “Commit my answer”.',
       'After the commit, two more buttons appear. Each one replays the same minute in a different way, and the panel on the right says what each replay adds.',
       'Your answer, any words you typed, and the time are recorded.',
@@ -73,16 +73,16 @@ export const SCREENS: Record<Step, StepScreen> = {
     title: STEP_TITLES[3],
     kind: 'exploration',
     willDo: [
-      'In this step you will run three computer programs, called learners here, on the language of Step 1. Each learner takes in syllables, one at a time, and computes something from them. None of the three is given the words. Each learner’s panel on the right says, step by step, what it computes.',
+      'In this step you will run three computer programs, called learners here, on the language of Step 1. Each learner takes in syllables, one at a time, and computes something from them. None of the three is given the words. Each learner’s description, under the plot, says step by step what it computes.',
       'A slider, “How much of the stream”, sets how many syllables each learner takes in: 30 seconds, 1, 2, 4, 7, 14, or 21 minutes of the language. The panel prints how many syllables that is. Press “Run the learners” to run every learner on that much of your stream, and on the same amount of 19 other streams of the same language, so that you see the spread.',
       'After taking in the stream, each learner takes a test of 36 trials in two versions. On each trial, a learner is given two strings of three syllables, and its choice is the string with the higher score by its own rule. The panel says what the two versions of the test are once the first run is done.',
-      'Before the first run, choose three predictions from the lists on the left and press “Commit my predictions”. The plot shows each learner’s percentage correct on each version of the test against how much of the stream it took in. Two published results are marked on the plot once the first run is done.',
+      'Before the first run, choose three predictions from the lists in the center, above the plot, and press “Commit my predictions”. The plot shows each learner’s percentage correct on each version of the test against how much of the stream it took in. Two published results are marked on the plot once the first run is done.',
       'Nothing is scored. Your predictions are recorded. A run takes a few seconds at the longest setting.',
     ],
     minutes: 5,
     sitting: 'leave any time',
     sittingLine: EXPLORATION_SITTING_LINE,
-    keys: ['“Commit my predictions” commits the three predictions, asked once before the first run.', '“How much of the stream” is a slider with seven settings.', '“Run the learners” runs all three at the slider’s setting.', 'Click a learner’s name at the top of the right panel to read what it computes.'],
+    keys: ['“Commit my predictions” commits the three predictions, asked once before the first run.', '“How much of the stream” is a slider with seven settings.', '“Run the learners” runs all three at the slider’s setting.', 'Click a learner’s name under the plot to read what it computes.'],
     content: [MADE_UP_LANGUAGE_LINE],
     next: NEXT_LINE[3],
   },
@@ -92,14 +92,14 @@ export const SCREENS: Record<Step, StepScreen> = {
     kind: 'exploration',
     willDo: [
       'In this step you will look at real speech spoken to young children, written out as syllables. The utterances come from transcripts in a public archive of recordings of children and the adults around them. No sound plays in this step. Each word was turned into syllables by a pronouncing dictionary, so what you see is the dictionary’s syllables, not the recordings’.',
-      'Choose an utterance from the menu on the left. It appears as a strip of syllable tiles. Above each pair of neighboring syllables is a number computed from the whole sample of utterances, the same number the first learner of Step 3 computes, and the panel defines it. The true word boundaries are marked under the strip. Press “Show stress” to mark the syllables the dictionary gives stress.',
-      'Under the strip, a histogram compares that number at two kinds of place in the sample of real speech, beside the same two kinds for the made-up language of Step 1. A second panel runs the first learner from Step 3 on the sample and prints two shares.',
+      'Choose an utterance from the menu in the center, above the strip. It appears as a strip of syllable tiles. Above each pair of neighboring syllables is a number computed from the whole sample of utterances, the same number the first learner of Step 3 computes, and the panel defines it. The true word boundaries are marked under the strip. Press “Show stress” to mark the syllables the dictionary gives stress.',
+      'Under the strip, a histogram compares that number at two kinds of place in the sample of real speech, beside the same two kinds for the made-up language of Step 1. Under them, the first learner from Step 3 is run on the sample, and two shares are printed.',
       'Nothing is scored, and nothing is recorded in this step.',
     ],
     minutes: 3,
     sitting: 'leave any time',
-    sittingLine: EXPLORATION_SITTING_LINE,
-    keys: ['The menu on the left chooses an utterance.', '“Show stress” marks the stressed syllables on the strip.'],
+    sittingLine: EXPLORATION_NO_PREDICTION_LINE,
+    keys: ['Choose an utterance from the menu above the strip.', '“Show stress” marks the stressed syllables on the strip.'],
     content: [REAL_SPEECH_LINE],
     next: NEXT_LINE[4],
   },

@@ -274,7 +274,9 @@ describe('Part 3: commit, then reveal', () => {
     w.store.commit()
     m = w.all()
     expect(m).toMatch(/data-reveal="models"/)
-    expect(text(m)).toMatch(/Press “Run the models”/)
+    // The button is in the center, in the section of the three rows (the left column is navigation only).
+    expect(m).toMatch(/data-step3-controls/)
+    expect(text(m)).toMatch(/Run the models/)
     w.store.runModels()
     await until(() => w.store.gcRuns !== null && w.store.tallyRuns !== null && !w.store.computing)
     m = w.all()

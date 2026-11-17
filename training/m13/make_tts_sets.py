@@ -34,6 +34,50 @@ VOT_PAIR = {"tot": "tɑt", "dot": "dɑt"}
 WORDS_A = {"dax": "dæks", "blicket": "blˈɪkət", "toma": "tˈOmə", "fep": "fɛp", "gorp": "ɡɔɹp", "kibby": "kˈɪbi", "mipen": "mˈIpən", "nellum": "nˈɛləm", "pimwit": "pˈɪmwɪt", "sprock": "spɹɑk", "wug": "wʌɡ", "zorch": "zɔɹʧ"}
 WORDS_B = {"crannel": "kɹˈænəl", "lorp": "lɔɹp", "flimmer": "flˈɪmɚ", "hinnet": "hˈɪnət", "jeb": "ʤɛb", "rasket": "ɹˈæskət", "vimble": "vˈɪmbəl", "stibble": "stˈɪbəl", "greeble": "ɡɹˈibəl", "yoop": "jup", "chelk": "ʧɛlk", "thade": "θAd"}
 
+# OVERRIDES, 2026-11-17: Jon's picks by ear on the walk. On 2026-11-16 he flagged boo and doo (an open vowel at the end),
+# three training tokens (dah in voices 9 and 11 heard as dou; day in voice 10 heard as day-dah), and zorch, sprock and fep
+# (final consonant unclear). Candidates were synthesized with say() at other phoneme strings and speeds by
+# bcogapp_data/m13/review/candidates/make_candidates.py and listened to on its page; the picks are below. Each entry gives
+# the phoneme string and speed that replace the defaults (SIX, CONSONANTS + VOWELS, WORDS_A; speed 1.0) for that one
+# item; everything not listed keeps its default. fep had no pick and stays as shipped.
+# Kokoro is not deterministic: two calls with the same voice, phonemes and speed give different samples (measured
+# 2026-11-17: peak difference 0.1 of full scale, sometimes a different length), so a resynthesis is not the sound Jon
+# chose. Each pick therefore also names the candidate file he heard ("take", in CANDIDATES_DIR); synth() uses that
+# file when it is there and resynthesizes only when it is gone. The token takes are the candidate files as the page
+# played them: already cut to ship.py's window (40 ms before the burst to 260 ms after), not the raw synthesis; the
+# pitch-shifted copies are made from that cut, as they were made from the raw synthesis before.
+CANDIDATES_DIR = "/Users/jon/Documents/Projects/bcogapp_data/m13/review/candidates"
+OVERRIDES = {
+    "six": {
+        "boo": {"phonemes": "bu", "speed": 1.1, "take": "boo_u_s110.wav"},
+        "doo": {"phonemes": "duː", "speed": 1.0, "take": "doo_uu_s100.wav"},
+    },
+    "words": {
+        "zorch": {"phonemes": "zɔɹtʃ", "speed": 1.0, "take": "zorch_tS_s100.wav"},
+        "sprock": {"phonemes": "spɹˈɑk", "speed": 1.0, "take": "sprock_stress_s100.wav"},
+    },
+    # (voice number, consonant, vowel) as the lab names them.
+    "tokens": {
+        (9, "d", "ah"): {"phonemes": "dɑː", "speed": 1.0, "take": "dah_v9_aa_s100.wav"},
+        (11, "d", "ah"): {"phonemes": "dˈɑ", "speed": 1.0, "take": "dah_v11_stress_s100.wav"},
+        (10, "d", "ay"): {"phonemes": "dA", "speed": 1.15, "take": "day_v10_A_s115.wav"},
+    },
+}
+
+
+def synth(voice, default_ph, override=None):
+    """The sound for one item: the default phoneme string at speed 1.0, or the override's phonemes and speed, taken from the
+    candidate file Jon heard when it exists (see OVERRIDES). Returns the samples and the phoneme string used."""
+    if not override:
+        return say(voice, default_ph), default_ph
+    take = os.path.join(CANDIDATES_DIR, override["take"]) if override.get("take") else None
+    if take and os.path.exists(take):
+        y, sr = sf.read(take)
+        assert sr == SR, (take, sr)
+        return (y if y.ndim == 1 else y[:, 0]), override["phonemes"]
+    print(f"override take {override.get('take')} not found; resynthesizing (Kokoro is not deterministic: this is not the sound that was picked)")
+    return say(voice, override["phonemes"], override["speed"]), override["phonemes"]
+
 
 def write(path, y):
     sf.write(path, np.clip(y, -1, 1).astype(np.float32), SR, subtype="PCM_16")
@@ -96,7 +140,7 @@ def six(out):
     os.makedirs(out, exist_ok=True)
     rows = {}
     for name, ph in SIX.items():
-        y = say(VOICE_1, ph)
+        y, ph = synth(VOICE_1, ph, OVERRIDES["six"].get(name))
         write(os.path.join(out, f"{name}.wav"), y)
         snd = parselmouth.Sound(y, sampling_frequency=SR)
         b = burst_onset(y)
@@ -124,7 +168,7 @@ def words(out):
     rows = []
     for set_i, words in enumerate([WORDS_A, WORDS_B]):
         for w, ph in words.items():
-            y = say(VOICE_1, ph)
+            y, ph = synth(VOICE_1, ph, OVERRIDES["words"].get(w) if set_i == 0 else None)
             write(os.path.join(out, f"{w}.wav"), y)
             rows.append({"word": w, "set": set_i, "phonemes": ph, "file": f"{w}.wav", "voice": 1, "durationS": round(len(y) / SR, 4)})
     print("words:", [(r["word"], r["durationS"]) for r in rows])
@@ -139,7 +183,7 @@ def tokens(out, quick=False):
     for vi, voice in enumerate(voices):
         for c, cph in CONSONANTS.items():
             for v, vph in VOWELS.items():
-                base = say(voice, cph + vph)
+                base, _ = synth(voice, cph + vph, OVERRIDES["tokens"].get((vi + 1, c, v)))
                 for shift in [0, -SHIFT_SEMITONES, SHIFT_SEMITONES]:
                     y = base if shift == 0 else pitch_shift(base, shift)
                     index.append({"voice": vi + 1, "heldOut": voice in HELD_OUT, "consonant": c, "vowel": v, "shift": shift, "start": pos, "length": len(y), "burstS": round(burst_onset(y), 4), "pitchHz": round(mean_pitch(y), 1)})

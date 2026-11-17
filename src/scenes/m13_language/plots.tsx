@@ -3,9 +3,10 @@ import type { ReactNode } from 'react'
 /**
  * The plots of this lab: lines over an ordered axis (labeling curves,
  * discrimination, learners against listening, agreement by depth), bars
- * (next-token distributions), and a scatter of labeled points (vowels, the
- * principal plane). SVG, dependency-free, every axis labeled with what it
- * counts and in what units.
+ * (next-token distributions), a scatter of labeled points (vowels, the
+ * principal plane), and a dendrogram (the count model's tree of clusters).
+ * SVG, dependency-free, every axis labeled with what it counts and in what
+ * units.
  */
 
 export interface Series {
@@ -116,7 +117,70 @@ export function BarChart({ bars, width = 400, max, format = (v) => v.toFixed(2),
   )
 }
 
-/** Labeled points on a plane. The domain is padded by a tenth on each side, and a label sits on whichever side of its point has room, so no label runs off the plot (Jon, 2026-11-16). */
+// ------------------------------------------------------------ label placement
+
+/** A label's box on a plot, in pixels. */
+export interface Box {
+  x0: number
+  y0: number
+  x1: number
+  y1: number
+}
+/** A label's estimated size at font size 10: about 5.5 px per character, 12 px tall. */
+const LABEL_CHAR_W = 5.5
+const LABEL_H = 12
+const overlapArea = (a: Box, b: Box) => Math.max(0, Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0)) * Math.max(0, Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0))
+const inside = (b: Box, r: Box) => b.x0 >= r.x0 && b.x1 <= r.x1 && b.y0 >= r.y0 && b.y1 <= r.y1
+const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v))
+
+export interface PlacedLabel {
+  /** The text's anchor point. */
+  x: number
+  y: number
+  anchor: 'start' | 'end' | 'middle'
+  /** The label could not be placed clear of the others: draw a thin line from the point to it. */
+  leader: boolean
+  box: Box
+}
+
+/**
+ * Place labels so that none sits on top of another (Jon, 2026-11-17: on the
+ * plane many labels were right on top of each other). The candidates for
+ * each label, in order: right of the point, left, above, below, then the
+ * same four farther out, twice. The first candidate that overlaps no label
+ * placed so far and stays inside `room` is taken; with few points the first
+ * candidate always fits, so a sparse plot looks as it did. If none fits, the
+ * least-overlapping candidate is taken and `leader` is set.
+ */
+export function placeLabels(points: { px: number; py: number; label: string }[], room: Box): PlacedLabel[] {
+  const placed: Box[] = []
+  return points.map((p) => {
+    const w = Math.max(LABEL_CHAR_W, p.label.length * LABEL_CHAR_W)
+    const h = LABEL_H
+    const cands: { box: Box; x: number; y: number; anchor: PlacedLabel['anchor'] }[] = []
+    for (const d of [7, 18, 30]) {
+      cands.push({ box: { x0: p.px + d, x1: p.px + d + w, y0: p.py - h / 2, y1: p.py + h / 2 }, x: p.px + d, y: p.py + 3.5, anchor: 'start' })
+      cands.push({ box: { x0: p.px - d - w, x1: p.px - d, y0: p.py - h / 2, y1: p.py + h / 2 }, x: p.px - d, y: p.py + 3.5, anchor: 'end' })
+      cands.push({ box: { x0: p.px - w / 2, x1: p.px + w / 2, y0: p.py - d + 1 - h, y1: p.py - d + 1 }, x: p.px, y: p.py - d - 2, anchor: 'middle' })
+      cands.push({ box: { x0: p.px - w / 2, x1: p.px + w / 2, y0: p.py + d - 1, y1: p.py + d - 1 + h }, x: p.px, y: p.py + d - 4 + h, anchor: 'middle' })
+    }
+    const cost = (b: Box) => placed.reduce((s, q) => s + overlapArea(b, q), 0) + (inside(b, room) ? 0 : 1e6)
+    let best = cands[0]
+    let bestCost = Infinity
+    for (const c of cands) {
+      const k = cost(c.box)
+      if (k < bestCost) {
+        bestCost = k
+        best = c
+      }
+      if (k === 0) break
+    }
+    placed.push(best.box)
+    return { x: best.x, y: best.y, anchor: best.anchor, leader: bestCost > 0, box: best.box }
+  })
+}
+
+/** Labeled points on a plane. The domain is padded by a tenth on each side, and labels are placed clear of one another and inside the plot (`placeLabels`); a label that cannot be placed clear gets a thin leader line from its point. */
 export function Scatter({ points, width = 320, height = 240, xLabel, yLabel, flipX, flipY, testId, children }: { points: { x: number; y: number; label: string; color?: string }[]; width?: number; height?: number; xLabel: string; yLabel: string; flipX?: boolean; flipY?: boolean; testId?: string; children?: ReactNode }) {
   const pad = { l: 40, r: 12, t: 12, b: 30 }
   const xs = points.map((p) => p.x)
@@ -134,15 +198,20 @@ export function Scatter({ points, width = 320, height = 240, xLabel, yLabel, fli
     const u = (y - ylo) / (yhi - ylo || 1)
     return height - pad.b - (flipY ? 1 - u : u) * (height - pad.t - pad.b)
   }
-  const midX = (pad.l + width - pad.r) / 2
+  // Labels may use the plot and the left pad past the rotated axis label, down to the tick line.
+  const room: Box = { x0: 16, y0: 1, x1: width - 1, y1: height - pad.b + 6 }
+  const placed = placeLabels(points.map((p) => ({ px: X(p.x), py: Y(p.y), label: p.label })), room)
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${yLabel} against ${xLabel}`} style={{ display: 'block', background: 'var(--bg)', borderRadius: 8 }} data-plot={testId ?? 'scatter'}>
-      {points.map((p) => {
-        const right = X(p.x) <= midX
+      {points.map((p, i) => {
+        const l = placed[i]
+        const px = X(p.x)
+        const py = Y(p.y)
         return (
           <g key={p.label} data-point={p.label}>
-            <circle cx={X(p.x)} cy={Y(p.y)} r={4} fill={p.color ?? 'var(--accent)'} />
-            <text x={X(p.x) + (right ? 7 : -7)} y={Y(p.y) + 3.5} fontSize={10} textAnchor={right ? 'start' : 'end'} fill="var(--text)">
+            <circle cx={px} cy={py} r={4} fill={p.color ?? 'var(--accent)'} />
+            {l.leader && <line x1={px} y1={py} x2={clamp(px, l.box.x0, l.box.x1)} y2={clamp(py, l.box.y0, l.box.y1)} stroke="var(--text-muted)" strokeWidth={0.6} data-leader={p.label} />}
+            <text x={l.x} y={l.y} fontSize={10} textAnchor={l.anchor} fill="var(--text)">
               {p.label}
             </text>
           </g>
@@ -160,6 +229,80 @@ export function Scatter({ points, width = 320, height = 240, xLabel, yLabel, fli
       </text>
       <text x={width - pad.r} y={height - pad.b + 12} fontSize={9} textAnchor="end" fill="var(--text-muted)">
         {(flipX ? Math.min(...xs) : Math.max(...xs)).toFixed(0)}
+      </text>
+    </svg>
+  )
+}
+
+// ---------------------------------------------------------------- dendrogram
+
+/** A node of a cluster tree: a leaf has one member and height 0; a join has two children and the height at which they joined. */
+export interface TreeNode {
+  members: number[]
+  height: number
+  children?: [TreeNode, TreeNode]
+}
+
+/**
+ * A horizontal dendrogram (Jon, 2026-11-17: the clustering was not rendering
+ * as a graph). The leaves are stacked at the left with their labels, in the
+ * order of a depth-first walk of the tree so that no lines cross; the x axis
+ * is the height of a join, from 0 at the leaves to the root's height, and
+ * each join is drawn as a bracket: a line from each child to the join's x,
+ * and a vertical line between them.
+ */
+export function Dendrogram({ tree, labels, leafColor, width = 520, rowH = 14, xLabel = '1 − correlation at the join', testId }: { tree: TreeNode; labels: string[]; leafColor?: (member: number) => string; width?: number; rowH?: number; xLabel?: string; testId?: string }) {
+  const leaves: number[] = []
+  const walk = (c: TreeNode) => {
+    if (!c.children) leaves.push(c.members[0])
+    else {
+      walk(c.children[0])
+      walk(c.children[1])
+    }
+  }
+  walk(tree)
+  const n = leaves.length
+  const pad = { t: 8, b: 34, l: 6, r: 14 }
+  const labelW = Math.max(0, ...leaves.map((m) => (labels[m] ?? '').length)) * 6.2 + 10
+  const x0 = pad.l + labelW
+  const plotW = Math.max(40, width - x0 - pad.r)
+  const maxH = tree.height || 1e-9
+  const X = (h: number) => x0 + (h / maxH) * plotW
+  const rowOf = new Map<number, number>()
+  leaves.forEach((m, i) => rowOf.set(m, i))
+  const yOfRow = (i: number) => pad.t + i * rowH + rowH / 2
+  const axisY = pad.t + n * rowH + 6
+  const height = axisY + pad.b - 6
+  const joins: ReactNode[] = []
+  const place = (c: TreeNode): { x: number; y: number } => {
+    if (!c.children) return { x: X(0), y: yOfRow(rowOf.get(c.members[0])!) }
+    const a = place(c.children[0])
+    const b = place(c.children[1])
+    const x = X(c.height)
+    joins.push(<path key={c.members.join('-')} d={`M ${a.x} ${a.y} H ${x} V ${b.y} H ${b.x}`} fill="none" stroke="var(--text-muted)" strokeWidth={1} data-join={c.height.toFixed(3)} />)
+    return { x, y: (a.y + b.y) / 2 }
+  }
+  place(tree)
+  const ticks = [0, maxH / 2, maxH]
+  return (
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`a tree of clusters, joins placed by ${xLabel}`} style={{ display: 'block', background: 'var(--bg)', borderRadius: 8 }} data-plot={testId ?? 'tree'}>
+      {ticks.map((t) => (
+        <g key={t}>
+          <line x1={X(t)} y1={pad.t} x2={X(t)} y2={axisY} stroke="var(--border)" />
+          <text x={X(t)} y={axisY + 12} fontSize={9} textAnchor="middle" fill="var(--text-muted)">
+            {t.toFixed(2)}
+          </text>
+        </g>
+      ))}
+      <line x1={x0} y1={axisY} x2={x0 + plotW} y2={axisY} stroke="var(--text-muted)" />
+      {joins}
+      {leaves.map((m, i) => (
+        <text key={m} x={x0 - 4} y={yOfRow(i) + 3.5} fontSize={10} textAnchor="end" fill={leafColor?.(m) ?? 'var(--text)'} data-leaf={labels[m]}>
+          {labels[m]}
+        </text>
+      ))}
+      <text x={x0 + plotW / 2} y={height - 4} fontSize={10} textAnchor="middle" fill="var(--text-muted)">
+        {xLabel}
       </text>
     </svg>
   )
