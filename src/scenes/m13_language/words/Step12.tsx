@@ -2,6 +2,7 @@ import { Btn, Content, FixedLines, Note, StagePanel } from '../ui'
 import { MADE_OFFLINE_LINE, NO_FEEDBACK_LINE } from '../lines'
 import { objectUrl } from './assets'
 import type { WordsStore } from './store'
+import { PauseButton } from '../steps'
 
 /**
  * Steps 1 and 2's stage (spec §7.2): five objects (four on the test) in
@@ -20,7 +21,7 @@ export function Step12Stage({ s }: { s: WordsStore }) {
   if (!t)
     return (
       <StagePanel wide testId="words-trials">
-        <Note>The test is done. Its results are on the right.</Note>
+        <Note>The test is done. Its results are below.</Note>
       </StagePanel>
     )
   const test = s.phase === 'test'
@@ -43,6 +44,7 @@ export function Step12Stage({ s }: { s: WordsStore }) {
           Hear it again
         </Btn>
         <Note>The word played once when the objects appeared.</Note>
+        <PauseButton s={s} />
       </div>
       <Content>{NO_FEEDBACK_LINE}</Content>
       <Content>{MADE_OFFLINE_LINE}</Content>

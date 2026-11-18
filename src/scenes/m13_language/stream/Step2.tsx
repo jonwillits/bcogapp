@@ -5,6 +5,8 @@ import { SYLLABLES, type Syllable } from '../../../sim/language/stream/language'
 import { coloring, neighbors, uncovered, ROW, TRAY_MAX, TRAY_MIN } from '../../../sim/language/stream/board'
 import { Tile } from './Strip'
 import type { StreamStore } from './store'
+import { BoardReveal } from './Reveal'
+import { MAIN_TABS } from '../params'
 
 /**
  * Step 2's board (spec §6.2; decision 8): 300 tiles in rows of 20, a click
@@ -12,9 +14,11 @@ import type { StreamStore } from './store'
  * from the board or the palette (or by clicking a palette tile, which does
  * the same), Check this word, Empty the tray, Show me the words behind an
  * in-page confirmation, and the counter of syllables not yet in a found
- * word. The panel of counts is in `Step2Panel`.
+ * word. The panel of counts (`Step2Panel`) sits beside the board, and
+ * wraps under it when the panel is narrow; once the unit is complete the
+ * reveal follows, with the button that comes next (Jon, 2026-11-18).
  */
-export function Step2Stage({ s }: { s: StreamStore }) {
+export function Step2Stage({ s, onNext }: { s: StreamStore; onNext?: () => void }) {
   const board = s.boardSyllables
   const colors = coloring(board, s.foundWords)
   const [over, setOver] = useState(false)
@@ -25,9 +29,22 @@ export function Step2Stage({ s }: { s: StreamStore }) {
     e.dataTransfer.effectAllowed = 'copy'
   }
   const ended = s.board.ended
+  const result = s.boardResult()
   return (
     <StagePanel wide testId="stream-2">
       <div style={{ fontSize: 14, fontWeight: 600 }}>Find the words</div>
+      {result && onNext && (
+        <>
+          <Note data-next>{`This step is done. Its results are under the board, with their explanation, and on the ${MAIN_TABS.results} tab at the top of this panel. When you are ready to move on, press “Go on to Step 3” here or in the navigation panel.`}</Note>
+          <div>
+            <Btn primary onClick={onNext}>
+              Go on to Step 3
+            </Btn>
+          </div>
+        </>
+      )}
+      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }} data-board-layout>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: '1 1 560px', minWidth: 0 }}>
       <Note>The first 300 syllables of your stream, in the order they are spoken, 20 to a row. A row break means nothing. Click a tile to highlight its syllable everywhere; drag tiles into the tray to build a word.</Note>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }} data-board>
         {rows.map((row, r) => (
@@ -101,7 +118,14 @@ export function Step2Stage({ s }: { s: StreamStore }) {
           </div>
         </div>
       )}
-      {ended && <Note data-board-ended>The search is over. The results of this step are on the right.</Note>}
+      {ended && <Note data-board-ended>The search is over. The results of this step are under the board.</Note>}
+      </div>
+      <div style={{ flex: '0 1 280px', display: 'flex', flexDirection: 'column', gap: 6, padding: 8, border: '1px solid var(--border)', borderRadius: 8 }} data-counts-panel>
+        <GroupLabel>Counts on the board</GroupLabel>
+        <Step2Panel s={s} />
+      </div>
+      </div>
+      {result && <BoardReveal seed={s.seed} result={result} />}
     </StagePanel>
   )
 }

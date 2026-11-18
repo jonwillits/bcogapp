@@ -1,9 +1,11 @@
-/* Lab 13's three columns (Jon, 2026-11-16; LAB_COMMON_FEATURES §1). Unlike the
-   shared SceneCanvasLayout, the columns never stack at a narrow width: a side
-   column is capped at 0.3 of the window and scrolls sideways inside its panels
-   past that, and the center panel takes the room between them. Each column
-   is its panels' one scroll container, with the room a classic scrollbar
-   takes reserved, so a column that starts to scroll never scrolls sideways. */
+/* Lab 13's two panels (Jon, 2026-11-18; LAB_COMMON_FEATURES §1). The
+   navigation panel is capped at 0.3 of the window and scrolls sideways
+   inside its panels past that; the main panel takes the room that is left.
+   The navigation column is its panels' one scroll container, with the room
+   a classic scrollbar takes reserved, so a column that starts to scroll
+   never scrolls sideways. The main cell is a flex column so that the main
+   panel's tab strip sits at the top and the panel under it fills the rest
+   and scrolls inside itself. */
 .wrap {
   position: absolute;
   inset: 0;
@@ -18,7 +20,7 @@
   inset: 0;
   pointer-events: none;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr;
   grid-template-rows: 1fr;
   gap: 12px;
   padding: 12px;
@@ -26,17 +28,20 @@
 .overlay > * {
   pointer-events: auto;
 }
-.left,
-.right {
+.nav {
+  grid-column: 1;
   align-self: start;
   max-height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-gutter: stable;
 }
-.left {
-  grid-column: 1;
-}
-.right {
-  grid-column: 3;
+.main {
+  grid-column: 2;
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }

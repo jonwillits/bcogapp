@@ -1,11 +1,10 @@
-import type { ProgressStore } from '../../../sim/language/progress/store'
-import { Content, FixedLines, GroupLabel, Note, Para, Section } from '../ui'
+import { Content, FixedLines, Note, Para, Section, useRef, useWidth } from '../ui'
 import { LinePlot } from '../plots'
 import { makeDesign, isCorrect, OCCURRENCES } from '../../../sim/language/words/design'
 import { keyMeasure } from '../../../sim/language/words/keyMeasure'
 import { RESTARTED_LINE } from '../lines'
 import { objectUrl, type ObjectFile, type WordFile } from './assets'
-import { WORDS_UNIT, type WordsResult } from './store'
+import type { WordsResult } from './store'
 
 /**
  * The reveal of Steps 1 and 2 (spec §7.2), once the test is done: the
@@ -24,13 +23,16 @@ export function WordsReveal({ seed, result, words, objects }: { seed: number; re
   })
   const name = (w: number) => words[w]?.word ?? `word ${w + 1}`
   const objId = (o: number) => objects[o]?.id ?? `object ${o + 1}`
+  const ref = useRef<HTMLDivElement>(null)
+  const room = useWidth(ref, 640)
+  const plotW = Math.min(640, room)
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }} data-reveal="words">
+    <div ref={ref} style={{ display: 'flex', flexDirection: 'column', gap: 12 }} data-reveal="words">
       {result.restarts > 0 && <Content>{RESTARTED_LINE}</Content>}
       {result.materials === 1 && <Note>These are the reserve set of 12 words and 12 objects, used because the first set was interrupted.</Note>}
       <Section n={1} title="Your accuracy at each occurrence">
         <Para>Each word occurred 5 times in the 60 learning trials. The line is the percentage of the 12 words you clicked correctly at the first occurrence, the second, and so on. Chance is 20%, one object in five.</Para>
-        <LinePlot series={[{ label: 'percent correct', color: 'var(--accent)', points: km.byOccurrence.map((v, i) => [i + 1, 100 * v] as [number, number]) }]} width={400} height={180} xLabel="occurrence of a word, 1 to 5" yLabel="percent of 12 words correct" xMin={1} xMax={OCCURRENCES} xTicks={[1, 2, 3, 4, 5].map((x) => ({ x, label: String(x) }))} hLines={[{ y: 20, label: 'chance, 20%' }]} testId="by-occurrence" />
+        <LinePlot series={[{ label: 'percent correct', color: 'var(--accent)', points: km.byOccurrence.map((v, i) => [i + 1, 100 * v] as [number, number]) }]} width={plotW} height={Math.round(plotW * 0.45)} xLabel="occurrence of a word, 1 to 5" yLabel="percent of 12 words correct" xMin={1} xMax={OCCURRENCES} xTicks={[1, 2, 3, 4, 5].map((x) => ({ x, label: String(x) }))} hLines={[{ y: 20, label: 'chance, 20%' }]} testId="by-occurrence" />
         <FixedLines lines={km.byOccurrence.map((v, i) => `occurrence ${i + 1}: ${String(Math.round(12 * v)).padStart(2)} of 12 correct`)} testId="by-occurrence-table" />
       </Section>
       <Section n={2} title="The test">
@@ -55,17 +57,6 @@ export function WordsReveal({ seed, result, words, objects }: { seed: number; re
           ))}
         </div>
       </Section>
-    </div>
-  )
-}
-
-export function WordsResults({ progress, words, objects }: { progress: ProgressStore; words: WordFile[]; objects: ObjectFile[] }) {
-  const r = progress.result(WORDS_UNIT) as WordsResult | undefined
-  if (!r) return <Note>Part 3’s experiment is not finished yet.</Note>
-  return (
-    <div data-results="words">
-      <GroupLabel>Steps 1 and 2</GroupLabel>
-      <WordsReveal seed={progress.seed} result={r} words={words} objects={objects} />
     </div>
   )
 }

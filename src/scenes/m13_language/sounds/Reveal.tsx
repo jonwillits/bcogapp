@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react'
-import type { ProgressStore } from '../../../sim/language/progress/store'
-import { Btn, Content, FixedLines, GroupLabel, Note, Para, Section, StagePanel, useWidth } from '../ui'
+import { Btn, Content, FixedLines, Note, Para, Section, StagePanel, useWidth } from '../ui'
+import { MAIN_TABS } from '../params'
 import { Spectrogram } from '../Spectrogram'
 import { LinePlot } from '../plots'
 import { ReferencePanel } from '../ReferencePanel'
@@ -9,19 +9,25 @@ import { reference } from '../../../sim/language/references'
 import { crossing, discrimination, labelingCurves, predictedCurve, LABELS as ABX_LABELS, PAIRS, STEPS } from '../../../sim/language/sounds/abx'
 import { MEASURED_LINE, ONE_LISTENER_LINE, RESTARTED_LINE } from '../lines'
 import { SIX_ORDER, type Six } from './assets'
-import { LABELS_UNIT, LABELING_UNIT, ABX_UNIT, type AbxResult, type LabelingResult, type LabelsResult, type SoundsStore } from './store'
+import type { AbxResult, LabelingResult, LabelsResult, SoundsStore } from './store'
 
 /**
  * Part 1's reveals (spec §5.2, §5.3): Step 2's, after the commit of the
- * six labels (the named spectrograms in the center, in a 3 × 2 grid, and
- * the table of labels on the right: Jon, 2026-11-16), and Step 3's, after
- * both blocks, in numbered sections, each saying what its rows, lines and
- * marks are and none saying what to conclude. Step 3's series is the first
- * 9 of the shipped 14 (abx.ts). This is the one Part 1 file that may name a
- * transition, a rise or a fall, a category or a boundary (`naming.test.ts`).
+ * six labels (the table of labels, then the named spectrograms in a 3 × 2
+ * grid: Jon, 2026-11-16 and 2026-11-18), and Step 3's, after both blocks,
+ * in numbered sections, each saying what its rows, lines and marks are and
+ * none saying what to conclude. Each reveal has two modes: `full`, on the
+ * step itself, with the explanation and the references; `results`, on the
+ * All Results tab, the numbered sections with their one-sentence
+ * descriptions and nothing more (Jon, 2026-11-18). Step 3's series is the
+ * first 9 of the shipped 14 (abx.ts). This is the one Part 1 file that may
+ * name a transition, a rise or a fall, a category or a boundary
+ * (`naming.test.ts`).
  */
-/** Step 2's results in the center, after the commit (Jon, 2026-11-16: the spectrograms need the room; the table of labels stays on the right). */
-const STEP2_DONE_LINE = 'Your labels beside the right ones are on the right. Below, the six syllables are named, in the order you saw them, with their measured formant tracks.'
+export type RevealMode = 'full' | 'results'
+
+/** Step 2's finished stage: the done line, then the sections. */
+const STEP2_DONE_LINE = `This step is done. Below are your labels beside the right ones, then the six syllables named, in the order you saw them, with their measured formant tracks. The table is also on the ${MAIN_TABS.results} tab at the top of this panel.`
 
 const IPA: Record<Six, string> = { bee: '/bi/', bah: '/bɑ/', boo: '/bu/', dee: '/di/', dah: '/dɑ/', doo: '/du/' }
 const COLORS: Record<string, string> = { b: 'var(--accent)', d: 'var(--sensor)', g: 'var(--actuator)' }
@@ -69,7 +75,7 @@ function SixReveal({ s, k, n, width }: { s: SoundsStore; k: Six; n: number; widt
   )
 }
 
-/** Step 2's center panel once the six labels are committed: the named spectrograms in a 3 × 2 grid, the context section, voice timing, and the button that comes next. */
+/** Step 2's stage once the six labels are committed: the done line and the button that comes next, then the table of labels, the named spectrograms in a 3 × 2 grid, the context section, and voice timing. */
 export function LabelsStage({ s, result, onNext }: { s: SoundsStore; result: LabelsResult; onNext: () => void }) {
   const ref = useRef<HTMLDivElement>(null)
   const room = useWidth(ref, 720)
@@ -78,9 +84,16 @@ export function LabelsStage({ s, result, onNext }: { s: SoundsStore; result: Lab
     <StagePanel wide testId="sounds-2-done">
       <div style={{ fontSize: 14, fontWeight: 600 }}>Six syllables: the reveal</div>
       <Note style={{ color: 'var(--text)' }}>{STEP2_DONE_LINE}</Note>
+      <Note data-next>When you are ready to move on, press “Go on to Step 3” here or in the navigation panel.</Note>
+      <div>
+        <Btn primary onClick={onNext}>
+          Go on to Step 3
+        </Btn>
+      </div>
       <div ref={ref} style={{ display: 'flex', flexDirection: 'column', gap: 12 }} data-reveal="labels-stage">
         {result.restarts > 0 && <Content>{RESTARTED_LINE}</Content>}
-        <Section n={1} title="The six syllables, with their measured formant tracks">
+        <LabelsTable result={result} />
+        <Section n={2} title="The six syllables, with their measured formant tracks">
           <Para>Each spectrogram is now labeled with its syllable, in the order you saw them. The orange line is the second formant’s track and the green line the first formant’s, measured from the sound over the first 100 ms after the release (the red mark), at 5 ms steps. A formant transition is the movement of a formant from the consonant into the vowel.</Para>
           <div style={{ display: 'grid', gridTemplateColumns: `repeat(3, ${card}px)`, gap: 10 }} data-six-grid>
             {result.order.map((k, i) => (
@@ -100,23 +113,17 @@ export function LabelsStage({ s, result, onNext }: { s: SoundsStore; result: Lab
           {s.showVot && <VotScreen s={s} width={Math.max(220, Math.floor((room - 10) / 2))} />}
         </Section>
       </div>
-      <Note data-next>When you are ready to move on, press “Go on to Step 3” here or on the left.</Note>
-      <div>
-        <Btn primary onClick={onNext}>
-          Go on to Step 3
-        </Btn>
-      </div>
     </StagePanel>
   )
 }
 
-/** Step 2's right column once the labels are committed: the table of labels beside the right ones (section 2). */
-export function LabelsReveal({ result }: { result: LabelsResult }) {
+/** Step 2's results, section 1: the table of the student's labels beside the right ones. On the step and on the All Results tab. */
+export function LabelsTable({ result }: { result: LabelsResult }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }} data-reveal="labels">
       {result.restarts > 0 && <Content>{RESTARTED_LINE}</Content>}
-      <Section n={2} title="Your labels beside the right ones">
-        <Para>One row per sound, in the order you saw them: your label, the right label, and whether they agree. The last line is your count correct out of 6. The six spectrograms, named and with their measured tracks, are in the center.</Para>
+      <Section n={1} title="Your labels beside the right ones">
+        <Para>One row per sound, in the order you saw them: your label, the right label, and whether they agree. The last line is your count correct out of 6.</Para>
         <FixedLines lines={[...result.order.map((k, i) => `Sound ${i + 1}  ${k.padEnd(4)} your label ${result.labels[k]}   right label ${k[0]}   ${result.labels[k] === k[0] ? 'agree' : 'differ'}`), `Correct: ${result.correct} of 6`]} testId="labels-table" />
       </Section>
     </div>
@@ -150,7 +157,8 @@ function VotScreen({ s, width }: { s: SoundsStore; width: number }) {
   )
 }
 
-export function Step3Reveal({ labeling, abx }: { labeling: LabelingResult; abx: AbxResult }) {
+export function Step3Reveal({ labeling, abx, mode = 'full' }: { labeling: LabelingResult; abx: AbxResult; mode?: RevealMode }) {
+  const full = mode === 'full'
   const curves = labelingCurves(labeling.trials, labeling.answers)
   const disc = discrimination(abx.trials, abx.answers)
   const pred = predictedCurve(curves)
@@ -166,60 +174,62 @@ export function Step3Reveal({ labeling, abx }: { labeling: LabelingResult; abx: 
   const steps = Array.from({ length: STEPS }, (_, i) => i + 1)
   const tick = [1, 3, 5, 7, 9].map((x) => ({ x, label: String(x) }))
   const nPairs = PAIRS.length
+  const box = useRef<HTMLDivElement>(null)
+  const room = useWidth(box, 900)
+  // The two plots of sections 1 and 2 side by side when each gets at least 420 px; one under the other otherwise (Jon, 2026-11-18: the reveals take the main panel's width).
+  const twoUp = room >= 860
+  const plotW = twoUp ? Math.floor((room - 16) / 2) : Math.min(640, room)
+  const plotH = Math.round(plotW * 0.48)
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }} data-reveal="step3">
+    <div ref={box} style={{ display: 'flex', flexDirection: 'column', gap: 12 }} data-reveal="step3" data-plots={twoUp ? 'two-up' : 'stacked'}>
       {(labeling.restarts > 0 || abx.restarts > 0) && <Content>{RESTARTED_LINE}</Content>}
+      <div style={{ display: 'flex', flexDirection: twoUp ? 'row' : 'column', gap: 16, alignItems: 'flex-start' }}>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
       <Section n={1} title="Your labeling curves">
         <Para>{`The ${STEPS} sounds differ only in where the second formant starts: at sound 1 it starts 840 Hz below the vowel’s second formant and rises into it; at sound ${STEPS} it starts 120 Hz above it; between them the start moves up in steps of 120 Hz. Each line is one label: for each sound, the percentage of its 6 presentations you labeled b or d.`}</Para>
-        <LinePlot series={ABX_LABELS.map((l) => ({ label: `labeled ${l}`, color: COLORS[l], points: steps.map((st) => [st, 100 * curves[l][st - 1]] as [number, number]) }))} width={440} height={200} xLabel={`sound, 1 to ${STEPS} (second-formant start from 1,320 to 2,280 Hz)`} yLabel="percent of 6 presentations" xMin={1} xMax={STEPS} xTicks={tick} testId="labeling-curves" />
+        <LinePlot series={ABX_LABELS.map((l) => ({ label: `labeled ${l}`, color: COLORS[l], points: steps.map((st) => [st, 100 * curves[l][st - 1]] as [number, number]) }))} width={plotW} height={plotH} xLabel={`sound, 1 to ${STEPS} (second-formant start from 1,320 to 2,280 Hz)`} yLabel="percent of 6 presentations" xMin={1} xMax={STEPS} xTicks={tick} testId="labeling-curves" />
       </Section>
+      </div>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
       <Section n={2} title="Your discrimination">
         <Para>Each point is one pair of sounds two steps apart, plotted at the pair’s middle sound: the percentage of its 4 triads on which you said which sound the third one matched. Chance, 50%, is marked. This is the measure the reading’s figure of categorical perception plots (§13.2.2).</Para>
-        <LinePlot series={[{ label: 'told apart (your answers)', color: 'var(--accent)', points: disc.map((d) => [d.middle, 100 * d.correct] as [number, number]) }, { label: 'predicted from your labels alone', color: 'var(--text-muted)', dashed: true, points: pred.map((p) => [p.middle, 100 * p.predicted] as [number, number]) }]} width={440} height={200} xLabel="middle sound of a pair two steps apart" yLabel="percent of 4 triads correct" xMin={1} xMax={STEPS} xTicks={tick} hLines={[{ y: 50, label: 'chance, 50%' }]} testId="discrimination" />
+        <LinePlot series={[{ label: 'told apart (your answers)', color: 'var(--accent)', points: disc.map((d) => [d.middle, 100 * d.correct] as [number, number]) }, { label: 'predicted from your labels alone', color: 'var(--text-muted)', dashed: true, points: pred.map((p) => [p.middle, 100 * p.predicted] as [number, number]) }]} width={plotW} height={plotH} xLabel="middle sound of a pair two steps apart" yLabel="percent of 4 triads correct" xMin={1} xMax={STEPS} xTicks={tick} hLines={[{ y: 50, label: 'chance, 50%' }]} testId="discrimination" />
       </Section>
+      </div>
+      </div>
       <Section n={3} title="Discrimination predicted from your labels alone">
-        <Para>The dashed line is what your discrimination would be if you could hear no difference between two sounds beyond the labels you give them. It is computed by the 1957 paper’s method (pp. 362–363). For a pair of sounds A and B, with p the shares of A’s six labels and p′ the shares of B’s:</Para>
-        <FixedLines lines={['predicted percent correct = 50% + 25% × [ (p_b − p′_b)² + (p_d − p′_d)² ]']} testId="formula" />
-        <Para>Two sounds you always labeled the same give 50%, chance. Two sounds you never labeled the same give 100%. The formula averages the paper’s two triad orders. It rests on the assumption that a listener hears each sound as one of the two labels and judges the triad from the labels alone.</Para>
+        <Para>One row per pair of sounds two steps apart: the percentage you told apart, the percentage predicted from your labels alone, and the gap between them. The last line is the mean gap over the pairs.</Para>
+        {full && (
+          <>
+            <Para>The dashed line in section 2 is what your discrimination would be if you could hear no difference between two sounds beyond the labels you give them. It is computed by the 1957 paper’s method (pp. 362–363). For a pair of sounds A and B, with p the shares of A’s six labels and p′ the shares of B’s:</Para>
+            <FixedLines lines={['predicted percent correct = 50% + 25% × [ (p_b − p′_b)² + (p_d − p′_d)² ]']} testId="formula" />
+            <Para>Two sounds you always labeled the same give 50%, chance. Two sounds you never labeled the same give 100%. The formula averages the paper’s two triad orders. It rests on the assumption that a listener hears each sound as one of the two labels and judges the triad from the labels alone.</Para>
+          </>
+        )}
         <FixedLines lines={PAIRS.map(([a, b], i) => `sounds ${String(a).padStart(2)} and ${String(b).padStart(2)}   told apart ${String(Math.round(100 * disc[i].correct)).padStart(3)}%   predicted ${String(Math.round(100 * pred[i].predicted)).padStart(3)}%   gap ${gap[i] >= 0 ? '+' : '−'}${String(Math.abs(Math.round(gap[i]))).padStart(3)}`)} testId="predicted-table" />
+        <FixedLines lines={[`Your mean gap, told apart minus predicted, over the ${nPairs} pairs: ${meanGap >= 0 ? '+' : '−'}${Math.abs(meanGap).toFixed(1)} points`]} testId="mean-gap" />
       </Section>
       <Section n={4} title="Where your boundary fell">
         <Para>A phoneme boundary is the point on the series where your labels change from one consonant to the next: the sound at which the two labeling curves cross. The crossing is read off by a straight line between neighboring sounds.</Para>
         <FixedLines lines={[`b to d: ${bd === null ? 'the b and d curves do not cross' : `between sounds ${Math.floor(bd)} and ${Math.ceil(bd)}, at about ${bd.toFixed(1)}`}`]} testId="boundaries" />
       </Section>
+      {full && (
+        <>
       <Section n={5} title="The reference listener">
         <Para>{`The reading’s figure of categorical perception shows one listener from the 1957 experiment, over 14 sounds; this step played the first ${STEPS} of them. Here are that listener’s labeling curves and discrimination over those ${STEPS}, drawn from the same figure, beside yours. The 1957 series went on to a third consonant, g, and at sound ${STEPS} this listener heard g 17% of the time. In words, from the paper (p. 362): stimuli 1 and 3, both heard as b, were told apart 55% of the time; stimuli 3 and 5, heard as b and d, 100% of the time.`}</Para>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <LinePlot series={[{ label: 'b', color: COLORS.b, points: steps.map((st) => [st, refB[st - 1]] as [number, number]) }, { label: 'd', color: COLORS.d, points: steps.map((st) => [st, refD[st - 1]] as [number, number]) }, { label: 'g', color: COLORS.g, points: steps.map((st) => [st, refG[st - 1]] as [number, number]) }]} width={300} height={170} xLabel={`sound, 1 to ${STEPS}`} yLabel="percent labeled" xMin={1} xMax={STEPS} xTicks={tick} testId="ref-labels" />
-          <LinePlot series={[{ label: 'told apart', color: 'var(--accent)', points: refObt.slice(0, nPairs).map((v, i) => [i + 2, v] as [number, number]) }, { label: 'predicted', color: 'var(--text-muted)', dashed: true, points: refPred.slice(0, nPairs).map((v, i) => [i + 2, v] as [number, number]) }]} width={300} height={170} xLabel="middle sound of a pair" yLabel="percent correct" xMin={1} xMax={STEPS} xTicks={tick} hLines={[{ y: 50, label: 'chance' }]} testId="ref-disc" />
+          <LinePlot series={[{ label: 'b', color: COLORS.b, points: steps.map((st) => [st, refB[st - 1]] as [number, number]) }, { label: 'd', color: COLORS.d, points: steps.map((st) => [st, refD[st - 1]] as [number, number]) }, { label: 'g', color: COLORS.g, points: steps.map((st) => [st, refG[st - 1]] as [number, number]) }]} width={Math.max(300, Math.floor((plotW - 10) / 2))} height={Math.round(Math.max(300, Math.floor((plotW - 10) / 2)) * 0.55)} xLabel={`sound, 1 to ${STEPS}`} yLabel="percent labeled" xMin={1} xMax={STEPS} xTicks={tick} testId="ref-labels" />
+          <LinePlot series={[{ label: 'told apart', color: 'var(--accent)', points: refObt.slice(0, nPairs).map((v, i) => [i + 2, v] as [number, number]) }, { label: 'predicted', color: 'var(--text-muted)', dashed: true, points: refPred.slice(0, nPairs).map((v, i) => [i + 2, v] as [number, number]) }]} width={Math.max(300, Math.floor((plotW - 10) / 2))} height={Math.round(Math.max(300, Math.floor((plotW - 10) / 2)) * 0.55)} xLabel="middle sound of a pair" yLabel="percent correct" xMin={1} xMax={STEPS} xTicks={tick} hLines={[{ y: 50, label: 'chance' }]} testId="ref-disc" />
         </div>
         <Content>{ONE_LISTENER_LINE}</Content>
         <ReferencePanel reference={reference('liberman-pairs')} />
       </Section>
       <Section n={6} title="What the 1957 paper found about prediction">
         <Para>The paper’s authors compared each listener’s obtained discrimination with the discrimination predicted from the labels, and reported that the predicted peaks fell in the right places, but that the listeners discriminated better than the labels alone predict (p. 366). The pattern is called categorical perception: labeling that changes sharply along a continuum, with discrimination best at the boundary between categories and poorer within a category, though not absent there (§13.2.2).</Para>
-        <FixedLines lines={[`Your mean gap, told apart minus predicted, over the ${nPairs} pairs: ${meanGap >= 0 ? '+' : '−'}${Math.abs(meanGap).toFixed(1)} points`]} testId="mean-gap" />
         <ReferencePanel reference={reference('liberman-prediction')} />
       </Section>
-    </div>
-  )
-}
-
-/** Part 1's gathered results, for the Open tab: the finished experiments' reveals from the saved results (the spectrograms need the sounds, so Step 2's shows its table only here). */
-export function SoundsResults({ progress }: { progress: ProgressStore }) {
-  const labels = progress.result(LABELS_UNIT) as LabelsResult | undefined
-  const labeling = progress.result(LABELING_UNIT) as LabelingResult | undefined
-  const abx = progress.result(ABX_UNIT) as AbxResult | undefined
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-results="sounds">
-      {labels && (
-        <>
-          <GroupLabel>Step 2: your six labels</GroupLabel>
-          <FixedLines lines={[...labels.order.map((k, i) => `Sound ${i + 1}  ${k.padEnd(4)} your label ${labels.labels[k]}   right label ${k[0]}`), `Correct: ${labels.correct} of 6`]} />
         </>
       )}
-      {labeling && abx && <Step3Reveal labeling={labeling} abx={abx} />}
-      {!labels && !(labeling && abx) && <Note>No experiment of Part 1 is finished yet.</Note>}
     </div>
   )
 }

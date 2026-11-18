@@ -1,69 +1,70 @@
-import { Panel } from '../../components/Panel'
 import type { ProgressStore } from '../../sim/language/progress/store'
-import { Content, FixedLines, Note, RIGHT_STYLE, PART_TITLES, useStore } from './ui'
-import { StepLeft, StepStage } from './steps'
+import { Note, useStore } from './ui'
+import { StepNav, StepStage } from './steps'
 import { MADE_UP_LANGUAGE_LINE } from './lines'
 import type { PartContext, PartModule } from './contract'
-import { StreamStore, MINUTE_UNIT, BOARD_UNIT } from './stream/store'
+import { StreamStore, MINUTE_UNIT, BOARD_UNIT, type BoardResult, type MinuteResult } from './stream/store'
 import { SCREENS, STEP_TITLES } from './stream/screens'
 import { Step1Stage } from './stream/Step1'
-import { Step2Stage, Step2Panel } from './stream/Step2'
+import { Step2Stage } from './stream/Step2'
 import { Step3Stage } from './stream/Step3'
 import { Step4Stage } from './stream/Step4'
-import { MinuteReveal, BoardReveal, StreamResults } from './stream/Reveal'
-import { registerResults } from './Part0'
+import { MinuteReveal, BoardReveal } from './stream/Reveal'
+import { registerStepResults } from './results'
 
 /**
- * Part 2's screens (spec §6): the left column is navigation only (Jon,
- * 2026-11-16, LAB_COMMON_FEATURES §1); the stage carries the instruction
- * screen and then the minute, the board, the learners with their
- * predictions and slider, or the real speech with its menu; the right
- * column carries the board's panel of counts and, once a unit is complete,
- * its reveal.
+ * Part 2's screens (spec §6): the navigation panel is navigation only (Jon,
+ * 2026-11-16, LAB_COMMON_FEATURES §1); the main panel carries the
+ * instruction screen and then the minute, the board with its panel of
+ * counts beside it, the learners with their predictions and slider, or the
+ * real speech with its menu, and, once a unit is complete, its reveal under
+ * the step (Jon, 2026-11-18). Steps 1 and 2 register their results for the
+ * All Results tab.
  */
 
 type Ctx = PartContext<StreamStore>
 
-registerResults(2, (progress: ProgressStore) => <StreamResults progress={progress} />)
+registerStepResults([
+  { part: 2, tab: 'stream', step: 1, title: STEP_TITLES[1], done: (p: ProgressStore) => p.isComplete(MINUTE_UNIT), render: (p: ProgressStore) => <MinuteReveal result={p.result(MINUTE_UNIT) as MinuteResult} mode="results" /> },
+  { part: 2, tab: 'stream', step: 2, title: STEP_TITLES[2], done: (p: ProgressStore) => p.isComplete(BOARD_UNIT), render: (p: ProgressStore) => <BoardReveal seed={p.seed} result={p.result(BOARD_UNIT) as BoardResult} mode="results" /> },
+])
 
 function progressLines(s: StreamStore): string[] {
   const p = s.progress
   return [`Step 1  ${p.isComplete(MINUTE_UNIT) ? 'done' : 'not started'}`, `Step 2  ${p.isComplete(BOARD_UNIT) ? 'done' : s.board.found.length ? `${s.board.found.length} ${s.board.found.length === 1 ? 'word' : 'words'} found` : 'not started'}`, `Step 3  an exploration${s.allPredicted ? ', predictions committed' : ''}`, 'Step 4  an exploration']
 }
 
-function Left({ ctx }: { ctx: Ctx }) {
-  return <StepLeft ctx={ctx} tab="stream" screens={SCREENS} progressLines={progressLines} topLines={[MADE_UP_LANGUAGE_LINE]} />
+function Nav({ ctx }: { ctx: Ctx }) {
+  return <StepNav ctx={ctx} tab="stream" screens={SCREENS} progressLines={progressLines} topLines={[MADE_UP_LANGUAGE_LINE]} />
 }
 
 function Stage({ ctx }: { ctx: Ctx }) {
-  return <StepStage ctx={ctx} tab="stream" screens={SCREENS} running={(s) => (s.step === 1 ? <Step1Stage s={s} /> : s.step === 2 ? <Step2Stage s={s} /> : s.step === 3 ? <Step3Stage s={s} /> : <Step4Stage s={s} />)} done={(s) => (s.step === 1 ? <Step1Stage s={s} /> : s.step === 2 ? <Step2Stage s={s} /> : null)} />
-}
-
-function Right({ ctx }: { ctx: Ctx }) {
   const s = useStore(ctx.store)
-  useStore(ctx.progress)
-  const minute = s.minuteResult()
-  const board = s.boardResult()
+  const error = s.loadError ? <Note data-load-error>{s.loadError}</Note> : null
   return (
-    <Panel title={`${PART_TITLES.stream}: ${STEP_TITLES[s.step].replace(/^Step \d — /, '')}`} style={RIGHT_STYLE}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <FixedLines lines={progressLines(s)} testId="results-progress" />
-        {s.loadError && <Note data-load-error>{s.loadError}</Note>}
-        {s.step === 1 && (minute ? <MinuteReveal result={minute} /> : <Note data-results-pending>The results of this step appear here once your answer is committed. Nothing about the language’s words is shown before then.</Note>)}
-        {s.step === 2 && s.state !== 'intro' && !board && <Step2Panel s={s} />}
-        {s.step === 2 && board && <BoardReveal seed={s.seed} result={board} />}
-        {s.step === 3 && s.state !== 'intro' && <Content>The predictions, the slider, the plot, the table of scores, and each learner’s description are in the center. The table fills in as you run the learners at each amount.</Content>}
-        {s.step === 4 && s.state !== 'intro' && <Content>The menu of utterances, the strip, the histogram, and the dips learner’s shares are in the center.</Content>}
-      </div>
-    </Panel>
+    <StepStage
+      ctx={ctx}
+      tab="stream"
+      screens={SCREENS}
+      running={(s) => (
+        <>
+          {error}
+          {s.step === 1 ? <Step1Stage s={s} /> : s.step === 2 ? <Step2Stage s={s} /> : s.step === 3 ? <Step3Stage s={s} /> : <Step4Stage s={s} />}
+        </>
+      )}
+      done={(s) => (
+        <>
+          {error}
+          {s.step === 1 ? <Step1Stage s={s} onNext={() => ctx.openStep(2)} /> : s.step === 2 ? <Step2Stage s={s} onNext={() => ctx.openStep(3)} /> : null}
+        </>
+      )}
+    />
   )
 }
 
 export const stream: PartModule<StreamStore> = {
   createStore: (seed, progress) => new StreamStore(seed, progress),
-  Left,
+  Nav,
   Stage,
-  Right,
-  Results: StreamResults,
 }
 export { StreamStore }

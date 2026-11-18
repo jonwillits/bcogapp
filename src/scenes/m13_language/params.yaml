@@ -1,0 +1,111 @@
+# Lab 13's parameters (Jon, 2026-11-18). The details a walk-through changes
+# without touching the code: what happens when a step is left while
+# something is under way, how long a pause may last, each step's length,
+# and the names of the main panel's two tabs. `params.ts` reads this file
+# at build time and checks every part and step against the code's own
+# lists; the screens build their texts from these values, so a change here
+# cannot drift from what the student reads. Edit a value, save, and the dev
+# server reloads. A wrong key or value fails `params.test.ts` and the
+# close-out.
+#
+# The two panels. The NAVIGATION PANEL is the column on the left: the part
+# tabs, the step buttons, Begin, Go on, Show the instructions again. The
+# MAIN PANEL is the rest of the window, with two tabs at its top edge:
+# the current part (its instruction screens, its steps, and each step's
+# results with their explanation once the step is done) and all results
+# (every finished step's results without the explanations, each with a
+# button back to the full version on the current-part tab).
+#
+# A SWITCH is a press that leaves a step while something is under way: the
+# All Results tab, another part's tab, or another step's button. An in-page
+# dialog says what the switch does and asks to go on or stay. What can be
+# under way, and its consequence, is listed per step under `under_way`:
+#   pause     the step pauses where it is and goes on from there on return;
+#             a reload or a closed tab still restarts it, as its screen says
+#   restart   what was under way starts again on return, and the restart is
+#             noted on the results screen
+#   continue  nothing is lost: a run keeps going while the student is away
+# A step whose consequence is `pause` has a Pause button of its own.
+# `pause_limit_minutes` is how long it may stay paused before it restarts
+# anyway (null: no limit). The limit runs on the wall clock.
+
+main_panel:
+  tabs:
+    current: Current Part
+    results: All Results
+
+parts:
+  sounds:
+    steps:
+      1:
+        kind: exploration
+        minutes: 5
+      2:
+        kind: experiment
+        minutes: 4
+        under_way:
+          labels: pause          # the six labels, begun and not yet committed
+        pause_limit_minutes: null
+      3:
+        kind: experiment
+        minutes: 5
+        under_way:
+          block: restart         # a block of trials, running in real time
+      4:
+        kind: exploration
+        minutes: 6
+        under_way:
+          run: continue          # a network training
+  stream:
+    steps:
+      1:
+        kind: experiment
+        minutes: 2
+        under_way:
+          minute: restart        # the minute playing, or played and not yet answered
+      2:
+        kind: experiment
+        minutes: 6               # the board is saved as it goes: nothing is ever under way
+      3:
+        kind: exploration
+        minutes: 5
+        under_way:
+          run: continue          # the learners running
+      4:
+        kind: exploration
+        minutes: 3
+  words:
+    steps:
+      1:
+        kind: experiment
+        minutes: 6
+        under_way:
+          trials: pause          # the 60 learning trials
+        pause_limit_minutes: 5
+      2:
+        kind: experiment
+        minutes: 1
+        under_way:
+          test: restart          # the 12 test trials
+      3:
+        kind: exploration
+        minutes: 7
+        under_way:
+          run: continue          # the models running
+  predictors:
+    steps:
+      1:
+        kind: exploration
+        minutes: 3
+      2:
+        kind: exploration
+        minutes: 5
+      3:
+        kind: exploration
+        minutes: 5
+      4:
+        kind: exploration
+        minutes: 6
+      5:
+        kind: exploration
+        minutes: 4

@@ -25,7 +25,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
  * neighbor before Step 2's prediction; no distribution before Steps 3's
  * and 4's predictions. Also: no microphone is ever asked for.
  */
-type Mod = { Left: unknown; Stage: unknown; Right: unknown }
+type Mod = { Nav: unknown; Stage: unknown }
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
 const until = async (f: () => boolean, ms = 20000) => {
   const t0 = Date.now()

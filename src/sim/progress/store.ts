@@ -132,6 +132,26 @@ export class ProgressStore<U extends string, P extends number, F extends string>
     this.changed()
   }
 
+  /**
+   * A unit interrupted within the session (Lab 13: a switch away from a
+   * step whose consequence is a restart, or a pause past its limit): it is
+   * discarded now exactly as an interrupted unit is on the next load, and
+   * the next begin uses the next materials slot. A resuming unit is left as
+   * it is. Nothing happens to a unit that is not in progress.
+   */
+  interrupt(unit: U): void {
+    const rec = this.state.units[unit]
+    if (rec.status !== 'in progress' || this.spec.resumes(unit)) return
+    const last = this.spec.reservesFor(unit) - 1
+    rec.status = 'not started'
+    rec.materials = Math.min(last, rec.materials + 1)
+    rec.restarts += 1
+    delete rec.result
+    delete rec.partial
+    this.save()
+    this.changed()
+  }
+
   complete(unit: U, result: unknown): void {
     const rec = this.state.units[unit]
     if (rec.status === 'complete') return

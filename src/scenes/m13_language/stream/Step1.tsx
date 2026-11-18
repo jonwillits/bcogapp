@@ -3,6 +3,8 @@ import { Btn, Content, FixedLines, Note, StagePanel, Countdown } from '../ui'
 import { useAudioCursor, useBlockGuard } from '../hooks'
 import { MADE_OFFLINE_LINE, MADE_UP_LANGUAGE_LINE } from '../lines'
 import { Strip, WordStrip } from './Strip'
+import { MinuteReveal } from './Reveal'
+import { MAIN_TABS } from '../params'
 import { MINUTE_SYLLABLES, type StreamStore } from './store'
 
 /**
@@ -10,10 +12,11 @@ import { MINUTE_SYLLABLES, type StreamStore } from './store'
  * line saying what is happening now, the spectrogram scrolling under a
  * cursor with nothing marking words, the committed answer, and after the
  * commit the two replays (the marked one with the word strip and boundary
- * lines, and the lengthened one). The first playback stops and starts
- * again if the page is hidden.
+ * lines, and the lengthened one), the reveal with its explanation, and the
+ * button that comes next (Jon, 2026-11-18). The first playback stops and
+ * starts again if the page is hidden.
  */
-export function Step1Stage({ s }: { s: StreamStore }) {
+export function Step1Stage({ s, onNext }: { s: StreamStore; onNext?: () => void }) {
   const read = useCallback(() => s.cursor(), [s])
   const cursor = useAudioCursor(read, s.playback !== null)
   const stop = useCallback((reason: string) => s.stopMinute(reason), [s])
@@ -89,6 +92,17 @@ export function Step1Stage({ s }: { s: StreamStore }) {
       <Content>{MADE_UP_LANGUAGE_LINE}</Content>
       <Content>{MADE_OFFLINE_LINE}</Content>
       {done && <FixedLines lines={[`Your answer: ${done.guess} ${done.guess === 1 ? 'word' : 'words'}.`]} mono={false} />}
+      {done && onNext && (
+        <>
+          <Note data-next>{`This step is done. Its results are below, with their explanation, and on the ${MAIN_TABS.results} tab at the top of this panel. When you are ready to move on, press “Go on to Step 2” here or in the navigation panel.`}</Note>
+          <div>
+            <Btn primary onClick={onNext}>
+              Go on to Step 2
+            </Btn>
+          </div>
+        </>
+      )}
+      {done && <MinuteReveal result={done} />}
     </StagePanel>
   )
 }

@@ -54,6 +54,8 @@ export interface InstructionScreenProps {
   inline?: boolean
   /** The inline width cap (560 px by default); Lab 13 passes "none" so the screen fills its frame between the columns. */
   maxWidth?: number | string
+  /** No border, background or padding of its own: the screen is the content of a panel that draws them (Lab 13's main panel, 2026-11-18). */
+  bare?: boolean
 }
 
 function groupBullets(lines: string[]): (string | string[])[] {
@@ -68,14 +70,14 @@ function groupBullets(lines: string[]): (string | string[])[] {
   return out
 }
 
-export function InstructionScreen({ title, willDo, minutes, sitting, sittingLine, ready = READY_DEFAULT, keys, content, next, figure, onBegin, beginLabel = 'Begin', disabled, extra, inline, maxWidth = 560 }: InstructionScreenProps) {
+export function InstructionScreen({ title, willDo, minutes, sitting, sittingLine, ready = READY_DEFAULT, keys, content, next, figure, onBegin, beginLabel = 'Begin', disabled, extra, inline, maxWidth = 560, bare }: InstructionScreenProps) {
   const style = inline
     ? { width: '100%', maxWidth, boxSizing: 'border-box' as const }
     : { position: 'absolute' as const, left: 'calc(50% + var(--stage-shift, 0px))', top: 24, transform: 'translateX(-50%)', width: 'min(560px, calc(100vw - 780px))', minWidth: 360, maxHeight: 'calc(100vh - 170px)', overflowY: 'auto' as const }
   return (
     <div
       data-instruction
-      style={{ ...style, padding: '16px 20px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 12.5, lineHeight: 1.55, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'auto' }}
+      style={{ ...style, ...(bare ? {} : { padding: '16px 20px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)' }), color: 'var(--text)', fontSize: 12.5, lineHeight: 1.55, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'auto' }}
     >
       <div style={{ fontSize: 14, fontWeight: 600 }}>{title}</div>
       <GroupLabel>What you will do</GroupLabel>

@@ -80,44 +80,28 @@ export function TabBar({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void
 }
 
 /**
- * The columns' widths (Jon, 2026-11-16, LAB_COMMON_FEATURES §1): a side
- * column is its design width, 310 px on the left and 440 px on the right,
- * but never more than 0.3 of the window; past that, zoomed in, the panel
- * scrolls sideways inside itself rather than growing. The column itself is
- * the one scroll container (no `maxHeight` here), so there is one vertical
- * scrollbar per column, not one inside another. The center panel sits
- * between the columns, 0.02 of the window from each (Jon, 2026-11-16: 0.05 was too much), and spans the room
- * between them, with no cap (Jon, 2026-11-16).
+ * The navigation panel's width (Jon, 2026-11-16, LAB_COMMON_FEATURES §1):
+ * its design width, 310 px, but never more than 0.3 of the window; past
+ * that, zoomed in, its panels scroll sideways inside themselves rather
+ * than growing. The column itself is the one scroll container (no
+ * `maxHeight` here), so there is one vertical scrollbar, not one inside
+ * another. The main panel takes the rest of the window (Jon, 2026-11-18).
  */
 export const LEFT_WIDTH = 'min(310px, 30vw)'
-export const RIGHT_WIDTH = 'min(440px, 30vw)'
 export const PANEL_STYLE: CSSProperties = { width: LEFT_WIDTH, maxWidth: LEFT_WIDTH, overflowX: 'auto' }
-export const RIGHT_STYLE: CSSProperties = { width: RIGHT_WIDTH, maxWidth: RIGHT_WIDTH, overflowX: 'auto' }
-/** The gap between a side column and the center panel, as a share of the window. */
-const CENTER_GAP = '2vw'
-/** The room between the columns' gaps: the window minus the layout's 12 px padding on each side, both columns, a reserved scrollbar gutter on each (16 px), and both gaps. */
-export const STAGE_ROOM = `calc(100vw - 24px - 32px - ${LEFT_WIDTH} - ${RIGHT_WIDTH} - 2 * ${CENTER_GAP})`
-/** The center panel's width is the room: the window minus the two columns and the two gaps, with no cap (Jon, 2026-11-16: a cap left a widening gap at small font sizes). What does not fit scrolls sideways inside the panel. The argument is kept for the callers; it no longer caps anything. */
-export const stageWidth = (_max: number) => STAGE_ROOM
-/** The center panel's left edge: after the left column and its gap. */
-export const stageLeft = (_max: number) => `calc(12px + 16px + ${LEFT_WIDTH} + ${CENTER_GAP})`
 
 /**
- * The center panel: positioned between the columns, scrolling vertically
- * inside itself when tall, never horizontally for text (text wraps; only a
- * fixed-width block can be wider). The scroll container is a plain block
- * and the column of children is a separate inner flex box: a flex column
- * with a capped height shrinks any child whose overflow is hidden (a block
- * of fixed lines, a table) to nothing once the panel overflows (Jon,
- * 2026-11-17: Part 4's count table appeared and then vanished).
+ * A step's content in the main panel: a plain column of blocks. The panel
+ * itself is the scroll container and draws the border (`MainPanel.tsx`);
+ * this is only the column, so a flex column with a capped height never
+ * shrinks a child whose overflow is hidden to nothing (Jon, 2026-11-17:
+ * Part 4's count table appeared and then vanished). `wide` is kept for the
+ * callers; every stage has the panel's whole width now.
  */
 export function StagePanel({ children, wide, testId }: { children: ReactNode; wide?: boolean; testId?: string }) {
   return (
-    <div
-      data-stage={testId ?? true}
-      style={{ position: 'absolute', left: stageLeft(wide ? 760 : 560), top: 24, width: stageWidth(wide ? 760 : 560), maxHeight: 'calc(100vh - 120px)', overflowY: 'auto', overflowX: 'auto', padding: '16px 20px', borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', fontSize: 12.5, lineHeight: 1.55, pointerEvents: 'auto', boxSizing: 'border-box' }}
-    >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>{children}</div>
+    <div data-stage={testId ?? true} data-wide={wide || undefined} style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
+      {children}
     </div>
   )
 }

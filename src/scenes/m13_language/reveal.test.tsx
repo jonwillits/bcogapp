@@ -38,14 +38,14 @@ export function memoryStorage(): RawStorage {
   return { read: () => text, write: (t) => ((text = t), true) }
 }
 
-type Mod = { Left: unknown; Stage: unknown; Right: unknown }
+type Mod = { Nav: unknown; Stage: unknown }
+/** A part rendered as the shell renders it: the main panel's current-part tab and the navigation panel, on one store. `openStep` opens the step on the store directly, as the shell does when nothing is under way. */
 export function fresh<S>(mod: Mod, make: (seed: number, progress: ProgressStore) => S, seed = 7, progress = new ProgressStore(memoryStorage(), seed)) {
   const store = make(seed, progress)
-  const ctx = { seed, progress, store, anim: undefined as never, header: null, openTab: () => {} } as never
+  const ctx = { seed, progress, store, anim: undefined as never, header: null, openTab: () => {}, openStep: (step: number) => (store as { open?: (s: number) => void }).open?.(step) } as never
   const Stage = mod.Stage as (p: { ctx: never }) => ReactElement
-  const Left = mod.Left as (p: { ctx: never }) => ReactElement
-  const Right = mod.Right as (p: { ctx: never }) => ReactElement
-  const all = () => renderToStaticMarkup(<Stage ctx={ctx} />) + renderToStaticMarkup(<Left ctx={ctx} />) + renderToStaticMarkup(<Right ctx={ctx} />)
+  const Nav = mod.Nav as (p: { ctx: never }) => ReactElement
+  const all = () => renderToStaticMarkup(<Stage ctx={ctx} />) + renderToStaticMarkup(<Nav ctx={ctx} />)
   return { store, progress, ctx, all }
 }
 export const text = (html: string) => html.replace(/<[^>]+>/g, ' ').replace(/&#x27;/g, '’').replace(/&quot;/g, '"').replace(/\s+/g, ' ')

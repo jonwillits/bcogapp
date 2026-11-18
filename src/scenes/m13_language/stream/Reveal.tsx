@@ -1,5 +1,4 @@
-import type { ProgressStore } from '../../../sim/language/progress/store'
-import { Content, FixedLines, GroupLabel, Note, Para, Section } from '../ui'
+import { Content, FixedLines, Note, Para, Section } from '../ui'
 import { ReferencePanel } from '../ReferencePanel'
 import { reference } from '../../../sim/language/references'
 import { streamFor, SYLLABLES, WORDS, wordAverageTp } from '../../../sim/language/stream/language'
@@ -7,7 +6,7 @@ import { tpTableOf } from '../../../sim/language/stream/board'
 import { LENGTHENED_DIFFERENTLY_LINE, RESTARTED_LINE } from '../lines'
 import { SIX_WORDS_LINE, STEP1_AFTER_COMMIT } from './texts'
 import { Tile } from './Strip'
-import { MINUTE_UNIT, BOARD_UNIT, type BoardResult, type MinuteResult } from './store'
+import type { BoardResult, MinuteResult } from './store'
 
 /**
  * Part 2's reveals (spec §6.1, §6.2): Step 1's after the commit (the six
@@ -15,9 +14,15 @@ import { MINUTE_UNIT, BOARD_UNIT, type BoardResult, type MinuteResult } from './
  * lines, the lengthening experiment), and Step 2's results in numbered
  * sections (the order the words were found in, the table of transitional
  * probabilities with the within-word cells shaded, and each word's average
- * beside the original's finding). None says what to conclude.
+ * beside the original's finding). None says what to conclude. Each has two
+ * modes: `full` on the step, with the explanation and the references;
+ * `results` on the All Results tab, the sections with their one-sentence
+ * descriptions only (Jon, 2026-11-18).
  */
-export function MinuteReveal({ result }: { result: MinuteResult }) {
+export type RevealMode = 'full' | 'results'
+
+export function MinuteReveal({ result, mode = 'full' }: { result: MinuteResult; mode?: RevealMode }) {
+  const full = mode === 'full'
   const typed = result.typed ? result.typed.split(/[\s,;]+/).filter(Boolean) : []
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-reveal="minute">
@@ -35,22 +40,27 @@ export function MinuteReveal({ result }: { result: MinuteResult }) {
         </div>
         <Note>Each word is shown as its three syllables in the word’s own color, the colors the board in Step 2 uses.</Note>
       </Section>
-      <Section n={2} title="The two replays">
-        {STEP1_AFTER_COMMIT.map((p) => (
-          <Para key={p.slice(0, 12)}>{p}</Para>
-        ))}
-        <Content>{SIX_WORDS_LINE}</Content>
-      </Section>
-      <Section n={3} title="The original’s lengthening experiment">
-        <Para>In the original study’s second experiment, the vowel of the last syllable was lengthened by 100 milliseconds in three of the six words, in a language with m and n in place of b and d. Scores against nonwords were 80% with the final syllable lengthened, 61% with the first syllable lengthened, and 65% with no lengthening (pp. 616–617).</Para>
-        <Content>{LENGTHENED_DIFFERENTLY_LINE}</Content>
-        <ReferencePanel reference={reference('saffran-lengthening')} />
-      </Section>
+      {full && (
+        <>
+          <Section n={2} title="The two replays">
+            {STEP1_AFTER_COMMIT.map((p) => (
+              <Para key={p.slice(0, 12)}>{p}</Para>
+            ))}
+            <Content>{SIX_WORDS_LINE}</Content>
+          </Section>
+          <Section n={3} title="The original’s lengthening experiment">
+            <Para>In the original study’s second experiment, the vowel of the last syllable was lengthened by 100 milliseconds in three of the six words, in a language with m and n in place of b and d. Scores against nonwords were 80% with the final syllable lengthened, 61% with the first syllable lengthened, and 65% with no lengthening (pp. 616–617).</Para>
+            <Content>{LENGTHENED_DIFFERENTLY_LINE}</Content>
+            <ReferencePanel reference={reference('saffran-lengthening')} />
+          </Section>
+        </>
+      )}
     </div>
   )
 }
 
-export function BoardReveal({ seed, result }: { seed: number; result: BoardResult }) {
+export function BoardReveal({ seed, result, mode = 'full' }: { seed: number; result: BoardResult; mode?: RevealMode }) {
+  const full = mode === 'full'
   const stream = streamFor(seed, 1512)
   const { table, within } = tpTableOf(stream)
   const avgs = WORDS.map((w) => ({ word: w, avg: wordAverageTp(table, w) })).sort((a, b) => b.avg - a.avg)
@@ -93,33 +103,12 @@ export function BoardReveal({ seed, result }: { seed: number; result: BoardResul
         </div>
       </Section>
       <Section n={3} title="Each word’s average transitional probability inside it">
-        <Para>For each word, the mean of its two transitions from the table, from highest to lowest. The original study’s authors split the six words this way and found that the three words with the highest average transitional probabilities were learned better than the three with the lowest, 79% against 72% (p. 614). Beside it, where each word fell in your own order of finding; shown words have no place.</Para>
+        <Para>For each word, the mean of its two transitions from the table, from highest to lowest; beside it, where each word fell in your own order of finding. Shown words have no place.</Para>
+        {full && <Para>The original study’s authors split the six words this way and found that the three words with the highest average transitional probabilities were learned better than the three with the lowest, 79% against 72% (p. 614).</Para>}
         <FixedLines lines={avgs.map((a, i) => `${i + 1}. ${a.word.padEnd(7)} average ${a.avg.toFixed(2)}   your order: ${foundOrder.includes(a.word) ? `found ${foundOrder.indexOf(a.word) + 1}${['st', 'nd', 'rd'][foundOrder.indexOf(a.word)] ?? 'th'}` : 'shown'}`)} testId="word-averages" />
         <Note data-ranking>{foundOrder.length >= 2 ? `The three words highest by average transitional probability are ${rank.slice(0, 3).join(', ')}; of the words you found, ${foundOrder.filter((w) => rank.slice(0, 3).includes(w)).length} of your first ${Math.min(3, foundOrder.length)} were among them.` : 'You found fewer than two words, so there is no order of finding to compare.'}</Note>
-        <ReferencePanel reference={reference('saffran-high-low')} />
+        {full && <ReferencePanel reference={reference('saffran-high-low')} />}
       </Section>
-    </div>
-  )
-}
-
-export function StreamResults({ progress }: { progress: ProgressStore }) {
-  const minute = progress.result(MINUTE_UNIT) as MinuteResult | undefined
-  const board = progress.result(BOARD_UNIT) as BoardResult | undefined
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-results="stream">
-      {minute && (
-        <>
-          <GroupLabel>Step 1</GroupLabel>
-          <MinuteReveal result={minute} />
-        </>
-      )}
-      {board && (
-        <>
-          <GroupLabel>Step 2</GroupLabel>
-          <BoardReveal seed={progress.seed} result={board} />
-        </>
-      )}
-      {!minute && !board && <Note>No experiment of Part 2 is finished yet.</Note>}
     </div>
   )
 }

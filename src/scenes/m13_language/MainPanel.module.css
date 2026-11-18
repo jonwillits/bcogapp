@@ -1,0 +1,80 @@
+/* The main panel (Jon, 2026-11-18): a tab strip at the top edge and the
+   panel under it. The two tabs are drawn as tabs, not buttons: the chosen
+   one shares the panel's background and its bottom border is open onto the
+   panel, so the two read as one surface; the other sits a shade darker. A
+   chosen tab changes color and never size (LAB_COMMON_FEATURES §7): the two
+   classes differ in colors only. The panel is the one scroll container for
+   everything a part shows. The dialog overlay covers the strip and the
+   panel together. */
+.tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  flex: none;
+}
+.tab,
+.tabOn {
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  border: 1px solid var(--border);
+  border-radius: 10px 10px 0 0;
+  margin-bottom: -1px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.tab {
+  background: color-mix(in srgb, var(--surface) 50%, transparent);
+  color: var(--text-muted);
+}
+.tabOn {
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: var(--text);
+  border-bottom-color: transparent;
+  position: relative;
+  z-index: 1;
+}
+.tab:hover {
+  color: var(--text);
+}
+.panel {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: 0 var(--radius) var(--radius) var(--radius);
+  box-shadow: var(--shadow);
+  color: var(--text);
+  padding: 16px 20px;
+  box-sizing: border-box;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: rgba(5, 8, 16, 0.55);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 72px;
+  border-radius: var(--radius);
+}
+.dialog {
+  width: min(560px, 92%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--text);
+  font-size: 12.5px;
+  line-height: 1.55;
+}

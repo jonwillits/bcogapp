@@ -7,6 +7,7 @@ import { bufferFrom, type Clip } from '../../../sim/language/audio/clips'
 import { abxTrials, labelingTrials, LABELING_GAP_MS, STEPS, TRIAD_INTERVAL_S, type Label as Lbl, type Triad } from '../../../sim/language/sounds/abx'
 import { accuracy, confusion, forward, makeClassifier, shares, splitOnePitch, splitOneVoice, splitRun1, train, PASSES, type Classifier, type Token } from '../../../sim/language/sounds/classifier'
 import { StepStore } from '../steps'
+import type { UnderWay } from '../params'
 import type { Step } from './screens'
 import { RUN3_AFTER_STEP3 } from './afterStep3'
 import { continuumClip, continuumPatch, loadContinuum, loadTts, loadVowels, syllableClip, tokenPatches, tokensClip, votClip, vowelClip, SIX_ORDER, type Continuum, type Six, type Tts, type Vowels } from './assets'
@@ -95,7 +96,7 @@ export class SoundsStore extends StepStore<Step> {
   playing: { key: string; start: number; end: number } | null = null
 
   // Step 2
-  readonly sixOrder: Six[]
+  sixOrder: Six[]
   labels: Partial<Record<Six, 'b' | 'd'>> = {}
   labelsStarted = 0
   showVot = false
@@ -112,7 +113,7 @@ export class SoundsStore extends StepStore<Step> {
   private trainSeed = 0
 
   constructor(seed: number, progress: ProgressStore) {
-    super(seed, progress, [1, 2, 3, 4])
+    super(seed, progress, [1, 2, 3, 4], 'sounds')
     const rng = makeRng(seed ^ 0x51a)
     const order = [...SIX_ORDER]
     for (let i = order.length - 1; i > 0; i--) {
@@ -141,6 +142,45 @@ export class SoundsStore extends StepStore<Step> {
   }
   get betweenBlocks(): boolean {
     return this.step === 3 && this.progress.isComplete(LABELING_UNIT) && !this.progress.isComplete(ABX_UNIT) && this.block === null && this.blockStopped === null
+  }
+
+  // ------------------------------------------------ leaving and pausing
+
+  /** What is under way (Jon, 2026-11-18): the six labels once begun and not committed; a block while it runs; a network while it trains. */
+  protected underWayNow(): UnderWay | null {
+    if (this.step === 2 && this.stateOf(2) === 'running') return 'labels'
+    if (this.step === 3 && this.block !== null) return 'block'
+    if (this.step === 4 && (this.run1.state === 'training' || this.run2.state === 'training')) return 'run'
+    return null
+  }
+
+  protected onPause(what: UnderWay): void {
+    if (what === 'labels') {
+      player.stop()
+      this.playing = null
+    }
+  }
+
+  /** The labels' clock skips the pause. */
+  protected onResume(what: UnderWay, ms: number): void {
+    if (what === 'labels') this.labelsStarted += ms
+  }
+
+  /** A switch away, or a pause past its limit: the block stops as a focus loss stops it; the six labels start again in a new order. */
+  protected onInterrupt(what: UnderWay): void {
+    if (what === 'block') this.stopBlock('You left the step, so the block stopped.')
+    if (what === 'labels') this.restartLabels()
+  }
+
+  /** The six syllables appear again from the start, in a new order, and the restart is counted (as a reload counts it). */
+  private restartLabels(): void {
+    this.progress.interrupt(LABELS_UNIT)
+    const order = [...this.sixOrder]
+    order.push(order.shift()!)
+    this.sixOrder = order
+    this.labels = {}
+    this.progress.begin(LABELS_UNIT)
+    this.labelsStarted = performance.now()
   }
 
   protected onOpen(step: Step): void {

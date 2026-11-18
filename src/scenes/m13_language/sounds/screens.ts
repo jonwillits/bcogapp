@@ -1,5 +1,7 @@
 import { HEADPHONES_LINE, MADE_OFFLINE_LINE, SETTINGS_NOT_MEASUREMENTS_LINE } from '../lines'
-import { READY_SOUND_LINE, EXPLORATION_SITTING_LINE, type StepScreen } from '../steps'
+import { READY_SOUND_LINE, EXPLORATION_SITTING_LINE, RESULTS_BELOW, type StepScreen } from '../steps'
+import { stepParams } from '../params'
+import { LEAVING_PHRASE, RESTART_PHRASE, pauseClause, restartClause } from '../switching'
 
 /**
  * Part 1's instruction screens (spec §5, §4.4): every acoustic term defined
@@ -19,14 +21,16 @@ export const STEP_TITLES: Record<Step, string> = {
 }
 
 export const NEXT_LINE: Record<Step, string> = {
-  1: 'This step is an exploration with no end of its own. When you have seen the screens you want to see, press “Go to Step 2” on the last screen or “Go on to Step 2” on the left.',
-  2: 'When this step is done, your labels beside the right ones appear on the right, and the named spectrograms in the center. To move on, press “Go on to Step 3” in the center or on the left.',
-  3: 'When both blocks are done, the results of this step appear on the right. To move on, press “Go on to Step 4” on the left.',
-  4: 'This step is an exploration with no end of its own. When you have done the three runs, this part is done. To move on to Part 2, press “Go on to Part 2” on the left, or choose the Stream tab at the top left.',
+  1: 'This step is an exploration with no end of its own. When you have seen the screens you want to see, press “Go to Step 2” on the last screen or “Go on to Step 2” in the navigation panel.',
+  2: `When this step is done, ${RESULTS_BELOW}: your labels beside the right ones, then the named spectrograms. To move on, press “Go on to Step 3” here or in the navigation panel.`,
+  3: `When both blocks are done, ${RESULTS_BELOW}. To move on, press “Go on to Step 4” here or in the navigation panel.`,
+  4: 'This step is an exploration with no end of its own. When you have done the three runs, this part is done. To move on to Part 2, press “Go on to Part 2” in the navigation panel, or choose the Stream tab at the top left.',
 }
 
-export const LABELS_SITTING_LINE = 'Once you press “Begin”, label all six in one sitting if you can. If you leave partway, the same six syllables appear again from the start, in a new order, and the restart is noted on the results screen. Nothing was revealed, so nothing needs to change.'
-export const BLOCKS_SITTING_LINE = 'Once you press “Begin”, finish each block in one sitting. A block runs in real time. If you leave partway through a block, that block starts again from its first trial when you return, and the restart is noted on the results screen. A block you have finished is saved and not played again.'
+/** Built from params.yaml (Jon, 2026-11-18): the six labels pause, with or without a limit; a block restarts. */
+const LABELS_LIMIT = stepParams('sounds', 2).pauseLimitMinutes ?? null
+export const LABELS_SITTING_LINE = `Once you press “Begin”, label all six in one sitting if you can. ${pauseClause(LABELS_LIMIT)} ${restartClause(LABELS_LIMIT, RESTART_PHRASE.labels)} Nothing was revealed, so nothing needs to change.`
+export const BLOCKS_SITTING_LINE = `Once you press “Begin”, finish each block in one sitting. A block runs in real time and cannot be paused. If you leave partway through a block, by ${LEAVING_PHRASE} or by closing or reloading the page, that block starts again from its first trial when you return, and the restart is noted on the results screen. A block you have finished is saved and not played again.`
 
 export const SCREENS: Record<Step, StepScreen> = {
   1: {
@@ -40,7 +44,7 @@ export const SCREENS: Record<Step, StepScreen> = {
       'Screens 5 to 7 compare sounds. On “Pitch”, you will hear the vowel ah made at a low pitch and at a high pitch. Before the two spectrograms appear, choose a prediction on that screen and press “Commit my prediction”: when the pitch goes up, what moves on the spectrogram? On “Voice”, you will hear the same vowel at the same pitch from a shorter throat and mouth. On “Vowels”, you will hear ee, ah, and oo, and see each one placed on a plot of its second formant against its first.',
       'Nothing is scored in this step. Your one prediction is recorded. You can leave and come back at any time.',
     ],
-    minutes: 5,
+    minutes: stepParams('sounds', 1).minutes,
     sitting: 'leave any time',
     sittingLine: EXPLORATION_SITTING_LINE,
     ready: READY_SOUND_LINE,
@@ -55,10 +59,10 @@ export const SCREENS: Record<Step, StepScreen> = {
     willDo: [
       'In this step you will hear six short syllables, one at a time, and look at each one’s spectrogram. Each syllable begins with one of two consonants, b or d, and ends in one of three vowels, ee, ah, or oo. Your task is to label each syllable b or d by what you hear.',
       'The six spectrograms appear without labels, in an order drawn for you. Under each one are “Play”, which plays the syllable, and two buttons, “b” and “d”. Click one to label the syllable. You can change a label as often as you like, and you can play a syllable as often as you like, until you press “Commit my labels”. Before the commit, nothing on the screen says which syllable is which.',
-      'When all six are labeled, press “Commit my labels”. Then your six labels appear beside the right ones on the right, with the number correct out of 6. In the center, the six spectrograms are named, with a drawing on each and a sentence about each syllable.',
+      'When all six are labeled, press “Commit my labels”. Then your six labels appear beside the right ones, with the number correct out of 6, and under them the six spectrograms are named, with a drawing on each and a sentence about each syllable.',
       'Your six labels and the time you took are recorded. There is no time limit.',
     ],
-    minutes: 4,
+    minutes: stepParams('sounds', 2).minutes,
     sitting: 'one sitting',
     sittingLine: LABELS_SITTING_LINE,
     ready: READY_SOUND_LINE,
@@ -74,10 +78,10 @@ export const SCREENS: Record<Step, StepScreen> = {
       'In this step you will hear short synthetic syllables and answer a question about each one. There are two blocks. Each block opens on its own screen, with its instructions and a button that starts it, runs on its own, and is saved when it ends.',
       'Block 1, labeling: 54 trials, about 2 minutes. On each trial you hear one syllable. Then two buttons appear, “B” and “D”. Press the one that says which consonant you heard. You can also press the keys B and D. The next syllable plays 800 milliseconds after your answer. No answer is marked right or wrong, and there is no feedback.',
       'Block 2, telling apart: 28 trials, about 2 minutes. On each trial you hear three syllables in a row, with a pause between them. The first two are different from each other. The third is the same as one of the first two, and your task is to say which. Press “X matched the first” or “X matched the second”, or the keys 1 and 2. Again there is no feedback.',
-      'When both blocks are done, the results of this step appear on the right, with your answers drawn as curves and explained.',
+      'When both blocks are done, the results of this step appear below in this panel, with your answers drawn as curves and explained.',
       'Every answer and its time are recorded. A trial has no time limit, but the sounds in a trial play on their own once the trial starts.',
     ],
-    minutes: 5,
+    minutes: stepParams('sounds', 3).minutes,
     sitting: 'one sitting',
     sittingLine: BLOCKS_SITTING_LINE,
     ready: READY_SOUND_LINE,
@@ -91,11 +95,11 @@ export const SCREENS: Record<Step, StepScreen> = {
     kind: 'exploration',
     willDo: [
       'In this step you will train a small network of the kind described in Module 7 to sort syllables into three labels, b, d, and g, and then test it. The network takes in numbers, not sound: a small patch of a spectrogram, about 40 frequency bands by 10 frames of 10 milliseconds each, starting 20 milliseconds before the consonant begins. Each number is the energy in one frequency band in one frame. The same code that draws the spectrograms you see computes the network’s input.',
-      'The training sounds are natural syllables, b, d, and g before five vowels, made by a text-to-speech program in several voices, each voice at its own pitch and at two shifted pitches. The text at the top of the center panel states the exact counts. Two of the voices are held out of training, so that the network can be tested on voices it has not learned from.',
-      'There are three runs, one under another in the center panel. Before each run, choose a prediction from the list above its button and press “Commit my prediction”. In run 1, press “Train”: the network is trained on every voice but the two held out, and tested on those two. A plot shows the percentage correct on the held-out syllables rising while the network trains, and a table of its labels against the right labels appears when training ends. In run 2, press “Train on one pitch” or “Train on one voice”: the network is trained on that alone and tested on all the rest. In run 3, press “Run on the 9 sounds”: the network from run 1 is run on the 9 synthetic syllables of Step 3, and its three outputs are drawn as three lines, one for each label.',
+      'The training sounds are natural syllables, b, d, and g before five vowels, made by a text-to-speech program in several voices, each voice at its own pitch and at two shifted pitches. The text at the top of this panel states the exact counts. Two of the voices are held out of training, so that the network can be tested on voices it has not learned from.',
+      'There are three runs, one under another in this panel. Before each run, choose a prediction from the list above its button and press “Commit my prediction”. In run 1, press “Train”: the network is trained on every voice but the two held out, and tested on those two. A plot shows the percentage correct on the held-out syllables rising while the network trains, and a table of its labels against the right labels appears when training ends. In run 2, press “Train on one pitch” or “Train on one voice”: the network is trained on that alone and tested on all the rest. In run 3, press “Run on the 9 sounds”: the network from run 1 is run on the 9 synthetic syllables of Step 3, and its three outputs are drawn as three lines, one for each label.',
       'Nothing is scored. Your three predictions are recorded. Training takes a few seconds, and the panel says when it is done.',
     ],
-    minutes: 6,
+    minutes: stepParams('sounds', 4).minutes,
     sitting: 'leave any time',
     sittingLine: EXPLORATION_SITTING_LINE,
     ready: READY_SOUND_LINE,

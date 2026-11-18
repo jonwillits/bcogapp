@@ -7,6 +7,7 @@ import { makeDesign, isCorrect, LEARNING_TRIALS, WORDS_PER_SET, type Design, typ
 import { keyMeasure, type KeyMeasure } from '../../../sim/language/words/keyMeasure'
 import { fit, runs, runModel, ALPHA_GRID, BETA_GRID, type ModelId, type ModelRuns } from '../../../sim/language/words/fit'
 import { StepStore } from '../steps'
+import type { UnderWay } from '../params'
 import { NOTICE_LINE, type Step } from './screens'
 import { loadObjects, loadWordFiles, wordClip, type ObjectFile, type WordFile } from './assets'
 
@@ -35,8 +36,8 @@ export interface WordsResult {
 }
 
 export class WordsStore extends StepStore<Step> {
-  readonly materials: 0 | 1
-  readonly design: Design
+  materials: 0 | 1
+  design: Design
   /** The words of the set in use, by word index, and the objects by object index: filled once the files are loaded. */
   words: WordFile[] = []
   objects: ObjectFile[] = []
@@ -67,7 +68,7 @@ export class WordsStore extends StepStore<Step> {
   computing = false
 
   constructor(seed: number, progress: ProgressStore) {
-    super(seed, progress, [1, 2, 3])
+    super(seed, progress, [1, 2, 3], 'words')
     this.materials = Math.min(1, progress.materialsSlot(WORDS_UNIT)) as 0 | 1
     this.design = makeDesign(seed, this.materials)
   }
@@ -84,6 +85,60 @@ export class WordsStore extends StepStore<Step> {
   protected onOpen(): void {
     if (this.timer) clearTimeout(this.timer)
     player.stop()
+  }
+
+  // ------------------------------------------------ leaving and pausing
+
+  /** What is under way (Jon, 2026-11-18): the learning trials, the test, or the models while they run. */
+  protected underWayNow(): UnderWay | null {
+    if (this.step !== 3 && !this.progress.isComplete(WORDS_UNIT) && this.stateOf(this.step) === 'running') return this.phase === 'test' ? 'test' : 'trials'
+    if (this.step === 3 && this.computing) return 'run'
+    return null
+  }
+
+  /** The trial's word stops; a choice already made goes on to the next trial, which waits, unplayed, for the resume. */
+  protected onPause(): void {
+    if (this.timer) clearTimeout(this.timer)
+    this.timer = null
+    player.stop()
+    if (this.chosenNow !== null) this.advance(false)
+  }
+
+  /** The trial that was waiting plays its word again, and its clock starts again. */
+  protected onResume(): void {
+    this.trialStart = performance.now()
+    this.playTrialWord()
+  }
+
+  /** A switch away from the test, or a pause past its limit: the unit starts again from its first trial on the reserve set (spec §4.1, §7.1). */
+  protected onInterrupt(): void {
+    this.restartUnit()
+  }
+
+  private restartUnit(): void {
+    if (this.timer) clearTimeout(this.timer)
+    this.timer = null
+    player.stop()
+    this.progress.interrupt(WORDS_UNIT)
+    this.materials = Math.min(1, this.progress.materialsSlot(WORDS_UNIT)) as 0 | 1
+    this.design = makeDesign(this.seed, this.materials)
+    this.words = []
+    this.objects = []
+    this.clips.clear()
+    this.loadedOk = false
+    this.phase = 'learning'
+    this.i = 0
+    this.choices = []
+    this.testChoices = []
+    this.seconds = []
+    this.chosenNow = null
+    this.step = 1
+    this.progress.begin(WORDS_UNIT)
+    this.trialStart = performance.now()
+    void this.ensureLoaded().then(() => {
+      this.trialStart = performance.now()
+      this.playTrialWord()
+    })
   }
 
   protected onBegin(step: Step): void {
@@ -164,7 +219,7 @@ export class WordsStore extends StepStore<Step> {
     this.timer = setTimeout(() => this.advance(), CHOICE_SHOW_MS)
   }
 
-  private advance(): void {
+  private advance(play = true): void {
     this.chosenNow = null
     this.i++
     if (this.phase === 'learning' && this.i >= this.design.learning.length) {
@@ -181,7 +236,7 @@ export class WordsStore extends StepStore<Step> {
     }
     this.trialStart = performance.now()
     this.changed()
-    this.playTrialWord()
+    if (play) this.playTrialWord()
   }
 
   result(): WordsResult | null {

@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import { Btn, Choice, Content, Note, StagePanel } from '../ui'
+import { PauseButton } from '../steps'
 import { Spectrogram } from '../Spectrogram'
 import { useAudioCursor } from '../hooks'
 import { MADE_OFFLINE_LINE } from '../lines'
@@ -54,6 +55,7 @@ export function Step2Stage({ s }: { s: SoundsStore }) {
           Commit my labels
         </Btn>
         <Note data-labeled-count>{`${labeled} of 6 labeled.`}</Note>
+        <PauseButton s={s} />
       </div>
     </StagePanel>
   )

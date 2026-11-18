@@ -41,7 +41,7 @@ export const TOUR_TEXT: Record<TourScreen, string[]> = {
     'Here is the same vowel at the same pitch, 100 Hz, made by the synthesizer twice: once with the formants of the earlier screens, and once with every formant raised by 15%, which is what a vocal tract about 13% shorter would do. The first two formants are marked at their set frequencies in both. Look at what moves between the two pictures and what does not: the formant marks, or the spacing of the harmonics.',
   ],
   vowels: [
-    'Here are three vowels at one pitch, 120 Hz: ee as in see, ah as in father, and oo as in who. Each has its first two formants marked at the synthesizer’s settings. The plot on the right places each vowel by its second formant (left to right) against its first formant (up and down), with the axes turned so that the plot has the same orientation as the reading’s figure of monkey and human vowels (§13.1.6): the first formant increases downward and the second increases leftward.',
+    'Here are three vowels at one pitch, 120 Hz: ee as in see, ah as in father, and oo as in who. Each has its first two formants marked at the synthesizer’s settings. The plot under them places each vowel by its second formant (left to right) against its first formant (up and down), with the axes turned so that the plot has the same orientation as the reading’s figure of monkey and human vowels (§13.1.6): the first formant increases downward and the second increases leftward.',
   ],
 }
 

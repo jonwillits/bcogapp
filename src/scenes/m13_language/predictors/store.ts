@@ -76,7 +76,7 @@ export class PredictorsStore extends StepStore<Step> {
   loadingSnapshot = false
 
   constructor(seed: number, progress: ProgressStore) {
-    super(seed, progress, [1, 2, 3, 4, 5])
+    super(seed, progress, [1, 2, 3, 4, 5], 'predictors')
     this.sentences = corpus(makeRng(SETTINGS.corpusSeed), SETTINGS.corpusSentences)
     this.tokens = this.sentences.flat().map((t) => VOCABULARY.indexOf(t))
     this.probes = makeProbes()

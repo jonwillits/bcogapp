@@ -4,7 +4,7 @@ import { Spectrogram } from '../Spectrogram'
 import { Scatter } from '../plots'
 import { useAudioCursor } from '../hooks'
 import { SETTINGS_NOT_MEASUREMENTS_LINE, MADE_OFFLINE_LINE } from '../lines'
-import { TOUR_TEXT, TOUR_TITLES, VIEW_FIXED_LINE } from './texts'
+import { TOUR_RIGHT, TOUR_TEXT, TOUR_TITLES, VIEW_FIXED_LINE } from './texts'
 import { PREDICTIONS, TOUR, type SoundsStore } from './store'
 
 /**
@@ -14,10 +14,12 @@ import { PREDICTIONS, TOUR, type SoundsStore } from './store'
  * title, the view row, the pictures with Play, and the text under them.
  * Screens 1 to 3 show the wide-band view only; the switch appears on screen
  * 4, where the two views are explained. The pitch prediction is on the
- * Pitch screen itself, in the center: the left column is navigation only.
- * Pitch and Voice put their two pictures side by side. The last screen
- * carries Go to Step 2. Every frequency marked is a setting of the
- * synthesizer.
+ * Pitch screen itself: the navigation panel is navigation only. Pitch and
+ * Voice put their two pictures side by side. Each screen's side text, read
+ * while looking at the picture, sits in a column to the right of the
+ * pictures when the panel is wide enough, and under them when it is not
+ * (Jon, 2026-11-18). The last screen carries Go to Step 2. Every frequency
+ * marked is a setting of the synthesizer.
  */
 
 /** The row of view buttons, or the fixed-view line, at one height so the picture under it does not move. */
@@ -68,8 +70,11 @@ export function Step1Stage({ s }: { s: SoundsStore }) {
   const loaded = s.isLoaded(1)
   const f2 = (name: string) => (vowels ? vowels.sounds[name].formants.slice(0, 2).map((hz, k) => ({ hz, label: `F${k + 1} ${hz} Hz` })) : undefined)
   const ref = useRef<HTMLDivElement>(null)
-  const room = useWidth(ref, 700)
-  // Two pictures side by side on Pitch and Voice; three on Vowels, with the map on the right.
+  const whole = useWidth(ref, 700)
+  // The side text takes a column of its own when the panel is at least 900 px wide; the pictures get the rest.
+  const aside = whole >= 900
+  const room = aside ? whole - 310 : whole
+  // Two pictures side by side on Pitch and Voice; three on Vowels, with the map under them.
   const two = Math.max(240, Math.floor((room - 10) / 2))
   // The three vowels share the room three inRow when each gets at least 220 px; in a narrower room they stack at full width, legible over small (Jon, 2026-11-16: three inRow at 174 px were too small to read). The vowel map sits under them.
   const inRow = Math.floor((room - 20) / 3) >= 220
@@ -82,7 +87,8 @@ export function Step1Stage({ s }: { s: SoundsStore }) {
         <Choice value={screen} options={TOUR.map((t) => ({ id: t, label: TOUR_TITLES[t] }))} onChange={(t) => s.goTour(t as typeof screen)} />
       </div>
       <div style={{ fontSize: 14, fontWeight: 600 }}>{`Screen ${i + 1} of ${TOUR.length}: ${TOUR_TITLES[screen]}`}</div>
-      <div ref={ref} style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-tour-body>
+      <div ref={ref} style={{ display: 'flex', flexDirection: aside ? 'row' : 'column', gap: 10, alignItems: 'flex-start' }} data-tour-layout={aside ? 'side' : 'stacked'}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1, minWidth: 0 }} data-tour-body>
         {single && (
           <>
             <ViewRow s={s} switchable={screen === 'patterns'} />
@@ -118,6 +124,11 @@ export function Step1Stage({ s }: { s: SoundsStore }) {
             <Text screen={screen} />
           </>
         )}
+      </div>
+      <div style={{ width: aside ? 300 : 'auto', flex: 'none', display: 'flex', flexDirection: 'column', gap: 6, padding: 8, border: '1px solid var(--border)', borderRadius: 8 }} data-tour-aside>
+        <Note>{TOUR_TITLES[screen]}</Note>
+        <Content>{TOUR_RIGHT[screen]}</Content>
+      </div>
       </div>
       <Content>{SETTINGS_NOT_MEASUREMENTS_LINE}</Content>
       {screen === 'time' && <Content>{MADE_OFFLINE_LINE}</Content>}

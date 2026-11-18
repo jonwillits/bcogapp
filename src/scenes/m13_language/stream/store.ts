@@ -11,6 +11,7 @@ import { makeSrn, trainSrn, srnScorer } from '../../../sim/language/stream/learn
 import { makeParser, trainParser, parserScorer, parserKnows } from '../../../sim/language/stream/learners/parser'
 import { boardSyllables, isWord, newBoard, trayCount, TRAY_MAX, type BoardState } from '../../../sim/language/stream/board'
 import { StepStore } from '../steps'
+import type { UnderWay } from '../params'
 import { NOTICE_LINE, type Step } from './screens'
 import { assemble, loadRealSpeech, loadStreamJson, streamClip, syllableSpectrograms, type Assembled, type RealSpeech, type StreamJson } from './assets'
 
@@ -97,7 +98,7 @@ export class StreamStore extends StepStore<Step> {
   showStress = false
 
   constructor(seed: number, progress: ProgressStore) {
-    super(seed, progress, [1, 2, 3, 4])
+    super(seed, progress, [1, 2, 3, 4], 'stream')
     this.stream = streamFor(seed, 1512)
     this.board = (progress.partial(BOARD_UNIT) as BoardState | undefined) ?? newBoard()
   }
@@ -123,6 +124,31 @@ export class StreamStore extends StepStore<Step> {
 
   protected onOpen(): void {
     this.stopPlayback()
+  }
+
+  // ------------------------------------------------ leaving and pausing
+
+  /** What is under way (Jon, 2026-11-18): the minute, while it plays or once played and not yet answered; the learners, while they run. The board is saved as it goes and is never under way. */
+  protected underWayNow(): UnderWay | null {
+    if (this.step === 1 && !this.progress.isComplete(MINUTE_UNIT) && ((this.replay === 'first' && this.playback !== null) || this.minutePlayed)) return 'minute'
+    if (this.step === 3 && this.running !== null) return 'run'
+    return null
+  }
+
+  /** A switch away from the minute: while it plays, it stops as a focus loss stops it; once played and unanswered, the answer is discarded and the minute plays again from the start on the next press. */
+  protected onInterrupt(what: UnderWay): void {
+    if (what !== 'minute') return
+    if (this.replay === 'first' && this.playback !== null) {
+      this.stopMinute('You left the step, so the playback stopped.')
+      return
+    }
+    if (this.minutePlayed) {
+      this.minuteStopped = 'You left the step before committing your answer.'
+      this.minuteRestarts++
+      this.replay = null
+      this.guessDraft = null
+      this.typedDraft = ''
+    }
   }
 
   protected onBegin(step: Step): void {
