@@ -17,7 +17,8 @@ import { MANY_NETWORKS, PREDICTIONS, RUN2_KEYS, type PredictionKey, type RunStat
  * first, in the center panel one under another (Jon, 2026-11-16: the left
  * column is navigation only), the curve of held-out accuracy by pass, the
  * confusion table, run 1's 10 networks with their mean and its band (Jon,
- * 2026-11-19), run 2's two networks side by side, and run 3's labeling
+ * 2026-11-19), run 2's two networks side by side and its 10 of each (Jon,
+ * 2026-11-20), and run 3's labeling
  * curve on the 9 sounds of Step 3. Nothing here uses a word from Step 3's
  * held-back list until Step 3 is done.
  */
@@ -64,7 +65,7 @@ function Loading({ s }: { s: SoundsStore }) {
 
 function Run1Controls({ s }: { s: SoundsStore }) {
   const ready = s.tokens !== null && s.continuumPatches !== null
-  const busy = s.run1.state === 'training' || s.run1Many.state === 'training'
+  const busy = s.anyTraining
   return (
     <>
       <GroupLabel>Run 1</GroupLabel>
@@ -92,9 +93,14 @@ function Run2Controls({ s }: { s: SoundsStore }) {
         <Prediction key={k} s={s} k={k} />
       ))}
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        <Btn primary onClick={() => s.trainBoth()} disabled={!ready || !s.run2Predicted || s.run2.state === 'training'}>
+        <Btn primary onClick={() => s.trainBoth()} disabled={!ready || !s.run2Predicted || s.anyTraining}>
           Train both
         </Btn>
+        {s.run2.state === 'done' && (
+          <Btn onClick={() => s.train2Many()} disabled={!ready || s.anyTraining}>
+            {`Train ${MANY_NETWORKS} of each`}
+          </Btn>
+        )}
       </div>
       {!s.run2Predicted && <Note>“Train both” is available once all three predictions are committed.</Note>}
     </>
@@ -204,33 +210,79 @@ function ManyPlot({ curves, width }: { curves: number[][]; width: number }) {
   )
 }
 
-/** Run 1's 10 networks: the progress line, the plot, its explanation, the table of final accuracies, and the summed confusion table. */
-function ManyPanel({ s, width }: { s: SoundsStore; width: number }) {
-  const many = s.run1Many
-  if (many.state === 'idle') return null
-  const curves = many.nets.map((n) => n.curve).filter((c) => c.length > 0)
-  const done = many.nets.filter((n) => n.state === 'done')
-  const finals = done.map((n) => n.accuracy!)
+/** The mean of the final percentages with its 95% confidence interval, as the plot's band computes it at the last pass. */
+function finalLine(finals: number[]): string {
   const { mean, sd } = meanAndSd(finals)
+  const half = (T_95_DF9 * sd) / Math.sqrt(finals.length)
+  return `mean ${pct(mean)}, standard deviation ${sd.toFixed(1)}, 95% confidence interval ${pct(mean - half)} to ${pct(mean + half)}, lowest ${pct(Math.min(...finals))}, highest ${pct(Math.max(...finals))}`
+}
+
+/**
+ * MANY_NETWORKS networks of one kind: the progress line, the plot, its
+ * explanation, the table of final accuracies, and the summed confusion
+ * table. Run 1 has one of these; run 2 has two side by side (Jon,
+ * 2026-11-20). `progress` is the line that says where the training is.
+ */
+function ManyPanel({ title, nets, finished, progress, note, testSize, after, width, testId }: { title: string; nets: RunState[]; finished: boolean; progress: string; note: string; testSize: number; after?: ReactNode; width: number; testId: string }) {
+  const curves = nets.map((n) => n.curve).filter((c) => c.length > 0)
+  const done = nets.filter((n) => n.state === 'done')
+  const finals = done.map((n) => n.accuracy!)
   const summed = LABELS.map((_, i) => LABELS.map((_, j) => done.reduce((a, n) => a + (n.confusion?.[i][j] ?? 0), 0)))
-  const current = many.nets[many.nets.length - 1]
-  const title = `Run 1, ${MANY_NETWORKS} networks: ten voices in, two held out`
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }} data-run={title}>
       <GroupLabel>{title}</GroupLabel>
-      <Note>{`${MANY_NETWORKS} networks, each from its own starting weights, trained one after another on the split of run 1: voices 1 to 10 at all three pitches (450 syllables), tested on voices 11 and 12 (90 syllables) after every pass.`}</Note>
-      <Note data-many-state>{many.state === 'training' ? `Network ${many.k} of ${MANY_NETWORKS}, pass ${current?.pass ?? 0} of ${PASSES}.` : `Training is done: ${MANY_NETWORKS} networks, ${PASSES} passes each.`}</Note>
+      <Note>{note}</Note>
+      <Note data-many-state>{progress}</Note>
       {curves.length > 0 && <ManyPlot curves={curves} width={Math.min(480, width)} />}
       <Note>{`The thick line is the mean over the ${MANY_NETWORKS} networks at each pass; each thin line is one network. The band is the 95% confidence interval of the mean over the ${MANY_NETWORKS} networks: the mean plus or minus ${T_95_DF9} times the standard deviation divided by the square root of ${MANY_NETWORKS}, where ${T_95_DF9} is Student’s t for 9 degrees of freedom.`}</Note>
       {done.length > 0 && (
         <>
-          <Note>The percentage correct on the 90 held-out syllables after the last pass, network by network.</Note>
-          <DataTable columns={[{ key: 'k', label: 'network', mono: true, align: 'right' }, { key: 'acc', label: 'percent correct', mono: true, align: 'right' }]} rows={done.map((n, i) => ({ k: i + 1, acc: pct(n.accuracy!) }))} footer={many.state === 'done' ? `mean ${pct(mean)}, standard deviation ${sd.toFixed(1)}, lowest ${pct(Math.min(...finals))}, highest ${pct(Math.max(...finals))}` : undefined} testId="many-accuracies" />
+          <Note>{`The percentage correct on the ${testSize} test syllables after the last pass, network by network.`}</Note>
+          <DataTable columns={[{ key: 'k', label: 'network', mono: true, align: 'right' }, { key: 'acc', label: 'percent correct', mono: true, align: 'right' }]} rows={done.map((n, i) => ({ k: i + 1, acc: pct(n.accuracy!) }))} footer={finished ? finalLine(finals) : undefined} testId={`many-accuracies-${testId}`} />
         </>
       )}
-      {many.state === 'done' && <Confusion matrix={summed} testId={`confusion-${title}`} note={`Summed over the ${MANY_NETWORKS} networks’ labels of the 90 test syllables: each cell counts syllables over all ${MANY_NETWORKS} networks, 900 in all.`} />}
-      <Note>{`Run 3 uses the network from the single run 1 above, not one of these ${MANY_NETWORKS}.`}</Note>
+      {finished && <Confusion matrix={summed} testId={`confusion-${title}`} note={`Summed over the ${MANY_NETWORKS} networks’ labels of the ${testSize} test syllables: each cell counts syllables over all ${MANY_NETWORKS} networks, ${testSize * MANY_NETWORKS} in all.`} />}
+      {after}
     </div>
+  )
+}
+
+/** Run 1's 10 networks. */
+function Run1Many({ s, width }: { s: SoundsStore; width: number }) {
+  const many = s.run1Many
+  if (many.state === 'idle') return null
+  const current = many.nets[many.nets.length - 1]
+  const progress = many.state === 'training' ? `Network ${many.k} of ${MANY_NETWORKS}, pass ${current?.pass ?? 0} of ${PASSES}.` : `Training is done: ${MANY_NETWORKS} networks, ${PASSES} passes each.`
+  return <ManyPanel title={`Run 1, ${MANY_NETWORKS} networks: ten voices in, two held out`} nets={many.nets} finished={many.state === 'done'} progress={progress} note={`${MANY_NETWORKS} networks, each from its own starting weights, trained one after another on the split of run 1: voices 1 to 10 at all three pitches (450 syllables), tested on voices 11 and 12 (90 syllables) after every pass.`} testSize={90} width={width} testId="run1" after={<Note>{`Run 3 uses the network from the single run 1 above, not one of these ${MANY_NETWORKS}.`}</Note>} />
+}
+
+/** Run 2's 10 of each (Jon, 2026-11-20): the one-pitch networks, then the one-voice networks, side by side when there is room, and a line under them with the two means. */
+function Run2Many({ s, width }: { s: SoundsStore; width: number }) {
+  const many = s.run2Many
+  if (many.state === 'idle') return null
+  const twoColumns = width >= 760
+  const col = twoColumns ? Math.floor((width - 16) / 2) : width
+  const doneLine = `Training is done: ${MANY_NETWORKS} networks, ${PASSES} passes each.`
+  const training = (nets: RunState[], k: number) => `Network ${k} of ${MANY_NETWORKS}, pass ${nets[nets.length - 1]?.pass ?? 0} of ${PASSES}.`
+  const pitchProgress = many.state === 'done' || many.k > MANY_NETWORKS ? doneLine : training(many.pitch, many.k)
+  const voiceProgress = many.state === 'done' ? doneLine : many.k <= MANY_NETWORKS ? 'The one-voice networks train after the one-pitch networks.' : training(many.voice, many.k - MANY_NETWORKS)
+  const colStyle = { flex: twoColumns ? '1 1 0' : undefined, minWidth: 0, width: twoColumns ? undefined : '100%' } as const
+  return (
+    <>
+      <div style={{ display: 'flex', flexDirection: twoColumns ? 'row' : 'column', gap: twoColumns ? 16 : 8, alignItems: 'flex-start' }} data-run2-many>
+        <div style={colStyle}>
+          <ManyPanel title={`Run 2, ${MANY_NETWORKS} networks: one pitch`} nets={many.pitch} finished={many.pitch.length === MANY_NETWORKS && many.pitch.every((n) => n.state === 'done')} progress={pitchProgress} note={`${MANY_NETWORKS} networks, each from its own starting weights, trained one after another as the one-pitch network was: every voice at its own pitch only (150 syllables), tested on every shifted syllable and the two held-out voices (390 syllables) after every pass.`} testSize={390} width={col} testId="run2-pitch" />
+        </div>
+        <div style={colStyle}>
+          <ManyPanel title={`Run 2, ${MANY_NETWORKS} networks: one voice`} nets={many.voice} finished={many.state === 'done'} progress={voiceProgress} note={`${MANY_NETWORKS} networks, each from its own starting weights, trained one after another as the one-voice network was: voice 1 at its three pitches (45 syllables), tested on the other eleven voices (495 syllables) after every pass.`} testSize={495} width={col} testId="run2-voice" />
+        </div>
+      </div>
+      {many.state === 'done' && (
+        <Note data-run2-many-summary style={{ color: 'var(--text)' }}>
+          {`Over ${MANY_NETWORKS} networks of each kind: trained on one pitch, ${finalLine(many.pitch.map((n) => n.accuracy!))}; trained on one voice, ${finalLine(many.voice.map((n) => n.accuracy!))}.`}
+        </Note>
+      )}
+    </>
   )
 }
 
@@ -302,11 +354,12 @@ export function Step4Stage({ s }: { s: SoundsStore }) {
       <Run k="run1">
         <Run1Controls s={s} />
         <RunPanel title="Run 1: ten voices in, two held out" run={s.run1} note="Trained on voices 1 to 10 at all three pitches (450 syllables); tested on voices 11 and 12 (90 syllables) after every pass." width={room} />
-        <ManyPanel s={s} width={room} />
+        <Run1Many s={s} width={room} />
       </Run>
       <Run k="run2">
         <Run2Controls s={s} />
         <Run2Results s={s} width={room} />
+        <Run2Many s={s} width={room} />
       </Run>
       <Run k="run3">
         <Run3Controls s={s} />

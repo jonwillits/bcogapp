@@ -4,7 +4,7 @@ import type { UnitId } from '../../../sim/language/parts'
 import type { View } from '../../../sim/language/audio/spectrogram'
 import { player } from '../../../sim/language/audio/player'
 import { bufferFrom, type Clip } from '../../../sim/language/audio/clips'
-import { abxTrials, labelingTrials, LABELING_GAP_MS, STEPS, TRIAD_INTERVAL_S, type Label as Lbl, type Triad } from '../../../sim/language/sounds/abx'
+import { abxTrials, labelingTrials, LABELING_GAP_MS, LABELING_REPEATS, REPEAT_GAP_S, STEPS, TRIAD_INTERVAL_S, type Label as Lbl, type Triad } from '../../../sim/language/sounds/abx'
 import { accuracy, confusion, forward, makeClassifier, shares, splitOnePitch, splitOneVoice, splitRun1, train, PASSES, type Classifier, type Token } from '../../../sim/language/sounds/classifier'
 import { StepStore } from '../steps'
 import type { UnderWay } from '../params'
@@ -124,12 +124,18 @@ export class SoundsStore extends StepStore<Step> {
   /** Run 2's two networks (Jon, 2026-11-19): one trained on one pitch, one on one voice, trained one after the other by Train both. */
   run2pitch: RunState = freshRun()
   run2voice: RunState = freshRun()
+  /** Run 2's second button (Jon, 2026-11-20): MANY_NETWORKS one-pitch networks, then MANY_NETWORKS one-voice networks, one after another; `k` counts the networks trained so far, 1 to 2 × MANY_NETWORKS. */
+  run2Many: { state: 'idle' | 'training' | 'done'; pitch: RunState[]; voice: RunState[]; k: number } = { state: 'idle', pitch: [], voice: [], k: 0 }
   /** Run 2 as one state, for whatever reads it as one run: training while either network trains, done when both are. */
   get run2(): { state: 'idle' | 'training' | 'done' } {
     const states = [this.run2pitch.state, this.run2voice.state]
     return { state: states.includes('training') ? 'training' : states.every((x) => x === 'done') ? 'done' : 'idle' }
   }
   run3: { state: 'idle' | 'done'; shares: number[][] | null } = { state: 'idle', shares: null }
+  /** Some network of Step 4 is training; every training button waits. */
+  get anyTraining(): boolean {
+    return this.run1.state === 'training' || this.run1Many.state === 'training' || this.run2.state === 'training' || this.run2Many.state === 'training'
+  }
   private trainSeed = 0
 
   constructor(seed: number, progress: ProgressStore) {
@@ -170,7 +176,7 @@ export class SoundsStore extends StepStore<Step> {
   protected underWayNow(): UnderWay | null {
     if (this.step === 2 && this.stateOf(2) === 'running') return 'labels'
     if (this.step === 3 && this.block !== null) return 'block'
-    if (this.step === 4 && (this.run1.state === 'training' || this.run2.state === 'training' || this.run1Many.state === 'training')) return 'run'
+    if (this.step === 4 && this.anyTraining) return 'run'
     return null
   }
 
@@ -418,7 +424,9 @@ export class SoundsStore extends StepStore<Step> {
     }
     let end: number
     if (b.kind === 'labeling') {
-      const r = player.play(buf(b.trials[b.i]))
+      // The sound plays LABELING_REPEATS times in a row, REPEAT_GAP_S apart (Jon, 2026-11-20); the buttons appear after the last play.
+      const bb = buf(b.trials[b.i])
+      const r = player.playSequence(Array.from({ length: LABELING_REPEATS }, (_, k) => ({ buffer: bb, offsetS: k * (bb.duration + REPEAT_GAP_S) })))
       end = r.end
       this.playing = { key: `cont:${b.trials[b.i]}`, start: r.start, end: r.end }
     } else {
@@ -464,7 +472,7 @@ export class SoundsStore extends StepStore<Step> {
     }
     b.phase = 'waiting'
     this.changed()
-    // The next sound plays 800 ms after the answer in block 1; in block 2 the next triad starts after the same gap.
+    // The next trial starts 800 ms after the answer in both blocks.
     this.after(LABELING_GAP_MS, () => this.playTrial())
   }
 
@@ -552,14 +560,14 @@ export class SoundsStore extends StepStore<Step> {
   }
 
   train1(): void {
-    if (!this.tokens || !this.predicted('run1') || this.run1.state === 'training' || this.run1Many.state === 'training') return
+    if (!this.tokens || !this.predicted('run1') || this.anyTraining) return
     const { training, test } = splitRun1(this.tokens, this.heldOut)
     this.trainSeed += 1
     void this.trainRun(this.run1, training, test, this.trainSeed)
   }
   /** Train 10 networks: MANY_NETWORKS networks on run 1's split, one after another, each from a new seed; available once the single network of run 1 is done. */
   train1Many(): void {
-    if (!this.tokens || !this.predicted('run1') || this.run1.state !== 'done' || this.run1Many.state === 'training') return
+    if (!this.tokens || !this.predicted('run1') || this.run1.state !== 'done' || this.anyTraining) return
     const { training, test } = splitRun1(this.tokens, this.heldOut)
     const many = { state: 'training' as const, nets: [] as RunState[], k: 0 }
     this.run1Many = many
@@ -583,7 +591,7 @@ export class SoundsStore extends StepStore<Step> {
   }
   /** Train both: the one-pitch network, then the one-voice network, each on its own split (classifier.ts). */
   trainBoth(): void {
-    if (!this.tokens || !this.run2Predicted || this.run2.state === 'training') return
+    if (!this.tokens || !this.run2Predicted || this.anyTraining) return
     const pitch = splitOnePitch(this.tokens, this.heldOut)
     const voice = splitOneVoice(this.tokens, 1)
     void (async () => {
@@ -591,6 +599,29 @@ export class SoundsStore extends StepStore<Step> {
       await this.trainRun(this.run2pitch, pitch.training, pitch.test, this.trainSeed)
       this.trainSeed += 1
       await this.trainRun(this.run2voice, voice.training, voice.test, this.trainSeed)
+    })()
+  }
+  /** Train 10 of each (Jon, 2026-11-20): MANY_NETWORKS networks on the one-pitch split, then MANY_NETWORKS on the one-voice split, one after another, each from a new seed; available once run 2's two networks are done. */
+  train2Many(): void {
+    if (!this.tokens || !this.run2Predicted || this.run2.state !== 'done' || this.anyTraining) return
+    const pitch = splitOnePitch(this.tokens, this.heldOut)
+    const voice = splitOneVoice(this.tokens, 1)
+    const many = { state: 'training' as const, pitch: [] as RunState[], voice: [] as RunState[], k: 0 }
+    this.run2Many = many
+    this.changed()
+    void (async () => {
+      for (const [list, split] of [[many.pitch, pitch], [many.voice, voice]] as const) {
+        for (let k = 0; k < MANY_NETWORKS; k++) {
+          const run = freshRun()
+          list.push(run)
+          many.k += 1
+          this.trainSeed += 1
+          await this.trainRun(run, split.training, split.test, this.trainSeed)
+          if (this.run2Many !== many) return
+        }
+      }
+      this.run2Many = { ...many, state: 'done' }
+      this.changed()
     })()
   }
   run3Now(): void {

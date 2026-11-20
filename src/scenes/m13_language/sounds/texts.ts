@@ -70,15 +70,15 @@ export const STEP3_PANEL = [
 
 /** The screen before block 1, with Start block 1 (Jon, 2026-11-16: each block's instructions right before it). */
 export const BLOCK1_SCREEN = [
-  'Block 1 has 54 trials and takes about 2 minutes. On each trial you hear one short syllable. Then two buttons appear, “B” and “D”. Press the one that says which consonant you heard, or press the key B or D. The next syllable plays 800 milliseconds after your answer.',
-  'There are 9 different sounds, each played 6 times in an order drawn for you. No answer is marked right or wrong, and there is no feedback. Some sounds will be hard to call; answer by what you hear, and if you cannot tell, pick one anyway.',
+  'Block 1 has 54 trials and takes about 3 minutes. On each trial you hear one short syllable three times in a row, half a second apart. Then two buttons appear, “B” and “D”. Press the one that says which consonant you heard, or press the key B or D. The next trial starts 800 milliseconds after your answer.',
+  'There are 9 different sounds, and each is the sound of 6 trials, in an order drawn for you. No answer is marked right or wrong, and there is no feedback. Some sounds will be hard to call; answer by what you hear, and if you cannot tell, pick one anyway.',
   'The block runs in real time. If you leave the page partway, the block starts again from its first trial. Press “Start block 1” when you are ready.',
 ]
 
 /** The screen between the blocks, with Start block 2. */
 export const BLOCK2_SCREEN = [
   'Block 1, labeling, is done and saved.',
-  'Block 2 has 28 trials and takes about 2 minutes. On each trial you hear three sounds, one second apart. The first two are different from each other. The third is the same as one of the first two, and your task is to say which. After the third sound, press “X matched the first” or “X matched the second”, or the key 1 or 2.',
+  'Block 2 has 28 trials and takes about 2 minutes. On each trial you hear three sounds, one second apart. The first two are different from each other. The third is the same as one of the first two, and your task is to say which. After the third sound, press “3rd sounds like the 1st” or “3rd sounds like the 2nd”, or the key 1 or 2.',
   'Many trials will feel like guessing: the two sounds are often very alike. That is expected. When you cannot tell, guess; a guess is the right answer here. There is no feedback.',
   'The block runs in real time. If you leave the page partway, the block starts again from its first trial. Block 2 starts only when you press “Start block 2”.',
 ]

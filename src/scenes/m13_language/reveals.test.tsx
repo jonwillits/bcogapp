@@ -87,6 +87,14 @@ describe('Part 1: commit, then reveal', () => {
     expect(text(m)).toMatch(/Start block 2/)
     expect(text(m)).toMatch(/28 trials/)
     expect(m).not.toMatch(/data-reveal/)
+    // Block 2's buttons are in Jon's words (2026-11-20), with the key under each; block 1's screen says each sound plays three times.
+    expect(text(m)).toMatch(/3rd sounds like the 1st/)
+    c.store.startBlock2()
+    m = c.all()
+    expect(m).toMatch(/data-stage="block-abx"/)
+    expect(text(m)).toMatch(/3rd sounds like the 1st\s*key 1\s*3rd sounds like the 2nd\s*key 2/)
+    expect(text(m)).not.toMatch(/X matched/)
+    c.store.block = null
     c.progress.complete('p1-abx', abxFixture)
     c.store.open(3)
     m = c.all()
@@ -125,13 +133,31 @@ describe('Part 1: commit, then reveal', () => {
     expect(c.store.run2pitch.state).toBe('idle')
     for (const k of ['run2pitch', 'run2voice', 'run2which'] as const) expect(m).toMatch(new RegExp(`data-predict="${k}"`))
     expect(m).not.toMatch(/data-run="Run 2/)
+    // Train 10 of each waits for Train both (Jon, 2026-11-20); then it trains ten one-pitch and ten one-voice networks, shown side by side with a line of the two means.
+    c.store.train2Many()
+    expect(c.store.run2Many.state).toBe('idle')
+    for (const k of ['run2pitch', 'run2voice', 'run2which'] as const) {
+      c.store.draft(k, k === 'run2which' ? 'the network trained on one pitch' : 'lower')
+      c.store.commit(k)
+    }
+    c.store.trainBoth()
+    await until(() => c.store.run2.state === 'done')
+    expect(text(c.all())).toMatch(/Train 10 of each/)
+    c.store.train2Many()
+    expect(c.store.run2Many.state).toBe('training')
+    await until(() => c.store.run2Many.state === 'done', 60000)
+    const m2 = c.all()
+    expect(m2).toMatch(/data-run2-many/)
+    expect(m2).toMatch(/data-table="many-accuracies-run2-pitch"/)
+    expect(m2).toMatch(/data-table="many-accuracies-run2-voice"/)
+    expect(text(m2)).toMatch(/Over 10 networks of each kind: trained on one pitch, mean \d+\.\d%, standard deviation \d+\.\d, 95% confidence interval/)
     c.store.draft('run3', 'b, then d')
     c.store.commit('run3')
     c.store.run3Now()
     expect(c.store.run3.state).toBe('done')
     expect(c.all()).toMatch(/data-run="run3"/)
     expect(text(c.all())).toMatch(/appear beside the network’s once Step 3 is done/)
-  })
+  }, 90000)
 })
 
 describe('Part 2: commit, then reveal', () => {

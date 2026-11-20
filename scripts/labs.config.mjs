@@ -953,7 +953,7 @@ export const LABS = [
 
     controls: [
       'Open', 'Sounds', 'Stream', 'Words', 'Predictors', 'Begin', 'Begin Part 1', 'Play a test sound', 'Export my results', 'Load my results', 'Clear my saved results', 'Erase and start over', 'Keep my results', 'Replace my saved results', 'Keep what I have', 'Open anyway', 'Show the instructions again', 'Back to the step',
-      'Play', 'Wide bands', 'Narrow bands', 'Next', 'Back', 'Go to Step 2', 'Commit my prediction', 'Commit my labels', 'B', 'D', 'X matched the first', 'X matched the second', 'Start block 1', 'Start block 2', 'Start again', 'Train', 'Train again', 'Train 10 networks', 'Train both', 'Run on the 9 sounds', 'Show voice timing',
+      'Play', 'Wide bands', 'Narrow bands', 'Next', 'Back', 'Go to Step 2', 'Commit my prediction', 'Commit my labels', 'B', 'D', '3rd sounds like the 1st', '3rd sounds like the 2nd', 'Start block 1', 'Start block 2', 'Start again', 'Train', 'Train again', 'Train 10 networks', 'Train both', 'Train 10 of each', 'Run on the 9 sounds', 'Show voice timing',
       'Play the minute', 'Commit my answer', 'Play again, with the words marked', 'Play again, with each word’s last syllable lengthened', 'Clear the highlight', 'Check this word', 'Empty the tray', 'Show me the words', 'Show the words and end the search', 'Keep searching', 'Commit my predictions', 'How much of the stream', 'Run the learners', 'PARSER’s test rule', 'Higher weight wins', 'Known word wins, else random', 'Show stress',
       'Hear it again', 'Run the models', 'Back to the fitted value',
       'Show me sentences', 'Count', 'Prediction from counts', 'One point per word', 'Compute', 'Remove the last token', 'Clear the prompt', 'Temperature', 'Generate a sentence', 'Snapshot', 'Change the prompt',

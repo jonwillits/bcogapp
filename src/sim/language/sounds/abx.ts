@@ -11,8 +11,11 @@ import type { Rng } from '../../random'
  * about 9 minutes to about 5. Steps 10 to 14 stay shipped and unplayed.
  *
  *   Block 1, labeling: each of the 9 sounds 6 times, in 6 shuffled rounds
- *   of 9: 54 trials. The original's interval was 6 s (p. 360); this step
- *   plays the next sound 800 ms after the answer.
+ *   of 9: 54 trials. On each trial the sound plays LABELING_REPEATS times
+ *   in a row, REPEAT_GAP_S apart (Jon, walk, 2026-11-20: repetition, for
+ *   the sounds near the boundary; the original played each once). The
+ *   original's interval was 6 s (p. 360); this step starts the next trial
+ *   800 ms after the answer.
  *   Block 2, telling apart: ABX triads over the 7 two-step pairs (1, 3) to
  *   (7, 9), each in the four orders ABA, ABB, BAA, BAB: 28 triads in a
  *   seeded order, the sounds of a triad 1 s apart (p. 360).
@@ -26,6 +29,9 @@ import type { Rng } from '../../random'
 export const STEPS = 9
 export const LABELING_ROUNDS = 6
 export const LABELING_GAP_MS = 800
+/** How many times a labeling trial plays its sound, and the silence between the plays (Jon, 2026-11-20). */
+export const LABELING_REPEATS = 3
+export const REPEAT_GAP_S = 0.5
 export const PAIRS: [number, number][] = Array.from({ length: STEPS - 2 }, (_, i) => [i + 1, i + 3])
 export const ORDERS = ['ABA', 'ABB', 'BAA', 'BAB'] as const
 export type Order = (typeof ORDERS)[number]
