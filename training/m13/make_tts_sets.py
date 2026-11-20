@@ -31,8 +31,8 @@ VOWELS = {"ee": "i", "ay": "A", "ah": "ɑ", "oh": "O", "oo": "u"}
 SHIFT_SEMITONES = 3
 VOT_PAIR = {"tot": "tɑt", "dot": "dɑt"}
 # Spec §7.1: made-up words that follow English sound patterns, every word with a different first sound, in two sets with nothing shared.
-WORDS_A = {"dax": "dæks", "blicket": "blˈɪkət", "toma": "tˈOmə", "fep": "fɛp", "gorp": "ɡɔɹp", "kibby": "kˈɪbi", "mipen": "mˈIpən", "nellum": "nˈɛləm", "pimwit": "pˈɪmwɪt", "sprock": "spɹɑk", "wug": "wʌɡ", "zorch": "zɔɹʧ"}
-WORDS_B = {"crannel": "kɹˈænəl", "lorp": "lɔɹp", "flimmer": "flˈɪmɚ", "hinnet": "hˈɪnət", "jeb": "ʤɛb", "rasket": "ɹˈæskət", "vimble": "vˈɪmbəl", "stibble": "stˈɪbəl", "greeble": "ɡɹˈibəl", "yoop": "jup", "chelk": "ʧɛlk", "thade": "θAd"}
+WORDS_A = {"dax": "dæks", "blicket": "blˈɪkət", "toma": "tˈOmə", "lorp": "lɔɹp", "gorp": "ɡɔɹp", "kibby": "kˈɪbi", "mipen": "mˈIpən", "nellum": "nˈɛləm", "pimwit": "pˈɪmwɪt", "sprock": "spɹɑk", "wug": "wʌɡ", "zorch": "zɔɹʧ"}
+WORDS_B = {"crannel": "kɹˈænəl", "fep": "fɛp", "flimmer": "flˈɪmɚ", "hinnet": "hˈɪnət", "jeb": "ʤɛb", "rasket": "ɹˈæskət", "vimble": "vˈɪmbəl", "stibble": "stˈɪbəl", "greeble": "ɡɹˈibəl", "yoop": "jup", "chelk": "ʧɛlk", "thade": "θAd"}
 
 # OVERRIDES, 2026-11-17: Jon's picks by ear on the walk. On 2026-11-16 he flagged boo and doo (an open vowel at the end),
 # three training tokens (dah in voices 9 and 11 heard as dou; day in voice 10 heard as day-dah), and zorch, sprock and fep
@@ -53,8 +53,14 @@ OVERRIDES = {
         "doo": {"phonemes": "duː", "speed": 1.0, "take": "doo_uu_s100.wav"},
     },
     "words": {
-        "zorch": {"phonemes": "zɔɹtʃ", "speed": 1.0, "take": "zorch_tS_s100.wav"},
+        # 2026-11-19, Jon's second-round pick: the plain rounded o. The page wrote zorch_O_tS_s100.wav (zOɹtʃ) and then
+        # zorch_o_tS_s100.wav (zoɹtʃ) to a case-insensitive disk, so the second overwrote the first and both cards played
+        # the same 0.561 s file; that file, zoɹtʃ, is what Jon heard and picked, and it is shipped as it is.
+        "zorch": {"phonemes": "zoɹtʃ", "speed": 1.0, "take": "zorch_O_tS_s100.wav"},
         "sprock": {"phonemes": "spɹˈɑk", "speed": 1.0, "take": "sprock_stress_s100.wav"},
+        # 2026-11-19: lorp replaces fep in set A (Jon's pick from the nine set-B words that keep every first sound
+        # distinct); fep moves to set B in lorp's place. The shipped lorp is the set-B file Jon heard (swap_lorp.wav).
+        "lorp": {"phonemes": "lɔɹp", "speed": 1.0, "take": "swap_lorp.wav"},
     },
     # (voice number, consonant, vowel) as the lab names them.
     "tokens": {

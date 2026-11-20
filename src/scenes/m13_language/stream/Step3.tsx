@@ -1,4 +1,4 @@
-import { Btn, Choice, Content, FixedLines, GroupLabel, Note, StagePanel } from '../ui'
+import { Btn, Choice, Content, DataTable, FixedLines, GroupLabel, Note, StagePanel } from '../ui'
 import { LinePlot, type Series } from '../plots'
 import { ReferencePanel } from '../ReferencePanel'
 import { reference } from '../../../sim/language/references'
@@ -86,7 +86,11 @@ export function Step3Stage({ s }: { s: StreamStore }) {
           <LinePlot series={series} width={620} height={260} xLabel="minutes of the stream taken in (logarithmic axis)" yLabel="percent of 36 test trials correct" xMin={0.5} xMax={21} logX xTicks={AMOUNTS_MIN.map((m) => ({ x: m, label: m < 1 ? '0.5' : String(m) }))} yMin={0} yMax={100} yTicks={[0, 25, 50, 75, 100]} hLines={[{ y: 50, label: 'chance, 50%' }, { y: 76, label: 'adults, nonwords, 76% at 21 min', color: 'var(--accent)' }, { y: 65, label: 'adults, part-words, 65% at 21 min', color: 'var(--sensor)' }]} marks={[{ x: 2, label: 'infants, 2 minutes: measured by listening times, not by a test like this one' }]} testId="learners-plot" />
           <Note>Each line is one learner on one version of the test: the mean over your stream and 19 others, with the shaded band from the lowest to the highest of the 20 streams. The solid lines are the nonword test, the dashed lines the part-word test.</Note>
           <GroupLabel>Scores at the amounts you have run</GroupLabel>
-          <FixedLines lines={['learner, test'.padEnd(34) + amounts.map((a) => `${AMOUNTS_MIN[a] < 1 ? '0.5' : AMOUNTS_MIN[a]} min`.padStart(9)).join(''), ...LEARNERS.flatMap((l) => (['nonword', 'partword'] as const).map((t) => `${LEARNER_NAMES[l]}, ${t === 'nonword' ? 'nonwords' : 'part-words'}`.padEnd(34) + amounts.map((a) => `${mean(s.scoresOf(s.results.get(a)!, l, t)).toFixed(1)}%`.padStart(9)).join('')))]} testId="learners-table" />
+          <DataTable
+            testId="learners-table"
+            columns={[{ key: 'learner', label: 'Learner' }, { key: 'test', label: 'Test' }, ...amounts.map((a) => ({ key: `a${a}`, label: `${AMOUNTS_MIN[a] < 1 ? '0.5' : AMOUNTS_MIN[a]} min`, mono: true }))]}
+            rows={LEARNERS.flatMap((l) => (['nonword', 'partword'] as const).map((t) => ({ learner: LEARNER_NAMES[l], test: t === 'nonword' ? 'nonwords' : 'part-words', ...Object.fromEntries(amounts.map((a) => [`a${a}`, `${mean(s.scoresOf(s.results.get(a)!, l, t)).toFixed(1)}%`])) })))}
+          />
           <Note>The table shows each learner’s mean percentage correct over the 20 streams at each amount run so far; the adults scored 76% against nonwords and 65% against part-words after 21 minutes.</Note>
           <GroupLabel>PARSER’s test rule</GroupLabel>
           <div data-parser-rule={s.parserRule}>

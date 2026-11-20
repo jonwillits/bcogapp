@@ -1,40 +1,38 @@
-import { Btn, Choice, Content, FixedLines, GroupLabel, Note, StagePanel } from '../ui'
+import { Btn, Choice, Content, FixedLines, GroupLabel, Note, StagePanel, useRef, useWidth } from '../ui'
 import { BarChart } from '../plots'
 import { ONE_CORPUS_LINE } from '../lines'
-import { VOCABULARY, kindOf, verbOf } from '../../../sim/language/predictors/grammar'
-import { contribution, embedding, sameCounts } from '../../../sim/language/predictors/counts'
-import { predictFromOne, predictFromTwo } from '../../../sim/language/predictors/ngram'
-import { STEP3_ONE_POINT, STEP3_ORDER, STEP3_PREDICT } from './texts'
+import { VOCABULARY, END, WHO, kindOf, verbOf, start, step as parseStep, nextTokens } from '../../../sim/language/predictors/grammar'
+import { embedding } from '../../../sim/language/predictors/counts'
+import { predictFromOne, predictFromTwo, type Prediction } from '../../../sim/language/predictors/ngram'
+import { STEP3_ONE_POINT, STEP3_PREDICT } from './texts'
 import { PREDICTIONS, type PredictorsStore } from './store'
 
 /**
- * Step 3's screens (spec §8.4; Jon, 2026-11-17: everything in the center).
- * The three screens' names at the top of the stage; Order, with the two
- * sentences' contributions and the switch above them; Prediction from
- * counts, with its prediction and Compute above the two distributions over
- * every word; One point per word.
+ * Step 3's screens (spec §8.4; Jon, 2026-11-17: everything in the center;
+ * 2026-11-19: two screens). Prediction from counts: three prompts side by
+ * side (girls; girls who chase boys; girls who boys chase), each with what
+ * the grammar allows next, the prediction from the one token before and
+ * from the two tokens before, after the one prediction is committed and
+ * Compute is pressed. One point per word: a token's one list of counts,
+ * whatever sentence it is in, from the count model, counted here if Step
+ * 2's Count has not run. The Order screen and its switch were cut: the
+ * two settings showed nothing a student could see (store.ts).
  */
 const idx = (t: string) => VOCABULARY.indexOf(t)
 
-/** The three screens' names, at the top of the stage. */
+/** The three prompts: a subject alone; a subject with a clause whose last token is a plural noun; a subject with a clause whose last token is a verb. */
+export const PROMPTS: string[][] = [['girls'], ['girls', 'who', 'chase', 'boys'], ['girls', 'who', 'boys', 'chase']]
+
+/** The two screens' names, at the top of the stage. */
 export function Step3Screens({ s }: { s: PredictorsStore }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-step3-controls>
-      <Choice value={s.screen3} options={[{ id: 'order', label: 'Order' }, { id: 'predict', label: 'Prediction from counts' }, { id: 'point', label: 'One point per word' }]} onChange={(v) => s.goScreen3(v as 'order' | 'predict' | 'point')} />
+      <Choice value={s.screen3} options={[{ id: 'predict', label: 'Prediction from counts' }, { id: 'point', label: 'One point per word' }]} onChange={(v) => s.goScreen3(v as 'predict' | 'point')} />
     </div>
   )
 }
 
-/** The Order screen's switch, above the two tables. */
-function SeparateSwitch({ s }: { s: PredictorsStore }) {
-  return (
-    <label style={{ fontSize: 12, display: 'flex', gap: 6, alignItems: 'center' }}>
-      <input type="checkbox" checked={s.separate} onChange={(e) => s.setSeparate(e.target.checked)} /> Count words before and after separately
-    </label>
-  )
-}
-
-/** The Prediction screen's prediction and Compute, above the two distributions. */
+/** The Prediction screen's prediction and Compute, above the three columns. */
 function PredictControls({ s }: { s: PredictorsStore }) {
   const committed = s.predicted('counts')
   return (
@@ -64,52 +62,72 @@ function PredictControls({ s }: { s: PredictorsStore }) {
   )
 }
 
-function Contribution({ sentence, separate }: { sentence: string[]; separate: boolean }) {
-  const toks = sentence.map(idx)
-  const m = contribution(4, separate, toks)
-  const ws = [...new Set(sentence)]
+/** What the grammar allows after a prompt, as kinds of token in plain words, from the parser. */
+export function allowedNext(prompt: string[]): string {
+  let st = start()
+  for (const t of prompt) st = parseStep(st, t)
+  if (!st.ok) return 'the grammar does not allow this prompt'
+  const next = nextTokens(st)
+  const kinds: string[] = []
+  const pl = next.filter((t) => kindOf(t) === 'verb' && verbOf(t)!.number === 'pl').length
+  const sg = next.filter((t) => kindOf(t) === 'verb' && verbOf(t)!.number === 'sg').length
+  const nouns = next.filter((t) => kindOf(t) === 'noun').length
+  if (pl) kinds.push('a plural verb form')
+  if (sg) kinds.push('a singular verb form')
+  if (nouns) kinds.push('a noun')
+  if (next.includes(WHO)) kinds.push('who')
+  if (next.includes(END)) kinds.push('the end mark')
+  return kinds.length ? kinds.join(', or ') : 'nothing: the sentence is complete'
+}
+
+const color = (t: string) => (kindOf(t) === 'verb' ? (verbOf(t)!.number === 'pl' ? 'var(--actuator)' : 'var(--sensor)') : kindOf(t) === 'noun' ? 'var(--accent)' : 'var(--text-muted)')
+const bars = (p: Prediction) =>
+  VOCABULARY.map((t, j) => ({ label: t, value: p.probs[j], color: color(t) }))
+    .filter((x) => x.value > 0)
+    .sort((x, y) => y.value - x.value)
+    .slice(0, 12)
+const sumOf = (p: Prediction, test: (t: string) => boolean) => VOCABULARY.reduce((acc, t, j) => acc + (test(t) ? p.probs[j] : 0), 0)
+const plural = (t: string) => kindOf(t) === 'verb' && verbOf(t)!.number === 'pl'
+const singular = (t: string) => kindOf(t) === 'verb' && verbOf(t)!.number === 'sg'
+const noun = (t: string) => kindOf(t) === 'noun'
+const sums = (p: Prediction) => `plural verb forms ${sumOf(p, plural).toFixed(2)}, singular verb forms ${sumOf(p, singular).toFixed(2)}, nouns ${sumOf(p, noun).toFixed(2)}`
+
+/** One prompt's column: the prompt, what the grammar allows next, then the two predictions from counts. */
+function PromptColumn({ s, prompt, k, width }: { s: PredictorsStore; prompt: string[]; k: number; width: number }) {
+  const last = prompt[prompt.length - 1]
+  // The token before a sentence's first token is the end mark of the sentence before, as the corpus is counted as one stream.
+  const before = prompt.length >= 2 ? prompt[prompt.length - 2] : END
+  const one = predictFromOne(s.ngram, idx(last))
+  const two = predictFromTwo(s.ngram, idx(before), idx(last))
+  const pair = prompt.length >= 2 ? `${before} ${last}` : `the end mark, then ${last}`
   return (
-    <div data-contribution={sentence.join(' ')}>
-      <FixedLines lines={[`${sentence.join(' ')}`, '        ' + ws.map((w) => w.padStart(8)).join('') + (separate ? '   (before)' : ''), ...ws.map((r) => `${r.padEnd(8)}${ws.map((c) => String(m.before[idx(r)][idx(c)] + (separate ? 0 : m.after[idx(r)][idx(c)])).padStart(8)).join('')}`), ...(separate ? ['        ' + ws.map((w) => w.padStart(8)).join('') + '   (after)', ...ws.map((r) => `${r.padEnd(8)}${ws.map((c) => String(m.after[idx(r)][idx(c)]).padStart(8)).join('')}`)] : [])]} />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width, minWidth: 0 }} data-prompt-column={prompt.join(' ')}>
+      <GroupLabel>{`Prompt ${k + 1}: ${prompt.join(' ')}`}</GroupLabel>
+      <Note data-allowed-next>{`The grammar allows next: ${allowedNext(prompt)}.`}</Note>
+      {s.computed && (
+        <>
+          <Note style={{ color: 'var(--text)' }}>{`From the one token before: after ${last}`}</Note>
+          <Note>{`Each probability is the count of ${last} followed by the token, divided by ${one.denominator.toLocaleString()}, the count of ${last} followed by anything. Summed: ${sums(one)}.`}</Note>
+          <BarChart bars={bars(one)} width={width} format={(v) => v.toFixed(3)} rowH={12} testId={`from-one-${k + 1}`} />
+          <Note style={{ color: 'var(--text)' }}>{`From the two tokens before: after ${pair}`}</Note>
+          <Note>{`Each probability is the count of ${pair} followed by the token, divided by ${two.denominator.toLocaleString()}. Summed: ${sums(two)}.`}</Note>
+          <BarChart bars={bars(two)} width={width} format={(v) => v.toFixed(3)} rowH={12} testId={`from-two-${k + 1}`} />
+        </>
+      )}
     </div>
   )
 }
 
 export function Step3Stage({ s }: { s: PredictorsStore }) {
-  const a = ['dog', 'chases', 'cat', '.']
-  const b = ['cat', 'chases', 'dog', '.']
-  const same = sameCounts(contribution(4, s.separate, a.slice(0, 3).map(idx)), contribution(4, s.separate, b.slice(0, 3).map(idx)))
-  const prompt = ['boys', 'who', 'the', 'dog', 'chases']
-  const hasThe = idx('the') >= 0
-  const usedPrompt = hasThe ? prompt : ['boys', 'who', 'dogs', 'chase']
-  const one = predictFromOne(s.ngram, idx(usedPrompt[usedPrompt.length - 1]))
-  const two = predictFromTwo(s.ngram, idx(usedPrompt[usedPrompt.length - 2]), idx(usedPrompt[usedPrompt.length - 1]))
-  const bars = (p: { probs: number[]; numerators: number[]; denominator: number }) =>
-    VOCABULARY.map((t, j) => ({ label: t, value: p.probs[j], color: kindOf(t) === 'verb' ? (verbOf(t)!.number === 'pl' ? 'var(--actuator)' : 'var(--sensor)') : 'var(--accent)' }))
-      .filter((x) => x.value > 0)
-      .sort((x, y) => y.value - x.value)
-  const plural = (p: { probs: number[] }) => VOCABULARY.reduce((acc, t, j) => acc + (kindOf(t) === 'verb' && verbOf(t)!.number === 'pl' ? p.probs[j] : 0), 0)
-  const singular = (p: { probs: number[] }) => VOCABULARY.reduce((acc, t, j) => acc + (kindOf(t) === 'verb' && verbOf(t)!.number === 'sg' ? p.probs[j] : 0), 0)
+  const ref = useRef<HTMLDivElement>(null)
+  const room = useWidth(ref, 900)
+  const inRow = room >= 760
+  const col = inRow ? Math.floor((room - 32) / 3) : Math.min(560, room)
   return (
     <StagePanel wide testId={`predictors-3-${s.screen3}`}>
       <div style={{ fontSize: 14, fontWeight: 600 }}>What counts cannot do</div>
-      <Note>Three screens. Press a screen’s name to go to it.</Note>
+      <Note>Two screens. Press a screen’s name to go to it.</Note>
       <Step3Screens s={s} />
-      {s.screen3 === 'order' && (
-        <>
-          {STEP3_ORDER.map((p) => (
-            <Note key={p.slice(0, 12)} style={{ color: 'var(--text)' }}>
-              {p}
-            </Note>
-          ))}
-          <SeparateSwitch s={s} />
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-            <Contribution sentence={a.slice(0, 3)} separate={s.separate} />
-            <Contribution sentence={b.slice(0, 3)} separate={s.separate} />
-          </div>
-          <FixedLines lines={[`With the setting ${s.separate ? 'on' : 'off'}, the two sentences add ${same ? 'the same' : 'different'} counts.`]} mono={false} testId="same-counts" />
-        </>
-      )}
       {s.screen3 === 'predict' && (
         <>
           {STEP3_PREDICT.map((p) => (
@@ -117,37 +135,38 @@ export function Step3Stage({ s }: { s: PredictorsStore }) {
               {p}
             </Note>
           ))}
-          <Note>{`The prompt: ${usedPrompt.join(' ')}. ${hasThe ? '' : 'The grammar has no article, so the prompt is boys who dogs chase: a plural subject, boys, with a relative clause whose own noun, dogs, is also plural; the next word in the grammar is a plural verb.'}`}</Note>
           <PredictControls s={s} />
-          {!s.computed && <Note data-awaiting-commit>The two distributions appear once your prediction above is committed and “Compute” is pressed.</Note>}
+          {!s.computed && <Note data-awaiting-commit>The predictions from counts appear once your prediction above is committed and “Compute” is pressed.</Note>}
+          <div ref={ref} style={{ display: 'flex', flexDirection: inRow ? 'row' : 'column', gap: 16, alignItems: 'flex-start' }} data-reveal={s.computed ? 'ngram' : undefined} data-prompts-layout={inRow ? 'three-in-a-row' : 'stacked'}>
+            {PROMPTS.map((p, k) => (
+              <PromptColumn key={p.join(' ')} s={s} prompt={p} k={k} width={col} />
+            ))}
+          </div>
           {s.computed && (
-            <div data-reveal="ngram" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <GroupLabel>{`From the one word before: after ${usedPrompt[usedPrompt.length - 1]}`}</GroupLabel>
-              <Note>{`Each probability is the count of ${usedPrompt[usedPrompt.length - 1]} followed by the word, divided by ${one.denominator.toLocaleString()}, the count of ${usedPrompt[usedPrompt.length - 1]} followed by anything. Plural verb forms are green, singular forms orange, other tokens blue. Summed: plural verbs ${plural(one).toFixed(2)}, singular verbs ${singular(one).toFixed(2)}.`}</Note>
-              <BarChart bars={bars(one)} width={560} format={(v) => v.toFixed(3)} testId="from-one" />
-              <GroupLabel>{`From the two words before: after ${usedPrompt.slice(-2).join(' ')}`}</GroupLabel>
-              <Note>{`Each probability is the count of ${usedPrompt.slice(-2).join(' ')} followed by the word, divided by ${two.denominator.toLocaleString()}. Summed: plural verbs ${plural(two).toFixed(2)}, singular verbs ${singular(two).toFixed(2)}.`}</Note>
-              <BarChart bars={bars(two)} width={560} format={(v) => v.toFixed(3)} testId="from-two" />
-              <Note>{`Your prediction: ${s.predicted('counts')}. What decides each prediction is the word or two words just before it, ${usedPrompt[usedPrompt.length - 1]} alone or ${usedPrompt.slice(-2).join(' ')}; the subject of the sentence, boys, is further back than either count reaches.`}</Note>
-            </div>
+            <>
+              <Note>Plural verb forms are green, singular forms orange, nouns blue, and who and the end mark gray. The twelve most probable tokens are shown.</Note>
+              <Note data-after-compute>{`Your prediction: ${s.predicted('counts')}. What decides each prediction is the token or two tokens just before it. After girls, and after girls who chase boys, the token just before is a plural noun. After girls who boys chase, the token just before is a verb, chase. The subject of the sentence, girls, is further back than either count reaches when a clause stands between.`}</Note>
+            </>
           )}
         </>
       )}
-      {s.screen3 === 'point' && (
-        <>
-          {STEP3_ONE_POINT.map((p) => (
-            <Note key={p.slice(0, 12)} style={{ color: 'var(--text)' }}>
-              {p}
-            </Note>
-          ))}
-          {s.model && !s.counting ? (
-            <FixedLines lines={[`chases, in “boys who Mary chases walk”:  the one list of ${embedding(s.model, idx('chases')).length} counts`, `chases, in “Mary chases boys”:           the same list of ${embedding(s.model, idx('chases')).length} counts`, `the first ten counts of that list: ${Array.from(embedding(s.model, idx('chases')).slice(0, 10)).map((v) => Math.round(v)).join(' ')}`]} testId="one-point" scroll />
-          ) : (
-            <Note>Run “Count” in Step 2 to see the list.</Note>
-          )}
-        </>
-      )}
+      {s.screen3 === 'point' && <OnePoint s={s} />}
       <Content>{ONE_CORPUS_LINE}</Content>
     </StagePanel>
+  )
+}
+
+function OnePoint({ s }: { s: PredictorsStore }) {
+  const m = s.ensureCounted()
+  const e = embedding(m, idx('chases'))
+  return (
+    <>
+      {STEP3_ONE_POINT.map((p) => (
+        <Note key={p.slice(0, 12)} style={{ color: 'var(--text)' }}>
+          {p}
+        </Note>
+      ))}
+      <FixedLines lines={[`chases, in “boys who Mary chases walk”:  the one list of ${e.length} counts`, `chases, in “Mary chases boys”:           the same list of ${e.length} counts`, `the first ten counts of that list: ${Array.from(e.slice(0, 10)).map((v) => Math.round(v)).join(' ')}`]} testId="one-point" scroll />
+    </>
   )
 }

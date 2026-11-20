@@ -160,3 +160,33 @@ export function splitOnePitch(all: readonly Token[], heldOut: readonly number[])
 export function splitOneVoice(all: readonly Token[], voice = 1) {
   return { training: all.filter((t) => t.voice === voice), test: all.filter((t) => t.voice !== voice) }
 }
+
+// ------------------------------------------------------------ several networks
+
+/** The sample mean and the sample standard deviation (divided by n − 1) of a list; sd is 0 for fewer than two values. */
+export function meanAndSd(xs: readonly number[]): { mean: number; sd: number } {
+  const n = xs.length
+  if (n === 0) return { mean: NaN, sd: 0 }
+  const mean = xs.reduce((a, b) => a + b, 0) / n
+  const sd = n < 2 ? 0 : Math.sqrt(xs.reduce((a, x) => a + (x - mean) ** 2, 0) / (n - 1))
+  return { mean, sd }
+}
+
+/** Student's t for 9 degrees of freedom at 95%: the band over 10 networks. */
+export const T_95_DF9 = 2.262
+
+/**
+ * At each pass, the mean over several curves and the 95% confidence interval
+ * of that mean, mean ± t · sd / √n, with sd the sample standard deviation
+ * across the curves at that pass. Passes a curve has not reached are skipped.
+ */
+export function meanBand(curves: readonly (readonly number[])[], t = T_95_DF9): { pass: number; mean: number; lo: number; hi: number; sd: number }[] {
+  const n = curves.length
+  const passes = Math.min(...curves.map((c) => c.length))
+  if (n === 0 || !Number.isFinite(passes)) return []
+  return Array.from({ length: passes }, (_, p) => {
+    const { mean, sd } = meanAndSd(curves.map((c) => c[p]))
+    const half = (t * sd) / Math.sqrt(n)
+    return { pass: p + 1, mean, lo: mean - half, hi: mean + half, sd }
+  })
+}

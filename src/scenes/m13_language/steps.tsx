@@ -38,6 +38,8 @@ export interface StepScreen {
   next: string
   /** What to have ready, where it differs from the default. */
   ready?: string
+  /** An exploration's stage ends with the button that comes next; false where the stage carries its own (Part 1's tour, on its last screen). */
+  bottomNext?: boolean
 }
 
 export const READY_LINE = 'Nothing is needed. You will answer in the app. The report is filled in from the results screens afterward.'
@@ -352,7 +354,43 @@ export function StepStage<Step extends number, S extends StepStore<Step>>({ ctx,
     <>
       {s.pauseExpired && <Note data-pause-expired>{s.pauseExpired}</Note>}
       {running(s)}
+      {screen.kind === 'exploration' && screen.bottomNext !== false && <NextRow ctx={ctx} tab={tab} />}
     </>
+  )
+}
+
+/**
+ * The button that comes next, at the end of a stage, after everything the
+ * stage shows (Jon, 2026-11-19: at the bottom, not among the first things
+ * at the top): Go on to Step n, or Go on to Part n on a part's last step,
+ * with the line that names it. On the lab's last step, the line that says
+ * where every result is.
+ */
+export function NextRow<Step extends number, S extends StepStore<Step>>({ ctx, tab }: { ctx: PartContext<S>; tab: Tab }) {
+  const s = ctx.store
+  const next = s.nextStep(s.step)
+  const nextTab = NEXT_TAB[tab]
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8, paddingTop: 10, borderTop: '1px solid var(--border)' }} data-next-row>
+      <Note data-next>
+        {next !== null
+          ? `When you are ready to move on, press “Go on to Step ${next}” here or in the navigation panel.`
+          : nextTab
+            ? `When you are ready to move on, press “Go on to Part ${partNumber(nextTab)}” here or in the navigation panel, or choose the ${tabName(nextTab)} tab at the top left.`
+            : `This is the lab’s last step. Every finished experiment’s results are on the ${MAIN_TABS.results} tab at the top of this panel.`}
+      </Note>
+      <div>
+        {next !== null ? (
+          <Btn primary onClick={() => ctx.openStep(next)}>
+            Go on to Step {next}
+          </Btn>
+        ) : nextTab ? (
+          <Btn primary onClick={() => ctx.openTab(nextTab)}>
+            Go on to Part {partNumber(nextTab)}
+          </Btn>
+        ) : null}
+      </div>
+    </div>
   )
 }
 
@@ -401,34 +439,15 @@ export function PauseButton<Step extends number>({ s }: { s: StepStore<Step> }) 
   )
 }
 
-/** A finished step's stage: the step is done, where its results are, what to press next with the button itself (Jon, 2026-11-09), and under that the results with their explanation (Jon, 2026-11-18). */
+/** A finished step's stage: the step is done and where its results are, then the results with their explanation (Jon, 2026-11-18), then the button that comes next, after everything (Jon, 2026-11-19). */
 export function DoneStage<Step extends number, S extends StepStore<Step>>({ ctx, tab, screens, children }: { ctx: PartContext<S>; tab: Tab; screens: Record<Step, StepScreen>; children?: ReactNode }) {
   const s = ctx.store
-  const next = s.nextStep(s.step)
-  const nextTab = NEXT_TAB[tab]
   return (
     <StagePanel testId="done">
       <div style={{ fontSize: 14, fontWeight: 600 }}>{screens[s.step].title}</div>
-      <Note>{`This step is done. Its results are below, with their explanation, and on the ${MAIN_TABS.results} tab at the top of this panel.`}</Note>
-      <Note data-next>
-        {next !== null
-          ? `When you are ready to move on, press “Go on to Step ${next}” here or in the navigation panel.`
-          : nextTab
-            ? `When you are ready to move on, press “Go on to Part ${partNumber(nextTab)}” here or in the navigation panel, or choose the ${tabName(nextTab)} tab at the top left.`
-            : `This was the lab’s last part. Every part’s results are on the ${MAIN_TABS.results} tab at the top of this panel.`}
-      </Note>
-      <div>
-        {next !== null ? (
-          <Btn primary onClick={() => ctx.openStep(next)}>
-            Go on to Step {next}
-          </Btn>
-        ) : nextTab ? (
-          <Btn primary onClick={() => ctx.openTab(nextTab)}>
-            Go on to Part {partNumber(nextTab)}
-          </Btn>
-        ) : null}
-      </div>
+      <Note>{`This step is done. Its results are below, with their explanation, and on the ${MAIN_TABS.results} tab at the top of this panel. The button that moves on is at the end.`}</Note>
       {children}
+      <NextRow ctx={ctx} tab={tab} />
     </StagePanel>
   )
 }

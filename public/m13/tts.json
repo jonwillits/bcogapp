@@ -679,12 +679,12 @@
    "durationS": 0.5444
   },
   {
-   "word": "fep",
+   "word": "lorp",
    "set": 0,
-   "phonemes": "f\u025bp",
-   "file": "fep.wav",
+   "phonemes": "l\u0254\u0279p",
+   "file": "lorp.wav",
    "voice": 1,
-   "durationS": 0.4338
+   "durationS": 0.5025
   },
   {
    "word": "gorp",
@@ -745,10 +745,10 @@
   {
    "word": "zorch",
    "set": 0,
-   "phonemes": "z\u0254\u0279t\u0283",
+   "phonemes": "zo\u0279t\u0283",
    "file": "zorch.wav",
    "voice": 1,
-   "durationS": 0.4124
+   "durationS": 0.5613
   },
   {
    "word": "crannel",
@@ -759,12 +759,12 @@
    "durationS": 0.5549
   },
   {
-   "word": "lorp",
+   "word": "fep",
    "set": 1,
-   "phonemes": "l\u0254\u0279p",
-   "file": "lorp.wav",
+   "phonemes": "f\u025bp",
+   "file": "fep.wav",
    "voice": 1,
-   "durationS": 0.5025
+   "durationS": 0.4338
   },
   {
    "word": "flimmer",

@@ -19,7 +19,7 @@ export function AllResults({ progress, go }: { progress: ProgressStore; go: (tab
   return (
     <StagePanel testId="all-results">
       <div style={{ fontSize: 14, fontWeight: 600 }}>{MAIN_TABS.results}</div>
-      <Note style={{ color: 'var(--text)', fontSize: 12.5 }}>{`Every finished experiment’s results, without the explanations, for your report. Under each one, “Show this step with its explanation” opens the step on the ${MAIN_TABS.current} tab, where the same results are explained. A step appears here once it is done.`}</Note>
+      <Note style={{ color: 'var(--text)', fontSize: 12.5 }}>{`Every finished experiment’s results, without the explanations, for your report. Under each one, “Show this step with its explanation” opens the step on the “${MAIN_TABS.current}” tab, where the same results are explained. A step appears here once it is done.`}</Note>
       <FixedLines lines={progressRows(progress)} testId="results-all" />
       {([1, 2, 3, 4] as const).map((part) => {
         const tab = PART_TABS[part]

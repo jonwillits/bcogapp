@@ -92,17 +92,18 @@ export function Step1Stage({ s, onNext }: { s: StreamStore; onNext?: () => void 
       <Content>{MADE_UP_LANGUAGE_LINE}</Content>
       <Content>{MADE_OFFLINE_LINE}</Content>
       {done && <FixedLines lines={[`Your answer: ${done.guess} ${done.guess === 1 ? 'word' : 'words'}.`]} mono={false} />}
+      {done && onNext && <Note>{`This step is done. Its results are below, with their explanation, and on the ${MAIN_TABS.results} tab at the top of this panel. The button that moves on is at the end.`}</Note>}
+      {done && <MinuteReveal result={done} />}
       {done && onNext && (
-        <>
-          <Note data-next>{`This step is done. Its results are below, with their explanation, and on the ${MAIN_TABS.results} tab at the top of this panel. When you are ready to move on, press “Go on to Step 2” here or in the navigation panel.`}</Note>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8, paddingTop: 10, borderTop: '1px solid var(--border)' }} data-next-row>
+          <Note data-next>When you are ready to move on, press “Go on to Step 2” here or in the navigation panel.</Note>
           <div>
             <Btn primary onClick={onNext}>
               Go on to Step 2
             </Btn>
           </div>
-        </>
+        </div>
       )}
-      {done && <MinuteReveal result={done} />}
     </StagePanel>
   )
 }

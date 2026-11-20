@@ -1,4 +1,5 @@
-import { Btn, Choice, Content, FixedLines, GroupLabel, Note, StagePanel } from '../ui'
+import type { ReactNode } from 'react'
+import { Btn, Choice, Content, FixedLines, GroupLabel, Note, StagePanel, useRef, useWidth } from '../ui'
 import { BarChart } from '../plots'
 import { ReferencePanel } from '../ReferencePanel'
 import { reference } from '../../../sim/language/references'
@@ -6,19 +7,24 @@ import { NOT_ENGLISH_LINE, REAL_WEIGHTS_LINE, TRAINED_BEFORE_LINE } from '../lin
 import { VOCABULARY, kindOf, verbOf, END, WHO } from '../../../sim/language/predictors/grammar'
 import type { TransformerOutput } from '../../../sim/language/predictors/runtime/seqNet'
 import { STEP4_MODELS } from './texts'
-import { PREDICTIONS, TEMPERATURES, type PredictorsStore } from './store'
+import { SrnSchematic, TransformerSchematic } from './Schematics'
+import { PREDICTIONS, TEMPERATURES, type CountPrediction, type PredictorsStore } from './store'
 
 /**
- * Step 4's screens (spec §8.5; Jon, 2026-11-17: everything in the center).
- * The two predictions and Commit above the palette; the prompt palette from
- * the parser, Allow any token, the two next-token distributions grouped as
- * nouns, verbs, who and the end mark, attention as lines from the last
- * token back to each earlier token per layer and computation, the same word
- * in two sentences; Temperature and Generate a sentence beside the
- * generated sentences.
+ * Step 4's screens (spec §8.5; Jon, 2026-11-17: everything in the center;
+ * Jon, 2026-11-19: the two networks drawn side by side with their texts
+ * under the drawings; three next-token distributions at the panel's width,
+ * the prediction from counts beside the two networks; the palette offers
+ * the whole vocabulary with the grammar's next tokens outlined; Generate a
+ * sentence samples from both networks at once). The two predictions and
+ * Commit above the palette; attention as lines from the last token back to
+ * each earlier token per layer and computation; the same word in two
+ * sentences; Temperature and Generate a sentence beside the generated
+ * sentences in two columns.
  */
 const groupOf = (t: string) => (t === WHO ? 'who' : t === END ? 'the end mark' : kindOf(t) === 'verb' ? 'verbs' : 'nouns')
 const GROUPS = ['nouns', 'verbs', 'who', 'the end mark']
+const GAP = 16
 
 /** The two predictions, asked once, above what they predict. */
 export function Step4Predictions({ s }: { s: PredictorsStore }) {
@@ -71,7 +77,19 @@ function GenerateControls({ s }: { s: PredictorsStore }) {
   )
 }
 
-function Distribution({ probs, title, testId }: { probs: Float64Array; title: string; testId: string }) {
+/** The line under a chart of the prediction from counts: which words it was computed from, and the division. */
+export function CountNote({ c }: { c: CountPrediction }) {
+  const two = c.from === 'two'
+  return <Note data-count-from={c.from}>{two ? `From the two words before, ${c.context.join(' ')}: each probability is a count divided by ${c.denominator.toLocaleString()}, the count of ${c.context.join(' ')} followed by anything.` : `The two words before never occurred together in the corpus, so from the one word before, ${c.context[0]}: each probability is a count divided by ${c.denominator.toLocaleString()}, the count of ${c.context[0]} followed by anything.`}</Note>
+}
+
+/** How many charts sit in one row at a panel width, and each chart's width. */
+export function chartColumns(w: number, n = 3): { cols: number; width: number } {
+  const cols = Math.min(n, w >= 960 ? 3 : w >= 640 ? 2 : 1)
+  return { cols, width: Math.max(220, Math.floor((w - GAP * (cols - 1)) / cols)) }
+}
+
+function Distribution({ probs, title, testId, width, children }: { probs: ArrayLike<number>; title: string; testId: string; width: number; children?: ReactNode }) {
   const bars = GROUPS.flatMap((g) =>
     VOCABULARY.map((t, j) => ({ t, j }))
       .filter(({ t }) => groupOf(t) === g)
@@ -81,10 +99,11 @@ function Distribution({ probs, title, testId }: { probs: Float64Array; title: st
   )
   const sums = GROUPS.map((g) => `${g}: ${VOCABULARY.reduce((a, t, j) => a + (groupOf(t) === g ? probs[j] : 0), 0).toFixed(2)}`)
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }} data-distribution={testId}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, width, minWidth: 0 }} data-distribution={testId}>
       <GroupLabel>{title}</GroupLabel>
       <Note>{`Summed by group: ${sums.join('; ')}. The ten most probable nouns are shown, and every verb.`}</Note>
-      <BarChart bars={bars} width={300} max={1} format={(v) => v.toFixed(3)} rowH={12} testId={testId} />
+      <BarChart bars={bars} width={width} max={1} format={(v) => v.toFixed(3)} rowH={12} testId={testId} />
+      {children}
     </div>
   )
 }
@@ -116,94 +135,122 @@ export function Attention({ out, tokens }: { out: TransformerOutput; tokens: str
   )
 }
 
+/** The generated sentences of one network, one line per press of Generate a sentence, each marked allowed or not. */
+function GeneratedColumn({ title, lines, testId }: { title: string; lines: { temperature: number; tokens: string[]; allowed: boolean }[]; testId: string }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: '1 1 280px', minWidth: 0 }} data-generated={testId}>
+      <GroupLabel>{title}</GroupLabel>
+      {lines.length > 0 ? <FixedLines lines={lines.map((g) => `T ${g.temperature.toFixed(1)}  ${g.allowed ? 'allowed    ' : 'not allowed'}  ${g.tokens.join(' ')}`)} testId={testId} scroll /> : <Note>No sentence yet.</Note>}
+    </div>
+  )
+}
+
 export function Step4Stage({ s }: { s: PredictorsStore }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const w = useWidth(ref, 960)
+  const twoColumns = w >= 760
+  const { width: chartW } = chartColumns(w)
   const out = s.outputs()
+  const count = s.countPrediction(s.prompt)
   const ok = s.allPredicted4
   const last = (o: { probs: Float64Array[] }) => o.probs[o.probs.length - 1]
   const two = s.final ? [s.outputs(['boys', 'who', 'Mary', 'chases', 'walk']), s.outputs(['Mary', 'chases', 'boys'])] : null
   const chasesIn = (o: TransformerOutput | null, pos: number) => (o ? Array.from(o.hidden[o.hidden.length - 1][pos].slice(0, 12)) : null)
+  const allowed = new Set(s.allowedNext)
+  const complete = s.parse.complete
   return (
     <StagePanel wide testId="predictors-4">
-      <div style={{ fontSize: 14, fontWeight: 600 }}>A simple recurrent network and a transformer</div>
-      {STEP4_MODELS.map((p) => (
-        <Note key={p.slice(0, 12)} style={{ color: 'var(--text)' }}>
-          {p}
-        </Note>
-      ))}
-      {s.descs && <FixedLines lines={[`transformer: ${s.descs.transformer.params.toLocaleString()} weights; held-out next-token accuracy ${(100 * s.descs.transformer.snapshots[s.descs.transformer.snapshots.length - 1].heldOutAccuracy).toFixed(1)}% after ${s.descs.transformer.snapshots[s.descs.transformer.snapshots.length - 1].updates.toLocaleString()} updates`, `recurrent network: ${s.descs.srn.params.toLocaleString()} weights; held-out next-token accuracy ${(100 * s.descs.srn.snapshots[s.descs.srn.snapshots.length - 1].heldOutAccuracy).toFixed(1)}% after ${s.descs.srn.snapshots[s.descs.srn.snapshots.length - 1].updates.toLocaleString()} updates`]} testId="model-sizes" scroll />}
-      {s.loadError && <Note data-load-error>{s.loadError}</Note>}
-      {!s.final && !s.loadError && <Note data-loading>The two networks are loading.</Note>}
-      <Content>{TRAINED_BEFORE_LINE}</Content>
-      <Step4Predictions s={s} />
-      {!ok && <Note data-awaiting-commit>The palette, the distributions, and the attention appear once your two predictions above are committed.</Note>}
-      {ok && (
-        <div data-reveal="networks" style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
-          <GroupLabel>Your prompt</GroupLabel>
-          <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }} data-prompt>
-            <FixedLines lines={[s.prompt.length ? s.prompt.join(' ') : '(empty: press a token below)']} />
-            {!s.promptAllowed && <Note data-not-allowed>not a sentence the grammar allows</Note>}
-            <Btn small onClick={() => s.removeLast()} disabled={!s.prompt.length}>
-              Remove the last token
-            </Btn>
-            <Btn small onClick={() => s.clearPrompt()} disabled={!s.prompt.length}>
-              Clear the prompt
-            </Btn>
-            <label style={{ fontSize: 12, display: 'flex', gap: 6, alignItems: 'center' }}>
-              <input type="checkbox" checked={s.anyToken} onChange={(e) => s.setAnyToken(e.target.checked)} /> Allow any token
-            </label>
+      <div ref={ref} style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0, width: '100%' }}>
+        <div style={{ fontSize: 14, fontWeight: 600 }}>A simple recurrent network and a transformer</div>
+        <Note style={{ color: 'var(--text)' }}>{STEP4_MODELS[0]}</Note>
+        <div style={{ display: 'flex', flexDirection: twoColumns ? 'row' : 'column', gap: GAP, alignItems: 'flex-start' }} data-schematics>
+          <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <GroupLabel>The simple recurrent network</GroupLabel>
+            <SrnSchematic />
+            <Note style={{ color: 'var(--text)' }}>{STEP4_MODELS[1]}</Note>
           </div>
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }} data-palette>
-            {s.palette.map((t) => (
-              <button key={t} type="button" onClick={() => s.addToken(t)} style={{ padding: '3px 8px', fontSize: 11.5, borderRadius: 999, border: '1px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text)', cursor: 'pointer' }}>
-                {t}
-              </button>
-            ))}
-            {s.palette.length === 0 && <Note>{s.parse.complete ? 'The prompt is a complete sentence. Clear it, or remove the end mark, to go on.' : 'The grammar allows no token here. Turn on “Allow any token” to add one anyway.'}</Note>}
+          <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <GroupLabel>The transformer</GroupLabel>
+            <TransformerSchematic />
+            <Note style={{ color: 'var(--text)' }}>{STEP4_MODELS[2]}</Note>
           </div>
-          {out && (
-            <>
-              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-                <Distribution probs={last(out.transformer)} title="The transformer: probability of each token as the next" testId="transformer" />
-                <Distribution probs={last(out.srn)} title="The recurrent network: probability of each token as the next" testId="srn" />
-              </div>
-              <GroupLabel>Attention in the transformer, for the last token of your prompt</GroupLabel>
-              <Note>Each panel is one attention computation in one layer: lines run from the last token back to each earlier token, and to itself, with a line’s thickness set by the weight the computation gives that position. The weights in a panel sum to one. Hover a line for its number.</Note>
-              <Attention out={out.transformer} tokens={s.prompt} />
-              <Content>{REAL_WEIGHTS_LINE}</Content>
-            </>
-          )}
-          {two && two[0] && two[1] && (
-            <>
-              <GroupLabel>The same word in two sentences</GroupLabel>
-              <Note>The transformer’s numbers for chases at its last layer, in boys who Mary chases walk (position 4) and in Mary chases boys (position 2): the first 12 of the 32 numbers, as bars. In the count model of Step 3, chases had one list whatever the sentence.</Note>
-              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }} data-same-word>
-                {[
-                  ['boys who Mary chases walk', chasesIn(two[0].transformer, 3)],
-                  ['Mary chases boys', chasesIn(two[1].transformer, 1)],
-                ].map(([title, vals]) => (
-                  <div key={title as string}>
-                    <Note>{title as string}</Note>
-                    <BarChart bars={(vals as number[]).map((v, i) => ({ label: `n${i + 1}`, value: Math.abs(v), color: v >= 0 ? 'var(--accent)' : 'var(--avoid)' }))} width={240} rowH={11} format={(v) => v.toFixed(2)} />
-                  </div>
-                ))}
-              </div>
-              <Note>A blue bar is a positive number and a red bar a negative one; the length is the size.</Note>
-            </>
-          )}
-          <GroupLabel>Generated sentences</GroupLabel>
-          <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-            <GenerateControls s={s} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: '1 1 280px', minWidth: 0 }}>
-              <Note>{`“Generate a sentence” samples one token at a time from the transformer’s probabilities at the temperature set beside it, from the start of a sentence, until the end mark or 32 tokens. A low temperature favors the most probable tokens; a high one flattens the probabilities. Each sentence is marked with whether the grammar allows it.`}</Note>
-              {s.generated.length > 0 && <FixedLines lines={s.generated.map((g) => `T ${g.temperature.toFixed(1)}  ${g.allowed ? 'allowed    ' : 'not allowed'}  ${g.tokens.join(' ')}`)} testId="generated" scroll />}
-            </div>
-          </div>
-          <Content>{NOT_ENGLISH_LINE}</Content>
-          <Note>{`Your predictions: after boys who Mary chases, ${s.predicted('agree')}; at temperature 2.0, ${s.predicted('temp')}.`}</Note>
-          <ReferencePanel reference={reference('elman-1991')} />
-          <ReferencePanel reference={reference('mao-2025')} />
         </div>
-      )}
+        {s.descs && <FixedLines lines={[`transformer: ${s.descs.transformer.params.toLocaleString()} weights; held-out next-token accuracy ${(100 * s.descs.transformer.snapshots[s.descs.transformer.snapshots.length - 1].heldOutAccuracy).toFixed(1)}% after ${s.descs.transformer.snapshots[s.descs.transformer.snapshots.length - 1].updates.toLocaleString()} updates`, `recurrent network: ${s.descs.srn.params.toLocaleString()} weights; held-out next-token accuracy ${(100 * s.descs.srn.snapshots[s.descs.srn.snapshots.length - 1].heldOutAccuracy).toFixed(1)}% after ${s.descs.srn.snapshots[s.descs.srn.snapshots.length - 1].updates.toLocaleString()} updates`]} testId="model-sizes" scroll />}
+        {s.loadError && <Note data-load-error>{s.loadError}</Note>}
+        {!s.final && !s.loadError && <Note data-loading>The two networks are loading.</Note>}
+        <Content>{TRAINED_BEFORE_LINE}</Content>
+        <Step4Predictions s={s} />
+        {!ok && <Note data-awaiting-commit>The palette, the distributions, and the attention appear once your two predictions above are committed.</Note>}
+        {ok && (
+          <div data-reveal="networks" style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
+            <GroupLabel>Your prompt</GroupLabel>
+            <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }} data-prompt>
+              <FixedLines lines={[s.prompt.length ? s.prompt.join(' ') : '(empty: press a token below)']} />
+              {!s.promptAllowed && <Note data-not-allowed>not a sentence the grammar allows</Note>}
+              <Btn small onClick={() => s.removeLast()} disabled={!s.prompt.length}>
+                Remove the last token
+              </Btn>
+              <Btn small onClick={() => s.clearPrompt()} disabled={!s.prompt.length}>
+                Clear the prompt
+              </Btn>
+            </div>
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }} data-palette>
+              {s.palette.map((t) => (
+                <button key={t} type="button" onClick={() => s.addToken(t)} disabled={complete} data-allowed={allowed.has(t) || undefined} style={{ padding: '3px 8px', fontSize: 11.5, borderRadius: 999, border: `2px solid ${allowed.has(t) ? 'var(--accent)' : 'var(--border)'}`, background: 'var(--surface-2)', color: 'var(--text)', cursor: complete ? 'default' : 'pointer', opacity: complete ? 0.6 : 1 }}>
+                  {t}
+                </button>
+              ))}
+            </div>
+            <Note data-palette-line>{complete ? 'The prompt is a complete sentence. Clear it, or remove the end mark, to go on.' : s.promptAllowed ? 'Outlined tokens are the ones the grammar allows next; any token can be pressed.' : 'The grammar allows no token after a prompt it does not allow, so none is outlined; any token can be pressed.'}</Note>
+            {out && count && (
+              <>
+                <div style={{ display: 'flex', gap: GAP, flexWrap: 'wrap', alignItems: 'flex-start' }} data-distributions>
+                  <Distribution probs={last(out.transformer)} title="The transformer: probability of each token as the next" testId="transformer" width={chartW} />
+                  <Distribution probs={last(out.srn)} title="The recurrent network: probability of each token as the next" testId="srn" width={chartW} />
+                  <Distribution probs={count.probs} title="The prediction from counts: probability of each token as the next" testId="counts" width={chartW}>
+                    <CountNote c={count} />
+                  </Distribution>
+                </div>
+                <GroupLabel>Attention in the transformer, for the last token of your prompt</GroupLabel>
+                <Note>Each panel is one attention computation in one layer: lines run from the last token back to each earlier token, and to itself, with a line’s thickness set by the weight the computation gives that position. The weights in a panel sum to one. Hover a line for its number.</Note>
+                <Attention out={out.transformer} tokens={s.prompt} />
+                <Content>{REAL_WEIGHTS_LINE}</Content>
+              </>
+            )}
+            {two && two[0] && two[1] && (
+              <>
+                <GroupLabel>The same word in two sentences</GroupLabel>
+                <Note>The transformer’s numbers for chases at its last layer, in boys who Mary chases walk (position 4) and in Mary chases boys (position 2): the first 12 of the 32 numbers, as bars. In the count model of Step 3, chases had one list whatever the sentence.</Note>
+                <div style={{ display: 'flex', gap: GAP, flexWrap: 'wrap' }} data-same-word>
+                  {[
+                    ['boys who Mary chases walk', chasesIn(two[0].transformer, 3)],
+                    ['Mary chases boys', chasesIn(two[1].transformer, 1)],
+                  ].map(([title, vals]) => (
+                    <div key={title as string}>
+                      <Note>{title as string}</Note>
+                      <BarChart bars={(vals as number[]).map((v, i) => ({ label: `n${i + 1}`, value: Math.abs(v), color: v >= 0 ? 'var(--accent)' : 'var(--avoid)' }))} width={240} rowH={11} format={(v) => v.toFixed(2)} />
+                    </div>
+                  ))}
+                </div>
+                <Note>A blue bar is a positive number and a red bar a negative one; the length is the size.</Note>
+              </>
+            )}
+            <GroupLabel>Generated sentences</GroupLabel>
+            <Note>{`“Generate a sentence” samples one sentence from each network at the temperature set beside it. The networks were trained on sentences from their first word, so the first token is drawn from how often each token begins a sentence in the corpus; every token after it is drawn from the network’s probabilities, one at a time, until the end mark or 32 tokens. A low temperature favors the most probable tokens; a high one flattens the probabilities. Each sentence is marked with whether the grammar allows it. The newest pair is at the top.`}</Note>
+            <div style={{ display: 'flex', gap: GAP, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+              <GenerateControls s={s} />
+              <div style={{ display: 'flex', gap: GAP, flexWrap: w >= 640 ? 'nowrap' : 'wrap', flex: '1 1 400px', minWidth: 0 }} data-generated-columns>
+                <GeneratedColumn title="The transformer" lines={s.generated.map((g) => g.transformer)} testId="generated" />
+                <GeneratedColumn title="The recurrent network" lines={s.generated.map((g) => g.srn)} testId="generated-srn" />
+              </div>
+            </div>
+            <Content>{NOT_ENGLISH_LINE}</Content>
+            <Note>{`Your predictions: after boys who Mary chases, ${s.predicted('agree')}. Most sentences allowed at a temperature of 2.0: ${s.predicted('temp')}.`}</Note>
+            <ReferencePanel reference={reference('elman-1991')} />
+            <ReferencePanel reference={reference('mao-2025')} />
+          </div>
+        )}
+      </div>
     </StagePanel>
   )
 }

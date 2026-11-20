@@ -31,7 +31,7 @@
 
 main_panel:
   tabs:
-    current: Current Part
+    current: This Step
     results: All Results
 
 parts:

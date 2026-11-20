@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode, type RefObject } from 'react'
-import { Btn, GroupLabel, Choice } from '../m06_brain/ui'
+import { Btn, GroupLabel as BaseGroupLabel, Choice } from '../m06_brain/ui'
 import { Content, FixedLines, OrientingPanel, DotPlot, statusStyle } from '../m09_rat/ui'
 
 /**
@@ -12,7 +12,7 @@ import { Content, FixedLines, OrientingPanel, DotPlot, statusStyle } from '../m0
  * block of aligned rows. Every text is selectable. A large timer and a
  * large line saying what is happening now on every timed screen (Lab 10).
  */
-export { Btn, GroupLabel, Choice, Content, FixedLines, OrientingPanel, DotPlot, statusStyle }
+export { Btn, Choice, Content, FixedLines, OrientingPanel, DotPlot, statusStyle }
 
 /** Lab 6's Note, with any data attribute passed through, so that a line's presence can be tested on rendered markup. */
 export function Note({ children, style, ...rest }: { children: ReactNode; style?: CSSProperties } & HTMLAttributes<HTMLParagraphElement>) {
@@ -24,7 +24,108 @@ export function Note({ children, style, ...rest }: { children: ReactNode; style?
 }
 export { useStore, useThrottledStore } from '../m09_rat/useStore'
 export { row, Countdown, useCountdown } from '../m10_memory/ui'
-export { BigChoice, Section, Para, rgbOf } from '../m12_planning/ui'
+export { BigChoice, Para, rgbOf } from '../m12_planning/ui'
+
+/** A header over a block of the main panel, with room above it so that it stands off from whatever is above (Jon, 2026-11-19: a line's worth of space before every header). */
+export function GroupLabel({ children }: { children: ReactNode }) {
+  return (
+    <div style={{ marginTop: 8 }} data-header>
+      <BaseGroupLabel>{children}</BaseGroupLabel>
+    </div>
+  )
+}
+
+/** A numbered section of a reveal: its header, then its sentence and its rows. The header carries the room above it. */
+export function Section({ n, title, children }: { n?: number; title: string; children: ReactNode }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-section={n ?? title}>
+      <GroupLabel>
+        {n !== undefined ? `${n}. ` : ''}
+        {title}
+      </GroupLabel>
+      {children}
+    </div>
+  )
+}
+
+export interface Column {
+  key: string
+  label: ReactNode
+  align?: 'left' | 'right' | 'center'
+  /** The column's cells in the monospace face: numbers, labels, words. */
+  mono?: boolean
+}
+
+/**
+ * A table with labeled rows and columns (Jon, 2026-11-19: every block of
+ * results is a table with headers, not a block of aligned text). `columns`
+ * name the columns; each row is a record keyed by column. `topHeader` is a
+ * header spanning the data columns (the network's label), and `leftHeader`
+ * one spanning the rows (the right label), for a table whose two axes have
+ * names of their own. `footer` is a line under the table, in the table's
+ * face. The first column is the row's own label when `rowHeader` is set.
+ */
+export function DataTable({ columns, rows, testId, topHeader, leftHeader, rowHeader, footer, style }: { columns: Column[]; rows: Record<string, ReactNode>[]; testId?: string; topHeader?: ReactNode; leftHeader?: ReactNode; rowHeader?: boolean; footer?: ReactNode; style?: CSSProperties }) {
+  const cell: CSSProperties = { padding: '2px 8px', fontSize: 11.5, lineHeight: 1.45, whiteSpace: 'nowrap', verticalAlign: 'top' }
+  const head: CSSProperties = { ...cell, fontWeight: 400, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)' }
+  const first = leftHeader ? 1 : 0
+  return (
+    <div style={{ overflowX: 'auto', maxWidth: '100%', alignSelf: 'flex-start', ...style }} data-table={testId ?? true}>
+      <table style={{ borderCollapse: 'collapse', color: 'var(--text)' }}>
+        <thead>
+          {topHeader && (
+            <tr>
+              {leftHeader ? <th style={{ ...cell, borderBottom: 'none' }} /> : null}
+              {rowHeader ? <th style={{ ...cell, borderBottom: 'none' }} /> : null}
+              <th colSpan={columns.length - (rowHeader ? 1 : 0)} style={{ ...head, textAlign: 'center', borderBottom: 'none', paddingBottom: 0 }}>
+                {topHeader}
+              </th>
+            </tr>
+          )}
+          <tr>
+            {leftHeader ? <th style={{ ...head, borderBottom: 'none' }} /> : null}
+            {columns.map((c) => (
+              <th key={c.key} scope="col" style={{ ...head, textAlign: c.align ?? (c.mono ? 'right' : 'left') }}>
+                {c.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={i} data-row={i}>
+              {leftHeader && i === 0 ? (
+                <th scope="rowgroup" rowSpan={rows.length} style={{ ...head, borderBottom: 'none', textAlign: 'right', verticalAlign: 'middle' }}>
+                  {leftHeader}
+                </th>
+              ) : null}
+              {columns.map((c, k) =>
+                rowHeader && k === 0 ? (
+                  <th key={c.key} scope="row" style={{ ...cell, fontWeight: 400, textAlign: c.align ?? 'left', fontFamily: c.mono ? 'var(--font-mono)' : undefined }}>
+                    {r[c.key]}
+                  </th>
+                ) : (
+                  <td key={c.key} style={{ ...cell, textAlign: c.align ?? (c.mono ? 'right' : 'left'), fontFamily: c.mono ? 'var(--font-mono)' : undefined }}>
+                    {r[c.key]}
+                  </td>
+                ),
+              )}
+            </tr>
+          ))}
+        </tbody>
+        {footer && (
+          <tfoot>
+            <tr>
+              <td colSpan={columns.length + first} style={{ ...cell, paddingTop: 6, color: 'var(--text)' }} data-table-footer>
+                {footer}
+              </td>
+            </tr>
+          </tfoot>
+        )}
+      </table>
+    </div>
+  )
+}
 
 export type Tab = 'open' | 'sounds' | 'stream' | 'words' | 'predictors'
 

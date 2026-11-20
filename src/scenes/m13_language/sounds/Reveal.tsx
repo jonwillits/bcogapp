@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react'
-import { Btn, Content, FixedLines, Note, Para, Section, StagePanel, useWidth } from '../ui'
+import { Btn, Content, DataTable, FixedLines, Note, Para, Section, StagePanel, useWidth } from '../ui'
 import { MAIN_TABS } from '../params'
 import { Spectrogram } from '../Spectrogram'
 import { LinePlot } from '../plots'
@@ -27,7 +27,7 @@ import type { AbxResult, LabelingResult, LabelsResult, SoundsStore } from './sto
 export type RevealMode = 'full' | 'results'
 
 /** Step 2's finished stage: the done line, then the sections. */
-const STEP2_DONE_LINE = `This step is done. Below are your labels beside the right ones, then the six syllables named, in the order you saw them, with their measured formant tracks. The table is also on the ${MAIN_TABS.results} tab at the top of this panel.`
+const STEP2_DONE_LINE = `This step is done. Below are your labels beside the right ones, then the six syllables named, in the order you saw them, with their measured formant tracks. The table is also on the ${MAIN_TABS.results} tab at the top of this panel. The button that moves on is at the end.`
 
 const IPA: Record<Six, string> = { bee: '/bi/', bah: '/bɑ/', boo: '/bu/', dee: '/di/', dah: '/dɑ/', doo: '/du/' }
 const COLORS: Record<string, string> = { b: 'var(--accent)', d: 'var(--sensor)', g: 'var(--actuator)' }
@@ -84,12 +84,6 @@ export function LabelsStage({ s, result, onNext }: { s: SoundsStore; result: Lab
     <StagePanel wide testId="sounds-2-done">
       <div style={{ fontSize: 14, fontWeight: 600 }}>Six syllables: the reveal</div>
       <Note style={{ color: 'var(--text)' }}>{STEP2_DONE_LINE}</Note>
-      <Note data-next>When you are ready to move on, press “Go on to Step 3” here or in the navigation panel.</Note>
-      <div>
-        <Btn primary onClick={onNext}>
-          Go on to Step 3
-        </Btn>
-      </div>
       <div ref={ref} style={{ display: 'flex', flexDirection: 'column', gap: 12 }} data-reveal="labels-stage">
         {result.restarts > 0 && <Content>{RESTARTED_LINE}</Content>}
         <LabelsTable result={result} />
@@ -113,6 +107,14 @@ export function LabelsStage({ s, result, onNext }: { s: SoundsStore; result: Lab
           {s.showVot && <VotScreen s={s} width={Math.max(220, Math.floor((room - 10) / 2))} />}
         </Section>
       </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8, paddingTop: 10, borderTop: '1px solid var(--border)' }} data-next-row>
+        <Note data-next>When you are ready to move on, press “Go on to Step 3” here or in the navigation panel.</Note>
+        <div>
+          <Btn primary onClick={onNext}>
+            Go on to Step 3
+          </Btn>
+        </div>
+      </div>
     </StagePanel>
   )
 }
@@ -123,8 +125,19 @@ export function LabelsTable({ result }: { result: LabelsResult }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }} data-reveal="labels">
       {result.restarts > 0 && <Content>{RESTARTED_LINE}</Content>}
       <Section n={1} title="Your labels beside the right ones">
-        <Para>One row per sound, in the order you saw them: your label, the right label, and whether they agree. The last line is your count correct out of 6.</Para>
-        <FixedLines lines={[...result.order.map((k, i) => `Sound ${i + 1}  ${k.padEnd(4)} your label ${result.labels[k]}   right label ${k[0]}   ${result.labels[k] === k[0] ? 'agree' : 'differ'}`), `Correct: ${result.correct} of 6`]} testId="labels-table" />
+        <Para>One row per trial, in the order you heard the sounds: the sound, your label, the right label, and 1 where they agree and 0 where they differ. The last line is your count correct out of 6.</Para>
+        <DataTable
+          testId="labels-table"
+          columns={[
+            { key: 'trial', label: 'Trial', mono: true },
+            { key: 'sound', label: 'Sound', mono: true, align: 'left' },
+            { key: 'yours', label: 'Your label', mono: true, align: 'center' },
+            { key: 'right', label: 'Right label', mono: true, align: 'center' },
+            { key: 'agree', label: 'Agree', mono: true, align: 'center' },
+          ]}
+          rows={result.order.map((k, i) => ({ trial: i + 1, sound: k, yours: result.labels[k], right: k[0], agree: result.labels[k] === k[0] ? 1 : 0 }))}
+          footer={`Correct: ${result.correct} of 6`}
+        />
       </Section>
     </div>
   )
@@ -206,8 +219,17 @@ export function Step3Reveal({ labeling, abx, mode = 'full' }: { labeling: Labeli
             <Para>Two sounds you always labeled the same give 50%, chance. Two sounds you never labeled the same give 100%. The formula averages the paper’s two triad orders. It rests on the assumption that a listener hears each sound as one of the two labels and judges the triad from the labels alone.</Para>
           </>
         )}
-        <FixedLines lines={PAIRS.map(([a, b], i) => `sounds ${String(a).padStart(2)} and ${String(b).padStart(2)}   told apart ${String(Math.round(100 * disc[i].correct)).padStart(3)}%   predicted ${String(Math.round(100 * pred[i].predicted)).padStart(3)}%   gap ${gap[i] >= 0 ? '+' : '−'}${String(Math.abs(Math.round(gap[i]))).padStart(3)}`)} testId="predicted-table" />
-        <FixedLines lines={[`Your mean gap, told apart minus predicted, over the ${nPairs} pairs: ${meanGap >= 0 ? '+' : '−'}${Math.abs(meanGap).toFixed(1)} points`]} testId="mean-gap" />
+        <DataTable
+          testId="predicted-table"
+          columns={[
+            { key: 'pair', label: 'Sounds', mono: true, align: 'left' },
+            { key: 'told', label: 'Told apart', mono: true },
+            { key: 'pred', label: 'Predicted from your labels', mono: true },
+            { key: 'gap', label: 'Gap, in points', mono: true },
+          ]}
+          rows={PAIRS.map(([a, b], i) => ({ pair: `${a} and ${b}`, told: `${Math.round(100 * disc[i].correct)}%`, pred: `${Math.round(100 * pred[i].predicted)}%`, gap: `${gap[i] >= 0 ? '+' : '−'}${Math.abs(Math.round(gap[i]))}` }))}
+          footer={<span data-lines="mean-gap">{`Your mean gap, told apart minus predicted, over the ${nPairs} pairs: ${meanGap >= 0 ? '+' : '−'}${Math.abs(meanGap).toFixed(1)} points`}</span>}
+        />
       </Section>
       <Section n={4} title="Where your boundary fell">
         <Para>A phoneme boundary is the point on the series where your labels change from one consonant to the next: the sound at which the two labeling curves cross. The crossing is read off by a straight line between neighboring sounds.</Para>

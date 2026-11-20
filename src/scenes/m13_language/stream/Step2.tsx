@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Btn, Content, FixedLines, GroupLabel, Note, StagePanel } from '../ui'
+import { Btn, Content, DataTable, FixedLines, GroupLabel, Note, StagePanel } from '../ui'
 import { COUNTS_FROM_YOUR_STREAM_LINE } from '../lines'
 import { SYLLABLES, type Syllable } from '../../../sim/language/stream/language'
 import { coloring, neighbors, uncovered, ROW, TRAY_MAX, TRAY_MIN } from '../../../sim/language/stream/board'
@@ -33,16 +33,7 @@ export function Step2Stage({ s, onNext }: { s: StreamStore; onNext?: () => void 
   return (
     <StagePanel wide testId="stream-2">
       <div style={{ fontSize: 14, fontWeight: 600 }}>Find the words</div>
-      {result && onNext && (
-        <>
-          <Note data-next>{`This step is done. Its results are under the board, with their explanation, and on the ${MAIN_TABS.results} tab at the top of this panel. When you are ready to move on, press “Go on to Step 3” here or in the navigation panel.`}</Note>
-          <div>
-            <Btn primary onClick={onNext}>
-              Go on to Step 3
-            </Btn>
-          </div>
-        </>
-      )}
+      {result && onNext && <Note>{`This step is done. Its results are under the board, with their explanation, and on the ${MAIN_TABS.results} tab at the top of this panel. The button that moves on is at the end.`}</Note>}
       <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }} data-board-layout>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: '1 1 560px', minWidth: 0 }}>
       <Note>The first 300 syllables of your stream, in the order they are spoken, 20 to a row. A row break means nothing. Click a tile to highlight its syllable everywhere; drag tiles into the tray to build a word.</Note>
@@ -126,6 +117,16 @@ export function Step2Stage({ s, onNext }: { s: StreamStore; onNext?: () => void 
       </div>
       </div>
       {result && <BoardReveal seed={s.seed} result={result} />}
+      {result && onNext && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8, paddingTop: 10, borderTop: '1px solid var(--border)' }} data-next-row>
+          <Note data-next>When you are ready to move on, press “Go on to Step 3” here or in the navigation panel.</Note>
+          <div>
+            <Btn primary onClick={onNext}>
+              Go on to Step 3
+            </Btn>
+          </div>
+        </div>
+      )}
     </StagePanel>
   )
 }
@@ -136,17 +137,18 @@ export function Step2Panel({ s }: { s: StreamStore }) {
   if (!h) return <Note data-no-highlight>Click a syllable on the board to see what comes right after it and right before it on the board, and how many times each does.</Note>
   const nb = neighbors(s.boardSyllables, h)
   const withTp = s.firstWordFound
-  const line = (x: { syllable: string; count: number }) => `${x.syllable}  ${String(x.count).padStart(3)}${withTp ? `   ${(x.count / nb.occurrences).toFixed(2)}` : ''}`
+  const cols = [{ key: 'syllable', label: 'Syllable', mono: true, align: 'left' as const }, { key: 'count', label: 'Count', mono: true }, ...(withTp ? [{ key: 'tp', label: 'Proportion', mono: true }] : [])]
+  const row = (x: { syllable: string; count: number }) => ({ syllable: x.syllable, count: x.count, tp: withTp ? (x.count / nb.occurrences).toFixed(2) : '' })
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-neighbors={h}>
       <Note>{`${h} occurs ${nb.occurrences} times on the board.`}</Note>
       {withTp && <Note data-tp-definition>The second column is the transitional probability from one syllable to the next: how often the second follows the first, divided by how often the first occurs (§13.2.3).</Note>}
       <GroupLabel>Comes right after {h}</GroupLabel>
-      <FixedLines lines={[`syllable  count${withTp ? '   proportion' : ''}`, ...nb.after.map(line)]} testId="after" />
+      <DataTable testId="after" columns={cols} rows={nb.after.map(row)} />
       <GroupLabel>Comes right before {h}</GroupLabel>
-      <FixedLines lines={[`syllable  count${withTp ? '   proportion' : ''}`, ...nb.before.map(line)]} testId="before" />
+      <DataTable testId="before" columns={cols} rows={nb.before.map(row)} />
       <GroupLabel>Words found</GroupLabel>
-      <FixedLines lines={s.board.found.length ? s.board.found.map((f, i) => `${i + 1}. ${f.word}  after ${f.checksBefore} check${f.checksBefore === 1 ? '' : 's'}${f.how === 'shown' ? '  (shown)' : ''}`) : ['none yet']} testId="found" />
+      {s.board.found.length ? <DataTable testId="found" columns={[{ key: 'n', label: 'Order', mono: true }, { key: 'word', label: 'Word', mono: true, align: 'left' }, { key: 'checks', label: 'Checks before it', mono: true }, { key: 'how', label: 'Found or shown' }]} rows={s.board.found.map((f, i) => ({ n: i + 1, word: f.word, checks: f.checksBefore, how: f.how }))} /> : <Note data-lines="found">none yet</Note>}
     </div>
   )
 }

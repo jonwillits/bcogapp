@@ -1,4 +1,4 @@
-import { Btn, Choice, Content, FixedLines, GroupLabel, Note, StagePanel } from '../ui'
+import { Btn, Choice, Content, DataTable, FixedLines, GroupLabel, Note, StagePanel } from '../ui'
 import { BarChart } from '../plots'
 import { ReferencePanel } from '../ReferencePanel'
 import { reference } from '../../../sim/language/references'
@@ -96,7 +96,17 @@ export function Step4Stage({ s }: { s: StreamStore }) {
       </div>
       <GroupLabel>The dips learner on real speech</GroupLabel>
       <Note>The first learner of Step 3, run on the whole sample: a cut wherever a transitional probability is lower than at both neighboring pairs. Two shares: how many of its cuts fall on a true word boundary, and how many of the true boundaries it finds. The same two shares for the made-up language over 21 minutes are beside them.</Note>
-      <FixedLines lines={['                                   real speech   made-up language', `cuts that fall on a word boundary   ${pct(r.dipsLearner.precision).padStart(8)}      ${pct(r.madeUpLanguage.shares.precision).padStart(8)}`, `word boundaries found               ${pct(r.dipsLearner.recall).padStart(8)}      ${pct(r.madeUpLanguage.shares.recall).padStart(8)}`, `cuts made                          ${r.dipsLearner.cuts.toLocaleString().padStart(9)}      ${r.madeUpLanguage.shares.cuts.toLocaleString().padStart(8)}`, `true boundaries                    ${r.dipsLearner.boundaries.toLocaleString().padStart(9)}      ${r.madeUpLanguage.shares.boundaries.toLocaleString().padStart(8)}`]} testId="dips-shares" />
+      <DataTable
+        testId="dips-shares"
+        rowHeader
+        columns={[{ key: 'what', label: '' }, { key: 'real', label: 'Real speech', mono: true }, { key: 'made', label: 'Made-up language', mono: true }]}
+        rows={[
+          { what: 'cuts that fall on a word boundary', real: pct(r.dipsLearner.precision).trim(), made: pct(r.madeUpLanguage.shares.precision).trim() },
+          { what: 'word boundaries found', real: pct(r.dipsLearner.recall).trim(), made: pct(r.madeUpLanguage.shares.recall).trim() },
+          { what: 'cuts made', real: r.dipsLearner.cuts.toLocaleString(), made: r.madeUpLanguage.shares.cuts.toLocaleString() },
+          { what: 'true boundaries', real: r.dipsLearner.boundaries.toLocaleString(), made: r.madeUpLanguage.shares.boundaries.toLocaleString() },
+        ]}
+      />
       <GroupLabel>The other cues</GroupLabel>
       <Note>In English conversation, about 90% of content words, such as nouns and verbs, begin with a stressed syllable, and infants use stress and the patterns of which sounds can occur together as cues to word boundaries as well (§13.2.3). Press “Show stress” above the strip to mark the syllables the dictionary gives primary stress.</Note>
       <FixedLines lines={[`The sample: ${r.utterancesUsed.toLocaleString()} utterances from ${r.transcriptsUsed.toLocaleString()} transcripts in ${r.corpora.length} corpora; ${r.syllableTokens.toLocaleString()} syllables of ${r.syllableTypes.toLocaleString()} kinds; ${r.utterancesDropped.toLocaleString()} utterances dropped for a word not in the dictionary.`, `Syllables: ${r.syllabification}.`]} mono={false} />

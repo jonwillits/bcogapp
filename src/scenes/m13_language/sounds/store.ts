@@ -33,12 +33,18 @@ export const TOUR: TourScreen[] = ['time', 'frequency', 'energy', 'patterns', 'p
 export const PREDICTIONS = {
   pitch: { key: 'p1-s1-pitch', question: 'When the pitch of the vowel goes up from 100 Hz to 200 Hz, what will move on the spectrogram?', choices: ['the harmonics', 'the formants', 'both', 'neither'] },
   run1: { key: 'p1-s4-run1', question: 'Trained on ten voices and tested on the two voices it never learned from, what percentage of the held-out syllables will the network label correctly? Chance is 33%.', choices: ['under 50%', '50% to 75%', '75% to 90%', 'over 90%'] },
-  run2: { key: 'p1-s4-run2', question: 'Trained on one pitch only, or on one voice only, and tested on all the rest, will the percentage correct be higher than, about the same as, or lower than in run 1?', choices: ['higher', 'about the same', 'lower'] },
+  run2pitch: { key: 'p1-s4-run2-pitch', question: 'Trained on every voice at its own pitch only, and tested on the shifted pitches and the two held-out voices, will the percentage correct be higher than, about the same as, or lower than in run 1?', choices: ['higher', 'about the same', 'lower'] },
+  run2voice: { key: 'p1-s4-run2-voice', question: 'Trained on one voice at its three pitches only, and tested on the other eleven voices, will the percentage correct be higher than, about the same as, or lower than in run 1?', choices: ['higher', 'about the same', 'lower'] },
+  run2which: { key: 'p1-s4-run2-which', question: 'Which of the two will label more of its test syllables correctly?', choices: ['the network trained on one pitch', 'the network trained on one voice', 'about the same'] },
   run3: { key: 'p1-s4-run3', question: `Run on the ${STEPS} synthetic sounds of Step 3, in what order will the network’s most likely label change from the first sound to the ninth?`, choices: ['b, then d', 'another order', `one label for all ${STEPS}`] },
   // Asked instead of run3's when Step 3 is done (spec §5.4; §11, item 2): the wording is in afterStep3.ts.
   run3After: RUN3_AFTER_STEP3,
 } as const
 export type PredictionKey = keyof typeof PREDICTIONS
+/** The three predictions of run 2, all committed before Train both (Jon, 2026-11-19). */
+export const RUN2_KEYS = ['run2pitch', 'run2voice', 'run2which'] as const satisfies readonly PredictionKey[]
+/** How many networks Train 10 networks trains, one after another, in run 1. */
+export const MANY_NETWORKS = 10
 
 export interface LabelsResult {
   order: Six[]
@@ -75,6 +81,11 @@ export interface RunState {
   net: Classifier | null
 }
 
+/** A run before it trains. */
+function freshRun(): RunState {
+  return { state: 'idle', curve: [], accuracy: null, confusion: null, pass: 0, trainingSize: 0, testSize: 0, net: null }
+}
+
 export class SoundsStore extends StepStore<Step> {
   // Loading
   vowels: Vowels | null = null
@@ -107,8 +118,17 @@ export class SoundsStore extends StepStore<Step> {
   private timers: ReturnType<typeof setTimeout>[] = []
 
   // Step 4
-  run1: RunState = { state: 'idle', curve: [], accuracy: null, confusion: null, pass: 0, trainingSize: 0, testSize: 0, net: null }
-  run2: RunState & { which: 'pitch' | 'voice' | null } = { state: 'idle', curve: [], accuracy: null, confusion: null, pass: 0, trainingSize: 0, testSize: 0, net: null, which: null }
+  run1: RunState = freshRun()
+  /** Run 1's second button (Jon, 2026-11-19): MANY_NETWORKS networks trained one after another on run 1's split, each from its own seed; `k` is the network under training, 1-based. */
+  run1Many: { state: 'idle' | 'training' | 'done'; nets: RunState[]; k: number } = { state: 'idle', nets: [], k: 0 }
+  /** Run 2's two networks (Jon, 2026-11-19): one trained on one pitch, one on one voice, trained one after the other by Train both. */
+  run2pitch: RunState = freshRun()
+  run2voice: RunState = freshRun()
+  /** Run 2 as one state, for whatever reads it as one run: training while either network trains, done when both are. */
+  get run2(): { state: 'idle' | 'training' | 'done' } {
+    const states = [this.run2pitch.state, this.run2voice.state]
+    return { state: states.includes('training') ? 'training' : states.every((x) => x === 'done') ? 'done' : 'idle' }
+  }
   run3: { state: 'idle' | 'done'; shares: number[][] | null } = { state: 'idle', shares: null }
   private trainSeed = 0
 
@@ -150,7 +170,7 @@ export class SoundsStore extends StepStore<Step> {
   protected underWayNow(): UnderWay | null {
     if (this.step === 2 && this.stateOf(2) === 'running') return 'labels'
     if (this.step === 3 && this.block !== null) return 'block'
-    if (this.step === 4 && (this.run1.state === 'training' || this.run2.state === 'training')) return 'run'
+    if (this.step === 4 && (this.run1.state === 'training' || this.run2.state === 'training' || this.run1Many.state === 'training')) return 'run'
     return null
   }
 
@@ -532,17 +552,46 @@ export class SoundsStore extends StepStore<Step> {
   }
 
   train1(): void {
-    if (!this.tokens || !this.predicted('run1') || this.run1.state === 'training') return
+    if (!this.tokens || !this.predicted('run1') || this.run1.state === 'training' || this.run1Many.state === 'training') return
     const { training, test } = splitRun1(this.tokens, this.heldOut)
     this.trainSeed += 1
     void this.trainRun(this.run1, training, test, this.trainSeed)
   }
-  train2(which: 'pitch' | 'voice'): void {
-    if (!this.tokens || !this.predicted('run2') || this.run2.state === 'training') return
-    const { training, test } = which === 'pitch' ? splitOnePitch(this.tokens, this.heldOut) : splitOneVoice(this.tokens, 1)
-    this.run2.which = which
-    this.trainSeed += 1
-    void this.trainRun(this.run2, training, test, this.trainSeed)
+  /** Train 10 networks: MANY_NETWORKS networks on run 1's split, one after another, each from a new seed; available once the single network of run 1 is done. */
+  train1Many(): void {
+    if (!this.tokens || !this.predicted('run1') || this.run1.state !== 'done' || this.run1Many.state === 'training') return
+    const { training, test } = splitRun1(this.tokens, this.heldOut)
+    const many = { state: 'training' as const, nets: [] as RunState[], k: 0 }
+    this.run1Many = many
+    this.changed()
+    void (async () => {
+      for (let k = 0; k < MANY_NETWORKS; k++) {
+        const run = freshRun()
+        many.nets.push(run)
+        many.k = k + 1
+        this.trainSeed += 1
+        await this.trainRun(run, training, test, this.trainSeed)
+        if (this.run1Many !== many) return
+      }
+      this.run1Many = { ...many, state: 'done' }
+      this.changed()
+    })()
+  }
+  /** Every one of run 2's three predictions is committed. */
+  get run2Predicted(): boolean {
+    return RUN2_KEYS.every((k) => this.predicted(k) !== null)
+  }
+  /** Train both: the one-pitch network, then the one-voice network, each on its own split (classifier.ts). */
+  trainBoth(): void {
+    if (!this.tokens || !this.run2Predicted || this.run2.state === 'training') return
+    const pitch = splitOnePitch(this.tokens, this.heldOut)
+    const voice = splitOneVoice(this.tokens, 1)
+    void (async () => {
+      this.trainSeed += 1
+      await this.trainRun(this.run2pitch, pitch.training, pitch.test, this.trainSeed)
+      this.trainSeed += 1
+      await this.trainRun(this.run2voice, voice.training, voice.test, this.trainSeed)
+    })()
   }
   run3Now(): void {
     if (!this.run1.net || !this.continuumPatches || !this.predicted('run3')) return

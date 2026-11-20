@@ -1,4 +1,4 @@
-import { Btn, Choice, Content, FixedLines, GroupLabel, Note, Para, Section, StagePanel } from '../ui'
+import { Btn, Choice, Content, DataTable, FixedLines, GroupLabel, Note, Para, Section, StagePanel } from '../ui'
 import { ReferencePanel } from '../ReferencePanel'
 import { reference } from '../../../sim/language/references'
 import { share } from '../../../sim/language/words/keyMeasure'
@@ -100,7 +100,7 @@ export function Step3Stage({ s }: { s: WordsStore }) {
           <Section n={1} title="The key measure">
             <Para>For each word, its occurrences 2 to 5 are each paired with the occurrence just before: 12 words × 4 = 48 pairs. Each pair is sorted by whether the earlier choice was right or wrong, and the share of the later choices that were correct is computed in each group. Chance is 1 in 5, 20%, since five objects are on the screen.</Para>
             {km ? (
-              <FixedLines lines={[`after a right choice:  ${pct(share(km.afterRight))} correct, of ${km.afterRight.n} pairs`, `after a wrong choice:  ${pct(share(km.afterWrong))} correct, of ${km.afterWrong.n} pairs`, `overall, occurrences 2 to 5: ${pct(km.accuracy)} correct, of 48`]} testId="key-measure" />
+              <DataTable testId="key-measure" rowHeader columns={[{ key: 'what', label: 'Pairs' }, { key: 'correct', label: 'Later choice correct', mono: true }, { key: 'n', label: 'Of how many pairs', mono: true }]} rows={[{ what: 'after a right choice', correct: pct(share(km.afterRight)).trim(), n: km.afterRight.n }, { what: 'after a wrong choice', correct: pct(share(km.afterWrong)).trim(), n: km.afterWrong.n }, { what: 'overall, occurrences 2 to 5', correct: pct(km.accuracy).trim(), n: 48 }]} />
             ) : (
               <Note>Your row is empty until Steps 1 and 2 are done.</Note>
             )}
@@ -120,7 +120,18 @@ export function Step3Stage({ s }: { s: WordsStore }) {
             <RunButton s={s} />
             {gc && ta && (
               <>
-                <FixedLines lines={['                     after right          after wrong         overall', `you                  ${km ? pct(share(km.afterRight)).padEnd(21) : '  —'.padEnd(21)}${km ? pct(share(km.afterWrong)).padEnd(20) : '  —'.padEnd(20)}${km ? pct(km.accuracy) : '  —'}`, `guess and check      ${pct(gc.afterRight.mean)} [${pct(gc.afterRight.lo).trim()}–${pct(gc.afterRight.hi).trim()}]`.padEnd(42) + `${pct(gc.afterWrong.mean)} [${pct(gc.afterWrong.lo).trim()}–${pct(gc.afterWrong.hi).trim()}]`.padEnd(20) + pct(gc.accuracy.mean), `tallying             ${pct(ta.afterRight.mean)} [${pct(ta.afterRight.lo).trim()}–${pct(ta.afterRight.hi).trim()}]`.padEnd(42) + `${pct(ta.afterWrong.mean)} [${pct(ta.afterWrong.lo).trim()}–${pct(ta.afterWrong.hi).trim()}]`.padEnd(20) + pct(ta.accuracy.mean), 'chance                20%                  20%                 20%']} testId="three-rows" />
+                <DataTable
+                  testId="three-rows"
+                  rowHeader
+                  columns={[{ key: 'who', label: '' }, { key: 'right', label: 'After a right choice', mono: true }, { key: 'wrong', label: 'After a wrong choice', mono: true }, { key: 'overall', label: 'Overall', mono: true }]}
+                  rows={[
+                    { who: 'you', right: km ? pct(share(km.afterRight)).trim() : '—', wrong: km ? pct(share(km.afterWrong)).trim() : '—', overall: km ? pct(km.accuracy).trim() : '—' },
+                    { who: 'guess and check', right: `${pct(gc.afterRight.mean).trim()} [${pct(gc.afterRight.lo).trim()}–${pct(gc.afterRight.hi).trim()}]`, wrong: `${pct(gc.afterWrong.mean).trim()} [${pct(gc.afterWrong.lo).trim()}–${pct(gc.afterWrong.hi).trim()}]`, overall: pct(gc.accuracy.mean).trim() },
+                    { who: 'tallying', right: `${pct(ta.afterRight.mean).trim()} [${pct(ta.afterRight.lo).trim()}–${pct(ta.afterRight.hi).trim()}]`, wrong: `${pct(ta.afterWrong.mean).trim()} [${pct(ta.afterWrong.lo).trim()}–${pct(ta.afterWrong.hi).trim()}]`, overall: pct(ta.accuracy.mean).trim() },
+                    { who: 'chance', right: '20%', wrong: '20%', overall: '20%' },
+                  ]}
+                  footer="A bracket holds the range of the middle 90% of the 200 runs."
+                />
                 <Para>{`Guess and check at α = ${gc.param.toFixed(3)} reaches an overall accuracy of ${pct(gc.accuracy.mean).trim()} (the fit aimed at ${pct(s.targetAccuracy).trim()}); tallying at β = ${ta.param.toFixed(2)} reaches ${pct(ta.accuracy.mean).trim()}. After a wrong choice, guess and check is correct ${pct(gc.afterWrong.mean).trim()} of the time and tallying ${pct(ta.afterWrong.mean).trim()}${km ? `; you were correct ${pct(share(km.afterWrong)).trim()} of the time` : ''}.`}</Para>
                 {s.fitted && gc.accuracy.mean < s.targetAccuracy - 0.05 && <Note data-ceiling>{`Guess and check, as stated here, cannot reach an overall accuracy of ${pct(s.targetAccuracy).trim()}: at α = 1 it keeps a wrong pick whenever that object is on the screen again, and its accuracy tops out near ${pct(gc.accuracy.mean).trim()}. The fit chose the value nearest your accuracy.`}</Note>}
                 <Sliders s={s} />

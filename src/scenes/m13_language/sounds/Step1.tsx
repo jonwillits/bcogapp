@@ -51,6 +51,7 @@ function ViewRow({ s, switchable }: { s: SoundsStore; switchable: boolean }) {
   )
 }
 
+/** The screen's text under its pictures: the main paragraphs, then the side text under its own header, in the same column (Jon, 2026-11-19: never in a box of its own, which moved with the zoom). */
 function Text({ screen }: { screen: (typeof TOUR)[number] }) {
   return (
     <>
@@ -59,6 +60,10 @@ function Text({ screen }: { screen: (typeof TOUR)[number] }) {
           {p}
         </Note>
       ))}
+      <div data-tour-aside>
+        <GroupLabel>{TOUR_TITLES[screen]}</GroupLabel>
+        <Content>{TOUR_RIGHT[screen]}</Content>
+      </div>
     </>
   )
 }
@@ -70,16 +75,14 @@ export function Step1Stage({ s }: { s: SoundsStore }) {
   const loaded = s.isLoaded(1)
   const f2 = (name: string) => (vowels ? vowels.sounds[name].formants.slice(0, 2).map((hz, k) => ({ hz, label: `F${k + 1} ${hz} Hz` })) : undefined)
   const ref = useRef<HTMLDivElement>(null)
-  const whole = useWidth(ref, 700)
-  // The side text takes a column of its own when the panel is at least 900 px wide; the pictures get the rest.
-  const aside = whole >= 900
-  const room = aside ? whole - 310 : whole
+  // The pictures take the panel's whole width (Jon, 2026-11-19); the text sits under them.
+  const room = useWidth(ref, 700)
   // Two pictures side by side on Pitch and Voice; three on Vowels, with the map under them.
   const two = Math.max(240, Math.floor((room - 10) / 2))
-  // The three vowels share the room three inRow when each gets at least 220 px; in a narrower room they stack at full width, legible over small (Jon, 2026-11-16: three inRow at 174 px were too small to read). The vowel map sits under them.
+  // The three vowels share the whole width in a row when each gets at least 220 px; in a narrower room they stack at full width, legible over small (Jon, 2026-11-16: three in a row at 174 px were too small to read). The vowel map sits under them.
   const inRow = Math.floor((room - 20) / 3) >= 220
   const three = inRow ? Math.floor((room - 20) / 3) : Math.min(560, room)
-  const one = Math.min(560, room)
+  const one = Math.min(640, room)
   const single = screen === 'time' || screen === 'frequency' || screen === 'energy' || screen === 'patterns'
   return (
     <StagePanel wide testId={`sounds-1-${screen}`}>
@@ -87,7 +90,7 @@ export function Step1Stage({ s }: { s: SoundsStore }) {
         <Choice value={screen} options={TOUR.map((t) => ({ id: t, label: TOUR_TITLES[t] }))} onChange={(t) => s.goTour(t as typeof screen)} />
       </div>
       <div style={{ fontSize: 14, fontWeight: 600 }}>{`Screen ${i + 1} of ${TOUR.length}: ${TOUR_TITLES[screen]}`}</div>
-      <div ref={ref} style={{ display: 'flex', flexDirection: aside ? 'row' : 'column', gap: 10, alignItems: 'flex-start' }} data-tour-layout={aside ? 'side' : 'stacked'}>
+      <div ref={ref} style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'stretch' }} data-tour-layout="stacked">
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1, minWidth: 0 }} data-tour-body>
         {single && (
           <>
@@ -124,10 +127,6 @@ export function Step1Stage({ s }: { s: SoundsStore }) {
             <Text screen={screen} />
           </>
         )}
-      </div>
-      <div style={{ width: aside ? 300 : 'auto', flex: 'none', display: 'flex', flexDirection: 'column', gap: 6, padding: 8, border: '1px solid var(--border)', borderRadius: 8 }} data-tour-aside>
-        <Note>{TOUR_TITLES[screen]}</Note>
-        <Content>{TOUR_RIGHT[screen]}</Content>
       </div>
       </div>
       <Content>{SETTINGS_NOT_MEASUREMENTS_LINE}</Content>

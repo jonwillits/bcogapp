@@ -2,7 +2,7 @@ import { makeRng } from '../../../sim/random'
 import type { ProgressStore } from '../../../sim/language/progress/store'
 import { corpus, nextTokens, start, step as parseStep, accepts, SETTINGS, VOCABULARY, NOUNS, END, kindOf, type ParseState } from '../../../sim/language/predictors/grammar'
 import { makeCountModel, countStream, type CountModel } from '../../../sim/language/predictors/counts'
-import { makeNgram, type Ngram } from '../../../sim/language/predictors/ngram'
+import { makeNgram, predictFromOne, predictFromTwo, type Ngram } from '../../../sim/language/predictors/ngram'
 import { makeProbes, type Probe } from '../../../sim/language/predictors/probes'
 import { loadDesc, loadSnapshot } from '../../../sim/language/predictors/runtime/load'
 import { softmax, srnForward, transformerForward, type SeqDesc, type SeqModel, type TransformerOutput, type SrnOutput } from '../../../sim/language/predictors/runtime/seqNet'
@@ -20,9 +20,9 @@ import type { Step } from './screens'
 
 export const PREDICTIONS = {
   nearest: { key: 'p4-s2-nearest', question: 'Which word will lie closest to cat in the count model, by the similarity of their lists of counts?' },
-  counts: { key: 'p4-s3-counts', question: 'After boys who the dog chases, will the prediction from counts give more probability to the plural verb form (chase, walk, …) or to the singular form (chases, walks, …)?', choices: ['the plural form', 'the singular form'] },
+  counts: { key: 'p4-s3-counts', question: 'After girls who boys chase, which kind of token will the prediction from counts make most probable: a plural verb form (chase, walk, …), a singular verb form (chases, walks, …), or a noun?', choices: ['a plural verb form', 'a singular verb form', 'a noun'] },
   agree: { key: 'p4-s4-agree', question: 'After boys who Mary chases, which verb form will each network give more probability to?', choices: ['both the plural form', 'both the singular form', 'the transformer plural, the recurrent network singular', 'the transformer singular, the recurrent network plural'] },
-  temp: { key: 'p4-s4-temp', question: 'At a temperature of 2.0, will most of the sentences the transformer generates be ones the grammar allows?', choices: ['yes, most', 'no, fewer than half'] },
+  temp: { key: 'p4-s4-temp', question: 'At a temperature of 2.0, will most of the sentences each network generates be ones the grammar allows?', choices: ['yes, for both', 'no, for neither', 'yes for the transformer, no for the recurrent network', 'no for the transformer, yes for the recurrent network'] },
 } as const
 export type PredictionKey = keyof typeof PREDICTIONS
 
@@ -37,6 +37,22 @@ export interface Generated {
   temperature: number
 }
 
+/** One press of Generate a sentence: a sentence from each network at the same temperature (Jon, 2026-11-19). */
+export interface GeneratedPair {
+  temperature: number
+  transformer: Generated
+  srn: Generated
+}
+
+/** The prediction from counts for a prompt (Steps 4 and 5): from the two words before, or from the one word before when the two never occurred together. */
+export interface CountPrediction {
+  probs: number[]
+  /** The words the prediction was computed from: two, or one. */
+  context: string[]
+  from: 'two' | 'one'
+  denominator: number
+}
+
 export class PredictorsStore extends StepStore<Step> {
   readonly sentences: string[][]
   readonly tokens: number[]
@@ -47,16 +63,19 @@ export class PredictorsStore extends StepStore<Step> {
   // Step 1
   shown = 0
 
-  // Step 2
-  windowSize = WINDOW_DEFAULT
-  separate = true
+  // Step 2. The window and the two-list rule are fixed (Jon, 2026-11-19): measured over windows 1 to 8 with the
+  // lists joined or added, cat's five nearest, the tree's groups and the plane were the same to the eye, so the two
+  // settings showed nothing and were cut. The window is WINDOW_DEFAULT; the lists of words before and after are
+  // joined, as the original program did.
+  readonly windowSize = WINDOW_DEFAULT
+  readonly separate = true
   counting: { done: number } | null = null
   model: CountModel | null = null
   clicked: string | null = null
   private countSeq = 0
 
   // Step 3
-  screen3: 'order' | 'predict' | 'point' = 'order'
+  screen3: 'predict' | 'point' = 'predict'
   computed = false
 
   // Step 4
@@ -64,9 +83,8 @@ export class PredictorsStore extends StepStore<Step> {
   final: { transformer: SeqModel; srn: SeqModel } | null = null
   loadError: string | null = null
   prompt: string[] = []
-  anyToken = false
   temperature = 1.0
-  generated: Generated[] = []
+  generated: GeneratedPair[] = []
   private genRng = makeRng(0)
 
   // Step 5
@@ -74,6 +92,7 @@ export class PredictorsStore extends StepStore<Step> {
   snapshots = new Map<string, SeqModel>()
   fixedPrompt: string[] = ['boys', 'who', 'Mary', 'chases']
   loadingSnapshot = false
+  private countAgreement: number[] | null = null
 
   constructor(seed: number, progress: ProgressStore) {
     super(seed, progress, [1, 2, 3, 4, 5], 'predictors')
@@ -120,15 +139,14 @@ export class PredictorsStore extends StepStore<Step> {
 
   // ----------------------------------------------------------- Step 2
 
-  setWindow(w: number): void {
-    this.windowSize = Math.max(1, Math.min(8, Math.round(w)))
-    this.model = null
-    this.changed()
-  }
-  setSeparate(on: boolean): void {
-    this.separate = on
-    this.model = null
-    this.changed()
+  /** The finished count model, counted at once where a later step needs it before Step 2's Count has run (Steps 3 and 5). */
+  ensureCounted(): CountModel {
+    if (this.model && !this.counting) return this.model
+    this.countSeq++
+    const m = countStream(makeCountModel(this.windowSize, this.separate), this.tokens)
+    this.model = m
+    this.counting = null
+    return m
   }
   /** Count the corpus in slices of 2,000 tokens, so that the table fills as it runs and the main thread is never held long. */
   async count(): Promise<void> {
@@ -156,7 +174,7 @@ export class PredictorsStore extends StepStore<Step> {
 
   // ----------------------------------------------------------- Step 3
 
-  goScreen3(s: 'order' | 'predict' | 'point'): void {
+  goScreen3(s: 'predict' | 'point'): void {
     this.screen3 = s
     this.changed()
   }
@@ -189,14 +207,32 @@ export class PredictorsStore extends StepStore<Step> {
     for (const t of this.prompt) st = parseStep(st, t)
     return st
   }
-  /** The tokens the palette offers: the grammar's legal next tokens, or every token with Allow any token. */
+  /** The tokens the palette offers: the whole vocabulary (Jon, 2026-11-19: no Allow any token; the ones the grammar allows next are outlined). */
   get palette(): string[] {
-    if (this.anyToken) return VOCABULARY
+    return VOCABULARY
+  }
+  /** The tokens the grammar allows next after the prompt: none when the prompt is not allowed or is a complete sentence. */
+  get allowedNext(): string[] {
     const st = this.parse
     return st.ok && !st.complete ? nextTokens(st) : []
   }
   get promptAllowed(): boolean {
     return this.parse.ok
+  }
+
+  /**
+   * The prediction from counts for a prompt, by Step 3's rule: from the two
+   * words before, or, when those two words never occurred together in the
+   * corpus, from the one word before. A one-token prompt follows the end mark,
+   * as a sentence's first word does in the stream.
+   */
+  countPrediction(prompt: readonly string[]): CountPrediction | null {
+    if (prompt.length === 0) return null
+    const ctx = prompt.length === 1 ? [END, prompt[0]] : prompt.slice(-2)
+    const two = predictFromTwo(this.ngram, VOCABULARY.indexOf(ctx[0]), VOCABULARY.indexOf(ctx[1]))
+    if (two.denominator > 0) return { probs: two.probs, context: ctx, from: 'two', denominator: two.denominator }
+    const one = predictFromOne(this.ngram, VOCABULARY.indexOf(ctx[1]))
+    return { probs: one.probs, context: [ctx[1]], from: 'one', denominator: one.denominator }
   }
   addToken(t: string): void {
     if (!this.allPredicted4 || this.prompt.length >= GENERATE_MAX - 1 || this.parse.complete) return
@@ -209,10 +245,6 @@ export class PredictorsStore extends StepStore<Step> {
   }
   clearPrompt(): void {
     this.prompt = []
-    this.changed()
-  }
-  setAnyToken(on: boolean): void {
-    this.anyToken = on
     this.changed()
   }
   get allPredicted4(): boolean {
@@ -230,29 +262,48 @@ export class PredictorsStore extends StepStore<Step> {
     return { transformer: transformerForward(models.transformer, ids), srn: srnForward(models.srn, ids) }
   }
 
-  /** Sample one sentence from the transformer at the temperature, from an empty start token: the first token is drawn from the distribution after the end mark, as a sentence begins after one. */
-  generate(): void {
-    if (!this.final || !this.allPredicted4) return
-    const V = VOCABULARY
-    const out: string[] = []
-    let ctx: number[] = [V.indexOf(END)]
-    for (let k = 0; k < GENERATE_MAX; k++) {
-      const o = transformerForward(this.final.transformer, ctx)
-      const p = softmax(o.logits[o.logits.length - 1], this.temperature)
-      let r = this.genRng.next()
-      let pick = p.length - 1
-      for (let j = 0; j < p.length; j++) {
-        r -= p[j]
-        if (r <= 0) {
-          pick = j
-          break
-        }
+  /** One draw from a distribution with the seeded generator. */
+  private draw(p: ArrayLike<number>): number {
+    let r = this.genRng.next()
+    let pick = p.length - 1
+    for (let j = 0; j < p.length; j++) {
+      r -= p[j]
+      if (r <= 0) {
+        pick = j
+        break
       }
+    }
+    return pick
+  }
+
+  /**
+   * Sample one sentence from one network at the temperature. The networks
+   * were trained on sentences from their first word, so the first token is
+   * drawn from how often each token begins a sentence in the corpus (the
+   * counts after the end mark, the temperature applied the same way); every
+   * token after it is drawn from the network's probabilities on the growing
+   * context, until the end mark or GENERATE_MAX tokens.
+   */
+  private sample(kind: 'transformer' | 'srn'): Generated {
+    const V = VOCABULARY
+    const m = this.final![kind]
+    const first = predictFromOne(this.ngram, V.indexOf(END)).probs
+    const out: string[] = [V[this.draw(softmax(first.map((p) => Math.log(p || 1e-12)), this.temperature))]]
+    let ctx: number[] = [V.indexOf(out[0])]
+    while (out.length < GENERATE_MAX && out[out.length - 1] !== END) {
+      const o = kind === 'transformer' ? transformerForward(m, ctx) : srnForward(m, ctx)
+      const pick = this.draw(softmax(o.logits[o.logits.length - 1], this.temperature))
       out.push(V[pick])
-      if (V[pick] === END) break
       ctx = ctx.length >= 31 ? [...ctx.slice(1), pick] : [...ctx, pick]
     }
-    this.generated = [{ tokens: out, allowed: accepts(out), temperature: this.temperature }, ...this.generated].slice(0, 12)
+    return { tokens: out, allowed: accepts(out), temperature: this.temperature }
+  }
+
+  /** Generate a sentence: one from the transformer and one from the recurrent network, at the same temperature, by the same rules (Jon, 2026-11-19). */
+  generate(): void {
+    if (!this.final || !this.allPredicted4) return
+    const pair: GeneratedPair = { temperature: this.temperature, transformer: this.sample('transformer'), srn: this.sample('srn') }
+    this.generated = [pair, ...this.generated].slice(0, 12)
     this.changed()
   }
 
@@ -318,6 +369,30 @@ export class PredictorsStore extends StepStore<Step> {
         out[kind].push(ps.length ? ok / ps.length : 0)
       }
     }
+    return out
+  }
+  /**
+   * Agreement by depth for the prediction from counts, computed once: for
+   * each probe, the two words before the main verb (the last two tokens of
+   * the prefix; a one-token prefix follows the end mark), falling back to the
+   * one word before when the two never occurred together. The agreeing form
+   * must have strictly more probability than the other; a tie, both zero
+   * included, counts as not agreeing. The count model is not trained, so the
+   * numbers are the same at every snapshot.
+   */
+  countAgreementByDepth(): number[] {
+    if (this.countAgreement) return this.countAgreement
+    const out: number[] = []
+    for (const depth of [0, 1, 2, 3]) {
+      const ps = this.probes.filter((p) => p.depth === depth)
+      let ok = 0
+      for (const p of ps) {
+        const c = this.countPrediction(p.prefix)
+        if (c && c.probs[VOCABULARY.indexOf(p.agreeing)] > c.probs[VOCABULARY.indexOf(p.other)]) ok++
+      }
+      out.push(ps.length ? ok / ps.length : 0)
+    }
+    this.countAgreement = out
     return out
   }
 }

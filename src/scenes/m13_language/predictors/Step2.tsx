@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Btn, Choice, Content, FixedLines, GroupLabel, Note, StagePanel, useRef, useWidth } from '../ui'
+import { Btn, Choice, Content, DataTable, FixedLines, GroupLabel, Note, StagePanel, useRef, useWidth } from '../ui'
 import { Dendrogram, Scatter } from '../plots'
 import { ONE_CORPUS_LINE } from '../lines'
 import { VOCABULARY, nounOf, verbOf } from '../../../sim/language/predictors/grammar'
@@ -12,27 +12,19 @@ import { PREDICTIONS, type PredictorsStore } from './store'
 
 /**
  * Step 2's screens (spec §8.3; Jon, 2026-11-17: everything in the center).
- * In order down the panel: the two settings, the prediction (which word
- * lies closest to cat), Count; the whole table of counts as a heat map,
- * filling as the count runs; the similarity demo; the words as points on a
- * plane; the nearest neighbors of a word whose name is pressed; the tree of
- * clusters as a dendrogram. One similarity measure throughout: correlation.
+ * In order down the panel: the prediction (which word lies closest to cat),
+ * Count; the one table of counts as a heat map, filling as the count runs
+ * (a token's row is what came before it, its column what came after it:
+ * Jon, 2026-11-19, in place of two tables that were each other's transpose);
+ * the similarity demo; the words as points on a plane; the nearest neighbors
+ * of a word whose name is pressed; the tree of clusters as a dendrogram.
+ * One similarity measure throughout: correlation. The window and the
+ * two-list rule are fixed (store.ts says why); the settings were cut.
  */
 export function Step2Controls({ s }: { s: PredictorsStore }) {
   const committed = s.predicted('nearest')
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-step2-controls>
-      <GroupLabel>Settings</GroupLabel>
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, width: 220 }}>
-          <Note>Window size</Note>
-          <input type="range" min={1} max={8} step={1} value={s.windowSize} onChange={(e) => s.setWindow(Number(e.target.value))} aria-label="Window size" style={{ width: '100%' }} />
-          <FixedLines lines={[`${s.windowSize} word${s.windowSize === 1 ? '' : 's'}`]} />
-        </div>
-        <label style={{ fontSize: 12, display: 'flex', gap: 6, alignItems: 'center', paddingBottom: 4 }}>
-          <input type="checkbox" checked={s.separate} onChange={(e) => s.setSeparate(e.target.checked)} /> Count words before and after separately
-        </label>
-      </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 8, border: '1px solid var(--border)', borderRadius: 8, maxWidth: 520 }} data-predict="nearest">
         <GroupLabel>Predict first</GroupLabel>
         <Note>{PREDICTIONS.nearest.question}</Note>
@@ -107,17 +99,10 @@ export function Step2Stage({ s }: { s: PredictorsStore }) {
       {!committed && <Note data-awaiting-commit>The table of counts, the demo, the plane, the tree, and the nearest neighbors appear once your prediction above is committed and “Count” has run.</Note>}
       {m && (
         <>
-          <GroupLabel>The table of counts, every word</GroupLabel>
-          <Note>{`Each row is a word and each column another word; a cell is how much the column word occurred ${s.separate ? 'before the row word (the first table) or after it (the second)' : 'within the window of the row word, before or after'}, added up over the corpus with the window’s weights. The table is wider than the panel: it scrolls sideways inside its own frame, and the column of row words stays put. ${s.counting ? 'The table is filling as the window moves along the corpus.' : 'The window has run through the whole corpus.'}`}</Note>
+          <GroupLabel>The table of counts, every token</GroupLabel>
+          <Note>{`Each row is a token and each column another token. A cell is how often the row token came after the column token within the window, added up over the corpus with the window’s weights. So a token’s row is its counts of the tokens before it, and its column, read down, is its counts of the tokens after it. The table is wider than the panel: it scrolls sideways inside its own frame, and the column of row tokens stays put. ${s.counting ? 'The table is filling as the window moves along the corpus.' : 'The window has run through the whole corpus.'}`}</Note>
           <HeatLegend max={max} />
-          {s.separate && <Note style={{ color: 'var(--text)' }}>Words before the row word:</Note>}
-          <CountTable m={m} which={s.separate ? 'before' : 'sum'} max={max} testId="before" />
-          {s.separate && (
-            <>
-              <Note style={{ color: 'var(--text)' }}>Words after the row word:</Note>
-              <CountTable m={m} which="after" max={max} testId="after" />
-            </>
-          )}
+          <CountTable m={m} which="before" max={max} testId="counts" />
           {done && <SimilarityDemo m={m} max={max} />}
         </>
       )}
@@ -135,7 +120,7 @@ export function Step2Stage({ s }: { s: PredictorsStore }) {
             <>
               <GroupLabel>{`The five nearest neighbors of ${s.clicked}`}</GroupLabel>
               <Note>{VIEWS_TEXT.neighbors}</Note>
-              <FixedLines lines={near.map((n, i) => `${i + 1}. ${VOCABULARY[n.word].padEnd(10)} correlation ${n.similarity.toFixed(3)}`)} testId="neighbors" />
+              <DataTable testId="neighbors" columns={[{ key: 'rank', label: 'Rank', mono: true }, { key: 'word', label: 'Token', mono: true, align: 'left' }, { key: 'r', label: 'Correlation', mono: true }]} rows={near.map((n, i) => ({ rank: i + 1, word: VOCABULARY[n.word], r: n.similarity.toFixed(3) }))} />
             </>
           )}
           {committed && near && s.clicked === 'cat' && <Note data-nearest-cat>{`Your prediction for the word closest to cat: ${committed}. The nearest by this count: ${VOCABULARY[near[0].word]}.`}</Note>}
