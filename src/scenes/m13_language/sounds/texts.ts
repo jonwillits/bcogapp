@@ -78,7 +78,7 @@ export const BLOCK1_SCREEN = [
 /** The screen between the blocks, with Start block 2. */
 export const BLOCK2_SCREEN = [
   'Block 1, labeling, is done and saved.',
-  'Block 2 has 28 trials and takes about 7 minutes. On each trial you hear three sounds, one second apart, and then the same three sounds twice more, with a longer pause before each repeat. The first two sounds are different from each other. The third is the same as one of the first two, and your task is to say which. After the last sound, press “3rd sounds like the 1st” or “3rd sounds like the 2nd”, or the key 1 or 2.',
+  'Block 2 has 28 trials and takes about 2 minutes. On each trial you hear three sounds, one second apart. The first two are different from each other. The third is the same as one of the first two, and your task is to say which. After the third sound, press “3rd sounds like the 1st” or “3rd sounds like the 2nd”, or the key 1 or 2.',
   'Many trials will feel like guessing: the two sounds are often very alike. That is expected. When you cannot tell, guess; a guess is the right answer here. There is no feedback.',
   'The block runs in real time. If you leave the page partway, the block starts again from its first trial. Block 2 starts only when you press “Start block 2”.',
 ]

@@ -8,6 +8,7 @@ import type { SeqModel } from '../../../sim/language/predictors/runtime/seqNet'
 import { STEP5_PANEL } from './texts'
 import { CountNote, PromptPalette, chartColumns } from './Step4'
 import { SENTENCES_PER_UPDATE, type PredictorsStore } from './store'
+import type { Scores } from '../../../sim/language/predictors/scoring'
 
 /**
  * Step 5's screens (spec §8.6; Jon, 2026-11-17: everything in the center;
@@ -63,10 +64,16 @@ function Plane({ title, plane, width, testId }: { title: string; plane: [number,
   )
 }
 
-/** One predictor's row of every snapshot: held-out accuracy and agreement by depth. */
-function SnapshotsTable({ title, snapshots, testId }: { title: string; snapshots: { updates: number; heldOutAccuracy: number; agreementByDepth: Record<string, number> }[]; testId: string }) {
-  const columns: Column[] = [{ key: 'updates', label: 'updates', mono: true }, { key: 'acc', label: 'held-out accuracy', mono: true }, ...DEPTHS.map((d) => ({ key: `d${d}`, label: `depth ${d}`, mono: true }))]
-  const rows = snapshots.map((sn) => ({ updates: sn.updates.toLocaleString(), acc: pct(sn.heldOutAccuracy), ...Object.fromEntries(DEPTHS.map((d) => [`d${d}`, pct(sn.agreementByDepth[String(d)])])) }))
+/** One predictor's row of every snapshot (Jon, 2026-11-20): the three scores on the held-out and the training sentences, then agreement by depth on the probes. */
+type SnapshotRow = { updates: number; scores?: { heldOut: Scores; training: Scores }; agreementByDepth: Record<string, number> }
+function SnapshotsTable({ title, snapshots, testId }: { title: string; snapshots: SnapshotRow[]; testId: string }) {
+  const sets = [['heldOut', 'held-out'], ['training', 'training']] as const
+  const columns: Column[] = [{ key: 'updates', label: 'updates', mono: true }, ...sets.flatMap(([k, label]) => [{ key: `${k}.agreement`, label: `${label}: agreement`, mono: true }, { key: `${k}.kind`, label: `${label}: right kind`, mono: true }, { key: `${k}.exact`, label: `${label}: exact`, mono: true }]), ...DEPTHS.map((d) => ({ key: `d${d}`, label: `probes, depth ${d}`, mono: true }))]
+  const rows = snapshots.map((sn) => ({
+    updates: sn.updates.toLocaleString(),
+    ...Object.fromEntries(sets.flatMap(([k]) => (['agreement', 'kind', 'exact'] as const).map((m) => [`${k}.${m}`, sn.scores ? pct(sn.scores[k][m]) : '—']))),
+    ...Object.fromEntries(DEPTHS.map((d) => [`d${d}`, pct(sn.agreementByDepth[String(d)])])),
+  }))
   return <DataTable columns={columns} rows={rows} rowHeader topHeader={title} testId={testId} />
 }
 
@@ -99,7 +106,7 @@ export function Step5Stage({ s }: { s: PredictorsStore }) {
   const srnPlane = useMemo(() => (models ? principalPlane(WORDS.map((w) => outputVector(models.srn, VOCABULARY.indexOf(w)))) : null), [models])
   const plane = useMemo(() => (models ? principalPlane(WORDS.map((w) => outputVector(models.transformer, VOCABULARY.indexOf(w)))) : null), [models])
   /** The count model's row of every snapshot, computed here: the networks' rows were measured when they were trained. */
-  const countSnapshots = useMemo(() => s.snapshotUpdates.map((u) => { const c = s.countStateAt(u); return { updates: u, heldOutAccuracy: c.heldOutAccuracy, agreementByDepth: Object.fromEntries(DEPTHS.map((d) => [String(d), c.agreement[d]])) } }), [s])
+  const countSnapshots = useMemo((): SnapshotRow[] => s.snapshotUpdates.map((u) => { const c = s.countStateAt(u); return { updates: u, scores: c.scores, agreementByDepth: Object.fromEntries(DEPTHS.map((d) => [String(d), c.agreement[d]])) } }), [s])
   const top = (probs: ArrayLike<number>) =>
     VOCABULARY.map((t, j) => ({ label: t, value: probs[j], color: kindOf(t) === 'verb' ? (verbOf(t)!.number === 'pl' ? 'var(--actuator)' : 'var(--sensor)') : 'var(--accent)' }))
       .sort((a, b) => b.value - a.value)
@@ -114,7 +121,8 @@ export function Step5Stage({ s }: { s: PredictorsStore }) {
     { key: 'transformer', label: 'the transformer', mono: true },
   ]
   const all = s.training.length
-  const seenLine = cs.sentences < all ? `The count model at this snapshot: counts over the first ${cs.sentences.toLocaleString()} training sentences, the ones the networks had seen after ${updates.toLocaleString()} updates, ${SENTENCES_PER_UPDATE} sentences per update.` : `The count model at this snapshot: counts over all ${all.toLocaleString()} training sentences. The networks had seen them all by ${Math.ceil(all / SENTENCES_PER_UPDATE).toLocaleString()} updates, ${SENTENCES_PER_UPDATE} sentences per update, and went through them again and again; a second pass changes nothing in the count model, so from here on it is the same at every snapshot.`
+  // The two forms are kept near one length, and the box is three lines tall, so nothing under it moves as the slider moves (Jon, 2026-11-20).
+  const seenLine = cs.sentences < all ? `The count model at this snapshot: counts over the first ${cs.sentences.toLocaleString()} training sentences, the ones the networks had seen after ${updates.toLocaleString()} updates, ${SENTENCES_PER_UPDATE} sentences per update.` : `The count model at this snapshot: counts over all ${all.toLocaleString()} training sentences, which the networks had seen by ${Math.ceil(all / SENTENCES_PER_UPDATE).toLocaleString()} updates; later passes change nothing in a count, so from here on it is the same at every snapshot.`
   return (
     <StagePanel wide testId="predictors-5">
       <div ref={ref} style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0, width: '100%' }}>
@@ -140,7 +148,9 @@ export function Step5Stage({ s }: { s: PredictorsStore }) {
               </Btn>
             </div>
             <PromptPalette tokens={s.palette} allowed={allowed} complete={parse.complete} promptAllowed={parse.ok} onAdd={(t) => s.addToken5(t)} />
-            <Note data-count-seen>{seenLine}</Note>
+            <Note data-count-seen style={{ minHeight: `${3 * 1.45}em` }}>
+              {seenLine}
+            </Note>
             {out && count && (
               <>
                 <GroupLabel>The next token after the current prompt, at this snapshot</GroupLabel>
@@ -183,13 +193,13 @@ export function Step5Stage({ s }: { s: PredictorsStore }) {
             <DataTable columns={agreeColumns} rows={DEPTHS.map((d) => ({ depth: String(d), counts: pct(cs.agreement[d]), srn: pct(agree.srn[d]), transformer: pct(agree.transformer[d]) }))} rowHeader testId="agreement-table" footer={`At this snapshot, after ${updates.toLocaleString()} updates; the share of 50 probes at each depth.`} />
             {desc && (
               <>
-                <GroupLabel>Every snapshot: held-out accuracy and agreement by depth</GroupLabel>
+                <GroupLabel>Every snapshot: three scores on the held-out and the training sentences, and agreement by depth on the probes</GroupLabel>
                 <div style={{ display: 'flex', gap: GAP, flexWrap: 'wrap', alignItems: 'flex-start' }} data-all-snapshots>
                   <SnapshotsTable title="The count model" snapshots={countSnapshots} testId="all-snapshots-counts" />
                   <SnapshotsTable title="The recurrent network" snapshots={desc.srn.snapshots} testId="all-snapshots-srn" />
                   <SnapshotsTable title="The transformer" snapshots={desc.transformer.snapshots} testId="all-snapshots-transformer" />
                 </div>
-                <Note>{`Held-out accuracy is the share of next tokens a predictor gave the most probability to, over every token after the first in the ${s.heldOut.length.toLocaleString()} held-out sentences, which no model learned from. The networks’ numbers were measured when they were trained; the count model’s are computed here, by the same rule, from the sentences counted at each snapshot. Agreement by depth is the share of the 50 probes at each depth, as above. The grammar is small, so ${pct(0.635)} of the held-out sentences also occur somewhere among the training sentences; that holds for every predictor alike.`}</Note>
+                <Note>{`Three scores on the ${s.heldOut.length.toLocaleString()} held-out sentences, which no model learned from, and on the ${s.training.length.toLocaleString()} training sentences, over every token after a sentence’s first, predicted from the tokens before it. Agreement: over the verbs, the share for which the most probable verb form is in the number the subject requires. Right kind: the share for which the most probable token is of a kind the grammar allows there, a noun, a verb, “who” or the end mark. Exact: the share for which the most probable token is the very token that comes next; at most positions the grammar leaves many tokens equally possible, so no predictor can push this far past 40%. The networks’ scores were measured when they were trained; the count model’s are computed here, by the same rule, from the sentences counted at each snapshot. The last four columns are the share of the 50 probes at each depth, as above. The grammar is small, so ${pct(0.635)} of the held-out sentences also occur somewhere among the training sentences; that holds for every predictor alike.`}</Note>
               </>
             )}
             <GroupLabel>Three planes: the count model’s numbers for each token, and the two networks’ at this snapshot</GroupLabel>

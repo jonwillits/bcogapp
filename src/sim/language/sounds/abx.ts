@@ -18,10 +18,8 @@ import type { Rng } from '../../random'
  *   800 ms after the answer.
  *   Block 2, telling apart: ABX triads over the 7 two-step pairs (1, 3) to
  *   (7, 9), each in the four orders ABA, ABB, BAA, BAB: 28 triads in a
- *   seeded order, the sounds of a triad 1 s apart (p. 360). Each triad
- *   plays TRIAD_REPEATS times, TRIAD_REPEAT_GAP_S apart (Jon, walk,
- *   2026-11-20; the original played each once). With 0.3 s sounds a trial's
- *   plays take 11.7 s, so the block takes about 7 minutes.
+ *   seeded order, the sounds of a triad 1 s apart (p. 360), each triad
+ *   played once (Jon, 2026-11-20: the three plays are block 1's only).
  *
  * The analysis: labeling curves (the share of each sound's 6 presentations
  * labeled b or d); discrimination (the share of each pair's 4 triads
@@ -35,9 +33,6 @@ export const LABELING_GAP_MS = 800
 /** How many times a labeling trial plays its sound, and the silence between the plays (Jon, 2026-11-20). */
 export const LABELING_REPEATS = 3
 export const REPEAT_GAP_S = 0.5
-/** How many times a telling-apart trial plays its triad, and the silence between the plays, longer than the triad's own interval so the three plays stay three groups (Jon, 2026-11-20). */
-export const TRIAD_REPEATS = 3
-export const TRIAD_REPEAT_GAP_S = 1.5
 export const PAIRS: [number, number][] = Array.from({ length: STEPS - 2 }, (_, i) => [i + 1, i + 3])
 export const ORDERS = ['ABA', 'ABB', 'BAA', 'BAB'] as const
 export type Order = (typeof ORDERS)[number]

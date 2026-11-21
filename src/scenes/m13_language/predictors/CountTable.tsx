@@ -12,9 +12,11 @@ import { SIMILARITY_TEXT } from './texts'
  * rows scroll down. Not built from FixedLines; the scroll container has
  * `flexShrink: 0` so a capped column cannot squeeze it to nothing.
  *
- * Under the table, the similarity demo: four words' lists as strips of heat
- * cells and the 4 × 4 matrix of their correlations, the one similarity
- * measure the step uses.
+ * Under the table, the similarity demo: ten words' lists as strips of heat
+ * cells and the 10 × 10 matrix of their correlations, the one similarity
+ * measure the step uses (Jon, 2026-11-20: two people, two small animals,
+ * two foods, four verbs). The column labels sit at the right of their
+ * cells, over the numbers (Jon, 2026-11-20).
  */
 
 /** The share of the scale a count fills: the square root of its share of the largest count. */
@@ -56,7 +58,7 @@ export function CountTable({ m, which, max, testId }: { m: CountModel; which: 'b
             <th style={{ position: 'sticky', top: 0, left: 0, zIndex: 3, background: STICKY_BG, width: HEAD_W, minWidth: HEAD_W, textAlign: 'left', padding: '2px 6px', fontWeight: 400, color: 'var(--text-muted)', verticalAlign: 'bottom', borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)' }}>row word</th>
             {V.map((w) => (
               <th key={w} style={{ position: 'sticky', top: 0, zIndex: 2, background: STICKY_BG, width: CELL_W, minWidth: CELL_W, height: HEAD_H, padding: '2px 0', fontWeight: 400, color: 'var(--text)', verticalAlign: 'bottom', borderBottom: '1px solid var(--border)' }}>
-                <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', margin: '0 auto', whiteSpace: 'nowrap' }}>{w}</div>
+                <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', margin: '0 3px 0 auto', whiteSpace: 'nowrap' }}>{w}</div>
               </th>
             ))}
           </tr>
@@ -101,10 +103,10 @@ export function HeatLegend({ max }: { max: number }) {
   )
 }
 
-/** The four words of the similarity demo: two people, a large animal, a food. */
-export const DEMO_WORDS = ['boy', 'girl', 'dog', 'cookie']
+/** The ten words of the similarity demo (Jon, 2026-11-20): two people, two small animals, two foods, two intransitive verbs, two transitive-or-optional verbs. */
+export const DEMO_WORDS = ['boy', 'girl', 'mouse', 'bird', 'cookie', 'sandwich', 'walks', 'sleeps', 'chases', 'sees']
 
-/** The similarity demo: each word's list of counts as a strip of heat cells, then the 4 × 4 matrix of correlations. */
+/** The similarity demo: each word's list of counts as a strip of heat cells, then the matrix of correlations. */
 export function SimilarityDemo({ m, max, words = DEMO_WORDS }: { m: CountModel; max: number; words?: string[] }) {
   const V = m.vocab
   const lists = words.map((w) => embedding(m, V.indexOf(w)))

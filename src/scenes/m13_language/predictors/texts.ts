@@ -45,9 +45,9 @@ export function groupsInWords(cats: readonly Category[]): string {
 /** The grammar as rewrite rules, each with its reading in plain words. The rule is printed in a monospace block; the reading beside it. */
 export const REWRITE_RULES: { rule: string; reading: string }[] = [
   { rule: 'S  → NP VP .', reading: 'a sentence is a noun phrase, then a verb phrase, then the end mark' },
-  { rule: 'NP → N  |  N who RC', reading: 'a noun phrase is a noun alone, or a noun followed by who and a relative clause' },
+  { rule: 'NP → N  |  N who RC', reading: 'a noun phrase is a noun alone, or a noun followed by “who” and a relative clause' },
   { rule: 'VP → V  |  V NP', reading: 'a verb phrase is a verb alone, or a verb and the noun phrase that is its object' },
-  { rule: 'RC → VP  |  NP V', reading: 'a relative clause is a verb phrase, so the noun before who is its subject (boy who chases dogs), or a noun phrase and a verb, so the noun before who is its object (boy who dogs chase)' },
+  { rule: 'RC → VP  |  NP V', reading: 'a relative clause is a verb phrase, so the noun before “who” is its subject (“boy who chases dogs”), or a noun phrase and a verb, so the noun before “who” is its object (“boy who dogs chase”)' },
 ]
 
 /** Every symbol in the rules, defined. */
@@ -59,15 +59,15 @@ export const GRAMMAR_SYMBOLS: { symbol: string; meaning: string }[] = [
   { symbol: 'VP', meaning: 'a verb phrase: a verb, with its object or not' },
   { symbol: 'N', meaning: 'one noun from the vocabulary, a person, an animal or a thing, in its singular or its plural form' },
   { symbol: 'V', meaning: 'one verb from the vocabulary, in its singular or its plural form' },
-  { symbol: 'RC', meaning: 'a relative clause: what follows who and says more about the noun before it' },
+  { symbol: 'RC', meaning: 'a relative clause: what follows “who” and says more about the noun before it' },
   { symbol: '.', meaning: 'the end mark, the token that ends every sentence' },
 ]
 
 /** The rules the rewrite rules leave out, in plain sentences. */
 export const GRAMMAR_RULES = [
-  'N and V agree in number: a singular noun takes the singular verb form (boy walks) and a plural noun the plural form (boys walk). The V of the sentence’s verb phrase agrees with the N that begins the sentence’s noun phrase, even when a relative clause comes between them (boys who Mary chases walk). In RC → VP, the verb agrees with the noun before who; in RC → NP V, it agrees with the noun inside the clause.',
+  'N and V agree in number: a singular noun takes the singular verb form (“boy walks”) and a plural noun the plural form (“boys walk”). The V of the sentence’s verb phrase agrees with the N that begins the sentence’s noun phrase, even when a relative clause comes between them (“boys who Mary chases walk”). In RC → VP, the verb agrees with the noun before “who”; in RC → NP V, it agrees with the noun inside the clause.',
   'Which verbs take an object, and which nouns may be a verb’s subject or its object, are in the list of verbs above. A verb that needs an object always takes VP → V NP; a verb that never has one always takes VP → V; a verb that may have one takes either, and the object’s noun is drawn from the groups the list names.',
-  'The subject of a sentence is always a person or an animal, and only a person or an animal can be followed by who. A relative clause can contain another, up to three deep. There is no article: no the or a.',
+  'The subject of a sentence is always a person or an animal, and only a person or an animal can be followed by “who”. A relative clause can contain another, up to three deep. There is no article: no “the” or “a”.',
 ]
 
 export const STEP2_PANEL = [
@@ -78,23 +78,23 @@ export const STEP2_PANEL = [
 /** The one similarity measure of Step 2, defined in plain words (Jon, 2026-11-17: correlation, not cosine, because it is easier to explain). */
 export const SIMILARITY_TEXT = [
   'How similar are two words? Take their two lists of counts, one count per column of the table, and compute the correlation of the two lists: how the two rise and fall together over the same positions. A correlation of 1 means the two lists rise and fall exactly in step, 0 means no relation, and −1 means exactly opposite.',
-  'To compute it, each list is centered on its own mean (the mean of the list is subtracted from every count in it) and divided by its own spread, so that a frequent word and a rare word are compared on the same footing; then the products of the two centered, scaled lists are averaged, position by position. The four strips below show four words’ lists in the table’s colors, shrunk to fit; the matrix under them shows the correlation of every pair.',
+  'To compute it, each list is centered on its own mean (the mean of the list is subtracted from every count in it) and divided by its own spread, so that a frequent word and a rare word are compared on the same footing; then the products of the two centered, scaled lists are averaged, position by position. The strips below show ten words’ lists in the table’s colors, shrunk to fit; the matrix under them shows the correlation of every pair.',
 ]
 
 export const VIEWS_TEXT = {
   plane: 'The plane: each word’s list of counts is a point in a space with one dimension per count. The plane shows only the two directions in which the words’ lists differ most (the first two principal components), after each list is scaled to the same length, so distances on the plane are a flattened picture of distances in the full space.',
   tree: 'The tree: words are joined into clusters by average linkage on correlation. The two words whose lists have the highest correlation join first; a cluster joins the cluster whose members have, on average, the highest correlation with its own. A join is drawn at a height of one minus that average correlation, so a low join is a close pair and a high join a distant one. Each noun is a leaf at the left; follow its line to the right to the join where it meets the rest. Leaf colors: people blue, animals orange, things green.',
-  neighbors: 'The nearest neighbors: for the word whose name you pressed, the five words whose lists have the highest correlation with its list, computed as the demo above computes it. A correlation of 1 means two lists rise and fall exactly in step; 0 means no relation.',
+  neighbors: 'The nearest neighbors: for the word chosen in the menu, the five words whose lists have the highest correlation with its list, computed as the demo above computes it. A correlation of 1 means two lists rise and fall exactly in step; 0 means no relation.',
 }
 
 /** Step 3's one screen of predictions (Jon, 2026-11-19): three prompts side by side, each with the prediction from the one word before and from the two words before. */
 export const STEP3_PREDICT = [
   'The predictor gives a probability to each possible next token in two ways. From the one token before: the count of that token followed by the candidate, divided by the count of that token followed by anything. From the two tokens before: the count of those two followed by the candidate, divided by the count of those two followed by anything. The panel prints the division behind each number.',
-  'Three prompts stand side by side. In the grammar, the next token after each of them is a plural verb form, because the subject of each is girls, or who, which opens one more clause. Under each prompt, the line says what the grammar allows next, then the two predictions from counts appear as bars, one for every token with a count.',
+  'Three prompts stand side by side. In the grammar, the next token after each of them is a plural verb form, because the subject of each is “girls”, or “who”, which opens one more clause. Under each prompt, the line says what the grammar allows next, then the two predictions from counts appear as bars, one for every token with a count.',
 ]
 
 export const STEP3_ONE_POINT = [
-  'In the count model, a token has one list of counts, one point, whatever sentence it is in. Here is chases in two sentences, boys who Mary chases walk and Mary chases boys, and the same point for both. The order of the tokens in a sentence is not in the list either: dog chases cat and cat chases dog add to the same rows and columns of the table. In Step 4, the transformer computes a different list of numbers for chases in each of these sentences.',
+  'In the count model, a token has one list of counts, one point, whatever sentence it is in. Here is “chases” in two sentences, “boys who Mary chases walk” and “Mary chases boys”, and the same point for both. The order of the tokens in a sentence is not in the list either: “dog chases cat” and “cat chases dog” add to the same rows and columns of the table. In Step 4, the transformer computes a different list of numbers for “chases” in each of these sentences.',
 ]
 
 /** Step 4's text: [0] above the two drawings, full width; [1] under the recurrent network's drawing; [2] under the transformer's (Jon, 2026-11-19: each text grouped with its picture). */
@@ -108,7 +108,7 @@ export const STEP5_PANEL = [
   'Eight snapshots of each network were saved during training: before any update, and after 50, 200, 500, 1,000, 3,000, 10,000, and 20,000 updates of the weights. An update is one step of learning on a batch of 32 sentences. The slider moves through them.',
   'At each snapshot, three charts show the probability of each token as the next one after the current prompt: from the counts of Step 3, by the rule of that step (from the two words before, or from the one word before when the two never occurred together), from the recurrent network, and from the transformer. The prompt starts as the beginning of a held-out sentence; “Change the prompt” draws another, and the palette of tokens under it builds any prompt you like, as in Step 4.',
   'The count model follows the slider. One update is one step of learning on 32 sentences, so after 50 updates the networks had seen 1,600 of the 9,000 training sentences, and after 200 updates 6,400; the count model at those snapshots has counted only those sentences. By 500 updates the networks had seen every training sentence, and the count model has counted them all. The networks then go through the sentences again and again, about seventy times by the last snapshot; a second pass changes nothing in a count, so from the third snapshot on the count model is the same.',
-  'Agreement by depth: for a set of probe sentences cut off just before the main verb, with 0, 1, 2, or 3 relative clauses between the subject and the verb, the share on which a predictor gives more probability to the verb form that agrees with the subject than to the form that does not. In every probe, the noun just before the verb differs in number from the subject, so a predictor that went by the nearest noun would get every probe wrong. There are 50 probes at each depth. The plot has three lines: the prediction from counts and the two networks, each at the snapshot. Under it, three tables give every snapshot’s held-out accuracy and agreement by depth: the share of next tokens each predictor gets right on the 1,000 held-out sentences, which no model learned from.',
+  'Agreement by depth: for a set of probe sentences cut off just before the main verb, with 0, 1, 2, or 3 relative clauses between the subject and the verb, the share on which a predictor gives more probability to the verb form that agrees with the subject than to the form that does not. In every probe, the noun just before the verb differs in number from the subject, so a predictor that went by the nearest noun would get every probe wrong. There are 50 probes at each depth. The plot has three lines: the prediction from counts and the two networks, each at the snapshot. Under it, three tables give each predictor three scores at every snapshot, on the 1,000 held-out sentences, which no model learned from, and on the 9,000 training sentences. Agreement: over the verbs in the sentences, the share for which the predictor’s most probable verb form is in the number the subject requires. Right kind: over every token after a sentence’s first, the share for which the predictor’s most probable token is of a kind the grammar allows there, a noun, a verb, “who” or the end mark. Exact: the share for which the most probable token is the very token that comes next. No predictor can push the exact score far past 40%, because at most positions the grammar leaves many tokens equally possible, so the first two scores say more about what a predictor has learned.',
   'The reading reports a network trained to predict the next word whose representation of nesting degraded after about three levels (§13.2.8). The depth panel shows how each network here does at each depth, at each snapshot.',
   'The three planes at the bottom are three sets of numbers for the same nouns and verbs, each projected onto its own two directions of greatest difference: the count model’s lists of counts from Step 2, and each network’s output weights, the numbers its final state is read against to score each token as the next one, 64 for the recurrent network and 32 for the transformer. All three change with the slider: the count model’s through the first snapshots, the networks’ throughout.',
 ]

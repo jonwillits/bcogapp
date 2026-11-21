@@ -17,7 +17,8 @@ import { PREDICTIONS, TEMPERATURES, type CountPrediction, type PredictorsStore }
  * the prediction from counts beside the two networks, in the order count
  * model, recurrent network, transformer everywhere (Jon, 2026-11-20); the palette offers
  * the whole vocabulary with the grammar's next tokens outlined; Generate a
- * sentence samples from both networks at once). The two predictions and
+ * sentence samples from both networks at once; 2026-11-20: the one
+ * prediction, the temperature line, no size lines). The prediction and
  * Commit above the palette; attention as lines from the last token back to
  * each earlier token per layer and computation; the same word in two
  * sentences; Temperature and Generate a sentence beside the generated
@@ -27,34 +28,21 @@ const groupOf = (t: string) => (t === WHO ? 'who' : t === END ? 'the end mark' :
 const GROUPS = ['nouns', 'verbs', 'who', 'the end mark']
 const GAP = 16
 
-/** The two predictions, asked once, above what they predict. */
+/** The one prediction, asked once, above what it predicts (Jon, 2026-11-20: the temperature prediction was cut). */
 export function Step4Predictions({ s }: { s: PredictorsStore }) {
   const ok = s.allPredicted4
+  const committed = s.predicted('agree')
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-step4-controls>
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-        {(['agree', 'temp'] as const).map((k) => {
-          const committed = s.predicted(k)
-          return (
-            <div key={k} style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 8, border: '1px solid var(--border)', borderRadius: 8, flex: '1 1 260px', minWidth: 0 }} data-predict={k}>
-              <GroupLabel>Predict first</GroupLabel>
-              <Note>{PREDICTIONS[k].question}</Note>
-              {committed ? <FixedLines lines={[`Committed: ${committed}`]} mono={false} /> : <Choice value={s.drafts[k] ?? null} options={PREDICTIONS[k].choices.map((c) => ({ id: c, label: c }))} onChange={(c) => s.draft(k, c)} />}
-            </div>
-          )
-        })}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: 8, border: '1px solid var(--border)', borderRadius: 8, maxWidth: 560, minWidth: 0 }} data-predict="agree">
+        <GroupLabel>Predict first</GroupLabel>
+        <Note>{PREDICTIONS.agree.question}</Note>
+        {committed ? <FixedLines lines={[`Committed: ${committed}`]} mono={false} /> : <Choice value={s.drafts.agree ?? null} options={PREDICTIONS.agree.choices.map((c) => ({ id: c, label: c }))} onChange={(c) => s.draft('agree', c)} />}
       </div>
       {!ok && (
         <div>
-          <Btn
-            primary
-            onClick={() => {
-              s.commit('agree')
-              s.commit('temp')
-            }}
-            disabled={!s.drafts.agree || !s.drafts.temp}
-          >
-            Commit my predictions
+          <Btn primary onClick={() => s.commit('agree')} disabled={!s.drafts.agree}>
+            Commit my prediction
           </Btn>
         </div>
       )}
@@ -204,12 +192,11 @@ export function Step4Stage({ s }: { s: PredictorsStore }) {
             <Note style={{ color: 'var(--text)' }}>{STEP4_MODELS[2]}</Note>
           </div>
         </div>
-        {s.descs && <FixedLines lines={[`recurrent network: ${s.descs.srn.params.toLocaleString()} weights; held-out next-token accuracy ${(100 * s.descs.srn.snapshots[s.descs.srn.snapshots.length - 1].heldOutAccuracy).toFixed(1)}% after ${s.descs.srn.snapshots[s.descs.srn.snapshots.length - 1].updates.toLocaleString()} updates`, `transformer: ${s.descs.transformer.params.toLocaleString()} weights; held-out next-token accuracy ${(100 * s.descs.transformer.snapshots[s.descs.transformer.snapshots.length - 1].heldOutAccuracy).toFixed(1)}% after ${s.descs.transformer.snapshots[s.descs.transformer.snapshots.length - 1].updates.toLocaleString()} updates`]} testId="model-sizes" scroll />}
         {s.loadError && <Note data-load-error>{s.loadError}</Note>}
         {!s.final && !s.loadError && <Note data-loading>The two networks are loading.</Note>}
         <Content>{TRAINED_BEFORE_LINE}</Content>
         <Step4Predictions s={s} />
-        {!ok && <Note data-awaiting-commit>The palette, the distributions, and the attention appear once your two predictions above are committed.</Note>}
+        {!ok && <Note data-awaiting-commit>The palette, the distributions, and the attention appear once your prediction above is committed.</Note>}
         {ok && (
           <div data-reveal="networks" style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
             <GroupLabel>Your prompt</GroupLabel>
@@ -242,14 +229,14 @@ export function Step4Stage({ s }: { s: PredictorsStore }) {
             {two && two[0] && two[1] && (
               <>
                 <GroupLabel>The same word in two sentences</GroupLabel>
-                <Note>The transformer’s numbers for chases at its last layer, in boys who Mary chases walk (position 4) and in Mary chases boys (position 2): the first 12 of the 32 numbers, as bars. In the count model of Step 3, chases had one list whatever the sentence.</Note>
+                <Note>The transformer’s numbers for “chases” at its last layer, in “boys who Mary chases walk” (position 4) and in “Mary chases boys” (position 2): the first 12 of the 32 numbers, as bars. In the count model of Step 3, “chases” had one list whatever the sentence.</Note>
                 <div style={{ display: 'flex', gap: GAP, flexWrap: 'wrap' }} data-same-word>
                   {[
                     ['boys who Mary chases walk', chasesIn(two[0].transformer, 3)],
                     ['Mary chases boys', chasesIn(two[1].transformer, 1)],
                   ].map(([title, vals]) => (
                     <div key={title as string}>
-                      <Note>{title as string}</Note>
+                      <Note>{`“${title as string}”`}</Note>
                       <BarChart bars={(vals as number[]).map((v, i) => ({ label: `n${i + 1}`, value: Math.abs(v), color: v >= 0 ? 'var(--accent)' : 'var(--avoid)' }))} width={240} rowH={11} format={(v) => v.toFixed(2)} />
                     </div>
                   ))}
@@ -258,7 +245,8 @@ export function Step4Stage({ s }: { s: PredictorsStore }) {
               </>
             )}
             <GroupLabel>Generated sentences</GroupLabel>
-            <Note>{`“Generate a sentence” samples one sentence from each network at the temperature set beside it. The networks were trained on sentences from their first word, so the first token is drawn from how often each token begins a sentence in the corpus; every token after it is drawn from the network’s probabilities, one at a time, until the end mark or 32 tokens. A low temperature favors the most probable tokens; a high one flattens the probabilities. Each sentence is marked with whether the grammar allows it. The newest pair is at the top.`}</Note>
+            <Note>{`“Generate a sentence” samples one sentence from each network at the temperature set beside it. The networks were trained on sentences from their first word, so the first token is drawn from how often each token begins a sentence in the corpus; every token after it is drawn from the network’s probabilities, one at a time, until the end mark or 32 tokens. Each sentence is marked with whether the grammar allows it. The newest pair is at the top.`}</Note>
+            <Note data-temperature-line>{`The temperature sets how the network’s probabilities are used when a token is drawn. At 1.0 each token is drawn with the probability the network gives it. Below 1.0 the probabilities are sharpened, so the most probable tokens are drawn more often; at 0.2 the most probable token is drawn almost every time, and the sentence comes out the same again and again. Above 1.0 the probabilities are flattened, so improbable tokens are drawn more often; at 2.0 many sentences break the grammar.`}</Note>
             <div style={{ display: 'flex', gap: GAP, alignItems: 'flex-start', flexWrap: 'wrap' }}>
               <GenerateControls s={s} />
               <div style={{ display: 'flex', gap: GAP, flexWrap: w >= 640 ? 'nowrap' : 'wrap', flex: '1 1 400px', minWidth: 0 }} data-generated-columns>
@@ -267,7 +255,7 @@ export function Step4Stage({ s }: { s: PredictorsStore }) {
               </div>
             </div>
             <Content>{NOT_ENGLISH_LINE}</Content>
-            <Note>{`Your predictions: after boys who Mary chases, ${s.predicted('agree')}. Most sentences allowed at a temperature of 2.0: ${s.predicted('temp')}.`}</Note>
+            <Note>{`Your prediction: after “boys who Mary chases”, ${s.predicted('agree')}.`}</Note>
             <ReferencePanel reference={reference('elman-1991')} />
             <ReferencePanel reference={reference('mao-2025')} />
           </div>

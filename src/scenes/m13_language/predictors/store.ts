@@ -2,8 +2,9 @@ import { makeRng } from '../../../sim/random'
 import type { ProgressStore } from '../../../sim/language/progress/store'
 import { corpus, nextTokens, start, step as parseStep, accepts, SETTINGS, VOCABULARY, NOUNS, END, kindOf, type ParseState } from '../../../sim/language/predictors/grammar'
 import { makeCountModel, countStream, type CountModel } from '../../../sim/language/predictors/counts'
-import { makeNgram, predictFromOne, predictFromTwo, type Ngram, type Prediction } from '../../../sim/language/predictors/ngram'
+import { makeNgram, predictFromOne, predictFromTwo, type Ngram } from '../../../sim/language/predictors/ngram'
 import { makeProbes, type Probe } from '../../../sim/language/predictors/probes'
+import { scoreSentences, type Scores } from '../../../sim/language/predictors/scoring'
 import { loadDesc, loadSnapshot } from '../../../sim/language/predictors/runtime/load'
 import { softmax, srnForward, transformerForward, type SeqDesc, type SeqModel, type TransformerOutput, type SrnOutput } from '../../../sim/language/predictors/runtime/seqNet'
 import { StepStore } from '../steps'
@@ -19,11 +20,11 @@ import type { Step } from './screens'
  */
 
 export const PREDICTIONS = {
-  nearest: { key: 'p4-s2-nearest', question: 'Which word will lie closest to cat in the count model, by the similarity of their lists of counts?' },
-  counts: { key: 'p4-s3-counts', question: 'After girls who boys chase, which kind of token will the prediction from counts make most probable: a plural verb form (chase, walk, …), a singular verb form (chases, walks, …), or a noun?', choices: ['a plural verb form', 'a singular verb form', 'a noun'] },
-  agree: { key: 'p4-s4-agree', question: 'After boys who Mary chases, which verb form will each network give more probability to?', choices: ['both the plural form', 'both the singular form', 'the transformer plural, the recurrent network singular', 'the transformer singular, the recurrent network plural'] },
-  temp: { key: 'p4-s4-temp', question: 'At a temperature of 2.0, will most of the sentences each network generates be ones the grammar allows?', choices: ['yes, for both', 'no, for neither', 'yes for the transformer, no for the recurrent network', 'no for the transformer, yes for the recurrent network'] },
+  nearest: { key: 'p4-s2-nearest', question: 'Which word will lie closest to “cat” in the count model, by the similarity of their lists of counts?' },
+  counts: { key: 'p4-s3-counts', question: 'After “girls who boys chase”, which kind of token will the prediction from counts make most probable: a plural verb form (“chase”, “walk”, …), a singular verb form (“chases”, “walks”, …), or a noun?', choices: ['a plural verb form', 'a singular verb form', 'a noun'] },
+  agree: { key: 'p4-s4-agree', question: 'After “boys who Mary chases”, which verb form will each network give more probability to?', choices: ['both the plural form', 'both the singular form', 'the transformer plural, the recurrent network singular', 'the transformer singular, the recurrent network plural'] },
 } as const
+// Step 4's temperature prediction was cut (Jon, 2026-11-20): temperature is explained beside Generate a sentence instead.
 export type PredictionKey = keyof typeof PREDICTIONS
 
 export const SHOW_SENTENCES = 20
@@ -64,8 +65,8 @@ export interface CountState {
   model: CountModel
   /** Agreement by depth, as `countAgreementByDepth`. */
   agreement: number[]
-  /** The share of next tokens the prediction from counts gives the most probability to, over the held-out sentences. */
-  heldOutAccuracy: number
+  /** The three scores of `scoring.ts` on the held-out and the training sentences, as the networks' were scored when they were trained. */
+  scores: { heldOut: Scores; training: Scores }
 }
 
 export class PredictorsStore extends StepStore<Step> {
@@ -280,7 +281,7 @@ export class PredictorsStore extends StepStore<Step> {
     this.changed()
   }
   get allPredicted4(): boolean {
-    return this.predicted('agree') !== null && this.predicted('temp') !== null
+    return this.predicted('agree') !== null
   }
   setTemperature(t: number): void {
     this.temperature = Math.max(TEMPERATURES.min, Math.min(TEMPERATURES.max, Math.round(t * 10) / 10))
@@ -445,7 +446,7 @@ export class PredictorsStore extends StepStore<Step> {
       ngram = makeNgram(tokens)
       model = countStream(makeCountModel(this.windowSize, this.separate), tokens)
     }
-    const state: CountState = { updates, sentences: n, ngram, model, agreement: this.countAgreementByDepth(ngram), heldOutAccuracy: this.countHeldOutAccuracy(ngram) }
+    const state: CountState = { updates, sentences: n, ngram, model, agreement: this.countAgreementByDepth(ngram), scores: { heldOut: this.countScores(ngram, this.heldOut), training: this.countScores(ngram, this.training) } }
     this.countStates.set(n, state)
     return state
   }
@@ -471,33 +472,21 @@ export class PredictorsStore extends StepStore<Step> {
     return out
   }
   /**
-   * The count model's held-out accuracy, scored as the networks' was when they
-   * were trained (train_predictors.py, held_out_accuracy): over every held-out
-   * sentence, every token after the first is predicted from the tokens before
-   * it, and the share predicted right is returned. The prediction is the most
-   * probable token by Step 3's rule (the two words before, else the one word
-   * before; the first of equals, as the training script took it); a context
-   * never seen gives no prediction and counts as wrong.
+   * The count model's three scores on a set of sentences (scoring.ts), as
+   * the networks' were scored when they were trained: every token after a
+   * sentence's first is predicted from the tokens before it by Step 3's rule
+   * (the two words before, else the one word before; a first token follows
+   * the end mark).
    */
-  countHeldOutAccuracy(ngram: Ngram = this.ngram): number {
-    let right = 0
-    let total = 0
-    const argmax = (p: Prediction): number => {
-      if (p.denominator === 0) return -1
-      let best = 0
-      for (let j = 1; j < p.probs.length; j++) if (p.probs[j] > p.probs[best]) best = j
-      return best
-    }
-    for (const s of this.heldOut) {
-      const ids = s.map((t) => VOCABULARY.indexOf(t))
+  countScores(ngram: Ngram, sentences: readonly string[][]): Scores {
+    const end = VOCABULARY.indexOf(END)
+    return scoreSentences(sentences, (ids) => {
+      const out: number[][] = []
       for (let i = 1; i < ids.length; i++) {
-        const w2 = i >= 2 ? ids[i - 2] : VOCABULARY.indexOf(END)
-        const two = predictFromTwo(ngram, w2, ids[i - 1])
-        const pick = two.denominator > 0 ? argmax(two) : argmax(predictFromOne(ngram, ids[i - 1]))
-        if (pick === ids[i]) right++
-        total++
+        const two = predictFromTwo(ngram, i >= 2 ? ids[i - 2] : end, ids[i - 1])
+        out.push(two.denominator > 0 ? two.probs : predictFromOne(ngram, ids[i - 1]).probs)
       }
-    }
-    return total ? right / total : 0
+      return out
+    })
   }
 }

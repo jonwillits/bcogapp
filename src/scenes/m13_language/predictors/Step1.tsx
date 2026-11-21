@@ -41,12 +41,12 @@ export function VocabularyBlock() {
             <span style={{ fontFamily: MONO, overflowWrap: 'anywhere' }}>{VERBS.filter((v) => v.cls === cls).map(forms).join('   ')}</span>
           </Fragment>
         ))}
-        <span style={muted}>the word who</span>
+        <span style={muted}>the word “who”</span>
         <span style={{ fontFamily: MONO }}>{WHO}</span>
         <span style={muted}>the end mark</span>
         <span style={{ fontFamily: MONO }}>{END}</span>
       </div>
-      <Note>The proper nouns, John and Mary, have a single form each. All other nouns have two forms, singular and plural, written singular/plural. As in English, verbs can be singular or plural too, written the same way. The singular verb form goes with a singular subject (for example, boy walks), and the plural verb form with a plural subject (for example, boys walk).</Note>
+      <Note>The proper nouns, “John” and “Mary”, have a single form each. All other nouns have two forms, singular and plural, written singular/plural. As in English, verbs can be singular or plural too, written the same way. The singular verb form goes with a singular subject (for example, “boy walks”), and the plural verb form with a plural subject (for example, “boys walk”).</Note>
       <GroupLabel>Each verb: what may be its subject, and what may be its object</GroupLabel>
       <DataTable
         testId="verb-list"
@@ -101,7 +101,7 @@ export function Step1Stage({ s }: { s: PredictorsStore }) {
     <StagePanel wide testId="predictors-1">
       <div style={{ fontSize: 14, fontWeight: 600 }}>The corpus</div>
       <Note style={{ color: 'var(--text)' }}>{`The corpus is ${s.sentences.length.toLocaleString()} sentences, ${s.corpusTokens.toLocaleString()} tokens in all. Each sentence is made by a generator function that uses the vocabulary and the grammar (rules for how to combine words) below. The sentences are generated pseudo-randomly, using a single fixed seed for all students, so you all see the same sentences.`}</Note>
-      <Note style={{ color: 'var(--text)' }} data-held-out>{`Every model in this part learns from the first ${s.training.length.toLocaleString()} sentences only. The last ${s.heldOut.length.toLocaleString()} sentences, ${(s.training.length + 1).toLocaleString()} to ${s.sentences.length.toLocaleString()}, are held out: no model learns from them, and they are used in Step 5 to test the models on sentences they never saw.`}</Note>
+      <Note style={{ color: 'var(--text)' }} data-held-out>{`Every model in this part learns from the first ${s.training.length.toLocaleString()} sentences only. The last ${s.heldOut.length.toLocaleString()} sentences, ${(s.training.length + 1).toLocaleString()} to ${s.sentences.length.toLocaleString()}, are held out as test sentences, to see how each model performs on sentences it has never seen. No model learns from them, and Step 5 tests the models on them.`}</Note>
       <VocabularyBlock />
       <GrammarBlock />
       <GroupLabel>The sentences</GroupLabel>

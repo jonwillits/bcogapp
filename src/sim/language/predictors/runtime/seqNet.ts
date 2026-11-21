@@ -1,3 +1,4 @@
+import type { Scores } from '../scoring'
 /**
  * The lab's own runtime for Part 4's networks trained offline (spec §2,
  * §8.5): Lab 8's choice of a runtime of our own rather than a library,
@@ -30,6 +31,8 @@ export interface SnapshotDesc {
   heldOutAccuracy: number
   agreementByDepth: Record<string, number>
   loss: number | null
+  /** The three scores of `scoring.ts` on the held-out and the training sentences, written by `scores.probe.ts` (Jon, 2026-11-20). */
+  scores?: { heldOut: Scores; training: Scores }
 }
 
 export interface SeqDesc {

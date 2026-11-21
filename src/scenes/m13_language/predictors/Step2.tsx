@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Btn, Choice, Content, DataTable, FixedLines, GroupLabel, Note, StagePanel, useRef, useWidth } from '../ui'
+import { Btn, Content, DataTable, FixedLines, GroupLabel, Note, StagePanel, useRef, useWidth } from '../ui'
 import { Dendrogram, Scatter } from '../plots'
 import { ONE_CORPUS_LINE } from '../lines'
 import { VOCABULARY, nounOf, verbOf } from '../../../sim/language/predictors/grammar'
@@ -17,7 +17,7 @@ import { PREDICTIONS, type PredictorsStore } from './store'
  * (a token's row is what came before it, its column what came after it:
  * Jon, 2026-11-19, in place of two tables that were each other's transpose);
  * the similarity demo; the words as points on a plane; the nearest neighbors
- * of a word whose name is pressed; the tree of clusters as a dendrogram.
+ * of a word chosen from a menu (Jon, 2026-11-20); the tree of clusters as a dendrogram.
  * One similarity measure throughout: correlation. The window and the
  * two-list rule are fixed (store.ts says why); the settings were cut.
  */
@@ -112,19 +112,24 @@ export function Step2Stage({ s }: { s: PredictorsStore }) {
           <Note>{VIEWS_TEXT.plane} Nouns blue, verbs orange.</Note>
           <FitWidth max={640}>{(w) => <Scatter width={w} height={Math.round(w * 0.58)} xLabel="first direction of greatest difference" yLabel="second direction" testId="plane" points={words.map((w, i) => ({ x: plane[i][0], y: plane[i][1], label: VOCABULARY[w], color: nounOf(VOCABULARY[w]) ? 'var(--accent)' : 'var(--sensor)' }))} />}</FitWidth>
           <GroupLabel>The nearest neighbors</GroupLabel>
-          <Note>Press a word’s name to see its five nearest neighbors.</Note>
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }} data-word-buttons>
-            <Choice value={s.clicked} options={words.map((w) => ({ id: VOCABULARY[w], label: VOCABULARY[w] }))} onChange={(w) => s.click(w)} />
-          </div>
+          <Note>Choose a word from the menu to see its five nearest neighbors.</Note>
+          <select value={s.clicked ?? ''} onChange={(e) => e.target.value && s.click(e.target.value)} aria-label="Nearest neighbors of" style={{ alignSelf: 'flex-start' }} data-word-menu>
+            <option value="">choose a token</option>
+            {words.map((w) => (
+              <option key={w} value={VOCABULARY[w]}>
+                {VOCABULARY[w]}
+              </option>
+            ))}
+          </select>
           {near && (
             <>
-              <GroupLabel>{`The five nearest neighbors of ${s.clicked}`}</GroupLabel>
+              <GroupLabel>{`The five nearest neighbors of “${s.clicked}”`}</GroupLabel>
               <Note>{VIEWS_TEXT.neighbors}</Note>
               <DataTable testId="neighbors" columns={[{ key: 'rank', label: 'Rank', mono: true }, { key: 'word', label: 'Token', mono: true, align: 'left' }, { key: 'r', label: 'Correlation', mono: true }]} rows={near.map((n, i) => ({ rank: i + 1, word: VOCABULARY[n.word], r: n.similarity.toFixed(3) }))} />
             </>
           )}
-          {committed && near && s.clicked === 'cat' && <Note data-nearest-cat>{`Your prediction for the word closest to cat: ${committed}. The nearest by this count: ${VOCABULARY[near[0].word]}.`}</Note>}
-          {committed && s.clicked !== 'cat' && <Note>Press cat to see its nearest neighbor beside your prediction.</Note>}
+          {committed && near && s.clicked === 'cat' && <Note data-nearest-cat>{`Your prediction for the word closest to “cat”: ${committed}. The nearest by this count: “${VOCABULARY[near[0].word]}”.`}</Note>}
+          {committed && s.clicked !== 'cat' && <Note>Choose “cat” to see its nearest neighbor beside your prediction.</Note>}
           <GroupLabel>A tree of clusters</GroupLabel>
           <Note>{VIEWS_TEXT.tree}</Note>
           {tree && <FitWidth max={560}>{(w) => <Dendrogram tree={tree} labels={nouns.map((n) => VOCABULARY[n])} leafColor={(i) => leafColor(VOCABULARY[nouns[i]])} width={w} testId="tree" />}</FitWidth>}

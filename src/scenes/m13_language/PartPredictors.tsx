@@ -22,7 +22,7 @@ import { Step5Stage } from './predictors/Step5'
 type Ctx = PartContext<PredictorsStore>
 
 function progressLines(s: PredictorsStore): string[] {
-  return [`Step 1  an exploration`, `Step 2  an exploration${s.predicted('nearest') ? ', prediction committed' : ''}`, `Step 3  an exploration${s.predicted('counts') ? ', prediction committed' : ''}`, `Step 4  an exploration${s.allPredicted4 ? ', predictions committed' : ''}`, `Step 5  an exploration`]
+  return [`Step 1  an exploration`, `Step 2  an exploration${s.predicted('nearest') ? ', prediction committed' : ''}`, `Step 3  an exploration${s.predicted('counts') ? ', prediction committed' : ''}`, `Step 4  an exploration${s.allPredicted4 ? ', prediction committed' : ''}`, `Step 5  an exploration`]
 }
 
 function Nav({ ctx }: { ctx: Ctx }) {

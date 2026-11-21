@@ -113,7 +113,23 @@
     "2": 0.58,
     "3": 0.4
    },
-   "loss": null
+   "loss": null,
+   "scores": {
+    "heldOut": {
+     "agreement": 0.4007,
+     "kind": 0.4384,
+     "exact": 0.0158,
+     "positions": 3670,
+     "verbPositions": 1415
+    },
+    "training": {
+     "agreement": 0.4109,
+     "kind": 0.4495,
+     "exact": 0.0146,
+     "positions": 32595,
+     "verbPositions": 12702
+    }
+   }
   },
   {
    "updates": 50,
@@ -125,7 +141,23 @@
     "2": 0.52,
     "3": 0.44
    },
-   "loss": 3.609074773788452
+   "loss": 3.609074773788452,
+   "scores": {
+    "heldOut": {
+     "agreement": 0.641,
+     "kind": 0.5782,
+     "exact": 0.3482,
+     "positions": 3670,
+     "verbPositions": 1415
+    },
+    "training": {
+     "agreement": 0.6335,
+     "kind": 0.598,
+     "exact": 0.3514,
+     "positions": 32595,
+     "verbPositions": 12702
+    }
+   }
   },
   {
    "updates": 200,
@@ -137,7 +169,23 @@
     "2": 0.52,
     "3": 0.44
    },
-   "loss": 2.896090950965881
+   "loss": 2.896090950965881,
+   "scores": {
+    "heldOut": {
+     "agreement": 0.6141,
+     "kind": 0.6815,
+     "exact": 0.3657,
+     "positions": 3670,
+     "verbPositions": 1415
+    },
+    "training": {
+     "agreement": 0.618,
+     "kind": 0.6892,
+     "exact": 0.3668,
+     "positions": 32595,
+     "verbPositions": 12702
+    }
+   }
   },
   {
    "updates": 500,
@@ -149,7 +197,23 @@
     "2": 0.3,
     "3": 0.0
    },
-   "loss": 2.2804535627365112
+   "loss": 2.2804535627365112,
+   "scores": {
+    "heldOut": {
+     "agreement": 0.9173,
+     "kind": 0.891,
+     "exact": 0.3888,
+     "positions": 3670,
+     "verbPositions": 1415
+    },
+    "training": {
+     "agreement": 0.932,
+     "kind": 0.8844,
+     "exact": 0.3891,
+     "positions": 32595,
+     "verbPositions": 12702
+    }
+   }
   },
   {
    "updates": 1000,
@@ -161,7 +225,23 @@
     "2": 0.74,
     "3": 0.44
    },
-   "loss": 1.9740205252170562
+   "loss": 1.9740205252170562,
+   "scores": {
+    "heldOut": {
+     "agreement": 0.9724,
+     "kind": 0.9801,
+     "exact": 0.4,
+     "positions": 3670,
+     "verbPositions": 1415
+    },
+    "training": {
+     "agreement": 0.9698,
+     "kind": 0.9757,
+     "exact": 0.4048,
+     "positions": 32595,
+     "verbPositions": 12702
+    }
+   }
   },
   {
    "updates": 3000,
@@ -173,7 +253,23 @@
     "2": 1.0,
     "3": 0.96
    },
-   "loss": 1.8404447388648988
+   "loss": 1.8404447388648988,
+   "scores": {
+    "heldOut": {
+     "agreement": 0.9866,
+     "kind": 0.9965,
+     "exact": 0.4005,
+     "positions": 3670,
+     "verbPositions": 1415
+    },
+    "training": {
+     "agreement": 0.9917,
+     "kind": 0.9973,
+     "exact": 0.408,
+     "positions": 32595,
+     "verbPositions": 12702
+    }
+   }
   },
   {
    "updates": 10000,
@@ -185,7 +281,23 @@
     "2": 1.0,
     "3": 0.96
    },
-   "loss": 1.764119462966919
+   "loss": 1.764119462966919,
+   "scores": {
+    "heldOut": {
+     "agreement": 0.9979,
+     "kind": 0.9981,
+     "exact": 0.4044,
+     "positions": 3670,
+     "verbPositions": 1415
+    },
+    "training": {
+     "agreement": 0.9987,
+     "kind": 0.999,
+     "exact": 0.4253,
+     "positions": 32595,
+     "verbPositions": 12702
+    }
+   }
   },
   {
    "updates": 20000,
@@ -197,7 +309,23 @@
     "2": 1.0,
     "3": 0.9
    },
-   "loss": 1.7235933780670165
+   "loss": 1.7235933780670165,
+   "scores": {
+    "heldOut": {
+     "agreement": 0.9979,
+     "kind": 0.9986,
+     "exact": 0.4008,
+     "positions": 3670,
+     "verbPositions": 1415
+    },
+    "training": {
+     "agreement": 0.9989,
+     "kind": 0.9997,
+     "exact": 0.4437,
+     "positions": 32595,
+     "verbPositions": 12702
+    }
+   }
   }
  ],
  "params": 10997,

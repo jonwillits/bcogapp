@@ -4,7 +4,7 @@ import type { UnitId } from '../../../sim/language/parts'
 import type { View } from '../../../sim/language/audio/spectrogram'
 import { player } from '../../../sim/language/audio/player'
 import { bufferFrom, type Clip } from '../../../sim/language/audio/clips'
-import { abxTrials, labelingTrials, LABELING_GAP_MS, LABELING_REPEATS, REPEAT_GAP_S, STEPS, TRIAD_INTERVAL_S, TRIAD_REPEATS, TRIAD_REPEAT_GAP_S, type Label as Lbl, type Triad } from '../../../sim/language/sounds/abx'
+import { abxTrials, labelingTrials, LABELING_GAP_MS, LABELING_REPEATS, REPEAT_GAP_S, STEPS, TRIAD_INTERVAL_S, type Label as Lbl, type Triad } from '../../../sim/language/sounds/abx'
 import { accuracy, confusion, forward, makeClassifier, shares, splitOnePitch, splitOneVoice, splitRun1, train, PASSES, type Classifier, type Token } from '../../../sim/language/sounds/classifier'
 import { StepStore } from '../steps'
 import { loadAll, type LoadProgress } from '../loading'
@@ -444,17 +444,13 @@ export class SoundsStore extends StepStore<Step> {
       end = r.end
       this.playing = { key: `cont:${b.trials[b.i]}`, start: r.start, end: r.end }
     } else {
-      // The triad plays TRIAD_REPEATS times, TRIAD_REPEAT_GAP_S between the plays (Jon, 2026-11-20); the buttons appear after the last play.
       const t = b.trials[b.i]
       const items: { buffer: AudioBuffer; offsetS: number }[] = []
       let off = 0
-      for (let k = 0; k < TRIAD_REPEATS; k++) {
-        for (const s of t.sounds) {
-          const bb = buf(s)
-          items.push({ buffer: bb, offsetS: off })
-          off += bb.duration + TRIAD_INTERVAL_S
-        }
-        off += TRIAD_REPEAT_GAP_S - TRIAD_INTERVAL_S
+      for (const s of t.sounds) {
+        const bb = buf(s)
+        items.push({ buffer: bb, offsetS: off })
+        off += bb.duration + TRIAD_INTERVAL_S
       }
       const r = player.playSequence(items)
       end = r.end
