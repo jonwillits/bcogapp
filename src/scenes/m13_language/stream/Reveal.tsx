@@ -1,23 +1,25 @@
+import type { ReactNode } from 'react'
 import { Content, DataTable, FixedLines, Note, Para, Section } from '../ui'
 import { ReferencePanel } from '../ReferencePanel'
 import { reference } from '../../../sim/language/references'
-import { streamFor, SYLLABLES, WORDS, wordAverageTp } from '../../../sim/language/stream/language'
-import { tpTableOf } from '../../../sim/language/stream/board'
-import { LENGTHENED_DIFFERENTLY_LINE, RESTARTED_LINE } from '../lines'
-import { SIX_WORDS_LINE, STEP1_AFTER_COMMIT } from './texts'
+import { streamFor, SYLLABLES, WORDS, wordAverageTp, type Stream } from '../../../sim/language/stream/language'
+import { boardSyllables, tpTableOf, ROW } from '../../../sim/language/stream/board'
+import { RESTARTED_LINE } from '../lines'
 import { Tile } from './Strip'
 import type { BoardResult, MinuteResult } from './store'
 
 /**
- * Part 2's reveals (spec §6.1, §6.2): Step 1's after the commit (the six
- * words beside the student's answer and typed words, the two replays'
- * lines, the lengthening experiment), and Step 2's results in numbered
- * sections (the order the words were found in, the table of transitional
- * probabilities with the within-word cells shaded, and each word's average
- * beside the original's finding). None says what to conclude. Each has two
- * modes: `full` on the step, with the explanation and the references;
- * `results` on the All Results tab, the sections with their one-sentence
- * descriptions only (Jon, 2026-11-18).
+ * Part 2's reveals (spec §6.1, §6.2): Step 1's after the commit (the
+ * student's answer beside the number of words, and the typed words; Jon,
+ * 2026-11-21: no word is named here, and the replays wait for Step 2), and
+ * Step 2's results in numbered sections once the search has ended (the 300
+ * syllables printed and divided into words, the two replays of the minute
+ * with the lengthening experiment, the order the words were found in, the
+ * table of transitional probabilities with the within-word cells shaded,
+ * and each word's average beside the original's finding). None says what to
+ * conclude. Each has two modes: `full` on the step, with the explanation,
+ * the replays and the references; `results` on the All Results tab, the
+ * sections with their one-sentence descriptions only (Jon, 2026-11-18).
  */
 export type RevealMode = 'full' | 'results'
 
@@ -29,51 +31,56 @@ export function MinuteReveal({ result, mode = 'full' }: { result: MinuteResult; 
       {result.restarts > 0 && <Content>{RESTARTED_LINE}</Content>}
       <Section n={1} title="Your answer beside the language">
         <FixedLines lines={[`You answered: ${result.guess} ${result.guess === 1 ? 'word' : 'words'}.`, 'The language has 6 words.', `Words you typed: ${typed.length ? typed.join(', ') : 'none'}.`]} mono={false} testId="answer-truth" />
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }} data-six-words>
-          {WORDS.map((w) => (
-            <div key={w} style={{ display: 'flex', gap: 2 }}>
-              {[w.slice(0, 2), w.slice(2, 4), w.slice(4, 6)].map((syl, k) => (
-                <Tile key={k} text={syl} word={w} />
-              ))}
-            </div>
-          ))}
-        </div>
-        <Note>Each word is shown as its three syllables in the word’s own color, the colors the board in Step 2 uses.</Note>
+        {full && <Note>Which syllables make up the words is for Step 2 to find. The minute can be heard again, with its words marked, once Step 2 is done.</Note>}
       </Section>
-      {full && (
-        <>
-          <Section n={2} title="The two replays">
-            {STEP1_AFTER_COMMIT.map((p) => (
-              <Para key={p.slice(0, 12)}>{p}</Para>
-            ))}
-            <Content>{SIX_WORDS_LINE}</Content>
-          </Section>
-          <Section n={3} title="The original’s lengthening experiment">
-            <Para>In the original study’s second experiment, the vowel of the last syllable was lengthened by 100 milliseconds in three of the six words, in a language with m and n in place of b and d. Scores against nonwords were 80% with the final syllable lengthened, 61% with the first syllable lengthened, and 65% with no lengthening (pp. 616–617).</Para>
-            <Content>{LENGTHENED_DIFFERENTLY_LINE}</Content>
-            <ReferencePanel reference={reference('saffran-lengthening')} />
-          </Section>
-        </>
-      )}
     </div>
   )
 }
 
-export function BoardReveal({ seed, result, mode = 'full' }: { seed: number; result: BoardResult; mode?: RevealMode }) {
+/** The first 300 syllables of the stream as tiles, 20 to a row, each word filled with its color: the step's result once the search has ended. */
+export function PrintedStream({ stream }: { stream: Stream }) {
+  const board = boardSyllables(stream)
+  const rows: number[][] = []
+  for (let i = 0; i < board.length; i += ROW) rows.push(board.slice(i, i + ROW).map((_, k) => i + k))
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }} data-printed-stream>
+      {rows.map((row, r) => (
+        <div key={r} style={{ display: 'flex', gap: 3 }} data-row={r}>
+          {row.map((i) => (
+            <Tile key={i} text={board[i]} word={stream.words[stream.wordIndex[i]]} />
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+export function BoardReveal({ seed, result, mode = 'full', replays }: { seed: number; result: BoardResult; mode?: RevealMode; replays?: ReactNode }) {
   const full = mode === 'full'
   const stream = streamFor(seed, 1512)
   const { table, within } = tpTableOf(stream)
   const avgs = WORDS.map((w) => ({ word: w, avg: wordAverageTp(table, w) })).sort((a, b) => b.avg - a.avg)
   const foundOrder = result.found.filter((f) => f.how === 'found').map((f) => f.word)
   const rank = avgs.map((a) => a.word)
+  let n = 0
+  const next = () => ++n
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-reveal="board">
-      <Section n={1} title="The six words, in the order you found them">
+      <Section n={next()} title="The 300 syllables, divided into words">
+        <Para>The syllables the counts were taken from, in the order they are spoken, 20 to a row; a row break means nothing. Each word is filled with its own color, the words you found and the words shown alike. Click a syllable in the palette above to see its counts.</Para>
+        <PrintedStream stream={stream} />
+      </Section>
+      {full && replays && (
+        <Section n={next()} title="The minute of Step 1, again">
+          {replays}
+        </Section>
+      )}
+      <Section n={next()} title="The six words, in the order you found them">
         <Para>One row per word: its place in your order, the number of checks you made before it, and whether you found it or it was shown by “Show me the words”.</Para>
         <DataTable testId="found-order" columns={[{ key: 'n', label: 'Order', mono: true }, { key: 'word', label: 'Word', mono: true, align: 'left' }, { key: 'checks', label: 'Checks before it', mono: true }, { key: 'how', label: 'Found or shown' }]} rows={result.found.map((f, i) => ({ n: i + 1, word: f.word, checks: f.checksBefore, how: f.how }))} />
-        <Note>{`You made ${result.checks.length} checks and ${result.clicks.length} clicks on the board.`}</Note>
+        <Note>{`You made ${result.checks.length} checks and ${result.clicks.length} syllable clicks.`}</Note>
       </Section>
-      <Section n={2} title="The table of transitional probabilities">
+      <Section n={next()} title="The table of transitional probabilities">
         <Para>Computed from your whole 21-minute stream of 4,536 syllables. Each row is a first syllable and each column the syllable after it; a cell is the count of that pair divided by the count of the first syllable. The shaded cells are pairs inside one of the six words.</Para>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: 10.5 }} data-tp-table>
@@ -108,7 +115,7 @@ export function BoardReveal({ seed, result, mode = 'full' }: { seed: number; res
           </table>
         </div>
       </Section>
-      <Section n={3} title="Each word’s average transitional probability inside it">
+      <Section n={next()} title="Each word’s average transitional probability inside it">
         <Para>For each word, the mean of its two transitions from the table, from highest to lowest; beside it, where each word fell in your own order of finding. Shown words have no place.</Para>
         {full && <Para>The original study’s authors split the six words this way and found that the three words with the highest average transitional probabilities were learned better than the three with the lowest, 79% against 72% (p. 614).</Para>}
         <DataTable testId="word-averages" columns={[{ key: 'rank', label: 'Rank', mono: true }, { key: 'word', label: 'Word', mono: true, align: 'left' }, { key: 'avg', label: 'Average transitional probability', mono: true }, { key: 'yours', label: 'Your order of finding' }]} rows={avgs.map((a, i) => ({ rank: i + 1, word: a.word, avg: a.avg.toFixed(2), yours: foundOrder.includes(a.word) ? `found ${foundOrder.indexOf(a.word) + 1}${['st', 'nd', 'rd'][foundOrder.indexOf(a.word)] ?? 'th'}` : 'shown' }))} />

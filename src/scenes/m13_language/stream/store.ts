@@ -19,11 +19,14 @@ import { assemble, loadRealSpeech, loadStreamJson, streamClip, syllableSpectrogr
 /**
  * Part 2's state (spec §6): four steps. Step 1 is one unit (the first
  * minute and the committed answer, restarted from the start if left); Step
- * 2 is a unit that resumes (the board is saved as it goes); Steps 3 and 4
- * are explorations. Steps 2 to 4 show the stream divided into words, so
- * while Step 1 is not committed they open behind a one-line notice (spec
- * §11, item 3). Every run of the learners is on the student's own stream
- * from its beginning, and on 19 other seeds' streams.
+ * 2 is a unit that resumes (the search is saved as it goes: the palette,
+ * the panel of counts and the tray, with the 300 syllables printed only
+ * when the search ends, Jon, 2026-11-21); Steps 3 and 4 are explorations.
+ * Steps 2 to 4 show the stream divided into words, so while Step 1 is not
+ * committed they open behind a one-line notice (spec §11, item 3). The two
+ * replays of the minute, with the words marked, play only once Step 2 is
+ * done (Jon, 2026-11-21). Every run of the learners is on the student's own
+ * stream from its beginning, and on 19 other seeds' streams.
  */
 
 export const MINUTE_UNIT: UnitId = 'p2-minute'
@@ -103,7 +106,8 @@ export class StreamStore extends StepStore<Step> {
   constructor(seed: number, progress: ProgressStore) {
     super(seed, progress, [1, 2, 3, 4], 'stream')
     this.stream = streamFor(seed, 1512)
-    this.board = (progress.partial(BOARD_UNIT) as BoardState | undefined) ?? newBoard()
+    // A finished search comes back from its result, so that after a reload the step still shows the words found and no tray; one under way comes back from the saved partial.
+    this.board = progress.isComplete(BOARD_UNIT) ? (progress.result(BOARD_UNIT) as BoardState) : ((progress.partial(BOARD_UNIT) as BoardState | undefined) ?? newBoard())
   }
 
   get boardSyllables(): Syllable[] {
@@ -125,8 +129,10 @@ export class StreamStore extends StepStore<Step> {
     return { line: NOTICE_LINE, goTo: 1 }
   }
 
-  protected onOpen(): void {
+  protected onOpen(step: Step): void {
     this.stopPlayback()
+    // A finished step draws on the decoded sounds (Step 2's replays), which `onBegin` alone would never load again after a reload, as the sounds store found on 2026-11-17. Decode them when such a step is opened.
+    if (this.isDone(step)) void this.ensureLoaded(step)
   }
 
   // ------------------------------------------------ leaving and pausing
@@ -220,7 +226,7 @@ export class StreamStore extends StepStore<Step> {
   playMinute(which: Replay): void {
     if (!this.isLoaded(1)) return
     if (which === 'first' && this.progress.isComplete(MINUTE_UNIT)) return
-    if (which !== 'first' && !this.progress.isComplete(MINUTE_UNIT)) return
+    if (which !== 'first' && !(this.progress.isComplete(MINUTE_UNIT) && this.progress.isComplete(BOARD_UNIT))) return
     const ctx = player.ensure()
     if (!ctx) return
     this.stopPlayback()
@@ -301,12 +307,17 @@ export class StreamStore extends StepStore<Step> {
     return this.board.found.map((f) => f.word)
   }
 
-  clickTile(s: Syllable): void {
-    if (this.board.ended) return
+  /** A click on a palette syllable: it is highlighted, and the panel shows its counts; the click is recorded while the search runs, and the highlight still works once the search has ended. */
+  clickSyllable(s: Syllable): void {
     this.highlight = this.highlight === s ? null : s
-    this.board = { ...this.board, clicks: [...this.board.clicks, { syllable: s, at: Date.now() }] }
-    this.saveBoard()
+    if (!this.board.ended) {
+      this.board = { ...this.board, clicks: [...this.board.clicks, { syllable: s, at: Date.now() }] }
+      this.saveBoard()
+    }
     this.changed()
+  }
+  addHighlightedToTray(): void {
+    if (this.highlight) this.addToTray(this.highlight)
   }
   clearHighlight(): void {
     this.highlight = null
@@ -365,6 +376,8 @@ export class StreamStore extends StepStore<Step> {
       const result: BoardResult = { ...this.board, seconds: (performance.now() - this.boardStarted) / 1000 }
       this.progress.complete(BOARD_UNIT, result)
     }
+    // The replays at the end of the search need the sounds, which a search resumed after a reload has not loaded.
+    void this.ensureLoaded(2)
   }
   boardResult(): BoardResult | null {
     return (this.progress.result(BOARD_UNIT) as BoardResult | undefined) ?? null

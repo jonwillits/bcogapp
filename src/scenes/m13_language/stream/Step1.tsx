@@ -3,31 +3,31 @@ import { Btn, Content, FixedLines, LoadingLine, Note, StagePanel, Countdown } fr
 import { loadingText } from '../loading'
 import { useAudioCursor, useBlockGuard } from '../hooks'
 import { MADE_OFFLINE_LINE, MADE_UP_LANGUAGE_LINE } from '../lines'
-import { Strip, WordStrip } from './Strip'
 import { MinuteReveal } from './Reveal'
 import { MAIN_TABS } from '../params'
-import { MINUTE_SYLLABLES, type StreamStore } from './store'
+import type { StreamStore } from './store'
 
 /**
  * Step 1's stage (spec §6.1): Play the minute, the large timer and the
- * line saying what is happening now, and nothing else while the first
- * playback runs (Jon, 2026-11-20: no spectrogram, so that the student
- * listens), the committed answer, and after the commit the two replays,
- * each with the spectrogram scrolling under a cursor (the marked one with
- * the word strip and boundary lines, and the lengthened one), the reveal
- * with its explanation, and the button that comes next (Jon, 2026-11-18).
- * The first playback stops and starts again if the page is hidden.
+ * line saying what is happening now, and nothing else while the minute
+ * plays (Jon, 2026-11-20: no spectrogram, so that the student listens),
+ * then the question and the commit, and after the commit the answer beside
+ * the number of words and the button that comes next (Jon, 2026-11-18).
+ * The two replays, with the words marked, are at the end of Step 2 (Jon,
+ * 2026-11-21), so that nothing here names a word before the search. The
+ * playback stops and starts again if the page is hidden.
  */
 export function Step1Stage({ s, onNext }: { s: StreamStore; onNext?: () => void }) {
   const read = useCallback(() => s.cursor(), [s])
-  const cursor = useAudioCursor(read, s.playback !== null)
+  // Read on every frame while the minute plays, so that the timer moves.
+  useAudioCursor(read, s.playback !== null)
   const stop = useCallback((reason: string) => s.stopMinute(reason), [s])
   useBlockGuard(s.replay === 'first' && s.playback !== null, stop)
   const done = s.minuteResult()
   const playing = s.playback !== null
   const left = playing ? s.secondsLeft() : 0
   const total = s.assembled?.durationS ?? 60
-  const now = playing ? (s.replay === 'first' ? 'Listen. The language is playing.' : s.replay === 'marked' ? 'The same minute, with the words marked.' : 'The same minute, with each word’s last syllable lengthened.') : s.minuteStopped ? 'The playback stopped.' : done ? 'Your answer is committed.' : s.minutePlayed ? 'The minute is over. Answer the question below.' : 'Press “Play the minute” to begin.'
+  const now = playing ? 'Listen. The language is playing.' : s.minuteStopped ? 'The playback stopped.' : done ? 'Your answer is committed.' : s.minutePlayed ? 'The minute is over. Answer the question below.' : 'Press “Play the minute” to begin.'
   return (
     <StagePanel wide testId="stream-1">
       <div style={{ fontSize: 14, fontWeight: 600 }}>A minute of the language</div>
@@ -41,8 +41,6 @@ export function Step1Stage({ s, onNext }: { s: StreamStore; onNext?: () => void 
           <Note>{s.minuteStopped} The same minute plays again from the start when you press “Play the minute”.</Note>
         </div>
       )}
-      {done && s.replay === 'marked' && s.assembled && <WordStrip stream={s.stream} n={MINUTE_SYLLABLES} marks={s.assembled.marks} cursorS={cursor} />}
-      {done && s.spectrograms && s.assembled && s.replay !== null && <Strip stream={s.stream} n={MINUTE_SYLLABLES} spectrograms={s.replay === 'long' ? s.spectrogramsLong! : s.spectrograms} cursorS={cursor} marks={s.assembled.marks} marked={s.replay === 'marked'} />}
       {!done && (
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           <Btn primary onClick={() => s.playMinute('first')} disabled={!s.isLoaded(1) || playing || s.minutePlayed}>
@@ -73,21 +71,6 @@ export function Step1Stage({ s, onNext }: { s: StreamStore; onNext?: () => void 
               Commit my answer
             </Btn>
           </div>
-        </div>
-      )}
-      {done && (
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }} data-replays>
-          <Btn onClick={() => s.playMinute('marked')} disabled={!s.isLoaded(1) || playing}>
-            Play again, with the words marked
-          </Btn>
-          <Btn onClick={() => s.playMinute('long')} disabled={!s.isLoaded(1) || playing}>
-            Play again, with each word’s last syllable lengthened
-          </Btn>
-          {playing && (
-            <Btn onClick={() => s.stopPlayback()}>
-              Stop
-            </Btn>
-          )}
         </div>
       )}
       <Content>{MADE_UP_LANGUAGE_LINE}</Content>

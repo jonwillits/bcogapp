@@ -17,10 +17,11 @@ import { renderToStaticMarkup } from 'react-dom/server'
  * §11 item 1, §14), as Lab 6 tests it. Part 1: no syllable label, formant
  * track, or count before Step 2's commit; no curve, reference, or
  * predicted line before both blocks of Step 3; no result before each
- * prediction in Step 4. Part 2: no word, count of words, or lengthened
- * replay before Step 1's commit; no table of transitional probabilities
- * before the first word is found; no learner's result before Step 3's
- * predictions. Part 3: no word's object, score or model before Step 2 is
+ * prediction in Step 4. Part 2: no word, count of words, or replay before
+ * Step 1's commit; after it the count of words only, and no word and no
+ * replay before Step 2's search has ended (Jon, 2026-11-21); no table of
+ * transitional probabilities before the first word is found; no learner's
+ * result before Step 3's predictions. Part 3: no word's object, score or model before Step 2 is
  * done; no model's row before Step 3's prediction. Part 4: no nearest
  * neighbor before Step 2's prediction; no distribution before Steps 3's
  * and 4's predictions. Also: no microphone is ever asked for.
@@ -161,7 +162,7 @@ describe('Part 1: commit, then reveal', () => {
 })
 
 describe('Part 2: commit, then reveal', () => {
-  it('Step 1: no word, count of words, or replay before the commit; the answer cannot be committed before the minute has played; the reveal after', () => {
+  it('Step 1: no word, count of words, or replay before the commit; the answer cannot be committed before the minute has played; after it the count of words, and still no word and no replay (Jon, 2026-11-21)', () => {
     const z = fresh(stream as Mod, (s, p) => new StreamStore(s, p))
     z.store.open(1)
     z.store.begin()
@@ -172,35 +173,47 @@ describe('Part 2: commit, then reveal', () => {
     z.store.setGuess(4)
     z.store.commitAnswer()
     expect(z.progress.isComplete('p2-minute')).toBe(false)
-    z.progress.complete('p2-minute', { guess: 4, typed: 'babupu', seconds: 70, restarts: 0 })
+    z.progress.complete('p2-minute', { guess: 4, typed: 'tabu pada', seconds: 70, restarts: 0 })
     z.store.open(1)
     m = z.all()
     expect(m).toMatch(/data-reveal="minute"/)
-    expect(m).toMatch(/data-replays/)
     expect(text(m)).toMatch(/The language has 6 words/)
-    expect(text(m)).toMatch(/lengthens all six/)
-    expect(m).toMatch(/data-reference="saffran-lengthening"/)
+    expect(m).not.toMatch(/data-replays|data-six-words|data-strip/)
+    expect(text(m)).not.toMatch(/babupu|bupada|dutaba|patubi|pidabu|tutibu|Play again/)
+    expect(text(m)).toMatch(/once Step 2 is done/)
+    // The replays play only once Step 2 is done, whatever is asked of the store.
+    z.store.playMinute('marked')
+    expect(z.store.replay).toBeNull()
   })
-  it('Step 2: counts only before the first word is found, then the term and the proportions; a true word colors exactly its instances; a part-word changes nothing; the results after Show me the words', () => {
+  it('Step 2: the search on the palette and the counts, no printed stream and no word before it ends (Jon, 2026-11-21); counts only before the first word is found, then the term and the proportions; a part-word changes nothing; the printed stream, colored, the replays and the results after Show me the words', () => {
     const z = fresh(stream as Mod, (s, p) => new StreamStore(s, p))
     z.progress.complete('p2-minute', { guess: 6, typed: '', seconds: 70, restarts: 0 })
     z.store.open(2)
     z.store.begin()
-    z.store.clickTile('bu')
+    z.store.clickSyllable('bu')
     let m = z.all()
+    expect(m).toMatch(/data-palette/)
     expect(m).toMatch(/data-neighbors="bu"/)
+    expect(m).not.toMatch(/data-printed-stream|data-replays|data-reveal/)
     expect(text(m)).not.toMatch(/transitional|probability|proportion/i)
+    expect(text(m)).not.toMatch(/babupu|bupada|dutaba|patubi|pidabu|tutibu/)
+    expect(z.store.board.clicks.length).toBe(1)
     for (const syl of ['pi', 'da', 'ta'] as const) z.store.addToTray(syl)
     z.store.checkTray()
     expect(z.store.lastCheck).toBe('not a word')
     expect(z.store.board.found.length).toBe(0)
     expect((z.all().match(/data-word="/g) ?? []).length).toBe(0)
-    for (const syl of ['pi', 'da', 'bu'] as const) z.store.addToTray(syl)
+    z.store.clickSyllable('pi')
+    z.store.addHighlightedToTray()
+    for (const syl of ['da', 'bu'] as const) z.store.addToTray(syl)
+    expect(z.store.tray).toEqual(['pi', 'da', 'bu'])
+    expect(z.store.trayOccurrences).toBe(trayCount(z.store.boardSyllables, ['pi', 'da', 'bu']))
     z.store.checkTray()
     expect(z.store.board.found.map((f) => f.word)).toEqual(['pidabu'])
     m = z.all()
-    const filled = (m.match(/data-word="pidabu"/g) ?? []).length
-    expect(filled).toBe(3 * trayCount(z.store.boardSyllables, ['pi', 'da', 'bu']))
+    // The found word's three tiles in its color, and nothing else: the stream is not printed while the search runs.
+    expect((m.match(/data-word="pidabu"/g) ?? []).length).toBe(3)
+    expect(m).not.toMatch(/data-printed-stream/)
     expect(m).toMatch(/data-tp-definition/)
     expect(text(m)).toMatch(/transitional probability/)
     expect(z.progress.partial('p2-board')).toBeTruthy()
@@ -210,11 +223,21 @@ describe('Part 2: commit, then reveal', () => {
     expect(z.progress.isComplete('p2-board')).toBe(true)
     m = z.all()
     expect(m).toMatch(/data-reveal="board"/)
+    expect(m).toMatch(/data-printed-stream/)
+    expect((m.match(/data-word="pidabu"/g) ?? []).length).toBe(3 + 3 * trayCount(z.store.boardSyllables, ['pi', 'da', 'bu']))
+    expect(m).toMatch(/data-replays/)
+    expect(text(m)).toMatch(/lengthens all six/)
+    expect(m).toMatch(/data-reference="saffran-lengthening"/)
     expect(m).toMatch(/data-tp-table/)
     expect((m.match(/data-within="true"/g) ?? []).length).toBe(12)
     expect(text(m)).toMatch(/79% against 72%/)
     for (const w of WORDS) expect(text(m)).toContain(w)
     expect(SYLLABLES.length).toBe(12)
+    // The palette still highlights after the end, without a recorded click.
+    const clicks = z.store.board.clicks.length
+    z.store.clickSyllable('ta')
+    expect(z.store.highlight).toBe('ta')
+    expect(z.store.board.clicks.length).toBe(clicks)
   })
   it('Step 3: no learner runs before the three predictions; after them a run fills the plot and the table with the adults’ lines', async () => {
     const z = fresh(stream as Mod, (s, p) => new StreamStore(s, p))

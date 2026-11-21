@@ -1,16 +1,18 @@
 /**
  * Part 2's panel texts beyond the instruction screens: the learners'
- * explanations, the prediction questions, and the lines shown only after
- * Step 1's commit (which may name the six words and the transitional
- * probability). `store.ts` holds none of these, since it is read before the
- * commit (`naming.test.ts`).
+ * explanations, the prediction questions, and the lines shown only once
+ * Step 2's search has ended (which name the six words and the transitional
+ * probability; Jon, 2026-11-21: nothing names a word before the search).
+ * `store.ts` holds none of these, since it is read before Step 1's commit
+ * (`naming.test.ts`).
  */
 
 export const SIX_WORDS_LINE = 'The language is made up. It has six words and no meanings.'
 
-export const STEP1_AFTER_COMMIT = [
-  'The language has six words, each of three syllables: babupu, bupada, dutaba, patubi, pidabu, tutibu. The minute you heard was 72 words in a row, in a random order in which no word came twice in a row, with no pause between them.',
-  'Two replays are now available. “Play again, with the words marked” plays the same minute, now with its spectrogram scrolling under a cursor at the moment being played. Above the spectrogram, a strip of syllables fills in as the sound plays, and each word lights up in its own color as it is heard. Thin lines mark the word boundaries on the spectrogram. The sound itself shows nothing at those lines: every syllable is the same length, the same loudness, and the same pitch wherever it falls.',
+/** The replays' paragraphs, at the end of Step 2 once every word is found or shown. */
+export const REPLAYS_TEXT = [
+  'The language has six words, each of three syllables: babupu, bupada, dutaba, patubi, pidabu, tutibu. The minute you heard in Step 1 was 72 words in a row, in a random order in which no word came twice in a row, with no pause between them.',
+  '“Play again, with the words marked” plays that minute again, now with its spectrogram, the picture of the sound from Part 1, scrolling under a cursor at the moment being played. Above the spectrogram, a strip of syllables fills in as the sound plays, and each word lights up in its own color as it is heard. Thin lines mark the word boundaries on the spectrogram. The sound itself shows nothing at those lines: every syllable is the same length, the same loudness, and the same pitch wherever it falls.',
   '“Play again, with each word’s last syllable lengthened” plays the same 72 words with the vowel of every word’s last syllable lengthened by 100 milliseconds.',
 ]
 

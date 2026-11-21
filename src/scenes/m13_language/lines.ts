@@ -45,7 +45,7 @@ export const MADE_UP_LANGUAGE_LINE = 'The language in this part is made up. Its 
 export const LENGTHENED_DIFFERENTLY_LINE = 'The original experiment lengthened the last syllable of three of the six words. This replay lengthens all six, so the difference is easy to hear.'
 
 /** 9. Part 2, Step 2. */
-export const COUNTS_FROM_YOUR_STREAM_LINE = 'Every count on this panel is from the 300 syllables printed on the board.'
+export const COUNTS_FROM_YOUR_STREAM_LINE = 'Every count on this panel is from the first 300 syllables of your stream, which are printed when the search ends.'
 
 /** 10. Part 2, Step 3. */
 export const ADULTS_21_MINUTES_LINE = 'The adults’ results came after 21 minutes of listening.'

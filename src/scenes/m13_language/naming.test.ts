@@ -211,7 +211,7 @@ describe('the lines that are content, each on its panel (§10)', () => {
       ['MADE_OFFLINE_LINE', /made by a computer before the lab was posted/, 'words/screens.ts'],
       ['SETTINGS_NOT_MEASUREMENTS_LINE', /a setting of the synthesizer/, 'sounds/screens.ts'],
       ['MADE_UP_LANGUAGE_LINE', /The language in this part is made up/, 'stream/screens.ts'],
-      ['COUNTS_FROM_YOUR_STREAM_LINE', /300 syllables printed on the board/, 'stream/screens.ts'],
+      ['COUNTS_FROM_YOUR_STREAM_LINE', /first 300 syllables of your stream/, 'stream/screens.ts'],
       ['REAL_SPEECH_LINE', /spoken to young children and transcribed by researchers/, 'stream/screens.ts'],
       ['NO_FEEDBACK_LINE', /No one will say whether a choice was right/, 'words/screens.ts'],
       ['FITTED_TO_YOUR_ACCURACY_LINE', /chosen to match your overall accuracy/, 'words/step3Screen.ts'],
