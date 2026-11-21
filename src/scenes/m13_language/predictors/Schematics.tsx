@@ -4,7 +4,9 @@
  * colors, legible at about 360 px wide and scaled to the column it sits in.
  * Each drawing is a picture of the shape of the computation, not of the
  * numbers: the units, the layers, the arrows between them, and the labels
- * that name the sizes.
+ * that name the sizes. In the recurrent network's drawing each layer is in
+ * a box with one arrow to the next, and the hidden and output units are
+ * filled to suggest a pattern of activity (Jon, 2026-11-21).
  */
 
 import type { ReactNode } from 'react'
@@ -18,8 +20,13 @@ const ACTUATOR = 'var(--actuator)'
 
 const svgStyle = { display: 'block', width: '100%', maxWidth: 440, background: 'var(--bg)', borderRadius: 8 } as const
 
-/** A row of unit circles, with a gap and an ellipsis to say the row goes on. */
-function Units({ y, x0, x1, n, r, color }: { y: number; x0: number; x1: number; n: number; r: number; color: string }) {
+/**
+ * A row of unit circles, with a gap and an ellipsis to say the row goes on.
+ * `activity` fills each unit with the layer's color at that opacity, to
+ * suggest a pattern of activity (Jon, 2026-11-21); without it the units
+ * are outlines.
+ */
+function Units({ y, x0, x1, n, r, color, activity }: { y: number; x0: number; x1: number; n: number; r: number; color: string; activity?: readonly number[] }) {
   const left = Math.floor(n / 2)
   const right = n - left
   const step = (x1 - x0) / (n + 1)
@@ -30,7 +37,7 @@ function Units({ y, x0, x1, n, r, color }: { y: number; x0: number; x1: number; 
   return (
     <g>
       {xs.map((x, i) => (
-        <circle key={i} cx={x} cy={y} r={r} fill="none" stroke={color} strokeWidth={1.2} />
+        <circle key={i} cx={x} cy={y} r={r} fill={activity ? color : 'none'} fillOpacity={activity ? activity[i] : undefined} stroke={color} strokeWidth={1.2} />
       ))}
       <text x={gap} y={y + 3} fontSize={10} textAnchor="middle" fill={MUTED}>
         …
@@ -42,11 +49,19 @@ function Units({ y, x0, x1, n, r, color }: { y: number; x0: number; x1: number; 
 /** An arrow head pointing up at (x, y). */
 const headUp = (x: number, y: number, color: string) => <path d={`M ${x - 3.5} ${y + 6} L ${x} ${y} L ${x + 3.5} ${y + 6}`} fill="none" stroke={color} strokeWidth={1.2} />
 
+/** A made-up pattern of activity over the hidden units drawn: some high, some low, no order to it. */
+const HIDDEN_ACTIVITY = [0.85, 0.15, 0.55, 0.3, 0.95, 0.1, 0.4, 0.7, 0.2, 0.6, 0.05, 0.9, 0.35, 0.5] as const
+/** A made-up pattern over the output units drawn: one token probable, a few less so, the rest near 0. */
+const OUTPUT_ACTIVITY = [0.08, 0.05, 0.9, 0.12, 0.04, 0.35, 0.06, 0.1, 0.55, 0.05, 0.15, 0.07] as const
+
 /**
  * The simple recurrent network: 52 input units, one for each token, with
  * one on; a hidden layer of 64 units; 52 output units, one probability for
  * each token; and the hidden layer's activity at the token before fed back
- * into the hidden layer.
+ * into the hidden layer. Each layer sits in a box, one arrow runs from a
+ * layer to the next, and the hidden and output units are filled to
+ * suggest a pattern of activity (Jon, 2026-11-21; before, three lines
+ * stood in for the weights and every unit was an outline).
  */
 export function SrnSchematic() {
   const W = 360
@@ -57,27 +72,33 @@ export function SrnSchematic() {
   const x0 = 82
   const x1 = 218
   const mid = (x0 + x1) / 2
-  const band = (yFrom: number, yTo: number, color: string) => <path d={`M ${x0 - 8} ${yFrom - 9} L ${x0 - 8} ${yTo + 9} M ${x1 + 8} ${yFrom - 9} L ${x1 + 8} ${yTo + 9} M ${mid} ${yFrom - 9} L ${mid} ${yTo + 9}`} fill="none" stroke={color} strokeWidth={1} opacity={0.8} />
+  const boxX = x0 - 14
+  const boxW = x1 - x0 + 28
+  const half = 13
+  const box = (y: number, color: string) => <rect x={boxX} y={y - half} width={boxW} height={2 * half} rx={5} fill="none" stroke={color} strokeWidth={1} opacity={0.9} />
+  const arrow = (yFrom: number, yTo: number) => (
+    <g>
+      <line x1={mid} y1={yFrom - half} x2={mid} y2={yTo + half} stroke={TEXT} strokeWidth={1.2} />
+      {headUp(mid, yTo + half, TEXT)}
+    </g>
+  )
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="the simple recurrent network: input, hidden layer with its own activity at the token before fed back, output" style={svgStyle} data-schematic="srn">
-      {/* input to hidden, hidden to output: three lines each, as a stand-in for every weight */}
-      {band(yIn, yHid, BORDER)}
-      {headUp(x0 - 8, yHid + 9, BORDER)}
-      {headUp(mid, yHid + 9, BORDER)}
-      {headUp(x1 + 8, yHid + 9, BORDER)}
-      {band(yHid, yOut, BORDER)}
-      {headUp(x0 - 8, yOut + 9, BORDER)}
-      {headUp(mid, yOut + 9, BORDER)}
-      {headUp(x1 + 8, yOut + 9, BORDER)}
-      {/* the three layers */}
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="the simple recurrent network: an input layer, a hidden layer with its own activity at the token before fed back, and an output layer, each in a box, with one arrow from each layer to the next" style={svgStyle} data-schematic="srn">
+      {/* one arrow from each layer to the next, standing for all the weights between them */}
+      {arrow(yIn, yHid)}
+      {arrow(yHid, yOut)}
+      {/* the three layers, each in a box */}
+      {box(yIn, SENSOR)}
+      {box(yHid, ACCENT)}
+      {box(yOut, ACTUATOR)}
       <Units y={yIn} x0={x0} x1={x1} n={12} r={5} color={SENSOR} />
-      <Units y={yHid} x0={x0} x1={x1} n={14} r={5} color={ACCENT} />
-      <Units y={yOut} x0={x0} x1={x1} n={12} r={5} color={ACTUATOR} />
+      <Units y={yHid} x0={x0} x1={x1} n={14} r={5} color={ACCENT} activity={HIDDEN_ACTIVITY} />
+      <Units y={yOut} x0={x0} x1={x1} n={12} r={5} color={ACTUATOR} activity={OUTPUT_ACTIVITY} />
       {/* the one input unit that is on */}
       <circle cx={x0 + ((x1 - x0) / 13) * 2} cy={yIn} r={5} fill={SENSOR} />
-      {/* the loop: the hidden layer's activity at the token before, back into the hidden layer */}
-      <path d={`M ${x1 + 14} ${yHid + 4} C ${x1 + 62} ${yHid + 40}, ${x1 + 62} ${yHid - 40}, ${x1 + 14} ${yHid - 4}`} fill="none" stroke={ACCENT} strokeWidth={1.4} />
-      <path d={`M ${x1 + 14} ${yHid - 4} L ${x1 + 22} ${yHid - 11} M ${x1 + 14} ${yHid - 4} L ${x1 + 23} ${yHid - 1}`} fill="none" stroke={ACCENT} strokeWidth={1.4} />
+      {/* the loop: the hidden layer's activity at the token before, back into the hidden layer, from the box's right side */}
+      <path d={`M ${boxX + boxW} ${yHid + 6} C ${x1 + 62} ${yHid + 40}, ${x1 + 62} ${yHid - 40}, ${boxX + boxW} ${yHid - 6}`} fill="none" stroke={ACCENT} strokeWidth={1.4} />
+      <path d={`M ${boxX + boxW} ${yHid - 6} L ${boxX + boxW + 8} ${yHid - 13} M ${boxX + boxW} ${yHid - 6} L ${boxX + boxW + 9} ${yHid - 3}`} fill="none" stroke={ACCENT} strokeWidth={1.4} />
       <text x={x1 + 66} y={yHid - 8} fontSize={8.5} fill={ACCENT}>
         the hidden layer’s
       </text>
@@ -91,10 +112,10 @@ export function SrnSchematic() {
       <text x={W / 2} y={14} fontSize={10} textAnchor="middle" fill={TEXT}>
         output: 52 units, the probability of each token as the next
       </text>
-      <text x={x0 - 16} y={yHid + 3} fontSize={9.5} textAnchor="end" fill={TEXT}>
+      <text x={boxX - 6} y={yHid + 3} fontSize={9.5} textAnchor="end" fill={TEXT}>
         hidden layer
       </text>
-      <text x={x0 - 16} y={yHid + 14} fontSize={9} textAnchor="end" fill={MUTED}>
+      <text x={boxX - 6} y={yHid + 14} fontSize={9} textAnchor="end" fill={MUTED}>
         64 units
       </text>
       <text x={W / 2} y={H - 18} fontSize={10} textAnchor="middle" fill={TEXT}>

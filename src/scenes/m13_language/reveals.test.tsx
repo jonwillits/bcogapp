@@ -379,7 +379,7 @@ describe('Part 4: commit, then reveal', () => {
     k.store.compute()
     expect(k.all()).toMatch(/data-reveal="ngram"/)
     expect(k.all()).toMatch(/data-bars="from-two-3"/)
-    expect(k.all()).toMatch(/data-prompt-column="girls who boys chase"/)
+    expect(k.all()).toMatch(/data-prompt-column="girls who dogs chase"/)
     k.store.open(4)
     k.store.begin()
     expect(k.all()).not.toMatch(/data-reveal="networks"|data-palette/)

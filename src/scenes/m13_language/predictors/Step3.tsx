@@ -33,7 +33,7 @@ import { PREDICTIONS, type PredictorsStore } from "./store";
 /**
  * Step 3's screens (spec §8.4; Jon, 2026-11-17: everything in the center;
  * 2026-11-19: two screens). Prediction from counts: three prompts side by
- * side (girls; girls who chase boys; girls who boys chase), each with what
+ * side (girls; girls who chase boys; girls who dogs chase), each with what
  * the grammar allows next, the prediction from the one token before and
  * from the two tokens before, after the one prediction is committed and
  * Compute is pressed. One point per word: a token's one list of counts,
@@ -47,7 +47,7 @@ const idx = (t: string) => VOCABULARY.indexOf(t);
 export const PROMPTS: string[][] = [
   ["girls"],
   ["girls", "who", "chase", "boys"],
-  ["girls", "who", "boys", "chase"],
+  ["girls", "who", "dogs", "chase"],
 ];
 
 /** The two screens' names, at the top of the stage. */
@@ -310,7 +310,7 @@ export function Step3Stage({ s }: { s: PredictorsStore }) {
                 </Note>
                 <Note
                   data-after-compute
-                >{`Your prediction: ${s.predicted("counts")}. What decides each prediction is the token or two tokens just before it. After “girls”, and after “girls who chase boys”, the token just before is a plural noun. After “girls who boys chase”, the token just before is a verb, “chase”. The subject of the sentence, “girls”, is further back than either count reaches when a clause stands between.`}</Note>
+                >{`Your prediction: ${s.predicted("counts")}. What decides each prediction is the token or two tokens just before it. After “girls”, and after “girls who chase boys”, the token just before is a plural noun. After “girls who dogs chase”, the token just before is a verb, “chase”. The subject of the sentence, “girls”, is further back than either count reaches when a clause stands between.`}</Note>
               </>
             )}
           </>

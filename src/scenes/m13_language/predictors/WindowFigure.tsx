@@ -11,18 +11,20 @@ import { heatColor, heatShare } from './CountTable'
  * as counts.ts counts); at the right, the matrix's rows and columns for
  * those tokens and one more, every cell 0 but the ones this step adds to,
  * in the target's row. The stretch is the first place in the corpus where
- * the window holds no end mark, so that the picture is one sentence's.
+ * the window holds no end mark, so that the picture is one sentence's, and
+ * no form of chase (Jon, 2026-11-21: no example in the lab has men or boys
+ * chasing girls or women; the corpus's first sentence does).
  */
 export const WINDOW_FIGURE_CAPTION = 'Left: the window at one place in the corpus, 4 tokens wide, with its target at the right end; above each earlier token, what this step adds to the count of that token with the target: 4 for the neighbor, down to 1 at the window’s far edge. Right: the rows and columns of the matrix for those tokens and one more, with every cell 0 except the ones this step adds to, in the target’s row.'
 
 const MONO = 'var(--font-mono)'
 
 export function WindowFigure({ tokens, windowSize }: { tokens: readonly number[]; windowSize: number }) {
-  const end = VOCABULARY.indexOf(END)
+  const skip = new Set([END, 'chase', 'chases'].map((t) => VOCABULARY.indexOf(t)))
   let target = Math.min(windowSize, Math.max(0, tokens.length - 1))
   for (let i = windowSize; i < tokens.length; i++) {
     let ok = true
-    for (let d = 0; d <= windowSize; d++) if (tokens[i - d] === end) ok = false
+    for (let d = 0; d <= windowSize; d++) if (skip.has(tokens[i - d])) ok = false
     if (ok) {
       target = i
       break
