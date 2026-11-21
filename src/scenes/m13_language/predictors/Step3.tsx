@@ -121,9 +121,10 @@ function PromptColumn({ s, prompt, k, width }: { s: PredictorsStore; prompt: str
 
 export function Step3Stage({ s }: { s: PredictorsStore }) {
   const ref = useRef<HTMLDivElement>(null)
-  const room = useWidth(ref, 900)
-  const inRow = room >= 760
-  const col = inRow ? Math.floor((room - 32) / 3) : Math.min(560, room)
+  const room = useWidth(ref, 1000)
+  // Three columns across only where each gets at least about 320 px; otherwise one under another at a reading width (Jon, 2026-11-20: the columns were a few words wide).
+  const inRow = room >= 1000
+  const col = inRow ? Math.floor((room - 32) / 3) : Math.min(640, room)
   return (
     <StagePanel wide testId={`predictors-3-${s.screen3}`}>
       <div style={{ fontSize: 14, fontWeight: 600 }}>What counts cannot do</div>
@@ -138,7 +139,7 @@ export function Step3Stage({ s }: { s: PredictorsStore }) {
           ))}
           <PredictControls s={s} />
           {!s.computed && <Note data-awaiting-commit>The predictions from counts appear once your prediction above is committed and “Compute” is pressed.</Note>}
-          <div ref={ref} style={{ display: 'flex', flexDirection: inRow ? 'row' : 'column', gap: 16, alignItems: 'flex-start' }} data-reveal={s.computed ? 'ngram' : undefined} data-prompts-layout={inRow ? 'three-in-a-row' : 'stacked'}>
+          <div ref={ref} style={{ display: 'flex', flexDirection: inRow ? 'row' : 'column', gap: 16, alignItems: 'flex-start', width: '100%', minWidth: 0 }} data-reveal={s.computed ? 'ngram' : undefined} data-prompts-layout={inRow ? 'three-in-a-row' : 'stacked'}>
             {PROMPTS.map((p, k) => (
               <PromptColumn key={p.join(' ')} s={s} prompt={p} k={k} width={col} />
             ))}

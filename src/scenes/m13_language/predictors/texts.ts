@@ -90,7 +90,7 @@ export const VIEWS_TEXT = {
 /** Step 3's one screen of predictions (Jon, 2026-11-19): three prompts side by side, each with the prediction from the one word before and from the two words before. */
 export const STEP3_PREDICT = [
   'The predictor gives a probability to each possible next token in two ways. From the one token before: the count of that token followed by the candidate, divided by the count of that token followed by anything. From the two tokens before: the count of those two followed by the candidate, divided by the count of those two followed by anything. The panel prints the division behind each number.',
-  'Three prompts stand side by side. In the grammar, the next token after each of them is a plural verb form, because the subject of each is “girls”, or “who”, which opens one more clause. Under each prompt, the line says what the grammar allows next, then the two predictions from counts appear as bars, one for every token with a count.',
+  'Three prompts stand side by side, or one under another when the panel is narrow. In the grammar, the next token after each of them is a plural verb form, because the subject of each is “girls”, or “who”, which opens one more clause. Under each prompt, the line says what the grammar allows next, then the two predictions from counts appear as bars, one for every token with a count.',
 ]
 
 export const STEP3_ONE_POINT = [
