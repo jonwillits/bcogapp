@@ -7,7 +7,8 @@ import { clusterTree, embedding, nearest, principalPlane } from '../../../sim/la
 import { reference } from '../../../sim/language/references'
 import { ReferencePanel } from '../ReferencePanel'
 import { CountTable, HeatLegend, SimilarityDemo, tableMax } from './CountTable'
-import { STEP2_PANEL, VIEWS_TEXT } from './texts'
+import { STEP2_PANEL, TABLE_NOTE, VIEWS_TEXT } from './texts'
+import { WindowFigure } from './WindowFigure'
 import { PREDICTIONS, type PredictorsStore } from './store'
 
 /**
@@ -19,7 +20,9 @@ import { PREDICTIONS, type PredictorsStore } from './store'
  * the similarity demo; the words as points on a plane; the nearest neighbors
  * of a word chosen from a menu (Jon, 2026-11-20); the tree of clusters as a dendrogram.
  * One similarity measure throughout: correlation. The window and the
- * two-list rule are fixed (store.ts says why); the settings were cut.
+ * two-list rule are fixed (store.ts says why); the settings were cut. The
+ * texts are Jon's (2026-11-21), with the window figure between the two
+ * opening paragraphs (`WindowFigure.tsx`).
  */
 export function Step2Controls({ s }: { s: PredictorsStore }) {
   const committed = s.predicted('nearest')
@@ -90,17 +93,15 @@ export function Step2Stage({ s }: { s: PredictorsStore }) {
   return (
     <StagePanel wide testId="predictors-2">
       <div style={{ fontSize: 14, fontWeight: 600 }}>A count model</div>
-      {STEP2_PANEL.map((p) => (
-        <Note key={p.slice(0, 12)} style={{ color: 'var(--text)' }}>
-          {p}
-        </Note>
-      ))}
+      <Note style={{ color: 'var(--text)' }}>{STEP2_PANEL[0]}</Note>
+      <WindowFigure tokens={s.tokens} windowSize={s.windowSize} />
+      <Note style={{ color: 'var(--text)' }}>{STEP2_PANEL[1]}</Note>
       <Step2Controls s={s} />
       {!committed && <Note data-awaiting-commit>The table of counts, the demo, the plane, the tree, and the nearest neighbors appear once your prediction above is committed and “Count” has run.</Note>}
       {m && (
         <>
           <GroupLabel>The table of counts, every token</GroupLabel>
-          <Note>{`Each row is a token and each column another token. A cell is how often the row token came after the column token within the window, added up over the corpus with the window’s weights. So a token’s row is its counts of the tokens before it, and its column, read down, is its counts of the tokens after it. The table is wider than the panel: it scrolls sideways inside its own frame, and the column of row tokens stays put. ${s.counting ? 'The table is filling as the window moves along the corpus.' : 'The window has run through the whole corpus.'}`}</Note>
+          <Note>{`${TABLE_NOTE} ${s.counting ? 'The table is filling as the window moves along the corpus.' : 'The window has run through the whole corpus.'}`}</Note>
           <HeatLegend max={max} />
           <CountTable m={m} which="before" max={max} testId="counts" />
           {done && <SimilarityDemo m={m} max={max} />}
@@ -109,7 +110,9 @@ export function Step2Stage({ s }: { s: PredictorsStore }) {
       {done && plane && (
         <div data-reveal="counts" style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
           <GroupLabel>The words as points on a plane</GroupLabel>
-          <Note>{VIEWS_TEXT.plane} Nouns blue, verbs orange.</Note>
+          {VIEWS_TEXT.plane.map((p) => (
+            <Note key={p.slice(0, 20)}>{p}</Note>
+          ))}
           <FitWidth max={640}>{(w) => <Scatter width={w} height={Math.round(w * 0.58)} xLabel="first direction of greatest difference" yLabel="second direction" testId="plane" points={words.map((w, i) => ({ x: plane[i][0], y: plane[i][1], label: VOCABULARY[w], color: nounOf(VOCABULARY[w]) ? 'var(--accent)' : 'var(--sensor)' }))} />}</FitWidth>
           <GroupLabel>The nearest neighbors</GroupLabel>
           <Note>Choose a word from the menu to see its five nearest neighbors.</Note>

@@ -1,7 +1,7 @@
 import { Fragment } from 'react'
 import { GroupLabel, Note } from '../ui'
 import { correlation, embedding, type CountModel } from '../../../sim/language/predictors/counts'
-import { SIMILARITY_TEXT } from './texts'
+import { MATRIX_NOTE, SIMILARITY_TEXT } from './texts'
 
 /**
  * Step 2's table of counts as a heat map (Jon, 2026-11-17): every word a row
@@ -12,11 +12,13 @@ import { SIMILARITY_TEXT } from './texts'
  * rows scroll down. Not built from FixedLines; the scroll container has
  * `flexShrink: 0` so a capped column cannot squeeze it to nothing.
  *
- * Under the table, the similarity demo: ten words' lists as strips of heat
- * cells and the 10 × 10 matrix of their correlations, the one similarity
- * measure the step uses (Jon, 2026-11-20: two people, two small animals,
- * two foods, four verbs). The column labels sit at the right of their
- * cells, over the numbers (Jon, 2026-11-20).
+ * Under the table, the similarity demo: ten words' lists as strips, each
+ * cell its normalized value, warm above the list's mean and blue below
+ * (Jon, 2026-11-21: the strips show what the correlation multiplies), and
+ * the 10 × 10 matrix of their correlations, the one similarity measure the
+ * step uses (Jon, 2026-11-20: two people, two small animals, two foods,
+ * four verbs). The column labels sit at the right of their cells, over the
+ * numbers (Jon, 2026-11-20).
  */
 
 /** The share of the scale a count fills: the square root of its share of the largest count. */
@@ -106,11 +108,26 @@ export function HeatLegend({ max }: { max: number }) {
 /** The ten words of the similarity demo (Jon, 2026-11-20): two people, two small animals, two foods, two intransitive verbs, two transitive-or-optional verbs. */
 export const DEMO_WORDS = ['boy', 'girl', 'mouse', 'bird', 'cookie', 'sandwich', 'walks', 'sleeps', 'chases', 'sees']
 
-/** The similarity demo: each word's list of counts as a strip of heat cells, then the matrix of correlations. */
-export function SimilarityDemo({ m, max, words = DEMO_WORDS }: { m: CountModel; max: number; words?: string[] }) {
+/** A list's normalized values: centered on its mean and divided by its standard deviation; all zero when the list has no spread. */
+export function normalized(list: Float64Array): number[] {
+  const n = list.length
+  if (n === 0) return []
+  let mean = 0
+  for (const v of list) mean += v / n
+  let variance = 0
+  for (const v of list) variance += ((v - mean) * (v - mean)) / n
+  const sd = Math.sqrt(variance)
+  return Array.from(list, (v) => (sd > 0 ? (v - mean) / sd : 0))
+}
+/** How far from the mean a strip's cell is drawn: a normalized value of 3 or more is full strength. */
+const STRIP_FULL = 3
+
+/** The similarity demo: each word's list as a strip of its normalized values, then the matrix of correlations. */
+export function SimilarityDemo({ m, words = DEMO_WORDS }: { m: CountModel; max?: number; words?: string[] }) {
   const V = m.vocab
   const lists = words.map((w) => embedding(m, V.indexOf(w)))
   const n = lists[0]?.length ?? 0
+  const zs = lists.map(normalized)
   const corr = lists.map((a) => lists.map((b) => correlation(a, b)))
   return (
     <div data-similarity-demo style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0, minWidth: 0 }}>
@@ -125,16 +142,13 @@ export function SimilarityDemo({ m, max, words = DEMO_WORDS }: { m: CountModel; 
           <Fragment key={w}>
             <span style={{ fontFamily: MONO, fontSize: 11 }}>{w}</span>
             <svg width="100%" height={14} viewBox={`0 0 ${Math.max(1, n)} 1`} preserveAspectRatio="none" shapeRendering="crispEdges" style={{ display: 'block', background: 'var(--bg)', border: '1px solid var(--border)' }} data-strip={w}>
-              {Array.from(lists[k]).map((v, i) => {
-                const t = heatShare(v, max)
-                return t > 0 ? <rect key={i} x={i} y={0} width={1} height={1} fill={heatColor(t)} /> : null
-              })}
+              {zs[k].map((z, i) => (z !== 0 ? <rect key={i} x={i} y={0} width={1} height={1} fill={correlationColor(Math.max(-1, Math.min(1, z / STRIP_FULL)))} /> : null))}
               {m.separate && <line x1={V.length} y1={0} x2={V.length} y2={1} stroke="var(--text)" strokeWidth={1} vectorEffect="non-scaling-stroke" />}
             </svg>
           </Fragment>
         ))}
       </div>
-      <Note>{`Each strip is one word’s whole list of ${n} counts, one cell per count, in the order of the table’s columns${m.separate ? ': the counts of the words before, then, after the mark, the counts of the words after' : ''}, in the table’s colors, shrunk to fit the width.`}</Note>
+      <Note>{`Each strip is one word’s whole list of ${n} normalized values, one cell per position, in the order of the table’s columns${m.separate ? ': the words before, then, after the mark, the words after' : ''}, shrunk to fit the width. A warm cell is above the vector’s mean and a blue cell below it, the darker the farther from the mean.`}</Note>
       <table data-demo-matrix style={{ borderCollapse: 'separate', borderSpacing: 0, fontFamily: MONO, fontSize: 11, alignSelf: 'flex-start' }}>
         <thead>
           <tr>
@@ -164,7 +178,7 @@ export function SimilarityDemo({ m, max, words = DEMO_WORDS }: { m: CountModel; 
           ))}
         </tbody>
       </table>
-      <Note>The matrix: the correlation of each pair of lists, to two decimals. A warm cell is above 0 and a blue cell below, the darker the stronger; the diagonal is each word with itself, 1.00.</Note>
+      <Note>{MATRIX_NOTE}</Note>
     </div>
   )
 }

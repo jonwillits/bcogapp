@@ -351,6 +351,9 @@ describe('Part 4: commit, then reveal', () => {
     const k = fresh(predictors as Mod, (s, p) => new PredictorsStore(s, p))
     k.store.open(2)
     k.store.begin()
+    // The window figure (Jon, 2026-11-21) stands above the prediction: one place in the corpus, the target, and the matrix's cells this step adds to.
+    expect(k.all()).toMatch(/data-window-figure/)
+    expect(k.all()).toMatch(/data-target="true"/)
     await k.store.count()
     expect(k.store.model).toBeNull()
     expect(k.all()).not.toMatch(/data-reveal="counts"/)

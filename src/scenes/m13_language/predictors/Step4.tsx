@@ -6,7 +6,7 @@ import { reference } from '../../../sim/language/references'
 import { NOT_ENGLISH_LINE, REAL_WEIGHTS_LINE, TRAINED_BEFORE_LINE } from '../lines'
 import { VOCABULARY, kindOf, verbOf, END, WHO } from '../../../sim/language/predictors/grammar'
 import type { TransformerOutput } from '../../../sim/language/predictors/runtime/seqNet'
-import { STEP4_MODELS } from './texts'
+import { STEP4_INTRO, STEP4_SRN, STEP4_TRANSFORMER, TEMPERATURE_LINE } from './texts'
 import { SrnSchematic, TransformerSchematic } from './Schematics'
 import { PREDICTIONS, TEMPERATURES, type CountPrediction, type PredictorsStore } from './store'
 
@@ -179,17 +179,25 @@ export function Step4Stage({ s }: { s: PredictorsStore }) {
     <StagePanel wide testId="predictors-4">
       <div ref={ref} style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0, width: '100%' }}>
         <div style={{ fontSize: 14, fontWeight: 600 }}>A simple recurrent network and a transformer</div>
-        <Note style={{ color: 'var(--text)' }}>{STEP4_MODELS[0]}</Note>
+        <Note style={{ color: 'var(--text)' }}>{STEP4_INTRO}</Note>
         <div style={{ display: 'flex', flexDirection: twoColumns ? 'row' : 'column', gap: GAP, alignItems: 'flex-start' }} data-schematics>
           <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
             <GroupLabel>The simple recurrent network</GroupLabel>
             <SrnSchematic />
-            <Note style={{ color: 'var(--text)' }}>{STEP4_MODELS[1]}</Note>
+            {STEP4_SRN.map((p) => (
+              <Note key={p.slice(0, 20)} style={{ color: 'var(--text)' }}>
+                {p}
+              </Note>
+            ))}
           </div>
           <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
             <GroupLabel>The transformer</GroupLabel>
             <TransformerSchematic />
-            <Note style={{ color: 'var(--text)' }}>{STEP4_MODELS[2]}</Note>
+            {STEP4_TRANSFORMER.map((p) => (
+              <Note key={p.slice(0, 20)} style={{ color: 'var(--text)' }}>
+                {p}
+              </Note>
+            ))}
           </div>
         </div>
         {s.loadError && <Note data-load-error>{s.loadError}</Note>}
@@ -246,7 +254,7 @@ export function Step4Stage({ s }: { s: PredictorsStore }) {
             )}
             <GroupLabel>Generated sentences</GroupLabel>
             <Note>{`“Generate a sentence” samples one sentence from each network at the temperature set beside it. The networks were trained on sentences from their first word, so the first token is drawn from how often each token begins a sentence in the corpus; every token after it is drawn from the network’s probabilities, one at a time, until the end mark or 32 tokens. Each sentence is marked with whether the grammar allows it. The newest pair is at the top.`}</Note>
-            <Note data-temperature-line>{`The temperature sets how the network’s probabilities are used when a token is drawn. At 1.0 each token is drawn with the probability the network gives it. Below 1.0 the probabilities are sharpened, so the most probable tokens are drawn more often; at 0.2 the most probable token is drawn almost every time, and the sentence comes out the same again and again. Above 1.0 the probabilities are flattened, so improbable tokens are drawn more often; at 2.0 many sentences break the grammar.`}</Note>
+            <Note data-temperature-line>{TEMPERATURE_LINE}</Note>
             <div style={{ display: 'flex', gap: GAP, alignItems: 'flex-start', flexWrap: 'wrap' }}>
               <GenerateControls s={s} />
               <div style={{ display: 'flex', gap: GAP, flexWrap: w >= 640 ? 'nowrap' : 'wrap', flex: '1 1 400px', minWidth: 0 }} data-generated-columns>
