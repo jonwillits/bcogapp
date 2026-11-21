@@ -10,7 +10,7 @@ export const SIX_WORDS_LINE = 'The language is made up. It has six words and no 
 
 export const STEP1_AFTER_COMMIT = [
   'The language has six words, each of three syllables: babupu, bupada, dutaba, patubi, pidabu, tutibu. The minute you heard was 72 words in a row, in a random order in which no word came twice in a row, with no pause between them.',
-  'Two replays are now available. “Play again, with the words marked” plays the same minute; above the spectrogram, a strip of syllables fills in as the sound plays, and each word lights up in its own color as it is heard. Thin lines mark the word boundaries on the spectrogram. The sound itself shows nothing at those lines: every syllable is the same length, the same loudness, and the same pitch wherever it falls.',
+  'Two replays are now available. “Play again, with the words marked” plays the same minute, now with its spectrogram scrolling under a cursor at the moment being played. Above the spectrogram, a strip of syllables fills in as the sound plays, and each word lights up in its own color as it is heard. Thin lines mark the word boundaries on the spectrogram. The sound itself shows nothing at those lines: every syllable is the same length, the same loudness, and the same pitch wherever it falls.',
   '“Play again, with each word’s last syllable lengthened” plays the same 72 words with the vowel of every word’s last syllable lengthened by 100 milliseconds.',
 ]
 

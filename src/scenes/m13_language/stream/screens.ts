@@ -39,9 +39,9 @@ export const SCREENS: Record<Step, StepScreen> = {
     kind: 'experiment',
     willDo: [
       'In this step you will hear one minute of a made-up language. The language has words, but its words have no meanings, and it has no grammar. A synthetic voice speaks its words one after another, with no pauses between them. Your task, as in the original experiment, is to work out where its words begin and end. There is no test.',
-      'Press “Play the minute”. The sound plays for 60 seconds. A large timer counts down. Under the timer, a spectrogram scrolls past a cursor at the sound being played. A spectrogram is a picture of a sound: time runs from left to right, frequency from bottom to top, and brightness shows energy. Nothing on the screen marks where a word begins or ends.',
+      'Press “Play the minute”. The sound plays for 60 seconds. A large timer counts down, and nothing else is on the screen while the sound plays. Listen.',
       'When the minute ends, answer one question: how many different words do you think the language has? Choose a number from 1 to 20. A box under the number takes any words you think you heard, typed as they sound. The box is optional. Then press “Commit my answer”.',
-      'After the commit, two more buttons appear. Each one replays the same minute in a different way, and the results under them say what each replay adds.',
+      'After the commit, two more buttons appear. Each one replays the same minute in a different way, with its spectrogram, the picture of the sound from Part 1, scrolling under a cursor, and the results under them say what each replay adds.',
       'Your answer, any words you typed, and the time are recorded.',
     ],
     minutes: stepParams('stream', 1).minutes,

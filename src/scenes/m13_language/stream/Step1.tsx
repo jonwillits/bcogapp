@@ -10,12 +10,13 @@ import { MINUTE_SYLLABLES, type StreamStore } from './store'
 
 /**
  * Step 1's stage (spec §6.1): Play the minute, the large timer and the
- * line saying what is happening now, the spectrogram scrolling under a
- * cursor with nothing marking words, the committed answer, and after the
- * commit the two replays (the marked one with the word strip and boundary
- * lines, and the lengthened one), the reveal with its explanation, and the
- * button that comes next (Jon, 2026-11-18). The first playback stops and
- * starts again if the page is hidden.
+ * line saying what is happening now, and nothing else while the first
+ * playback runs (Jon, 2026-11-20: no spectrogram, so that the student
+ * listens), the committed answer, and after the commit the two replays,
+ * each with the spectrogram scrolling under a cursor (the marked one with
+ * the word strip and boundary lines, and the lengthened one), the reveal
+ * with its explanation, and the button that comes next (Jon, 2026-11-18).
+ * The first playback stops and starts again if the page is hidden.
  */
 export function Step1Stage({ s, onNext }: { s: StreamStore; onNext?: () => void }) {
   const read = useCallback(() => s.cursor(), [s])
@@ -41,14 +42,13 @@ export function Step1Stage({ s, onNext }: { s: StreamStore; onNext?: () => void 
         </div>
       )}
       {done && s.replay === 'marked' && s.assembled && <WordStrip stream={s.stream} n={MINUTE_SYLLABLES} marks={s.assembled.marks} cursorS={cursor} />}
-      {s.spectrograms && s.assembled && (s.replay !== null || playing) && <Strip stream={s.stream} n={MINUTE_SYLLABLES} spectrograms={s.replay === 'long' ? s.spectrogramsLong! : s.spectrograms} cursorS={cursor} marks={s.assembled.marks} marked={done !== null && s.replay === 'marked'} />}
-      {!s.assembled && <div style={{ height: 150, borderRadius: 8, background: '#0b1020' }} data-strip="empty" />}
+      {done && s.spectrograms && s.assembled && s.replay !== null && <Strip stream={s.stream} n={MINUTE_SYLLABLES} spectrograms={s.replay === 'long' ? s.spectrogramsLong! : s.spectrograms} cursorS={cursor} marks={s.assembled.marks} marked={s.replay === 'marked'} />}
       {!done && (
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
           <Btn primary onClick={() => s.playMinute('first')} disabled={!s.isLoaded(1) || playing || s.minutePlayed}>
             Play the minute
           </Btn>
-          <Note>The spectrogram scrolls under the white line at the moment being played. Nothing on it marks a word.</Note>
+          <Note>While the minute plays, only the timer is on the screen. Listen.</Note>
         </div>
       )}
       {!done && s.minutePlayed && (
