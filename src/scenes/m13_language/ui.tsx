@@ -240,7 +240,10 @@ export function useWidth(ref: RefObject<HTMLElement | null>, fallback: number): 
   useEffect(() => {
     const el = ref.current
     if (!el || typeof ResizeObserver === 'undefined') return
-    const read = () => setW(Math.max(1, Math.floor(el.clientWidth)))
+    // An element on its way out of the layout reports 0; keep the last real width (Jon, 2026-11-20: Step 3's columns shrank to a word after a screen switch).
+    const read = () => {
+      if (el.clientWidth > 0) setW(Math.floor(el.clientWidth))
+    }
     read()
     const ro = new ResizeObserver(read)
     ro.observe(el)
