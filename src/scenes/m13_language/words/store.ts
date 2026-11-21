@@ -7,6 +7,7 @@ import { makeDesign, isCorrect, LEARNING_TRIALS, WORDS_PER_SET, type Design, typ
 import { keyMeasure, type KeyMeasure } from '../../../sim/language/words/keyMeasure'
 import { fit, runs, runModel, ALPHA_GRID, BETA_GRID, type ModelId, type ModelRuns } from '../../../sim/language/words/fit'
 import { StepStore } from '../steps'
+import { loadAll, type LoadProgress } from '../loading'
 import type { UnderWay } from '../params'
 import { NOTICE_LINE, type Step } from './screens'
 import { loadObjects, loadWordFiles, wordClip, type ObjectFile, type WordFile } from './assets'
@@ -43,6 +44,8 @@ export class WordsStore extends StepStore<Step> {
   objects: ObjectFile[] = []
   clips = new Map<number, Clip>()
   loading = false
+  /** The count of the word sounds while they load. */
+  loadProgress: LoadProgress | null = null
   loadedOk = false
   loadError: string | null = null
 
@@ -154,23 +157,37 @@ export class WordsStore extends StepStore<Step> {
     if (step === 3 && this.result()) void this.prepareModels()
   }
 
+  /** The word files and the objects, the sounds fetched all at once and counted (Jon, 2026-11-20). */
   async ensureLoaded(): Promise<void> {
     if (this.loadedOk || this.loading) return
     this.loading = true
     this.changed()
     try {
       const ctx = player.ensure()
-      const all = await loadWordFiles()
+      const [all, objects] = await Promise.all([loadWordFiles(), loadObjects()])
       this.words = all.filter((w) => w.set === this.materials)
-      this.objects = (await loadObjects()).filter((o) => o.set === this.materials)
-      for (let w = 0; w < WORDS_PER_SET; w++) this.clips.set(w, await wordClip(this.words[w].file, ctx))
+      this.objects = objects.filter((o) => o.set === this.materials)
+      await loadAll(
+        Array.from({ length: WORDS_PER_SET }, (_, w) => async () => {
+          this.clips.set(w, await wordClip(this.words[w].file, ctx))
+        }),
+        (p) => {
+          this.loadProgress = p
+          this.changed()
+        },
+      )
       this.loadedOk = true
     } catch (e) {
       this.loadError = `A file could not be loaded: ${String(e)}`
     } finally {
       this.loading = false
+      this.loadProgress = null
       this.changed()
     }
+  }
+
+  preload(): void {
+    void this.ensureLoaded()
   }
 
   // ------------------------------------------------------- the unit

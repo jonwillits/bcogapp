@@ -52,7 +52,7 @@ export function Step2Controls({ s }: { s: PredictorsStore }) {
         <Btn primary onClick={() => void s.count()} disabled={!committed || s.counting !== null}>
           Count
         </Btn>
-        {s.counting && <Note data-counting>{`Counting: ${s.counting.done.toLocaleString()} of ${s.tokens.length.toLocaleString()} tokens.`}</Note>}
+        {s.counting && <Note data-counting>{`Counting: ${s.counting.done.toLocaleString()} of ${s.tokens.length.toLocaleString()} tokens, the ${s.training.length.toLocaleString()} training sentences.`}</Note>}
       </div>
     </div>
   )

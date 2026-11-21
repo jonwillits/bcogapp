@@ -48,7 +48,7 @@ parts:
         pause_limit_minutes: null
       3:
         kind: experiment
-        minutes: 6               # block 1 about 3 minutes with each sound played three times (Jon, 2026-11-20), block 2 about 2
+        minutes: 10              # block 1 about 3 minutes with each sound played three times, block 2 about 7 with each triad played three times (Jon, 2026-11-20)
         under_way:
           block: restart         # a block of trials, running in real time
       4:

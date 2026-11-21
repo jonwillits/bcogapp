@@ -11,6 +11,7 @@ import { makeSrn, trainSrn, srnScorer } from '../../../sim/language/stream/learn
 import { makeParser, trainParser, parserScorer, parserKnows } from '../../../sim/language/stream/learners/parser'
 import { boardSyllables, isWord, newBoard, trayCount, TRAY_MAX, type BoardState } from '../../../sim/language/stream/board'
 import { StepStore } from '../steps'
+import { loadAll, type LoadProgress } from '../loading'
 import type { UnderWay } from '../params'
 import { NOTICE_LINE, type Step } from './screens'
 import { assemble, loadRealSpeech, loadStreamJson, streamClip, syllableSpectrograms, type Assembled, type RealSpeech, type StreamJson } from './assets'
@@ -62,6 +63,8 @@ export class StreamStore extends StepStore<Step> {
   real: RealSpeech | null = null
   clips = new Map<string, Clip>()
   loading = new Set<string>()
+  /** The count of the syllable files while they load. */
+  loadProgress: LoadProgress | null = null
   loaded = new Set<string>()
   loadError: string | null = null
   spectrograms: Map<Syllable, Spectrogram> | null = null
@@ -174,10 +177,22 @@ export class StreamStore extends StepStore<Step> {
       else {
         const ctx = player.ensure()
         this.json = this.json ?? (await loadStreamJson())
-        for (const s of SYLLABLES) {
-          this.clips.set(`plain:${s}`, await streamClip(this.json.plain[s].file, ctx))
-          this.clips.set(`long:${s}`, await streamClip(this.json.long[s].file, ctx))
-        }
+        const json = this.json
+        // All 24 files at once, counted for the loading line (Jon, 2026-11-20).
+        await loadAll(
+          SYLLABLES.flatMap((s) => [
+            async () => {
+              this.clips.set(`plain:${s}`, await streamClip(json.plain[s].file, ctx))
+            },
+            async () => {
+              this.clips.set(`long:${s}`, await streamClip(json.long[s].file, ctx))
+            },
+          ]),
+          (p) => {
+            this.loadProgress = p
+            this.changed()
+          },
+        )
         this.spectrograms = syllableSpectrograms(this.clips, false)
         this.spectrogramsLong = syllableSpectrograms(this.clips, true)
       }
@@ -186,8 +201,13 @@ export class StreamStore extends StepStore<Step> {
       this.loadError = `A file could not be loaded: ${String(e)}`
     } finally {
       this.loading.delete(key)
+      this.loadProgress = null
       this.changed()
     }
+  }
+
+  preload(step: Step): void {
+    void this.ensureLoaded(step)
   }
 
   isLoaded(step: Step): boolean {

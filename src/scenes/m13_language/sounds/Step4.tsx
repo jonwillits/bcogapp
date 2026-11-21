@@ -1,5 +1,6 @@
 import { useCallback, useRef, type ReactNode } from 'react'
-import { Btn, Choice, Content, DataTable, FixedLines, GroupLabel, Note, Para, StagePanel, useWidth, type Column } from '../ui'
+import { Btn, Choice, Content, DataTable, FixedLines, GroupLabel, LoadingLine, Note, Para, StagePanel, useWidth, type Column } from '../ui'
+import { loadingText } from '../loading'
 import { LinePlot } from '../plots'
 import { Spectrogram } from '../Spectrogram'
 import { useAudioCursor } from '../hooks'
@@ -60,7 +61,10 @@ function Run({ k, children }: { k: string; children: ReactNode }) {
 function Loading({ s }: { s: SoundsStore }) {
   const ready = s.tokens !== null && s.continuumPatches !== null
   if (ready) return null
-  return <Note data-loading>{s.tokens ? `The ${STEPS} sounds are loading.` : `The 540 training syllables are loading: ${s.tokenProgress} prepared.`}</Note>
+  const p = s.loadProgress
+  // The sounds first (the token file and the continuum), then the 540 patches, counted as a bar (Jon, 2026-11-20).
+  if (p && p.what === 'syllable') return <LoadingLine text={loadingText('the training syllables', p)} done={p.done} total={p.total} testId="sounds-4" />
+  return <LoadingLine text={loadingText('the sounds', p)} testId="sounds-4" />
 }
 
 function Run1Controls({ s }: { s: SoundsStore }) {

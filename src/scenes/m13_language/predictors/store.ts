@@ -2,7 +2,7 @@ import { makeRng } from '../../../sim/random'
 import type { ProgressStore } from '../../../sim/language/progress/store'
 import { corpus, nextTokens, start, step as parseStep, accepts, SETTINGS, VOCABULARY, NOUNS, END, kindOf, type ParseState } from '../../../sim/language/predictors/grammar'
 import { makeCountModel, countStream, type CountModel } from '../../../sim/language/predictors/counts'
-import { makeNgram, predictFromOne, predictFromTwo, type Ngram } from '../../../sim/language/predictors/ngram'
+import { makeNgram, predictFromOne, predictFromTwo, type Ngram, type Prediction } from '../../../sim/language/predictors/ngram'
 import { makeProbes, type Probe } from '../../../sim/language/predictors/probes'
 import { loadDesc, loadSnapshot } from '../../../sim/language/predictors/runtime/load'
 import { softmax, srnForward, transformerForward, type SeqDesc, type SeqModel, type TransformerOutput, type SrnOutput } from '../../../sim/language/predictors/runtime/seqNet'
@@ -28,6 +28,8 @@ export type PredictionKey = keyof typeof PREDICTIONS
 
 export const SHOW_SENTENCES = 20
 export const WINDOW_DEFAULT = 4
+/** One update of a network is one gradient step on a batch of this many sentences (training/m13/train_predictors.py, BATCH; public/m13/models/training.json). */
+export const SENTENCES_PER_UPDATE = 32
 export const TEMPERATURES = { min: 0.2, max: 2.0, step: 0.1 }
 export const GENERATE_MAX = 32
 
@@ -53,9 +55,28 @@ export interface CountPrediction {
   denominator: number
 }
 
+/** The count model's state matching one snapshot of the networks (Jon, 2026-11-20): the counts over the sentences the networks had seen by then. */
+export interface CountState {
+  updates: number
+  /** How many of the training sentences are counted: 32 per update, up to all 9,000. */
+  sentences: number
+  ngram: Ngram
+  model: CountModel
+  /** Agreement by depth, as `countAgreementByDepth`. */
+  agreement: number[]
+  /** The share of next tokens the prediction from counts gives the most probability to, over the held-out sentences. */
+  heldOutAccuracy: number
+}
+
 export class PredictorsStore extends StepStore<Step> {
+  /** The whole corpus, 10,000 sentences; the first 9,000 are the training sentences every model learns from, the last 1,000 are held out. */
   readonly sentences: string[][]
+  readonly training: string[][]
+  readonly heldOut: string[][]
+  /** The training sentences as one stream, end marks included: what the count model and the n-gram model count. */
   readonly tokens: number[]
+  /** The token count of the whole corpus, for Step 1's line. */
+  readonly corpusTokens: number
   readonly probes: Probe[]
   readonly ngram: Ngram
   drafts: Partial<Record<PredictionKey, string>> = {}
@@ -90,14 +111,18 @@ export class PredictorsStore extends StepStore<Step> {
   // Step 5
   snapshotIndex = 7
   snapshots = new Map<string, SeqModel>()
-  fixedPrompt: string[] = ['boys', 'who', 'Mary', 'chases']
+  /** Step 5's prompt: a held-out sentence's prefix to start with, then whatever the student builds from the palette or draws with Change the prompt (Jon, 2026-11-20). */
+  prompt5: string[] = ['boys', 'who', 'Mary', 'chases']
   loadingSnapshot = false
-  private countAgreement: number[] | null = null
+  private countStates = new Map<number, CountState>()
 
   constructor(seed: number, progress: ProgressStore) {
     super(seed, progress, [1, 2, 3, 4, 5], 'predictors')
     this.sentences = corpus(makeRng(SETTINGS.corpusSeed), SETTINGS.corpusSentences)
-    this.tokens = this.sentences.flat().map((t) => VOCABULARY.indexOf(t))
+    this.training = this.sentences.slice(0, SETTINGS.trainingSentences)
+    this.heldOut = this.sentences.slice(SETTINGS.trainingSentences)
+    this.tokens = this.training.flat().map((t) => VOCABULARY.indexOf(t))
+    this.corpusTokens = this.sentences.reduce((n, s) => n + s.length, 0)
     this.probes = makeProbes()
     this.ngram = makeNgram(this.tokens)
     this.genRng = makeRng(seed ^ 0x9e4)
@@ -202,10 +227,18 @@ export class PredictorsStore extends StepStore<Step> {
     this.changed()
   }
 
-  get parse(): ParseState {
+  parseOf(prompt: readonly string[]): ParseState {
     let st = start()
-    for (const t of this.prompt) st = parseStep(st, t)
+    for (const t of prompt) st = parseStep(st, t)
     return st
+  }
+  /** The tokens the grammar allows next after a prompt: none when the prompt is not allowed or is a complete sentence. */
+  allowedNextOf(prompt: readonly string[]): string[] {
+    const st = this.parseOf(prompt)
+    return st.ok && !st.complete ? nextTokens(st) : []
+  }
+  get parse(): ParseState {
+    return this.parseOf(this.prompt)
   }
   /** The tokens the palette offers: the whole vocabulary (Jon, 2026-11-19: no Allow any token; the ones the grammar allows next are outlined). */
   get palette(): string[] {
@@ -213,8 +246,7 @@ export class PredictorsStore extends StepStore<Step> {
   }
   /** The tokens the grammar allows next after the prompt: none when the prompt is not allowed or is a complete sentence. */
   get allowedNext(): string[] {
-    const st = this.parse
-    return st.ok && !st.complete ? nextTokens(st) : []
+    return this.allowedNextOf(this.prompt)
   }
   get promptAllowed(): boolean {
     return this.parse.ok
@@ -226,12 +258,12 @@ export class PredictorsStore extends StepStore<Step> {
    * corpus, from the one word before. A one-token prompt follows the end mark,
    * as a sentence's first word does in the stream.
    */
-  countPrediction(prompt: readonly string[]): CountPrediction | null {
+  countPrediction(prompt: readonly string[], ngram: Ngram = this.ngram): CountPrediction | null {
     if (prompt.length === 0) return null
     const ctx = prompt.length === 1 ? [END, prompt[0]] : prompt.slice(-2)
-    const two = predictFromTwo(this.ngram, VOCABULARY.indexOf(ctx[0]), VOCABULARY.indexOf(ctx[1]))
+    const two = predictFromTwo(ngram, VOCABULARY.indexOf(ctx[0]), VOCABULARY.indexOf(ctx[1]))
     if (two.denominator > 0) return { probs: two.probs, context: ctx, from: 'two', denominator: two.denominator }
-    const one = predictFromOne(this.ngram, VOCABULARY.indexOf(ctx[1]))
+    const one = predictFromOne(ngram, VOCABULARY.indexOf(ctx[1]))
     return { probs: one.probs, context: [ctx[1]], from: 'one', denominator: one.denominator }
   }
   addToken(t: string): void {
@@ -338,20 +370,34 @@ export class PredictorsStore extends StepStore<Step> {
     const s = this.snapshots.get(`srn:${u}`)
     return t && s ? { transformer: t, srn: s } : null
   }
+  /** Change the prompt: a held-out sentence's prefix, cut before its main verb where one can be found, else before its end. */
   changePrompt(): void {
-    // A new fixed prompt: a held-out sentence's prefix, cut before its main verb where one can be found, else before its end.
     const rng = this.genRng
     for (let tries = 0; tries < 50; tries++) {
-      const s = this.sentences[9000 + rng.int(1000)]
+      const s = this.heldOut[rng.int(this.heldOut.length)]
       const i = s.findIndex((t) => kindOf(t) === 'verb')
       const cut = i > 0 ? i : s.length - 1
       const p = s.slice(0, cut)
-      if (p.length >= 1 && p.join(' ') !== this.fixedPrompt.join(' ')) {
-        this.fixedPrompt = p
+      if (p.length >= 1 && p.join(' ') !== this.prompt5.join(' ')) {
+        this.prompt5 = p
         this.changed()
         return
       }
     }
+  }
+  /** Step 5's palette (Jon, 2026-11-20): any token, up to the window; a complete sentence takes no more. */
+  addToken5(t: string): void {
+    if (this.prompt5.length >= GENERATE_MAX - 1 || this.parseOf(this.prompt5).complete) return
+    this.prompt5 = [...this.prompt5, t]
+    this.changed()
+  }
+  removeLast5(): void {
+    this.prompt5 = this.prompt5.slice(0, -1)
+    this.changed()
+  }
+  clearPrompt5(): void {
+    this.prompt5 = []
+    this.changed()
   }
   /** Agreement by depth at the current snapshot, as the training script measured it, recomputed here from the probes so the student sees the runtime's own numbers. */
   agreementByDepth(models: { transformer: SeqModel; srn: SeqModel }): Record<'transformer' | 'srn', number[]> {
@@ -371,28 +417,87 @@ export class PredictorsStore extends StepStore<Step> {
     }
     return out
   }
+
+  // ----------------------------------------------------------- the count model by snapshot (Jon, 2026-11-20)
+
+  /** How many training sentences the networks had seen after `updates` updates: 32 per update, up to all 9,000. */
+  sentencesSeen(updates: number): number {
+    return Math.min(this.training.length, updates * SENTENCES_PER_UPDATE)
+  }
   /**
-   * Agreement by depth for the prediction from counts, computed once: for
-   * each probe, the two words before the main verb (the last two tokens of
-   * the prefix; a one-token prefix follows the end mark), falling back to the
-   * one word before when the two never occurred together. The agreeing form
-   * must have strictly more probability than the other; a tie, both zero
-   * included, counts as not agreeing. The count model is not trained, so the
-   * numbers are the same at every snapshot.
+   * The count model's state matching a snapshot: its n-gram counts and its
+   * count model over the first `sentencesSeen(updates)` training sentences,
+   * with its agreement by depth and its held-out accuracy. From the third
+   * snapshot on the whole training set is counted and nothing changes any
+   * more. Computed once per distinct sentence count.
    */
-  countAgreementByDepth(): number[] {
-    if (this.countAgreement) return this.countAgreement
+  countStateAt(updates: number): CountState {
+    const n = this.sentencesSeen(updates)
+    const had = this.countStates.get(n)
+    if (had) return had
+    let ngram: Ngram
+    let model: CountModel
+    if (n === this.training.length) {
+      ngram = this.ngram
+      model = this.ensureCounted()
+    } else {
+      const tokens = this.training.slice(0, n).flat().map((t) => VOCABULARY.indexOf(t))
+      ngram = makeNgram(tokens)
+      model = countStream(makeCountModel(this.windowSize, this.separate), tokens)
+    }
+    const state: CountState = { updates, sentences: n, ngram, model, agreement: this.countAgreementByDepth(ngram), heldOutAccuracy: this.countHeldOutAccuracy(ngram) }
+    this.countStates.set(n, state)
+    return state
+  }
+  /**
+   * Agreement by depth for the prediction from counts: for each probe, the
+   * two words before the main verb (the last two tokens of the prefix; a
+   * one-token prefix follows the end mark), falling back to the one word
+   * before when the two never occurred together. The agreeing form must have
+   * strictly more probability than the other; a tie, both zero included,
+   * counts as not agreeing.
+   */
+  countAgreementByDepth(ngram: Ngram = this.ngram): number[] {
     const out: number[] = []
     for (const depth of [0, 1, 2, 3]) {
       const ps = this.probes.filter((p) => p.depth === depth)
       let ok = 0
       for (const p of ps) {
-        const c = this.countPrediction(p.prefix)
+        const c = this.countPrediction(p.prefix, ngram)
         if (c && c.probs[VOCABULARY.indexOf(p.agreeing)] > c.probs[VOCABULARY.indexOf(p.other)]) ok++
       }
       out.push(ps.length ? ok / ps.length : 0)
     }
-    this.countAgreement = out
     return out
+  }
+  /**
+   * The count model's held-out accuracy, scored as the networks' was when they
+   * were trained (train_predictors.py, held_out_accuracy): over every held-out
+   * sentence, every token after the first is predicted from the tokens before
+   * it, and the share predicted right is returned. The prediction is the most
+   * probable token by Step 3's rule (the two words before, else the one word
+   * before; the first of equals, as the training script took it); a context
+   * never seen gives no prediction and counts as wrong.
+   */
+  countHeldOutAccuracy(ngram: Ngram = this.ngram): number {
+    let right = 0
+    let total = 0
+    const argmax = (p: Prediction): number => {
+      if (p.denominator === 0) return -1
+      let best = 0
+      for (let j = 1; j < p.probs.length; j++) if (p.probs[j] > p.probs[best]) best = j
+      return best
+    }
+    for (const s of this.heldOut) {
+      const ids = s.map((t) => VOCABULARY.indexOf(t))
+      for (let i = 1; i < ids.length; i++) {
+        const w2 = i >= 2 ? ids[i - 2] : VOCABULARY.indexOf(END)
+        const two = predictFromTwo(ngram, w2, ids[i - 1])
+        const pick = two.denominator > 0 ? argmax(two) : argmax(predictFromOne(ngram, ids[i - 1]))
+        if (pick === ids[i]) right++
+        total++
+      }
+    }
+    return total ? right / total : 0
   }
 }

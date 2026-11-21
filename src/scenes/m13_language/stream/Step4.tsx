@@ -1,4 +1,4 @@
-import { Btn, Choice, Content, DataTable, FixedLines, GroupLabel, Note, StagePanel } from '../ui'
+import { Btn, Choice, Content, DataTable, FixedLines, GroupLabel, LoadingLine, Note, StagePanel } from '../ui'
 import { BarChart } from '../plots'
 import { ReferencePanel } from '../ReferencePanel'
 import { reference } from '../../../sim/language/references'
@@ -17,7 +17,7 @@ import type { StreamStore } from './store'
  */
 function Step4Controls({ s }: { s: StreamStore }) {
   const r = s.real
-  if (!r) return <Note data-loading>The sample is loading.</Note>
+  if (!r) return <LoadingLine text="Loading the sample." testId="stream-4-controls" />
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-step4-controls>
       <GroupLabel>Utterance</GroupLabel>
@@ -34,7 +34,7 @@ export function Step4Stage({ s }: { s: StreamStore }) {
   if (!r)
     return (
       <StagePanel wide testId="stream-4">
-        <Note data-loading>The sample is loading.</Note>
+        <LoadingLine text="Loading the sample." testId="stream-4" />
       </StagePanel>
     )
   const u = r.utterances[s.utterance]

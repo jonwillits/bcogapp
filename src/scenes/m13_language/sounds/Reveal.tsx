@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react'
-import { Btn, Content, DataTable, FixedLines, Note, Para, Section, StagePanel, useWidth } from '../ui'
+import { Btn, Content, DataTable, FixedLines, LoadingLine, Note, Para, Section, StagePanel, useWidth } from '../ui'
 import { MAIN_TABS } from '../params'
 import { Spectrogram } from '../Spectrogram'
 import { LinePlot } from '../plots'
@@ -145,7 +145,7 @@ export function LabelsTable({ result }: { result: LabelsResult }) {
 
 function VotScreen({ s, width }: { s: SoundsStore; width: number }) {
   const vot = s.tts?.vot
-  if (!vot) return <Note data-loading>Loading.</Note>
+  if (!vot) return <LoadingLine text="Loading the sounds." testId="vot" />
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-vot>
       <div style={{ display: 'flex', flexWrap: 'nowrap', gap: 10 }}>

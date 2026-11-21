@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react'
-import { Btn, Choice, Content, FixedLines, GroupLabel, Note, StagePanel, useWidth } from '../ui'
+import { Btn, Choice, Content, FixedLines, GroupLabel, LoadingLine, Note, StagePanel, useWidth } from '../ui'
+import { loadingText } from '../loading'
 import { Spectrogram } from '../Spectrogram'
 import { Scatter } from '../plots'
 import { useAudioCursor } from '../hooks'
@@ -96,7 +97,7 @@ export function Step1Stage({ s }: { s: SoundsStore }) {
           <>
             <ViewRow s={s} switchable={screen === 'patterns'} />
             <Sound s={s} clipKey="vowel:ah_120" label="ah at 120 Hz" view={screen === 'patterns' ? s.view : 'wide'} frequencyLines={screen === 'patterns' ? f2('ah_120') : undefined} width={one} height={Math.round(one * 0.42)} />
-            {!loaded && <Note data-loading>The sounds are loading.</Note>}
+            {!loaded && <LoadingLine text={loadingText('the sounds', s.loadProgress)} testId="sounds-1" />}
             <Text screen={screen} />
           </>
         )}

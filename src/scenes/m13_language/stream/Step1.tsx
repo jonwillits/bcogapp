@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
-import { Btn, Content, FixedLines, Note, StagePanel, Countdown } from '../ui'
+import { Btn, Content, FixedLines, LoadingLine, Note, StagePanel, Countdown } from '../ui'
+import { loadingText } from '../loading'
 import { useAudioCursor, useBlockGuard } from '../hooks'
 import { MADE_OFFLINE_LINE, MADE_UP_LANGUAGE_LINE } from '../lines'
 import { Strip, WordStrip } from './Strip'
@@ -29,7 +30,7 @@ export function Step1Stage({ s, onNext }: { s: StreamStore; onNext?: () => void 
   return (
     <StagePanel wide testId="stream-1">
       <div style={{ fontSize: 14, fontWeight: 600 }}>A minute of the language</div>
-      {!s.isLoaded(1) && <Note data-loading>The sounds are loading.</Note>}
+      {!s.isLoaded(1) && <LoadingLine text={loadingText('the sounds', s.loadProgress)} testId="stream-1" />}
       <div data-now style={{ fontSize: 20, fontWeight: 600, minHeight: 30 }}>
         {now}
       </div>

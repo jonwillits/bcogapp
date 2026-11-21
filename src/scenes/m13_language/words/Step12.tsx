@@ -1,4 +1,5 @@
-import { Btn, Content, FixedLines, Note, StagePanel } from '../ui'
+import { Btn, Content, FixedLines, LoadingLine, Note, StagePanel } from '../ui'
+import { loadingText } from '../loading'
 import { MADE_OFFLINE_LINE, NO_FEEDBACK_LINE } from '../lines'
 import { objectUrl } from './assets'
 import type { WordsStore } from './store'
@@ -15,7 +16,7 @@ export function Step12Stage({ s }: { s: WordsStore }) {
   if (!s.loadedOk)
     return (
       <StagePanel wide testId="words-trials">
-        <Note data-loading>{s.loadError ?? 'The words and objects are loading.'}</Note>
+        {s.loadError ? <Note data-loading>{s.loadError}</Note> : <LoadingLine text={loadingText('the words and objects', s.loadProgress)} testId="words-trials" />}
       </StagePanel>
     )
   if (!t)

@@ -100,7 +100,8 @@ export function Step1Stage({ s }: { s: PredictorsStore }) {
   return (
     <StagePanel wide testId="predictors-1">
       <div style={{ fontSize: 14, fontWeight: 600 }}>The corpus</div>
-      <Note style={{ color: 'var(--text)' }}>{`The corpus is ${s.sentences.length.toLocaleString()} sentences, ${s.tokens.length.toLocaleString()} tokens in all. Each sentence is made by a generator function that uses the vocabulary and the grammar (rules for how to combine words) below. The sentences are generated pseudo-randomly, using a single fixed seed for all students, so you all see the same sentences.`}</Note>
+      <Note style={{ color: 'var(--text)' }}>{`The corpus is ${s.sentences.length.toLocaleString()} sentences, ${s.corpusTokens.toLocaleString()} tokens in all. Each sentence is made by a generator function that uses the vocabulary and the grammar (rules for how to combine words) below. The sentences are generated pseudo-randomly, using a single fixed seed for all students, so you all see the same sentences.`}</Note>
+      <Note style={{ color: 'var(--text)' }} data-held-out>{`Every model in this part learns from the first ${s.training.length.toLocaleString()} sentences only. The last ${s.heldOut.length.toLocaleString()} sentences, ${(s.training.length + 1).toLocaleString()} to ${s.sentences.length.toLocaleString()}, are held out: no model learns from them, and they are used in Step 5 to test the models on sentences they never saw.`}</Note>
       <VocabularyBlock />
       <GrammarBlock />
       <GroupLabel>The sentences</GroupLabel>

@@ -129,6 +129,8 @@ export abstract class StepStore<Step extends number> implements PartStore {
 
   protected onOpen(_step: Step): void {}
   protected onBegin(_step: Step): void {}
+  /** Start loading what a step needs while its instruction screen is read, so that Begin finds it ready (Jon, 2026-11-20). */
+  preload(_step: Step): void {}
 
   showInstructions(): void {
     this.instructionsShown = true
@@ -312,6 +314,10 @@ export function StepStage<Step extends number, S extends StepStore<Step>>({ ctx,
   useStore(ctx.progress)
   const screen = screens[s.step]
   const state = s.state
+  const step = s.step
+  useEffect(() => {
+    if (state === 'intro' || s.instructionsShown) s.preload(step)
+  }, [s, state, step, s.instructionsShown])
   if (state === 'intro' && s.noticePending(s.step)) {
     const n = s.notice(s.step)!
     return (

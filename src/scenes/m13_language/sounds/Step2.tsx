@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
-import { Btn, Choice, Content, Note, StagePanel } from '../ui'
+import { Btn, Choice, Content, LoadingLine, Note, StagePanel } from '../ui'
+import { loadingText } from '../loading'
 import { PauseButton } from '../steps'
 import { Spectrogram } from '../Spectrogram'
 import { useAudioCursor } from '../hooks'
@@ -43,7 +44,7 @@ export function Step2Stage({ s }: { s: SoundsStore }) {
           {p}
         </Note>
       ))}
-      {!s.isLoaded(2) && <Note data-loading>The sounds are loading.</Note>}
+      {!s.isLoaded(2) && <LoadingLine text={loadingText('the sounds', s.loadProgress)} testId="sounds-2" />}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
         {s.sixOrder.map((k, i) => (
           <Card key={k} s={s} k={k} n={i + 1} />

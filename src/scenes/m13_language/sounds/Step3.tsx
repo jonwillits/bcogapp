@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react'
-import { Btn, Content, FixedLines, Note, StagePanel } from '../ui'
+import { Btn, Content, FixedLines, LoadingLine, Note, StagePanel } from '../ui'
+import { loadingText } from '../loading'
 import { useBlockGuard, useKeys } from '../hooks'
 import { MADE_OFFLINE_LINE } from '../lines'
 import { BLOCK1_SCREEN, BLOCK2_SCREEN, STEP3_PANEL } from './texts'
@@ -63,11 +64,11 @@ export function Step3Stage({ s }: { s: SoundsStore }) {
   if (!b)
     return (
       <StagePanel testId="sounds-3">
-        <Note data-loading>The sounds are loading.</Note>
+        <LoadingLine text={loadingText('the sounds', s.loadProgress)} testId="sounds-3" />
       </StagePanel>
     )
   const n = b.trials.length
-  const now = b.phase === 'answer' ? (b.kind === 'labeling' ? 'Which consonant did you hear? Press B or D.' : 'Did the 3rd sound like the 1st or the 2nd? Press 1 or 2.') : b.phase === 'playing' ? (b.kind === 'labeling' ? 'Listen: one sound, three times.' : 'Listen: three sounds.') : 'The next trial starts in a moment.'
+  const now = b.phase === 'answer' ? (b.kind === 'labeling' ? 'Which consonant did you hear? Press B or D.' : 'Did the 3rd sound like the 1st or the 2nd? Press 1 or 2.') : b.phase === 'playing' ? (b.kind === 'labeling' ? 'Listen: one sound, three times.' : 'Listen: three sounds, three times.') : 'The next trial starts in a moment.'
   const buttonStyle = (enabled: boolean, fontSize: number) => ({ flex: 1, padding: '14px 0', fontSize, fontWeight: 600, borderRadius: 'var(--radius-sm)', border: '2px solid var(--border)', background: 'var(--surface-2)', color: 'var(--text)', cursor: enabled ? 'pointer' : 'not-allowed', opacity: enabled ? 1 : 0.45 }) as const
   return (
     <StagePanel testId={`block-${b.kind}`}>

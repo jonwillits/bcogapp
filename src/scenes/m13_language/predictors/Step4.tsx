@@ -14,7 +14,8 @@ import { PREDICTIONS, TEMPERATURES, type CountPrediction, type PredictorsStore }
  * Step 4's screens (spec §8.5; Jon, 2026-11-17: everything in the center;
  * Jon, 2026-11-19: the two networks drawn side by side with their texts
  * under the drawings; three next-token distributions at the panel's width,
- * the prediction from counts beside the two networks; the palette offers
+ * the prediction from counts beside the two networks, in the order count
+ * model, recurrent network, transformer everywhere (Jon, 2026-11-20); the palette offers
  * the whole vocabulary with the grammar's next tokens outlined; Generate a
  * sentence samples from both networks at once). The two predictions and
  * Commit above the palette; attention as lines from the last token back to
@@ -77,10 +78,38 @@ function GenerateControls({ s }: { s: PredictorsStore }) {
   )
 }
 
-/** The line under a chart of the prediction from counts: which words it was computed from, and the division. */
+/**
+ * The line under a chart of the prediction from counts: which words it was
+ * computed from, and the division. Its box is the height of its longest
+ * form, four lines at a chart's width, so that what stands under it does
+ * not move when the prompt changes (Jon, 2026-11-20); a very long form
+ * still grows past it.
+ */
+export const COUNT_NOTE_LINES = 4
 export function CountNote({ c }: { c: CountPrediction }) {
   const two = c.from === 'two'
-  return <Note data-count-from={c.from}>{two ? `From the two words before, ${c.context.join(' ')}: each probability is a count divided by ${c.denominator.toLocaleString()}, the count of ${c.context.join(' ')} followed by anything.` : `The two words before never occurred together in the corpus, so from the one word before, ${c.context[0]}: each probability is a count divided by ${c.denominator.toLocaleString()}, the count of ${c.context[0]} followed by anything.`}</Note>
+  const text = c.denominator === 0 ? 'The count model has not counted any sentence yet, so every probability is zero.' : two ? `From the two words before, ${c.context.join(' ')}: each probability is a count divided by ${c.denominator.toLocaleString()}, the count of ${c.context.join(' ')} followed by anything.` : `The two words before never occurred together in the corpus, so from the one word before, ${c.context[0]}: each probability is a count divided by ${c.denominator.toLocaleString()}, the count of ${c.context[0]} followed by anything.`
+  return (
+    <Note data-count-from={c.denominator === 0 ? 'none' : c.from} style={{ minHeight: `${COUNT_NOTE_LINES * 1.45}em` }}>
+      {text}
+    </Note>
+  )
+}
+
+/** The palette of every token, pressed to append to a prompt; the ones the grammar allows next are outlined (Steps 4 and 5). */
+export function PromptPalette({ tokens, allowed, complete, promptAllowed, onAdd }: { tokens: string[]; allowed: Set<string>; complete: boolean; promptAllowed: boolean; onAdd: (t: string) => void }) {
+  return (
+    <>
+      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }} data-palette>
+        {tokens.map((t) => (
+          <button key={t} type="button" onClick={() => onAdd(t)} disabled={complete} data-allowed={allowed.has(t) || undefined} style={{ padding: '3px 8px', fontSize: 11.5, borderRadius: 999, border: `2px solid ${allowed.has(t) ? 'var(--accent)' : 'var(--border)'}`, background: 'var(--surface-2)', color: 'var(--text)', cursor: complete ? 'default' : 'pointer', opacity: complete ? 0.6 : 1 }}>
+            {t}
+          </button>
+        ))}
+      </div>
+      <Note data-palette-line>{complete ? 'The prompt is a complete sentence. Clear it, or remove the end mark, to go on.' : promptAllowed ? 'Outlined tokens are the ones the grammar allows next; any token can be pressed.' : 'The grammar allows no token after a prompt it does not allow, so none is outlined; any token can be pressed.'}</Note>
+    </>
+  )
 }
 
 /** How many charts sit in one row at a panel width, and each chart's width. */
@@ -175,7 +204,7 @@ export function Step4Stage({ s }: { s: PredictorsStore }) {
             <Note style={{ color: 'var(--text)' }}>{STEP4_MODELS[2]}</Note>
           </div>
         </div>
-        {s.descs && <FixedLines lines={[`transformer: ${s.descs.transformer.params.toLocaleString()} weights; held-out next-token accuracy ${(100 * s.descs.transformer.snapshots[s.descs.transformer.snapshots.length - 1].heldOutAccuracy).toFixed(1)}% after ${s.descs.transformer.snapshots[s.descs.transformer.snapshots.length - 1].updates.toLocaleString()} updates`, `recurrent network: ${s.descs.srn.params.toLocaleString()} weights; held-out next-token accuracy ${(100 * s.descs.srn.snapshots[s.descs.srn.snapshots.length - 1].heldOutAccuracy).toFixed(1)}% after ${s.descs.srn.snapshots[s.descs.srn.snapshots.length - 1].updates.toLocaleString()} updates`]} testId="model-sizes" scroll />}
+        {s.descs && <FixedLines lines={[`recurrent network: ${s.descs.srn.params.toLocaleString()} weights; held-out next-token accuracy ${(100 * s.descs.srn.snapshots[s.descs.srn.snapshots.length - 1].heldOutAccuracy).toFixed(1)}% after ${s.descs.srn.snapshots[s.descs.srn.snapshots.length - 1].updates.toLocaleString()} updates`, `transformer: ${s.descs.transformer.params.toLocaleString()} weights; held-out next-token accuracy ${(100 * s.descs.transformer.snapshots[s.descs.transformer.snapshots.length - 1].heldOutAccuracy).toFixed(1)}% after ${s.descs.transformer.snapshots[s.descs.transformer.snapshots.length - 1].updates.toLocaleString()} updates`]} testId="model-sizes" scroll />}
         {s.loadError && <Note data-load-error>{s.loadError}</Note>}
         {!s.final && !s.loadError && <Note data-loading>The two networks are loading.</Note>}
         <Content>{TRAINED_BEFORE_LINE}</Content>
@@ -194,22 +223,15 @@ export function Step4Stage({ s }: { s: PredictorsStore }) {
                 Clear the prompt
               </Btn>
             </div>
-            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }} data-palette>
-              {s.palette.map((t) => (
-                <button key={t} type="button" onClick={() => s.addToken(t)} disabled={complete} data-allowed={allowed.has(t) || undefined} style={{ padding: '3px 8px', fontSize: 11.5, borderRadius: 999, border: `2px solid ${allowed.has(t) ? 'var(--accent)' : 'var(--border)'}`, background: 'var(--surface-2)', color: 'var(--text)', cursor: complete ? 'default' : 'pointer', opacity: complete ? 0.6 : 1 }}>
-                  {t}
-                </button>
-              ))}
-            </div>
-            <Note data-palette-line>{complete ? 'The prompt is a complete sentence. Clear it, or remove the end mark, to go on.' : s.promptAllowed ? 'Outlined tokens are the ones the grammar allows next; any token can be pressed.' : 'The grammar allows no token after a prompt it does not allow, so none is outlined; any token can be pressed.'}</Note>
+            <PromptPalette tokens={s.palette} allowed={allowed} complete={complete} promptAllowed={s.promptAllowed} onAdd={(t) => s.addToken(t)} />
             {out && count && (
               <>
                 <div style={{ display: 'flex', gap: GAP, flexWrap: 'wrap', alignItems: 'flex-start' }} data-distributions>
-                  <Distribution probs={last(out.transformer)} title="The transformer: probability of each token as the next" testId="transformer" width={chartW} />
-                  <Distribution probs={last(out.srn)} title="The recurrent network: probability of each token as the next" testId="srn" width={chartW} />
                   <Distribution probs={count.probs} title="The prediction from counts: probability of each token as the next" testId="counts" width={chartW}>
                     <CountNote c={count} />
                   </Distribution>
+                  <Distribution probs={last(out.srn)} title="The recurrent network: probability of each token as the next" testId="srn" width={chartW} />
+                  <Distribution probs={last(out.transformer)} title="The transformer: probability of each token as the next" testId="transformer" width={chartW} />
                 </div>
                 <GroupLabel>Attention in the transformer, for the last token of your prompt</GroupLabel>
                 <Note>Each panel is one attention computation in one layer: lines run from the last token back to each earlier token, and to itself, with a line’s thickness set by the weight the computation gives that position. The weights in a panel sum to one. Hover a line for its number.</Note>
@@ -240,8 +262,8 @@ export function Step4Stage({ s }: { s: PredictorsStore }) {
             <div style={{ display: 'flex', gap: GAP, alignItems: 'flex-start', flexWrap: 'wrap' }}>
               <GenerateControls s={s} />
               <div style={{ display: 'flex', gap: GAP, flexWrap: w >= 640 ? 'nowrap' : 'wrap', flex: '1 1 400px', minWidth: 0 }} data-generated-columns>
-                <GeneratedColumn title="The transformer" lines={s.generated.map((g) => g.transformer)} testId="generated" />
                 <GeneratedColumn title="The recurrent network" lines={s.generated.map((g) => g.srn)} testId="generated-srn" />
+                <GeneratedColumn title="The transformer" lines={s.generated.map((g) => g.transformer)} testId="generated" />
               </div>
             </div>
             <Content>{NOT_ENGLISH_LINE}</Content>

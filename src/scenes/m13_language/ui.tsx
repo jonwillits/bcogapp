@@ -27,6 +27,33 @@ export { row, Countdown, useCountdown } from '../m10_memory/ui'
 export { BigChoice, Para, rgbOf } from '../m12_planning/ui'
 
 /** A header over a block of the main panel, with room above it so that it stands off from whatever is above (Jon, 2026-11-19: a line's worth of space before every header). */
+/**
+ * The loading line (Jon, 2026-11-20): larger than a Note, placed where the
+ * content will appear, with a mark that moves while the files come in, so
+ * that a slow load reads as working, not frozen. With `done` and `total`
+ * a bar fills under the line (Part 1 Step 4's 540 patches). The mark
+ * stands still under prefers-reduced-motion.
+ */
+export function LoadingLine({ text, done, total, testId }: { text: string; done?: number; total?: number; testId?: string }) {
+  const bar = done !== undefined && total !== undefined && total > 0
+  return (
+    <div data-loading data-loading-for={testId} style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '6px 0' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: 'var(--text)' }}>
+        <span aria-hidden style={{ position: 'relative', width: 44, height: 8, borderRadius: 4, background: 'var(--border)', overflow: 'hidden', flex: 'none' }}>
+          <span className="m13-loading-mark" style={{ position: 'absolute', top: 0, left: 0, width: 14, height: 8, borderRadius: 4, background: 'var(--accent)' }} />
+        </span>
+        <span>{text}</span>
+      </div>
+      {bar && (
+        <div style={{ height: 6, borderRadius: 3, background: 'var(--border)', overflow: 'hidden', maxWidth: 360 }}>
+          <div data-loading-bar style={{ width: `${((100 * done) / total).toFixed(1)}%`, height: '100%', background: 'var(--accent)', transition: 'width 120ms linear' }} />
+        </div>
+      )}
+      <style>{'@keyframes m13-loading-mark{from{transform:translateX(0)}to{transform:translateX(30px)}}.m13-loading-mark{animation:m13-loading-mark .8s ease-in-out infinite alternate}@media (prefers-reduced-motion:reduce){.m13-loading-mark{animation:none;left:15px}}'}</style>
+    </div>
+  )
+}
+
 export function GroupLabel({ children }: { children: ReactNode }) {
   return (
     <div style={{ marginTop: 8 }} data-header>

@@ -4,9 +4,10 @@ import type { UnitId } from '../../../sim/language/parts'
 import type { View } from '../../../sim/language/audio/spectrogram'
 import { player } from '../../../sim/language/audio/player'
 import { bufferFrom, type Clip } from '../../../sim/language/audio/clips'
-import { abxTrials, labelingTrials, LABELING_GAP_MS, LABELING_REPEATS, REPEAT_GAP_S, STEPS, TRIAD_INTERVAL_S, type Label as Lbl, type Triad } from '../../../sim/language/sounds/abx'
+import { abxTrials, labelingTrials, LABELING_GAP_MS, LABELING_REPEATS, REPEAT_GAP_S, STEPS, TRIAD_INTERVAL_S, TRIAD_REPEATS, TRIAD_REPEAT_GAP_S, type Label as Lbl, type Triad } from '../../../sim/language/sounds/abx'
 import { accuracy, confusion, forward, makeClassifier, shares, splitOnePitch, splitOneVoice, splitRun1, train, PASSES, type Classifier, type Token } from '../../../sim/language/sounds/classifier'
 import { StepStore } from '../steps'
+import { loadAll, type LoadProgress } from '../loading'
 import type { UnderWay } from '../params'
 import type { Step } from './screens'
 import { RUN3_AFTER_STEP3 } from './afterStep3'
@@ -95,6 +96,8 @@ export class SoundsStore extends StepStore<Step> {
   loadingFor = new Set<string>()
   loaded = new Set<string>()
   loadError: string | null = null
+  /** The count of the step's files, or of Step 4's prepared syllables, while they load. */
+  loadProgress: LoadProgress | null = null
   tokens: Token[] | null = null
   tokenProgress = 0
   continuumPatches: Float32Array[] | null = null
@@ -227,49 +230,60 @@ export class SoundsStore extends StepStore<Step> {
 
   // ------------------------------------------------------------ loading
 
-  /** Decode a step's sounds before its first trial; `changed()` when done. */
+  /** Decode a step's sounds before its first trial, the files fetched all at once and counted (Jon, 2026-11-20); `changed()` when done. */
   async ensureLoaded(step: Step): Promise<void> {
     const key = `step${step}`
     if (this.loaded.has(key) || this.loadingFor.has(key)) return
     this.loadingFor.add(key)
     this.changed()
     const ctx = player.ensure()
+    const progress = (p: LoadProgress) => {
+      this.loadProgress = p
+      this.changed()
+    }
+    const put = (k: string, load: Promise<Clip>) => async () => {
+      const c = await load
+      this.clips.set(k, c)
+      return c
+    }
     try {
       if (step === 1) {
         this.vowels = this.vowels ?? (await loadVowels())
-        for (const [k, s] of Object.entries(this.vowels.sounds)) this.clips.set(`vowel:${k}`, await vowelClip(s.file, ctx))
+        await loadAll(Object.entries(this.vowels.sounds).map(([k, v]) => put(`vowel:${k}`, vowelClip(v.file, ctx))), progress)
       } else if (step === 2) {
         this.tts = this.tts ?? (await loadTts())
-        for (const k of SIX_ORDER) this.clips.set(`six:${k}`, await syllableClip(this.tts.six[k].file, ctx))
-        for (const [k, v] of Object.entries(this.tts.vot)) this.clips.set(`vot:${k}`, await votClip(v.file, ctx))
+        const tts = this.tts
+        await loadAll([...SIX_ORDER.map((k) => put(`six:${k}`, syllableClip(tts.six[k].file, ctx))), ...Object.entries(tts.vot).map(([k, v]) => put(`vot:${k}`, votClip(v.file, ctx)))], progress)
       } else if (step === 3) {
         this.continuum = this.continuum ?? (await loadContinuum())
         // The lab plays the first STEPS of the shipped 14 (abx.ts).
-        for (const s of this.continuum.steps.filter((x) => x.step <= STEPS)) this.clips.set(`cont:${s.step}`, await continuumClip(s.file, ctx))
+        await loadAll(this.continuum.steps.filter((x) => x.step <= STEPS).map((st) => put(`cont:${st.step}`, continuumClip(st.file, ctx))), progress)
       } else {
-        this.tts = this.tts ?? (await loadTts())
-        this.continuum = this.continuum ?? (await loadContinuum())
-        const tk = await tokensClip(ctx)
-        this.clips.set('tokens', tk)
-        this.tokens = await tokenPatches(tk, this.tts.tokens.tokens, (n) => {
+        const [tts, continuum] = await Promise.all([this.tts ?? loadTts(), this.continuum ?? loadContinuum()])
+        this.tts = tts
+        this.continuum = continuum
+        const steps = continuum.steps.filter((x) => x.step <= STEPS)
+        const [tk, ...conts] = await loadAll([put('tokens', tokensClip(ctx)), ...steps.map((st) => put(`cont:${st.step}`, continuumClip(st.file, ctx)))], progress)
+        const total = tts.tokens.tokens.length
+        progress({ done: 0, total, what: 'syllable' })
+        this.tokens = await tokenPatches(tk, tts.tokens.tokens, (n) => {
           this.tokenProgress = n
-          this.changed()
+          progress({ done: n, total, what: 'syllable' })
         })
-        const steps: Float32Array[] = []
-        for (const s of this.continuum.steps.filter((x) => x.step <= STEPS)) {
-          const c = await continuumClip(s.file, ctx)
-          this.clips.set(`cont:${s.step}`, c)
-          steps.push(continuumPatch(c))
-        }
-        this.continuumPatches = steps
+        this.continuumPatches = conts.map((c) => continuumPatch(c))
       }
       this.loaded.add(key)
     } catch (e) {
       this.loadError = `A sound file could not be loaded: ${String(e)}`
     } finally {
       this.loadingFor.delete(key)
+      this.loadProgress = null
       this.changed()
     }
+  }
+
+  preload(step: Step): void {
+    void this.ensureLoaded(step)
   }
 
   isLoaded(step: Step): boolean {
@@ -430,13 +444,17 @@ export class SoundsStore extends StepStore<Step> {
       end = r.end
       this.playing = { key: `cont:${b.trials[b.i]}`, start: r.start, end: r.end }
     } else {
+      // The triad plays TRIAD_REPEATS times, TRIAD_REPEAT_GAP_S between the plays (Jon, 2026-11-20); the buttons appear after the last play.
       const t = b.trials[b.i]
       const items: { buffer: AudioBuffer; offsetS: number }[] = []
       let off = 0
-      for (const s of t.sounds) {
-        const bb = buf(s)
-        items.push({ buffer: bb, offsetS: off })
-        off += bb.duration + TRIAD_INTERVAL_S
+      for (let k = 0; k < TRIAD_REPEATS; k++) {
+        for (const s of t.sounds) {
+          const bb = buf(s)
+          items.push({ buffer: bb, offsetS: off })
+          off += bb.duration + TRIAD_INTERVAL_S
+        }
+        off += TRIAD_REPEAT_GAP_S - TRIAD_INTERVAL_S
       }
       const r = player.playSequence(items)
       end = r.end

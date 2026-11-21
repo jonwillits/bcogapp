@@ -95,6 +95,8 @@ export const SETTINGS = {
   /** The seed of the one corpus every student sees. */
   corpusSeed: 1991,
   corpusSentences: 10000,
+  /** The networks were trained on the first 9,000 sentences; the last 1,000 are held out from every model, the count model too (Jon, 2026-11-20). */
+  trainingSentences: 9000,
 }
 
 export type Number_ = 'sg' | 'pl'

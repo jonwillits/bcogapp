@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { ProgressStore } from '../../sim/language/progress/store'
-import { Note, useStore } from './ui'
+import { LoadingLine, Note, useStore } from './ui'
 import { DoneStage, StepNav, StepStage } from './steps'
 import { HEADPHONES_LINE } from './lines'
 import type { PartContext, PartModule } from './contract'
@@ -33,7 +33,7 @@ function GatheredResults({ progress }: { progress: ProgressStore }) {
     void Promise.all([loadWordFiles(), loadObjects()]).then(([w, o]) => setFiles({ words: w.filter((x) => x.set === r.materials), objects: o.filter((x) => x.set === r.materials) }))
   }, [r])
   if (!r) return <Note>Part 3’s experiment is not finished yet.</Note>
-  if (!files) return <Note data-loading>Loading the words and objects.</Note>
+  if (!files) return <LoadingLine text="Loading the words and objects." testId="words-results" />
   return <WordsReveal seed={progress.seed} result={r} words={files.words} objects={files.objects} />
 }
 registerStepResults([{ part: 3, tab: 'words', step: 2, title: `Steps 1 and 2 — ${STEP_TITLES[1].replace(/^Step \d — /, '')}, and ${STEP_TITLES[2].replace(/^Step \d — /, '').toLowerCase()}`, done: (p: ProgressStore) => p.isComplete(WORDS_UNIT), render: (p: ProgressStore) => <GatheredResults progress={p} /> }])
@@ -67,7 +67,7 @@ function Stage({ ctx }: { ctx: Ctx }) {
         return (
           <DoneStage ctx={ctx} tab="words" screens={SCREENS}>
             {error}
-            {r && s.loadedOk ? <WordsReveal seed={s.seed} result={r} words={s.words} objects={s.objects} /> : r ? <Note data-loading>Loading the words and objects.</Note> : null}
+            {r && s.loadedOk ? <WordsReveal seed={s.seed} result={r} words={s.words} objects={s.objects} /> : r ? <LoadingLine text="Loading the words and objects." testId="words-reveal" /> : null}
           </DoneStage>
         )
       }}
