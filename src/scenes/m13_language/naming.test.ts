@@ -272,7 +272,7 @@ describe('the shell', () => {
     }
   })
   it('the controls carry the names the spec gives them', () => {
-    for (const w of ['Begin', 'Begin Part 1', 'Play a test sound', 'Export my results', 'Load my results', 'Clear my saved results', 'Erase and start over', 'Keep my results', 'Open anyway', 'Show the instructions again', 'Commit my prediction', 'Commit my labels', 'Go to Step 2', 'Start block 1', 'Start block 2', '3rd sounds like the 1st', '3rd sounds like the 2nd', 'Train', 'Run on the 9 sounds', 'Play the minute', 'Commit my answer', 'Check this word', 'Empty the tray', 'Clear the highlight', 'Show me the words', 'How much of the stream', 'Run the learners', 'Show stress', 'Hear it again', 'Run the models', 'Back to the fitted value', 'Show me sentences', 'Count', 'Compute', 'Remove the last token', 'Clear the prompt', 'Temperature', 'Generate a sentence', 'Snapshot', 'Change the prompt'])
+    for (const w of ['Begin', 'Begin Part 1', 'Play a test sound', 'Export my results', 'Load my results', 'Clear my saved results', 'Erase and start over', 'Keep my results', 'Open anyway', 'Show the instructions again', 'Commit my prediction', 'Commit my labels', 'Go to Step 2', 'Start block 1', 'Start block 2', '3rd sounds like the 1st', '3rd sounds like the 2nd', 'Train', 'Run on the 9 sounds', 'Play the minute', 'Commit my answer', 'Check this word', 'Empty the tray', 'Clear the highlight', 'Show me the words', 'Run the learners', 'Show stress', 'Hear it again', 'Run the models', 'Back to the fitted value', 'Show me sentences', 'Count', 'Compute', 'Remove the last token', 'Clear the prompt', 'Temperature', 'Generate a sentence', 'Snapshot', 'Change the prompt'])
       expect(screen, w).toContain(w)
   })
 })

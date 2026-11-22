@@ -67,7 +67,8 @@ export function Step4Stage({ s }: { s: StreamStore }) {
               <div data-syllable={syl} style={{ padding: '4px 6px', borderRadius: 4, border: '1px solid var(--border)', background: 'var(--surface-2)', fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: s.showStress && u.stress[i] === 1 ? 700 : 400 }}>
                 {syl.toLowerCase()}
               </div>
-              <div style={{ height: 10, width: '100%', borderBottom: i > 0 && u.wordOf[i] !== u.wordOf[i - 1] ? 'none' : '2px solid var(--sensor)' }} />
+              {/* The bar under every syllable; with the bar across each within-word gap it runs under the whole word (Jon, 2026-11-21: before, only the syllables after a word's first carried one). */}
+              <div style={{ height: 10, width: '100%', borderBottom: '2px solid var(--sensor)' }} data-word-bar />
             </div>
             {i + 1 < u.syllables.length && (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 36 }}>
@@ -75,13 +76,13 @@ export function Step4Stage({ s }: { s: StreamStore }) {
                   {u.tp[i].toFixed(3)}
                 </div>
                 <div style={{ height: 22 }} />
-                <div style={{ fontSize: 9, color: 'var(--sensor)', height: 12 }}>{u.wordOf[i] !== u.wordOf[i + 1] ? '| boundary' : ''}</div>
+                {u.wordOf[i] !== u.wordOf[i + 1] ? <div style={{ fontSize: 9, color: 'var(--sensor)', height: 12 }}>| boundary</div> : <div style={{ height: 10, width: '100%', borderBottom: '2px solid var(--sensor)' }} data-word-bar="gap" />}
               </div>
             )}
           </div>
         ))}
       </div>
-      <Note>The number between two syllables is the transitional probability from the first to the second over the whole sample, to three decimals; the orange bars under the tiles join the syllables of one word, and “boundary” marks where one word ends and the next begins. The syllables are written in the dictionary’s symbols, in which AH is the vowel of the, IY the vowel of see, and so on.</Note>
+      <Note>The number between two syllables is the transitional probability from the first to the second over the whole sample, to three decimals; the orange bar under the tiles runs under all the syllables of one word and breaks at “boundary”, where one word ends and the next begins. The syllables are written in the dictionary’s symbols, in which AH is the vowel of the, IY the vowel of see, and so on.</Note>
       <GroupLabel>Transitional probabilities inside words and across word boundaries</GroupLabel>
       <Note>{`Each bar is the share of pairs whose transitional probability falls in that range: in the real speech sample, ${h.insideN.toLocaleString()} pairs inside words (mean ${h.insideMean.toFixed(2)}) and ${h.acrossN.toLocaleString()} pairs across boundaries (mean ${h.acrossMean.toFixed(2)}); in the made-up language over 21 minutes, the same two kinds of pair.`}</Note>
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>

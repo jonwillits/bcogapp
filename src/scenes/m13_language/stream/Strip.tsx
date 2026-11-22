@@ -10,7 +10,8 @@ import { WORD_COLORS } from '../../../sim/language/stream/board'
  * center. The cursor's position comes from the audio clock, read on every
  * frame by the caller. In the marked replay, thin lines mark word
  * boundaries, and the syllable strip above fills in as the sound plays,
- * each word in its own color with its own pattern.
+ * each word in its own color: a solid fill, since a pattern over the
+ * letters made the syllables hard to read (Jon, 2026-11-21).
  */
 export const WINDOW_S = 4
 
@@ -23,23 +24,6 @@ function colorOf(db: number): [number, number, number] {
   }
   const u = (t - 0.55) / 0.45
   return [79 + 176 * u, 156 + 99 * u, 255]
-}
-
-export function pattern(p: (typeof WORD_COLORS)[Word]['pattern']): string {
-  switch (p) {
-    case 'stripes':
-      return 'repeating-linear-gradient(45deg, rgba(0,0,0,0.35) 0 3px, transparent 3px 7px)'
-    case 'dots':
-      return 'radial-gradient(rgba(0,0,0,0.45) 1.5px, transparent 1.6px)'
-    case 'rings':
-      return 'radial-gradient(circle, transparent 2px, rgba(0,0,0,0.4) 2.5px, transparent 3.5px)'
-    case 'checks':
-      return 'repeating-conic-gradient(rgba(0,0,0,0.35) 0 25%, transparent 0 50%)'
-    case 'waves':
-      return 'repeating-linear-gradient(0deg, rgba(0,0,0,0.35) 0 2px, transparent 2px 6px)'
-    default:
-      return 'none'
-  }
 }
 
 export function Tile({ text, word, highlighted, onClick, small, draggable, onDragStart, title }: { text: string; word?: Word | null; highlighted?: boolean; onClick?: () => void; small?: boolean; draggable?: boolean; onDragStart?: (e: React.DragEvent) => void; title?: string }) {
@@ -66,8 +50,6 @@ export function Tile({ text, word, highlighted, onClick, small, draggable, onDra
         borderRadius: 4,
         border: `2px solid ${highlighted ? '#ffffff' : 'var(--border)'}`,
         backgroundColor: c ? c.fill : 'var(--surface-2)',
-        backgroundImage: c ? pattern(c.pattern) : undefined,
-        backgroundSize: c && c.pattern === 'dots' ? '6px 6px' : c && c.pattern === 'rings' ? '9px 9px' : c && c.pattern === 'checks' ? '8px 8px' : undefined,
         color: c ? '#0b111c' : 'var(--text)',
         fontWeight: c ? 600 : 400,
         cursor: onClick || draggable ? 'pointer' : 'default',

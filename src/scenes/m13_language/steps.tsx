@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Panel } from '../../components/Panel'
 import type { ProgressStore } from '../../sim/language/progress/store'
 import { InstructionScreen, type Sitting } from '../m10_memory/progress/InstructionScreen'
-import { Btn, Choice, Content, FixedLines, GroupLabel, Note, PANEL_STYLE, PART_TITLES, NEXT_TAB, TABS, StagePanel, useStore, type Tab } from './ui'
+import { Btn, Choice, Content, FixedLines, GroupLabel, Note, PANEL_STYLE, PART_TITLES, NEXT_TAB, TABS, StagePanel, useScrollToTop, useStore, type Tab } from './ui'
 import { MAIN_TABS, stepParams, type PartKey, type UnderWay } from './params'
 import { pauseExpiredLine, pauseLines, pausedFor, type Busy } from './switching'
 import type { PartContext, PartStore } from './contract'
@@ -318,6 +318,8 @@ export function StepStage<Step extends number, S extends StepStore<Step>>({ ctx,
   useEffect(() => {
     if (state === 'intro' || s.instructionsShown) s.preload(step)
   }, [s, state, step, s.instructionsShown])
+  // Every change of screen opens the panel at its top: a step opened, Begin, a step finished, the instructions shown again, a pause (Jon, 2026-11-21).
+  useScrollToTop(`${tab}/${step}/${state}/${s.instructionsShown}/${s.paused ? 'paused' : ''}`)
   if (state === 'intro' && s.noticePending(s.step)) {
     const n = s.notice(s.step)!
     return (

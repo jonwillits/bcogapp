@@ -16,14 +16,14 @@ export const ROW = 20
 export const TRAY_MIN = 2
 export const TRAY_MAX = 4
 
-/** The six words' colors, chosen apart in hue and lightness so that no two are confused by the common forms of color blindness, each with a second cue, a pattern, on the tiles (spec: the dark theme and color blindness). */
-export const WORD_COLORS: Record<Word, { fill: string; pattern: 'solid' | 'stripes' | 'dots' | 'rings' | 'checks' | 'waves' }> = {
-  babupu: { fill: '#4f9cff', pattern: 'solid' },
-  bupada: { fill: '#f0a94b', pattern: 'stripes' },
-  dutaba: { fill: '#34d399', pattern: 'dots' },
-  patubi: { fill: '#d64f9a', pattern: 'rings' },
-  pidabu: { fill: '#f0e68c', pattern: 'checks' },
-  tutibu: { fill: '#9aa6b8', pattern: 'waves' },
+/** Each word's fill on the tiles: six colors apart in hue and lightness, with no pattern over the letters (Jon, 2026-11-21: the patterns made the syllables hard to read). */
+export const WORD_COLORS: Record<Word, { fill: string }> = {
+  babupu: { fill: '#4f9cff' },
+  bupada: { fill: '#f0a94b' },
+  dutaba: { fill: '#34d399' },
+  patubi: { fill: '#d64f9a' },
+  pidabu: { fill: '#f0e68c' },
+  tutibu: { fill: '#9aa6b8' },
 }
 export const HIGHLIGHT = '#ffffff'
 

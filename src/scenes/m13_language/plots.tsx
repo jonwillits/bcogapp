@@ -18,8 +18,21 @@ export interface Series {
   band?: [number, number, number][]
 }
 
-export function LinePlot({ series, width = 420, height = 200, xLabel, yLabel, xMin, xMax, yMin = 0, yMax = 100, xTicks, yTicks, marks, hLines, logX, testId }: { series: Series[]; width?: number; height?: number; xLabel: string; yLabel: string; xMin?: number; xMax?: number; yMin?: number; yMax?: number; xTicks?: { x: number; label: string }[]; yTicks?: number[]; marks?: { x: number; label: string; color?: string }[]; hLines?: { y: number; label: string; color?: string }[]; logX?: boolean; testId?: string }) {
-  const pad = { l: 44, r: 12, t: 12, b: 34 }
+/**
+ * A line plot. By default the key sits inside the plot area at the top left
+ * and a horizontal line's label at its right end inside the area; with
+ * `legend="left"` the key stands in a column to the left of the y axis, and
+ * with `hLineLabels="right"` the lines' labels stand to the right of where
+ * the plot area stops (Jon, 2026-11-21: Part 2's Step 3 plot, where six
+ * lines with their bands covered the key and the adults' labels); a
+ * vertical mark's label sits at the top of the area, or at the bottom with
+ * `markLabels="bottom"` where the lines crowd the top. `fluid` lets the
+ * picture shrink with its container, keeping its proportions.
+ */
+export function LinePlot({ series, width = 420, height = 200, xLabel, yLabel, xMin, xMax, yMin = 0, yMax = 100, xTicks, yTicks, marks, hLines, logX, legend = 'inside', legendWidth = 196, hLineLabels = 'inside', rightWidth = 152, markLabels = 'top', fluid, testId }: { series: Series[]; width?: number; height?: number; xLabel: string; yLabel: string; xMin?: number; xMax?: number; yMin?: number; yMax?: number; xTicks?: { x: number; label: string }[]; yTicks?: number[]; marks?: { x: number; label: string; color?: string }[]; hLines?: { y: number; label: string; color?: string }[]; logX?: boolean; legend?: 'inside' | 'left'; legendWidth?: number; hLineLabels?: 'inside' | 'right'; rightWidth?: number; markLabels?: 'top' | 'bottom'; fluid?: boolean; testId?: string }) {
+  const legendW = legend === 'left' ? legendWidth : 0
+  const rightW = hLineLabels === 'right' ? rightWidth : 0
+  const pad = { l: 44 + legendW, r: 12 + rightW, t: 12, b: 34 }
   const xs = series.flatMap((s) => s.points.map((p) => p[0]))
   const lo = xMin ?? Math.min(...xs)
   const hi = xMax ?? Math.max(...xs)
@@ -28,7 +41,7 @@ export function LinePlot({ series, width = 420, height = 200, xLabel, yLabel, xM
   const Y = (y: number) => height - pad.b - ((y - yMin) / (yMax - yMin || 1)) * (height - pad.t - pad.b)
   const yt = yTicks ?? [yMin, (yMin + yMax) / 2, yMax]
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${yLabel} against ${xLabel}`} style={{ display: 'block', background: 'var(--bg)', borderRadius: 8 }} data-plot={testId ?? 'line'}>
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${yLabel} against ${xLabel}`} style={{ display: 'block', background: 'var(--bg)', borderRadius: 8, ...(fluid ? { width: '100%', maxWidth: width, height: 'auto' } : {}) }} data-plot={testId ?? 'line'} data-legend={legend}>
       {yt.map((y) => (
         <g key={y}>
           <line x1={pad.l} y1={Y(y)} x2={width - pad.r} y2={Y(y)} stroke="var(--border)" />
@@ -40,9 +53,15 @@ export function LinePlot({ series, width = 420, height = 200, xLabel, yLabel, xM
       {hLines?.map((h) => (
         <g key={h.label}>
           <line x1={pad.l} y1={Y(h.y)} x2={width - pad.r} y2={Y(h.y)} stroke={h.color ?? 'var(--text-muted)'} strokeDasharray="3 3" />
-          <text x={width - pad.r - 2} y={Y(h.y) - 3} fontSize={9} textAnchor="end" fill={h.color ?? 'var(--text-muted)'}>
-            {h.label}
-          </text>
+          {hLineLabels === 'right' ? (
+            <text x={width - pad.r + 5} y={Y(h.y) + 3} fontSize={9} fill={h.color ?? 'var(--text-muted)'}>
+              {h.label}
+            </text>
+          ) : (
+            <text x={width - pad.r - 2} y={Y(h.y) - 3} fontSize={9} textAnchor="end" fill={h.color ?? 'var(--text-muted)'}>
+              {h.label}
+            </text>
+          )}
         </g>
       ))}
       {(xTicks ?? []).map((t) => (
@@ -53,7 +72,7 @@ export function LinePlot({ series, width = 420, height = 200, xLabel, yLabel, xM
       {marks?.map((m) => (
         <g key={m.label}>
           <line x1={X(m.x)} y1={pad.t} x2={X(m.x)} y2={height - pad.b} stroke={m.color ?? 'var(--sensor)'} strokeDasharray="3 3" />
-          <text x={X(m.x) + 3} y={pad.t + 10} fontSize={9} fill={m.color ?? 'var(--sensor)'}>
+          <text x={X(m.x) + 3} y={markLabels === 'bottom' ? height - pad.b - 5 : pad.t + 10} fontSize={9} fill={m.color ?? 'var(--sensor)'}>
             {m.label}
           </text>
         </g>
@@ -72,17 +91,26 @@ export function LinePlot({ series, width = 420, height = 200, xLabel, yLabel, xM
       <text x={(pad.l + width - pad.r) / 2} y={height - 4} fontSize={10} textAnchor="middle" fill="var(--text-muted)">
         {xLabel}
       </text>
-      <text x={10} y={(pad.t + height - pad.b) / 2} fontSize={10} textAnchor="middle" fill="var(--text-muted)" transform={`rotate(-90 10 ${(pad.t + height - pad.b) / 2})`}>
+      <text x={legendW + 10} y={(pad.t + height - pad.b) / 2} fontSize={10} textAnchor="middle" fill="var(--text-muted)" transform={`rotate(-90 ${legendW + 10} ${(pad.t + height - pad.b) / 2})`}>
         {yLabel}
       </text>
-      {series.map((s, i) => (
-        <g key={'k' + s.label}>
-          <line x1={pad.l + 8} y1={pad.t + 8 + i * 12} x2={pad.l + 22} y2={pad.t + 8 + i * 12} stroke={s.color} strokeWidth={2} strokeDasharray={s.dashed ? '5 4' : undefined} />
-          <text x={pad.l + 26} y={pad.t + 11 + i * 12} fontSize={9} fill="var(--text-muted)">
-            {s.label}
-          </text>
-        </g>
-      ))}
+      {series.map((s, i) =>
+        legend === 'left' ? (
+          <g key={'k' + s.label} data-key={s.label}>
+            <line x1={6} y1={pad.t + 8 + i * 14} x2={22} y2={pad.t + 8 + i * 14} stroke={s.color} strokeWidth={2} strokeDasharray={s.dashed ? '5 4' : undefined} />
+            <text x={26} y={pad.t + 11 + i * 14} fontSize={9} fill="var(--text)">
+              {s.label}
+            </text>
+          </g>
+        ) : (
+          <g key={'k' + s.label} data-key={s.label}>
+            <line x1={pad.l + 8} y1={pad.t + 8 + i * 12} x2={pad.l + 22} y2={pad.t + 8 + i * 12} stroke={s.color} strokeWidth={2} strokeDasharray={s.dashed ? '5 4' : undefined} />
+            <text x={pad.l + 26} y={pad.t + 11 + i * 12} fontSize={9} fill="var(--text-muted)">
+              {s.label}
+            </text>
+          </g>
+        ),
+      )}
     </svg>
   )
 }
@@ -100,15 +128,17 @@ export function BarChart({ bars, width = 400, max, format = (v) => v.toFixed(2),
   const labelW = 90
   const valueW = 44
   const barW = width - labelW - valueW - 8
+  // Tight rows (under 12 px) leave the first label's top above the picture, so give it room (Jon, 2026-11-21: Part 2, Step 4's histograms).
+  const top = rowH < 12 ? 5 : 0
   return (
-    <svg width={width} height={bars.length * rowH + 4} viewBox={`0 0 ${width} ${bars.length * rowH + 4}`} style={{ display: 'block' }} data-bars={testId ?? true}>
+    <svg width={width} height={bars.length * rowH + 4 + top} viewBox={`0 0 ${width} ${bars.length * rowH + 4 + top}`} style={{ display: 'block' }} data-bars={testId ?? true}>
       {bars.map((b, i) => (
         <g key={b.label + i} data-bar={b.label}>
-          <text x={labelW - 4} y={i * rowH + rowH - 3} fontSize={10} textAnchor="end" fill="var(--text)">
+          <text x={labelW - 4} y={top + i * rowH + rowH - 3} fontSize={10} textAnchor="end" fill="var(--text)">
             {b.label}
           </text>
-          <rect x={labelW} y={i * rowH + 2} width={Math.max(0, (b.value / m) * barW)} height={rowH - 4} fill={b.color ?? 'var(--accent)'} />
-          <text x={labelW + barW + 4} y={i * rowH + rowH - 3} fontSize={10} fill="var(--text-muted)" fontFamily="var(--font-mono)">
+          <rect x={labelW} y={top + i * rowH + 2} width={Math.max(0, (b.value / m) * barW)} height={rowH - 4} fill={b.color ?? 'var(--accent)'} />
+          <text x={labelW + barW + 4} y={top + i * rowH + rowH - 3} fontSize={10} fill="var(--text-muted)" fontFamily="var(--font-mono)">
             {format(b.value)}
           </text>
         </g>

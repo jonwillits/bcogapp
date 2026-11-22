@@ -94,7 +94,7 @@ export class StreamStore extends StepStore<Step> {
 
   // Step 3
   drafts: Partial<Record<'partwords' | 'reach76' | 'least', string>> = {}
-  amountIndex = 3
+  /** Each amount's result, by its index in AMOUNTS_MIN, as the run reaches it. */
   results = new Map<number, AmountResult>()
   running: { amount: number; done: number } | null = null
   parserRule: ParserRule = 'spec'
@@ -407,13 +407,6 @@ export class StreamStore extends StepStore<Step> {
     for (const k of ['partwords', 'reach76', 'least'] as const) this.progress.commitPrediction(this.predictionKey(k), this.drafts[k]!)
     this.changed()
   }
-  setAmount(i: number): void {
-    this.amountIndex = Math.max(0, Math.min(AMOUNTS_MIN.length - 1, i))
-    this.changed()
-  }
-  get amountSyllables(): number {
-    return Math.round(AMOUNTS_MIN[this.amountIndex] * SYLLABLES_PER_MINUTE)
-  }
   setParserRule(r: ParserRule): void {
     this.parserRule = r
     this.changed()
@@ -423,39 +416,48 @@ export class StreamStore extends StepStore<Step> {
     return l === 'parser' && this.parserRule === 'paper' ? r.parserPaper[test] : r.scores[l][test]
   }
 
-  /** Run the three learners on the student's stream and 19 others at the slider's amount, one stream per slice, so that no task holds the main thread long. */
-  async runLearners(): Promise<void> {
+  /**
+   * Run the three learners at every amount in turn, 30 seconds to 21 minutes,
+   * each on the student's stream and 19 others, one stream per slice so that
+   * no task holds the main thread long; the plot fills in as each amount's
+   * result lands (Jon, 2026-11-21: one press runs it all, in place of a
+   * slider and a press per amount). Each amount trains afresh on the first n
+   * syllables, as before. `upTo` limits the amounts run, for the tests.
+   */
+  async runLearners(upTo: number = AMOUNTS_MIN.length - 1): Promise<void> {
     if (!this.allPredicted || this.running) return
-    const amount = this.amountIndex
-    if (this.results.has(amount)) return
-    const n = Math.round(AMOUNTS_MIN[amount] * SYLLABLES_PER_MINUTE)
-    const scores: AmountResult['scores'] = { dips: { nonword: [], partword: [] }, srn: { nonword: [], partword: [] }, parser: { nonword: [], partword: [] } }
-    const parserPaper: AmountResult['parserPaper'] = { nonword: [], partword: [] }
-    this.running = { amount, done: 0 }
-    this.changed()
-    for (let k = 0; k <= OTHER_STREAMS; k++) {
-      await new Promise((r) => setTimeout(r, 0))
-      const seed = k === 0 ? this.seed : (this.seed ^ 0x2e5d) + k * 7919
-      const s = k === 0 ? this.stream : streamFor(seed, Math.ceil(n / 3))
-      const nw = testTrials('nonword', makeRng(seed + 1))
-      const pw = testTrials('partword', makeRng(seed + 2))
-      const dips = trainDips(s.syllables.slice(0, n))
-      scores.dips.nonword.push(scoreTest(nw, dipsScorer(dips), makeRng(seed + 3)))
-      scores.dips.partword.push(scoreTest(pw, dipsScorer(dips), makeRng(seed + 4)))
-      const srn = makeSrn(seed)
-      trainSrn(srn, s.syllables, 0, n)
-      scores.srn.nonword.push(scoreTest(nw, srnScorer(srn), makeRng(seed + 5)))
-      scores.srn.partword.push(scoreTest(pw, srnScorer(srn), makeRng(seed + 6)))
-      const parser = makeParser(seed)
-      trainParser(parser, s.syllables.slice(0, n))
-      scores.parser.nonword.push(scoreTest(nw, parserScorer(parser), makeRng(seed + 7)))
-      scores.parser.partword.push(scoreTest(pw, parserScorer(parser), makeRng(seed + 8)))
-      parserPaper.nonword.push(scoreTestByRecognition(nw, parserKnows(parser), makeRng(seed + 9)))
-      parserPaper.partword.push(scoreTestByRecognition(pw, parserKnows(parser), makeRng(seed + 10)))
-      this.running = { amount, done: k + 1 }
+    for (let amount = 0; amount <= upTo; amount++) {
+      if (this.results.has(amount)) continue
+      const n = Math.round(AMOUNTS_MIN[amount] * SYLLABLES_PER_MINUTE)
+      const scores: AmountResult['scores'] = { dips: { nonword: [], partword: [] }, srn: { nonword: [], partword: [] }, parser: { nonword: [], partword: [] } }
+      const parserPaper: AmountResult['parserPaper'] = { nonword: [], partword: [] }
+      this.running = { amount, done: 0 }
+      this.changed()
+      for (let k = 0; k <= OTHER_STREAMS; k++) {
+        await new Promise((r) => setTimeout(r, 0))
+        const seed = k === 0 ? this.seed : (this.seed ^ 0x2e5d) + k * 7919
+        const s = k === 0 ? this.stream : streamFor(seed, Math.ceil(n / 3))
+        const nw = testTrials('nonword', makeRng(seed + 1))
+        const pw = testTrials('partword', makeRng(seed + 2))
+        const dips = trainDips(s.syllables.slice(0, n))
+        scores.dips.nonword.push(scoreTest(nw, dipsScorer(dips), makeRng(seed + 3)))
+        scores.dips.partword.push(scoreTest(pw, dipsScorer(dips), makeRng(seed + 4)))
+        const srn = makeSrn(seed)
+        trainSrn(srn, s.syllables, 0, n)
+        scores.srn.nonword.push(scoreTest(nw, srnScorer(srn), makeRng(seed + 5)))
+        scores.srn.partword.push(scoreTest(pw, srnScorer(srn), makeRng(seed + 6)))
+        const parser = makeParser(seed)
+        trainParser(parser, s.syllables.slice(0, n))
+        scores.parser.nonword.push(scoreTest(nw, parserScorer(parser), makeRng(seed + 7)))
+        scores.parser.partword.push(scoreTest(pw, parserScorer(parser), makeRng(seed + 8)))
+        parserPaper.nonword.push(scoreTestByRecognition(nw, parserKnows(parser), makeRng(seed + 9)))
+        parserPaper.partword.push(scoreTestByRecognition(pw, parserKnows(parser), makeRng(seed + 10)))
+        this.running = { amount, done: k + 1 }
+        this.changed()
+      }
+      this.results.set(amount, { scores, parserPaper })
       this.changed()
     }
-    this.results.set(amount, { scores, parserPaper })
     this.running = null
     this.changed()
   }

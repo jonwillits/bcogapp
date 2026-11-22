@@ -24,11 +24,10 @@ describe('the board', () => {
     expect(trayCount(b, ['bu'])).toBe(b.filter((x) => x === 'bu').length)
     expect(trayCount(b, [])).toBe(0)
   })
-  it('the table marks the within-word cells, and the six colors are distinct with a pattern each', () => {
+  it('the table marks the within-word cells, and the six colors are distinct', () => {
     const t = tpTableOf(s)
     expect(t.table.length).toBe(12)
     expect(t.within.flat().filter(Boolean).length).toBe(12)
     expect(new Set(Object.values(WORD_COLORS).map((c) => c.fill)).size).toBe(6)
-    expect(new Set(Object.values(WORD_COLORS).map((c) => c.pattern)).size).toBe(6)
   })
 })

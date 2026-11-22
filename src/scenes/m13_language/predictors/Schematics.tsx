@@ -55,15 +55,17 @@ const HIDDEN_ACTIVITY = [0.85, 0.15, 0.55, 0.3, 0.95, 0.1, 0.4, 0.7, 0.2, 0.6, 0
 const OUTPUT_ACTIVITY = [0.08, 0.05, 0.9, 0.12, 0.04, 0.35, 0.06, 0.1, 0.55, 0.05, 0.15, 0.07] as const
 
 /**
- * The simple recurrent network: 52 input units, one for each token, with
- * one on; a hidden layer of 64 units; 52 output units, one probability for
- * each token; and the hidden layer's activity at the token before fed back
- * into the hidden layer. Each layer sits in a box, one arrow runs from a
- * layer to the next, and the hidden and output units are filled to
- * suggest a pattern of activity (Jon, 2026-11-21; before, three lines
- * stood in for the weights and every unit was an outline).
+ * The simple recurrent network: an input unit for each token, with one on;
+ * a hidden layer; an output unit for each token, one probability each; and
+ * the hidden layer's activity at the token before fed back into the hidden
+ * layer. Each layer sits in a box, one arrow runs from a layer to the next,
+ * and the hidden and output units are filled to suggest a pattern of
+ * activity (Jon, 2026-11-21; before, three lines stood in for the weights
+ * and every unit was an outline). Part 4's network has 52 tokens and 64
+ * hidden units, the defaults; Part 2's Step 3 draws its syllable network
+ * with the same picture, 12 and 12 (Jon, 2026-11-21).
  */
-export function SrnSchematic() {
+export function SrnSchematic({ units = 52, hidden = 64, what = 'token' }: { units?: number; hidden?: number; what?: 'token' | 'syllable' } = {}) {
   const W = 360
   const H = 236
   const yIn = 196
@@ -83,7 +85,7 @@ export function SrnSchematic() {
     </g>
   )
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="the simple recurrent network: an input layer, a hidden layer with its own activity at the token before fed back, and an output layer, each in a box, with one arrow from each layer to the next" style={svgStyle} data-schematic="srn">
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`the simple recurrent network: an input layer, a hidden layer with its own activity at the ${what} before fed back, and an output layer, each in a box, with one arrow from each layer to the next`} style={svgStyle} data-schematic="srn">
       {/* one arrow from each layer to the next, standing for all the weights between them */}
       {arrow(yIn, yHid)}
       {arrow(yHid, yOut)}
@@ -106,23 +108,23 @@ export function SrnSchematic() {
         activity at the
       </text>
       <text x={x1 + 66} y={yHid + 14} fontSize={8.5} fill={ACCENT}>
-        token before
+        {`${what} before`}
       </text>
       {/* labels */}
       <text x={W / 2} y={14} fontSize={10} textAnchor="middle" fill={TEXT}>
-        output: 52 units, the probability of each token as the next
+        {`output: ${units} units, the probability of each ${what} as the next`}
       </text>
       <text x={boxX - 6} y={yHid + 3} fontSize={9.5} textAnchor="end" fill={TEXT}>
         hidden layer
       </text>
       <text x={boxX - 6} y={yHid + 14} fontSize={9} textAnchor="end" fill={MUTED}>
-        64 units
+        {`${hidden} units`}
       </text>
       <text x={W / 2} y={H - 18} fontSize={10} textAnchor="middle" fill={TEXT}>
-        input: 52 units, one for each token
+        {`input: ${units} units, one for each ${what}`}
       </text>
       <text x={W / 2} y={H - 6} fontSize={9} textAnchor="middle" fill={MUTED}>
-        the current token’s unit is on (filled); the rest are off
+        {`the current ${what}’s unit is on (filled); the rest are off`}
       </text>
     </svg>
   )

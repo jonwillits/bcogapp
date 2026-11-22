@@ -253,6 +253,20 @@ export function useWidth(ref: RefObject<HTMLElement | null>, fallback: number): 
 }
 export { useRef }
 
+/**
+ * Scroll the main panel to its top whenever `key` changes: a step opened,
+ * Begin pressed, a step finished, the instructions shown again, a tab
+ * switched (Jon, 2026-11-21: after Begin on a long instruction screen the
+ * step opened scrolled to the bottom, where the button had been). The main
+ * panel is the one scroll container (`MainPanel.module.css`).
+ */
+export function useScrollToTop(key: string): void {
+  useEffect(() => {
+    const panel = document.querySelector<HTMLElement>('[data-main-panel]')
+    if (panel) panel.scrollTop = 0
+  }, [key])
+}
+
 /** A one-line notice on a results screen or a panel: what is missing, and what fills it in. */
 export function Missing({ children, testId }: { children: ReactNode; testId?: string }) {
   return (

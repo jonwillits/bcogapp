@@ -24,20 +24,37 @@ export const PREDICTION_QUESTIONS = {
 
 export const LEARNER_NAMES = { dips: 'Cut at the dips', srn: 'A simple recurrent network', parser: 'PARSER' } as const
 
-export const LEARNER_TEXT: Record<keyof typeof LEARNER_NAMES, string[]> = {
+/**
+ * How each learner works, shown with its drawing at the top of Step 3's
+ * panel before anything runs (Jon, 2026-11-21: the explanation comes first,
+ * as Part 4's networks have theirs), and how each takes the test, shown
+ * under the plot once the first run is done. `LEARNER_TEXT` joins the two
+ * for the texts probe.
+ */
+export const LEARNER_HOW: Record<keyof typeof LEARNER_NAMES, string[]> = {
   dips: [
     'This learner counts. For every pair of neighboring syllables it takes in, it adds one to a count for that pair, and for every syllable it adds one to a count for that syllable. From the counts it computes the transitional probability from each syllable to the next: the count of the pair divided by the count of the first syllable (§13.2.3). For example, if pa occurs 30 times and pa is followed by tu 25 of those times, the transitional probability from pa to tu is 25 divided by 30, 0.83.',
-    'It places a cut wherever the transitional probability is lower than at both neighboring pairs: a dip. On the test, its score for a three-syllable string is the mean of the string’s two transitional probabilities, and its choice is the string with the higher score. It stores the counts and nothing else: it is never given the words.',
+    'It places a cut wherever the transitional probability is lower than at both neighboring pairs: a dip. It stores the counts and nothing else: it is never given the words.',
   ],
   srn: [
-    'This learner is a simple recurrent network (§13.2.9). It takes in one syllable at a time, coded as one of 12 inputs, together with a copy of its own 12 hidden units’ activity from the syllable before, which is its context. Its 12 outputs are compared with the code of the next syllable, and the difference is passed back through the connections to move the weights, by the rule of Module 7: the network is trained to predict the next syllable, one pass through the stream, and the stream itself supplies the target.',
-    'On the test, its score for a three-syllable string is minus its mean prediction error on the string’s second and third syllables: the string is fed in with the context reset to its starting value, and at each of the two later syllables the error is the sum over the 12 outputs of the squared difference between the output and the syllable’s code. Lower error is more word-like. Scoring moves no weight. It stores its weights and nothing else: it is never given the words.',
+    'This learner is a simple recurrent network (§13.2.9). It takes in one syllable at a time, coded as one of 12 inputs, together with a copy of its own 12 hidden units’ activity from the syllable before, which is its context. Its 12 outputs are compared with the code of the next syllable, and the difference is passed back through the connections to move the weights, by the rule of Module 7: the network is trained to predict the next syllable, one pass through the stream, and the stream itself supplies the target. It stores its weights and nothing else: it is never given the words.',
   ],
   parser: [
     'This learner is PARSER (Perruchet and Vinter, 1998). It stores units, each with a weight. It starts with the 12 syllables as units, each at a weight of 1. It takes in the stream in small pieces: for each piece, a seeded draw sets how many units the piece covers, 1, 2, or 3. A unit covers the stream where it matches, if its weight is 1 or more; where several match, the longest is used; a syllable on its own always matches.',
-    'A piece of 2 or 3 units that is not yet a unit becomes a new unit at a weight of 1, and each unit inside it gains 0.5. A piece that is already a unit gains 0.5, and so does each unit inside it. A piece of one unit adds 0.5 to that unit. After every piece, every unit loses 0.05, and every unit that shares a syllable with the piece loses 0.005 more. A unit whose weight reaches 0 is dropped; the 12 syllables are never dropped. Pieces inside words recur more often than pieces across word boundaries, so the words come to be the strongest units, with no count and no probability. Every number here is the paper’s (pp. 250 to 252).',
-    'On the test, its score for a three-syllable string is the string’s weight as a unit, or 0 if the string is not a unit, and its choice is the string with the higher score. The paper scored its test by another rule, on the control under the table: the word is chosen if it is a unit with a weight above 1, and otherwise the choice is random (p. 256). It stores the units and their weights and nothing else: it is never given the words.',
+    'A piece of 2 or 3 units that is not yet a unit becomes a new unit at a weight of 1, and each unit inside it gains 0.5. A piece that is already a unit gains 0.5, and so does each unit inside it. A piece of one unit adds 0.5 to that unit. After every piece, every unit loses 0.05, and every unit that shares a syllable with the piece loses 0.005 more. A unit whose weight reaches 0 is dropped; the 12 syllables are never dropped. Pieces inside words recur more often than pieces across word boundaries, so the words come to be the strongest units, with no count and no probability. Every number here is the paper’s (pp. 250 to 252). It stores the units and their weights and nothing else: it is never given the words.',
   ],
+}
+
+export const LEARNER_TEST: Record<keyof typeof LEARNER_NAMES, string> = {
+  dips: 'On the test, its score for a three-syllable string is the mean of the string’s two transitional probabilities, and its choice is the string with the higher score.',
+  srn: 'On the test, its score for a three-syllable string is minus its mean prediction error on the string’s second and third syllables: the string is fed in with the context reset to its starting value, and at each of the two later syllables the error is the sum over the 12 outputs of the squared difference between the output and the syllable’s code. Lower error is more word-like. Scoring moves no weight.',
+  parser: 'On the test, its score for a three-syllable string is the string’s weight as a unit, or 0 if the string is not a unit, and its choice is the string with the higher score. The paper scored its test by another rule, on the control under the table: the word is chosen if it is a unit with a weight above 1, and otherwise the choice is random (p. 256).',
+}
+
+export const LEARNER_TEXT: Record<keyof typeof LEARNER_NAMES, string[]> = {
+  dips: [...LEARNER_HOW.dips, LEARNER_TEST.dips],
+  srn: [...LEARNER_HOW.srn, LEARNER_TEST.srn],
+  parser: [...LEARNER_HOW.parser, LEARNER_TEST.parser],
 }
 
 /** PARSER's two test rules on the control under the table: the spec's (§6.3) is the default. */
@@ -49,7 +66,7 @@ export const PARSER_RULE_LINES = [
 ]
 
 export const STEP3_PANEL = [
-  'Each learner takes in the first so many syllables of your stream, the same stream Step 1 plays, and then takes the test. The slider sets how many: 30 seconds, 1, 2, 4, 7, 14, or 21 minutes of the language, which is 108, 216, 432, 864, 1,512, 3,024, or 4,536 syllables at 216 a minute. The same is done on 19 other streams of the same language, drawn from other seeds, and the plot shades the range over the 20 streams.',
+  'Each learner takes in the first so many syllables of your stream, the same stream Step 1 plays, and then takes the test. One press of “Run the learners” does this at seven amounts in turn: 30 seconds, 1, 2, 4, 7, 14, and 21 minutes of the language, which is 108, 216, 432, 864, 1,512, 3,024, and 4,536 syllables at 216 a minute. The same is done on 19 other streams of the same language, drawn from other seeds, and the plot shades the range over the 20 streams. The plot fills in as each amount is done.',
   'The test is the original experiment’s (Saffran, Newport, and Aslin, 1996, p. 613), in two versions of 36 trials. In the nonword version, each of the six words is paired once with each of six nonwords: strings of three syllables from the language in an order that never occurs in any stream. In the part-word version, each word is paired once with each of six part-words: a word’s first two syllables plus another syllable, or a word’s last two plus another. On each trial the learner’s choice is the string with the higher score by its own rule; a tie is settled by the seeded stream. The score is the percentage of 36 trials on which the learner chose the word.',
 ]
 

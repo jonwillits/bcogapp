@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import styles from './MainPanel.module.css'
 import { MAIN_TABS } from './params'
-import { Btn } from './ui'
+import { Btn, useScrollToTop } from './ui'
 import type { SwitchDialog } from './switching'
 
 export type MainTab = 'current' | 'results'
@@ -11,9 +11,11 @@ export type MainTab = 'current' | 'results'
  * that asks before a switch. The current part stays mounted while the All
  * Results tab shows: it is hidden, not unmounted, so a run or a paused
  * step keeps its state and its canvases. The results tab is mounted only
- * while it shows. The two tab names come from `params.yaml`.
+ * while it shows. The two tab names come from `params.yaml`. A tab switch
+ * opens the panel at its top (`useScrollToTop`; the steps do the same).
  */
 export function MainPanel({ tab, onTab, current, results, dialog }: { tab: MainTab; onTab: (t: MainTab) => void; current: ReactNode; results: ReactNode; dialog: (SwitchDialog & { onConfirm: () => void; onCancel: () => void }) | null }) {
+  useScrollToTop(tab)
   return (
     <>
       <div className={styles.tabs} role="tablist" data-main-tabs>
