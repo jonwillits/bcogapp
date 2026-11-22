@@ -161,3 +161,56 @@ export function ParserSchematic() {
     </svg>
   )
 }
+
+/**
+ * The simple recurrent network's prediction error at each syllable of the
+ * start of the student's stream, after 21 minutes of it, with the word
+ * boundaries marked: Elman's Fig. 6 (1990, p. 194) on this language (Jon,
+ * 2026-11-21). The first syllable of a word is hard to predict, so its
+ * error is high; the second and third are fixed by the first, so theirs
+ * are low. `errors[i]` is the error at `syllables[i]`, which is at
+ * `positions[i]` in its word (0 begins a word).
+ */
+export function ErrorProfileFigure({ syllables, errors, positions }: { syllables: readonly string[]; errors: readonly number[]; positions: readonly number[] }) {
+  const W = 360
+  const H = 160
+  const pad = { l: 34, r: 10, t: 22, b: 36 }
+  const n = errors.length
+  const max = Math.max(0.1, ...errors)
+  const X = (i: number) => pad.l + ((i + 0.5) / n) * (W - pad.l - pad.r)
+  const Y = (e: number) => H - pad.b - (e / max) * (H - pad.t - pad.b)
+  const ticks = [0, max / 2, max]
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="the network's prediction error at each of the first syllables of the stream after 21 minutes of it: high at the first syllable of each word, low at the second and third, with a dashed line at the start of each word" style={svgStyle} data-figure="error-profile">
+      <text x={W / 2} y={12} fontSize={9.5} textAnchor="middle" fill={TEXT}>
+        prediction error at each syllable, after 21 minutes of your stream
+      </text>
+      {ticks.map((e) => (
+        <g key={e}>
+          <line x1={pad.l} y1={Y(e)} x2={W - pad.r} y2={Y(e)} stroke={BORDER} />
+          <text x={pad.l - 4} y={Y(e) + 3} fontSize={8} textAnchor="end" fill={MUTED}>
+            {e.toFixed(1)}
+          </text>
+        </g>
+      ))}
+      {positions.map((p, i) =>
+        p === 0 ? <line key={'b' + i} x1={X(i) - ((W - pad.l - pad.r) / n) * 0.5} y1={pad.t - 4} x2={X(i) - ((W - pad.l - pad.r) / n) * 0.5} y2={H - pad.b + 14} stroke={SENSOR} strokeDasharray="3 3" /> : null,
+      )}
+      <polyline points={errors.map((e, i) => `${X(i)},${Y(e)}`).join(' ')} fill="none" stroke={ACCENT} strokeWidth={1.5} />
+      {errors.map((e, i) => (
+        <circle key={i} cx={X(i)} cy={Y(e)} r={2.6} fill={ACCENT} />
+      ))}
+      {syllables.map((s, i) => (
+        <text key={i} x={X(i)} y={H - pad.b + 11} fontSize={8.5} textAnchor="middle" fill={TEXT} fontFamily="var(--font-mono)">
+          {s}
+        </text>
+      ))}
+      <text x={8} y={(pad.t + H - pad.b) / 2} fontSize={9} textAnchor="middle" fill={MUTED} transform={`rotate(-90 8 ${(pad.t + H - pad.b) / 2})`}>
+        error
+      </text>
+      <text x={W / 2} y={H - 6} fontSize={8.5} textAnchor="middle" fill={MUTED}>
+        the syllables in order; a dashed line where a word begins
+      </text>
+    </svg>
+  )
+}

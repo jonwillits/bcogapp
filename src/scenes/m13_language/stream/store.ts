@@ -7,7 +7,7 @@ import type { Spectrogram } from '../../../sim/language/audio/spectrogram'
 import { streamFor, SYLLABLES, SYLLABLES_PER_MINUTE, WORDS, type Stream, type Syllable, type Word } from '../../../sim/language/stream/language'
 import { scoreTest, scoreTestByRecognition, testTrials } from '../../../sim/language/stream/test'
 import { trainDips, dipsScorer } from '../../../sim/language/stream/learners/dips'
-import { makeSrn, trainSrn, srnScorer } from '../../../sim/language/stream/learners/srn'
+import { makeSrn, trainSrn, srnScorer, errorProfile } from '../../../sim/language/stream/learners/srn'
 import { makeParser, trainParser, parserScorer, parserKnows } from '../../../sim/language/stream/learners/parser'
 import { boardSyllables, isWord, newBoard, trayCount, TRAY_MAX, type BoardState } from '../../../sim/language/stream/board'
 import { StepStore } from '../steps'
@@ -460,6 +460,25 @@ export class StreamStore extends StepStore<Step> {
     }
     this.running = null
     this.changed()
+  }
+
+  private errorFigureCache: { syllables: Syllable[]; errors: number[]; positions: number[] } | null = null
+  /**
+   * The figure beside the recurrent network's drawing (Jon, 2026-11-21, as
+   * Elman's Fig. 6): a network trained on the student's whole stream, 21
+   * minutes, with no further learning, and its prediction error at each of
+   * the first `n` syllables after the first. Trained once, on first use;
+   * it is an illustration of the mechanism, not a run, so `results` is
+   * untouched.
+   */
+  errorFigure(n = 15): { syllables: Syllable[]; errors: number[]; positions: number[] } {
+    if (!this.errorFigureCache) {
+      const srn = makeSrn(this.seed)
+      trainSrn(srn, this.stream.syllables)
+      const shown = this.stream.syllables.slice(0, n + 1)
+      this.errorFigureCache = { syllables: shown.slice(1), errors: errorProfile(srn, shown), positions: this.stream.position.slice(1, n + 1) }
+    }
+    return this.errorFigureCache
   }
 
   // ----------------------------------------------------------- Step 4

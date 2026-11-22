@@ -37,7 +37,8 @@ export const LEARNER_HOW: Record<keyof typeof LEARNER_NAMES, string[]> = {
     'It places a cut wherever the transitional probability is lower than at both neighboring pairs: a dip. It stores the counts and nothing else: it is never given the words.',
   ],
   srn: [
-    'This learner is a simple recurrent network (§13.2.9). It takes in one syllable at a time, coded as one of 12 inputs, together with a copy of its own 12 hidden units’ activity from the syllable before, which is its context. Its 12 outputs are compared with the code of the next syllable, and the difference is passed back through the connections to move the weights, by the rule of Module 7: the network is trained to predict the next syllable, one pass through the stream, and the stream itself supplies the target. It stores its weights and nothing else: it is never given the words.',
+    'This learner is a simple recurrent network (§13.2.9). It takes in one syllable at a time, coded as one of 12 inputs, together with a copy of its own 12 hidden units’ activity from the syllable before, which is its context. Its 12 outputs are compared with the code of the next syllable, and the difference is passed back through the connections to move the weights, by the rule of Module 7: the network is trained to predict the next syllable, one pass through the stream, and the stream itself supplies the target.',
+    'Where a word begins, the syllable that comes is hard to predict from the syllables before it, since any of the other words may follow; inside a word, the next syllable is fixed. So the network’s error is high at the first syllable of a word and low at the second and the third, and the places where its error jumps are its word boundaries. The figure under the drawing shows its error at each of the first syllables of your stream after it has taken in 21 minutes of it. It stores its weights and nothing else: it is never given the words.',
   ],
   parser: [
     'This learner is PARSER (Perruchet and Vinter, 1998). It stores units, each with a weight. It starts with the 12 syllables as units, each at a weight of 1. It takes in the stream in small pieces: for each piece, a seeded draw sets how many units the piece covers, 1, 2, or 3. A unit covers the stream where it matches, if its weight is 1 or more; where several match, the longest is used; a syllable on its own always matches.',
@@ -63,6 +64,25 @@ export const PARSER_RULE_NAMES = { spec: 'Higher weight wins', paper: 'Known wor
 export const PARSER_RULE_LINES = [
   'Under “Higher weight wins”, PARSER’s choice on each trial is the string with the higher weight as a unit, 0 for a string that is not a unit. Under “Known word wins, else random”, the paper’s rule, the word is chosen if it is a unit with a weight above 1, and otherwise the choice is random. Both rules score the same units from the same run; switching changes PARSER’s lines and rows and nothing else.',
   'The two rules give different scores at the shorter amounts, from one store of units: a detail of how a test is scored changes the result.',
+]
+
+/** What the people of the original experiments did, at the top of Step 3's panel (Jon, 2026-11-21: the performance first, then the explanations and what counts as success, then the learners). The numbers are the reference entries' (`references.ts`, saffran-adults and saffran-infants). */
+export const PEOPLE_TEXT = [
+  'In the original experiment (Saffran, Newport, and Aslin, 1996), adults listened to 21 minutes of a stream like the one you heard, in three blocks of seven minutes, and then took a test of 36 trials in two versions. On each trial they heard two strings of three syllables, a word of the language and a foil, and said which was a word. Against nonwords, strings of the language’s syllables in an order that never occurred in the stream, they chose the word on 76% of the trials. Against part-words, a word’s first two syllables plus another syllable or its last two plus another, they chose the word on 65%.',
+  'Eight-month-old infants (Saffran, Aslin, and Newport, 1996) heard 2 minutes of a stream of the same kind. An infant cannot choose between two strings, so each was measured by how long it listened to a test item: the infants listened longer to the nonwords and the part-words than to the words (8.85 seconds against 7.97, and 7.60 against 6.77). After 2 minutes, the words had become familiar.',
+]
+
+export const EXPLANATIONS_TEXT = [
+  'The people learned the words from nothing but the order of the syllables: the stream has no pause, no stress, and no change of pitch at a boundary. The three learners below are three explanations of what people compute from that order: counts of which syllable follows which (cut at the dips); a prediction of the next syllable, with the places where the prediction fails (a simple recurrent network); or a store of the pieces that recur, each gaining strength as it recurs (PARSER). Each learner takes in the same stream you heard and then takes the adults’ test.',
+  'A learner succeeds as an explanation of the people if it does what they did with what they had: it tells the words from the nonwords and from the part-words after 21 minutes of the stream at about the adults’ 76% and 65%, and it tells them apart in some degree after the infants’ 2 minutes. A learner that reaches the adults’ scores only with far more of the stream, or that finds the two tests as easy as each other where the adults did not, fails as an account of the adults, however well it finds the words.',
+]
+
+/** Under the results: the questions the student answers from the plot and the table (Jon, 2026-11-21: show the results and ask them to interpret). Nothing is scored. */
+export const INTERPRET_QUESTIONS = [
+  'Which learners reached the adults’ 76% against nonwords and 65% against part-words, and with how much of the stream?',
+  'Which learners told the words from the foils after the infants’ 2 minutes?',
+  'Which test was harder for each learner, and was it the one the adults found harder?',
+  'Which of the three explanations, if any, does what the people did with what the people had? What would you change in the others?',
 ]
 
 export const STEP3_PANEL = [
