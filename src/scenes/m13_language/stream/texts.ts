@@ -12,7 +12,7 @@ export const SIX_WORDS_LINE = 'The language is made up. It has six words and no 
 /** The replays' paragraphs, at the end of Step 2 once every word is found or shown. */
 export const REPLAYS_TEXT = [
   'The language has six words, each of three syllables: babupu, bupada, dutaba, patubi, pidabu, tutibu. The minute you heard in Step 1 was 72 words in a row, in a random order in which no word came twice in a row, with no pause between them.',
-  '“Play again, with the words marked” plays that minute again, now with its spectrogram, the picture of the sound from Part 1, scrolling under a cursor at the moment being played. Above the spectrogram, a strip of syllables fills in as the sound plays, and each word lights up in its own color as it is heard. Thin lines mark the word boundaries on the spectrogram. The sound itself shows nothing at those lines: every syllable is the same length, the same loudness, and the same pitch wherever it falls.',
+  '“Play again, with the words marked” plays that minute again, now with its spectrogram, the picture of the sound from Part 1. The spectrogram scrolls under a cursor that marks the moment being played. Above it, a strip of syllables fills in as the sound plays, and each word lights up in its own color as it is heard. Thin lines mark the word boundaries on the spectrogram. The sound itself has nothing at those lines: every syllable has the same length, the same loudness, and the same pitch wherever it falls.',
   '“Play again, with each word’s last syllable lengthened” plays the same 72 words with the vowel of every word’s last syllable lengthened by 100 milliseconds.',
 ]
 
@@ -38,7 +38,7 @@ export const LEARNER_HOW: Record<keyof typeof LEARNER_NAMES, string[]> = {
   ],
   srn: [
     'This learner is a simple recurrent network (§13.2.9). It takes in one syllable at a time, coded as one of 12 inputs, together with a copy of its own 12 hidden units’ activity from the syllable before, which is its context. Its 12 outputs are compared with the code of the next syllable, and the difference is passed back through the connections to move the weights, by the rule of Module 7: the network is trained to predict the next syllable, one pass through the stream, and the stream itself supplies the target.',
-    'Where a word begins, the syllable that comes is hard to predict from the syllables before it, since any of the other words may follow; inside a word, the next syllable is fixed. So the network’s error is high at the first syllable of a word and low at the second and the third, and the places where its error jumps are its word boundaries. The figure under the drawing shows its error at each of the first syllables of your stream after it has taken in 21 minutes of it. It stores its weights and nothing else: it is never given the words.',
+    'Where a word begins, the next syllable is hard to predict from the syllables before it, since any of the other words may follow. Inside a word, the next syllable is fixed. So the network’s error is high at the first syllable of a word and low at the second and the third, and where its error jumps, it has a word boundary. The figure under the drawing shows its error at each of the first 15 syllables of your stream after it has taken in 21 minutes of the stream. It stores its weights and nothing else: it is never given the words.',
   ],
   parser: [
     'This learner is PARSER (Perruchet and Vinter, 1998). It stores units, each with a weight. It starts with the 12 syllables as units, each at a weight of 1. It takes in the stream in small pieces: for each piece, a seeded draw sets how many units the piece covers, 1, 2, or 3. A unit covers the stream where it matches, if its weight is 1 or more; where several match, the longest is used; a syllable on its own always matches.',
@@ -47,9 +47,9 @@ export const LEARNER_HOW: Record<keyof typeof LEARNER_NAMES, string[]> = {
 }
 
 export const LEARNER_TEST: Record<keyof typeof LEARNER_NAMES, string> = {
-  dips: 'On the test, its score for a three-syllable string is the mean of the string’s two transitional probabilities, and its choice is the string with the higher score.',
+  dips: 'On the test, its score for a three-syllable string is the mean of the string’s two transitional probabilities, and it chooses the string with the higher score.',
   srn: 'On the test, its score for a three-syllable string is minus its mean prediction error on the string’s second and third syllables: the string is fed in with the context reset to its starting value, and at each of the two later syllables the error is the sum over the 12 outputs of the squared difference between the output and the syllable’s code. Lower error is more word-like. Scoring moves no weight.',
-  parser: 'On the test, its score for a three-syllable string is the string’s weight as a unit, or 0 if the string is not a unit, and its choice is the string with the higher score. The paper scored its test by another rule, on the control under the table: the word is chosen if it is a unit with a weight above 1, and otherwise the choice is random (p. 256).',
+  parser: 'On the test, its score for a three-syllable string is the string’s weight as a unit, or 0 if the string is not a unit, and it chooses the string with the higher score. The paper scored its test by another rule, which you can choose with the control under the table: the word is chosen if it is a unit with a weight above 1, and otherwise the choice is random (p. 256).',
 }
 
 export const LEARNER_TEXT: Record<keyof typeof LEARNER_NAMES, string[]> = {
@@ -74,7 +74,7 @@ export const PEOPLE_TEXT = [
 
 export const EXPLANATIONS_TEXT = [
   'The people learned the words from nothing but the order of the syllables: the stream has no pause, no stress, and no change of pitch at a boundary. The three learners below are three explanations of what people compute from that order: counts of which syllable follows which (cut at the dips); a prediction of the next syllable, with the places where the prediction fails (a simple recurrent network); or a store of the pieces that recur, each gaining strength as it recurs (PARSER). Each learner takes in the same stream you heard and then takes the adults’ test.',
-  'A learner succeeds as an explanation of the people if it does what they did with what they had: it tells the words from the nonwords and from the part-words after 21 minutes of the stream at about the adults’ 76% and 65%, and it tells them apart in some degree after the infants’ 2 minutes. A learner that reaches the adults’ scores only with far more of the stream, or that finds the two tests as easy as each other where the adults did not, fails as an account of the adults, however well it finds the words.',
+  'A learner succeeds as an explanation of the people if it does what they did with what they had: it tells the words from the nonwords and from the part-words after 21 minutes of the stream at about the adults’ 76% and 65%, and it tells them apart in some degree after the infants’ 2 minutes. A learner that reaches the adults’ scores only with far more of the stream, or that scores the same on both tests where the adults did not, fails as an account of the adults, however well it finds the words.',
 ]
 
 /** Under the results: the questions the student answers from the plot and the table (Jon, 2026-11-21: show the results and ask them to interpret). Nothing is scored. */
@@ -87,7 +87,7 @@ export const INTERPRET_QUESTIONS = [
 
 export const STEP3_PANEL = [
   'Each learner takes in the first so many syllables of your stream, the same stream Step 1 plays, and then takes the test. One press of “Run the learners” does this at every amount in turn: nothing at all, then 30 seconds, then every minute from 1 to 21 minutes of the language, at 216 syllables a minute, 4,536 syllables at 21 minutes. The same is done on 19 other streams of the same language, drawn from other seeds, and the plot shades the 95% confidence interval of the mean over the 20 streams. The plot fills in as each amount is done.',
-  'The test is the original experiment’s (Saffran, Newport, and Aslin, 1996, p. 613), in two versions of 36 trials. In the nonword version, each of the six words is paired once with each of six nonwords: strings of three syllables from the language in an order that never occurs in any stream. In the part-word version, each word is paired once with each of six part-words: a word’s first two syllables plus another syllable, or a word’s last two plus another. On each trial the learner’s choice is the string with the higher score by its own rule; a tie is settled by the seeded stream. The score is the percentage of 36 trials on which the learner chose the word.',
+  'The test is the original experiment’s (Saffran, Newport, and Aslin, 1996, p. 613), in two versions of 36 trials. In the nonword version, each of the six words is paired once with each of six nonwords: strings of three syllables from the language in an order that never occurs in any stream. In the part-word version, each word is paired once with each of six part-words: a word’s first two syllables plus another syllable, or a word’s last two plus another. On each trial the learner chooses the string with the higher score by its own rule; a tie is settled by a coin toss fixed by the seed. The score is the percentage of 36 trials on which the learner chose the word.',
 ]
 
 export const STEP4_PANEL = [

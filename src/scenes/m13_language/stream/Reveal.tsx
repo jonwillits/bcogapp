@@ -67,7 +67,7 @@ export function BoardReveal({ seed, result, mode = 'full', replays }: { seed: nu
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-reveal="board">
       <Section n={next()} title="The 300 syllables, divided into words">
-        <Para>The syllables the counts were taken from, in the order they are spoken, 20 to a row; a row break means nothing. Each word is filled with its own color, the words you found and the words shown alike. Click a syllable in the palette above to see its counts.</Para>
+        <Para>These are the syllables the counts came from, in the order they are spoken, 20 to a row; a row break means nothing. Each word is filled with its own color, whether you found it or it was shown. Click a syllable in the palette above to see its counts.</Para>
         <PrintedStream stream={stream} />
       </Section>
       {full && replays && (
@@ -76,12 +76,12 @@ export function BoardReveal({ seed, result, mode = 'full', replays }: { seed: nu
         </Section>
       )}
       <Section n={next()} title="The six words, in the order you found them">
-        <Para>One row per word: its place in your order, the number of checks you made before it, and whether you found it or it was shown by “Show me the words”.</Para>
-        <DataTable testId="found-order" columns={[{ key: 'n', label: 'Order', mono: true }, { key: 'word', label: 'Word', mono: true, align: 'left' }, { key: 'checks', label: 'Checks before it', mono: true }, { key: 'how', label: 'Found or shown' }]} rows={result.found.map((f, i) => ({ n: i + 1, word: f.word, checks: f.checksBefore, how: f.how }))} />
-        <Note>{`You made ${result.checks.length} checks and ${result.clicks.length} syllable clicks.`}</Note>
+        <Para>One row per word: its place in your order, how many words you checked before it, and whether you found it or it was shown by “Show me the words”.</Para>
+        <DataTable testId="found-order" columns={[{ key: 'n', label: 'Order', mono: true }, { key: 'word', label: 'Word', mono: true, align: 'left' }, { key: 'checks', label: 'Checked before it', mono: true }, { key: 'how', label: 'Found or shown' }]} rows={result.found.map((f, i) => ({ n: i + 1, word: f.word, checks: f.checksBefore, how: f.how }))} />
+        <Note>{`You checked ${result.checks.length} ${result.checks.length === 1 ? 'word' : 'words'} and clicked ${result.clicks.length} ${result.clicks.length === 1 ? 'syllable' : 'syllables'}.`}</Note>
       </Section>
       <Section n={next()} title="The table of transitional probabilities">
-        <Para>Computed from your whole 21-minute stream of 4,536 syllables. Each row is a first syllable and each column the syllable after it; a cell is the count of that pair divided by the count of the first syllable. The shaded cells are pairs inside one of the six words.</Para>
+        <Para>These are computed from your whole 21-minute stream of 4,536 syllables. Each row is a first syllable and each column the syllable after it. A cell is the count of that pair divided by the count of the first syllable. The shaded cells are pairs inside one of the six words.</Para>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ borderCollapse: 'collapse', fontFamily: 'var(--font-mono)', fontSize: 10.5 }} data-tp-table>
             <thead>
@@ -116,10 +116,10 @@ export function BoardReveal({ seed, result, mode = 'full', replays }: { seed: nu
         </div>
       </Section>
       <Section n={next()} title="Each word’s average transitional probability inside it">
-        <Para>For each word, the mean of its two transitions from the table, from highest to lowest; beside it, where each word fell in your own order of finding. Shown words have no place.</Para>
+        <Para>For each word, the mean of its two transitional probabilities from the table, from highest to lowest, and beside it where the word fell in the order you found them. A word that was shown has no place.</Para>
         {full && <Para>The original study’s authors split the six words this way and found that the three words with the highest average transitional probabilities were learned better than the three with the lowest, 79% against 72% (p. 614).</Para>}
-        <DataTable testId="word-averages" columns={[{ key: 'rank', label: 'Rank', mono: true }, { key: 'word', label: 'Word', mono: true, align: 'left' }, { key: 'avg', label: 'Average transitional probability', mono: true }, { key: 'yours', label: 'Your order of finding' }]} rows={avgs.map((a, i) => ({ rank: i + 1, word: a.word, avg: a.avg.toFixed(2), yours: foundOrder.includes(a.word) ? `found ${foundOrder.indexOf(a.word) + 1}${['st', 'nd', 'rd'][foundOrder.indexOf(a.word)] ?? 'th'}` : 'shown' }))} />
-        <Note data-ranking>{foundOrder.length >= 2 ? `The three words highest by average transitional probability are ${rank.slice(0, 3).join(', ')}; of the words you found, ${foundOrder.filter((w) => rank.slice(0, 3).includes(w)).length} of your first ${Math.min(3, foundOrder.length)} were among them.` : 'You found fewer than two words, so there is no order of finding to compare.'}</Note>
+        <DataTable testId="word-averages" columns={[{ key: 'rank', label: 'Rank', mono: true }, { key: 'word', label: 'Word', mono: true, align: 'left' }, { key: 'avg', label: 'Average transitional probability', mono: true }, { key: 'yours', label: 'Where you found it' }]} rows={avgs.map((a, i) => ({ rank: i + 1, word: a.word, avg: a.avg.toFixed(2), yours: foundOrder.includes(a.word) ? `found ${foundOrder.indexOf(a.word) + 1}${['st', 'nd', 'rd'][foundOrder.indexOf(a.word)] ?? 'th'}` : 'shown' }))} />
+        <Note data-ranking>{foundOrder.length >= 2 ? `The three words with the highest average transitional probability are ${rank.slice(0, 3).join(', ')}. Of the first ${Math.min(3, foundOrder.length)} words you found, ${foundOrder.filter((w) => rank.slice(0, 3).includes(w)).length} ${foundOrder.filter((w) => rank.slice(0, 3).includes(w)).length === 1 ? 'was' : 'were'} among them.` : 'You found fewer than two words, so there is no order to compare.'}</Note>
         {full && <ReferencePanel reference={reference('saffran-high-low')} />}
       </Section>
     </div>

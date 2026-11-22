@@ -37,10 +37,10 @@ export function Step2Stage({ s, onNext }: { s: StreamStore; onNext?: () => void 
   return (
     <StagePanel wide testId="stream-2">
       <div style={{ fontSize: 14, fontWeight: 600 }}>Find the words</div>
-      {result && onNext && <Note>{`This step is done. Its results are below, with their explanation, and on the ${MAIN_TABS.results} tab at the top of this panel. The button that moves on is at the end.`}</Note>}
+      {result && onNext && <Note>{`This step is done. Its results are below, with their explanation, and on the ${MAIN_TABS.results} tab at the top of this panel. The button to move on is at the end.`}</Note>}
       <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }} data-board-layout>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: '1 1 420px', minWidth: 0 }} data-search>
-          <Note>{ended ? `The search is over. The ${BOARD_SYLLABLES} syllables are printed below, divided into words. Click a syllable in the palette to see its counts.` : `The first ${BOARD_SYLLABLES} syllables of your stream are counted here but not shown. Click a syllable to see how often it occurs, what comes right after it and what comes right before it. Build a word in the tray and check it.`}</Note>
+          <Note>{ended ? `The search is over. The ${BOARD_SYLLABLES} syllables are printed below, divided into words. Click a syllable in the palette to see its counts.` : `The counts here come from the first ${BOARD_SYLLABLES} syllables of your stream, which are not shown. Click a syllable to see how often it occurs, which syllables come right after it, and which come right before it. Build a word in the tray and check it.`}</Note>
           <GroupLabel>The palette: the language’s 12 syllables</GroupLabel>
           <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }} data-palette>
             {SYLLABLES.map((syl) => (
@@ -78,7 +78,7 @@ export function Step2Stage({ s, onNext }: { s: StreamStore; onNext?: () => void 
                 }}
                 style={{ minHeight: 40, display: 'flex', gap: 4, alignItems: 'center', padding: 6, border: `2px dashed ${over ? 'var(--accent)' : 'var(--border)'}`, borderRadius: 8 }}
               >
-                {s.tray.length === 0 && <Note>Drag {TRAY_MIN} to {TRAY_MAX} tiles here, or highlight a syllable and press “Add to the tray”. Click a tile in the tray to take it out.</Note>}
+                {s.tray.length === 0 && <Note>Drag {TRAY_MIN} to {TRAY_MAX} tiles here, or highlight a syllable and press “Add to the tray”. To take a tile out, click it.</Note>}
                 {s.tray.map((syl, i) => (
                   <Tile key={i} text={syl} onClick={() => s.removeFromTray(i)} title="Click to take this tile out of the tray" />
                 ))}
@@ -118,7 +118,7 @@ export function Step2Stage({ s, onNext }: { s: StreamStore; onNext?: () => void 
           )}
           {!ended && s.confirmingShow && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: 8, border: '1px solid var(--avoid)', borderRadius: 8 }} data-confirm-show>
-              <Note>This ends the search: every word you have not found is shown and marked as shown on your results, and no more words can be checked. It cannot be undone.</Note>
+              <Note>This ends the search: every word you have not found is shown, and marked as shown in your results, and you can check no more words. It cannot be undone.</Note>
               <div style={{ display: 'flex', gap: 6 }}>
                 <Btn primary onClick={() => s.showWords()}>
                   Show the words and end the search
@@ -152,7 +152,7 @@ export function Step2Stage({ s, onNext }: { s: StreamStore; onNext?: () => void 
 /** The panel of counts for the highlighted syllable: what comes right after it and right before it in the 300 syllables; counts only until the first word is found, then the proportion too, headed with the term and its definition (decision 10). */
 export function Step2Panel({ s }: { s: StreamStore }) {
   const h = s.highlight
-  if (!h) return <Note data-no-highlight>Click a syllable in the palette to see how many times it occurs in the first {BOARD_SYLLABLES} syllables of your stream, what comes right after it and how many times each does, and what comes right before it.</Note>
+  if (!h) return <Note data-no-highlight>Click a syllable in the palette to see how many times it occurs in the first {BOARD_SYLLABLES} syllables of your stream, which syllables come right after it, and which come right before it, each with its own count.</Note>
   const nb = neighbors(s.boardSyllables, h)
   const withTp = s.firstWordFound
   const cols = [{ key: 'syllable', label: 'Syllable', mono: true, align: 'left' as const }, { key: 'count', label: 'Count', mono: true }, ...(withTp ? [{ key: 'tp', label: 'Proportion', mono: true }] : [])]

@@ -17,7 +17,7 @@ import { PREDICTION, type WordsStore } from './store'
 const pct = (x: number) => (Number.isNaN(x) ? '  —' : `${Math.round(100 * x)}%`.padStart(4))
 
 /** From the build's measurement (docs/M13_AS_BUILT_NOTES.md §4.4): students simulated by each model at a range of accuracies, and how often their after-wrong share fell inside the other model's 90% range. */
-export const HOW_OFTEN_LINE = 'In the build’s measurement, for simulated students with an overall accuracy near chance (about 25%), the after-wrong share fell inside both models’ ranges about 7 times in 10, so 48 pairs did not tell the two apart. For simulated students at 33% accuracy and above, the after-wrong share fell inside the range of the model that produced it 19 times in 20 and inside the other model’s range 2 times in 20 or fewer.'
+export const HOW_OFTEN_LINE = 'Before the lab was posted, we simulated students with each model at a range of accuracies, to measure how often 48 pairs separate the two models. For simulated students with an overall accuracy near chance (about 25%), the share correct after a wrong choice fell inside both models’ ranges about 7 times in 10, so the two models could not be told apart. For simulated students at 33% accuracy and above, that share fell inside the range of the model that produced it 19 times in 20, and inside the other model’s range 2 times in 20 or fewer.'
 
 /** The prediction, at the top of the stage. */
 function PredictionBox({ s }: { s: WordsStore }) {
@@ -51,7 +51,7 @@ function RunButton({ s }: { s: WordsStore }) {
           Run the models
         </Btn>
       </div>
-      {s.computing && <Note data-computing>Fitting each model’s setting and running it 200 times.</Note>}
+      {s.computing && <Note data-computing>Fitting each model’s setting and running the model 200 times.</Note>}
     </div>
   )
 }
@@ -92,13 +92,13 @@ export function Step3Stage({ s }: { s: WordsStore }) {
   return (
     <StagePanel wide testId="words-3">
       <div style={{ fontSize: 14, fontWeight: 600 }}>Two models on your trials</div>
-      {s.usingSample && <Note data-missing="steps12">Steps 1 and 2 are not done, so the models run on a sample sequence of 60 trials drawn from your seed, with the choices of a scripted chooser standing in for yours. Your own row stays empty until Steps 1 and 2 are done.</Note>}
+      {s.usingSample && <Note data-missing="steps12">Steps 1 and 2 are not done, so the models run on a sample sequence of 60 trials drawn from your seed. The choices of a scripted chooser stand in for yours. Your own row stays empty until Steps 1 and 2 are done.</Note>}
       <PredictionBox s={s} />
-      {!committed && <Note data-awaiting-commit>The key measure and the models appear once your prediction is committed above.</Note>}
+      {!committed && <Note data-awaiting-commit>Once you commit your prediction above, you will see the key measure and the two models.</Note>}
       {committed && (
         <div data-reveal="models" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <Section n={1} title="The key measure">
-            <Para>For each word, its occurrences 2 to 5 are each paired with the occurrence just before: 12 words × 4 = 48 pairs. Each pair is sorted by whether the earlier choice was right or wrong, and the share of the later choices that were correct is computed in each group. Chance is 1 in 5, 20%, since five objects are on the screen.</Para>
+            <Para>For each word, we pair each of its occurrences 2 to 5 with the occurrence just before: 12 words × 4 = 48 pairs. We sort the pairs by whether the earlier choice was right or wrong. In each group, the key measure is the share of the later choices that were correct. Chance is 1 in 5, 20%, since five objects are on the screen.</Para>
             {km ? (
               <DataTable testId="key-measure" rowHeader columns={[{ key: 'what', label: 'Pairs' }, { key: 'correct', label: 'Later choice correct', mono: true }, { key: 'n', label: 'Of how many pairs', mono: true }]} rows={[{ what: 'after a right choice', correct: pct(share(km.afterRight)).trim(), n: km.afterRight.n }, { what: 'after a wrong choice', correct: pct(share(km.afterWrong)).trim(), n: km.afterWrong.n }, { what: 'overall, occurrences 2 to 5', correct: pct(km.accuracy).trim(), n: 48 }]} />
             ) : (
@@ -106,14 +106,14 @@ export function Step3Stage({ s }: { s: WordsStore }) {
             )}
           </Section>
           <Section n={2} title="The two models">
-            <Para>Guess and check and tallying are names of two procedures, not descriptions of a person. Each runs on exactly the same 60 trials: the same words and objects, in the same order and the same screen positions.</Para>
+            <Para>Guess and check and tallying are names of two procedures, not descriptions of a person. Both run on your 60 trials: the same words and objects, in the same order and the same screen positions.</Para>
             <Para>
-              <b>Guess and check</b> stores one object per word. On a word’s first occurrence, it picks one of the five objects on the screen at random. On each later occurrence, it recalls its last pick for that word with probability α. If it recalls the pick and that object is on the screen, it picks it again. Otherwise it picks one of the five at random, and stores that. It reads no count.
+              <b>Guess and check</b> stores one object per word. On a word’s first occurrence, it picks one of the five objects on the screen at random. On each later occurrence, it reads its stored pick for that word with probability α. If it reads the pick and that object is on the screen, it picks that object again. Otherwise it picks one of the five at random and stores that pick. It reads no count.
             </Para>
             <Para>
-              <b>Tallying</b> stores a count for every word with every object. On every trial, it adds one to the count of the word with each of the five objects on the screen. Then it picks among the five with probabilities proportional to each object’s count with the word raised to the power β: at β = 0 every object is equally likely, and the larger β, the more the highest count is favored. It reads no record of its own past picks.
+              <b>Tallying</b> stores a count for every word with every object. On every trial, it adds one to the count of the word with each of the five objects on the screen. Then it picks among the five, each object with a probability proportional to its count with the word raised to the power β. At β = 0 every object is equally likely; the larger β, the more the highest count is favored. It reads no record of its own past picks.
             </Para>
-            <Para>Each model’s one setting, α or β, is chosen to match your overall accuracy over occurrences 2 to 5: a search over 41 values of the setting, each run 50 times on your trials, picks the value whose mean accuracy is nearest yours. The models are then compared on the key measure, which neither was fitted to. Each runs 200 times at its fitted setting, and each cell shows the mean over the 200 runs and the range that holds the middle 90% of them.</Para>
+            <Para>Each model’s one setting, α or β, is chosen to match your overall accuracy over occurrences 2 to 5. We run the model 50 times on your trials at each of 41 values of the setting, and keep the value whose mean accuracy is nearest yours. Then we compare the models on the key measure, which neither was fitted to. Each model runs 200 times at its fitted setting. Each cell of the table shows the mean over the 200 runs and the range that holds the middle 90% of them.</Para>
             <Content>{FITTED_TO_YOUR_ACCURACY_LINE}</Content>
           </Section>
           <Section n={3} title="The three rows">
@@ -132,8 +132,8 @@ export function Step3Stage({ s }: { s: WordsStore }) {
                   ]}
                   footer="A bracket holds the range of the middle 90% of the 200 runs."
                 />
-                <Para>{`Guess and check at α = ${gc.param.toFixed(3)} reaches an overall accuracy of ${pct(gc.accuracy.mean).trim()} (the fit aimed at ${pct(s.targetAccuracy).trim()}); tallying at β = ${ta.param.toFixed(2)} reaches ${pct(ta.accuracy.mean).trim()}. After a wrong choice, guess and check is correct ${pct(gc.afterWrong.mean).trim()} of the time and tallying ${pct(ta.afterWrong.mean).trim()}${km ? `; you were correct ${pct(share(km.afterWrong)).trim()} of the time` : ''}.`}</Para>
-                {s.fitted && gc.accuracy.mean < s.targetAccuracy - 0.05 && <Note data-ceiling>{`Guess and check, as stated here, cannot reach an overall accuracy of ${pct(s.targetAccuracy).trim()}: at α = 1 it keeps a wrong pick whenever that object is on the screen again, and its accuracy tops out near ${pct(gc.accuracy.mean).trim()}. The fit chose the value nearest your accuracy.`}</Note>}
+                <Para>{`Guess and check at α = ${gc.param.toFixed(3)} reaches an overall accuracy of ${pct(gc.accuracy.mean).trim()}; the target was ${pct(s.targetAccuracy).trim()}. Tallying at β = ${ta.param.toFixed(2)} reaches ${pct(ta.accuracy.mean).trim()}. After a wrong choice, guess and check is correct ${pct(gc.afterWrong.mean).trim()} of the time and tallying ${pct(ta.afterWrong.mean).trim()} of the time.${km ? ` You were correct ${pct(share(km.afterWrong)).trim()} of the time.` : ''}`}</Para>
+                {s.fitted && gc.accuracy.mean < s.targetAccuracy - 0.05 && <Note data-ceiling>{`Guess and check, as stated here, cannot reach an overall accuracy of ${pct(s.targetAccuracy).trim()}. At α = 1 it keeps a wrong pick whenever that object is on the screen again, so its accuracy goes no higher than about ${pct(gc.accuracy.mean).trim()}. The fitted value is the one whose accuracy is nearest yours.`}</Note>}
                 <Sliders s={s} />
               </>
             )}

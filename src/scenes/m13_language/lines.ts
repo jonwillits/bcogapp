@@ -42,7 +42,7 @@ export const ONE_LISTENER_LINE = 'The reference curves are one listener’s, fro
 export const MADE_UP_LANGUAGE_LINE = 'The language in this part is made up. Its words have no meanings.'
 
 /** 8. Part 2, Step 1, after the commit. */
-export const LENGTHENED_DIFFERENTLY_LINE = 'The original experiment lengthened the last syllable of three of the six words. This replay lengthens all six, so the difference is easy to hear.'
+export const LENGTHENED_DIFFERENTLY_LINE = 'In the original experiment, the last syllable of three of the six words was lengthened. In this replay all six are, so the difference is easy to hear.'
 
 /** 9. Part 2, Step 2. */
 export const COUNTS_FROM_YOUR_STREAM_LINE = 'Every count on this panel is from the first 300 syllables of your stream, which are printed when the search ends.'
@@ -54,7 +54,7 @@ export const ADULTS_21_MINUTES_LINE = 'The adults’ results came after 21 minut
 export const INFANTS_MEASURED_DIFFERENTLY_LINE = 'The infants’ result is from how long they listened to each test item, not from a choice between two items.'
 
 /** 12. Part 2, Step 4. */
-export const REAL_SPEECH_LINE = 'These utterances were spoken to young children and transcribed by researchers. The syllables come from a pronouncing dictionary, not from the recordings, and this step plays no sound.'
+export const REAL_SPEECH_LINE = 'These utterances were spoken to young children and transcribed by researchers. The syllables come from a pronouncing dictionary, not from the recordings, and no sound plays in this step.'
 
 /** 13. Part 3, Steps 1 and 2. */
 export const NO_FEEDBACK_LINE = 'No one will say whether a choice was right. There is no feedback of any kind until the test is done.'

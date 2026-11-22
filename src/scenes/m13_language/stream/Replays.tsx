@@ -50,7 +50,7 @@ export function MinuteReplays({ s }: { s: StreamStore }) {
         <Para key={p.slice(0, 40)}>{p}</Para>
       ))}
       <Content>{SIX_WORDS_LINE}</Content>
-      <Para>In the original study’s second experiment, the vowel of the last syllable was lengthened by 100 milliseconds in three of the six words, in a language with m and n in place of b and d. Scores against nonwords were 80% with the final syllable lengthened, 61% with the first syllable lengthened, and 65% with no lengthening (pp. 616–617).</Para>
+      <Para>In the original study’s second experiment, the vowel of the last syllable was lengthened by 100 milliseconds in three of the six words, in a language with m and n in place of b and d. Scores against nonwords were 80% with the final syllable lengthened, 61% with the first syllable lengthened, and 65% with no syllable lengthened (pp. 616–617).</Para>
       <Content>{LENGTHENED_DIFFERENTLY_LINE}</Content>
       <ReferencePanel reference={reference('saffran-lengthening')} />
     </div>

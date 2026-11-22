@@ -24,7 +24,9 @@ import { meanAndSd } from '../../../sim/language/sounds/classifier'
  * axis from 0 (Jon, 2026-11-22: to show that every learner starts at
  * chance, with the axis scaled to the time), one line per learner per test
  * with the 95% confidence interval of the mean over the 20 streams shaded
- * (as Part 1's band over 10 networks; before, the range), its key
+ * (as Part 1's band over 10 networks; before, the range), the people's
+ * lines in white with dashes of their own, since blue and orange are two
+ * learners' colors (Jon, 2026-11-22), its key
  * at the left of the axis and the adults' two means labeled at the right
  * of the plot area, chance, and the infants' 2 minutes marked; the table;
  * how each learner takes the test; PARSER's test rule, the spec's by
@@ -146,7 +148,7 @@ export function Step3Stage({ s }: { s: StreamStore }) {
           ))}
         </div>
         <Step3Controls s={s} />
-        {!s.allPredicted && <Note data-awaiting-commit>The plot appears once your three predictions are committed above and the learners have run.</Note>}
+        {!s.allPredicted && <Note data-awaiting-commit>The plot appears once you have committed your three predictions above and run the learners.</Note>}
         {ran && (
           <div data-reveal="learners" style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
             <LinePlot
@@ -165,8 +167,8 @@ export function Step3Stage({ s }: { s: StreamStore }) {
               yMin={0}
               yMax={100}
               yTicks={[0, 25, 50, 75, 100]}
-              hLines={[{ y: 50, label: 'chance, 50%' }, { y: 76, label: 'adults, nonwords, 76% at 21 min', color: 'var(--accent)' }, { y: 65, label: 'adults, part-words, 65% at 21 min', color: 'var(--sensor)' }]}
-              marks={[{ x: 2, label: 'infants, 2 minutes: measured by listening times, not by a test like this one' }]}
+              hLines={[{ y: 50, label: 'chance, 50%', dash: '2 4' }, { y: 76, label: 'adults, nonwords, 76% at 21 min', color: 'var(--text)', dash: '8 4', width: 1.4 }, { y: 65, label: 'adults, part-words, 65% at 21 min', color: 'var(--text)', dash: '3 4', width: 1.4 }]}
+              marks={[{ x: 2, label: 'infants, 2 minutes: measured by listening times, not by a test like this one', color: 'var(--text)', dash: '8 4' }]}
               testId="learners-plot"
             />
             <Note>{`Each line is one learner on one version of the test: the mean over your stream and 19 others, one point per amount run. The shaded band is the 95% confidence interval of that mean over the 20 streams: the mean plus or minus ${T_95_DF19} times the standard deviation divided by the square root of 20, where ${T_95_DF19} is Student’s t for 19 degrees of freedom. The solid lines are the nonword test, the dashed lines the part-word test. The key is at the left of the plot; the adults’ two means are labeled at its right.`}</Note>

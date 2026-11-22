@@ -29,7 +29,7 @@ export interface Series {
  * `markLabels="bottom"` where the lines crowd the top. `fluid` lets the
  * picture shrink with its container, keeping its proportions.
  */
-export function LinePlot({ series, width = 420, height = 200, xLabel, yLabel, xMin, xMax, yMin = 0, yMax = 100, xTicks, yTicks, marks, hLines, logX, legend = 'inside', legendWidth = 196, hLineLabels = 'inside', rightWidth = 152, markLabels = 'top', fluid, testId }: { series: Series[]; width?: number; height?: number; xLabel: string; yLabel: string; xMin?: number; xMax?: number; yMin?: number; yMax?: number; xTicks?: { x: number; label: string }[]; yTicks?: number[]; marks?: { x: number; label: string; color?: string }[]; hLines?: { y: number; label: string; color?: string }[]; logX?: boolean; legend?: 'inside' | 'left'; legendWidth?: number; hLineLabels?: 'inside' | 'right'; rightWidth?: number; markLabels?: 'top' | 'bottom'; fluid?: boolean; testId?: string }) {
+export function LinePlot({ series, width = 420, height = 200, xLabel, yLabel, xMin, xMax, yMin = 0, yMax = 100, xTicks, yTicks, marks, hLines, logX, legend = 'inside', legendWidth = 196, hLineLabels = 'inside', rightWidth = 152, markLabels = 'top', fluid, testId }: { series: Series[]; width?: number; height?: number; xLabel: string; yLabel: string; xMin?: number; xMax?: number; yMin?: number; yMax?: number; xTicks?: { x: number; label: string }[]; yTicks?: number[]; marks?: { x: number; label: string; color?: string; dash?: string }[]; hLines?: { y: number; label: string; color?: string; dash?: string; width?: number }[]; logX?: boolean; legend?: 'inside' | 'left'; legendWidth?: number; hLineLabels?: 'inside' | 'right'; rightWidth?: number; markLabels?: 'top' | 'bottom'; fluid?: boolean; testId?: string }) {
   const legendW = legend === 'left' ? legendWidth : 0
   const rightW = hLineLabels === 'right' ? rightWidth : 0
   const pad = { l: 44 + legendW, r: 12 + rightW, t: 12, b: 34 }
@@ -52,7 +52,7 @@ export function LinePlot({ series, width = 420, height = 200, xLabel, yLabel, xM
       ))}
       {hLines?.map((h) => (
         <g key={h.label}>
-          <line x1={pad.l} y1={Y(h.y)} x2={width - pad.r} y2={Y(h.y)} stroke={h.color ?? 'var(--text-muted)'} strokeDasharray="3 3" />
+          <line x1={pad.l} y1={Y(h.y)} x2={width - pad.r} y2={Y(h.y)} stroke={h.color ?? 'var(--text-muted)'} strokeWidth={h.width ?? 1} strokeDasharray={h.dash ?? '3 3'} />
           {hLineLabels === 'right' ? (
             <text x={width - pad.r + 5} y={Y(h.y) + 3} fontSize={9} fill={h.color ?? 'var(--text-muted)'}>
               {h.label}
@@ -71,7 +71,7 @@ export function LinePlot({ series, width = 420, height = 200, xLabel, yLabel, xM
       ))}
       {marks?.map((m) => (
         <g key={m.label}>
-          <line x1={X(m.x)} y1={pad.t} x2={X(m.x)} y2={height - pad.b} stroke={m.color ?? 'var(--sensor)'} strokeDasharray="3 3" />
+          <line x1={X(m.x)} y1={pad.t} x2={X(m.x)} y2={height - pad.b} stroke={m.color ?? 'var(--sensor)'} strokeDasharray={m.dash ?? '3 3'} />
           <text x={X(m.x) + 3} y={markLabels === 'bottom' ? height - pad.b - 5 : pad.t + 10} fontSize={9} fill={m.color ?? 'var(--sensor)'}>
             {m.label}
           </text>

@@ -24,7 +24,7 @@ import { loadObjects, loadWordFiles, wordClip, type ObjectFile, type WordFile } 
 
 export const WORDS_UNIT: UnitId = 'p3-words'
 export const CHOICE_SHOW_MS = 200
-export const PREDICTION = { key: 'p3-s3-after-wrong', question: 'After a trial on which you clicked the wrong object for a word, will your next choice for that word be correct about as often as chance, which is 1 in 5 (20%), or more often than chance?', choices: ['about as often as chance', 'more often than chance'] } as const
+export const PREDICTION = { key: 'p3-s3-after-wrong', question: 'Suppose you clicked the wrong object for a word. On that word’s next trial, will your choice be correct about as often as chance, which is 1 in 5 (20%), or more often than chance?', choices: ['about as often as chance', 'more often than chance'] } as const
 
 export interface WordsResult {
   materials: 0 | 1
