@@ -253,19 +253,20 @@ describe('Part 2: commit, then reveal', () => {
     z.store.draft('reach76', '1 minute')
     z.store.draft('least', 'they will tie')
     z.store.commitPredictions()
-    await z.store.runLearners(0)
+    // Amounts 0 (nothing: every learner at chance) and 1 (30 seconds), the second being the one the rows below read.
+    await z.store.runLearners(1)
     const m = z.all()
     expect(m).toMatch(/data-reveal="learners"/)
     expect(m).toMatch(/data-plot="learners-plot"/)
     expect(text(m)).toMatch(/adults, nonwords, 76% at 21 min/)
     expect(text(m)).toMatch(/infants, 2 minutes/)
     expect(m).toMatch(/data-table="learners-table"/)
-    expect(z.store.results.get(0)!.scores.dips.nonword.length).toBe(20)
+    expect(z.store.results.get(1)!.scores.dips.nonword.length).toBe(20)
     // The third learner: a row for PARSER on each test, both test rules scored at the run, and the control switching PARSER's rows and nothing else.
     expect(text(m)).toMatch(/PARSER\s*nonwords/)
     expect(text(m)).toMatch(/PARSER\s*part-words/)
-    expect(z.store.results.get(0)!.scores.parser.nonword.length).toBe(20)
-    expect(z.store.results.get(0)!.parserPaper.partword.length).toBe(20)
+    expect(z.store.results.get(1)!.scores.parser.nonword.length).toBe(20)
+    expect(z.store.results.get(1)!.parserPaper.partword.length).toBe(20)
     expect(m).toMatch(/data-parser-rule="spec"/)
     // The learners table is a table now (2026-11-19): a row's cells run together in its text.
     const row = (t: string, l: string) => t.match(new RegExp(`${l}\\s*nonwords\\s*\\d+\\.\\d%`))![0]
@@ -276,7 +277,7 @@ describe('Part 2: commit, then reveal', () => {
     expect(m2).toMatch(/data-parser-rule="paper"/)
     expect(row(text(m2), 'Cut at the dips')).toBe(dipsRow)
     expect(row(text(m2), 'PARSER')).not.toBe(parserRow)
-    const r = z.store.results.get(0)!
+    const r = z.store.results.get(1)!
     expect(z.store.scoresOf(r, 'parser', 'nonword')).toBe(r.parserPaper.nonword)
     z.store.setParserRule('spec')
     expect(z.store.scoresOf(r, 'parser', 'nonword')).toBe(r.scores.parser.nonword)

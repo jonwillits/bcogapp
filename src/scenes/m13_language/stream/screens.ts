@@ -76,7 +76,7 @@ export const SCREENS: Record<Step, StepScreen> = {
     kind: 'exploration',
     willDo: [
       'In this step you will run three computer programs, called learners here, on the language of Step 1. Each learner takes in syllables, one at a time, and computes something from them. None of the three is given the words. The panel first says what the adults and the infants of the original experiments did, then what the three learners are explanations of and what would count as success, then describes each learner with a drawing, before anything runs; how each takes the test is explained under the plot once the first run is done, with questions to answer from the results.',
-      'Press “Run the learners” once. Every learner takes in 30 seconds of your stream and takes the test, then 1, 2, 4, 7, 14, and 21 minutes of it, in turn; the panel says how many syllables each amount is. The same is done at each amount on 19 other streams of the same language, so that you see the spread. The plot fills in as each amount is done.',
+      'Press “Run the learners” once. Every learner takes the test having taken in nothing, then 30 seconds of your stream, then every minute of it from 1 to 21, in turn. The same is done at each amount on 19 other streams of the same language, so that you see the spread. The plot fills in as each amount is done.',
       'After taking in the stream, each learner takes a test of 36 trials in two versions. On each trial, a learner is given two strings of three syllables, and its choice is the string with the higher score by its own rule. The panel says what the two versions of the test are once the first run is done.',
       'Before the first run, choose three predictions from the lists above the plot, and press “Commit my predictions”. The plot shows each learner’s percentage correct on each version of the test against how much of the stream it took in. Two published results are marked on the plot once the first run is done.',
       'Nothing is scored. Your predictions are recorded. The run takes some seconds, and the plot fills in amount by amount.',
@@ -84,7 +84,7 @@ export const SCREENS: Record<Step, StepScreen> = {
     minutes: stepParams('stream', 3).minutes,
     sitting: 'leave any time',
     sittingLine: EXPLORATION_SITTING_LINE,
-    keys: ['“Commit my predictions” commits the three predictions, asked once before the run.', '“Run the learners” runs all three at every amount, 30 seconds to 21 minutes, in turn.', 'The three learners are described at the top of the panel, each with a drawing; how each takes the test is under the plot.'],
+    keys: ['“Commit my predictions” commits the three predictions, asked once before the run.', '“Run the learners” runs all three at every amount, nothing to 21 minutes, in turn.', 'The three learners are described at the top of the panel, each with a drawing; how each takes the test is under the plot.'],
     content: [MADE_UP_LANGUAGE_LINE],
     next: NEXT_LINE[3],
   },

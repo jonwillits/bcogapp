@@ -59,7 +59,8 @@ export function Step4Stage({ s }: { s: StreamStore }) {
       ))}
       <Step4Controls s={s} />
       <GroupLabel>{u.words.join(' ')}</GroupLabel>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 0, overflowX: 'auto', paddingBottom: 6 }} data-utterance-strip>
+      {/* The strip scrolls sideways only: with overflow auto on both axes its box reported 10 px more than its tiles and showed a vertical scrollbar (Jon, 2026-11-22). */}
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 0, overflowX: 'auto', overflowY: 'hidden', paddingBottom: 8 }} data-utterance-strip>
         {u.syllables.map((syl, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'flex-end' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>

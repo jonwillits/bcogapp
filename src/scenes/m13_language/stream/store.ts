@@ -32,7 +32,10 @@ import { assemble, loadRealSpeech, loadStreamJson, streamClip, syllableSpectrogr
 export const MINUTE_UNIT: UnitId = 'p2-minute'
 export const BOARD_UNIT: UnitId = 'p2-board'
 export const MINUTE_SYLLABLES = SYLLABLES_PER_MINUTE
-export const AMOUNTS_MIN = [0.5, 1, 2, 4, 7, 14, 21] as const
+/** The amounts of the stream each learner takes in, in minutes, in the order run: nothing, 30 seconds, then every minute to 21 (Jon, 2026-11-22: the plot starts at 0 to show chance, on a linear axis, with a point every minute; before, 0.5, 1, 2, 4, 7, 14, 21 on a logarithmic axis). */
+export const AMOUNTS_MIN: readonly number[] = [0, 0.5, ...Array.from({ length: 21 }, (_, i) => i + 1)]
+/** The amounts the table under the plot shows, so that it stays readable: the plot has every amount. */
+export const TABLE_AMOUNTS_MIN: readonly number[] = [0, 0.5, 1, 2, 4, 7, 14, 21]
 export const OTHER_STREAMS = 19
 export type Replay = 'first' | 'marked' | 'long'
 
@@ -417,12 +420,15 @@ export class StreamStore extends StepStore<Step> {
   }
 
   /**
-   * Run the three learners at every amount in turn, 30 seconds to 21 minutes,
+   * Run the three learners at every amount in turn, nothing to 21 minutes,
    * each on the student's stream and 19 others, one stream per slice so that
    * no task holds the main thread long; the plot fills in as each amount's
    * result lands (Jon, 2026-11-21: one press runs it all, in place of a
    * slider and a press per amount). Each amount trains afresh on the first n
-   * syllables, as before. `upTo` limits the amounts run, for the tests.
+   * syllables, as before, so the scores at the amounts that were run before
+   * 2026-11-22 are unchanged; at 0 every learner is untrained and every trial
+   * is a tie or a guess, so its score is near chance. `upTo` limits the
+   * amounts run, for the tests.
    */
   async runLearners(upTo: number = AMOUNTS_MIN.length - 1): Promise<void> {
     if (!this.allPredicted || this.running) return
