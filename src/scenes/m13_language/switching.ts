@@ -28,7 +28,7 @@ export const UNDER_WAY_LINE: Record<UnderWay, string> = {
   minute: 'The minute is under way and your answer is not yet committed.',
   trials: 'The learning trials are under way.',
   test: 'The test is under way.',
-  run: 'A run is going.',
+  run: 'A run is under way.',
 }
 
 /** What starts again, for each thing that can be under way, as the clause after “when you come back,”. */
@@ -73,8 +73,8 @@ export function switchDialog(target: SwitchTarget, busy: Busy): SwitchDialog {
     line =
       L === null
         ? `If you go to ${t} now, this step pauses where it is, for as long as you like, and goes on from there when you come back.`
-        : `If you go to ${t} now, this step pauses where it is, for up to ${L} minutes. Come back within that time and it goes on from where it stopped. Later, ${restart}, and the restart is noted on the results screen.`
-  } else if (busy.consequence === 'restart') line = `If you go to ${t} now, ${restart} when you come back, and the restart is noted on the results screen.`
+        : `If you go to ${t} now, this step pauses where it is, for up to ${L} minutes. Come back within that time and the step goes on from where it stopped. Later, ${restart}, and a line on the results screen says so.`
+  } else if (busy.consequence === 'restart') line = `If you go to ${t} now, ${restart} when you come back, and a line on the results screen says so.`
   else line = `If you go to ${t} now, it keeps going while you are away, and its plots and tables are here when you come back. Nothing is lost.`
   return { title: 'Before you go', lines: [UNDER_WAY_LINE[busy.what], line], confirm: `Go to ${targetShort(target)}`, cancel: 'Stay here' }
 }
@@ -82,8 +82,8 @@ export function switchDialog(target: SwitchTarget, busy: Busy): SwitchDialog {
 /** The pause screen's lines, under its timer. */
 export function pauseLines(what: UnderWay, limitMinutes: number | null): string[] {
   const restart = RESTART_PHRASE[what]
-  if (limitMinutes === null) return ['This step is paused. It goes on from where it stopped when you press “Resume”, however long you wait.', `If you close or reload the page instead, ${restart}, and the restart is noted on the results screen.`]
-  return [`This step is paused. Press “Resume” within ${limitMinutes} minutes and it goes on from where it stopped.`, `After ${limitMinutes} minutes, or if you close or reload the page, ${restart}, and the restart is noted on the results screen.`]
+  if (limitMinutes === null) return ['This step is paused. It goes on from where it stopped when you press “Resume”, however long you wait.', `If you close or reload the page instead, ${restart}, and a line on the results screen says so.`]
+  return [`This step is paused. Press “Resume” within ${limitMinutes} minutes and it goes on from where it stopped.`, `After ${limitMinutes} minutes, or if you close or reload the page, ${restart}, and a line on the results screen says so.`]
 }
 
 /** The line on the step after a pause ran past its limit. */
@@ -100,7 +100,7 @@ export function pauseClause(limit: number | null): string {
 
 /** For the same section: when what was under way starts again, on a step that pauses. */
 export function restartClause(limit: number | null, restart: string): string {
-  return limit === null ? `If you close or reload the page partway, ${restart}, and the restart is noted on the results screen.` : `Past ${limit} minutes, or if you close or reload the page, ${restart}, and the restart is noted on the results screen.`
+  return limit === null ? `If you close or reload the page partway, ${restart}, and a line on the results screen says so.` : `Past ${limit} minutes, or if you close or reload the page, ${restart}, and a line on the results screen says so.`
 }
 
 /** The minutes and seconds of a pause, as the pause screen's timer prints them. */

@@ -20,7 +20,7 @@ import type { Step } from './screens'
  */
 
 export const PREDICTIONS = {
-  nearest: { key: 'p4-s2-nearest', question: 'Which word will lie closest to “cat” in the count model, by the similarity of their lists of counts?' },
+  nearest: { key: 'p4-s2-nearest', question: 'Which word will lie closest to “cat” in the count model, judged by how similar the two words’ lists of counts are?' },
   counts: { key: 'p4-s3-counts', question: 'After “girls who dogs chase”, which kind of token will the prediction from counts make most probable: a plural verb form (“chase”, “walk”, …), a singular verb form (“chases”, “walks”, …), or a noun?', choices: ['a plural verb form', 'a singular verb form', 'a noun'] },
   agree: { key: 'p4-s4-agree', question: 'After “boys who Mary chases”, which verb form will each network give more probability to?', choices: ['both the plural form', 'both the singular form', 'the transformer plural, the recurrent network singular', 'the transformer singular, the recurrent network plural'] },
 } as const
@@ -56,7 +56,7 @@ export interface CountPrediction {
   denominator: number
 }
 
-/** The count model's state matching one snapshot of the networks (Jon, 2026-11-20): the counts over the sentences the networks had seen by then. */
+/** The count model's state matching one snapshot of the networks (Jon, 2026-11-20): the counts over the sentences the networks had been trained on by then. */
 export interface CountState {
   updates: number
   /** How many of the training sentences are counted: 32 per update, up to all 9,000. */
@@ -421,7 +421,7 @@ export class PredictorsStore extends StepStore<Step> {
 
   // ----------------------------------------------------------- the count model by snapshot (Jon, 2026-11-20)
 
-  /** How many training sentences the networks had seen after `updates` updates: 32 per update, up to all 9,000. */
+  /** How many training sentences the networks had been trained on after `updates` updates: 32 per update, up to all 9,000. */
   sentencesSeen(updates: number): number {
     return Math.min(this.training.length, updates * SENTENCES_PER_UPDATE)
   }

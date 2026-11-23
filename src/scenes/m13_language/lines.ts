@@ -15,10 +15,10 @@ export const SECOND_RUN_LINE = 'A second run is not a first run: someone who kno
 export const ANY_ORDER_LINE = 'Every part, and every step within a part, can be done at any time and in any order. Nothing done once has to be done again to reach anything else.'
 
 /** The commit-then-reveal rule, on Part 0. */
-export const COMMIT_RULE_LINE = 'Nothing an experiment would tell you is shown until you commit your answers: not an expected value, not a published result, not what a question was for.'
+export const COMMIT_RULE_LINE = 'Nothing you could learn from an experiment is shown until you commit your answers.'
 
 /** Any results screen whose unit was restarted. */
-export const RESTARTED_LINE = 'This part was interrupted and run again.'
+export const RESTARTED_LINE = 'This step was interrupted and started again.'
 
 /** 1. The Open tab, and every instruction screen in Parts 1 to 3. */
 export const HEADPHONES_LINE = 'This step plays sound. Use headphones or earbuds if you have them, and set a comfortable volume once. Small differences between sounds may be harder to hear through speakers. You can still do every step without headphones.'
@@ -36,7 +36,7 @@ export const MEASURED_LINE = 'The formant tracks drawn here were measured from t
 export const SYNTHETIC_TEST_LINE = 'The network learned from natural voices. In this run it is tested on synthetic sounds unlike any it learned from.'
 
 /** 6. Part 1, Step 3, the reveal. */
-export const ONE_LISTENER_LINE = 'The reference curves are one listener’s, from the reading’s figure, measured in 1957.'
+export const ONE_LISTENER_LINE = 'The reference curves are one listener’s, measured in 1957 and drawn from the reading’s figure.'
 
 /** 7. Part 2, every step. */
 export const MADE_UP_LANGUAGE_LINE = 'The language in this part is made up. Its words have no meanings.'
@@ -66,7 +66,7 @@ export const FITTED_TO_YOUR_ACCURACY_LINE = 'Each model’s one setting was chos
 export const SMALL_NUMBERS_LINE = 'Your key measure rests on 48 pairs of choices: for each of 12 words, the choices on occurrences 2 to 5, each compared with the choice just before it.'
 
 /** 16. Part 4, every step. */
-export const ONE_CORPUS_LINE = 'Every model in this part learned from the same made-up corpus of sentences, built from a vocabulary of about 50 tokens, and from nothing else.'
+export const ONE_CORPUS_LINE = 'Every model in this part learned from the same made-up corpus of sentences, and from nothing else. The corpus was built from a vocabulary of about 50 tokens.'
 
 /** 17. Part 4, Steps 4 and 5. */
 export const TRAINED_BEFORE_LINE = 'These models were trained before the lab was posted. They do not change while you use them.'

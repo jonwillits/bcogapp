@@ -157,7 +157,14 @@ describe('Part 1: commit, then reveal', () => {
     c.store.run3Now()
     expect(c.store.run3.state).toBe('done')
     expect(c.all()).toMatch(/data-run="run3"/)
-    expect(text(c.all())).toMatch(/appear beside the network’s once Step 3 is done/)
+    expect(text(c.all())).toMatch(/Once Step 3 is done, you will see your own labels of these 9 sounds beside the network’s/)
+    expect(c.all()).not.toMatch(/data-yours/)
+    // Once Step 3 is done, the student's own labels stand beside the network's, and the note goes (Jon, 2026-11-23).
+    c.progress.complete('p1-labeling', labelingFixture)
+    c.progress.complete('p1-abx', abxFixture)
+    const m3 = text(c.all())
+    expect(m3).toMatch(/network:.*yours: +b +b +b +b +d +d +d +d +d/)
+    expect(m3).not.toMatch(/Once Step 3 is done, you will see/)
   }, 90000)
 })
 

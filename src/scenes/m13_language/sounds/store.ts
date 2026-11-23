@@ -33,11 +33,11 @@ export const TOUR: TourScreen[] = ['time', 'frequency', 'energy', 'patterns', 'p
 
 export const PREDICTIONS = {
   pitch: { key: 'p1-s1-pitch', question: 'When the pitch of the vowel goes up from 100 Hz to 200 Hz, what will move on the spectrogram?', choices: ['the harmonics', 'the formants', 'both', 'neither'] },
-  run1: { key: 'p1-s4-run1', question: 'Trained on ten voices and tested on the two voices it never learned from, what percentage of the held-out syllables will the network label correctly? Chance is 33%.', choices: ['under 50%', '50% to 75%', '75% to 90%', 'over 90%'] },
-  run2pitch: { key: 'p1-s4-run2-pitch', question: 'Trained on every voice at its own pitch only, and tested on the shifted pitches and the two held-out voices, will the percentage correct be higher than, about the same as, or lower than in run 1?', choices: ['higher', 'about the same', 'lower'] },
-  run2voice: { key: 'p1-s4-run2-voice', question: 'Trained on one voice at its three pitches only, and tested on the other eleven voices, will the percentage correct be higher than, about the same as, or lower than in run 1?', choices: ['higher', 'about the same', 'lower'] },
+  run1: { key: 'p1-s4-run1', question: 'The network is trained on ten voices and tested on the two voices it was not trained on. What percentage of the held-out syllables will it label correctly? Chance is 33%.', choices: ['under 50%', '50% to 75%', '75% to 90%', 'over 90%'] },
+  run2pitch: { key: 'p1-s4-run2-pitch', question: 'A network is trained on every voice at its own pitch only, and tested on the shifted pitches and the two held-out voices. Will its percentage correct be higher than, about the same as, or lower than run 1’s?', choices: ['higher', 'about the same', 'lower'] },
+  run2voice: { key: 'p1-s4-run2-voice', question: 'A network is trained on one voice at its three pitches only, and tested on the other eleven voices. Will its percentage correct be higher than, about the same as, or lower than run 1’s?', choices: ['higher', 'about the same', 'lower'] },
   run2which: { key: 'p1-s4-run2-which', question: 'Which of the two will label more of its test syllables correctly?', choices: ['the network trained on one pitch', 'the network trained on one voice', 'about the same'] },
-  run3: { key: 'p1-s4-run3', question: `Run on the ${STEPS} synthetic sounds of Step 3, in what order will the network’s most likely label change from the first sound to the ninth?`, choices: ['b, then d', 'another order', `one label for all ${STEPS}`] },
+  run3: { key: 'p1-s4-run3', question: `The network from run 1 is run on the ${STEPS} synthetic sounds of Step 3. From the first sound to the ninth, in what order will its most likely label change?`, choices: ['b, then d', 'another order', `one label for all ${STEPS}`] },
   // Asked instead of run3's when Step 3 is done (spec §5.4; §11, item 2): the wording is in afterStep3.ts.
   run3After: RUN3_AFTER_STEP3,
 } as const

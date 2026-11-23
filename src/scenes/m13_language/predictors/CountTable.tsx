@@ -6,8 +6,8 @@ import { MATRIX_NOTE, SIMILARITY_TEXT } from './texts'
 /**
  * Step 2's table of counts as a heat map (Jon, 2026-11-17): every word a row
  * and a column, the number printed in each cell, a warm background whose
- * strength grows with the square root of the count so that the few huge
- * counts do not wash out the rest, a word column that stays put while the
+ * strength grows with the square root of the count so that the few very
+ * large counts do not leave every other cell pale, a word column that stays put while the
  * number columns scroll sideways, and a header row that stays put while the
  * rows scroll down. Not built from FixedLines; the scroll container has
  * `flexShrink: 0` so a capped column cannot squeeze it to nothing.
@@ -57,7 +57,7 @@ export function CountTable({ m, which, max, testId }: { m: CountModel; which: 'b
       <table style={{ borderCollapse: 'separate', borderSpacing: 0, fontFamily: MONO, fontSize: 10.5, lineHeight: 1.3, tableLayout: 'fixed', width: HEAD_W + V.length * CELL_W }}>
         <thead>
           <tr>
-            <th style={{ position: 'sticky', top: 0, left: 0, zIndex: 3, background: STICKY_BG, width: HEAD_W, minWidth: HEAD_W, textAlign: 'left', padding: '2px 6px', fontWeight: 400, color: 'var(--text-muted)', verticalAlign: 'bottom', borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)' }}>row word</th>
+            <th style={{ position: 'sticky', top: 0, left: 0, zIndex: 3, background: STICKY_BG, width: HEAD_W, minWidth: HEAD_W, textAlign: 'left', padding: '2px 6px', fontWeight: 400, color: 'var(--text-muted)', verticalAlign: 'bottom', borderBottom: '1px solid var(--border)', borderRight: '1px solid var(--border)' }}>row token</th>
             {V.map((w) => (
               <th key={w} style={{ position: 'sticky', top: 0, zIndex: 2, background: STICKY_BG, width: CELL_W, minWidth: CELL_W, height: HEAD_H, padding: '2px 0', fontWeight: 400, color: 'var(--text)', verticalAlign: 'bottom', borderBottom: '1px solid var(--border)' }}>
                 <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', margin: '0 3px 0 auto', whiteSpace: 'nowrap' }}>{w}</div>
@@ -100,7 +100,7 @@ export function HeatLegend({ max }: { max: number }) {
           <span style={{ fontSize: 10.5, fontFamily: MONO, color: 'var(--text-muted)' }}>{Math.round(f * max).toLocaleString()}</span>
         </span>
       ))}
-      <Note>{`The color grows with the square root of the count, from 0 to ${Math.round(max).toLocaleString()}, the largest count in the table, so the few huge counts do not wash out the rest.`}</Note>
+      <Note>{`The color grows with the square root of the count, from 0 up to ${Math.round(max).toLocaleString()}, the largest count in the table. With the square root, the few very large counts do not leave every other cell pale.`}</Note>
     </div>
   )
 }
@@ -148,7 +148,7 @@ export function SimilarityDemo({ m, words = DEMO_WORDS }: { m: CountModel; max?:
           </Fragment>
         ))}
       </div>
-      <Note>{`Each strip is one word’s whole list of ${n} normalized values, one cell per position, in the order of the table’s columns${m.separate ? ': the words before, then, after the mark, the words after' : ''}, shrunk to fit the width. A warm cell is above the vector’s mean and a blue cell below it, the darker the farther from the mean.`}</Note>
+      <Note>{`Each strip is one word’s whole list of ${n} normalized values, one cell per position, shrunk to fit the width. The cells are in the order of the table’s columns${m.separate ? ': first the counts of the words before, then, past the black line, the counts of the words after' : ''}. A warm cell is above the vector’s mean and a blue cell below it; the darker the cell, the farther from the mean.`}</Note>
       <table data-demo-matrix style={{ borderCollapse: 'separate', borderSpacing: 0, fontFamily: MONO, fontSize: 11, alignSelf: 'flex-start' }}>
         <thead>
           <tr>

@@ -27,7 +27,7 @@ import type { AbxResult, LabelingResult, LabelsResult, SoundsStore } from './sto
 export type RevealMode = 'full' | 'results'
 
 /** Step 2's finished stage: the done line, then the sections. */
-const STEP2_DONE_LINE = `This step is done. Below are your labels beside the right ones, then the six syllables named, in the order you saw them, with their measured formant tracks. The table is also on the ${MAIN_TABS.results} tab at the top of this panel. The button that moves on is at the end.`
+const STEP2_DONE_LINE = `This step is done. Below, you will see your labels beside the right ones, then the six syllables, named, in the order you saw them. On each spectrogram are the tracks of its first two formants, measured from the sound. The table is also on the ${MAIN_TABS.results} tab at the top of this panel. The button to move on, “Go on to Step 3”, is at the end.`
 
 const IPA: Record<Six, string> = { bee: '/bi/', bah: '/bɑ/', boo: '/bu/', dee: '/di/', dah: '/dɑ/', doo: '/du/' }
 const COLORS: Record<string, string> = { b: 'var(--accent)', d: 'var(--sensor)', g: 'var(--actuator)' }
@@ -68,7 +68,7 @@ function SixReveal({ s, k, n, width }: { s: SoundsStore; k: Six; n: number; widt
       </div>
       {dir && (
         <Para>
-          {`The second formant ${dir.word} into the vowel: ${dir.from ?? '?'} Hz at 10 ms after the release and ${dir.to ?? '?'} Hz at 100 ms, by Praat’s measurement.`}
+          {dir.from === null || dir.to === null ? 'The second formant could not be measured in this syllable.' : `The second formant ${dir.word} into the vowel: ${dir.from} Hz at 10 milliseconds after the release and ${dir.to} Hz at 100 milliseconds, as measured by Praat, a speech-analysis program.`}
         </Para>
       )}
     </div>
@@ -88,7 +88,7 @@ export function LabelsStage({ s, result, onNext }: { s: SoundsStore; result: Lab
         {result.restarts > 0 && <Content>{RESTARTED_LINE}</Content>}
         <LabelsTable result={result} />
         <Section n={2} title="The six syllables, with their measured formant tracks">
-          <Para>Each spectrogram is now labeled with its syllable, in the order you saw them. The orange line is the second formant’s track and the green line the first formant’s, measured from the sound over the first 100 ms after the release (the red mark), at 5 ms steps. A formant transition is the movement of a formant from the consonant into the vowel.</Para>
+          <Para>Each spectrogram is now labeled with its syllable, in the order you saw them. The red mark is the release: the moment the closure of the lips or tongue opens and the consonant gives way to the vowel. The orange line is the track of the second formant and the green line the track of the first. Each track was measured from the sound at 5 millisecond steps over the first 100 milliseconds after the release. A formant transition is the movement of a formant from the consonant into the vowel.</Para>
           <div style={{ display: 'grid', gridTemplateColumns: `repeat(3, ${card}px)`, gap: 10 }} data-six-grid>
             {result.order.map((k, i) => (
               <SixReveal key={k} s={s} k={k} n={i + 1} width={card} />
@@ -97,10 +97,10 @@ export function LabelsStage({ s, result, onNext }: { s: SoundsStore; result: Lab
           <Content>{MEASURED_LINE}</Content>
         </Section>
         <Section n={3} title="The same consonant in different contexts">
-          <Para>The reading says that no acoustic property marks a speech sound in every context, and that the same consonant sounds a little different before different vowels (§13.2.2). The three b syllables begin with the same consonant, and so do the three d syllables; the tracks above show what the second formant did in each, before each vowel. This is called coarticulation: a consonant’s sound is shaped by the vowel that follows it.</Para>
+          <Para>The reading says that no acoustic property marks a speech sound in every context, and that the same consonant sounds a little different before different vowels (§13.2.2). The three “b” syllables begin with the same consonant, and so do the three “d” syllables. Compare the second formant’s track in the three “b” syllables, and then in the three “d” syllables: the same consonant, but a different track before each vowel. This shaping of a consonant’s sound by the vowel that follows it is called coarticulation.</Para>
         </Section>
         <Section n={4} title="Voice timing, an optional screen">
-          <Para>Press “Show voice timing” to see tot and dot, from the same voice, with the voice-onset time measured: the time from the consonant’s release to the start of voicing, which the reading’s figure of larynx timing illustrates (§13.3.1).</Para>
+          <Para>Press “Show voice timing” to see two more syllables from the same voice, “tot” and “dot”. On each, the voice-onset time is marked: the time from the consonant’s release to the start of voicing, when the vocal folds begin to vibrate. The reading’s figure of larynx timing shows the same measure (§13.3.1).</Para>
           <div>
             <Btn onClick={() => s.toggleVot()}>{s.showVot ? 'Hide voice timing' : 'Show voice timing'}</Btn>
           </div>
@@ -125,12 +125,12 @@ export function LabelsTable({ result }: { result: LabelsResult }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }} data-reveal="labels">
       {result.restarts > 0 && <Content>{RESTARTED_LINE}</Content>}
       <Section n={1} title="Your labels beside the right ones">
-        <Para>One row per trial, in the order you heard the sounds: the sound, your label, the right label, and 1 where they agree and 0 where they differ. The last line is your count correct out of 6.</Para>
+        <Para>One row per sound, in the order the six were shown: the syllable, your label, the right label, and 1 where they agree or 0 where they differ. The last line is your count correct out of 6.</Para>
         <DataTable
           testId="labels-table"
           columns={[
-            { key: 'trial', label: 'Trial', mono: true },
-            { key: 'sound', label: 'Sound', mono: true, align: 'left' },
+            { key: 'trial', label: 'Sound number', mono: true },
+            { key: 'sound', label: 'Syllable', mono: true, align: 'left' },
             { key: 'yours', label: 'Your label', mono: true, align: 'center' },
             { key: 'right', label: 'Right label', mono: true, align: 'center' },
             { key: 'agree', label: 'Agree', mono: true, align: 'center' },
@@ -159,13 +159,13 @@ function VotScreen({ s, width }: { s: SoundsStore; width: number }) {
               <Btn small onClick={() => s.play(`vot:${k}`)} disabled={!clip}>
                 Play
               </Btn>
-              <Note>{`${k}: voicing begins ${v.votMs} ms after the release.`}</Note>
+              <Note>{`“${k}”: voicing begins ${v.votMs} milliseconds after the release.`}</Note>
             </div>
           </div>
         )
       })}
       </div>
-      <Para>In tot, the vocal folds start vibrating tens of milliseconds after the release; in dot, almost at once. The reading’s figure (§13.3.1) draws the same timing difference.</Para>
+      <Para>In “tot”, the vocal folds start vibrating tens of milliseconds after the release; in “dot”, almost at once. The reading’s figure (§13.3.1) draws the same timing difference.</Para>
     </div>
   )
 }
@@ -199,13 +199,13 @@ export function Step3Reveal({ labeling, abx, mode = 'full' }: { labeling: Labeli
       <div style={{ display: 'flex', flexDirection: twoUp ? 'row' : 'column', gap: 16, alignItems: 'flex-start' }}>
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
       <Section n={1} title="Your labeling curves">
-        <Para>{`The ${STEPS} sounds differ only in where the second formant starts: at sound 1 it starts 840 Hz below the vowel’s second formant and rises into it; at sound ${STEPS} it starts 120 Hz above it; between them the start moves up in steps of 120 Hz. Each line is one label: for each sound, the percentage of its 6 presentations you labeled b or d.`}</Para>
+        <Para>{`The ${STEPS} sounds differ only in where the second formant starts. At sound 1, the second formant starts 840 Hz below the vowel’s second formant and rises into it. From one sound to the next, the start moves up by 120 Hz, so at sound ${STEPS} it starts 120 Hz above the vowel’s. Each line is one label: for each sound, the percentage of its 6 presentations on which you gave that label.`}</Para>
         <LinePlot series={ABX_LABELS.map((l) => ({ label: `labeled ${l}`, color: COLORS[l], points: steps.map((st) => [st, 100 * curves[l][st - 1]] as [number, number]) }))} width={plotW} height={plotH} xLabel={`sound, 1 to ${STEPS} (second-formant start from 1,320 to 2,280 Hz)`} yLabel="percent of 6 presentations" xMin={1} xMax={STEPS} xTicks={tick} testId="labeling-curves" />
       </Section>
       </div>
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
       <Section n={2} title="Your discrimination">
-        <Para>Each point is one pair of sounds two steps apart, plotted at the pair’s middle sound: the percentage of its 4 triads on which you said which sound the third one matched. Chance, 50%, is marked. This is the measure the reading’s figure of categorical perception plots (§13.2.2).</Para>
+        <Para>Each point is one pair of sounds two steps apart, plotted at the pair’s middle sound. In block 2, each pair came up on 4 trials of three sounds, called triads. The point is the percentage of those 4 on which you matched the third sound to the right one of the first two. Chance, 50%, is marked. This is the measure the reading’s figure of categorical perception shows (§13.2.2).</Para>
         <LinePlot series={[{ label: 'told apart (your answers)', color: 'var(--accent)', points: disc.map((d) => [d.middle, 100 * d.correct] as [number, number]) }, { label: 'predicted from your labels alone', color: 'var(--text-muted)', dashed: true, points: pred.map((p) => [p.middle, 100 * p.predicted] as [number, number]) }]} width={plotW} height={plotH} xLabel="middle sound of a pair two steps apart" yLabel="percent of 4 triads correct" xMin={1} xMax={STEPS} xTicks={tick} hLines={[{ y: 50, label: 'chance, 50%' }]} testId="discrimination" />
       </Section>
       </div>
@@ -214,9 +214,9 @@ export function Step3Reveal({ labeling, abx, mode = 'full' }: { labeling: Labeli
         <Para>One row per pair of sounds two steps apart: the percentage you told apart, the percentage predicted from your labels alone, and the gap between them. The last line is the mean gap over the pairs.</Para>
         {full && (
           <>
-            <Para>The dashed line in section 2 is what your discrimination would be if you could hear no difference between two sounds beyond the labels you give them. It is computed by the 1957 paper’s method (pp. 362–363). For a pair of sounds A and B, with p the shares of A’s six labels and p′ the shares of B’s:</Para>
+            <Para>The dashed line in section 2 is what your discrimination would be if you heard no difference between two sounds beyond the labels you give them. It is computed by the method of the 1957 paper the reading’s figure comes from (pp. 362–363). For a pair of sounds A and B, call p the shares of A’s six labels and p′ the shares of B’s:</Para>
             <FixedLines lines={['predicted percent correct = 50% + 25% × [ (p_b − p′_b)² + (p_d − p′_d)² ]']} testId="formula" />
-            <Para>Two sounds you always labeled the same give 50%, chance. Two sounds you never labeled the same give 100%. The formula averages the paper’s two triad orders. It rests on the assumption that a listener hears each sound as one of the two labels and judges the triad from the labels alone.</Para>
+            <Para>Two sounds you always labeled the same give 50%, chance. Two sounds you never labeled the same give 100%. The paper worked the value out for each of the two orders in which a pair can be played and averaged the two; the formula is that average. It rests on the assumption that a listener hears each sound as one of the two labels and judges the triad from the labels alone.</Para>
           </>
         )}
         <DataTable
@@ -232,13 +232,13 @@ export function Step3Reveal({ labeling, abx, mode = 'full' }: { labeling: Labeli
         />
       </Section>
       <Section n={4} title="Where your boundary fell">
-        <Para>A phoneme boundary is the point on the series where your labels change from one consonant to the next: the sound at which the two labeling curves cross. The crossing is read off by a straight line between neighboring sounds.</Para>
-        <FixedLines lines={[`b to d: ${bd === null ? 'the b and d curves do not cross' : `between sounds ${Math.floor(bd)} and ${Math.ceil(bd)}, at about ${bd.toFixed(1)}`}`]} testId="boundaries" />
+        <Para>A phoneme boundary is the point on the series of 9 sounds where your labels change from one consonant to the other: the sound at which the “b” curve and the “d” curve cross. Between two neighboring sounds, the crossing is placed on a straight line drawn from one sound’s value to the next.</Para>
+        <FixedLines lines={[`“b” to “d”: ${bd === null ? 'the “b” and “d” curves do not cross' : `between sounds ${Math.floor(bd)} and ${Math.ceil(bd)}, at about ${bd.toFixed(1)}`}`]} testId="boundaries" />
       </Section>
       {full && (
         <>
       <Section n={5} title="The reference listener">
-        <Para>{`The reading’s figure of categorical perception shows one listener from the 1957 experiment, over 14 sounds; this step played the first ${STEPS} of them. Here are that listener’s labeling curves and discrimination over those ${STEPS}, drawn from the same figure, beside yours. The 1957 series went on to a third consonant, g, and at sound ${STEPS} this listener heard g 17% of the time. In words, from the paper (p. 362): stimuli 1 and 3, both heard as b, were told apart 55% of the time; stimuli 3 and 5, heard as b and d, 100% of the time.`}</Para>
+        <Para>{`The reading’s figure of categorical perception shows one listener from the 1957 experiment, over 14 sounds; in this step you heard the first ${STEPS} of them. Here are that listener’s labeling curves and discrimination over those ${STEPS}, drawn from the same figure, for you to compare with yours above. The 1957 series went on to a third consonant, “g”, and at sound ${STEPS} this listener heard “g” 17% of the time. In the paper’s words (p. 362), stimuli 1 and 3, both heard as “b”, were told apart 55% of the time, and stimuli 3 and 5, heard as “b” and “d”, 100% of the time.`}</Para>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <LinePlot series={[{ label: 'b', color: COLORS.b, points: steps.map((st) => [st, refB[st - 1]] as [number, number]) }, { label: 'd', color: COLORS.d, points: steps.map((st) => [st, refD[st - 1]] as [number, number]) }, { label: 'g', color: COLORS.g, points: steps.map((st) => [st, refG[st - 1]] as [number, number]) }]} width={Math.max(300, Math.floor((plotW - 10) / 2))} height={Math.round(Math.max(300, Math.floor((plotW - 10) / 2)) * 0.55)} xLabel={`sound, 1 to ${STEPS}`} yLabel="percent labeled" xMin={1} xMax={STEPS} xTicks={tick} testId="ref-labels" />
           <LinePlot series={[{ label: 'told apart', color: 'var(--accent)', points: refObt.slice(0, nPairs).map((v, i) => [i + 2, v] as [number, number]) }, { label: 'predicted', color: 'var(--text-muted)', dashed: true, points: refPred.slice(0, nPairs).map((v, i) => [i + 2, v] as [number, number]) }]} width={Math.max(300, Math.floor((plotW - 10) / 2))} height={Math.round(Math.max(300, Math.floor((plotW - 10) / 2)) * 0.55)} xLabel="middle sound of a pair" yLabel="percent correct" xMin={1} xMax={STEPS} xTicks={tick} hLines={[{ y: 50, label: 'chance' }]} testId="ref-disc" />
@@ -247,7 +247,7 @@ export function Step3Reveal({ labeling, abx, mode = 'full' }: { labeling: Labeli
         <ReferencePanel reference={reference('liberman-pairs')} />
       </Section>
       <Section n={6} title="What the 1957 paper found about prediction">
-        <Para>The paper’s authors compared each listener’s obtained discrimination with the discrimination predicted from the labels, and reported that the predicted peaks fell in the right places, but that the listeners discriminated better than the labels alone predict (p. 366). The pattern is called categorical perception: labeling that changes sharply along a continuum, with discrimination best at the boundary between categories and poorer within a category, though not absent there (§13.2.2).</Para>
+        <Para>The paper’s authors compared each listener’s discrimination, as measured, with the discrimination predicted from the labels. They reported that the predicted peaks fell in the right places, but that the listeners discriminated better than the labels alone predict (p. 366). The pattern is called categorical perception: along a series of sounds that changes in even steps, labeling changes sharply, and discrimination is best at the boundary between categories and poorer, though not absent, within a category (§13.2.2).</Para>
         <ReferencePanel reference={reference('liberman-prediction')} />
       </Section>
         </>

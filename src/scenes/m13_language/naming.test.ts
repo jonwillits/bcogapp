@@ -201,7 +201,7 @@ describe('the lines that are content, each on its panel (§10)', () => {
     const uses: [string, RegExp, string][] = [
       ['SECOND_RUN_LINE', /A second run is not a first run/, 'Part0.tsx'],
       ['ANY_ORDER_LINE', /in any order/, 'Part0.tsx'],
-      ['COMMIT_RULE_LINE', /Nothing an experiment would tell you is shown until you commit/, 'Part0.tsx'],
+      ['COMMIT_RULE_LINE', /Nothing you could learn from an experiment is shown until you commit/, 'Part0.tsx'],
       ['HEADPHONES_LINE', /headphones or earbuds/, 'Part0.tsx'],
       ['HEADPHONES_LINE', /headphones or earbuds/, 'sounds/screens.ts'],
       ['HEADPHONES_LINE', /headphones or earbuds/, 'stream/screens.ts'],

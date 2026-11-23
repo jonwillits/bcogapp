@@ -275,8 +275,8 @@ export function Step3Stage({ s }: { s: PredictorsStore }) {
             <PredictControls s={s} />
             {!s.computed && (
               <Note data-awaiting-commit>
-                The predictions from counts appear once your prediction above is
-                committed and “Compute” is pressed.
+                The predictions from counts appear once you have committed your
+                prediction above and pressed “Compute”.
               </Note>
             )}
             <div
@@ -310,7 +310,7 @@ export function Step3Stage({ s }: { s: PredictorsStore }) {
                 </Note>
                 <Note
                   data-after-compute
-                >{`Your prediction: ${s.predicted("counts")}. What decides each prediction is the token or two tokens just before it. After “girls”, and after “girls who chase boys”, the token just before is a plural noun. After “girls who dogs chase”, the token just before is a verb, “chase”. The subject of the sentence, “girls”, is further back than either count reaches when a clause stands between.`}</Note>
+                >{`Your prediction: ${s.predicted("counts")}. Each prediction depends only on the one or two tokens just before it. After “girls”, and after “girls who chase boys”, the token just before is a plural noun. After “girls who dogs chase”, the token just before is a verb, “chase”. When a clause stands between, the subject of the sentence, “girls”, is farther back than one token or two.`}</Note>
               </>
             )}
           </>

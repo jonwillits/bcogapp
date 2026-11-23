@@ -17,7 +17,7 @@ import { PREDICTIONS, TEMPERATURES, type CountPrediction, type PredictorsStore }
  * the prediction from counts beside the two networks, in the order count
  * model, recurrent network, transformer everywhere (Jon, 2026-11-20); the palette offers
  * the whole vocabulary with the grammar's next tokens outlined; Generate a
- * sentence samples from both networks at once; 2026-11-20: the one
+ * sentence draws from both networks at once; 2026-11-20: the one
  * prediction, the temperature line, no size lines). The prediction and
  * Commit above the palette; attention as lines from the last token back to
  * each earlier token per layer and computation; the same word in two
@@ -76,7 +76,7 @@ function GenerateControls({ s }: { s: PredictorsStore }) {
 export const COUNT_NOTE_LINES = 4
 export function CountNote({ c }: { c: CountPrediction }) {
   const two = c.from === 'two'
-  const text = c.denominator === 0 ? 'The count model has not counted any sentence yet, so every probability is zero.' : two ? `From the two words before, ${c.context.join(' ')}: each probability is a count divided by ${c.denominator.toLocaleString()}, the count of ${c.context.join(' ')} followed by anything.` : `The two words before never occurred together in the corpus, so from the one word before, ${c.context[0]}: each probability is a count divided by ${c.denominator.toLocaleString()}, the count of ${c.context[0]} followed by anything.`
+  const text = c.denominator === 0 ? 'The count model has not counted any sentence yet, so every probability is zero.' : two ? `From the two words before, “${c.context.join(' ')}”: each probability is the count of “${c.context.join(' ')}” followed by that token, divided by ${c.denominator.toLocaleString()}, the count of “${c.context.join(' ')}” followed by anything.` : `The two words before never occurred together in the corpus, so the prediction is from the one word before, “${c.context[0]}”: each probability is the count of “${c.context[0]}” followed by that token, divided by ${c.denominator.toLocaleString()}, the count of “${c.context[0]}” followed by anything.`
   return (
     <Note data-count-from={c.denominator === 0 ? 'none' : c.from} style={{ minHeight: `${COUNT_NOTE_LINES * 1.45}em` }}>
       {text}
@@ -95,7 +95,7 @@ export function PromptPalette({ tokens, allowed, complete, promptAllowed, onAdd 
           </button>
         ))}
       </div>
-      <Note data-palette-line>{complete ? 'The prompt is a complete sentence. Clear it, or remove the end mark, to go on.' : promptAllowed ? 'Outlined tokens are the ones the grammar allows next; any token can be pressed.' : 'The grammar allows no token after a prompt it does not allow, so none is outlined; any token can be pressed.'}</Note>
+      <Note data-palette-line>{complete ? 'The prompt is a complete sentence. Clear it, or remove the end mark, to go on.' : promptAllowed ? 'The outlined tokens are the ones the grammar allows next. You can press any token.' : 'The grammar does not allow this prompt, so it allows no next token and none is outlined. You can still press any token.'}</Note>
     </>
   )
 }
@@ -114,7 +114,7 @@ function Distribution({ probs, title, testId, width, children }: { probs: ArrayL
       .slice(0, g === 'nouns' ? 10 : 20)
       .map(({ t, j }) => ({ label: t, value: probs[j], group: g, color: g === 'verbs' ? (verbOf(t)!.number === 'pl' ? 'var(--actuator)' : 'var(--sensor)') : g === 'nouns' ? 'var(--accent)' : 'var(--text-muted)' })),
   )
-  const sums = GROUPS.map((g) => `${g}: ${VOCABULARY.reduce((a, t, j) => a + (groupOf(t) === g ? probs[j] : 0), 0).toFixed(2)}`)
+  const sums = GROUPS.map((g) => `${g === 'who' ? '“who”' : g}: ${VOCABULARY.reduce((a, t, j) => a + (groupOf(t) === g ? probs[j] : 0), 0).toFixed(2)}`)
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, width, minWidth: 0 }} data-distribution={testId}>
       <GroupLabel>{title}</GroupLabel>
@@ -142,7 +142,7 @@ export function Attention({ out, tokens }: { out: TransformerOutput; tokens: str
             ))}
             {head[T - 1].map((wt, j) => (
               <path key={j} d={`M ${xs[T - 1]} 72 Q ${(xs[T - 1] + xs[j]) / 2} ${72 - 40 * Math.min(1, (xs[T - 1] - xs[j]) / (w - 40) + 0.2)} ${xs[j]} 72`} fill="none" stroke="var(--sensor)" strokeWidth={Math.max(0.4, 6 * wt)} opacity={0.9}>
-                <title>{`${tokens[T - 1]} to ${tokens[j]}: ${wt.toFixed(3)}`}</title>
+                <title>{`“${tokens[T - 1]}” to “${tokens[j]}”: ${wt.toFixed(3)}`}</title>
               </path>
             ))}
           </svg>
@@ -204,7 +204,7 @@ export function Step4Stage({ s }: { s: PredictorsStore }) {
         {!s.final && !s.loadError && <Note data-loading>The two networks are loading.</Note>}
         <Content>{TRAINED_BEFORE_LINE}</Content>
         <Step4Predictions s={s} />
-        {!ok && <Note data-awaiting-commit>The palette, the distributions, and the attention appear once your prediction above is committed.</Note>}
+        {!ok && <Note data-awaiting-commit>The palette, the three bar charts, and the attention panels appear once you have committed your prediction above.</Note>}
         {ok && (
           <div data-reveal="networks" style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
             <GroupLabel>Your prompt</GroupLabel>
@@ -229,7 +229,7 @@ export function Step4Stage({ s }: { s: PredictorsStore }) {
                   <Distribution probs={last(out.transformer)} title="The transformer: probability of each token as the next" testId="transformer" width={chartW} />
                 </div>
                 <GroupLabel>Attention in the transformer, for the last token of your prompt</GroupLabel>
-                <Note>Each panel is one attention computation in one layer: lines run from the last token back to each earlier token, and to itself, with a line’s thickness set by the weight the computation gives that position. The weights in a panel sum to one. Hover a line for its number.</Note>
+                <Note>Each panel is one attention computation in one layer. Lines run from the last token back to each earlier token, and to the last token itself. A line’s thickness is set by the weight the computation gives that position; the weights in a panel sum to one. Hover a line to see its number.</Note>
                 <Attention out={out.transformer} tokens={s.prompt} />
                 <Content>{REAL_WEIGHTS_LINE}</Content>
               </>
@@ -237,7 +237,7 @@ export function Step4Stage({ s }: { s: PredictorsStore }) {
             {two && two[0] && two[1] && (
               <>
                 <GroupLabel>The same word in two sentences</GroupLabel>
-                <Note>The transformer’s numbers for “chases” at its last layer, in “boys who Mary chases walk” (position 4) and in “Mary chases boys” (position 2): the first 12 of the 32 numbers, as bars. In the count model of Step 3, “chases” had one list whatever the sentence.</Note>
+                <Note>The bars are the transformer’s numbers for “chases” after its last layer, the first 12 of the 32, in “boys who Mary chases walk” (position 4) and in “Mary chases boys” (position 2). In the count model of Step 3, “chases” had one list whatever the sentence.</Note>
                 <div style={{ display: 'flex', gap: GAP, flexWrap: 'wrap' }} data-same-word>
                   {[
                     ['boys who Mary chases walk', chasesIn(two[0].transformer, 3)],
@@ -253,7 +253,7 @@ export function Step4Stage({ s }: { s: PredictorsStore }) {
               </>
             )}
             <GroupLabel>Generated sentences</GroupLabel>
-            <Note>{`“Generate a sentence” samples one sentence from each network at the temperature set beside it. The networks were trained on sentences from their first word, so the first token is drawn from how often each token begins a sentence in the corpus; every token after it is drawn from the network’s probabilities, one at a time, until the end mark or 32 tokens. Each sentence is marked with whether the grammar allows it. The newest pair is at the top.`}</Note>
+            <Note>{`Press “Generate a sentence” to draw one sentence from each network at the temperature set beside the button. The networks were trained on sentences from their first word on, so the first token is drawn by how often each token begins a sentence in the corpus. Every token after it is drawn from the network’s probabilities, one at a time, until the end mark or 32 tokens. Each sentence is marked with whether the grammar allows it. The newest pair is at the top.`}</Note>
             <Note data-temperature-line>{TEMPERATURE_LINE}</Note>
             <div style={{ display: 'flex', gap: GAP, alignItems: 'flex-start', flexWrap: 'wrap' }}>
               <GenerateControls s={s} />

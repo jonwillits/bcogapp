@@ -55,7 +55,7 @@ export function Step2Controls({ s }: { s: PredictorsStore }) {
         <Btn primary onClick={() => void s.count()} disabled={!committed || s.counting !== null}>
           Count
         </Btn>
-        {s.counting && <Note data-counting>{`Counting: ${s.counting.done.toLocaleString()} of ${s.tokens.length.toLocaleString()} tokens, the ${s.training.length.toLocaleString()} training sentences.`}</Note>}
+        {s.counting && <Note data-counting>{`Counting: ${s.counting.done.toLocaleString()} of the ${s.tokens.length.toLocaleString()} tokens in the ${s.training.length.toLocaleString()} training sentences.`}</Note>}
       </div>
     </div>
   )
@@ -97,11 +97,11 @@ export function Step2Stage({ s }: { s: PredictorsStore }) {
       <WindowFigure tokens={s.tokens} windowSize={s.windowSize} />
       <Note style={{ color: 'var(--text)' }}>{STEP2_PANEL[1]}</Note>
       <Step2Controls s={s} />
-      {!committed && <Note data-awaiting-commit>The table of counts, the demo, the plane, the tree, and the nearest neighbors appear once your prediction above is committed and “Count” has run.</Note>}
+      {!committed && <Note data-awaiting-commit>The table of counts, the similarity demonstration, the plane, the nearest neighbors, and the tree appear once you have committed your prediction above and pressed “Count”.</Note>}
       {m && (
         <>
           <GroupLabel>The table of counts, every token</GroupLabel>
-          <Note>{`${TABLE_NOTE} ${s.counting ? 'The table is filling as the window moves along the corpus.' : 'The window has run through the whole corpus.'}`}</Note>
+          <Note>{`${TABLE_NOTE} ${s.counting ? 'The table is filling as the window moves along the corpus.' : 'The count is finished: the window has moved through the whole corpus.'}`}</Note>
           <HeatLegend max={max} />
           <CountTable m={m} which="before" max={max} testId="counts" />
           {done && <SimilarityDemo m={m} max={max} />}
@@ -117,7 +117,7 @@ export function Step2Stage({ s }: { s: PredictorsStore }) {
           <GroupLabel>The nearest neighbors</GroupLabel>
           <Note>Choose a word from the menu to see its five nearest neighbors.</Note>
           <select value={s.clicked ?? ''} onChange={(e) => e.target.value && s.click(e.target.value)} aria-label="Nearest neighbors of" style={{ alignSelf: 'flex-start' }} data-word-menu>
-            <option value="">choose a token</option>
+            <option value="">choose a word</option>
             {words.map((w) => (
               <option key={w} value={VOCABULARY[w]}>
                 {VOCABULARY[w]}

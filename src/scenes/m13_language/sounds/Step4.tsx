@@ -6,7 +6,7 @@ import { Spectrogram } from '../Spectrogram'
 import { useAudioCursor } from '../hooks'
 import { SYNTHETIC_TEST_LINE, MADE_OFFLINE_LINE } from '../lines'
 import { LABELS, PASSES, meanAndSd, meanBand, T_95_DF9 } from '../../../sim/language/sounds/classifier'
-import { STEPS } from '../../../sim/language/sounds/abx'
+import { labelingCurves, STEPS } from '../../../sim/language/sounds/abx'
 import { STEP4_PANEL } from './texts'
 import { tokenSamples } from './assets'
 import { Schematic } from './Schematic'
@@ -257,7 +257,7 @@ function Run1Many({ s, width }: { s: SoundsStore; width: number }) {
   if (many.state === 'idle') return null
   const current = many.nets[many.nets.length - 1]
   const progress = many.state === 'training' ? `Network ${many.k} of ${MANY_NETWORKS}, pass ${current?.pass ?? 0} of ${PASSES}.` : `Training is done: ${MANY_NETWORKS} networks, ${PASSES} passes each.`
-  return <ManyPanel title={`Run 1, ${MANY_NETWORKS} networks: ten voices in, two held out`} nets={many.nets} finished={many.state === 'done'} progress={progress} note={`${MANY_NETWORKS} networks, each from its own starting weights, trained one after another on the split of run 1: voices 1 to 10 at all three pitches (450 syllables), tested on voices 11 and 12 (90 syllables) after every pass.`} testSize={90} width={width} testId="run1" after={<Note>{`Run 3 uses the network from the single run 1 above, not one of these ${MANY_NETWORKS}.`}</Note>} />
+  return <ManyPanel title={`Run 1, ${MANY_NETWORKS} networks: ten voices in, two held out`} nets={many.nets} finished={many.state === 'done'} progress={progress} note={`${MANY_NETWORKS} networks, each from its own starting weights, trained one after another as run 1’s network was: on voices 1 to 10 at all three pitches (450 syllables), tested on voices 11 and 12 (90 syllables) after every pass.`} testSize={90} width={width} testId="run1" after={<Note>{`Run 3 uses the network from the single run 1 above, not one of these ${MANY_NETWORKS}.`}</Note>} />
 }
 
 /** Run 2's 10 of each (Jon, 2026-11-20): the one-pitch networks, then the one-voice networks, side by side when there is room, and a line under them with the two means. */
@@ -269,7 +269,7 @@ function Run2Many({ s, width }: { s: SoundsStore; width: number }) {
   const doneLine = `Training is done: ${MANY_NETWORKS} networks, ${PASSES} passes each.`
   const training = (nets: RunState[], k: number) => `Network ${k} of ${MANY_NETWORKS}, pass ${nets[nets.length - 1]?.pass ?? 0} of ${PASSES}.`
   const pitchProgress = many.state === 'done' || many.k > MANY_NETWORKS ? doneLine : training(many.pitch, many.k)
-  const voiceProgress = many.state === 'done' ? doneLine : many.k <= MANY_NETWORKS ? 'The one-voice networks train after the one-pitch networks.' : training(many.voice, many.k - MANY_NETWORKS)
+  const voiceProgress = many.state === 'done' ? doneLine : many.k <= MANY_NETWORKS ? 'The one-voice networks are trained after the one-pitch networks.' : training(many.voice, many.k - MANY_NETWORKS)
   const colStyle = { flex: twoColumns ? '1 1 0' : undefined, minWidth: 0, width: twoColumns ? undefined : '100%' } as const
   return (
     <>
@@ -345,7 +345,7 @@ export function Step4Stage({ s }: { s: SoundsStore }) {
       {sample && (
         <>
           <GroupLabel>One training syllable</GroupLabel>
-          <Note>One training syllable, dah in voice 1 at its own pitch. The box marks the patch the network receives: from 20 ms before the release to 80 ms after it, 0 to 5,000 Hz.</Note>
+          <Note>One training syllable, “dah” in voice 1 at its own pitch. The box marks the patch the network receives: from 20 milliseconds before the release to 80 milliseconds after it, 0 to 5,000 Hz.</Note>
           <div>
             <Btn small onClick={() => s.playToken(sampleIndex)}>
               Play
@@ -378,17 +378,23 @@ function Run3({ s, width }: { s: SoundsStore; width: number }) {
   const shares = s.run3.shares!
   const series = LABELS.map((l, k) => ({ label: `share of output for ${l}`, color: COLORS[l], points: shares.map((sh, i) => [i + 1, 100 * sh[k]] as [number, number]) }))
   const top = shares.map((sh) => LABELS[sh.indexOf(Math.max(...sh))])
+  // Once Step 3 is done, the student's own label of each sound: the one given most often on its 6 trials of block 1, or b/d on a 3–3 tie (Jon, 2026-11-23).
+  const labeling = s.isDone(3) ? s.labelingResult() : null
+  const yours = labeling ? (() => { const c = labelingCurves(labeling.trials, labeling.answers); return Array.from({ length: STEPS }, (_, i) => (c.b[i] > 0.5 ? 'b' : c.b[i] < 0.5 ? 'd' : 'b/d')) })() : null
+  const cells = (xs: string[]) => xs.map((l) => l.padStart(3)).join('')
+  const lines = ['sound:  ' + cells(Array.from({ length: STEPS }, (_, i) => String(i + 1))), (yours ? 'network:' : 'label:  ') + cells(top), ...(yours ? ['yours:  ' + cells(yours)] : [])]
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }} data-run="run3">
       <GroupLabel>{`The network from run 1 on the ${STEPS} sounds of Step 3`}</GroupLabel>
       <Note>{`For each of the ${STEPS} sounds, the three outputs are scaled to shares that sum to 100%. Each line is one label’s share, sound by sound. The most likely label at each sound is printed under the plot.`}</Note>
       <LinePlot series={series} width={Math.min(460, width)} height={200} xLabel={`sound, 1 to ${STEPS}`} yLabel="share of the outputs (%)" xMin={1} xMax={STEPS} xTicks={[1, 3, 5, 7, 9].map((x) => ({ x, label: String(x) }))} testId="run3-curve" />
-      <FixedLines lines={['sound:  ' + Array.from({ length: STEPS }, (_, i) => String(i + 1).padStart(3)).join(''), 'label:  ' + top.map((l) => l.padStart(3)).join('')]} testId="run3-labels" />
+      <FixedLines lines={lines} testId="run3-labels" />
+      {yours && <Note data-yours="step3">{`The line “yours” is your own label of each sound from block 1 of Step 3: the label you gave most often on its 6 trials, or “b/d” where you gave each 3 times.`}</Note>}
       <Para>
-        {`What was measured on 2026-11-19, over ${MANY_NETWORKS} networks trained on run 1’s split: the most likely label on these ${STEPS} sounds was most often g, with b at sounds 1, 3 and 9, and the order differed from one network to the next; one network gave b to all ${STEPS}, another g to all ${STEPS}. The same ${STEPS} sounds with their 10 ms release burst removed were labeled b at sounds 1 to 4 and d at sounds 5 to 8 by most of the networks. The burst in these synthetic sounds is noise shaped by two formants only; the natural syllables’ bursts carry energy up to 5,000 Hz. The patch the network receives from a synthetic sound has almost no energy above 2,500 Hz, which is where the natural b and d bursts differ most.`}
+        {`Before the lab was posted, ${MANY_NETWORKS} networks trained as in run 1 were run on these ${STEPS} sounds. Their most likely label was most often “g”, with “b” at sounds 1, 3, and 9, and the order differed from one network to the next: one network gave “b” to all ${STEPS}, another “g” to all ${STEPS}. Each of these sounds begins with a 10 millisecond burst of noise at the release. With that burst removed, most of the networks labeled sounds 1 to 4 “b” and sounds 5 to 8 “d”. The burst in these synthetic sounds is noise shaped by two formants only, so the patch the network receives from a synthetic sound has almost no energy above 2,500 Hz. The natural syllables’ bursts carry energy up to 5,000 Hz, and above 2,500 Hz is where the natural “b” and “d” bursts differ most.`}
       </Para>
       <Content>{SYNTHETIC_TEST_LINE}</Content>
-      {!s.isDone(3) && <Note data-missing="step3">{`Your own labels of these ${STEPS} sounds appear beside the network’s once Step 3 is done.`}</Note>}
+      {!yours && <Note data-missing="step3">{`Once Step 3 is done, you will see your own labels of these ${STEPS} sounds beside the network’s.`}</Note>}
     </div>
   )
 }

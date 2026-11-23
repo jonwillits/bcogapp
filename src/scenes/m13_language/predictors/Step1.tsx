@@ -67,7 +67,7 @@ export function GrammarBlock() {
   return (
     <div data-grammar-rules style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
       <GroupLabel>The grammar, as rewrite rules</GroupLabel>
-      <Note>Four rules make every sentence in the corpus. Each rule is read as “is made of”; the symbols are defined under the rules.</Note>
+      <Note>Four rules make every sentence in the corpus. Read the arrow in each rule as “is made of”. The symbols are defined under the rules.</Note>
       <div style={grid} data-rewrite-rules>
         {REWRITE_RULES.map((r) => (
           <Fragment key={r.rule}>
@@ -91,7 +91,7 @@ export function GrammarBlock() {
           {r}
         </Note>
       ))}
-      <Note>{`The generator’s settings: a relative clause after a person or animal with probability ${SETTINGS.relativeClause} at the top level, halved at each level of nesting, to ${SETTINGS.maxDepth} levels; a subject-relative or an object-relative with equal probability; an optional object taken with probability ${SETTINGS.optionalObject}; a plural with probability ${SETTINGS.plural}.`}</Note>
+      <Note>{`The generator’s settings. After a person or an animal, a relative clause follows with probability ${SETTINGS.relativeClause} at the top level; the probability halves at each level of nesting, down to ${SETTINGS.maxDepth} levels. The clause is a subject-relative (“boy who chases dogs”) or an object-relative (“boy who dogs chase”) with equal probability. A verb that may have an object takes one with probability ${SETTINGS.optionalObject}. A noun is plural with probability ${SETTINGS.plural}.`}</Note>
     </div>
   )
 }
@@ -100,8 +100,8 @@ export function Step1Stage({ s }: { s: PredictorsStore }) {
   return (
     <StagePanel wide testId="predictors-1">
       <div style={{ fontSize: 14, fontWeight: 600 }}>The corpus</div>
-      <Note style={{ color: 'var(--text)' }}>{`The corpus is ${s.sentences.length.toLocaleString()} sentences, ${s.corpusTokens.toLocaleString()} tokens in all. Each sentence is made by a generator function that uses the vocabulary and the grammar (rules for how to combine words) below. The sentences are generated pseudo-randomly, using a single fixed seed for all students, so you all see the same sentences.`}</Note>
-      <Note style={{ color: 'var(--text)' }} data-held-out>{`Every model in this part learns from the first ${s.training.length.toLocaleString()} sentences only. The last ${s.heldOut.length.toLocaleString()} sentences, ${(s.training.length + 1).toLocaleString()} to ${s.sentences.length.toLocaleString()}, are held out as test sentences, to see how each model performs on sentences it has never seen. No model learns from them, and Step 5 tests the models on them.`}</Note>
+      <Note style={{ color: 'var(--text)' }}>{`The corpus is ${s.sentences.length.toLocaleString()} sentences, ${s.corpusTokens.toLocaleString()} tokens in all. A program made each sentence from the vocabulary and the grammar below; the grammar is the set of rules for how words combine. The program made its random choices from one fixed starting number, a “seed”, so every student sees the same sentences.`}</Note>
+      <Note style={{ color: 'var(--text)' }} data-held-out>{`Every model in this part learns from the first ${s.training.length.toLocaleString()} sentences only. The last ${s.heldOut.length.toLocaleString()} sentences, ${(s.training.length + 1).toLocaleString()} to ${s.sentences.length.toLocaleString()}, are held out as test sentences: no model learns from them. In Step 5 you will see how each model does on them, sentences it was never trained on.`}</Note>
       <VocabularyBlock />
       <GrammarBlock />
       <GroupLabel>The sentences</GroupLabel>

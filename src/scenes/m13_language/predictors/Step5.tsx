@@ -16,7 +16,7 @@ import type { Scores } from '../../../sim/language/predictors/scoring'
  * everywhere; Jon, 2026-11-20: the models in the order count model,
  * recurrent network, transformer everywhere; the prompt built from the
  * palette as in Step 4, or drawn by Change the prompt; the count model
- * follows the slider, counting the sentences the networks had seen at each
+ * follows the slider, counting the sentences the networks had been trained on at each
  * snapshot; its held-out accuracy and agreement in the snapshots tables;
  * the networks' planes from their output weights). The snapshot slider and
  * Change the prompt above the panels; at each snapshot three distributions
@@ -47,7 +47,7 @@ export function Step5Controls({ s }: { s: PredictorsStore }) {
   )
 }
 
-/** For token t, the row of a network's output matrix: the numbers its final state is read against to score that token. */
+/** For token t, the row of a network's output matrix: the numbers the network multiplies its final state by to score that token. */
 function outputVector(m: SeqModel, t: number): Float64Array {
   const w = m.weights.get('out.weight')!
   const width = m.desc.tensors['out.weight'].shape[1]
@@ -82,7 +82,7 @@ function CurrentPrompt({ prompt }: { prompt: string[] }) {
   return (
     <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', flexWrap: 'wrap', marginTop: 8 }} data-current-prompt={prompt.join(' ')}>
       <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 0.4, textTransform: 'uppercase', color: 'var(--text-muted)' }}>Current prompt:</span>
-      <span style={{ fontSize: 13, fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{prompt.length ? `"${prompt.join(' ')}"` : '(empty: press a token below)'}</span>
+      <span style={{ fontSize: 13, fontWeight: 600, fontFamily: 'var(--font-mono)' }}>{prompt.length ? `“${prompt.join(' ')}”` : '(empty: press a token below)'}</span>
     </div>
   )
 }
@@ -122,7 +122,7 @@ export function Step5Stage({ s }: { s: PredictorsStore }) {
   ]
   const all = s.training.length
   // The two forms are kept near one length, and the box is three lines tall, so nothing under it moves as the slider moves (Jon, 2026-11-20).
-  const seenLine = cs.sentences < all ? `The count model at this snapshot: counts over the first ${cs.sentences.toLocaleString()} training sentences, the ones the networks had seen after ${updates.toLocaleString()} updates, ${SENTENCES_PER_UPDATE} sentences per update.` : `The count model at this snapshot: counts over all ${all.toLocaleString()} training sentences, which the networks had seen by ${Math.ceil(all / SENTENCES_PER_UPDATE).toLocaleString()} updates; later passes change nothing in a count, so from here on it is the same at every snapshot.`
+  const seenLine = cs.sentences < all ? `The count model at this snapshot: counts over the first ${cs.sentences.toLocaleString()} training sentences, the ones the networks had been trained on after ${updates.toLocaleString()} updates, at ${SENTENCES_PER_UPDATE} sentences per update.` : `The count model at this snapshot: counts over all ${all.toLocaleString()} training sentences, which the networks had been trained on by ${Math.ceil(all / SENTENCES_PER_UPDATE).toLocaleString()} updates. Later passes change nothing in a count, so from here on the count model is the same at every snapshot.`
   return (
     <StagePanel wide testId="predictors-5">
       <div ref={ref} style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0, width: '100%' }}>
@@ -189,7 +189,7 @@ export function Step5Stage({ s }: { s: PredictorsStore }) {
               hLines={[{ y: 50, label: 'chance, 50%' }]}
               testId="agreement"
             />
-            <Note data-count-line>The dashed line is the prediction from counts, from the two words before the verb or, when those two never occurred together, from the one word before, over the sentences counted at this snapshot. From the third snapshot on it is the same line: the count model is finished after one pass through the training sentences, while the networks go on for about seventy.</Note>
+            <Note data-count-line>The dashed line is the prediction from counts over the sentences counted at this snapshot, by Step 3’s rule: from the two words before the verb, or from the one word before when those two never occurred together. From the third snapshot on, the dashed line is the same: the count model is finished after one pass through the training sentences, while the networks go on for about seventy.</Note>
             <DataTable columns={agreeColumns} rows={DEPTHS.map((d) => ({ depth: String(d), counts: pct(cs.agreement[d]), srn: pct(agree.srn[d]), transformer: pct(agree.transformer[d]) }))} rowHeader testId="agreement-table" footer={`At this snapshot, after ${updates.toLocaleString()} updates; the share of 50 probes at each depth.`} />
             {desc && (
               <>
@@ -199,11 +199,11 @@ export function Step5Stage({ s }: { s: PredictorsStore }) {
                   <SnapshotsTable title="The recurrent network" snapshots={desc.srn.snapshots} testId="all-snapshots-srn" />
                   <SnapshotsTable title="The transformer" snapshots={desc.transformer.snapshots} testId="all-snapshots-transformer" />
                 </div>
-                <Note>{`Three scores on the ${s.heldOut.length.toLocaleString()} held-out sentences, which no model learned from, and on the ${s.training.length.toLocaleString()} training sentences, over every token after a sentence’s first, predicted from the tokens before it. Agreement: over the verbs, the share for which the most probable verb form is in the number the subject requires. Right kind: the share for which the most probable token is of a kind the grammar allows there, a noun, a verb, “who” or the end mark. Exact: the share for which the most probable token is the very token that comes next; at most positions the grammar leaves many tokens equally possible, so no predictor can push this far past 40%. The networks’ scores were measured when they were trained; the count model’s are computed here, by the same rule, from the sentences counted at each snapshot. The last four columns are the share of the 50 probes at each depth, as above. The grammar is small, so ${pct(0.635)} of the held-out sentences also occur somewhere among the training sentences; that holds for every predictor alike.`}</Note>
+                <Note>{`The three scores are computed on the ${s.heldOut.length.toLocaleString()} held-out sentences, which no model learned from, and on the ${s.training.length.toLocaleString()} training sentences. Every token after a sentence’s first is predicted from the tokens before it. Agreement: over the verbs, the share for which the most probable verb form is in the number the subject requires. Right kind: the share for which the most probable token is of a kind the grammar allows there: a noun, a verb, “who” or the end mark. Exact: the share for which the most probable token is the very token that comes next. At most positions the grammar leaves many tokens equally possible, so no predictor can push the exact score far past 40%. The networks’ scores were measured when they were trained; the count model’s are computed here, by the same rule, from the sentences counted at each snapshot. The last four columns are the share of the 50 probes at each depth, as in the plot above. The grammar is small, so ${pct(0.635)} of the held-out sentences also occur among the training sentences; that holds for every predictor alike.`}</Note>
               </>
             )}
             <GroupLabel>Three planes: the count model’s numbers for each token, and the two networks’ at this snapshot</GroupLabel>
-            <Note>Each plane shows the nouns and verbs as points, by a projection of one set of numbers onto its two directions of greatest difference. The first plane projects the count model’s lists of counts from Step 2, over the sentences counted at this snapshot. The second and third project each network’s output weights: for each token, the numbers the network’s final state is read against to score that token as the next one, 64 for the recurrent network and 32 for the transformer. Those weights are what the network must see to predict the token, so they stand for the contexts the token comes after, as the count model’s list of the words before it does. Nouns blue, verbs orange. The directions are each plane’s own, so only the groupings compare across planes, not the positions.</Note>
+            <Note>Each plane shows the nouns and verbs as points, by a projection of one set of numbers onto its two directions of greatest difference. The first plane projects the count model’s lists of counts from Step 2, over the sentences counted at this snapshot. The second and third project each network’s output weights: for each token, the numbers the network multiplies its final state by to score that token as the next one, 64 for the recurrent network and 32 for the transformer. A token scores high when the network’s final state matches its weights, so the weights stand for the contexts the token comes after, as the count model’s list of the words before it does. Nouns blue, verbs orange. The directions are each plane’s own, so only the groupings compare across planes, not the positions.</Note>
             <div style={{ display: 'flex', gap: GAP, flexWrap: 'wrap', alignItems: 'flex-start' }} data-planes>
               <Plane title="The count model’s lists of counts" plane={countPlane} width={planeW} testId="count-plane" />
               {srnPlane && <Plane title="The recurrent network’s output weights" plane={srnPlane} width={planeW} testId="srn-outputs" />}

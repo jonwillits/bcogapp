@@ -6,16 +6,17 @@ import { heatColor, heatShare } from './CountTable'
 /**
  * Step 2's picture of one step of the count (Jon, 2026-11-21): at the left,
  * a stretch of the corpus with the window around it, the target at the
- * window's right end, and over each earlier token what this step adds to
+ * window's right end, and over each earlier token what this one move adds to
  * its count with the target (the window size minus the distance plus one,
- * as counts.ts counts); at the right, the matrix's rows and columns for
- * those tokens and one more, every cell 0 but the ones this step adds to,
+ * as counts.ts counts: the window is the target and the 4 tokens before it);
+ * at the right, the matrix's rows and columns for
+ * those tokens and one more, every cell 0 but the ones this move adds to,
  * in the target's row. The stretch is the first place in the corpus where
  * the window holds no end mark, so that the picture is one sentence's, and
  * no form of chase (Jon, 2026-11-21: no example in the lab has men or boys
  * chasing girls or women; the corpus's first sentence does).
  */
-export const WINDOW_FIGURE_CAPTION = 'Left: the window at one place in the corpus, 4 tokens wide, with its target at the right end; above each earlier token, what this step adds to the count of that token with the target: 4 for the neighbor, down to 1 at the window’s far edge. Right: the rows and columns of the matrix for those tokens and one more, with every cell 0 except the ones this step adds to, in the target’s row.'
+export const WINDOW_FIGURE_CAPTION = 'Left: the window at one place in the corpus: the target at its right end and the 4 tokens before it. Above each earlier token stands what this one move of the window adds to the count of that token with the target: 4 for the target’s neighbor, down to 1 at the window’s far edge. Right: the rows and columns of the matrix for those tokens and one more. Every cell is 0 except the ones this move adds to, all in the target’s row.'
 
 const MONO = 'var(--font-mono)'
 
@@ -69,7 +70,7 @@ export function WindowFigure({ tokens, windowSize }: { tokens: readonly number[]
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }} data-window-matrix>
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>the matrix: the row token came after the column token</span>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>the matrix: each cell counts the row token coming after the column token</span>
           <table style={{ borderCollapse: 'separate', borderSpacing: 0, fontFamily: MONO, fontSize: 11 }}>
             <thead>
               <tr>

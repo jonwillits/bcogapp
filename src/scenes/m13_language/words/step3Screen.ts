@@ -26,7 +26,7 @@ export const STEP3_SCREEN: StepScreen = {
   minutes: stepParams('words', 3).minutes,
   sitting: 'leave any time',
   sittingLine: EXPLORATION_SITTING_LINE,
-  keys: ['“Commit my prediction” commits your one prediction, which cannot be changed afterward.', '“Run the models” runs both models 200 times each on your trials.', 'You move each model’s setting with its slider. “Back to the fitted value” returns that setting to its fitted value.'],
+  keys: ['Press “Commit my prediction” to commit your one prediction, which cannot be changed afterward.', 'Press “Run the models” to run both models 200 times each on your trials.', 'You move each model’s setting with its slider. Press “Back to the fitted value” to return that setting to its fitted value.'],
   content: [FITTED_TO_YOUR_ACCURACY_LINE, SMALL_NUMBERS_LINE],
   next: STEP3_NEXT,
 }

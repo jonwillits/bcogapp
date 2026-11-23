@@ -51,7 +51,7 @@ export function Step3Stage({ s }: { s: SoundsStore }) {
       <StagePanel testId="block-stopped">
         <div style={{ fontSize: 14, fontWeight: 600 }}>The block stopped</div>
         <Note data-stop-reason>{s.blockStopped}</Note>
-        <Note>A block runs in real time and does not count unless it is done in one sitting. When you press “Start again”, the block starts from its first trial, and the restart is noted on the results screen.</Note>
+        <Note>A block runs in real time and does not count unless it is done in one sitting. When you press “Start again”, the block starts from its first trial, and a line on the results screen says that it was restarted.</Note>
         <div>
           <Btn primary onClick={() => s.startAgain()}>
             Start again
