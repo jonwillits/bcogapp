@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { Btn, Choice, Content, LoadingLine, Note, StagePanel } from '../ui'
+import { Btn, Choice, Content, LoadingLine, Note, StagePanel, rich } from '../ui'
 import { loadingText } from '../loading'
 import { PauseButton } from '../steps'
 import { Spectrogram } from '../Spectrogram'
@@ -38,7 +38,7 @@ export function Step2Stage({ s }: { s: SoundsStore }) {
   const labeled = SIX_ORDER.filter((k) => s.labels[k]).length
   return (
     <StagePanel wide testId="sounds-2">
-      <div style={{ fontSize: 14, fontWeight: 600 }}>Six syllables: label each “b” or “d”</div>
+      <div style={{ fontSize: 14, fontWeight: 600 }}>{rich('Six syllables: label each ‹b› or ‹d›')}</div>
       {STEP2_PANEL.map((p) => (
         <Note key={p.slice(0, 16)} style={{ color: 'var(--text)' }}>
           {p}

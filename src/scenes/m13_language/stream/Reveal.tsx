@@ -31,7 +31,7 @@ export function MinuteReveal({ result, mode = 'full' }: { result: MinuteResult; 
       {result.restarts > 0 && <Content>{RESTARTED_LINE}</Content>}
       <Section n={1} title="Your answer beside the language">
         <FixedLines lines={[`You answered: ${result.guess} ${result.guess === 1 ? 'word' : 'words'}.`, 'The language has 6 words.', `Words you typed: ${typed.length ? typed.join(', ') : 'none'}.`]} mono={false} testId="answer-truth" />
-        {full && <Note>Which syllables make up the words is for Step 2 to find. The minute can be heard again, with its words marked, once Step 2 is done.</Note>}
+        {full && <Note>In Step 2, you will find which syllables make up the words. Once Step 2 is done, you can hear the minute again, with its words marked.</Note>}
       </Section>
     </div>
   )

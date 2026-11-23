@@ -96,7 +96,7 @@ export function Step1Stage({ s }: { s: SoundsStore }) {
         {single && (
           <>
             <ViewRow s={s} switchable={screen === 'patterns'} />
-            <Sound s={s} clipKey="vowel:ah_120" label="“ah” at 120 Hz" view={screen === 'patterns' ? s.view : 'wide'} frequencyLines={screen === 'patterns' ? f2('ah_120') : undefined} width={one} height={Math.round(one * 0.42)} />
+            <Sound s={s} clipKey="vowel:ah_120" label="‹ah› at 120 Hz" view={screen === 'patterns' ? s.view : 'wide'} frequencyLines={screen === 'patterns' ? f2('ah_120') : undefined} width={one} height={Math.round(one * 0.42)} />
             {!loaded && <LoadingLine text={loadingText('the sounds', s.loadProgress)} testId="sounds-1" />}
             <Text screen={screen} />
           </>
@@ -105,8 +105,8 @@ export function Step1Stage({ s }: { s: SoundsStore }) {
         {screen === 'voice' && (
           <>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'nowrap' }}>
-              <Sound s={s} clipKey="vowel:ah_100" label="“ah” at 100 Hz, the earlier formants" view="narrow" frequencyLines={f2('ah_100')} width={two} height={Math.round(two * 0.6)} />
-              <Sound s={s} clipKey="vowel:ah_100_short" label="“ah” at 100 Hz, every formant raised by 15%" view="narrow" frequencyLines={f2('ah_100_short')} width={two} height={Math.round(two * 0.6)} />
+              <Sound s={s} clipKey="vowel:ah_100" label="‹ah› at 100 Hz, the earlier formants" view="narrow" frequencyLines={f2('ah_100')} width={two} height={Math.round(two * 0.6)} />
+              <Sound s={s} clipKey="vowel:ah_100_short" label="‹ah› at 100 Hz, every formant raised by 15%" view="narrow" frequencyLines={f2('ah_100_short')} width={two} height={Math.round(two * 0.6)} />
             </div>
             <Text screen={screen} />
           </>
@@ -115,7 +115,7 @@ export function Step1Stage({ s }: { s: SoundsStore }) {
           <>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'nowrap', flexDirection: inRow ? 'row' : 'column', alignItems: 'flex-start' }} data-vowels-layout={inRow ? 'three-in-a-row' : 'stacked'}>
               {(['ee_120', 'ah_120', 'oo_120'] as const).map((k) => (
-                <Sound key={k} s={s} clipKey={`vowel:${k}`} label={`“${k.slice(0, 2)}” at 120 Hz`} view="wide" frequencyLines={f2(k)} width={three} height={Math.round(three * (inRow ? 0.8 : 0.42))} />
+                <Sound key={k} s={s} clipKey={`vowel:${k}`} label={`‹${k.slice(0, 2)}› at 120 Hz`} view="wide" frequencyLines={f2(k)} width={three} height={Math.round(three * (inRow ? 0.8 : 0.42))} />
               ))}
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start' }}>
@@ -178,8 +178,8 @@ function PitchScreen({ s, width }: { s: SoundsStore; width: number }) {
       {committed && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }} data-reveal="pitch">
           <div style={{ display: 'flex', gap: 10, flexWrap: 'nowrap' }}>
-            <Sound s={s} clipKey="vowel:ah_100" label="“ah” at 100 Hz" view="narrow" frequencyLines={f2('ah_100')} width={width} height={Math.round(width * 0.6)} />
-            <Sound s={s} clipKey="vowel:ah_200" label="“ah” at 200 Hz" view="narrow" frequencyLines={f2('ah_200')} width={width} height={Math.round(width * 0.6)} />
+            <Sound s={s} clipKey="vowel:ah_100" label="‹ah› at 100 Hz" view="narrow" frequencyLines={f2('ah_100')} width={width} height={Math.round(width * 0.6)} />
+            <Sound s={s} clipKey="vowel:ah_200" label="‹ah› at 200 Hz" view="narrow" frequencyLines={f2('ah_200')} width={width} height={Math.round(width * 0.6)} />
           </div>
           <FixedLines lines={[`Your prediction: ${committed}`, 'The dashed lines mark the first two formants at the synthesizer’s settings, which are the same in both pictures.', 'Count the harmonics between 0 and 1,000 Hz in each picture: about ten at 100 Hz and about five at 200 Hz.']} mono={false} />
         </div>

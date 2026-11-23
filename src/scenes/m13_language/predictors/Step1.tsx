@@ -41,12 +41,12 @@ export function VocabularyBlock() {
             <span style={{ fontFamily: MONO, overflowWrap: 'anywhere' }}>{VERBS.filter((v) => v.cls === cls).map(forms).join('   ')}</span>
           </Fragment>
         ))}
-        <span style={muted}>the word “who”</span>
+        <span style={muted}>the word <i>who</i></span>
         <span style={{ fontFamily: MONO }}>{WHO}</span>
         <span style={muted}>the end mark</span>
         <span style={{ fontFamily: MONO }}>{END}</span>
       </div>
-      <Note>The proper nouns, “John” and “Mary”, have a single form each. All other nouns have two forms, singular and plural, written singular/plural. As in English, verbs can be singular or plural too, written the same way. The singular verb form goes with a singular subject (for example, “boy walks”), and the plural verb form with a plural subject (for example, “boys walk”).</Note>
+      <Note>The proper nouns, ‹John› and ‹Mary›, have a single form each. All other nouns have two forms, singular and plural, written singular/plural. As in English, verbs can be singular or plural too, written the same way. The singular verb form goes with a singular subject (for example, ‹boy walks›), and the plural verb form with a plural subject (for example, ‹boys walk›).</Note>
       <GroupLabel>Each verb: what may be its subject, and what may be its object</GroupLabel>
       <DataTable
         testId="verb-list"
@@ -91,7 +91,7 @@ export function GrammarBlock() {
           {r}
         </Note>
       ))}
-      <Note>{`The generator’s settings. After a person or an animal, a relative clause follows with probability ${SETTINGS.relativeClause} at the top level; the probability halves at each level of nesting, down to ${SETTINGS.maxDepth} levels. The clause is a subject-relative (“boy who chases dogs”) or an object-relative (“boy who dogs chase”) with equal probability. A verb that may have an object takes one with probability ${SETTINGS.optionalObject}. A noun is plural with probability ${SETTINGS.plural}.`}</Note>
+      <Note>{`The generator’s settings. After a person or an animal, a relative clause follows with probability ${SETTINGS.relativeClause} at the top level; the probability halves at each level of nesting, down to ${SETTINGS.maxDepth} levels. The clause is a subject-relative (‹boy who chases dogs›) or an object-relative (‹boy who dogs chase›) with equal probability. A verb that may have an object takes one with probability ${SETTINGS.optionalObject}. A noun is plural with probability ${SETTINGS.plural}.`}</Note>
     </div>
   )
 }

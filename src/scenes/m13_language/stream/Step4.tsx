@@ -83,7 +83,7 @@ export function Step4Stage({ s }: { s: StreamStore }) {
           </div>
         ))}
       </div>
-      <Note>The number between two syllables is the transitional probability from the first to the second over the whole sample, to three decimals. The orange bar under the tiles runs under all the syllables of one word and breaks at “boundary”, where one word ends and the next begins. The syllables are written in the dictionary’s symbols, in which “AH” is the vowel of “the”, “IY” the vowel of “see”, and so on.</Note>
+      <Note>The number between two syllables is the transitional probability from the first to the second over the whole sample, to three decimals. The orange bar under the tiles runs under all the syllables of one word and breaks at “boundary”, where one word ends and the next begins. The syllables are written in the dictionary’s symbols, in which ‹AH› is the vowel of ‹the›, ‹IY› the vowel of ‹see›, and so on.</Note>
       <GroupLabel>Transitional probabilities inside words and across word boundaries</GroupLabel>
       <Note>{`Each bar is the share of pairs whose transitional probability falls in that range: in the real speech sample, ${h.insideN.toLocaleString()} pairs inside words (mean ${h.insideMean.toFixed(2)}) and ${h.acrossN.toLocaleString()} pairs across boundaries (mean ${h.acrossMean.toFixed(2)}); in the made-up language over 21 minutes, the same two kinds of pair.`}</Note>
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>

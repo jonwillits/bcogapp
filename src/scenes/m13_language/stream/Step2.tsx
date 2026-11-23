@@ -56,7 +56,7 @@ export function Step2Stage({ s, onNext }: { s: StreamStore; onNext?: () => void 
                 Add to the tray
               </Btn>
             )}
-            <Note>{h ? `Highlighted: “${h}”.` : 'No syllable is highlighted.'}</Note>
+            <Note>{h ? `Highlighted: ‹${h}›.` : 'No syllable is highlighted.'}</Note>
           </div>
           {!ended && (
             <>
@@ -159,11 +159,11 @@ export function Step2Panel({ s }: { s: StreamStore }) {
   const row = (x: { syllable: string; count: number }) => ({ syllable: x.syllable, count: x.count, tp: withTp ? (x.count / nb.occurrences).toFixed(2) : '' })
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-neighbors={h}>
-      <Note>{`“${h}” occurs ${nb.occurrences} times in the ${BOARD_SYLLABLES} syllables.`}</Note>
+      <Note>{`‹${h}› occurs ${nb.occurrences} times in the ${BOARD_SYLLABLES} syllables.`}</Note>
       {withTp && <Note data-tp-definition>The Proportion column is the transitional probability from one syllable to the next: how often the second follows the first, divided by how often the first occurs (§13.2.3).</Note>}
-      <GroupLabel>Comes right after “{h}”</GroupLabel>
+      <GroupLabel>Comes right after <i>{h}</i></GroupLabel>
       <DataTable testId="after" columns={cols} rows={nb.after.map(row)} />
-      <GroupLabel>Comes right before “{h}”</GroupLabel>
+      <GroupLabel>Comes right before <i>{h}</i></GroupLabel>
       <DataTable testId="before" columns={cols} rows={nb.before.map(row)} />
     </div>
   )

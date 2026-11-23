@@ -20,9 +20,9 @@ import type { Step } from './screens'
  */
 
 export const PREDICTIONS = {
-  nearest: { key: 'p4-s2-nearest', question: 'Which word will lie closest to “cat” in the count model, judged by how similar the two words’ lists of counts are?' },
-  counts: { key: 'p4-s3-counts', question: 'After “girls who dogs chase”, which kind of token will the prediction from counts make most probable: a plural verb form (“chase”, “walk”, …), a singular verb form (“chases”, “walks”, …), or a noun?', choices: ['a plural verb form', 'a singular verb form', 'a noun'] },
-  agree: { key: 'p4-s4-agree', question: 'After “boys who Mary chases”, which verb form will each network give more probability to?', choices: ['both the plural form', 'both the singular form', 'the transformer plural, the recurrent network singular', 'the transformer singular, the recurrent network plural'] },
+  nearest: { key: 'p4-s2-nearest', question: 'Which word will lie closest to ‹cat› in the count model, judged by how similar the two words’ lists of counts are?' },
+  counts: { key: 'p4-s3-counts', question: 'After ‹girls who dogs chase›, which kind of token will the prediction from counts make most probable: a plural verb form (‹chase›, ‹walk›, …), a singular verb form (‹chases›, ‹walks›, …), or a noun?', choices: ['a plural verb form', 'a singular verb form', 'a noun'] },
+  agree: { key: 'p4-s4-agree', question: 'After ‹boys who Mary chases›, which verb form will each network give more probability to?', choices: ['both the plural form', 'both the singular form', 'the transformer plural, the recurrent network singular', 'the transformer singular, the recurrent network plural'] },
 } as const
 // Step 4's temperature prediction was cut (Jon, 2026-11-20): temperature is explained beside Generate a sentence instead.
 export type PredictionKey = keyof typeof PREDICTIONS

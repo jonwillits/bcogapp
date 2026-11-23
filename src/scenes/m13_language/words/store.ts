@@ -154,7 +154,6 @@ export class WordsStore extends StepStore<Step> {
       this.trialStart = performance.now()
       void this.ensureLoaded().then(() => this.playTrialWord())
     }
-    if (step === 3 && this.result()) void this.prepareModels()
   }
 
   /** The word files and the objects, the sounds fetched all at once and counted (Jon, 2026-11-20). */

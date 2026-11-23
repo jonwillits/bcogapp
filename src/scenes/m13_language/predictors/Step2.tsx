@@ -126,13 +126,13 @@ export function Step2Stage({ s }: { s: PredictorsStore }) {
           </select>
           {near && (
             <>
-              <GroupLabel>{`The five nearest neighbors of “${s.clicked}”`}</GroupLabel>
+              <GroupLabel>{`The five nearest neighbors of ‹${s.clicked}›`}</GroupLabel>
               <Note>{VIEWS_TEXT.neighbors}</Note>
               <DataTable testId="neighbors" columns={[{ key: 'rank', label: 'Rank', mono: true }, { key: 'word', label: 'Token', mono: true, align: 'left' }, { key: 'r', label: 'Correlation', mono: true }]} rows={near.map((n, i) => ({ rank: i + 1, word: VOCABULARY[n.word], r: n.similarity.toFixed(3) }))} />
             </>
           )}
-          {committed && near && s.clicked === 'cat' && <Note data-nearest-cat>{`Your prediction for the word closest to “cat”: ${committed}. The nearest by this count: “${VOCABULARY[near[0].word]}”.`}</Note>}
-          {committed && s.clicked !== 'cat' && <Note>Choose “cat” to see its nearest neighbor beside your prediction.</Note>}
+          {committed && near && s.clicked === 'cat' && <Note data-nearest-cat>{`Your prediction for the word closest to ‹cat›: ${committed}. The nearest by this count: ‹${VOCABULARY[near[0].word]}›.`}</Note>}
+          {committed && s.clicked !== 'cat' && <Note>Choose ‹cat› to see its nearest neighbor beside your prediction.</Note>}
           <GroupLabel>A tree of clusters</GroupLabel>
           <Note>{VIEWS_TEXT.tree}</Note>
           {tree && <FitWidth max={560}>{(w) => <Dendrogram tree={tree} labels={nouns.map((n) => VOCABULARY[n])} leafColor={(i) => leafColor(VOCABULARY[nouns[i]])} width={w} testId="tree" />}</FitWidth>}

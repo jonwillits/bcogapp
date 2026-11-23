@@ -56,6 +56,8 @@ export interface InstructionScreenProps {
   maxWidth?: number | string
   /** No border, background or padding of its own: the screen is the content of a panel that draws them (Lab 13's main panel, 2026-11-18). */
   bare?: boolean
+  /** Formats each text before it renders (Lab 13 renders its ‹example› spans in italics). */
+  format?: (text: string) => ReactNode
 }
 
 function groupBullets(lines: string[]): (string | string[])[] {
@@ -70,7 +72,8 @@ function groupBullets(lines: string[]): (string | string[])[] {
   return out
 }
 
-export function InstructionScreen({ title, willDo, minutes, sitting, sittingLine, ready = READY_DEFAULT, keys, content, next, figure, onBegin, beginLabel = 'Begin', disabled, extra, inline, maxWidth = 560, bare }: InstructionScreenProps) {
+export function InstructionScreen({ title, willDo, minutes, sitting, sittingLine, ready = READY_DEFAULT, keys, content, next, figure, onBegin, beginLabel = 'Begin', disabled, extra, inline, maxWidth = 560, bare, format = (s) => s }: InstructionScreenProps) {
+  const f = format
   const style = inline
     ? { width: '100%', maxWidth, boxSizing: 'border-box' as const }
     : { position: 'absolute' as const, left: 'calc(50% + var(--stage-shift, 0px))', top: 24, transform: 'translateX(-50%)', width: 'min(560px, calc(100vw - 780px))', minWidth: 360, maxHeight: 'calc(100vh - 170px)', overflowY: 'auto' as const }
@@ -84,12 +87,12 @@ export function InstructionScreen({ title, willDo, minutes, sitting, sittingLine
       {groupBullets(willDo).map((block, i) =>
         typeof block === 'string' ? (
           <p key={i} style={{ margin: 0 }} data-will-do>
-            {block}
+            {f(block)}
           </p>
         ) : (
           <ul key={i} style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 4 }} data-will-do>
             {block.map((item) => (
-              <li key={item}>{item}</li>
+              <li key={item}>{f(item)}</li>
             ))}
           </ul>
         ),
@@ -101,18 +104,18 @@ export function InstructionScreen({ title, willDo, minutes, sitting, sittingLine
       </p>
       <GroupLabel>Pausing</GroupLabel>
       <p style={{ margin: 0 }} data-sitting={sitting}>
-        {sittingLine ?? SITTING_LINES[sitting]}
+        {f(sittingLine ?? SITTING_LINES[sitting])}
       </p>
       <GroupLabel>What you need</GroupLabel>
       <p style={{ margin: 0 }} data-ready>
-        {ready}
+        {f(ready)}
       </p>
       {keys && keys.length > 0 && (
         <>
           <GroupLabel>The keys and buttons</GroupLabel>
           <ul style={{ margin: 0, paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 4 }} data-keys>
             {keys.map((k) => (
-              <li key={k}>{k}</li>
+              <li key={k}>{f(k)}</li>
             ))}
           </ul>
         </>
@@ -121,12 +124,12 @@ export function InstructionScreen({ title, willDo, minutes, sitting, sittingLine
         <>
           <GroupLabel>When you are done</GroupLabel>
           <p style={{ margin: 0 }} data-next>
-            {next}
+            {f(next)}
           </p>
         </>
       )}
       {content?.map((l) => (
-        <Content key={l}>{l}</Content>
+        <Content key={l}>{f(l)}</Content>
       ))}
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
         <Btn primary onClick={onBegin} disabled={disabled}>

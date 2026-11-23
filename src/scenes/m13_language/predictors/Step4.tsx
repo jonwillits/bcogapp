@@ -76,7 +76,7 @@ function GenerateControls({ s }: { s: PredictorsStore }) {
 export const COUNT_NOTE_LINES = 4
 export function CountNote({ c }: { c: CountPrediction }) {
   const two = c.from === 'two'
-  const text = c.denominator === 0 ? 'The count model has not counted any sentence yet, so every probability is zero.' : two ? `From the two words before, “${c.context.join(' ')}”: each probability is the count of “${c.context.join(' ')}” followed by that token, divided by ${c.denominator.toLocaleString()}, the count of “${c.context.join(' ')}” followed by anything.` : `The two words before never occurred together in the corpus, so the prediction is from the one word before, “${c.context[0]}”: each probability is the count of “${c.context[0]}” followed by that token, divided by ${c.denominator.toLocaleString()}, the count of “${c.context[0]}” followed by anything.`
+  const text = c.denominator === 0 ? 'The count model has not counted any sentence yet, so every probability is zero.' : two ? `From the two words before, ‹${c.context.join(' ')}›: each probability is the count of ‹${c.context.join(' ')}› followed by that token, divided by ${c.denominator.toLocaleString()}, the count of ‹${c.context.join(' ')}› followed by anything.` : `The two words before never occurred together in the corpus, so the prediction is from the one word before, ‹${c.context[0]}›: each probability is the count of ‹${c.context[0]}› followed by that token, divided by ${c.denominator.toLocaleString()}, the count of ‹${c.context[0]}› followed by anything.`
   return (
     <Note data-count-from={c.denominator === 0 ? 'none' : c.from} style={{ minHeight: `${COUNT_NOTE_LINES * 1.45}em` }}>
       {text}
@@ -114,7 +114,7 @@ function Distribution({ probs, title, testId, width, children }: { probs: ArrayL
       .slice(0, g === 'nouns' ? 10 : 20)
       .map(({ t, j }) => ({ label: t, value: probs[j], group: g, color: g === 'verbs' ? (verbOf(t)!.number === 'pl' ? 'var(--actuator)' : 'var(--sensor)') : g === 'nouns' ? 'var(--accent)' : 'var(--text-muted)' })),
   )
-  const sums = GROUPS.map((g) => `${g === 'who' ? '“who”' : g}: ${VOCABULARY.reduce((a, t, j) => a + (groupOf(t) === g ? probs[j] : 0), 0).toFixed(2)}`)
+  const sums = GROUPS.map((g) => `${g === 'who' ? '‹who›' : g}: ${VOCABULARY.reduce((a, t, j) => a + (groupOf(t) === g ? probs[j] : 0), 0).toFixed(2)}`)
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, width, minWidth: 0 }} data-distribution={testId}>
       <GroupLabel>{title}</GroupLabel>
@@ -237,14 +237,14 @@ export function Step4Stage({ s }: { s: PredictorsStore }) {
             {two && two[0] && two[1] && (
               <>
                 <GroupLabel>The same word in two sentences</GroupLabel>
-                <Note>The bars are the transformer’s numbers for “chases” after its last layer, the first 12 of the 32, in “boys who Mary chases walk” (position 4) and in “Mary chases boys” (position 2). In the count model of Step 3, “chases” had one list whatever the sentence.</Note>
+                <Note>The bars are the transformer’s numbers for ‹chases› after its last layer, the first 12 of the 32, in ‹boys who Mary chases walk› (position 4) and in ‹Mary chases boys› (position 2). In the count model of Step 3, ‹chases› had one list whatever the sentence.</Note>
                 <div style={{ display: 'flex', gap: GAP, flexWrap: 'wrap' }} data-same-word>
                   {[
                     ['boys who Mary chases walk', chasesIn(two[0].transformer, 3)],
                     ['Mary chases boys', chasesIn(two[1].transformer, 1)],
                   ].map(([title, vals]) => (
                     <div key={title as string}>
-                      <Note>{`“${title as string}”`}</Note>
+                      <Note>{`‹${title as string}›`}</Note>
                       <BarChart bars={(vals as number[]).map((v, i) => ({ label: `n${i + 1}`, value: Math.abs(v), color: v >= 0 ? 'var(--accent)' : 'var(--avoid)' }))} width={240} rowH={11} format={(v) => v.toFixed(2)} />
                     </div>
                   ))}
@@ -263,7 +263,7 @@ export function Step4Stage({ s }: { s: PredictorsStore }) {
               </div>
             </div>
             <Content>{NOT_ENGLISH_LINE}</Content>
-            <Note>{`Your prediction: after “boys who Mary chases”, ${s.predicted('agree')}.`}</Note>
+            <Note>{`Your prediction: after ‹boys who Mary chases›, ${s.predicted('agree')}.`}</Note>
             <ReferencePanel reference={reference('elman-1991')} />
             <ReferencePanel reference={reference('mao-2025')} />
           </div>

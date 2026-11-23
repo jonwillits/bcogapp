@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Panel } from '../../components/Panel'
 import type { ProgressStore } from '../../sim/language/progress/store'
 import { InstructionScreen, type Sitting } from '../m10_memory/progress/InstructionScreen'
-import { Btn, Choice, Content, FixedLines, GroupLabel, Note, PANEL_STYLE, PART_TITLES, NEXT_TAB, TABS, StagePanel, useScrollToTop, useStore, type Tab } from './ui'
+import { Btn, Choice, Content, FixedLines, GroupLabel, Note, PANEL_STYLE, PART_TITLES, NEXT_TAB, TABS, StagePanel, useScrollToTop, useStore, type Tab, rich } from './ui'
 import { MAIN_TABS, stepParams, type PartKey, type UnderWay } from './params'
 import { pauseExpiredLine, pauseLines, pausedFor, type Busy } from './switching'
 import type { PartContext, PartStore } from './contract'
@@ -353,6 +353,7 @@ export function StepStage<Step extends number, S extends StepStore<Step>>({ ctx,
           next={screen.next}
           onBegin={() => (s.instructionsShown ? s.hideInstructions() : s.begin())}
           beginLabel={s.instructionsShown ? 'Back to the step' : 'Begin'}
+          format={rich}
         />
       </div>
     )

@@ -145,7 +145,7 @@ export function allowedNext(prompt: string[]): string {
   if (pl) kinds.push("a plural verb form");
   if (sg) kinds.push("a singular verb form");
   if (nouns) kinds.push("a noun");
-  if (next.includes(WHO)) kinds.push("“who”");
+  if (next.includes(WHO)) kinds.push("‹who›");
   if (next.includes(END)) kinds.push("the end mark");
   return kinds.length
     ? kinds.join(", or ")
@@ -193,9 +193,9 @@ function PromptColumn({
   const one = predictFromOne(s.ngram, idx(last));
   const two = predictFromTwo(s.ngram, idx(before), idx(last));
   const pair =
-    prompt.length >= 2 ? `“${before} ${last}”` : `the end mark, then “${last}”`;
+    prompt.length >= 2 ? `‹${before} ${last}›` : `the end mark, then ‹${last}›`;
   const pairCount =
-    prompt.length >= 2 ? `“${before} ${last}”` : `the end mark then “${last}”`;
+    prompt.length >= 2 ? `‹${before} ${last}›` : `the end mark then ‹${last}›`;
   return (
     <div
       style={{
@@ -207,7 +207,7 @@ function PromptColumn({
       }}
       data-prompt-column={prompt.join(" ")}
     >
-      <GroupLabel>{`Prompt ${k + 1}: “${prompt.join(" ")}”`}</GroupLabel>
+      <GroupLabel>{`Prompt ${k + 1}: ‹${prompt.join(" ")}›`}</GroupLabel>
       <Note
         data-allowed-next
       >{`The grammar allows next: ${allowedNext(prompt)}.`}</Note>
@@ -215,8 +215,8 @@ function PromptColumn({
         <>
           <Note
             style={{ color: "var(--text)" }}
-          >{`From the one token before: after “${last}”`}</Note>
-          <Note>{`Each probability is the count of “${last}” followed by the token, divided by ${one.denominator.toLocaleString()}, the count of “${last}” followed by anything. Summed: ${sums(one)}.`}</Note>
+          >{`From the one token before: after ‹${last}›`}</Note>
+          <Note>{`Each probability is the count of ‹${last}› followed by the token, divided by ${one.denominator.toLocaleString()}, the count of ‹${last}› followed by anything. Summed: ${sums(one)}.`}</Note>
           <BarChart
             bars={bars(one)}
             width={width}
@@ -305,12 +305,12 @@ export function Step3Stage({ s }: { s: PredictorsStore }) {
               <>
                 <Note>
                   Plural verb forms are green, singular forms orange, nouns
-                  blue, and “who” and the end mark gray. The twelve most
+                  blue, and ‹who› and the end mark gray. The twelve most
                   probable tokens are shown.
                 </Note>
                 <Note
                   data-after-compute
-                >{`Your prediction: ${s.predicted("counts")}. Each prediction depends only on the one or two tokens just before it. After “girls”, and after “girls who chase boys”, the token just before is a plural noun. After “girls who dogs chase”, the token just before is a verb, “chase”. When a clause stands between, the subject of the sentence, “girls”, is farther back than one token or two.`}</Note>
+                >{`Your prediction: ${s.predicted("counts")}. Each prediction depends only on the one or two tokens just before it. After ‹girls›, and after ‹girls who chase boys›, the token just before is a plural noun. After ‹girls who dogs chase›, the token just before is a verb, ‹chase›. When a clause stands between, the subject of the sentence, ‹girls›, is farther back than one token or two.`}</Note>
               </>
             )}
           </>
@@ -334,8 +334,8 @@ function OnePoint({ s }: { s: PredictorsStore }) {
       ))}
       <FixedLines
         lines={[
-          `“chases”, in “boys who Mary chases walk”:  the one list of ${e.length} counts`,
-          `“chases”, in “Mary chases boys”:           the same list of ${e.length} counts`,
+          `‹chases›, in ‹boys who Mary chases walk›:  the one list of ${e.length} counts`,
+          `‹chases›, in ‹Mary chases boys›:           the same list of ${e.length} counts`,
           `the first ten counts of that list: ${Array.from(e.slice(0, 10))
             .map((v) => Math.round(v))
             .join(" ")}`,

@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode, type RefObject } from 'react'
+import { Children, useEffect, useRef, useState, type CSSProperties, type HTMLAttributes, type ReactNode, type RefObject } from 'react'
 import { Btn, GroupLabel as BaseGroupLabel, Choice } from '../m06_brain/ui'
-import { Content, FixedLines, OrientingPanel, DotPlot, statusStyle } from '../m09_rat/ui'
+import { Content as BaseContent, FixedLines as BaseFixedLines, OrientingPanel, DotPlot, statusStyle } from '../m09_rat/ui'
+import { Para as BasePara } from '../m12_planning/ui'
 
 /**
  * Small shared pieces for the five tabs. Lab 6's rule holds: selection
@@ -12,19 +13,54 @@ import { Content, FixedLines, OrientingPanel, DotPlot, statusStyle } from '../m0
  * block of aligned rows. Every text is selectable. A large timer and a
  * large line saying what is happening now on every timed screen (Lab 10).
  */
-export { Btn, Choice, Content, FixedLines, OrientingPanel, DotPlot, statusStyle }
+export { Btn, Choice, OrientingPanel, DotPlot, statusStyle }
+
+/**
+ * Examples in italics (Jon, 2026-11-23; LAB_COMMON_FEATURES §7, §8). A
+ * sound, a syllable, a word, a sentence, a token or a prompt named in a text
+ * is written ‹so› in the source, and every text component here renders the
+ * span in italics. A button's, key's, tab's, screen's or column's name, and
+ * a term being defined, stay in curly quotation marks. `naming.test.ts`
+ * holds the examples that may no longer be quoted and checks that every
+ * marker is paired.
+ */
+export const ITALIC_OPEN = '‹'
+export const ITALIC_CLOSE = '›'
+
+export function rich(text: string): ReactNode {
+  if (!text.includes(ITALIC_OPEN)) return text
+  const parts = text.split(/‹([^›]*)›/)
+  return parts.map((part, i) => (i % 2 ? <i key={i}>{part}</i> : part))
+}
+
+/** The same over a component's children: each string child is formatted, anything else passes through. */
+export function richChildren(children: ReactNode): ReactNode {
+  return Children.map(children, (c) => (typeof c === 'string' ? rich(c) : c))
+}
+
+export function Content({ children }: { children: ReactNode }) {
+  return <BaseContent>{richChildren(children)}</BaseContent>
+}
+
+export function Para({ children }: { children: ReactNode }) {
+  return <BasePara>{richChildren(children)}</BasePara>
+}
+
+export function FixedLines(props: Parameters<typeof BaseFixedLines>[0]) {
+  return <BaseFixedLines {...props} format={rich} />
+}
 
 /** Lab 6's Note, with any data attribute passed through, so that a line's presence can be tested on rendered markup. */
 export function Note({ children, style, ...rest }: { children: ReactNode; style?: CSSProperties } & HTMLAttributes<HTMLParagraphElement>) {
   return (
     <p {...rest} style={{ margin: 0, fontSize: 11.5, color: 'var(--text-muted)', lineHeight: 1.45, ...style }}>
-      {children}
+      {richChildren(children)}
     </p>
   )
 }
 export { useStore, useThrottledStore } from '../m09_rat/useStore'
 export { row, Countdown, useCountdown } from '../m10_memory/ui'
-export { BigChoice, Para, rgbOf } from '../m12_planning/ui'
+export { BigChoice, rgbOf } from '../m12_planning/ui'
 
 /** A header over a block of the main panel, with room above it so that it stands off from whatever is above (Jon, 2026-11-19: a line's worth of space before every header). */
 /**
@@ -57,7 +93,7 @@ export function LoadingLine({ text, done, total, testId }: { text: string; done?
 export function GroupLabel({ children }: { children: ReactNode }) {
   return (
     <div style={{ marginTop: 8 }} data-header>
-      <BaseGroupLabel>{children}</BaseGroupLabel>
+      <BaseGroupLabel>{richChildren(children)}</BaseGroupLabel>
     </div>
   )
 }

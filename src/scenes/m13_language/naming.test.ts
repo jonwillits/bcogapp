@@ -243,6 +243,31 @@ describe('the lines that are content, each on its panel (§10)', () => {
   })
 })
 
+describe('examples in italics (Jon, 2026-11-23; LAB_COMMON_FEATURES §7, §8)', () => {
+  // The language's words and syllables, Part 1's sounds and Part 4's example sentences are examples: ‹so› in the source, italic on the screen, never in quotation marks.
+  const EXAMPLES = /“(babupu|bupada|dutaba|patubi|pidabu|tutibu|pa|tu|bi|bu|da|du|ta|ba|pi|ti|ah|ee|oo|ay|oh|tot|dot|dah|dee|doo|bee|bah|boo|cat|dog|boy walks|boys walk|girls who dogs chase|boys who Mary chases|Mary chases boys|dog chases cat|cat chases dog)”/
+  it('no example is in quotation marks', () => {
+    for (const [p, src] of all) {
+      const hits = hitsIn(p, src, EXAMPLES)
+      expect(hits, p).toEqual([])
+    }
+  })
+  it('every italics marker is paired, in order, inside one string', () => {
+    for (const [p, src] of all) {
+      if (p.endsWith('/ui.tsx')) continue // defines the markers and the pattern that reads them
+      const bad = src
+        .split('\n')
+        .filter((l) => l.includes('‹') || l.includes('›'))
+        .filter((l) => !/^([^‹›]*‹[^‹›]+›)+[^‹›]*$/.test(l))
+      expect(bad, p).toEqual([])
+    }
+  })
+  it('a button or key is named in quotation marks, not italics', () => {
+    const buttons = /‹(Begin|Play|Next|Back|Pause|Resume|Count|Compute|Train|Commit my [a-z]+|Go on to [A-Z][a-z]+ \d|Show [a-z ]+|Run the [a-z]+)›/
+    for (const [p, src] of all) expect(hitsIn(p, src, buttons), p).toEqual([])
+  })
+})
+
 describe('the shell', () => {
   it('the tab and part titles are neutral', () => {
     const ui = visibleText(file('ui.tsx'))

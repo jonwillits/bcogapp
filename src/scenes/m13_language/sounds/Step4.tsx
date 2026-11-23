@@ -345,7 +345,7 @@ export function Step4Stage({ s }: { s: SoundsStore }) {
       {sample && (
         <>
           <GroupLabel>One training syllable</GroupLabel>
-          <Note>One training syllable, “dah” in voice 1 at its own pitch. The box marks the patch the network receives: from 20 milliseconds before the release to 80 milliseconds after it, 0 to 5,000 Hz.</Note>
+          <Note>One training syllable, ‹dah› in voice 1 at its own pitch. The box marks the patch the network receives: from 20 milliseconds before the release to 80 milliseconds after it, 0 to 5,000 Hz.</Note>
           <div>
             <Btn small onClick={() => s.playToken(sampleIndex)}>
               Play
@@ -391,7 +391,7 @@ function Run3({ s, width }: { s: SoundsStore; width: number }) {
       <FixedLines lines={lines} testId="run3-labels" />
       {yours && <Note data-yours="step3">{`The line “yours” is your own label of each sound from block 1 of Step 3: the label you gave most often on its 6 trials, or “b/d” where you gave each 3 times.`}</Note>}
       <Para>
-        {`Before the lab was posted, ${MANY_NETWORKS} networks trained as in run 1 were run on these ${STEPS} sounds. Their most likely label was most often “g”, with “b” at sounds 1, 3, and 9, and the order differed from one network to the next: one network gave “b” to all ${STEPS}, another “g” to all ${STEPS}. Each of these sounds begins with a 10 millisecond burst of noise at the release. With that burst removed, most of the networks labeled sounds 1 to 4 “b” and sounds 5 to 8 “d”. The burst in these synthetic sounds is noise shaped by two formants only, so the patch the network receives from a synthetic sound has almost no energy above 2,500 Hz. The natural syllables’ bursts carry energy up to 5,000 Hz, and above 2,500 Hz is where the natural “b” and “d” bursts differ most.`}
+        {`Before the lab was posted, ${MANY_NETWORKS} networks trained as in run 1 were run on these ${STEPS} sounds. Their most likely label was most often ‹g›, with ‹b› at sounds 1, 3, and 9, and the order differed from one network to the next: one network gave ‹b› to all ${STEPS}, another ‹g› to all ${STEPS}. Each of these sounds begins with a 10 millisecond burst of noise at the release. With that burst removed, most of the networks labeled sounds 1 to 4 ‹b› and sounds 5 to 8 ‹d›. The burst in these synthetic sounds is noise shaped by two formants only, so the patch the network receives from a synthetic sound has almost no energy above 2,500 Hz. The natural syllables’ bursts carry energy up to 5,000 Hz, and above 2,500 Hz is where the natural ‹b› and ‹d› bursts differ most.`}
       </Para>
       <Content>{SYNTHETIC_TEST_LINE}</Content>
       {!yours && <Note data-missing="step3">{`Once Step 3 is done, you will see your own labels of these ${STEPS} sounds beside the network’s.`}</Note>}

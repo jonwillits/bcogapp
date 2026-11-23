@@ -97,10 +97,10 @@ export function LabelsStage({ s, result, onNext }: { s: SoundsStore; result: Lab
           <Content>{MEASURED_LINE}</Content>
         </Section>
         <Section n={3} title="The same consonant in different contexts">
-          <Para>The reading says that no acoustic property marks a speech sound in every context, and that the same consonant sounds a little different before different vowels (§13.2.2). The three “b” syllables begin with the same consonant, and so do the three “d” syllables. Compare the second formant’s track in the three “b” syllables, and then in the three “d” syllables: the same consonant, but a different track before each vowel. This shaping of a consonant’s sound by the vowel that follows it is called coarticulation.</Para>
+          <Para>The reading says that no acoustic property marks a speech sound in every context, and that the same consonant sounds a little different before different vowels (§13.2.2). The three ‹b› syllables begin with the same consonant, and so do the three ‹d› syllables. Compare the second formant’s track in the three ‹b› syllables, and then in the three ‹d› syllables: the same consonant, but a different track before each vowel. This shaping of a consonant’s sound by the vowel that follows it is called coarticulation.</Para>
         </Section>
         <Section n={4} title="Voice timing, an optional screen">
-          <Para>Press “Show voice timing” to see two more syllables from the same voice, “tot” and “dot”. On each, the voice-onset time is marked: the time from the consonant’s release to the start of voicing, when the vocal folds begin to vibrate. The reading’s figure of larynx timing shows the same measure (§13.3.1).</Para>
+          <Para>Press “Show voice timing” to see two more syllables from the same voice, ‹tot› and ‹dot›. On each, the voice-onset time is marked: the time from the consonant’s release to the start of voicing, when the vocal folds begin to vibrate. The reading’s figure of larynx timing shows the same measure (§13.3.1).</Para>
           <div>
             <Btn onClick={() => s.toggleVot()}>{s.showVot ? 'Hide voice timing' : 'Show voice timing'}</Btn>
           </div>
@@ -159,13 +159,13 @@ function VotScreen({ s, width }: { s: SoundsStore; width: number }) {
               <Btn small onClick={() => s.play(`vot:${k}`)} disabled={!clip}>
                 Play
               </Btn>
-              <Note>{`“${k}”: voicing begins ${v.votMs} milliseconds after the release.`}</Note>
+              <Note>{`‹${k}›: voicing begins ${v.votMs} milliseconds after the release.`}</Note>
             </div>
           </div>
         )
       })}
       </div>
-      <Para>In “tot”, the vocal folds start vibrating tens of milliseconds after the release; in “dot”, almost at once. The reading’s figure (§13.3.1) draws the same timing difference.</Para>
+      <Para>In ‹tot›, the vocal folds start vibrating tens of milliseconds after the release; in ‹dot›, almost at once. The reading’s figure (§13.3.1) draws the same timing difference.</Para>
     </div>
   )
 }
@@ -232,13 +232,13 @@ export function Step3Reveal({ labeling, abx, mode = 'full' }: { labeling: Labeli
         />
       </Section>
       <Section n={4} title="Where your boundary fell">
-        <Para>A phoneme boundary is the point on the series of 9 sounds where your labels change from one consonant to the other: the sound at which the “b” curve and the “d” curve cross. Between two neighboring sounds, the crossing is placed on a straight line drawn from one sound’s value to the next.</Para>
-        <FixedLines lines={[`“b” to “d”: ${bd === null ? 'the “b” and “d” curves do not cross' : `between sounds ${Math.floor(bd)} and ${Math.ceil(bd)}, at about ${bd.toFixed(1)}`}`]} testId="boundaries" />
+        <Para>A phoneme boundary is the point on the series of 9 sounds where your labels change from one consonant to the other: the sound at which the ‹b› curve and the ‹d› curve cross. Between two neighboring sounds, the crossing is placed on a straight line drawn from one sound’s value to the next.</Para>
+        <FixedLines lines={[`‹b› to ‹d›: ${bd === null ? 'the ‹b› and ‹d› curves do not cross' : `between sounds ${Math.floor(bd)} and ${Math.ceil(bd)}, at about ${bd.toFixed(1)}`}`]} testId="boundaries" />
       </Section>
       {full && (
         <>
       <Section n={5} title="The reference listener">
-        <Para>{`The reading’s figure of categorical perception shows one listener from the 1957 experiment, over 14 sounds; in this step you heard the first ${STEPS} of them. Here are that listener’s labeling curves and discrimination over those ${STEPS}, drawn from the same figure, for you to compare with yours above. The 1957 series went on to a third consonant, “g”, and at sound ${STEPS} this listener heard “g” 17% of the time. In the paper’s words (p. 362), stimuli 1 and 3, both heard as “b”, were told apart 55% of the time, and stimuli 3 and 5, heard as “b” and “d”, 100% of the time.`}</Para>
+        <Para>{`The reading’s figure of categorical perception shows one listener from the 1957 experiment, over 14 sounds; in this step you heard the first ${STEPS} of them. Here are that listener’s labeling curves and discrimination over those ${STEPS}, drawn from the same figure, for you to compare with yours above. The 1957 series went on to a third consonant, ‹g›, and at sound ${STEPS} this listener heard ‹g› 17% of the time. In the paper’s words (p. 362), stimuli 1 and 3, both heard as ‹b›, were told apart 55% of the time, and stimuli 3 and 5, heard as ‹b› and ‹d›, 100% of the time.`}</Para>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <LinePlot series={[{ label: 'b', color: COLORS.b, points: steps.map((st) => [st, refB[st - 1]] as [number, number]) }, { label: 'd', color: COLORS.d, points: steps.map((st) => [st, refD[st - 1]] as [number, number]) }, { label: 'g', color: COLORS.g, points: steps.map((st) => [st, refG[st - 1]] as [number, number]) }]} width={Math.max(300, Math.floor((plotW - 10) / 2))} height={Math.round(Math.max(300, Math.floor((plotW - 10) / 2)) * 0.55)} xLabel={`sound, 1 to ${STEPS}`} yLabel="percent labeled" xMin={1} xMax={STEPS} xTicks={tick} testId="ref-labels" />
           <LinePlot series={[{ label: 'told apart', color: 'var(--accent)', points: refObt.slice(0, nPairs).map((v, i) => [i + 2, v] as [number, number]) }, { label: 'predicted', color: 'var(--text-muted)', dashed: true, points: refPred.slice(0, nPairs).map((v, i) => [i + 2, v] as [number, number]) }]} width={Math.max(300, Math.floor((plotW - 10) / 2))} height={Math.round(Math.max(300, Math.floor((plotW - 10) / 2)) * 0.55)} xLabel="middle sound of a pair" yLabel="percent correct" xMin={1} xMax={STEPS} xTicks={tick} hLines={[{ y: 50, label: 'chance' }]} testId="ref-disc" />

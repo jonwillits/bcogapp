@@ -61,12 +61,12 @@ export function Content({ children }: { children: ReactNode }) {
  * `scroll` is set: then the block scrolls sideways (Lab 11's Part 4 tables,
  * whose last columns were cut off on every screen; 2026-11-09).
  */
-export function FixedLines({ lines, mono = true, testId, lineStyle, scroll = false }: { lines: (string | null)[]; mono?: boolean; testId?: string; lineStyle?: (line: string | null, i: number) => CSSProperties | undefined; scroll?: boolean }) {
+export function FixedLines({ lines, mono = true, testId, lineStyle, scroll = false, format }: { lines: (string | null)[]; mono?: boolean; testId?: string; lineStyle?: (line: string | null, i: number) => CSSProperties | undefined; scroll?: boolean; format?: (line: string) => ReactNode }) {
   return (
     <div data-lines={testId} data-scroll={scroll || undefined} style={{ fontFamily: mono ? 'var(--font-mono)' : undefined, fontSize: 11.5, whiteSpace: 'pre', lineHeight: 1.5, overflow: 'hidden', overflowX: scroll ? 'auto' : undefined }}>
       {lines.map((l, i) => (
         <div key={i} data-line={i} style={lineStyle?.(l, i)}>
-          {l ?? ' '}
+          {l === null ? ' ' : format ? format(l) : l}
         </div>
       ))}
     </div>

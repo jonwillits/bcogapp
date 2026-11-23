@@ -187,7 +187,7 @@ describe('Part 2: commit, then reveal', () => {
     expect(text(m)).toMatch(/The language has 6 words/)
     expect(m).not.toMatch(/data-replays|data-six-words|data-strip/)
     expect(text(m)).not.toMatch(/babupu|bupada|dutaba|patubi|pidabu|tutibu|Play again/)
-    expect(text(m)).toMatch(/once Step 2 is done/)
+    expect(text(m)).toMatch(/Once Step 2 is done/)
     // The replays play only once Step 2 is done, whatever is asked of the store.
     z.store.playMinute('marked')
     expect(z.store.replay).toBeNull()
@@ -371,7 +371,8 @@ describe('Part 4: commit, then reveal', () => {
     const m = k.all()
     expect(m).toMatch(/data-reveal="counts"/)
     expect(m).toMatch(/data-table="neighbors"/)
-    expect(text(m)).toMatch(/Your prediction for the word closest to “cat”: dog/)
+    expect(text(m)).toMatch(/Your prediction for the word closest to\s*cat\s*: dog/)
+    expect(m).toMatch(/closest to <i>cat<\/i>/)
   })
   it('Step 3: no distribution before the prediction; Step 4: no palette, distribution, or attention before the two predictions', () => {
     const k = fresh(predictors as Mod, (s, p) => new PredictorsStore(s, p))
