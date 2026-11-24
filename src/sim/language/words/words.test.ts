@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { makeRng } from '../../random'
-import { makeDesign, LEARNING_TRIALS, OBJECTS_ON_SCREEN, TEST_OBJECTS, WORDS_PER_SET, isCorrect } from './design'
+import { makeDesign, LEARNING_TRIALS, MAX_SAME_OTHER, OBJECTS_ON_SCREEN, TEST_OBJECTS, WORDS_PER_SET, isCorrect } from './design'
 import { keyMeasure, share } from './keyMeasure'
 import { makeGuessCheck, guessCheckChoose } from './models/guessCheck'
 import { makeTally, tallyChoose } from './models/tally'
@@ -13,10 +13,16 @@ import { fit, runModel, runs } from './fit'
  * parameter near the value that matches a scripted accuracy.
  */
 describe('the design', () => {
-  it('60 learning trials, each word 5 times, never on neighboring trials, 5 objects with the target; 12 test trials with 4', () => {
+  it('60 learning trials, each word 5 times, never on neighboring trials, 2 objects with the target, the other object the same on at most 2 of a word’s trials (Trueswell et al., 2013, p. 133); 12 test trials with 4', () => {
     for (const seed of [1, 2, 3]) {
       for (const m of [0, 1] as const) {
         const d = makeDesign(seed, m)
+        // The paper's rule: no other object on more than MAX_SAME_OTHER of a word's 5 trials.
+        for (let w = 0; w < WORDS_PER_SET; w++) {
+          const withCount = Array(WORDS_PER_SET).fill(0)
+          for (const t of d.learning.filter((t) => t.word === w)) for (const o of t.objects) if (o !== d.pairing[w]) withCount[o]++
+          expect(Math.max(...withCount)).toBeLessThanOrEqual(MAX_SAME_OTHER)
+        }
         expect(d.learning.length).toBe(LEARNING_TRIALS)
         const counts = Array(WORDS_PER_SET).fill(0)
         d.learning.forEach((t, i) => {

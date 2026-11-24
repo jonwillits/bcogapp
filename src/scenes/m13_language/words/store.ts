@@ -31,7 +31,7 @@ export const CHOICE_SHOW_MS = 200
 export const GAP_MS = 800
 /** The moment between Begin (or Resume, or a restart) and the first objects and word. */
 export const BEGIN_DELAY_MS = 1000
-export const PREDICTION = { key: 'p3-s3-after-wrong', question: 'Suppose you clicked the wrong object for a word. On that word’s next trial, will your choice be correct about as often as chance, which is 1 in 5 (20%), or more often than chance?', choices: ['about as often as chance', 'more often than chance'] } as const
+export const PREDICTION = { key: 'p3-s3-after-wrong', question: 'Suppose you clicked the wrong object for a word. On that word’s next trial, will your choice be correct about as often as chance, which is 1 in 2 (50%), or more often than chance?', choices: ['about as often as chance', 'more often than chance'] } as const
 
 export interface WordsResult {
   materials: 0 | 1

@@ -31,8 +31,8 @@ export function WordsReveal({ seed, result, words, objects }: { seed: number; re
       {result.restarts > 0 && <Content>{RESTARTED_LINE}</Content>}
       {result.materials === 1 && <Note>This is the reserve set of 12 words and 12 objects. It was used because your first run of the trials was interrupted.</Note>}
       <Section n={1} title="Your accuracy at each occurrence">
-        <Para>Each word occurred 5 times in the 60 learning trials. The line shows the percentage of the 12 words you clicked correctly at the first occurrence, at the second, and so on. Chance is 20%, one object in five.</Para>
-        <LinePlot series={[{ label: 'percent correct', color: 'var(--accent)', points: km.byOccurrence.map((v, i) => [i + 1, 100 * v] as [number, number]) }]} width={plotW} height={Math.round(plotW * 0.45)} xLabel="occurrence of a word, 1 to 5" yLabel="percent of 12 words correct" xMin={1} xMax={OCCURRENCES} xTicks={[1, 2, 3, 4, 5].map((x) => ({ x, label: String(x) }))} hLines={[{ y: 20, label: 'chance, 20%' }]} testId="by-occurrence" />
+        <Para>Each word occurred 5 times in the 60 learning trials. The line shows the percentage of the 12 words you clicked correctly at the first occurrence, at the second, and so on. Chance is 50%, one object in two.</Para>
+        <LinePlot series={[{ label: 'percent correct', color: 'var(--accent)', points: km.byOccurrence.map((v, i) => [i + 1, 100 * v] as [number, number]) }]} width={plotW} height={Math.round(plotW * 0.45)} xLabel="occurrence of a word, 1 to 5" yLabel="percent of 12 words correct" xMin={1} xMax={OCCURRENCES} xTicks={[1, 2, 3, 4, 5].map((x) => ({ x, label: String(x) }))} hLines={[{ y: 50, label: 'chance, 50%' }]} testId="by-occurrence" />
         <DataTable testId="by-occurrence-table" columns={[{ key: 'occ', label: 'Occurrence', mono: true }, { key: 'n', label: 'Correct, of 12 words', mono: true }, { key: 'pct', label: 'Percent', mono: true }]} rows={km.byOccurrence.map((v, i) => ({ occ: i + 1, n: Math.round(12 * v), pct: `${Math.round(100 * v)}%` }))} />
       </Section>
       <Section n={2} title="The test">

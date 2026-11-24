@@ -41,7 +41,7 @@ export const SCREENS: Record<Step, StepScreen> = {
     kind: 'experiment',
     willDo: [
       'In this step you will hear new words and see new objects. Each word names one of the objects. No one will say which. Your task is to click the object each word names. If you are not sure, click anyway.',
-      'On each trial, five objects appear on the screen and a word plays once. To hear the word again, press “Hear it again”. Click one object. You see your choice marked for a moment, and then the next trial begins. There are 60 trials, and each one takes a few seconds.',
+      'On each trial, two objects appear on the screen and a word plays once. To hear the word again, press “Hear it again”. Click one object. You see your choice marked for a moment, and then the next trial begins. There are 60 trials, and each one takes a few seconds.',
       'This step and Step 2 are one unit. When the 60 trials are done, Step 2 begins at once. Step 2 is a short test on the same words and objects. Nothing is revealed between the trials and the test.',
       'Every click is recorded, with the time you took to make it. When the test is done, you will see the results of Steps 1 and 2 together in this panel.',
     ],

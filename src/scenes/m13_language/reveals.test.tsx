@@ -3,6 +3,7 @@ import { sounds, SoundsStore } from './PartSounds'
 import { stream, StreamStore } from './PartStream'
 import { words, WordsStore } from './PartWords'
 import { BEGIN_DELAY_MS, CHOICE_SHOW_MS, GAP_MS } from './words/store'
+import { OBJECTS_ON_SCREEN, TEST_OBJECTS } from '../../sim/language/words/design'
 import { predictors, PredictorsStore } from './PartPredictors'
 import { fresh, text, labelingFixture, abxFixture } from './reveal.test'
 import { loadShippedTokens, loadContinuumPatches } from '../../sim/language/sounds/tokens.node'
@@ -314,7 +315,7 @@ describe('Part 3: commit, then reveal', () => {
       await vi.advanceTimersByTimeAsync(BEGIN_DELAY_MS)
       m = w.all()
       expect(m).not.toMatch(/data-between/)
-      expect((m.match(/data-object=/g) ?? []).length).toBe(5)
+      expect((m.match(/data-object=/g) ?? []).length).toBe(OBJECTS_ON_SCREEN)
       w.store.choose(w.store.currentTrial!.objects[0])
       expect(w.store.choices.length).toBe(1)
       expect(text(m)).not.toMatch(/\b(dax|blicket|toma|lorp|gorp|kibby|mipen|nellum|pimwit|sprock|wug|zorch)\b|Test score|guess|tally/i)
@@ -323,7 +324,7 @@ describe('Part 3: commit, then reveal', () => {
       await vi.advanceTimersByTimeAsync(CHOICE_SHOW_MS)
       expect(w.all()).toMatch(/data-between="true"/)
       await vi.advanceTimersByTimeAsync(GAP_MS)
-      expect((w.all().match(/data-object=/g) ?? []).length).toBe(5)
+      expect((w.all().match(/data-object=/g) ?? []).length).toBe(OBJECTS_ON_SCREEN)
       // The sixtieth choice turns the unit to the test, and Step 2's stage shows the test's four objects (before 2026-11-23, its instruction screen showed, with nothing to click).
       for (let k = 1; k < 60; k++) {
         w.store.choose(w.store.currentTrial!.objects[0])
@@ -334,7 +335,7 @@ describe('Part 3: commit, then reveal', () => {
       expect(w.store.stateOf(2)).toBe('running')
       m = w.all()
       expect(m).toMatch(/data-stage="words-test"/)
-      expect((m.match(/data-object=/g) ?? []).length).toBe(4)
+      expect((m.match(/data-object=/g) ?? []).length).toBe(TEST_OBJECTS)
       expect(text(m)).not.toMatch(/Your choice/)
     } finally {
       vi.useRealTimers()

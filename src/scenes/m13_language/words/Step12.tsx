@@ -5,7 +5,7 @@ import type { WordsStore } from './store'
 import { PauseButton } from '../steps'
 
 /**
- * Steps 1 and 2's stage (spec §7.2): five objects (four on the test) in
+ * Steps 1 and 2's stage (spec §7.2): two objects (four on the test) in
  * shuffled positions, the word played once as they appear, Hear it again,
  * one click, the choice shown for about 200 ms, then a gap with no objects
  * before the next trial (Jon, 2026-11-23: a word right after the click
