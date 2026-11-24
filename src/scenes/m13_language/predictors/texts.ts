@@ -66,7 +66,7 @@ export const GRAMMAR_SYMBOLS: { symbol: string; meaning: string }[] = [
 /** The rules the rewrite rules leave out, in plain sentences. */
 export const GRAMMAR_RULES = [
   'N and V agree in number: a singular noun takes the singular verb form (‹boy walks›) and a plural noun the plural form (‹boys walk›). The V of the sentence’s verb phrase agrees with the N that begins the sentence’s noun phrase, even when a relative clause comes between them (‹boys who Mary chases walk›). In RC → VP, the verb agrees with the noun before ‹who›; in RC → NP V, it agrees with the noun inside the clause.',
-  'The table of verbs above shows which verbs take an object, and which nouns may be a verb’s subject or its object. A verb that needs an object always takes VP → V NP; a verb that never has one always takes VP → V; a verb that may have one takes either. The object’s noun comes from the groups the table names.',
+  'The table of verbs above shows which verbs take an object, and which nouns may be a verb’s subject or its object. A verb that needs an object always takes VP → V NP; a verb that never has one always takes VP → V; a verb that may have one takes either. The object’s noun comes from the groups named in the table.',
   'The subject of a sentence is always a person or an animal, and only a person or an animal can be followed by ‹who›. A relative clause can contain another, up to three deep. There is no article: no ‹the› or ‹a›.',
 ]
 

@@ -937,12 +937,12 @@ export const LABS = [
     handout: 'language/sounds_words_lab/sounds_words_lab.md',
     report: 'language/sounds_words_lab/sounds_words_lab_report.docx',
     /**
-     * Built 2026-11-15 with no handout; the handout is written after Jon's
-     * walk-through, from docs/M13_AS_BUILT_NOTES.md. The claims below are
-     * what the SCENE makes true, and the handout asserts nothing it cannot
-     * find here.
+     * Built 2026-11-15 with no handout; the handout was written 2026-11-23,
+     * after Jon's walk-through, from docs/M13_AS_BUILT_NOTES.md. The claims
+     * below are what the SCENE makes true, and the handout asserts nothing
+     * it cannot find here.
      */
-    handoutPending: true,
+    handoutPending: false,
 
     retired: [
       { term: /\bcategorical perception\b/gi, why: 'held back until Part 1, Step 3’s reveal; the handout may use it only after naming that reveal (spec §11, item 2)', unless: ['after the reveal', 'reveal'] },
@@ -954,10 +954,10 @@ export const LABS = [
     controls: [
       'Open', 'Sounds', 'Stream', 'Words', 'Predictors', 'Begin', 'Begin Part 1', 'Play a test sound', 'Export my results', 'Load my results', 'Clear my saved results', 'Erase and start over', 'Keep my results', 'Replace my saved results', 'Keep what I have', 'Open anyway', 'Show the instructions again', 'Back to the step',
       'Play', 'Wide bands', 'Narrow bands', 'Next', 'Back', 'Go to Step 2', 'Commit my prediction', 'Commit my labels', 'B', 'D', '3rd sounds like the 1st', '3rd sounds like the 2nd', 'Start block 1', 'Start block 2', 'Start again', 'Train', 'Train again', 'Train 10 networks', 'Train both', 'Train 10 of each', 'Run on the 9 sounds', 'Show voice timing',
-      'Play the minute', 'Commit my answer', 'Play again, with the words marked', 'Play again, with each word’s last syllable lengthened', 'Clear the highlight', 'Add to the tray', 'Check this word', 'Empty the tray', 'Show me the words', 'Show the words and end the search', 'Keep searching', 'Commit my predictions', 'How much of the stream', 'Run the learners', 'PARSER’s test rule', 'Higher weight wins', 'Known word wins, else random', 'Show stress',
+      'Play the minute', 'Commit my answer', 'Play again, with the words marked', 'Play again, with each word’s last syllable lengthened', 'Clear the highlight', 'Add to the tray', 'Check this word', 'Empty the tray', 'Show me the words', 'Show the words and end the search', 'Keep searching', 'Commit my predictions', 'Run the learners', 'PARSER’s test rule', 'Higher weight wins', 'Known word wins, else random', 'Show stress',
       'Hear it again', 'Run the models', 'Back to the fitted value',
       'Show me sentences', 'Count', 'Prediction from counts', 'One point per word', 'Compute', 'Remove the last token', 'Clear the prompt', 'Temperature', 'Generate a sentence', 'Snapshot', 'Change the prompt',
-      'Go on to Step', 'Go back to Step', 'Go to Step', 'Go on to Part', 'Run seed', 'My results',
+      'Go on to Step', 'Go back to Step', 'Go to Step', 'Go on to Part', 'Run seed',
     ],
 
     claims: [
@@ -973,7 +973,7 @@ export const LABS = [
       { says: 'Part 2: PARSER follows Perruchet and Vinter (1998) with every parameter from its page: one time step reproduces the paper’s Table 1 to the last digit; the six words are its strongest units after 21 minutes on most streams; on a wordless stream no word is a unit; its two test rules (the spec’s and the paper’s) are both scored at every run, the spec’s the default', test: 'reproduces Table 1 (p. 252)' },
       { says: 'Part 2: no word or replay before Step 1’s commit, and after it the count of words only, with no word and no replay before Step 2 ends; no learner runs before the three predictions; Steps 2 to 4 open behind the one-line notice while Step 1 is not committed', test: 'Steps 2 to 4 open behind the one-line notice' },
       { says: 'Part 2: the assembled stream has no acoustic cue to a word boundary: durations identical, peak intensity within 0.07 dB and pitch within 0.07 Hz over 21 minutes (training/m13/make_stream.py)', test: null },
-      { says: 'Part 3: 60 learning trials, each word 5 times, never on neighboring trials, 5 objects with the target; 12 test trials with 4; the key measure counts 48 pairs', test: '60 learning trials, each word 5 times' },
+      { says: 'Part 3: 60 learning trials, each word 5 times, never on neighboring trials, 2 objects with the target and the other object the same on at most 2 of a word’s trials (Trueswell et al., 2013); 12 test trials with 4; the key measure counts 48 pairs', test: '60 learning trials, each word 5 times' },
       { says: 'Part 3: each model reproduces hand-computed choices on a fixture; guess and check stores one object per word and reads no count; tallying reads no record of its past picks; the fit lands within 0.06 of a scripted accuracy', test: 'guess and check: a first random pick' },
       { says: 'Part 3: no word’s spelling, score, or model before the test is done; the key measure and the rows wait for the prediction; a sample sequence stands in when Steps 1 and 2 are not done', test: 'no word’s spelling, score, or model before the test is done' },
       { says: 'Part 4: the generator emits only sentences the parser accepts over 10,000 sentences; the parser rejects a fixture of ungrammatical ones; after boys who Mary chases only plural verbs are legal', test: 'every generated sentence is accepted' },

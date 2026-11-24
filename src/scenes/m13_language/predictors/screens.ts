@@ -28,7 +28,7 @@ export const NEXT_LINE: Record<Step, string> = {
   2: 'When you have seen the views you want to see, press “Go on to Step 3” at the end of the panel or in the navigation panel.',
   3: 'When you have seen the two screens, press “Go on to Step 4” at the end of the panel or in the navigation panel.',
   4: 'When you have tried the prompts you want to try and generated the sentences you want to see, press “Go on to Step 5” in the navigation panel.',
-  5: `This is the lab’s last step. When you have seen the snapshots you want to see, the lab is done: every finished experiment’s results are on the ${MAIN_TABS.results} tab at the top of this panel.`,
+  5: `This is the last step of the lab. When you have seen the snapshots you want to see, the lab is done: every finished experiment’s results are on the ${MAIN_TABS.results} tab at the top of this panel.`,
 }
 
 export const SCREENS: Record<Step, StepScreen> = {
@@ -38,7 +38,7 @@ export const SCREENS: Record<Step, StepScreen> = {
     kind: 'exploration',
     willDo: [
       'In this part you will look inside three kinds of program. Each one computes, from the text so far, how likely each word is to come next. Every program in this part learned from the same made-up corpus of sentences, and from nothing else.',
-      'A corpus is a collection of texts. Each text is a set of sentences, and each sentence is made of units called “tokens”. A token is the smallest unit in the corpus. Here the tokens are mostly words; the one other token is the period “.”, which the lab calls the end mark. In this step we show you the corpus: first the rules that made it, then its sentences.',
+      'A corpus is a collection of texts. Each text is a set of sentences, and each sentence is made of units called “tokens”. A token is the smallest unit in the corpus. Here the tokens are mostly words; the one other token is the period “.”, which we call the end mark here. In this step we show you the corpus: first the rules that made it, then its sentences.',
       'Nothing is scored, and nothing is recorded in this step.',
     ],
     minutes: stepParams('predictors', 1).minutes,
@@ -53,7 +53,7 @@ export const SCREENS: Record<Step, StepScreen> = {
     title: STEP_TITLES[2],
     kind: 'exploration',
     willDo: [
-      'In this step you will see how much of a word’s meaning can be learned from the words that occur near it. The reading calls this “distributional semantics” (§13.2.10). You will see it by building a “count model” of the corpus. The model counts how often each token occurs near each other token, and stores the counts in a co-occurrence matrix. Each cell of the matrix is how often the row token came after the column token, within a window a few tokens wide.',
+      'In this step you will see how much of a word’s meaning can be learned from the words that occur near it. In §13.2.10 of the reading, we call this “distributional semantics”. You will see it by building a “count model” of the corpus. The model counts how often each token occurs near each other token, and stores the counts in a co-occurrence matrix. Each cell of the matrix is how often the row token came after the column token, within a window a few tokens wide.',
       'The model moves a window, a few tokens wide, along the corpus, one token at a time. The last token in the window is the target. For each earlier token in the window, the model adds to the count of that token with the target, and adds more the closer the two are. Each token’s list of counts is called its “embedding” vector: one count for each other token before it, and one for each other token after it. An embedding vector is a list of numbers learned from the token’s contexts. Tokens that are used alike have similar embedding vectors.',
       'Before you press “Count”, choose a prediction from the menu above the “Count” button, then press “Commit my prediction”. The question: which word’s embedding vector will be most similar to the embedding vector for ‹cat›? Base your prediction on the rules that made the corpus, not on what you know about real languages or objects.',
       'Then press “Count”. The table of counts fills in as the model runs through the corpus. Every token is a row and a column, and each cell holds the count for its pair. The color behind a number grows with the count, so you can see at a glance where the counts are large and where they are small. The table is wider than the panel: it scrolls sideways inside its own frame, and the column of row tokens stays put.',

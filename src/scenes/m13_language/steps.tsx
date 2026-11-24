@@ -386,7 +386,7 @@ export function NextRow<Step extends number, S extends StepStore<Step>>({ ctx, t
           ? `When you are ready to move on, press “Go on to Step ${next}” here or in the navigation panel.`
           : nextTab
             ? `When you are ready to move on, press “Go on to Part ${partNumber(nextTab)}” here or in the navigation panel, or choose the ${tabName(nextTab)} tab at the top left.`
-            : `This is the lab’s last step. Every finished experiment’s results are on the ${MAIN_TABS.results} tab at the top of this panel.`}
+            : `This is the last step of the lab. Every finished experiment’s results are on the ${MAIN_TABS.results} tab at the top of this panel.`}
       </Note>
       <div>
         {next !== null ? (

@@ -324,9 +324,9 @@ export const scenes: SceneManifest[] = [
     mode: 'both',
     status: 'building',
     Component: LanguageScene,
-    // The handout is written after the build and Jon's walk-through, from the
-    // as-built notes, so the fetch fails until it lands. The folder name is
-    // provisional (spec §15, question 1).
+    // The handout was written 2026-11-23, after the build and Jon's
+    // walk-through, from the as-built notes; the notYet line shows only if the
+    // fetch fails.
     lab: {
       rawUrl: `${INTRO_RAW}/language/sounds_words_lab/sounds_words_lab.md`,
       sourceUrl: `${INTRO_BLOB}/language/sounds_words_lab/sounds_words_lab.md`,
