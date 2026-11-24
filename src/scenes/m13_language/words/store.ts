@@ -19,11 +19,18 @@ import { loadObjects, loadWordFiles, wordClip, type ObjectFile, type WordFile } 
  * layer gives the unit chooses the set); Step 3 is an exploration on the
  * student's own trials, behind a one-line notice while the unit is not
  * done. The word plays once when a trial's objects appear, on the audio
- * clock; a choice shows for about 200 ms before the next trial.
+ * clock; a choice shows for about 200 ms, then the objects go and the next
+ * trial's appear after a gap, with its word; the first trial's objects and
+ * word come a moment after Begin (Jon, 2026-11-23: with no gap, the next
+ * word sounded caused by the click, and the first came too abruptly).
  */
 
 export const WORDS_UNIT: UnitId = 'p3-words'
 export const CHOICE_SHOW_MS = 200
+/** The gap between a choice's display ending and the next trial's objects and word. */
+export const GAP_MS = 800
+/** The moment between Begin (or Resume, or a restart) and the first objects and word. */
+export const BEGIN_DELAY_MS = 1000
 export const PREDICTION = { key: 'p3-s3-after-wrong', question: 'Suppose you clicked the wrong object for a word. On that word’s next trial, will your choice be correct about as often as chance, which is 1 in 5 (20%), or more often than chance?', choices: ['about as often as chance', 'more often than chance'] } as const
 
 export interface WordsResult {
@@ -57,6 +64,8 @@ export class WordsStore extends StepStore<Step> {
   seconds: number[] = []
   /** The object just chosen, shown briefly before the next trial. */
   chosenNow: number | null = null
+  /** True in the gap before a trial's objects appear: nothing to click, nothing to hear. */
+  between = false
   private trialStart = 0
   private timer: ReturnType<typeof setTimeout> | null = null
   playing: { start: number; end: number } | null = null
@@ -78,6 +87,12 @@ export class WordsStore extends StepStore<Step> {
 
   isDone(step: Step): boolean {
     return step !== 3 && this.progress.isComplete(WORDS_UNIT)
+  }
+
+  /** The unit under way counts as running on the step its phase belongs to, so that the test's objects show on Step 2 the moment the learning trials end (before 2026-11-23, Step 2 showed its instruction screen then, with the test's first word playing and nothing to click). */
+  protected underWay(step: Step): boolean {
+    if (step === 3 || this.progress.status(WORDS_UNIT) !== 'in progress') return false
+    return step === 1 ? this.phase === 'learning' : this.phase === 'test'
   }
 
   notice(step: Step): { line: string; goTo: Step } | null {
@@ -107,10 +122,23 @@ export class WordsStore extends StepStore<Step> {
     if (this.chosenNow !== null) this.advance(false)
   }
 
-  /** The trial that was waiting plays its word again, and its clock starts again. */
+  /** The trial that was waiting shows its objects and plays its word again after the beginning moment, and its clock starts then. */
   protected onResume(): void {
-    this.trialStart = performance.now()
-    this.playTrialWord()
+    this.startTrial()
+  }
+
+  /** The gap, then the trial's objects with its word, the clock starting as they appear. */
+  private startTrial(delayMs = BEGIN_DELAY_MS): void {
+    if (this.timer) clearTimeout(this.timer)
+    this.between = true
+    this.changed()
+    this.timer = setTimeout(() => {
+      this.timer = null
+      this.between = false
+      this.trialStart = performance.now()
+      this.changed()
+      this.playTrialWord()
+    }, delayMs)
   }
 
   /** A switch away from the test, or a pause past its limit: the unit starts again from its first trial on the reserve set (spec §4.1, §7.1). */
@@ -137,11 +165,8 @@ export class WordsStore extends StepStore<Step> {
     this.chosenNow = null
     this.step = 1
     this.progress.begin(WORDS_UNIT)
-    this.trialStart = performance.now()
-    void this.ensureLoaded().then(() => {
-      this.trialStart = performance.now()
-      this.playTrialWord()
-    })
+    this.between = true
+    void this.ensureLoaded().then(() => this.startTrial())
   }
 
   protected onBegin(step: Step): void {
@@ -151,8 +176,8 @@ export class WordsStore extends StepStore<Step> {
       if (this.progress.status(WORDS_UNIT) !== 'in progress') this.progress.begin(WORDS_UNIT)
       this.phase = 'learning'
       this.i = 0
-      this.trialStart = performance.now()
-      void this.ensureLoaded().then(() => this.playTrialWord())
+      this.between = true
+      void this.ensureLoaded().then(() => this.startTrial())
     }
   }
 
@@ -221,12 +246,12 @@ export class WordsStore extends StepStore<Step> {
   }
   hearAgain(): void {
     const t = this.currentTrial
-    if (t && this.chosenNow === null) this.playWord(t.word)
+    if (t && this.chosenNow === null && !this.between) this.playWord(t.word)
   }
 
   choose(object: number): void {
     const t = this.currentTrial
-    if (!t || this.chosenNow !== null || !t.objects.includes(object)) return
+    if (!t || this.chosenNow !== null || this.between || !t.objects.includes(object)) return
     this.chosenNow = object
     this.seconds.push((performance.now() - this.trialStart) / 1000)
     if (this.phase === 'learning') this.choices.push(object)
@@ -250,9 +275,12 @@ export class WordsStore extends StepStore<Step> {
       this.changed()
       return
     }
-    this.trialStart = performance.now()
-    this.changed()
-    if (play) this.playTrialWord()
+    if (play) this.startTrial(GAP_MS)
+    else {
+      // Paused in the gap: the trial waits, unshown, for the resume.
+      this.between = true
+      this.changed()
+    }
   }
 
   result(): WordsResult | null {

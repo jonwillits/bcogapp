@@ -47,7 +47,7 @@ export const SCREENS: Record<Step, StepScreen> = {
     sitting: 'one sitting',
     sittingLine: MINUTE_SITTING_LINE,
     ready: READY_SOUND_LINE,
-    keys: ['Press “Play the minute” to play 60 seconds of the language once.', 'You choose your answer from a list from 1 to 20, and you can type words you think you heard in an optional box.', 'Press “Commit my answer” to commit them.'],
+    keys: ['Press “Play the minute” to play 60 seconds of the language once.', 'You choose your answer from a list from 1 to 20, and you can type words you think you heard in the box under it.', 'Press “Commit my answer” to commit them.'],
     content: [HEADPHONES_LINE, MADE_OFFLINE_LINE, MADE_UP_LANGUAGE_LINE],
     next: NEXT_LINE[1],
   },

@@ -11,7 +11,7 @@ export const SIX_WORDS_LINE = 'The language is made up. It has six words and no 
 
 /** The replays' paragraphs, at the end of Step 2 once every word is found or shown. */
 export const REPLAYS_TEXT = [
-  'The language has six words, each of three syllables: ‹babupu›, ‹bupada›, ‹dutaba›, ‹patubi›, ‹pidabu›, ‹tutibu›. The minute you heard in Step 1 was 72 words in a row, in a random order in which no word came twice in a row. The length of the pause between syllables was the same, whether the transition was within or between words. So pause length could not be used to identify the words.',
+  'The language has six words, each of three syllables: ‹babupu›, ‹bupada›, ‹dutaba›, ‹patubi›, ‹pidabu›, ‹tutibu›. The minute you heard in Step 1 was 72 words in a row, in a random order in which no word came twice in a row, with no pause between them.',
   '“Play again, with the words marked” plays that minute again, now with its spectrogram, the picture of the sound from Part 1. The spectrogram scrolls under a cursor that marks the moment being played. Above it, a strip of syllables fills in as the sound plays, and each word lights up in its own color as it is heard. Thin lines mark the word boundaries on the spectrogram. The sound itself has nothing at those lines: every syllable has the same length, the same loudness, and the same pitch wherever it falls.',
   '“Play again, with each word’s last syllable lengthened” plays the same 72 words with the vowel of every word’s last syllable lengthened by 100 milliseconds.',
 ]

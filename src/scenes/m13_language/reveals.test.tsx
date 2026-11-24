@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeAll } from 'vitest'
+import { describe, it, expect, beforeAll, vi } from 'vitest'
 import { sounds, SoundsStore } from './PartSounds'
 import { stream, StreamStore } from './PartStream'
 import { words, WordsStore } from './PartWords'
+import { BEGIN_DELAY_MS, CHOICE_SHOW_MS, GAP_MS } from './words/store'
 import { predictors, PredictorsStore } from './PartPredictors'
 import { fresh, text, labelingFixture, abxFixture } from './reveal.test'
 import { loadShippedTokens, loadContinuumPatches } from '../../sim/language/sounds/tokens.node'
@@ -292,33 +293,65 @@ describe('Part 2: commit, then reveal', () => {
 })
 
 describe('Part 3: commit, then reveal', () => {
-  it('no word’s spelling, score, or model before the test is done; the reveal has the curve, the score, and the table', () => {
+  it('no word’s spelling, score, or model before the test is done; the reveal has the curve, the score, and the table', async () => {
     const w = fresh(words as Mod, (s, p) => new WordsStore(s, p))
     // The files are not fetched in Node: the store is given the set's words and objects directly.
     w.store.loadedOk = true
-    w.store.words = ['dax', 'blicket', 'toma', 'fep', 'gorp', 'kibby', 'mipen', 'nellum', 'pimwit', 'sprock', 'wug', 'zorch'].map((word) => ({ word, set: 0, file: `${word}.wav`, durationS: 0.5 }))
-    w.store.objects = Array.from({ length: 12 }, (_, i) => ({ id: `object${String(i + 1).padStart(2, '0')}`, set: 0, fill: '#fff', pattern: 'dots' }))
-    w.store.open(1)
-    w.store.begin()
-    let m = w.all()
-    expect(m).toMatch(/data-stage="words-learning"/)
-    expect((m.match(/data-object=/g) ?? []).length).toBe(5)
-    w.store.choose(w.store.currentTrial!.objects[0])
-    expect(w.store.choices.length).toBe(1)
-    expect(text(m)).not.toMatch(/\b(dax|blicket|toma|fep|gorp|kibby|mipen|nellum|pimwit|sprock|wug|zorch)\b|Test score|guess|tally/i)
-    expect(m).not.toMatch(/data-reveal/)
+    w.store.words = ['dax', 'blicket', 'toma', 'lorp', 'gorp', 'kibby', 'mipen', 'nellum', 'pimwit', 'sprock', 'wug', 'zorch'].map((word) => ({ word, set: 0, file: `${word}.wav`, durationS: 0.5 }))
+    w.store.objects = Array.from({ length: 12 }, (_, i) => ({ id: `object${String(i + 1).padStart(2, '0')}`, set: 0, fill: '#fff', shape: 'oval on a pedestal', reviewNo: 1 }))
+    let m = ''
+    vi.useFakeTimers()
+    try {
+      w.store.open(1)
+      w.store.begin()
+      // The moment after Begin: the stage, with no objects to click yet (Jon, 2026-11-23).
+      m = w.all()
+      expect(m).toMatch(/data-stage="words-learning"/)
+      expect(m).toMatch(/data-between="true"/)
+      expect((m.match(/data-object=/g) ?? []).length).toBe(0)
+      w.store.choose(w.store.currentTrial!.objects[0])
+      expect(w.store.choices.length).toBe(0)
+      await vi.advanceTimersByTimeAsync(BEGIN_DELAY_MS)
+      m = w.all()
+      expect(m).not.toMatch(/data-between/)
+      expect((m.match(/data-object=/g) ?? []).length).toBe(5)
+      w.store.choose(w.store.currentTrial!.objects[0])
+      expect(w.store.choices.length).toBe(1)
+      expect(text(m)).not.toMatch(/\b(dax|blicket|toma|lorp|gorp|kibby|mipen|nellum|pimwit|sprock|wug|zorch)\b|Test score|guess|tally/i)
+      expect(m).not.toMatch(/data-reveal/)
+      // The choice shows, then the gap with no objects, then the next trial's objects.
+      await vi.advanceTimersByTimeAsync(CHOICE_SHOW_MS)
+      expect(w.all()).toMatch(/data-between="true"/)
+      await vi.advanceTimersByTimeAsync(GAP_MS)
+      expect((w.all().match(/data-object=/g) ?? []).length).toBe(5)
+      // The sixtieth choice turns the unit to the test, and Step 2's stage shows the test's four objects (before 2026-11-23, its instruction screen showed, with nothing to click).
+      for (let k = 1; k < 60; k++) {
+        w.store.choose(w.store.currentTrial!.objects[0])
+        await vi.advanceTimersByTimeAsync(CHOICE_SHOW_MS + GAP_MS)
+      }
+      expect(w.store.phase).toBe('test')
+      expect(w.store.step).toBe(2)
+      expect(w.store.stateOf(2)).toBe('running')
+      m = w.all()
+      expect(m).toMatch(/data-stage="words-test"/)
+      expect((m.match(/data-object=/g) ?? []).length).toBe(4)
+      expect(text(m)).not.toMatch(/Your choice/)
+    } finally {
+      vi.useRealTimers()
+    }
     const d = makeDesign(7, 0)
     const choices = runModel('tally', 3, d, 5)
     const testChoices = d.test.map((t) => t.objects[0])
     w.progress.complete('p3-words', { materials: 0, choices, testChoices, secondsPerTrial: [], restarts: 0 })
-    const wordsA = ['dax', 'blicket', 'toma', 'fep', 'gorp', 'kibby', 'mipen', 'nellum', 'pimwit', 'sprock', 'wug', 'zorch'].map((word) => ({ word, set: 0, file: `${word}.wav`, durationS: 0.5 }))
-    const objects = Array.from({ length: 12 }, (_, i) => ({ id: `object${String(i + 1).padStart(2, '0')}`, set: 0, fill: '#fff', pattern: 'dots' }))
+    const wordsA = ['dax', 'blicket', 'toma', 'lorp', 'gorp', 'kibby', 'mipen', 'nellum', 'pimwit', 'sprock', 'wug', 'zorch'].map((word) => ({ word, set: 0, file: `${word}.wav`, durationS: 0.5 }))
+    const objects = Array.from({ length: 12 }, (_, i) => ({ id: `object${String(i + 1).padStart(2, '0')}`, set: 0, fill: '#fff', shape: 'oval on a pedestal', reviewNo: 1 }))
     m = renderToStaticMarkup(<WordsReveal seed={7} result={w.progress.result('p3-words') as never} words={wordsA} objects={objects} />)
     expect(m).toMatch(/data-reveal="words"/)
     expect(m).toMatch(/data-plot="by-occurrence"/)
     expect(text(m)).toMatch(/Test score: \d+ of 12/)
     expect((m.match(/data-word-row=/g) ?? []).length).toBe(12)
     expect(w.store.stateOf(1)).toBe('done')
+    w.store.open(1)
     expect(text(w.all())).toMatch(/press “Go on to Step 2”/)
     w.store.open(2)
     expect(text(w.all())).toMatch(/press “Go on to Step 3”/)

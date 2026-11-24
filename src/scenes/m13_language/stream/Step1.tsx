@@ -63,7 +63,7 @@ export function Step1Stage({ s, onNext }: { s: StreamStore; onNext?: () => void 
             </select>
           </label>
           <label style={{ fontSize: 12.5, display: 'flex', flexDirection: 'column', gap: 4 }}>
-            Any words you think you heard, typed as they sound (optional):
+            Any words you think you heard, typed as they sound:
             <textarea value={s.typedDraft} onChange={(e) => s.setTyped(e.target.value)} rows={2} style={{ fontFamily: 'var(--font-mono)', fontSize: 12, background: 'var(--surface-2)', color: 'var(--text)', border: '1px solid var(--border)', borderRadius: 6, padding: 6 }} />
           </label>
           <div>

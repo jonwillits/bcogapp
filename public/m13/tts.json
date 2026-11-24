@@ -759,12 +759,12 @@
    "durationS": 0.5549
   },
   {
-   "word": "fep",
+   "word": "pelk",
    "set": 1,
-   "phonemes": "f\u025bp",
-   "file": "fep.wav",
+   "phonemes": "p\u025blk",
+   "file": "pelk.wav",
    "voice": 1,
-   "durationS": 0.4338
+   "durationS": 0.4836
   },
   {
    "word": "flimmer",
@@ -783,12 +783,12 @@
    "durationS": 0.5467
   },
   {
-   "word": "jeb",
+   "word": "jarbit",
    "set": 1,
-   "phonemes": "\u02a4\u025bb",
-   "file": "jeb.wav",
+   "phonemes": "\u02a4\u02c8\u0251\u0279b\u0259t",
+   "file": "jarbit.wav",
    "voice": 1,
-   "durationS": 0.4486
+   "durationS": 0.5779
   },
   {
    "word": "rasket",

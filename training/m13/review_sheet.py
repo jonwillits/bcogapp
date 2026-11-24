@@ -109,7 +109,7 @@ def main(repo, rev):
     parts.append("<h2>8. Part 3: the 24 objects (set A: the first 12; set B: the reserve)</h2>")
     parts.append("<p><b>Look for:</b> no two alike at a glance, none that looks like a face, an animal, or a known object, each legible on the dark background. Say any you would replace.</p><div class='objects'>")
     for o in objects:
-        parts.append(f"<figure><img src='objects/{o['id']}.svg' width='100' height='100'><figcaption>{o['id']} ({'A' if o['set'] == 0 else 'B'}; {o['pattern']})</figcaption></figure>")
+        parts.append(f"<figure><img src='objects/{o['id']}.svg' width='100' height='100'><figcaption>{o['id']} ({'A' if o['set'] == 0 else 'B'}; {o['shape']})</figcaption></figure>")
     parts.append("</div>")
     # 9. Part 4 vocabulary and sentences
     sheet = os.path.join(os.path.dirname(rev.rstrip("/")), "out", "grammar_sheet.txt")

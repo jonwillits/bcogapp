@@ -3,144 +3,168 @@
   "id": "object01",
   "set": 0,
   "fill": "#e4572e",
-  "pattern": "stripes"
+  "shape": "ring around a square",
+  "reviewNo": 63
  },
  {
   "id": "object02",
   "set": 0,
   "fill": "#f3a712",
-  "pattern": "crosshatch"
+  "shape": "oval on a pedestal",
+  "reviewNo": 1
  },
  {
   "id": "object03",
   "set": 0,
   "fill": "#a8c256",
-  "pattern": "waves"
+  "shape": "pinwheel, seven blades",
+  "reviewNo": 5
  },
  {
   "id": "object04",
   "set": 0,
   "fill": "#3d9970",
-  "pattern": "checks"
+  "shape": "four-point star, wide",
+  "reviewNo": 11
  },
  {
   "id": "object05",
   "set": 0,
   "fill": "#2bb3c0",
-  "pattern": "rings"
+  "shape": "block with two rings",
+  "reviewNo": 9
  },
  {
   "id": "object06",
   "set": 0,
   "fill": "#3f7fd9",
-  "pattern": "dots"
+  "shape": "hourglass",
+  "reviewNo": 17
  },
  {
   "id": "object07",
   "set": 0,
   "fill": "#7b5ea7",
-  "pattern": "stripes"
+  "shape": "ring with a bar",
+  "reviewNo": 21
  },
  {
   "id": "object08",
   "set": 0,
   "fill": "#d64f9a",
-  "pattern": "crosshatch"
+  "shape": "two crossed ovals",
+  "reviewNo": 24
  },
  {
   "id": "object09",
   "set": 0,
   "fill": "#c0a080",
-  "pattern": "waves"
+  "shape": "arch on a slab",
+  "reviewNo": 27
  },
  {
   "id": "object10",
   "set": 0,
   "fill": "#8fa3b5",
-  "pattern": "checks"
+  "shape": "stepped block",
+  "reviewNo": 30
  },
  {
   "id": "object11",
   "set": 0,
   "fill": "#f0e68c",
-  "pattern": "rings"
+  "shape": "square with corner discs",
+  "reviewNo": 35
  },
  {
   "id": "object12",
   "set": 0,
   "fill": "#ff8c69",
-  "pattern": "dots"
+  "shape": "comb",
+  "reviewNo": 39
  },
  {
   "id": "object13",
   "set": 1,
   "fill": "#e4572e",
-  "pattern": "dots"
+  "shape": "disc with four spokes",
+  "reviewNo": 36
  },
  {
   "id": "object14",
   "set": 1,
   "fill": "#f3a712",
-  "pattern": "stripes"
+  "shape": "anvil",
+  "reviewNo": 44
  },
  {
   "id": "object15",
   "set": 1,
   "fill": "#a8c256",
-  "pattern": "crosshatch"
+  "shape": "wave bar",
+  "reviewNo": 50
  },
  {
   "id": "object16",
   "set": 1,
   "fill": "#3d9970",
-  "pattern": "waves"
+  "shape": "rounded block with three holes",
+  "reviewNo": 56
  },
  {
   "id": "object17",
   "set": 1,
   "fill": "#2bb3c0",
-  "pattern": "checks"
+  "shape": "lobed blob",
+  "reviewNo": 66
  },
  {
   "id": "object18",
   "set": 1,
   "fill": "#3f7fd9",
-  "pattern": "rings"
+  "shape": "fan",
+  "reviewNo": 57
  },
  {
   "id": "object19",
   "set": 1,
   "fill": "#7b5ea7",
-  "pattern": "dots"
+  "shape": "horseshoe",
+  "reviewNo": 52
  },
  {
   "id": "object20",
   "set": 1,
   "fill": "#d64f9a",
-  "pattern": "stripes"
+  "shape": "teardrop",
+  "reviewNo": 18
  },
  {
   "id": "object21",
   "set": 1,
   "fill": "#c0a080",
-  "pattern": "crosshatch"
+  "shape": "gear",
+  "reviewNo": 19
  },
  {
   "id": "object22",
   "set": 1,
   "fill": "#8fa3b5",
-  "pattern": "waves"
+  "shape": "oval with three bumps",
+  "reviewNo": 32
  },
  {
   "id": "object23",
   "set": 1,
   "fill": "#f0e68c",
-  "pattern": "checks"
+  "shape": "two linked rings",
+  "reviewNo": 41
  },
  {
   "id": "object24",
   "set": 1,
   "fill": "#ff8c69",
-  "pattern": "rings"
+  "shape": "disc with four lobes",
+  "reviewNo": 6
  }
 ]

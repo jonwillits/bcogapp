@@ -30,9 +30,10 @@ CONSONANTS = {"b": "b", "d": "d", "g": "ɡ"}
 VOWELS = {"ee": "i", "ay": "A", "ah": "ɑ", "oh": "O", "oo": "u"}
 SHIFT_SEMITONES = 3
 VOT_PAIR = {"tot": "tɑt", "dot": "dɑt"}
-# Spec §7.1: made-up words that follow English sound patterns, every word with a different first sound, in two sets with nothing shared.
+# Spec §7.1: made-up words that follow English sound patterns, every word in a set with a different first sound, in two sets with nothing shared.
+# Set B, 2026-11-23: pelk for fep and jarbit for jeb (Jon; see OVERRIDES).
 WORDS_A = {"dax": "dæks", "blicket": "blˈɪkət", "toma": "tˈOmə", "lorp": "lɔɹp", "gorp": "ɡɔɹp", "kibby": "kˈɪbi", "mipen": "mˈIpən", "nellum": "nˈɛləm", "pimwit": "pˈɪmwɪt", "sprock": "spɹɑk", "wug": "wʌɡ", "zorch": "zɔɹʧ"}
-WORDS_B = {"crannel": "kɹˈænəl", "fep": "fɛp", "flimmer": "flˈɪmɚ", "hinnet": "hˈɪnət", "jeb": "ʤɛb", "rasket": "ɹˈæskət", "vimble": "vˈɪmbəl", "stibble": "stˈɪbəl", "greeble": "ɡɹˈibəl", "yoop": "jup", "chelk": "ʧɛlk", "thade": "θAd"}
+WORDS_B = {"crannel": "kɹˈænəl", "pelk": "pɛlk", "flimmer": "flˈɪmɚ", "hinnet": "hˈɪnət", "jarbit": "ʤˈɑɹbət", "rasket": "ɹˈæskət", "vimble": "vˈɪmbəl", "stibble": "stˈɪbəl", "greeble": "ɡɹˈibəl", "yoop": "jup", "chelk": "ʧɛlk", "thade": "θAd"}
 
 # OVERRIDES, 2026-11-17: Jon's picks by ear on the walk. On 2026-11-16 he flagged boo and doo (an open vowel at the end),
 # three training tokens (dah in voices 9 and 11 heard as dou; day in voice 10 heard as day-dah), and zorch, sprock and fep
@@ -61,6 +62,11 @@ OVERRIDES = {
         # 2026-11-19: lorp replaces fep in set A (Jon's pick from the nine set-B words that keep every first sound
         # distinct); fep moves to set B in lorp's place. The shipped lorp is the set-B file Jon heard (swap_lorp.wav).
         "lorp": {"phonemes": "lɔɹp", "speed": 1.0, "take": "swap_lorp.wav"},
+        # 2026-11-23, Jon's picks on the words review page (review/words/): jarbit replaces jeb in set B (jeb is a common
+        # proper name) and pelk replaces fep there (fep and flimmer were two f-words in one set). The takes are the
+        # candidate files he heard, copied into CANDIDATES_DIR.
+        "jarbit": {"phonemes": "ʤˈɑɹbət", "speed": 1.0, "take": "words_jarbit.wav"},
+        "pelk": {"phonemes": "pɛlk", "speed": 1.0, "take": "words_pelk.wav"},
     },
     # (voice number, consonant, vowel) as the lab names them.
     "tokens": {
@@ -174,7 +180,7 @@ def words(out):
     rows = []
     for set_i, words in enumerate([WORDS_A, WORDS_B]):
         for w, ph in words.items():
-            y, ph = synth(VOICE_1, ph, OVERRIDES["words"].get(w) if set_i == 0 else None)
+            y, ph = synth(VOICE_1, ph, OVERRIDES["words"].get(w))
             write(os.path.join(out, f"{w}.wav"), y)
             rows.append({"word": w, "set": set_i, "phonemes": ph, "file": f"{w}.wav", "voice": 1, "durationS": round(len(y) / SR, 4)})
     print("words:", [(r["word"], r["durationS"]) for r in rows])
