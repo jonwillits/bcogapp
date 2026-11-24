@@ -14,9 +14,9 @@ import { PREDICTION, type WordsStore } from './store'
  * Step 3 (Jon): what the people did first, with their curve and the
  * student's over it; the two explanations and what counts as success; the
  * prediction, committed after the numbers (Jon's call); a six-trial
- * demonstration stepped through one trial at a time, each model's memory
+ * demonstration shown one trial at a time, each model's memory
  * drawn beside the objects; then, after the commit, the student's key
- * measure, Run the models, the three rows with the sliders, questions to
+ * measure, Run the models, the rows with the adults' row and the sliders, questions to
  * answer from the rows, and the three references. The left column is
  * navigation only (Jon, 2026-11-16).
  */
@@ -30,21 +30,21 @@ const ADULTS_LABEL = 'the adults of the original experiment'
 export const HOW_OFTEN_LINE = 'Before the lab was posted, we simulated students with each model at a range of accuracies, to measure how often 48 pairs separate the two models. For simulated students with an overall accuracy near 60%, the share correct after a wrong choice fell inside both models’ ranges most of the time, so the two models could not be told apart. For simulated students at about 85% accuracy and above, that share fell inside the range of the model that produced it 16 to 19 times in 20, and inside the other model’s range 5 times in 20 or fewer. Between, at about 70 to 75% accuracy, the two models are told apart some of the time.'
 
 export const PEOPLE_TEXT = [
-  'In the original experiment (Trueswell, Medina, Hafri, and Gleitman, 2013), adults did what you did in Steps 1 and 2: 12 made-up words, each heard 5 times, two objects on the screen each time, one click, and no word about right or wrong. Their objects were photographs of familiar things, a different ball or bear on each occurrence. On the first occurrence of a word they were at chance, 50%. By the fifth they were right 90% of the time.',
-  'The authors then sorted occurrences 2 to 5 by what the person had clicked for that word the time before. After a right click, people were right 78% of the time at occurrence 2, rising to 93% at occurrence 5. After a wrong click, they were at chance, about 50%, at every occurrence. The object the word names had been on the screen the time before, with only one other object beside it, and after a wrong click people showed no sign of remembering it.',
-  'An earlier study by the same group (Medina, Snedeker, Trueswell, and Gleitman, 2011) found the same pattern with muted videos of parents talking to their children. People kept a guess when the next scene fit it and dropped the guess when it did not, and after a wrong guess they did no better than people who saw the scene with no earlier scene at all.',
+  'In the original experiment (Trueswell, Medina, Hafri, and Gleitman, 2013), adults did what you did in Steps 1 and 2. They heard 12 made-up words, each 5 times, with two objects on the screen each time, and clicked one, and no one said whether a click was right. Their objects were photographs of familiar things, a different ball or bear on each occurrence. On the first occurrence of a word they were at chance, 50%. By the fifth they were right 90% of the time.',
+  'The authors then sorted occurrences 2 to 5 by what the person had clicked for that word the time before. After a right click, people were right 78% of the time at occurrence 2, rising to 93% at occurrence 5. After a wrong click, they were at chance, about 50%, at every occurrence. The object the word names had been on the screen the time before, with only one other object beside it. After a wrong click, people showed no sign of remembering it.',
+  'Medina, Snedeker, Trueswell, and Gleitman (2011) had found the same pattern earlier, with muted videos of parents talking to their children. People kept a guess when the next scene fit it, and dropped the guess when it did not. After a wrong guess, they did no better than people who saw the scene with no earlier scene at all.',
 ]
 
 export const EXPLANATIONS_TEXT = [
   'The two models below are two explanations of what a person stores from a trial. Both are names of procedures, not descriptions of a person. Both run on the same trials: the same words and objects, in the same order and the same screen positions.',
   '“Guess and check” stores one object per word and nothing else. On a word’s first occurrence, it picks one of the two objects on the screen at random. On each later occurrence, it reads its stored pick for that word with probability α. If it reads the pick and that object is on the screen, it picks that object again. Otherwise it picks one of the two at random and stores that pick. It reads no count.',
   '“Tallying” stores a count for every word with every object. On every trial, it adds one to the count of the word with each of the two objects on the screen. Then it picks between the two, each object with a probability proportional to its count with the word raised to the power β. At β = 0 every object is equally likely; the larger β, the more the higher count is favored. It reads no record of its own past picks.',
-  'A model succeeds as an explanation of the people if it reaches their accuracy and shows their pattern: well above chance after a right click, and at chance after a wrong one. Tallying predicts above chance after a wrong click too, since it keeps a count for the object that was on the screen. Guess and check predicts chance, since it keeps nothing but the pick it has just dropped. That difference is the test.',
+  'A model succeeds as an explanation of the people if it reaches their accuracy and shows their pattern: well above chance after a right click, and at chance after a wrong one. If tallying is the explanation, people would be above chance after a wrong click too, since it keeps a count for the object that was on the screen. If guess and check is the explanation, they would be at chance, since it has dropped its pick and keeps nothing else. That difference is the test.',
 ]
 
 export const DEMO_TEXT = [
-  'These six trials are made for clarity, not drawn from yours: two words and three objects. ‹Word 1› names object A and ‹word 2› names object C. Press “Next trial” to step through them. Where a model’s rule says at random, the pick is scripted here, so that every step shows the rule at work. Each model’s memory is drawn under its pick: the one object guess and check stores for each word, and tallying’s count for each word with each object.',
-  'On trial 3, guess and check had stored object B for ‹word 1›. B was gone, so it picked at random. Tallying had a count of 1 for A with ‹word 1›, left from trial 1, and picked A. After a wrong pick, only tallying has something stored to recover from.',
+  'These six trials are made for clarity, not drawn from yours: two words and three objects. ‹Word 1› names object A and ‹word 2› names object C. Press “Next trial” to see them one at a time. Where a model’s rule says at random, we chose the pick in advance, so that every trial shows the rule at work. Under each model’s pick you see its memory: the one object guess and check stores for each word, and tallying’s count for each word with each object.',
+  'On trial 3, guess and check had stored object B for ‹word 1›. B was gone, so it picked at random. Tallying had a count of 1 for A with ‹word 1›, left from trial 1, and picked A. After a wrong pick, only tallying still holds something about the right object.',
 ]
 
 export const INTERPRET_QUESTIONS = [
@@ -77,7 +77,7 @@ function PredictionBox({ s }: { s: WordsStore }) {
   )
 }
 
-/** Run the models, in the section of the three rows. */
+/** Run the models, in the section of the rows. */
 function RunButton({ s }: { s: WordsStore }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} data-step3-controls>
@@ -290,7 +290,7 @@ export function Step3Stage({ s }: { s: WordsStore }) {
         ))}
       </Section>
       <PredictionBox s={s} />
-      <Section n={next()} title="Six trials, step by step">
+      <Section n={next()} title="Six trials, one at a time">
         <Para>{DEMO_TEXT[0]}</Para>
         <Demo s={s} />
         <Para>{DEMO_TEXT[1]}</Para>
@@ -308,7 +308,7 @@ export function Step3Stage({ s }: { s: WordsStore }) {
             <Para>Each model’s one setting, α or β, is chosen to match your overall accuracy over occurrences 2 to 5. We run the model 50 times on your trials at each of 41 values of the setting, and keep the value whose mean accuracy is nearest yours. Then we compare the models on the key measure, which neither was fitted to. Each model runs 200 times at its fitted setting. Each cell of the table shows the mean over the 200 runs and the range that holds the middle 90% of them.</Para>
             <Content>{FITTED_TO_YOUR_ACCURACY_LINE}</Content>
           </Section>
-          <Section n={next()} title="The three rows">
+          <Section n={next()} title="You, the two models, and the adults">
             <RunButton s={s} />
             {gc && ta && (
               <>
