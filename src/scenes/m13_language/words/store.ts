@@ -10,6 +10,7 @@ import { StepStore } from '../steps'
 import { loadAll, type LoadProgress } from '../loading'
 import type { UnderWay } from '../params'
 import { NOTICE_LINE, type Step } from './screens'
+import { DEMO_TRIALS } from './demo'
 import { loadObjects, loadWordFiles, wordClip, type ObjectFile, type WordFile } from './assets'
 
 /**
@@ -78,6 +79,8 @@ export class WordsStore extends StepStore<Step> {
   alpha: number | null = null
   beta: number | null = null
   computing = false
+  /** The six-trial demonstration's current trial, 0 to 5 (`demo.ts`). */
+  demoStep = 0
 
   constructor(seed: number, progress: ProgressStore) {
     super(seed, progress, [1, 2, 3], 'words')
@@ -362,6 +365,15 @@ export class WordsStore extends StepStore<Step> {
   runModels(): void {
     if (!this.predicted()) return
     void this.prepareModels()
+  }
+
+  demoNext(): void {
+    if (this.demoStep < DEMO_TRIALS.length - 1) this.demoStep++
+    this.changed()
+  }
+  demoBack(): void {
+    if (this.demoStep > 0) this.demoStep--
+    this.changed()
   }
 
   setAlpha(v: number): void {

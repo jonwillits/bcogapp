@@ -36,7 +36,7 @@ export function Step12Stage({ s }: { s: WordsStore }) {
         Click the object the word names.
       </div>
       <FixedLines lines={[s.trialLabel]} testId="trial-label" />
-      <div style={{ display: 'flex', gap: 14, justifyContent: 'center', padding: '10px 0', minHeight: 130 }} data-objects data-between={s.between || undefined}>
+      <div style={{ display: 'flex', gap: 14, justifyContent: 'flex-start', padding: '10px 0', minHeight: 130 }} data-objects data-between={s.between || undefined}>
         {!s.between && t.objects.map((o) => (
           <button key={o} type="button" onClick={() => s.choose(o)} disabled={s.chosenNow !== null} aria-label={`object ${t.objects.indexOf(o) + 1}`} data-object={s.objects[o]?.id} style={{ width: 110, height: 110, padding: 4, borderRadius: 12, border: `3px solid ${s.chosenNow === o ? 'var(--accent)' : 'var(--border)'}`, background: 'var(--surface-2)', cursor: s.chosenNow === null ? 'pointer' : 'default' }}>
             <img src={objectUrl(s.objects[o].id)} alt="" width={96} height={96} draggable={false} />

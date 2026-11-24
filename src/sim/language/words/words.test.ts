@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { makeRng } from '../../random'
+import { demoConsistent, DEMO_TRIALS } from '../../../scenes/m13_language/words/demo'
 import { makeDesign, LEARNING_TRIALS, MAX_SAME_OTHER, OBJECTS_ON_SCREEN, TEST_OBJECTS, WORDS_PER_SET, isCorrect } from './design'
 import { keyMeasure, share } from './keyMeasure'
 import { makeGuessCheck, guessCheckChoose } from './models/guessCheck'
@@ -123,5 +124,10 @@ describe('the two models on a fixture', () => {
       expect(rr.afterWrong.mean).toBeLessThanOrEqual(rr.afterWrong.hi)
     }
     expect(isCorrect(d, d.learning[0], d.pairing[d.learning[0].word])).toBe(true)
+  })
+
+  it('the six-trial demonstration follows the two rules it names on every trial', () => {
+    expect(DEMO_TRIALS.length).toBe(6)
+    expect(demoConsistent()).toEqual([])
   })
 })
